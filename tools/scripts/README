@@ -1,0 +1,20 @@
+
+Most of the Asim scripts are executed using 'asimstarter' as a trampoline 
+to allow a user to use an updated version of their scripts instead of the
+globally installed version. Thus adding a script is a little more complicated
+than usual. To add an asim script, e.g., 'new-asim-util', here one must do
+the following:
+
+  1) Create the script 'new-asim-util' here
+  2) Do a 'cvs add new-asim-util'
+  3) Add a new tool line to 'asimstarter.in'
+  4) Add 'new-asim-util' to the tool_SCRIPTS line in Makefile.AM
+  5) Do an autoconf of the package, see ../../README for instructions
+  6) Do an 'asim-shell update package core'
+
+As a user that can install asim, e.g., root or ASIM1 here in Hudson:
+
+  1) Use asim-shell to check out and build asim-core.
+  2) cd src/asim-core; make install
+
+

@@ -1,0 +1,284 @@
+:
+eval 'exec perl "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# Author:  Roger Espasa  and  Artur Klauser
+#
+
+$| = 1;
+
+use Getopt::Long;
+
+$Getopt::Long::order = $REQUIRE_ORDER;
+
+## setup some defaults
+my %OPT = (
+  "skip1"          => 0,     # #lines of file1 we skip before comparing
+  "skip2"          => 0,     # #lines of file2 we skip before comparing
+  "lookahead"      => 2000,  # #lines we look ahead trying to resynchronize
+  "maxdiff"        => 10000, # max #lines that can differ before we give up
+  "context"        => 10,    # #lines of context around differences
+  "verbose"        => 0,     # turn on verbose output mode (shows progress)
+  "help"           => 0      # print help message
+);
+
+## parse command line parameters
+if (!GetOptions(\%OPT, 
+                "skip1=s",
+                "skip2=s",
+                "lookahead=s",
+                "maxdiff=s",
+                "context=s",
+                "verbose!",
+                "help!") ||
+    $OPT{help}) {
+
+    usage_and_exit();
+}
+
+ ##
+ ## Require two arguments
+ ##
+ $, = " "; # separate array elements with space
+ $#ARGV == 1 || usage_and_exit(sprintf "need 2 input files, got %d (@ARGV)\n", $#ARGV + 1);
+
+ ##
+ ## Open pipes
+ ##
+ open(PIPEA,$ARGV[0]) || die "can't open $ARGV[0]: $!\n";
+ open(PIPEB,$ARGV[1]) || die "can't open $ARGV[0]: $!\n";
+
+ $numdiff = 0;
+ $count = 0;
+ $line1 = 0;
+ $line2 = 0;
+ # skip lines form file1
+ while ( $OPT{skip1} > $line1 && eof(PIPEA) == 0) {
+   $a = <PIPEA>;
+   $line1++;
+ }
+ # skip lines form file2
+ while ( $OPT{skip2} > $line2 && eof(PIPEB) == 0) {
+   $b = <PIPEB>;
+   $line2++;
+ }
+
+ while ( ($#lookahead1 >= 0 || eof(PIPEA) == 0) &&
+         ($#lookahead2 >= 0 || eof(PIPEB) == 0))
+ {
+  # fill lookahead
+  if ($#lookahead1 < 0 || $#lookahead2 < 0) {
+    look_ahead( $OPT{lookahead} );
+  }
+
+  # get first line
+  $a = $lookahead1[0];
+  $b = $lookahead2[0];
+
+  # some progress messages
+  if ($OPT{verbose}) {
+    if (($count % 1000) == 0) {
+      if ($OPT{verbose} && ($count % 50000) == 0) {
+        print STDERR "\n";
+        if ($OPT{verbose} && ($count % 1000000) == 0) {
+          print STDERR "$count lines: ";
+        }
+      }
+      print STDERR ".";
+    }
+  }
+  $count++;
+  $line1++;
+  $line2++;
+
+  if ( $a eq $b ) {
+   $buf[$idx] = $a;
+   $idx = ($idx + 1) % $OPT{context};
+   shift @lookahead1;
+   shift @lookahead2;
+  }
+  else {
+   ## Dump buffer contents
+
+   print "\n\nline: $count ($ARGV[0] line $line1) ($ARGV[1] line $line2)\n";
+   for ( $i = ($idx + 1) % $OPT{context}; $i != $idx; $i = ($i + 1) % $OPT{context} ) {
+    print "OK   : $buf[$i]" if ( $buf[$i] );
+   }
+   print "DIFF : from file $ARGV[0] line $line1: $a";
+   print "DIFF : from file $ARGV[1] line $line2: $b";
+
+   # try to resynchronize
+   look_ahead( $OPT{lookahead} );
+   resync();
+
+   # check if we are in sync again
+   look_ahead( $OPT{lookahead} );
+   if ($lookahead1[0] ne $lookahead2[0]) {
+     print "could not resolve difference with lookahead $OPT{lookahead}\n";
+     $, = "";
+     print "file $ARGV[0] line $line1:\n@lookahead1[0..$OPT{context}]";
+     print "file $ARGV[1] line $line2:\n@lookahead2[0..$OPT{context}]";
+     exit 1;
+   } else {
+     print "OK   : $lookahead1[0]";
+     print "line : $count ($ARGV[0] line $line1) ($ARGV[1] line $line2)\n";
+   }
+  }
+ }
+
+ if ( eof(PIPEA) == 0 && eof(PIPEB) == 1 ) {
+  die "Different length:\n\t   EOF file $ARGV[0] (line $line1)\n".
+                         "\tno EOF file $ARGV[1] (line $line2)\n".
+                         "$count lines compared\n";
+ }
+ if ( eof(PIPEA) == 1 && eof(PIPEB) == 0 ) {
+  die "Different length:\n\tno EOF file $ARGV[0] (line $line1)\n".
+                         "\t   EOF file $ARGV[1] (line $line2)\n".
+                         "$count lines compared\n";
+ }
+
+ print "\nXCHECK OK: Seen $count lines with $numdiff differences\n";
+
+ close PIPEA; 
+ close PIPEB; 
+
+ exit 0;
+
+#-----------------------------------------------------------------------------
+
+sub look_ahead {
+ my $num = shift;
+ my ($a,$b);
+
+  while ( $#lookahead1 < $num && eof(PIPEA) == 0) {
+    $a = <PIPEA>;
+    push @lookahead1, $a;
+  }
+  while ( $#lookahead2 < $num && eof(PIPEB) == 0) {
+    $b = <PIPEB>;
+    push @lookahead2, $b;
+  }
+}
+
+sub resync {
+  my ($diff,$drop_lines1,$drop_lines2);
+  my $tmp1 = "xcheck.tmp.$$.1";
+  my $tmp2 = "xcheck.tmp.$$.2";
+
+  $, = "";
+  open TMP1, ">$tmp1"  or die "can't open temp file $tmp1\n$!\n";
+  open TMP2, ">$tmp2"  or die "can't open temp file $tmp2\n$!\n";
+  print TMP1 @lookahead1;
+  print TMP2 @lookahead2;
+  close TMP1;
+  close TMP2;
+  open DIFF, "diff $tmp1 $tmp2|"  or die "can't execute diff $tmp1 $tmp2\n$!|n";
+  $diff = <DIFF>;
+  # first line of diff reveals what the first repair needs to be
+  close DIFF;
+  unlink $tmp1;
+  unlink $tmp2;
+  # analyze diff's ed commands
+  # note: we know that the diff HAS to start at the first line,
+  # which makes it somewhat simpler to figure out;
+  $drop_lines1 = 0;
+  $drop_lines2 = 0;
+  if ($diff =~ m/^(\d+)\s*a\s*(\d+),?(\d+)?$/) {
+    # need to drop lines from file2
+    if ($3 eq "") {
+      #abbreviated output n3=n2
+      $drop_lines2 = 1;
+    } else {
+      $drop_lines2 = $3 - $2 + 1;
+    }
+  } elsif ($diff =~ m/^(\d+),?(\d+)?\s*d\s*(\d+)$/) {
+    # need to drop lines from file1
+    if ($2 eq "") {
+      # abbreviated output n2=n1
+      $drop_lines1 = 1;
+    } else {
+      $drop_lines1 = $2 - $1 + 1;
+    }
+  } elsif ($diff =~ m/^(\d+),?(\d+)?\s*c\s*(\d+),?(\d+)?$/) {
+    # need to drop lines from both files
+    if ($2 eq "") {
+      # abbreviated output n2=n1
+      $drop_lines1 = 1;
+    } else {
+      $drop_lines1 = $2 - $1 + 1;
+    }
+    if ($4 eq "") {
+      # abbreviated output n4=n3
+      $drop_lines2 = 1;
+    } else {
+      $drop_lines2 = $4 - $3 + 1;
+    }
+  } else {
+    print "don't understand ed command $diff\n";
+    print "$#lookahead1 lines in lookahead for $ARGV[0]\n";
+    print "$#lookahead2 lines in lookahead for $ARGV[1]\n";
+    $, = "";
+    print "DIFF : file $ARGV[0]\n@lookahead1[0..$OPT{context}]\n";
+    print "DIFF : file $ARGV[1]\n@lookahead2[0..$OPT{context}]\n";
+    exit 1;
+  }
+
+  # apply patch
+  if ($drop_lines1 > 0) {
+    $numdiff += $drop_lines1;
+    printf "DIFF: dropping $drop_lines1 lines from file $ARGV[0]\n";
+    for ($n = $drop_lines1; $n > 0; $n--) {
+      printf "drop1: %s", shift @lookahead1;
+      $line1++;
+    }
+  }
+  if ($drop_lines2 > 0) {
+    $numdiff += $drop_lines2;
+    printf "DIFF: dropping $drop_lines2 lines from file $ARGV[1]\n";
+    for ($n = $drop_lines2; $n > 0; $n--) {
+      printf "drop2: %s", shift @lookahead2;
+      $line2++;
+    }
+  }
+  
+  if ($numdiff > $OPT{maxdiff}) {
+    print "*** Encountered $numdiff errors -- ".
+          "only $OPT{maxdiff} allowed -- giving up!\n";
+    exit 1;
+  }
+  # now we can go back and continue processing since the
+  # two lookaheads should be in sync again;
+}
+
+
+## print usage message and exit
+sub usage_and_exit {
+  print "\nERROR: @_\n"  if ($#_ > -1);
+  print "Usage: xcheck [options] <file1> <file2>\n";
+  printf "Options and current settings:\n";
+  foreach $par (sort keys %OPT) {
+    printf "  %-20s %s\n", $par ." " . "." x (20-length($par)), $OPT{$par};
+  }
+  exit 1;
+}
+

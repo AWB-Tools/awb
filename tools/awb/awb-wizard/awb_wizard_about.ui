@@ -1,0 +1,67 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>awb_about</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>awb_about</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>313</width>
+            <height>224</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>About AWB</string>
+    </property>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>text_about</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>50</x>
+                <y>10</y>
+                <width>210</width>
+                <height>160</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Awb - The Architects Workbench The Asim Team Intel Corporation Copyright 2002 Version 2.0 September 2002</string>
+        </property>
+        <property name="textFormat">
+            <enum>PlainText</enum>
+        </property>
+        <property name="alignment">
+            <set>WordBreak|AlignCenter</set>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>button_ok</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>130</x>
+                <y>170</y>
+                <width>50</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>OK</string>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>button_ok</sender>
+        <signal>clicked()</signal>
+        <receiver>awb_about</receiver>
+        <slot>accept()</slot>
+    </connection>
+</connections>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

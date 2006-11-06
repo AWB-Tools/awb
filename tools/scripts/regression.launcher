@@ -1,0 +1,510 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##################################################################################
+# 
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+##################################################################################
+# Author: Srilatha (Bobbie) Manne
+# Date: Mar, 2002
+# Purpose: To run regressions using asim-run.  
+#
+#  This is a simple regression script that everyone should run
+#  before checking in modifications to the ipf, core, feeder,
+#  or network packages. This script simply runs an instance of
+#  asim-run with some appropriate parameters. See asim-run
+#  for more details about what's going on.
+#
+###############################################################
+
+use Getopt::Long;
+use File::Temp;
+use Term::ANSIColor qw(:constants);
+
+use Asim;
+Asim::init();
+
+use Asim::Util;
+use Asim::Package;
+use Asim::Package::DB;
+
+# terminal default
+$Term::ANSIColor::AUTORESET = 1;
+
+# Global, hard coded information
+$RESOLVER="awb-resolver";
+$AWBLOCAL = $ENV{AWBLOCAL};
+$ASIM_RUN = "asim-run";
+$MODEL_COVERAGE = "model-coverage";
+
+# Global information
+#$TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
+
+# 
+# Default variables for all options. 
+# 
+my @packages = ();
+my @default_packages = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGES", "network ipf"));
+my $runtype = Asim::Util::get_asimrc_val("regression.launcher", "RUNTYPE", "regression");
+my $runstyle = Asim::Util::get_asimrc_val("regression.launcher", "RUNSTYLE", "list");
+my $runcmds = Asim::Util::get_asimrc_val("regression.launcher", "ASIMRUN_COMMANDS", undef);
+my $compress = Asim::Util::get_asimrc_val("regression.launcher", "COMPRESS", "gzip");
+my $queue = Asim::Util::get_asimrc_val("regression.launcher", "QSLOT", undef);
+my $regdir;
+my $dryrun = 0;
+my $rerun = 0;
+my $package_db;
+my $package_limit_warn = 0;
+my $shared_package_area = Asim::Datadir();
+
+my $status = GetOptions("package=s"    =>  \@packages,
+                        "runtype=s"    =>  \$runtype,
+			"runstyle=s"    =>  \$runstyle,
+			"regdir=s"     =>  \$regdir,
+                        "runcmds=s"    =>  \$runcmds,
+                        "compress=s"   =>  \$compress,
+                        "queue=s"      =>  \$queue,
+                        "dryrun!"      =>  \$dryrun,
+			"rerun"        =>  \$rerun
+                       );
+if ( ! $status ) {
+  print "Usage: regression.launcher\n";
+  print "\t\t [--package=ipf|arana|...]\n";
+  print "\t\t [--runtype=regression|nightly] \n";
+  print "\t\t [--runstyle=pruned|list] \n";
+  print "\t\t [--regdir=<root directory to place regression results>]\n";
+  print "\t\t [--runcmds=<asim-run commands>]\n";
+  print "\t\t [--compress=none|gzip|bzip2]\n";
+  print "\t\t [--queue=<netbatch queue - e.g. /fast or /slow/asim>]\n";
+  print "\t\t [--[no]dryrun]\n";
+  print "\t\t [--rerun]\n";
+  print "\n";
+  print "\t\tDefault packages are: " . join(" ", @default_packages) . "\n";
+  print "\t\tDefault runtype is: regression\n";
+  print "\t\tDefault runstyle is: list\n";
+  print "\t\tDefault regdir is: <workspace>/run/regtest/YYYY-MM-DD-HH-MM-SS\n";
+  print "\t\tDefault compression is gzip.\n";
+  print "\n";
+  print "Multiple packages can be provided at the same time as a space separated list.  \n";
+  exit 1;
+}
+
+@packages = split(/\s*[ ,]\s*/,join(',',@packages));
+if (defined $runstyle && $runstyle eq "pruned") {
+    $package_db = Asim::Package::DB->new() || die ("Cannot find any packages in workspace!\n");    
+    if ( $#packages >= 0 ) { $package_limit_warn = 1;  }
+    else { @packages = $package_db->directory();  }
+} elsif ( $#packages < 0 ) {
+    @packages = @default_packages;
+}
+
+my $asimrun_path = `$RESOLVER tools/scripts/$ASIM_RUN`;
+chomp $asimrun_path;
+
+if ( $? ne 0 ) {
+  print "ERROR: Unable to resolve tools/scripts/$ASIM_RUN directory.\n";
+  exit 1;
+}
+
+my %exp_fl;
+my %bm_fl;
+
+my $resdir;
+if (defined $regdir && $regdir ne "") {
+    # Use user specified location for results directory
+
+    chomp $regdir;
+
+    if (! -d $regdir) {
+	if (system("mkdir $regdir") ) {
+	    print "ERROR: Regression directory \'$regdir\' does not exist.  Make directory failed.\n";
+	    exit 1;
+	}
+	print "Regression directory \'$regdir\' does not exist.  Directory created.\n";
+    }
+
+    $resdir = $regdir;
+}
+else {
+    # Use default location for results directory
+
+    if ( ! -d "$AWBLOCAL/run" )  {
+        if ( system ("mkdir $AWBLOCAL/run") ) {
+            print "ERROR: Unable to make directory $AWBLOCAL/run.\n";
+            exit 1;
+        }
+    }
+
+    if ( ! -d "$AWBLOCAL/run/regtest") {
+        if ( system ("mkdir $AWBLOCAL/run/regtest") ) {
+            print "ERROR: Unable to make directory $AWBLOCAL/run/regtest.\n";
+            exit 1;
+        }
+    }
+
+    $resdir="$AWBLOCAL/run/regtest";
+}
+
+if ($rerun) {
+    #
+    #  Find last test run and use that result directory
+    #
+    my @rdirlist = sort(`ls $resdir`); 
+    my $last_dir = $rdirlist[$#rdirlist];
+    chomp($last_dir);
+    $resdir = $resdir . "/" . $last_dir;
+}
+else {
+    #
+    #  Start a new result directory
+    #
+    my $curdate = `date +%Y-%m-%d-%H-%M-%S`;
+    chomp $curdate;
+
+    $resdir = $resdir . "/" . $curdate;
+}
+
+print "Result directory: $resdir\n";
+
+if ( !$dryrun && !$rerun && system ("mkdir $resdir") ) {
+  print "ERROR: Unable to make directory $resdir.\n";
+  exit 1;
+}
+
+# construct experiments and benchmarks for pruned run if everything else succeeded
+if (defined $runstyle && $runstyle eq "pruned") {
+    my $model_coverage_path = `$RESOLVER tools/scripts/$MODEL_COVERAGE`;
+    chomp $model_coverage_path;
+
+    if ($? ne 0) {
+	print "ERROR: Unable to resolve tools/scripts/$MODEL_COVERAGE directory.\n";
+	exit 1;
+    }
+    
+    my @changeset = ();
+    my @empty_changeset = ();
+    my %changed_pkgs;
+    my %changed_models;
+
+    if ($package_limit_warn) {
+	print "\n** WARNING: Limiting runs to changes found in \'", join(", ", @packages), "\'.  Regression may be incomplete.\n"; 
+    }
+
+    print "\n** Collecting change sets ...\n";
+    
+    # collect change set for each package and the dependent apm files
+    foreach $package (@packages) {
+	my $asim_package = $package_db->get_package($package);
+	if (!defined($asim_package)) {
+	    printf "%14s%s", $package, " @ unknown\n";
+	    print RED "\t\t** ERROR: Cannot open package to check dependencies.  Skipped.\n";
+	    next;
+	}
+	my $location = $asim_package->location(); 
+	if ($location =~ m/\/asim\/.*\/share\/asim\/.*/) {
+	    printf "%14s%s", $package, " @ $location (Skipped shared)\n";
+	    next;
+	}
+	printf "%14s%s", $package, " @ $location ";
+	my @package_changes = $asim_package->get_change_set();
+	@package_changes = map("src/asim-$package/" . $_, @package_changes);
+	if (scalar @package_changes) {
+	    print "\n\t\t", join("\n\t\t", @package_changes), "\n";
+	    push(@changeset, @package_changes);
+	    $changed_pkgs{$package} = 1;
+	    
+	    # check whether packages dependent on this are available in our space	    
+	    my @regress_dep_packages = $asim_package->get_regress_dependent_packages();
+	    if ((scalar @regress_dep_packages) > 1) {	    
+		foreach my $dep_package (@regress_dep_packages) {
+		    if (ref($dep_package) eq "") {
+			print RED "\t\t** ERROR: Package \'$dep_package\', dependent on \'$package\', is inaccessible in the workspace.  Regression is incomplete.\n";
+		    }
+		}
+	    }
+	}
+	else {
+	    print "(Empty)\n";
+	}
+    }
+
+    # collect models dependent on this change set
+    print "\n** Collecting changed models ...";
+    my $cmd = "$model_coverage_path --changed=" . join(',', @changeset) . " --print=apmchanged"; # --package=$package
+
+    # collect packages containing affected models
+    open(MODELCOV, "$cmd |");
+    while (<MODELCOV>) {
+	chomp;
+	if (/src\/asim-(.*)\/(config\/.*)/) {
+	    $changed_pkgs{$1} = 1;
+	    $changed_models{$2} = 1;
+	}
+	else {
+	    print RED "ERROR: Incorrect changed APM file \'$_\'\n";
+	}
+    }
+    close MODELCOV;
+    print " done.\n";
+    
+#     foreach my $pp (keys %pruned_pack) {
+#       print "pruned pack: $pp\n";
+#       foreach my $apm (keys %{$pruned_pack{$pp}}) {   print "\t\tapm $apm\n"; }
+#     }
+
+    # intialize packages to hold fresh list 
+    @packages = ();
+
+    # construct new experiments file 
+    foreach my $package (keys %changed_pkgs) {
+	my $model_file = `$RESOLVER experiments/$package/$runtype/$runtype.models`;
+	chomp($model_file);
+
+	if ($? ne 0) {
+	    print RED "** ERROR: Unable to resolve file experiments/$package/$runtype/$runtype.models.  Skipping needed regression for $package.\n";
+	    next;
+	}
+	
+	# read the experiment file for this package
+	my @explist = ();
+	my @pruned_explist = ();
+	open(EXPIN, "<$model_file");
+	while (!eof(EXPIN)) {
+	    my $exp = "";
+	    while (<EXPIN>) {
+		chomp;
+		$exp .= $_;
+		last if (! ($exp =~ /\\\s*$/));
+		$exp =~ s/ *\\\s*$/ /;
+	    }
+	    next if ($exp =~ m/^\#/);
+	    next if ($exp =~ m/^[\t ]*$/);
+
+	    push(@explist, $exp);
+	}
+
+	# collect needed experiments using pruned apms
+	foreach my $apm (keys %changed_models) {
+	    my $apm_tr = $apm;
+	    $apm_tr =~ s/\//:/g;
+	    foreach my $exp (@explist) {
+		my $exp_tr = $exp;
+		$exp_tr =~ s/\//:/g;
+		my @exps = ($exp_tr); 
+		my $matches = grep(/$apm_tr/, @exps);
+		if ($matches > 0) {
+		    push(@pruned_explist, $exp);
+		    last;
+		}
+	    }
+	}
+
+	# write out revised experiments file
+	if (scalar @pruned_explist) {
+	    print "\n** Generating $resdir/$package.$runtype.pruned.models file.\n";
+	    open(EXPFILE, ">$resdir/$package.$runtype.pruned.models") || 
+		die ("Cannot create pruned experiments file for package \'$package\'");
+	    print EXPFILE "# Auto-generated from \'$runtype\' runtype based on changes for $package.\n\n";
+	    print EXPFILE join("\n", @pruned_explist);
+	    print EXPFILE "\n";
+	    close(EXPFILE);
+	    
+	    $exp_fl->{$package} = "$resdir/$package.$runtype.pruned.models";
+	    
+	    $bm_fl->{$package} = `$RESOLVER experiments/$package/$runtype/$runtype.benchmarks`;
+	    chomp $bm_fl->{$package};
+	    if ( $? ne 0 ) {
+		print "ERROR: Unable to resolve file experiments/$package/$runtype/$runtype.benchmarks.\n";
+		exit 1;
+	    }
+	    push(@packages, $package);
+	}
+    }
+    if ((scalar @packages) < 1) {
+	print "No experiments selected based on changeset.  Nothing to run!\n";
+	exit 0;
+    }
+} 
+else {	# not a pruned regression run
+    foreach $package (@packages) {
+	
+	$exp_fl->{$package} = `$RESOLVER experiments/$package/$runtype/$runtype.models`;
+	chomp $exp_fl->{$package};
+	
+	if ( $? ne 0 ) {
+	    print "ERROR: Unable to resolve file experiments/$package/$runtype/$runtype.models.\n";
+	    exit 1;
+	}
+	
+	$bm_fl->{$package} = `$RESOLVER experiments/$package/$runtype/$runtype.benchmarks`;
+	chomp $bm_fl->{$package};
+	
+	if ( $? ne 0 ) {
+	    print "ERROR: Unable to resolve file experiments/$package/$runtype/$runtype.benchmarks.\n";
+	    exit 1;
+	}
+    }
+}
+
+#
+# Check for existing runs. 
+#
+check_regression();
+
+
+$exit_code = run_regression($dryrun, $rerun);
+
+exit $exit_code;
+
+##############################################################################3
+# SUBROUTINES: 
+##############################################################################3
+
+#****************************
+# Check inflight regressions
+#*****************************
+
+sub check_regression {
+
+  #
+  # Tell program to run function if signal triggers. 
+  #
+  alarm (0);
+  $SIG{ALRM} = \&run_regression;
+  $SIG{INT} = \&Cleanup;
+  $SIG{KILL} = \&Cleanup;
+
+  my $NBQ="nbqstat -fe";
+
+  my $date = `date +%Y-%m-%d`;
+  chomp $date;
+
+  my $file = tmpnam("nbqlog_XXXXX");
+  my $found = 0;
+  my $state = 0;
+  my @users;
+
+  if ( ! system ("$NBQ > $file 2>&1") ) {
+    if ( open(NBQFL, "<$file") ) {
+      my $user = "";
+      while (<NBQFL>) {
+        chomp;
+        if ( /\s*User\s*=\s*([\S]*)[\s\S]*/ ) {
+          $user = $1;
+        }
+        elsif ( /\s*Job\s*State\s*=\s*([0-9]+)[\s\S]*/ ) {
+          $state = $1;
+        }
+        elsif ( /\s*Command\s*=[\s\S]*-resdir[\s\S]*$date-[\s\S]*/ )  {
+          # We've found a regression command. 
+          if ( $state == 3 || $state == 1 ) {
+            $found = 1;
+            print "$_\n";
+            if ( ! grep /^$user$/, @users ) {
+              push (@users, $user);
+            }
+          }
+        }
+      }
+      close NBQFL;
+      system ("rm $file > /dev/null 2>&1");
+    }
+    else {
+      print "WARNING: Unable to open netbatch output file $file.\n";
+      print "         Not checking for existing regression runs.\n";
+    }
+  }
+  else {
+    print "WARNING: Unable to run command $NBQ .\n";
+    print "         Not checking for existing regression runs.\n";
+  }
+  
+  if ($found == 1) {
+    my $answer='y';
+    my $user = join (", ", @users);
+    print "\n\nUser(s) $user is/are currently running regression jobs.\n";
+    print "\t\t Do you want to submit regression?  You have 10 seconds to decide.\n";
+    print "\t\t Default is 'y': (y, n): ";
+    alarm (10);
+    $answer = <STDIN>;
+    alarm (0);
+    chomp $answer;
+    $answer =~ tr/[A-Z]/[a-z]/;
+    if ( $answer eq "n" ) {
+      print "NOT SUBMITTING JOB.\n";
+      &Cleanup();
+    }
+  }
+}
+
+#****************
+#Submit job.
+#****************
+
+sub run_regression {
+  my $dryrun = shift || 0;
+  my $rerun  = shift || 0;
+
+  my $exit_code = 0;
+
+  print "\n\nRunning Regression.\n";
+
+  foreach my $package ( @packages ) {
+    print "\n\n****************  PACKAGE: $package  *****************\n\n";
+    my $cmd = "$asimrun_path ";
+    if ($rerun) {
+	$cmd = $cmd . " -nobuild ";
+    }
+    $cmd = $cmd . "-benchmarks=$bm_fl->{$package} -experiments=$exp_fl->{$package} -resdir=$resdir -compress=$compress ";
+    #
+    # Determine if certain values have been defined. 
+    #
+    if (defined $queue)  {
+      $cmd = $cmd . "-queue=$queue ";
+    }
+    if (defined $runcmds) {
+      $cmd = $cmd . "$runcmds";
+    }
+
+    print "CMD: $cmd\n";
+    if ( ! $dryrun && system $cmd ) {
+      print "ERROR: Something failed in $ASIM_RUN.\n";
+      print "COMMAND: $cmd\n";
+      $exit_code++;
+    }
+  }
+  return $exit_code;
+}
+
+#
+# Cleanup results directory.
+#
+sub Cleanup {
+  print "Cleaning up regression run.\n";
+  
+  # Removed this command because I could end up killing all the user's jobs, 
+  # not just the ones from the regression run. 
+        
+#  my $command = "nbqrm -a user=";
+#  $command = $command . $ENV{USER};
+#  system ("$command");
+  system ("rm -rf $resdir > /dev/null 2>&1");
+  exit 1;
+}

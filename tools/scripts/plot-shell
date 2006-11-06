@@ -1,0 +1,302 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+# *****************************************************************
+# *                                                               *
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Srilatha Manne
+#
+
+use File::Basename;
+use Getopt::Long;
+use Text::ParseWords;
+
+use Asim;
+use PlotShell;
+
+#
+# Argument handling
+#
+my $status;
+
+
+my $basedir = ".";
+my $experiments = "";
+my $benchmarks = "";
+my $params = "";
+my $batch = 0;
+my $batchfile = "";
+
+# Determines whether the user is pointing to a batch run stats location 
+# (generated using asim-run and derivatives) or to a local run stats 
+# Batch run stats are located in $basedir/$experiment/$benchmark.stats while
+# local run stats are located in $basedir/$experiment/bm/$benchmark/$benchmark.stats
+my $localrun = 0;
+
+my $runmode = "interactive";
+
+my $help = 0;
+
+$status = GetOptions( "basedir=s"      => \$basedir,
+                      "experiments=s"  => \$experiments,
+                      "benchmarks=s"   => \$benchmarks,
+                      "params=s"       => \$params,
+                      "batch!"         => \$batch,
+                      "batchfile=s"    => \$batchfile,
+                      "local"          => \$localrun,
+                      "help"           => \$help
+                    );
+
+
+if (!$status) {
+  my $prog = basename($0);
+  print STDERR "$prog: Illegal argument, try '$prog --help'\n";
+  exit 0;
+}
+
+if ($help) {
+  # BOBBIE: FIX THIS
+#  system "perldoc $0";
+  exit 0;
+}
+
+if ($batch) {
+  $runmode = "batch";
+}
+
+Asim::init()
+  || warn_or_die("Unable to access workspace\n");
+
+PlotShell::init($runmode);
+
+if ($basedir) {
+  PlotShell::set_basedir($basedir)
+    || warn_or_die("Unable to find directory $basedir\n");
+}  
+if ($experiments) {
+  PlotShell::set_experiments($experiments)
+    || warn_or_die("Had trouble finding one or more experiments\n");
+}  
+if ($benchmarks) {
+  PlotShell::set_benchmarks($benchmarks)
+    || warn_or_die("Unable to find one or more benchmarks\n");
+}  
+if ($params) {
+  PlotShell::SetParams($params)
+    || warn_or_die("Unable to set parameters\n");
+}
+#
+# If a batch file is specified, then run the commands in the batch 
+# file.  If -batch flag is specified, then quit at the end of 
+# the batch commands.  Otherwise, drop into interactive mode. 
+#
+if (-f $batchfile) {
+  open($fh, "< $batchfile") || die("Couldn't open $batchfile");
+  my $command = "";
+
+  #
+  # If we end with a '\', then this is a multi-line command.  Create
+  # a full command before running 'run_command' on it.  Otherwise, 
+  # run_command gets confused about the '\'
+  #
+  while (<$fh>) {
+    chop;
+    if (/^([\s\S]*)\\/) {
+      $command = "$command" . "$1";
+      next;
+    }
+    else {
+      $command = "$command" . "$_";
+    }
+    
+    if ( !($command =~ m/^\s*\#[\s\S]*/) && !($command =~ m/^\s*$/) ) {  
+      print "$command\n";
+      $status = PlotShell::run_command(shellwords($command)) || exit ! $status;
+    }
+    $command = "";
+  }
+}
+  
+
+#if ($batch != 0) {
+#  my $fh;
+#
+#  if ($batchfile eq "-") {
+#    $fh = *STDIN;
+#  } else {
+#    open($fh, "< $batchfile") || die("Couldn't open $batchfile");
+#  }
+#  while (<$fh>) {
+#    chop;
+#    if ( ! m/^\s*\#[\s\S]*/ && ! m/^\s*$/) {  
+#      print "$_\n";
+#      $status = PlotShell::run_command(shellwords($_)) || exit ! $status;
+#    }
+#  }
+#} 
+
+if ($batch == 0) {
+  print "Plot-shell - V0.1 (" . Asim::Release() . ")\n";
+
+  $status = PlotShell::shell();
+}
+else {
+  exit !$status;
+}
+
+
+# Die in batch mode, just warn in interactive mode
+sub warn_or_die {
+  my $msg = shift;
+
+  if ($runmode eq "interactive") {
+     warn($msg);
+  } else {
+     die($msg);
+  }
+}
+
+__END__
+
+=head1 NAME
+
+plot-shell - Shell to read, print, and plot ASIM stats
+
+=head1 SYNOPSIS
+
+plot-shell [--basedir <base directory for all experiments>]
+           [--experiments <one or more experiments to analyze>]
+           [--benchmarks <one or more benchmarks per experiment>] 
+           [--params <one or more parameters per benchmark>] 
+           [--file <commandfile for batch mode operation>]
+
+=head1 DESCRIPTION
+
+plot-shell provides a command line interface to extract, print or plot 
+statistics for ASIM runs.  The command line provides some initial default
+values, and the values can be further augmented or manipulated using the "set" 
+command. Use the command "help" to list the individual commands.
+
+If Text::ReadLine::Gnu is installed then command line completion will
+be available inside the shell.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --basedir <basedir>
+
+Look in the directory given for all the experiments.  This provides a base 
+location for all the experiments and benchmarks you would like to look at. 
+By default, the basedir is set to AWBLOCAL if the environment variable exists. 
+
+=item --experiments <experiments>
+
+Evaluate statistics over the following set of one or more experiments.  Each
+experiment represents one configuration of the simulated machine.  plot-shell
+expects to see a directory for each of the experiments in the basedir. 
+
+=item --benchmarks <benchmarks>
+
+Evaluate statistics for the given set of benchmarks.  The program grabs 
+the requested parameters for each of the benchmarks.  
+
+=item --params <params>
+
+Set One or more parameters to evaluate in the stats files. 
+
+=item --batch
+
+Run the script in batch mode. This mostly means that defaults will be
+provided for interactive inputs. 
+
+=item --file <commandfile>
+
+Read commands from <commandfile>. Use '-' to read commands from
+STDIN. When this option is used the command on the command line is
+ignored.
+
+=item --help
+
+Get this help information.
+
+=back
+
+
+# BOBBIE: FIX THIS WHEN the code is completed. 
+=head1 EXAMPLES
+
+    % plot-shell help quickstart
+
+    % plot-shell
+#    asim> set model pm/Arana/arana_aint_dev.apm
+#    asim> clean model
+#    asim> configure model
+#    asim> build model
+#    asim> run model bm/Micro/maxipc.cfg
+#    asim> quit
+#
+#
+#    % asim-shell --package=arana commit package
+#
+#
+#    % asim-shell help
+#
+#    % asim-shell help code
+
+
+=head1 BUGS
+
+The asim perl libraries must be in your perl path or the 'use AsimShell'
+statement won\'t work. The easiest way to make this true is to invoke
+asim-shell through asimstarter....you can also set the environment
+variable PERL5LIB.
+
+Maybe the command line format should allow one to specify commands
+with a '-e' switch and a bare word is a file to read commands from.
+
+Maybe asim-shell should also parse an environment variable and/or
+.rc file for switches.
+
+Asim-shell depends on the 'etc' directory being at $AWBSYSTEM/etc, 
+while ./configure could have put it somewhere else. We need to have
+a way of communicating where all the pieces of asim are not just
+the root.
+
+=head1 AUTHORS
+
+Srilatha Manne
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Intel Corporation, 2002              *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

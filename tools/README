@@ -1,0 +1,54 @@
+To add a new tool, e.g, <mytool> do the following:
+
+   1) Add tool's directory as tools/<mytool> and copy your sources into
+      it.
+
+   2) Add <mytool> to the SUBDIRS variable in tools/Makefile.am
+      Note: if <mytool> is not a direct subdirectory of tools, add
+            each directory of the <mytool> path to the appropriate
+            Makefile.am under the tools/* directory tree. E.g. if
+            <mytool> = lib/libawb
+            you need to make sure that tools/Makefile.am has an entry
+            SUBDIRS = ... lib ...
+            and tools/lib/Makefile.am has an entry
+            SUBDIRS = ... libawb ...
+
+   3) Add a tools/<mytool>/Makefile.am automake file;
+      look for an example in tools/lib/libawb or tools/awb/amc;
+
+   4) Add tools/<mytool>/Makefile to the list of Makefiles in
+      tools/../configure.in AC_CONFIG_FILES(...)
+
+   5) To generate the appropriate Makefile.in files, run the following
+      command in the top level directory:
+        csh> pwd
+        .../asim-core
+        csh> automake --foreign tools/<mytool>/Makefile
+
+   6) Configure the package in maintainer mode, so the rest of the
+      prebuilt makefile infrastructure will be updated as necessary.
+      You need to be on the top level for this.
+        csh> pwd
+        .../asim-core
+        csh> ./configure --enable-maintainer-mode
+        csh> make
+      This should have taken care of updating any necessary files required
+      for make to work properly with <mytool>. You are done with updating
+      the Makefile infrastructue.
+
+   7) Now you can iron out any problems you might have encountered when
+      trying to build <mytool> itself.
+
+
+
+Which files should get added to CVS (with cvs add) before commiting?
+
+  Add the following types of files:
+    * configure.in
+    * Makefile.am
+    * Makefile.in
+    * any file that is created by automake and autoconf
+
+  DO NOT add the following types of files:
+    * Makefile
+    * any file that is created by ./configure

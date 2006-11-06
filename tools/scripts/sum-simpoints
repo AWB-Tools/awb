@@ -1,0 +1,164 @@
+: # -*-Perl-*-
+eval 'exec perl -w "$0" ${1+"$@"}'
+    if 0;
+
+#
+# Copyright (C) 2004-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Michael Adler
+#
+
+#
+# sum-simpoints <stats files>
+#
+# Combine data from multpile regions.
+#
+
+use strict;
+
+use File::Basename;
+use Getopt::Long;
+
+my $csv = 0;
+my $help = 0;
+
+my $status = GetOptions(
+                        "csv"   => \$csv,
+                        "help"  => \$help
+                       );
+
+if ($help) {
+    system "perldoc $0";
+    exit 0;
+}
+
+my $totalTime = 0;
+my $totalCPI = 0;
+my $totalGB = 0;
+my $totalWeight = 0;
+
+foreach my $stats (@ARGV) {
+    if (! -e "$stats") {
+        printf STDERR "File not found: %s\n", $stats;
+        exit(1);
+    }
+
+    my $weight;
+    my $time;
+    my $ipc;
+    my $gb;
+
+    open(STATS, "summarize-stats --quick $stats |");
+    while (<STATS>) {
+        chomp;
+
+        /^Simpoint weight/ && do {
+            $weight = $_;
+            $weight =~ s/^Simpoint weight: *//;
+        };
+
+        /^Simpoint time/ && do {
+            $time = $_;
+            $time =~ s/^Simpoint time: *//;
+            $time =~ s/ \(.*//;
+        };
+
+        /^Average per core IPC/ && do {
+            $ipc = $_;
+            $ipc =~ s/^Average .*: *//;
+        };
+
+        /^Memory Traffic \(GB/ && do {
+            $gb = $_;
+            $gb =~ s/^Memory .*: *//;
+            $gb =~ s/ \(.*\)//;
+        };
+    }
+
+    if (! defined($weight) ||
+        ! defined($time) ||
+        ! defined($ipc) ||
+        ! defined($gb))
+    {
+        printf STDERR "Missing required value in %s\n", $stats;
+        exit(1);
+    }
+
+    $totalWeight += $weight;
+    $totalTime += $time;
+
+    $totalCPI += ($weight / $ipc);
+    $totalGB += ($time * $gb);
+
+#    printf "%s,%s,%s,%s\n", $time, $weight, $ipc, $gb;
+}
+
+if (($totalWeight < 0.99) || ($totalWeight > 1.01)) {
+    printf STDERR "Missing samples?  Total weight is %.4f\n", $totalWeight;
+    exit(1);
+}
+
+my $ipc = 1.0 / $totalCPI;
+my $mem = $totalGB / $totalTime;
+
+if (! $csv) {
+    printf "IPC:                     %.3f\n", $ipc;
+    printf "Projected run time:      %.5f\n", $totalTime;
+    printf "Memory Traffic (GB/s):   %.3f\n", $mem;
+}
+else {
+    print "IPC,Run Time (s),Memory Traffic (GB/s)\n";
+    printf "%.3f,%.5f,%.3f\n", $ipc, $totalTime, $mem;
+}
+
+=head1 NAME
+
+sum-simpoints - Project run time given a set of SimPoints statistics
+
+=head1 SYNOPSYS
+
+sum-simpoints <stats files>
+
+=head1 DESCRIPTION
+
+Compute projected run time and other metrics given a complete set of
+statistics files representing all SimPoint regions for a workload.  The
+statistics files may be compressed with gzip.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --csv
+
+Emit data as comma separated values.  Useful for scripting.
+
+=back
+
+=head1 AUTHOR
+
+Michael Adler
+
+=head1 COPYRIGHT
+
+Copyright (C) 2004-2006 Intel Corporation
+
+=cut

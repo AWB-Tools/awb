@@ -1,0 +1,1613 @@
+: # -*-Perl-*-
+eval 'exec perl -w "$0" ${1+"$@"}'
+    if 0;
+
+#
+# Copyright (C) 2003-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Michael Adler
+#
+
+use strict;
+
+use File::Basename;
+use Getopt::Long;
+use XML::GDOME;
+
+my $showProcessHistory = 0;
+my $showProcessSummary = 0;
+my $help = 0;
+my $isApe = 0;
+my $quick = 0;
+
+my $status = GetOptions("proc"  => \$showProcessHistory,
+                        "psum"  => \$showProcessSummary,
+                        "quick" => \$quick,
+                        "help"  => \$help
+                       );
+
+if ($help) {
+    system "perldoc $0";
+    exit 0;
+}
+
+if (!$status || !defined($ARGV[0])) {
+    my $prog = basename($0);
+    print STDERR "$prog: Illegal argument, try '$prog --help'\n";
+    exit 0;
+}
+
+
+my $root;
+my @root_common_sys;
+my @root_config;
+my @xml_chips;
+my @xml_zboxes;
+my $totalCycles = 0;
+my $coreFreqMHz = undef; 
+my $simulatedSec = undef;
+my @commit;
+my @slice;
+my $commitTotal = 0;
+my $activeCPUs = 0;
+my $numChips = 0;                 # Number of chips in the model
+my $numZboxes= 0;
+my $chipPrefix = "";              # Newer models name the chip in some stats
+
+sub comma_separated
+{
+    my $i = shift;
+    1 while $i =~ s/(.*\d)(\d\d\d)/$1,$2/;
+    return $i;
+}
+
+#
+# The XML findnodes may return some empty elements in the array if there are
+# extra newlines in the XML file.  Drop them.
+#
+sub findnodes($$)
+{
+  my $elem = shift;
+  my $xpath = shift;
+
+  my @idata = $elem->findnodes($xpath);
+
+  if ($#idata == 0)
+  {
+    return @idata;
+  }
+
+  #
+  # Copy elements from input that aren't empty
+  #
+  my @odata;
+  for (my $i = 0; $i <= $#idata; $i++)
+  {
+    my $s = $idata[$i]->getNodeValue();
+    if ((! defined($s)) || ($s ne "" && $s ne "\n"))
+    {
+      push(@odata, $idata[$i]);
+    }
+  }
+
+  return @odata;
+}
+
+#
+# XML syntax parsed here:
+# <scalar>
+#   <name>foo</name>
+#   123.456
+# </scalar>
+#
+
+sub get_nodevalue($$)
+{
+  my $elem = shift;
+  my $xpath = shift;
+
+  my @data = findnodes($elem, $xpath);
+  die "Failed to find $xpath"  if ($#data != 0);
+  return $data[0]->getNodeValue();
+}
+
+sub get_nodevalue_or_empty($$)
+{
+  my $elem = shift;
+  my $xpath = shift;
+
+  my @data = findnodes($elem, $xpath);
+  return "" if ($#data != 0);
+  return $data[0]->getNodeValue();
+}
+
+sub get_value(@$)
+{
+    my @tree = shift;
+    my $obj = shift;
+
+    my @n = findnodes($tree[0], $obj);
+    my @d = findnodes($n[0], "text()");
+    return $d[0]->getNodeValue();
+}
+
+sub cond_get_value(@$)
+{
+    my @tree = shift;
+    my $obj = shift;
+
+    my @n = findnodes($tree[0], $obj);
+    return undef if ($#n < 0);
+    my @d = findnodes($n[0], "text()");
+    return $d[0]->getNodeValue();
+}
+
+sub get_child_node_by_name(@$)
+{
+    my @tree = shift;
+    my $name = shift;
+
+    foreach my $child ($tree[0]->childNodes()) {
+        print $child->nodeName() . "\n";
+        if ($child->nodeName() eq $name) {
+            return $child->firstChild()->data();
+        }
+    }
+
+    return undef;
+}
+
+my @pHist;
+my %pidHist;
+my %pidCommitted;
+my @timerHist;
+my @spinLoopHist;
+my @colNames = ();
+
+
+######################################################################
+##
+## Process history tables
+##
+######################################################################
+
+##
+## Called only by load_process_history().
+##
+sub load_hwcs_process_history($$)
+{
+    my $hwc = shift;
+    my $tree = shift;
+
+    ##
+    ## Load column names into @colNames.  Only do it on the first history
+    ## processed.  (All history tables must have identical columns.)
+    ##
+    if ($#colNames < 0) {
+        my @colNameNodes = findnodes($tree, "vector[name='column names']/value/text()");
+
+        foreach my $n (@colNameNodes) {
+            # Drop leading instrs_ from column names to make the names shorter
+            ($colNames[++$#colNames] = $n->getNodeValue()) =~ s/^instrs_//;
+        }
+    }
+
+    ##
+    ## Load the data into $pHist[$hwc]
+    ##
+    my @rows = findnodes($tree, "compound[name='data']/vector");
+    my $rIdx = 0;
+    foreach my $r (@rows) {
+        $pHist[$hwc][$rIdx]{'name'} = get_nodevalue_or_empty($r, "name/text()");
+
+        my $i = 0;
+        foreach my $v (findnodes($r, "value")) {
+            $pHist[$hwc][$rIdx]{$colNames[$i++]} = get_nodevalue($v, "text()");
+        }
+
+        ##
+        ## Detect pid of -1 (it was emitted unsigned)
+        ##
+        if ($pHist[$hwc][$rIdx]{'pid'} == 18446744073709551615) {
+            $pHist[$hwc][$rIdx]{'pid'} = -1;
+        }
+
+        ##
+        ## Set the end_cycle property of the previous row from the start of this
+        ## one.
+        ##
+        if ($rIdx != 0) {
+            my $end_cycle = $pHist[$hwc][$rIdx]{'start_cycle'};
+            if ($end_cycle > 0) {
+                $end_cycle -= 1;
+            }
+            $pHist[$hwc][$rIdx - 1]{'end_cycle'} = $end_cycle;
+        }
+
+        $rIdx += 1;
+    }
+
+    ##
+    ## Last entry ends at the end of the simulation.
+    ##
+    if ($rIdx > 0) {
+        $pHist[$hwc][$rIdx - 1]{'end_cycle'} = $totalCycles;
+    }
+
+    ##
+    ## Add new information to pid indexed history structure
+    ##
+    if ($rIdx > 0) {
+        foreach my $r ( 0 .. $rIdx - 1 ) {
+            my $pid = $pHist[$hwc][$r]{'pid'};
+            my $i = $#{$pidHist{$pid}} + 1;
+            $pidHist{$pid}[$i]{'hwc'} = $hwc;
+            $pidHist{$pid}[$i]{'name'} = $pHist[$hwc][$r]{'name'};
+
+            $pidCommitted{$pid} += $pHist[$hwc][$r]{'committed'};
+
+            $pidHist{$pid}[$i]{'end_cycle'} = $pHist[$hwc][$r]{'end_cycle'};
+
+            foreach my $col (@colNames) {
+                $pidHist{$pid}[$i]{$col} = $pHist[$hwc][$r]{$col};
+            }
+        }
+    }
+}
+
+
+sub load_timer_history($$$) {
+    my $hwc = shift;
+    my $tpu = shift;
+    my $tree = shift;
+
+    my @t = findnodes($tree, "../scalar[name='HWC_${tpu}_n_timer_interrupts']");
+    if ($#t >= 0) {
+        $timerHist[$hwc]{'interrupts'} = get_nodevalue($t[0], "text()");
+        $timerHist[$hwc]{'cycles'} = get_nodevalue($tree, "../scalar[name='HWC_${tpu}_timer_interrupt_cycles']/text()");
+    }
+}
+
+
+sub load_spin_loop_history($$$) {
+    my $hwc = shift;
+    my $tpu = shift;
+    my $tree = shift;
+
+    my @t = findnodes($tree, "../scalar[name='HWC_${tpu}_user_spin_loop_cycles']");
+    if ($#t >= 0) {
+        $spinLoopHist[$hwc]{'userCycles'} = get_nodevalue($t[0], "text()");
+        $spinLoopHist[$hwc]{'kernelCycles'} = get_nodevalue($tree, "../scalar[name='HWC_${tpu}_kernel_spin_loop_cycles']/text()");
+    }
+}
+
+
+##
+## Initialize the $pHist and $pidHist arrays with process history data.
+## Returns non-0 if history available.
+##
+sub load_process_history()
+{
+    my @pHistNodes = findnodes($root, "//compound[name='HWC_0_PROCESS_HISTORY']");
+    if ($#pHistNodes < 0) {
+        return 0;
+    }
+    else {
+        ## Sort by hardware context UID (CPU number)
+        @pHistNodes = sort { get_nodevalue($a, "../scalar[name='HWC_0']/text()") <=>
+                            get_nodevalue($b, "../scalar[name='HWC_0']/text()") } @pHistNodes;
+
+        foreach my $p ( @pHistNodes ) {
+            my $hwc = get_nodevalue($p, "../scalar[name='HWC_0']/text()");
+            load_hwcs_process_history($hwc, $p);
+            load_timer_history($hwc, 0, $p);
+            load_spin_loop_history($hwc, 0, $p);
+
+            ##
+            ## Are there other TPUs on the same CPU?
+            ##
+            my $tpu = 1;
+            while (1) {
+                my @tpuPhist = findnodes($p, "../compound[name='HWC_${tpu}_PROCESS_HISTORY']");
+                last if ($#tpuPhist != 0);
+
+                $hwc = get_nodevalue($tpuPhist[0], "../scalar[name='HWC_${tpu}']/text()");
+                load_hwcs_process_history($hwc, $tpuPhist[0]);
+                load_timer_history($hwc, $tpu, $tpuPhist[0]);
+                load_spin_loop_history($hwc, 0, $p);
+                $tpu += 1;
+            }
+        }
+    }
+
+    return 1;
+}
+
+
+sub display_process_history()
+{
+    if ($#pHist < 0) {
+        warn "No process histories found in stats file\n";
+    }
+    else {
+        foreach my $hwc (0 .. $#pHist) {
+            if (defined($pHist[$hwc])) {
+                print "\nHWC ${hwc}:\n";
+
+                my %totals = ();
+
+                print "            Name    pid       cycles      fetched    issued    killed committed\n";
+                print "\n" if ($showProcessHistory);
+
+                foreach my $row (@{$pHist[$hwc]}) {
+                    if ($showProcessHistory) {
+                        if ($row->{'name'} ne $row->{'pid'}) {
+                            printf "%16.16s %6s", $row->{'name'}, $row->{'pid'};
+                        }
+                        else {
+                            printf "%23.23s", $row->{'pid'};
+                        }
+                        printf " %12s", $row->{'end_cycle'} - $row->{'start_cycle'};
+                        printf " %12s", $row->{'fetched'};
+                    }
+
+                    $totals{'fetched'} += $row->{'fetched'};
+
+                    foreach my $n ('issued', 'killed', 'committed') {
+                        $totals{$n} += $row->{$n};
+                        if ($showProcessHistory) {
+                            printf " %8.2f%%", 100.0 * $row->{$n} / $row->{'fetched'};
+                        }
+                    }
+                    print "\n" if ($showProcessHistory);
+                }
+
+                ## Print totals
+                print "          TOTALS                    ";
+                printf " %12s", $totals{'fetched'};
+                foreach my $n ('issued', 'killed', 'committed') {
+                    printf " %8.2f%%", 100.0 * $totals{$n} / $totals{'fetched'};
+                }
+                print "\n";
+            }
+        }
+
+        print "\n";
+        foreach my $pid (sort {$pidCommitted{$b} <=> $pidCommitted{$a}} keys %pidHist) {
+            print "\nPID ${pid} ($pidHist{$pid}[0]{'name'}):\n";
+            print "  HWC  start_cycle       cycles      fetched    issued    killed committed\n";
+            print "\n" if ($showProcessHistory);
+
+            my %totals = ();
+
+            foreach my $row (sort { $a->{'start_cycle'} <=> $b->{'start_cycle'} } @{$pidHist{$pid}}) {
+                my $cycles = $row->{'end_cycle'} - $row->{'start_cycle'};
+                if ($showProcessHistory) {
+                    printf "  %3.3s", $row->{'hwc'};
+                    printf " %12s", $row->{'start_cycle'};
+                    printf " %12s", $cycles;
+                    printf " %12s", $row->{'fetched'};
+                }
+
+                $totals{'cycles'} += $cycles;
+                $totals{'fetched'} += $row->{'fetched'};
+
+                foreach my $n ('issued', 'killed', 'committed') {
+                    $totals{$n} += $row->{$n};
+                    if ($showProcessHistory) {
+                        printf " %8.2f%%", 100.0 * $row->{$n} / $row->{'fetched'};
+                    }
+                }
+                print "\n" if ($showProcessHistory);
+            }
+
+            ## Print totals
+            print "   TOTALS         ";
+            printf " %12s", $totals{'cycles'};
+            printf " %12s", $totals{'fetched'};
+            foreach my $n ('issued', 'killed', 'committed') {
+                printf " %8.2f%%", 100.0 * $totals{$n} / $totals{'fetched'};
+            }
+            print "\n";
+        }
+    }
+}
+
+
+sub non_idle_info()
+{
+    my $total_cycles = 0;
+    my $total_instrs = 0;
+
+    if ($#pHist >= 0) {
+        foreach my $hwc (0 .. $#pHist) {
+            if (defined($pHist[$hwc])) {
+                my $r = 0;
+                while (defined($pHist[$hwc][$r])) {
+                    if (0 != $pHist[$hwc][$r]{'pid'}) {
+                        $total_cycles += $pHist[$hwc][$r]{'end_cycle'} -
+                            $pHist[$hwc][$r]{'start_cycle'};
+                        $total_instrs += $pHist[$hwc][$r]{'committed'};
+                    }
+                    $r += 1;
+                }
+            }
+        }
+    }
+
+    return ($total_cycles, $total_instrs);
+}
+
+
+sub summarize_process_state(@)
+{
+    my (@cpu_to_hwc) = @_;
+
+    ##
+    ## If no CPU to HWC mapping provided assume 1:1
+    ##
+    if (! @cpu_to_hwc) {
+        foreach my $cpu (0 .. $#commit) {
+            $cpu_to_hwc[$cpu][0] = $cpu;
+        }
+    }
+
+    if ($#pHist >= 0) {
+        my @activeCPUs = undef;
+
+        print "     <<<< Percentages of total cycles >>>>\n";
+
+        print "Idle Loop ";
+        foreach my $cpu (0 .. $#commit) {
+            my $idle_cycles = 0;
+            ##
+            ## Find all HWCs (TPUs) bound to the CPU
+            ##
+            foreach my $hwc (@{$cpu_to_hwc[$cpu]}) {
+                if (defined($pHist[$hwc])) {
+                    $activeCPUs[$cpu] = 1;
+
+                    my $r = 0;
+                    while (defined($pHist[$hwc][$r])) {
+                        if (0 == $pHist[$hwc][$r]{'pid'}) {
+                            $idle_cycles += $pHist[$hwc][$r]{'end_cycle'} -
+                                $pHist[$hwc][$r]{'start_cycle'};
+                        }
+                        $r += 1;
+                    }
+                }
+            }
+            if ($activeCPUs[$cpu]) {
+                printf "  %6.2f%%", 100.0 * $idle_cycles / $totalCycles;
+            }
+        }
+        print "\n";
+
+        if ($#timerHist >= 0) {
+            print "Timer Intr";
+            foreach my $cpu (0 .. $#commit) {
+                if ($activeCPUs[$cpu]) {
+                    my $timerCycles = 0;
+                    foreach my $hwc (@{$cpu_to_hwc[$cpu]}) {
+                        if (defined($timerHist[$hwc])) {
+                            $timerCycles += $timerHist[$hwc]{'cycles'};
+                        }
+                    }
+                    printf "  %6.2f%%", 100.0 * $timerCycles / $totalCycles;
+                }
+            }
+            print "\n";
+        }
+
+        if ($#spinLoopHist >= 0) {
+            print "User Spin ";
+            foreach my $cpu (0 .. $#commit) {
+                if ($activeCPUs[$cpu]) {
+                    my $spinLoopCycles = 0;
+                    foreach my $hwc (@{$cpu_to_hwc[$cpu]}) {
+                        if (defined($spinLoopHist[$hwc])) {
+                            $spinLoopCycles += $spinLoopHist[$hwc]{'userCycles'};
+                        }
+                    }
+                    printf "  %6.2f%%", 100.0 * $spinLoopCycles / $totalCycles;
+                }
+            }
+            print "\n";
+
+            print "Krnl Spin ";
+            foreach my $cpu (0 .. $#commit) {
+                if ($activeCPUs[$cpu]) {
+                    my $spinLoopCycles = 0;
+                    foreach my $hwc (@{$cpu_to_hwc[$cpu]}) {
+                        if (defined($spinLoopHist[$hwc])) {
+                            $spinLoopCycles += $spinLoopHist[$hwc]{'kernelCycles'};
+                        }
+                    }
+                    printf "  %6.2f%%", 100.0 * $spinLoopCycles / $totalCycles;
+                }
+            }
+            print "\n";
+        }
+    }
+}
+
+######################################################################
+##
+## SoftSDV specific.  Find workload name, look for workload specific
+## metrics, etc.
+##
+######################################################################
+
+sub softsdv_info()
+{
+    my @sdvRoot = findnodes($root, "compound[name='SoftSDV']");
+    return if ($#sdvRoot != 0);
+
+    my $group = get_value(@sdvRoot, "scalar[name='group']");
+    my $workload = get_value(@sdvRoot, "scalar[name='workload']");
+
+    print "\n";
+    print "Workload:              ${group} / ${workload}\n";
+
+    my $spinTrips = 0;
+    foreach my $spin (findnodes($sdvRoot[0], ".//scalar[name='spin_loop_trips']")) {
+        $spinTrips += get_nodevalue($spin, "text()");
+    }
+    if ($spinTrips > 0) {
+        printf "Spin loop trips:       %d", $spinTrips;
+        my $spinLen = get_value(@sdvRoot, "scalar[name='spin_loop_length']");
+        if ($spinLen != 0) {
+            printf "  (%.3f cycles)", $spinLen;
+        }
+        printf "\n";
+    }
+
+    my @taggedInstrs = ();
+    foreach my $counter (findnodes($sdvRoot[0], "vector[name='instrs_tagged_total']/value")) {
+        $taggedInstrs[++$#taggedInstrs] = get_nodevalue($counter, "text()");
+    }
+
+    if ($group eq "SPECJbb") {
+        print "Outer loops:  $taggedInstrs[1]";
+        if (defined($simulatedSec)) {
+            printf "   (%.0f / second)", $taggedInstrs[1] / $simulatedSec;
+        }
+    }
+
+    if ($group eq "Oracle9i_TPCC" || $workload eq "TPCC_300w") {
+        ##
+        ## Transaction tags are for individual transaction types.
+        ## The first bucket is at the start and the second is at the
+        ## end of each transaction.  Average the two.
+        ##
+        ##    0/1 - NEW
+        ##    2/3 - PAY
+        ##    4/5 - ORDER
+        ##    6/7 - DELETE
+        ##    8/9 - STORE
+        ##
+        my $transactions = 0;
+        my $newOrders = ($taggedInstrs[0] + $taggedInstrs[1]) >> 1;
+        foreach my $i ( 0 .. 9 ) {
+            $transactions += $taggedInstrs[$i];
+        }
+        $transactions >>= 1;
+
+        ##
+        ## tpmC - new order transactions per minute.  On a real TPC-C run
+        ## new orders are 45% of all transactions.  This run is too short
+        ## for the new order number to be reliable.  Use 45% of the total
+        ## transactions instead.
+        ##
+        if (defined($simulatedSec)) {
+            printf "tpmC:            %14.0f\n", 0.45 * $transactions * 60.0 / $simulatedSec;
+        }
+        printf "Transactions:           %7d", $transactions;
+        if (defined($simulatedSec)) {
+            printf "  (%.0f / second)", $transactions / $simulatedSec;
+        }
+        print "\n";
+        printf "New Order Transactions: %7d", $newOrders;
+        if (defined($simulatedSec)) {
+            printf "  (%.0f / second)", $newOrders / $simulatedSec;
+        }
+        print "\n";
+    }
+}
+
+
+######################################################################
+##
+## APE modules
+##
+######################################################################
+
+sub ape_frequency_print_category($$$) {
+    my $text = shift;
+    my $value = shift;
+    my $total_instrs = shift;
+
+    printf "%-24s  %16s", $text . ":", comma_separated($value);
+    if ($value != $total_instrs) {
+        printf "  (%6.2f%%)", 100.0 * $value / $total_instrs;
+    }
+    print "\n";
+}
+
+sub ape_frequency() {
+    my $cpu = 0;
+    my %buckets;
+    my %u_buckets;
+    my %k_buckets;
+
+    #
+    # Build a hash of all bucket names with totals across all CPUs
+    #
+
+    # User mode
+    $cpu = 0;
+    while (1) {
+        my @cpu_root = findnodes($root_common_sys[0], "compound[name='CHIP']/compound[name='CPU_$cpu']");
+        last if ($#cpu_root < 0);
+
+        my @categories = findnodes($cpu_root[0], "compound[name='DRIVER']/compound[name='user_instrs']/scalar");
+        foreach my $stat (@categories) {
+            my $name = get_nodevalue($stat, "name/text()");
+            my $value = get_nodevalue($stat, "text()");
+            $u_buckets{$name} += $value;
+            $buckets{$name} += $value;
+        }
+
+        $cpu += 1;
+    }
+
+    # Kernel mode
+    $cpu = 0;
+    while (1) {
+        my @cpu_root = findnodes($root_common_sys[0], "compound[name='CHIP']/compound[name='CPU_$cpu']");
+        last if ($#cpu_root < 0);
+
+        my @categories = findnodes($cpu_root[0], "compound[name='DRIVER']/compound[name='kernel_instrs']/scalar");
+        foreach my $stat (@categories) {
+            my $name = get_nodevalue($stat, "name/text()");
+            my $value = get_nodevalue($stat, "text()");
+            $k_buckets{$name} += $value;
+            $buckets{$name} += $value;
+        }
+
+        $cpu += 1;
+    }
+
+    if (! defined($buckets{'insts'})) {
+        ##
+        ## Old style freqs stats.  No separation between user and kernel.
+        ##
+        $cpu = 0;
+        while (1) {
+            my @cpu_root = findnodes($root_common_sys[0], "compound[name='CHIP']/compound[name='CPU_$cpu']");
+            last if ($#cpu_root < 0);
+
+            my @categories = findnodes($cpu_root[0], "compound[name='DRIVER']/scalar");
+            foreach my $stat (@categories) {
+                my $name = get_nodevalue($stat, "name/text()");
+                my $value = get_nodevalue($stat, "text()");
+                $u_buckets{$name} += $value;
+                $k_buckets{$name} = 0;
+                $buckets{$name} += $value;
+            }
+
+            $cpu += 1;
+        }
+    }
+
+    if (! defined($buckets{'insts'})) {
+        print "Couldn't find statistics!\n";
+        return;
+    }
+
+    my $tot = $buckets{'insts'};
+
+    print "\n";
+    ape_frequency_print_category("Total Instructions", $tot, $tot);
+    ape_frequency_print_category("  User Instructions", $u_buckets{'insts'}, $tot);
+    ape_frequency_print_category("  Kernel Instructions", $k_buckets{'insts'}, $tot);
+    print "\n";
+    ape_frequency_print_category("Loads", $buckets{'loads'}, $tot);
+    ape_frequency_print_category("  User Loads", $u_buckets{'loads'}, $tot);
+    ape_frequency_print_category("  Kernel Loads", $k_buckets{'loads'}, $tot);
+    ape_frequency_print_category("Stores", $buckets{'stores'}, $tot);
+    ape_frequency_print_category("  User Stores", $u_buckets{'stores'}, $tot);
+    ape_frequency_print_category("  Kernel Stores", $k_buckets{'stores'}, $tot);
+    print "\n";
+    ape_frequency_print_category("Loads + Stores",
+                                 $buckets{'loads'} + $buckets{'stores'},
+                                 $tot);
+    ape_frequency_print_category("  User Loads + Stores",
+                                 $u_buckets{'loads'} + $u_buckets{'stores'},
+                                 $tot);
+    ape_frequency_print_category("  Kernel Loads + Stores",
+                                 $k_buckets{'loads'} + $k_buckets{'stores'},
+                                 $tot);
+    print "\n";
+    ape_frequency_print_category("Compare and exchange",
+                                 $buckets{'compare_exchange'}, $tot);
+    ape_frequency_print_category("Exchange", $buckets{'exchange'}, $tot);
+    ape_frequency_print_category("Fetch and add", $buckets{'fetch_add'}, $tot);
+    ape_frequency_print_category("All exchange classes",
+                                 $buckets{'compare_exchange'} + $buckets{'exchange'} + $buckets{'fetch_add'},
+                                 $tot);
+    ape_frequency_print_category("  User all exchanges",
+                                 $u_buckets{'compare_exchange'} + $u_buckets{'exchange'} + $u_buckets{'fetch_add'},
+                                 $tot);
+    ape_frequency_print_category("  Kernel all exchanges",
+                                 $k_buckets{'compare_exchange'} + $k_buckets{'exchange'} + $k_buckets{'fetch_add'},
+                                 $tot);
+}
+
+
+sub ape_footprint() {
+    my $iPageBytes = get_value(@root_config, "scalar[name='Param_IPAGE_BYTES']");
+    my $dPageBytes = get_value(@root_config, "scalar[name='Param_DPAGE_BYTES']");
+
+    my $nActive  = 0;
+    my $dNewSum  = 0;
+    my $dRefsSum = 0;
+    my $iNewSum  = 0;
+    my $iRefsSum = 0;
+
+    my $cpu = 0;
+
+    print "\nCPU   Unique Data (MB)     Data Refs   Unique Instr (MB)  Instr Refs\n";
+
+    while (1) {
+        my @cpu_root = findnodes($root_common_sys[0], "compound[name='CHIP']/compound[name='CPU_$cpu']");
+        last if ($#cpu_root < 0);
+
+        my $nInstrs = get_value(@cpu_root, "scalar[name='RetiredInstructions']");
+        if ($nInstrs > 0) {
+            my $dNew  = get_value(@cpu_root, "compound[name='DRIVER']/scalar[name='D_new']");
+            my $dRefs = get_value(@cpu_root, "compound[name='DRIVER']/scalar[name='D_refs']");
+            my $iNew  = get_value(@cpu_root, "compound[name='DRIVER']/scalar[name='I_new']");
+            my $iRefs = get_value(@cpu_root, "compound[name='DRIVER']/scalar[name='I_refs']");
+
+            $nActive  += 1;
+            $dNewSum  += $dNew;
+            $dRefsSum += $dRefs;
+            $iNewSum  += $iNew;
+            $iRefsSum += $iRefs;
+
+            printf " %2d: %15.3f %15.0f %15.3f %15.0f\n",
+                $cpu,
+                ($dNew * $dPageBytes) / 1048576.0, $dRefs,
+                ($iNew * $iPageBytes) / 1048576.0, $iRefs;
+        }
+
+        $cpu += 1;
+    }
+
+    if ($nActive > 0) {
+        printf "\nMean:%15.3f %15.0f %15.3f %15.0f\n",
+            (($dNewSum / $nActive) * $dPageBytes) / 1048576.0,
+            $dRefsSum / $nActive,
+            (($iNewSum / $nActive) * $iPageBytes) / 1048576.0,
+            $iRefsSum / $nActive;
+    }
+
+    ##
+    ## Global memory usage
+    ##
+    my $dNew  = get_value(@root_common_sys, "compound[name='CHIP']/scalar[name='D_new']");
+    my $dRefs = get_value(@root_common_sys, "compound[name='CHIP']/scalar[name='D_refs']");
+    my $iNew  = get_value(@root_common_sys, "compound[name='CHIP']/scalar[name='I_new']");
+    my $iRefs = get_value(@root_common_sys, "compound[name='CHIP']/scalar[name='I_refs']");
+    printf "Global:%13.3f %15.0f %15.3f %15.0f\n",
+        ($dNew * $dPageBytes) / 1048576.0, $dRefs,
+        ($iNew * $iPageBytes) / 1048576.0, $iRefs;
+}
+
+
+sub ape_working_set() {
+    ##
+    ## Working set has a number of statistics in addition to the same ones
+    ## generated by footprint.  Just dump the footprint summary, fow now.
+    ##
+    ape_footprint();
+}
+
+######################################################################
+##
+## Network models
+##
+######################################################################
+
+sub chip_name($) {
+    my $chip = shift;
+
+    if ($chipPrefix eq "") {
+        return "CHIP";
+    }
+    else {
+        return "${chipPrefix}${chip}";
+    }
+}
+
+
+sub find_zboxes() {
+    ## Original models had the Zbox under chip
+    my $zbox = 0;
+
+    for my $chip_num (0 .. $#xml_chips) {
+        $zbox = 0;
+        while (1) {
+            my @new_zboxes = findnodes($xml_chips[$chip_num], "compound[name='ZBOX_$zbox']");
+            @xml_zboxes = (@xml_zboxes, @new_zboxes);
+            last if ($#new_zboxes != 0);
+            $zbox += 1;
+        }
+    }
+    $numZboxes = $zbox;
+
+    return if ($#xml_zboxes >= 0);
+
+    ## New models have the Zboxes under CHIP/SYSINT
+    for my $chip_num (0 .. $#xml_chips) {
+        $zbox = 0;
+        while (1) {
+            my @new_zboxes = findnodes($xml_chips[$chip_num], "compound[name='SYSINT']/compound[name='ZBOX_$zbox']");
+            @xml_zboxes = (@xml_zboxes, @new_zboxes);
+            last if ($#new_zboxes != 0);
+            $zbox += 1;
+        }
+    }
+    $numZboxes = $zbox;
+}
+
+sub twd_network_model() {
+    ##
+    ## Compute CPU to slice mapping.
+    ##
+    my @hwc_to_slice;
+    my %slice_to_hwc;
+    my @slices;
+    my $sliceNum = 0;
+    my $isSMT = 0;
+
+    while (1) {
+        my $chipName = chip_name(0);
+        my @slice_root;
+        if ($chipName eq "CHIP") {
+            # Single chip (older) models
+            @slice_root = findnodes($xml_chips[0], "compound[name='SLICE_$sliceNum']");
+        }
+        else {
+            @slice_root = findnodes($xml_chips[0], "compound[name='PROC']/compound[name='SLICE_$sliceNum']");
+        }
+        last if ($#slice_root < 0);
+        @{$slices[$sliceNum]} = @slice_root;
+
+        my @cpu_root = findnodes($slice_root[0], "compound[name='CPU']");
+        if ($#cpu_root >= 0) {
+            my $h = 0;
+            while (1) {
+                my $hwc = cond_get_value(@cpu_root, "scalar[name='HWC_${h}']");
+                last if (! defined($hwc));
+                $hwc_to_slice[$hwc] = $sliceNum;
+                $slice_to_hwc{$sliceNum}[++$#{$slice_to_hwc{$sliceNum}}] = $hwc;
+                if ($h > 0) {
+                    $isSMT = 1;
+                }
+                $h += 1;
+            }
+        }
+
+        $sliceNum += 1;
+    }
+
+    ##
+    ## At the top of the stats file is a list of stats indexed by CPU.  The
+    ## mapping of CPU numbers to slices is not impressive.  CPU numbers
+    ## are mapped in order to the sorted set of slice numbers.
+    ##
+    my @cpu_to_slice;
+    my @cpu_to_hwc;
+    foreach my $s (sort { $a <=> $b } keys %slice_to_hwc) {
+        $cpu_to_slice[++$#cpu_to_slice] = $s;
+        $cpu_to_hwc[++$#cpu_to_hwc] = $slice_to_hwc{$s};
+    }
+
+    ##
+    ## Initialize the array of pointers to each slice's XML data.
+    ##
+    my $chipName = chip_name(0);
+    for my $cpu (0 .. $#cpu_to_slice) {
+        if ($chipName eq "CHIP") {
+            # Single chip (older) models
+            @{$slice[$cpu]} = findnodes($xml_chips[0], "compound[name='SLICE_$cpu_to_slice[$cpu]']");
+        }
+        else {
+            @{$slice[$cpu]} = findnodes($xml_chips[0], "compound[name='PROC']/compound[name='SLICE_$cpu_to_slice[$cpu]']");
+        }
+    }
+
+    twd_wfd_ipc_calc();
+
+    ##
+    ## Print some global statistics
+    ##
+
+    ## Title
+    print "CPU/Slice ";
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            printf "    %2d/%-2d", $cpu, $cpu_to_slice[$cpu];
+        }
+    }
+    print "\n";
+
+    if ($isSMT) {
+        print "HWCs     ";
+        for my $cpu (0 .. $#commit) {
+            if ($commit[$cpu] > 0) {
+                my $s = "";
+                foreach my $hwc (@{$cpu_to_hwc[$cpu]}) {
+                    $s .= "," if ($s ne "");
+                    $s .= "$hwc";
+                }
+                printf " %8s", $s;
+            }
+        }
+    }
+
+    print "\n";
+
+    ## IPC
+    print "IPC       ";
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            my $t;
+            if ($chipPrefix eq "") {
+                $t = get_value(@root_common_sys, "scalar[name='CPU_${cpu}_Overall_IPC']");
+            }
+            else {
+                $t = get_value(@root_common_sys, "scalar[name='CHIP_0_CPU_${cpu}_Overall_IPC']");
+            }
+            printf "   %6.3f", $t;
+        }
+    }
+    print "\n";
+
+    ## Fetch
+    print "Fetched   ";
+    my $fetchTotal = 0;
+    my @fetched = ();
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            $fetched[$cpu] = get_value(@{$slice[$cpu]}, "compound[name='CPU']//compound[name='IP_CALC']/scalar[name='instsFetched']");
+            $fetchTotal += $fetched[$cpu];
+            printf " %8.3G", $fetched[$cpu];
+        }
+    }
+    print "\n";
+
+    print "     <<<< Percentages of fetched instructions >>>>\n";
+
+    ## Commit
+    print "Commit    ";
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            printf "  %6.2f%%", 100.0 * $commit[$cpu] / $fetched[$cpu];
+        }
+    }
+    print "\n";
+
+    if (! $quick) {
+        ## Exceptions
+        my @exceptions = ('IIE_DONE', 'RSE_SPILL', 'RSE_FILL',
+                          'CPTREADY', 'CPTFULL', 'DBREADY', 'DBFULL',
+                          'LPMISS', 'WAYMISS', 'ICMISS', 'RHDREPLAY',
+                          'REPLAY', 'RETURNMP', 'JUMPMP', 'CBRANCHMP' );
+
+        ## First pass to decide which categories to emit
+        my %excEmitCategory = ();
+        my %excValue = ();
+        for my $cpu (0 .. $#commit) {
+            if ($commit[$cpu] > 0) {
+                for my $category (@exceptions) {
+                    ##
+                    ## For configurations with 1 TPU per CPU the exceptions are
+                    ## scalars.  For multi-TPU configurations they are arrays.
+                    ##
+                    my $t = cond_get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='EXCEPT_HANDLER']/scalar[name='InstsKilledByException_${category}']");
+                    if (! defined($t)) {
+                        $t = 0;
+                        foreach my $e (findnodes($slice[$cpu][0], "compound[name='CPU']/compound[name='EXCEPT_HANDLER']/vector[name='InstsKilledByException_${category}']/value")) {
+                            $t += get_nodevalue($e, "text()");
+                        }
+                    }
+                    if ($t > ($fetched[$cpu] * 0.01)) {
+                        $excEmitCategory{$category} = 1;
+                        $excValue{$category}[$cpu] = $t;
+                    }
+                }
+            }
+        }
+        ## Second pass print the chosen categories
+        for my $category (@exceptions) {
+            if (defined($excEmitCategory{$category})) {
+                printf "%-9.9s ", $category;
+                for my $cpu (0 .. $#commit) {
+                    if ($commit[$cpu] > 0) {
+                        my $t = $excValue{$category}[$cpu];
+                        $t = 0 if (! defined($t));
+                        printf "  %6.2f%%", 100.0 * ${t} / $fetched[$cpu];
+                    }
+                }
+                print "\n";
+            }
+        }
+    }
+
+    ## Print information about processes on the CPUs
+    summarize_process_state(@cpu_to_hwc);
+
+    print "     <<<< Percentages of total instructions >>>>\n";
+    my @sdv = findnodes($root, "compound[name='SoftSDV']");
+    if ($#sdv == 0) {
+        print "Kernel    ";
+        foreach my $cpu (0 .. $#commit) {
+            if ($commit[$cpu] > 0) {
+                my $kInstrs = 0;
+                my $uInstrs = 0;
+                foreach my $hwc (@{$cpu_to_hwc[$cpu]}) {
+                    my @n = findnodes($sdv[0], "compound[name='CPU_$hwc']");
+                    $kInstrs += get_value(@n, "scalar[name='kernel_instrs_from_softsdv']");
+                    $uInstrs += get_value(@n, "scalar[name='user_instrs_from_softsdv']");
+                }
+                my $kFrac = 0;
+                if ($kInstrs + $uInstrs > 0) {
+                    $kFrac = $kInstrs / ($kInstrs + $uInstrs);
+                }
+                printf "  %6.2f%%", 100.0 * $kFrac;
+            }
+        }
+        print "\n";
+    }
+
+    print "\n";
+
+    #########
+    ## IBOX Predictors
+    #########
+    print "\n";
+    print "IBOX mispredictions / 1000 committed instrs (and % of wrong preds):\n";
+
+    my $bp_miss = 0;
+    my $bp_total = 0;
+    my $jp_miss = 0;
+    my $jp_total = 0;
+    my $lp_miss = 0;
+    my $lp_total = 0;
+    my $rp_miss = 0;
+    my $rp_total = 0;
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            $bp_miss += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='BP']/scalar[name='BP_Miss']");
+            $bp_total += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='BP']/scalar[name='BP_Predictions']");
+
+            $jp_miss += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='JP']/scalar[name='JP_Miss']");
+            $jp_total += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='JP']/scalar[name='JP_Predictions']");
+
+            $lp_miss += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='LP']/scalar[name='LP_Miss']");
+            $lp_total += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='LP']/scalar[name='LP_Predictions']");
+
+            $rp_miss += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='RP']/scalar[name='RP_Miss']");
+            $rp_total += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='RP']/scalar[name='RP_Predictions']");
+        }
+    }
+
+    printf "    LP Misses:  %6.2f  (%5.2f%%)\n",
+        1000.0 * $lp_miss / $commitTotal, 100.0 * $lp_miss / $lp_total;
+    printf "    BP Misses:  %6.2f  (%5.2f%%)\n",
+        1000.0 * $bp_miss / $commitTotal, 100.0 * $bp_miss / $bp_total;
+    printf "    JP Misses:  %6.2f  (%5.2f%%)\n",
+        1000.0 * $jp_miss / $commitTotal, 100.0 * $jp_miss / $jp_total;
+    printf "    RP Misses:  %6.2f  (%5.2f%%)\n",
+        1000.0 * $rp_miss / $commitTotal, 100.0 * $rp_miss / $rp_total;
+    print "\n";
+
+    #########
+    ## ALAT
+    #########
+    # Only print a summary line if there is interesting activity
+    my $emitAlat = 0;
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            my $t = get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='MBOX']/compound[name='ALAT']/scalar[name='ALATMiss']");
+            if ($t > ($fetched[$cpu] * 0.01)) {
+                $emitAlat = 1;
+            }
+        }
+    }
+
+    if ($emitAlat) {
+        print "\n";
+        printf "ALAT Miss ";
+        for my $cpu (0 .. $#commit) {
+            if ($commit[$cpu] > 0) {
+                my $t = get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='MBOX']/compound[name='ALAT']/scalar[name='ALATMiss']");
+                printf "  %6.2f%%", 100.0 * ${t} / $fetched[$cpu];
+            }
+        }
+        print "\n";
+    }
+
+    twd_wfd_mem_calc();
+
+    ##
+    ## R$
+    ##
+    my $RCacheBytes =
+        get_value(@root_config, "scalar[name='Param_NUM_SLICES']") *
+        get_value(@root_config, "scalar[name='Param_CBOX_CACHE_NUM_SETS']") *
+        get_value(@root_config, "scalar[name='Param_CBOX_CACHE_NUM_WAYS']") *
+        get_value(@root_config, "scalar[name='Param_CBOX_CACHE_LINE_SIZE_IN_QW']") *
+        8;
+
+    my $RCacheReadMisses = 0;
+    my $RCacheWriteMisses = 0;
+    for my $sliceNum (0 .. $#slices) {
+        $RCacheReadMisses += get_value(@{$slices[$sliceNum]}, "compound[name='CBOX']/compound[name='CBOX_CACHE']/scalar[name='CboxCacheLoadMiss']");
+        $RCacheWriteMisses += get_value(@{$slices[$sliceNum]}, "compound[name='CBOX']/compound[name='CBOX_CACHE']/scalar[name='CboxCacheStoreMiss']");
+    }
+    my $totalMisses = $RCacheReadMisses + $RCacheWriteMisses;
+    printf "RCache Misses / 1000 instrs (%3.1fMB):  %8.3f (%6.3f read + %6.3f write)\n",
+        $RCacheBytes / 1024 / 1024,
+        1000 * ($totalMisses / $commitTotal),
+        1000 * ($RCacheReadMisses / $commitTotal),
+        1000 * ($RCacheWriteMisses / $commitTotal);
+
+    ##
+    ## MCache
+    ##
+    my $MCacheBytes =
+        get_value(@root_config, "scalar[name='Param_MC_WAYS']") *
+        (1 << get_value(@root_config, "scalar[name='Param_MC_BLOCKS']")) *
+        (1 << get_value(@root_config, "scalar[name='Param_MC_BLOCKSIZE']"));
+
+    my $MCacheWriteMisses = 0;
+    my $MCacheReadMisses = 0;
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            $MCacheWriteMisses += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='MBOX']/compound[name='MC']/scalar[name='McacheWriteMiss']");
+            $MCacheReadMisses  += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='MBOX']/compound[name='MC']/scalar[name='McacheReadMiss']");
+        }
+    }
+    my $MCacheMisses = $MCacheReadMisses + $MCacheWriteMisses;
+    printf "MCache Misses / 1000 instrs (%4.0fKB):  %8.3f (%6.3f read + %6.3f write)\n",
+        $MCacheBytes / 1024,
+        1000 * ($MCacheMisses / $commitTotal),
+        1000 * ($MCacheReadMisses / $commitTotal),
+        1000 * ($MCacheWriteMisses / $commitTotal);
+
+    ##
+    ## DCache
+    ##
+    my $DCacheBytes =
+        get_value(@root_config, "scalar[name='Param_DC_WAYS']") *
+        (1 << get_value(@root_config, "scalar[name='Param_DC_BLOCKS']")) *
+        (1 << get_value(@root_config, "scalar[name='Param_DC_BLOCKSIZE']"));
+
+    my $DCacheMisses = 0;
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            $DCacheMisses =
+                get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='MBOX']/compound[name='DC']/scalar[name='DcachePAMiss']") +
+                get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='MBOX']/compound[name='DC']/scalar[name='DcachePAForceMiss']");
+        }
+    }
+    printf "DCache Misses / 1000 instrs (%4.0fKB):  %8.3f\n",
+        $DCacheBytes / 1024,
+        1000 * ($DCacheMisses / $commitTotal);
+
+    ##
+    ## ICache
+    ##
+
+    ## Computing the number of bytes in the I$ is hard sinze the number
+    ## of ways is ignored for the pseudo 2-way algorithm.  I don't see
+    ## a param to figure out which algorithm is in use.
+    my $ICacheBytes =
+        get_value(@root_config, "scalar[name='Param_ICACHE_SETS']") *
+        get_value(@root_config, "scalar[name='Param_ICACHE_FILL_LINE_SIZE']");
+
+    my $ICacheMisses = 0;
+    for my $cpu (0 .. $#commit) {
+        if ($commit[$cpu] > 0) {
+            $ICacheMisses += get_value(@{$slice[$cpu]}, "compound[name='CPU']/compound[name='IBOX']/compound[name='IFU']/scalar[name='ICacheFillReqSent']");
+        }
+    }
+    printf "ICache Misses / 1000 instrs (%4.0fKB):  %8.3f\n",
+        $ICacheBytes / 1024,
+        1000 * ($ICacheMisses / $commitTotal);
+}
+
+sub spis_model () {
+    twd_wfd_ipc_calc();
+    twd_wfd_mem_calc();
+}
+
+sub twd_wfd_ipc_calc() {
+
+    my $refClockDomain = cond_get_value(@root_common_sys, "scalar[name='Reference_clock_domain']");
+    if (defined $refClockDomain)
+    {
+        ## ClockServer case
+        my $freq_name = "Domain_" . $refClockDomain . "_current_frequency_in_MHz";
+        my $cycles_name = "Domain_" . $refClockDomain . "_cycles_simulated";
+        printf ("F_NAME $freq_name C_NAME $cycles_name\n");
+        $coreFreqMHz = cond_get_value(@root_common_sys, "scalar[name='$freq_name']");
+        my $simulatedCycles = cond_get_value(@root_common_sys, "scalar[name='$cycles_name']");
+        ((defined $coreFreqMHz) && (defined $simulatedCycles)) || die ("Something happens with ClockServer case.");
+        $simulatedSec = $simulatedCycles / ($coreFreqMHz * 1000000.0);
+    }
+    else 
+    {
+        $coreFreqMHz = cond_get_value(@root_config, "scalar[name='Param_ZBOX_FREQUENCY']");
+        if (! defined($coreFreqMHz)) {
+            $coreFreqMHz = get_value(@root_config, "scalar[name='Param_CORE_FREQUENCY_MHZ']");
+        }
+        $simulatedSec = $totalCycles / ($coreFreqMHz * 1000000.0);
+    }
+
+    printf "Cycles:                %s  (%0.5f seconds @ %0.2fGHz)\n",
+        comma_separated($totalCycles), $simulatedSec, $coreFreqMHz / 1000;
+
+    if ($totalCycles > 0) {
+        my $ipc = ${commitTotal} / ${totalCycles};
+        printf "Overall IPC:           %.3f\n", ${ipc};
+        my $avgIPC = $ipc /$activeCPUs;
+        my ($non_idle_cycles, $non_idle_instrs) = non_idle_info();
+        if ($non_idle_cycles > 0) {
+            printf "Overall non-idle IPC:  %.3f  (%s cycles/CPU)\n",
+                $activeCPUs * $non_idle_instrs / $non_idle_cycles,
+                comma_separated(sprintf("%.0f", $non_idle_cycles / $activeCPUs));
+        }
+        printf "Non-idle inst per ns:  %.3f\n", ($non_idle_instrs / $simulatedSec) * 1e-9;
+        printf "Average per core IPC:  %.3f\n", ${avgIPC};
+        my $simInstrs = cond_get_value(@root_config, "scalar[name='Param_SIMULATED_REGION_INSTRS_REPRESENTED']");
+        if (defined($simInstrs) && ($simInstrs > 0)) {
+            printf "Simpoint time:         %0.5f (seconds)\n",
+                ($simInstrs / $avgIPC) / ($coreFreqMHz * 1000000.0);
+        }
+    }
+
+    print "\n";
+    
+}
+
+sub twd_wfd_mem_calc () {
+    #########
+    ## Compute memory properties
+    #########
+
+    my $zbox = 0;
+    my $read_memops = 0;
+    my $write_memops = 0;
+
+    ########
+    ## Search for zboxes: path has changed over time
+    ########
+    find_zboxes();
+
+    #Grab stats for the Real Zbox
+    for my $num_chip (0 .. $numChips - 1) {
+        for my $num_zbox (0 .. $numZboxes -1) {
+            my $index = $num_chip * $numZboxes + $num_zbox;
+            my $dift_name = "ZRI";
+            my @dift_root = findnodes($xml_zboxes[$index], "compound[name='$dift_name\_$num_zbox']");
+            if ($#dift_root < 0) {
+                # The name changed.  Perhaps this is an older file...
+                $dift_name = "DIFT";
+                @dift_root = findnodes($xml_zboxes[$zbox], "compound[name='$dift_name\_$num_zbox']");
+            }
+            last if ($#dift_root < 0);
+
+            $read_memops += get_value(@dift_root,"scalar[name='n_reads_to_DIFT']");
+            $write_memops += get_value(@dift_root,"scalar[name='n_writes_to_DIFT']");
+
+            $zbox += 1;
+        }
+    }
+    
+    #If there was no real Zbox, grab stats for the Simple Zbox
+    if ($zbox == 0) {
+        for my $num_chip (0 .. $numChips - 1) {
+            while (1) {
+                my @zbox_root = findnodes($xml_chips[$num_chip], "compound[name='ZBOX_$zbox']");
+                last if ($#zbox_root < 0);
+        
+                $read_memops += get_value(@zbox_root,"scalar[name='n_reads_completed']");
+                $write_memops += get_value(@zbox_root,"scalar[name='n_writes_completed']");
+        
+                $zbox += 1;
+            }
+        }
+    }
+
+    my $lineBytes = 8 * get_value(@root_config, "scalar[name='Param_CBOX_CACHE_LINE_SIZE_IN_QW']");
+    my $read_bw = $lineBytes * ($read_memops) / $totalCycles;
+    my $write_bw = $lineBytes * ($write_memops) / $totalCycles;
+    my $conv_factor = $coreFreqMHz * 1000000.0 / 1024.0 / 1024.0 / 1024.0;
+
+    printf "Memory Traffic (bytes/cycle):          %8.3f (%6.3f read + %6.3f write)\n", $read_bw + $write_bw, $read_bw, $write_bw;
+    printf "Memory Traffic (GB/second):            %8.3f (%6.3f read + %6.3f write)\n", ($read_bw + $write_bw) * $conv_factor, $read_bw * $conv_factor, $write_bw * $conv_factor, ;
+
+    print "\n";
+
+}
+
+######################################################################
+##
+## Model-independent functions.
+##
+######################################################################
+
+sub compute_chips_and_commits() {
+    ##
+    ## First figure out how many chips are represented.
+    ##
+    my @c = findnodes($root_common_sys[0], "scalar[name='CPU_0_instructions_committed']");
+    if ($#c != 0) {
+        ## Assume chip is in name
+        $chipPrefix = "CHIP_";
+    }
+    else {
+        $chipPrefix = "";
+    }
+
+    my $chip = 0;
+    while (1) {
+        my $cpu = 0;
+        while (1) {
+            my $chipName = $chipPrefix;
+            $chipName .= "${chip}_" if ($chipPrefix ne "");
+            my @c = findnodes($root_common_sys[0], "scalar[name='${chipName}CPU_${cpu}_instructions_committed']");
+            last if ($#c != 0);
+
+            $commit[$cpu] = get_nodevalue($c[0], "text()");
+            if ($commit[$cpu] > 0) {
+                $activeCPUs += 1;
+                $commitTotal += $commit[$cpu];
+            }
+
+            $cpu += 1;
+        }
+
+        last if ($cpu == 0 || $chipPrefix eq "");   ## No CPUs on the chip
+        $chip += 1;
+    }
+
+    if ($chipPrefix eq "") {
+        $numChips = 1;
+    }
+    else {
+        $numChips = $chip;
+    }
+}
+
+sub param_info() {
+    my $simWeight = cond_get_value(@root_config, "scalar[name='Param_SIMULATED_REGION_WEIGHT']");
+    if (defined($simWeight)) {
+        printf "Simpoint weight:       %.4f\n", $simWeight / 10000.0;
+    }
+}
+
+######################################################################
+##
+## General parsing.  Figure out which model was run and try to print
+## useful stats.
+##
+######################################################################
+
+my $doc;
+
+
+sub read_from_stream($) {
+    my $stream = shift;
+    my $xml_data = '';
+    my $tmpbuf;
+
+    for(;;) {
+        last if (! sysread($stream, $tmpbuf, 8192));
+        $xml_data .= $tmpbuf;
+    }
+
+    return XML::GDOME->createDocFromString($xml_data);
+}
+
+sub find_chips() {
+    @xml_chips = findnodes($root_common_sys[0], "descendant::compound[name='CHIP']");
+
+    my $chip_num = 0;
+    while (1) {
+        my @moreChips = findnodes($root_common_sys[0], "descendant::compound[name='CHIP_$chip_num']");
+        @xml_chips = (@xml_chips, @moreChips);
+        last if ($#moreChips < 0);
+        $chip_num++;
+    }; 
+}
+
+if ($ARGV[0] eq "-") {
+    $doc = read_from_stream(*STDIN);
+}
+elsif ($ARGV[0] =~ /\.bz2$/) {
+    open(STDATA, "bzcat $ARGV[0] |");
+    $doc = read_from_stream(*STDATA);
+    close(STDATA);
+}
+elsif ($ARGV[0] =~ /\.gz$/) {
+    open(STDATA, "gzcat $ARGV[0] |");
+    $doc = read_from_stream(*STDATA);
+    close(STDATA);
+}
+else {
+    $doc = XML::GDOME->createDocFromURI($ARGV[0]);
+}
+
+$root = $doc->getDocumentElement();
+
+@root_common_sys = findnodes($root, "compound[name='COMMON_SYSTEM']");
+die "No Common_System region found\n" if ($#root_common_sys != 0);
+
+@root_config = findnodes($root_common_sys[0], "compound[name='CONFIG']");
+die "No CONFIG region found\n" if ($#root_config != 0);
+
+## 
+## Get chips
+##
+find_chips();
+die "No CHIPS found\n" if ($#xml_chips < 0);
+
+$totalCycles = get_value(@root_common_sys, "scalar[name='cycles_stats_gathered']");
+
+compute_chips_and_commits();
+
+##
+## Load the process history early so the data can be used by model-specific
+## code.
+##
+load_process_history();
+
+##
+## Is this an APE run?
+##
+my @ape_driver = findnodes($root_config[0], "scalar[name='Module_ape_driver']");
+
+if ($#ape_driver == 0) {
+
+    $isApe = 1;
+
+    my $apeModel = "Unknown";
+
+    ##
+    ## Try to figure out which APE model was run
+    ##
+    my $apeModelDesc = get_value(@ape_driver, "desc");
+    if ($apeModelDesc =~ /Footprint Driver/) {
+        $apeModel = "Footprint";
+    }
+    elsif ($apeModelDesc =~ /Working Set/) {
+        $apeModel = "Working Set";
+    }
+    elsif ($apeModelDesc =~ /Frequency Driver/) {
+        $apeModel = "Frequency";
+    }
+
+    print "Model:        Ape ${apeModel}\n";
+    print "Cycles:       " . comma_separated($totalCycles) . "\n";;
+
+    # Print idle process summary
+    if ($#pHist >= 0) {
+        print "\n";
+        print "CPU       ";
+
+        for my $cpu (0 .. $#commit) {
+            last if ($commit[$cpu] == 0);
+            printf " %6d  ", $cpu;
+        }
+        print "\n";
+
+        summarize_process_state();
+    }
+
+    if ($apeModel eq "Footprint") {
+        ape_footprint();
+    }
+    elsif ($apeModel eq "Working Set") {
+        ape_working_set();
+    }
+    elsif ($apeModel eq "Frequency") {
+        ape_frequency();
+    }
+}
+else {
+    ## Check whether it is a TWD-like model
+    my @spis = findnodes($root_config[0], "scalar[name='Module_spis']");
+    if ($#spis != 0) {
+        twd_network_model();
+    }
+    else {
+        spis_model();
+    }
+}
+
+softsdv_info();
+
+param_info();
+
+##
+## Find all the process history data.  Start by looking for hardware context
+## 0 on all CPUs.  Also look for other TPUs on each CPU.
+##
+if ($showProcessSummary || $showProcessHistory) {
+    display_process_history();
+}
+
+__END__
+
+=head1 NAME
+
+summarize-stats - Summarize ASIM stats file
+
+=head1 SYNOPSYS
+
+summarize-stats [--proc] [--psum] <stats file>
+
+=head1 DESCRIPTION
+
+Generate a summary of an ASIM statistics file.  If <stats file> is "-" then
+read the statistics from stdin.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --proc
+
+Show process history sorted two ways:  a sequential scheduling history
+for each CPU and a history sorted by pid.
+
+=item --psum
+
+Show summary of process history.  Similar to the --proc switch but shows
+only the totals instead of details.
+
+=back
+
+=head1 AUTHOR
+
+Michael Adler
+
+=head1 COPYRIGHT
+
+Copyright (C) 2003-2006 Intel Corporation
+
+=cut

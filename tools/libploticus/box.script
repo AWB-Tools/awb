@@ -1,0 +1,275 @@
+
+//
+// Script to do clustered/box bars 
+//
+
+// 
+// Load parameters specific to box/clustered bars
+//
+#setifnotgiven num_bar = 1
+#setifnotgiven num_cluster = 1
+#setifnotgiven title = ""
+#setifnotgiven xlabel = ""
+#setifnotgiven ylabel = ""
+#setifnotgiven subtitle = ""
+#setifnotgiven legloc = "top"
+#setifnotgiven stubvert = 1
+#setifnotgiven ymaxval = 100
+#setifnotgiven yminval = 0
+#setifnotgiven stubvert = yes
+
+/// Include file that contains information on how to space labels. 
+#include $spacing_var
+
+/// Read data
+#proc getdata
+file: @data
+fieldnameheader: no
+#endproc
+
+#proc print
+label: Got @NRECORDS records, @NFIELDS fields per record
+#endproc
+
+#setifnotgiven width = $arith(@num_bar*@num_cluster+@num_cluster*.4)
+#setifnotgiven height = 2
+
+#if @width = 0
+  #set width = $arith(@num_bar*@num_cluster+@num_cluster*.4)
+#endif
+
+#if @height = 0
+  #set height = 2
+#endif
+
+#proc print
+label: Width @width, Height @height
+#endproc
+
+
+// compute XMAX (Number of bars * number of clusters + spacing)
+// There is one space between each cluster. 
+#set xmaxval = $arith(@num_cluster*@num_bar+@num_cluster)
+#set YINC = $arith(@ymaxval-@yminval/5)
+
+
+// Step 3: Determine plot location given legend location
+#set ymin = 1
+#set ymax = $arith(@ymin+@height)
+#set xmin = 1
+#set xmax = $arith(@xmin+@width)
+
+#set Yadjust = 0
+#if @num_cluster > 1
+  #if @num_bar > 1
+    #set Yadjust = 0.5
+  #endif
+#endif
+
+#set ymin = $arith(@ymin+@Yadjust)
+
+#set pagexmax = $arith(@xmax+.5)
+#set pageymax = $arith(@ymax+.5)
+
+// Determine width of bars given plotting area. 
+#set bwidth = $arith(@xmax-@xmin/@NFIELDS*.65)
+
+//
+// Determine max length of each bar and whether the bar labels need to be vertical or not. 
+//
+#set bar_label = 0
+#set max_bar_label = 0
+#set bar_label = 1
+#shell #processrows cat @bar_name
+#while $shellrow( name ) = 0
+  #if $len(@name) > @max_bar_label
+    #set max_bar_label = $len(@name)
+  #endif
+#endloop
+
+#set bar_name_length = $arith(@max_bar_label*@VERT_MULT)
+#if @bar_name_length > @bwidth
+  // We have vertical bars
+  #set bar_label = 2
+#endif
+
+//
+// Determine longest name for each cluster.  
+//
+#shell #processrows cat @cluster_name
+
+#set cluster_label = 0
+#set max_cluster_label = 0
+#if @num_cluster > 1
+  #set cluster_label = 1
+  #while $shellrow( name ) = 0
+    #if $len(@name) > @max_cluster_label
+      #set max_cluster_label = $len(@name)
+    #endif
+  #endloop
+
+//  #proc print
+//    label: max_cluster_label @max_cluster_label
+//  #endproc
+
+  #set cluster_name_length = $arith(@max_cluster_label*@VERT_MULT)
+  #set cluster_spacing = $arith(@bwidth*@num_bar)
+  #if @cluster_name_length > @cluster_spacing
+    // We have vertical bars
+    #set cluster_label = 2
+  #endif
+#endif
+    
+//#proc print
+//  label: cluster_label @cluster_label
+//#endproc
+
+//#proc print
+//  label: bar_label @bar_label
+//#endproc
+// 
+// Adjust height of page for vertical labels, if necessary. 
+#set label_adjust = 0
+#if @cluster_label = 2
+  #set label_adjust = $arith(@max_cluster_label*@VERT_MULT)
+//  #proc print 
+//    label: Adjust for cluster @label_adjust
+//  #endpfoc
+#endif
+
+#if @bar_label = 2
+  #set vert_bar_adjust = $arith(@max_bar_label*@VERT_MULT)
+  #set label_adjust = $arith(@label_adjust+@vert_bar_adjust)
+//  #proc print 
+//    label: Adjust for bar @vert_bar_adjust
+//  #endproc
+#endif  
+
+#include $adjust_page
+
+//#set pageymax = $arith(@label_adjust+@pageymax)
+
+// Adjust the plot within the page. 
+//#set ymax = $arith(@pageymax-.5)
+//#set ymin = $arith(@ymax-@height)
+
+//
+// Adjust pageymax for title and x/y labels
+//
+//#if @title != ""
+//  #set pageymax = $arith(@pageymax+0.3)
+//#endif
+
+//#if @xlabel != ""
+//  #set pageymax = $arith(@pageymax+0.3)
+//  #set xlabeladj = $arith(-1*@ymin+0.5)
+//#endif
+
+//#if @ylabel != ""
+//  #set pagexmax = $arith(@pagexmax+0.3)
+//  #set ylabeladj = $arith(-1*@xmin+0.5)
+//#endif
+
+//#proc print
+//  label: pagexmax: @pagexmax, pageymax: @pageymax
+//#endproc
+
+/// Define page
+//#proc page
+//  pagesize: @pagexmax @pageymax
+//#endproc
+
+//#proc print
+//  label: xmin: @xmin, ymin: @ymin, xmax: @xmax, ymax: @ymax
+//#endproc
+
+//
+// YMIN & YMAX with automatic YINC tic increment computation
+//
+// set up temporary area
+#proc areadef
+  yrange: @yminval @ymaxval  
+  xrange: 0 @xmaxval
+  rectangle: @xmin @ymin @xmax @ymax
+#endproc
+// YINC, YMIN, YMAX fiddling subroutine (or the ploticus version of such)
+#include $adjust_yaxis
+
+// set up area
+#proc areadef
+  title: @title
+  titledetails: align=C
+  xrange: 0 @xmaxval
+  yrange: @YMIN @YMAX  
+  xaxis.stubs: file @bar_name
+  xaxis.label: @xlabel
+  xaxis.labeldetails: align=R 
+  xaxis.labeldistance: @xlabeladj
+  #if @bar_label = 2
+    xaxis.stubvert: yes
+  #endif
+  xaxis.stubdetails: size=@stubsize, adjust=0,-0.2
+
+  yaxis.stubs: inc @YINC
+  yaxis.stubdetails: size=@stubsize
+  yaxis.label: @ylabel
+  yaxis.labeldetails: align=R 
+  yaxis.labeldistance: @ylabeladj
+  yaxis.grid: color=gray(0.9) width=0.5
+  rectangle: @xmin @ymin @xmax @ymax
+#endproc
+
+// If we have clustering, determine labels to use for second axis. 
+#if @num_cluster > 1
+  #set ICLUST = 1
+
+  // Draw second axis using cluster labels. 
+  #proc xaxis
+    tics: none
+    #set xoffset = $arith(@num_bar*.6*@bwidth)
+    stubdetails: adjust=@xoffset,-@vert_bar_adjust size=@stubsize
+    stubs: file @cluster_name
+    #if @cluster_label = 2
+      stubvert: yes
+    #endif
+  #endproc
+#endif
+
+#set ICLUST = 0
+#set I = 0
+#set LOC = 0
+
+
+// start loop
+#while @ICLUST < @num_cluster
+  // Loop across the different bars
+  #set IBAR = 0
+  
+  // Have to leave a blank line after every while loop.  
+  // Otherwise the script parser messes up
+  #while @IBAR < @num_bar
+
+    #set IBAR = $arith(@IBAR+1)
+    #set I = $arith(@I+1)
+    #set LOC = $arith(@LOC+1)
+//#proc print
+//  label: I = @I
+//#endproc
+    #proc rangebar
+      barloc: @LOC
+      color: blue
+      #set dfield = $arith(@I+1)
+      datafield: @dfield
+      barwidth: @bwidth
+      showoutliers: yes
+      outliernearsym: shape=circle
+      outlierfarsym: shape=asterisk
+      outlierlabelfield: 1
+    #endproc
+  #endloop
+
+  #set ICLUST = $arith(@ICLUST+1)
+  #set LOC = $arith(@LOC+1)
+
+#endloop
+

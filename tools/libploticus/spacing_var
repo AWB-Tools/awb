@@ -1,0 +1,23 @@
+//
+// Set some globals
+// 
+#set CHARINCH = 6
+
+// Set defaults
+#set VERT_MULT = 0.10
+#set stubsize = 8
+
+#if @DEVICE = "x11"
+  #set VERT_MULT = 0.15
+#elseif @DEVICE = "eps"
+  #set VERT_MULT = 0.07
+#elseif @DEVICE = "ps"
+  #set VERT_MULT = 0.07
+#elseif @DEVICE = "bwps"
+  #set VERT_MULT = 0.07
+#elseif @DEVICE = "png"
+  #set VERT_MULT = 0.08
+#elseif @DEVICE = "gif"
+  #set VERT_MULT = 0.08
+#endif
+

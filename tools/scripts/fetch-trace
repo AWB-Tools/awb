@@ -1,0 +1,503 @@
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##################################################################################
+# 
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+##################################################################################
+
+# Author: Carl Beckmann
+# Date: July, 2006
+# Purpose:
+#       fetches trace files from the Asim trace disks in Hudson or the DPG trace
+#	disks in Portland into a local trace cache, and returns the path to the
+#	local files.
+#	This is intended to be used in "setup" scripts invoked by benchmark .cfg
+#	or .cfx scripts used by AWB and asim-run to set up benchmark traces. 
+#
+
+use File::Basename;
+use Getopt::Long;
+use IO::Handle;
+use Cwd 'realpath';
+use Asim;
+Asim::init();
+use Asim::Util;
+
+#
+# Hard coded global values.  These are not controlled by the asimrc file. 
+#
+
+#
+# Get configuration parameters from the asimrc file. 
+#
+
+# the master trace list for DPG traces
+my $DPG_MASTER_TLIST   = Asim::Util::get_asimrc_val('fetch-trace', 'DPG_MASTER_TLIST' );
+
+# the trace fetch program for DPG traces
+my $DPG_FETCH_TRACE    = Asim::Util::get_asimrc_val('fetch-trace', 'DPG_FETCH_TRACE'  );
+
+# a regular expression to recognize DPG trace file absolute paths
+my $DPG_TRACE_PATTERN  = Asim::Util::get_asimrc_val('fetch-trace', 'DPG_TRACE_PATTERN');
+
+# the master trace list for Asim traces
+my $ASIM_MASTER_TLIST  = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_MASTER_TLIST');
+
+# location of the local disk cache for Asim traces
+my $ASIM_TRACE_CACHE   = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_TRACE_CACHE' );
+
+# the server to rsync Asim traces from
+my $ASIM_TRACE_SERVER  = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_TRACE_SERVER');
+
+#
+# get command line options
+#
+$debug    = 0;
+$verbose  = 0;
+my $fetch = 1;
+$status = GetOptions(   "fetch!"         => \$fetch,
+			"debug"          => \$debug,
+                        "verbose!"       => \$verbose,
+                        "help"           => \$help,
+                    );
+
+if ($help) {
+  system "perldoc $0";
+  exit 0;
+}
+
+if ( $debug ) { $verbose = 1; }
+
+if ( $debug ) {
+  print "# DPG_MASTER_TLIST  = $DPG_MASTER_TLIST\n";
+  print "# DPG_FETCH_TRACE   = $DPG_FETCH_TRACE\n";
+  print "# DPG_TRACE_PATTERN = $DPG_TRACE_PATTERN\n";
+  print "# ASIM_MASTER_TLIST = $ASIM_MASTER_TLIST\n";
+  print "# ASIM_TRACE_CACHE  = $ASIM_TRACE_CACHE\n";
+  print "# ASIM_TRACE_SERVER = $ASIM_TRACE_SERVER\n";
+}
+
+#
+# positional command line args
+#
+my $trace_arg = shift;
+
+if (! $status      || 
+    ! $trace_arg     ) {
+
+  my $prog = basename($0);
+  
+  print "$prog: Insufficent switches specified.\n";
+  print "$prog: A trace file argument is required.\n";
+  print "$prog: Try \"$prog --help\" for more information.\n";
+  exit 1;
+}
+
+############### real work starts here ###############
+
+#
+# subroutine to search a Tlist file for a trace with the given name.
+# First arg is the name of the trace to find,
+# second arg is the Tlist file.
+#
+# FIX FIX this should be part of a reusable perl module
+# that deatls with Tlist files !!!
+#
+sub find_trace_in_tlist($$) {
+  my $trace_name = shift;
+  my $tlist_file = shift;
+  printf("# find_trace_in_tlist(%s,%s)\n", $trace_name, $tlist_file) if ( $debug );
+
+  return undef if ( ! -e $tlist_file );
+
+  my $trace_path = undef;
+  open TLISTSCAN, "grep $trace_name $tlist_file |"
+    || die "# cannot open Tlist file $tlist_file";
+  while ( <TLISTSCAN> ) {
+    chomp;
+    s/^\s*//;
+    s/\s*$//;
+    # skip comments and blank lines
+    next if ( m/^\s*(#.*)$/ );
+    # skip .tag: and .ptag: lines
+    next if ( m/^\s*[a-z]+\s*:/ );
+    # skip PARAMETER=valuelust lines
+    next if ( m/^\s*[a-zA-Z0-9_]+\s*=/ );
+    # otherwise it should be of the form directory/filename
+    if ( m/^\s*(.*)\/(.*)$/ ) {
+      print "# found possible match:\n#\t$_\n" if ( $debug );
+      if ( $2 eq $trace_name ) {
+        $trace_path = $_;
+      }
+    }
+  }
+  close TLISTSCAN;
+  return $trace_path;
+}
+
+##
+## if we were given just a name, first look up the name in various
+## Tlist files to find an absolute path to it.
+## Print the path and exit if we are not fetching the files.
+##
+my $trace_name = undef;
+my $trace_path = undef;
+if ( $trace_arg =~ m/\// ) {
+  print "# trace is an absolute path\n" if ( $debug );
+  $trace_path = $trace_arg;
+  ($trace_name = $trace_arg) =~ s/.*\///;
+
+} else {
+  print "# trace is just a name\n" if ( $debug );
+  $trace_name = $trace_arg;
+  
+  #
+  # first look for the trace in the DPG trace list
+  #
+  if ( $DPG_MASTER_TLIST ) {
+    print "# looking up trace in DPG trace list\n" if ( $verbose );
+    $trace_path = find_trace_in_tlist($trace_name, $DPG_MASTER_TLIST);
+  } else {
+    print "# there is no DPG trace list file to look up the trace\n" if ( $verbose );
+  }
+
+  #
+  # if not found, look for it in the Asim trace list
+  #
+  if ( ! $trace_path ) {
+    if ( $ASIM_MASTER_TLIST ) {
+      print "# looking up trace in Asim trace list\n" if ( $verbose );
+      $trace_path = find_trace_in_tlist($trace_name, $ASIM_MASTER_TLIST);
+    } else {
+      print "# there is no Asim trace list file to look up the trace\n" if ( $verbose );
+    }
+  }
+}
+
+die "# trace $trace_name not fond" if ( ! $trace_path );
+
+# if we are not actually fetching the trace, print the path and exit
+if ( ! $fetch ) {
+  print "$trace_path\n";
+  exit 0;
+}
+
+##
+## if it's a DPG trace, just invoke DPG fetch_trace and exit
+##
+if ( !$DPG_TRACE_PATTERN || !$DPG_FETCH_TRACE ) {
+  print "# skipping DPG fetch_trace because disabled\n" if ( $verbose );
+} elsif ( $trace_path =~ m/$DPG_TRACE_PATTERN/ ) {
+  print "# invoking DPG fetch_trace:\n# $DPG_FETCH_TRACE $trace_path\n" if ( $verbose );
+  exec("$DPG_FETCH_TRACE $trace_path");
+}
+
+##
+## if it's an Asim trace, see if the file at the absolute path exists here.
+## If not, rsync it to the local trace cache from the Asim server machine.
+##
+
+# note that the trace_path is just a prefix, not a full file name,
+# and moreover, the files may just be soft links to other locations.
+# We need to test that the soft links get us to actual files.
+my @trace_files = glob("${trace_path}*");
+my $files_exist = ( $#trace_files >= 0 );
+foreach my $f ( @trace_files ) {
+  if ( ! -e $f ) {
+    print "# file $f does not appear to exist locally\n" if ( $debug );
+    $files_exist = 0;
+    last;
+  }
+}
+
+if ( $files_exist ) {
+  #
+  # print the absolute path if the file exists locally
+  #
+  print "# files ${trace_path}* are available locally at sever path\n" if ( $debug );
+  print "$trace_path\n";
+  exit 0;
+
+} else {
+  #
+  # if the files do not exist locally, we'll need to rsync them from the server,
+  # unless they're already in the cache:
+  #
+  my @local_files = glob("$ASIM_TRACE_CACHE/${trace_name}*");
+  if ( $#local_files >= 0 ) {
+    print "# files ${trace_path}* are available locally in cache\n" if ( $debug );
+  } else {
+    print
+      "# copying files ${trace_path}* from remote server ${ASIM_TRACE_SERVER} to local cache $ASIM_TRACE_CACHE/\n"
+      if ( $verbose );
+    system("rsync ${ASIM_TRACE_SERVER}:${trace_path}\\* $ASIM_TRACE_CACHE/");
+  }
+  print "$ASIM_TRACE_CACHE/${trace_name}\n";
+
+}
+
+__END__
+
+=head1 NAME
+
+fetch-trace - Utility to fetch benchmark trace files into a local disk cache
+
+=head1 SYNOPSIS
+
+     % fetch-trace <trace name>
+          [--[no]fetch]
+          [--[no]verbose]
+          [--help]
+
+=head1 DESCRIPTION
+
+Fetch-trace is used to copy benchmark trace files into a local disk accessible
+by Asim model runs.  The traces could be in a remote file system, in which case
+they are rsync'ed to the local disk.  The use of fetch-trace allows benchmark
+configuration scripts to be written in a site-independent manner.
+
+Fetch-trace is given a trace name as an argument.  This name can be either the
+absolute path to the trace, or a simple name.  If it is a simple name, fetch-trace
+first looks up the name in various "trace list" files to determine its absolute
+path.  If the resulting file is not available locally, it looks in the local trace
+cache, and if it cannot find it there, it rsync's it from the remote site.
+
+Fetch-trace returns the absolute path to the local copy of the desired traces
+(which is usually a prefix of the actual file names).
+
+Fetch-trace is similar in spirit to DPG's fetch_trace (note the underscore), and
+in fact calls fetch_trace to retrieve traces on DPG's trace disk.  Fetch-trace
+adds the following features to fetch_trace:
+
+=over 4 
+
+=item
+
+Can fetch traces from not only the DPG disks, but also the Asim trace disks.
+
+=item
+
+Is configurable by system and user asimrc files.
+
+=item
+
+Can be used not only to fetch traces, but also to look up the location of traces
+by consulting trace list (tlist) files.
+
+=back
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --[no]fetch
+
+Specifies whether or not to fetch the trace.  If not, it only looks up
+and returns the absolute path name of the trace on its server.
+
+=item --[no]verbose
+
+Specified that extra information should be printed. The [no] prefix
+reverses the sense of the command. Default is NOT to be verbose.
+
+=item --help
+
+Get this help information.
+
+=back
+
+=head1 USAGE MODEL
+
+In its simplest usage, fetch-trace can be used as an improved version of
+(or rather, a wrapper around) DPG's fetch_trace script.
+In this mode, you supply fetch-trace with the absolute path name (on the server)
+of the desired trace, and fetch-trace copies the files, if necessary,
+into the local cache.  It's last line of output is the path name on the local
+machine, but may be preceded by debugging output lines starting with "#",
+which can be filtered as in the following example:
+
+=over 4
+
+#!/bin/sh
+
+local_path=`fetch-trace /trace/path/prefix | tail -1`
+
+=back
+
+It can also be used to look up the absolute path of the trace on the server,
+given just the trace name, as follows:
+
+=over 4
+
+abspath=`fetch-trace --nofetch tracename | tail -1`
+
+=back
+
+Both of these functions can be combined by omitting the --nofetch argument,
+and simply supplying a trace name.  In this case, fetch-trace tries to find
+the trace as described in ALGORITHM below, and fetches the needed files
+into the local trace cache as needed, returning the local absolute path:
+
+=over 4
+
+local_path=`fetch-trace tracename | tail -1`
+
+=back
+
+Typically, fetch-trace is invoked from the "setup" script called by Asim
+benchmark CFG files or CFX scripts, when copying (soft links to) trace files
+into the user's experiment run directories.
+
+=head1 ALGORITHM
+
+Fetch-trace performs one or both of the following two steps
+(depending on arguments) in the following order:
+
+=head2 Trace Location Lookup
+
+If only a name (not an absolute path) is supplied as the trace argument,
+fetch-trace first tries to determine the location of the trace.
+It does so by searching trace list (.tlist) files in the following order:
+
+=over 4
+
+=item
+
+in the DPG_MASTER_TLIST file
+
+=item
+
+in the ASIM_MASTER_TLIST file
+
+=back
+
+=head2 Trace caching
+
+Once it has an absolute path to the trace (either by Trace Location Lookup,
+or from the command line), fetch-trace performs trace caching
+by following the steps below:
+
+=over 4
+
+=item
+
+If the absolute path matches the regular expression DPG_TRACE_PATTERN,
+then fetch-trace invokes DPG_FETCH_TRACE to cache the trace, and exits.
+
+=item
+
+Otherwise, if any trace files exist with the given absolute path as a prefix,
+then fetch-trace assumes nothing else needs to be done,
+so it prints the absolute path and exits.
+
+=item
+
+Otherwise, it looks in the local ASIM_TRACE_CACHE directory for any files
+that match the absolute path as a prefix (without the enclosing directory),
+and if it finds any, it prints their location in the ASIM_TRACE_CACHE
+directory and exists.
+
+=item
+
+Otherwise, it uses rsync to copy any files with the absolute path as a prefix
+from the machine ASIM_TRACE_SERVER into the local directory ASIM_TRACE_CACHE,
+and prints their location in the ASIM_TRACE_CACHE directory.
+
+=back
+
+=head1 ASIMRC CONFIGURATION SETTINGS
+
+The following parameters can be set in the system or user asimrc files
+to control fetch-trace's behavior:
+
+=over 4
+
+=item DPG_MASTER_TLIST
+
+This is the absolute path to the DPG master trace list file,
+which is searched for the location of traces accessible via DPG_FETCH_TRACE.
+If this is set to the empty string,
+then only the ASIM_MASTER_TLIST file is searched.
+
+=item ASIM_MASTER_TLIST
+
+This is the absolute path to the Asim master trace list file,
+which is searched for the location of all other traces.
+
+=item DPG_TRACE_PATTERN
+
+A regular expression to recognize DPG trace file absolute paths.
+For example: "^\/fs..\/(psc|wmt|nhm)\.arch\.traces.*/traces".
+If this is set to ".*",
+then DPG fetch_trace is used exclusively to fetch all traces
+(although the ASIM_MASTER_TLIST file may still be used for lookup).
+
+=item DPG_FETCH_TRACE
+
+The trace fetch program for DPG traces,
+usually "fetch_trace" or "/nfs/site/proj/dpg/arch/bin/fetch_trace".
+If this is set to the empty string,
+then DPG fetch_trace is not used
+(although the DPG_MASTER_TLIST file may still be used for lookup).
+
+=item ASIM_TRACE_CACHE
+
+Location of the local disk cache for Asim traces.
+
+=item ASIM_TRACE_SERVER
+
+The server to rsync Asim traces from, e.g. "asim.intel.com".
+
+=back
+
+=head1 SEE ALSO
+
+perldoc /nfs/site/proj/dpg/arch/bin/fetch_trace
+
+=head1 BUGS
+
+The Tlist file parsing is currently very ad hoc.
+It should be generalized, and put in a reusable perl module.
+
+Cache cleanup of the ASIM_LOCAL_CACHE directory, in the case of overflow,
+has not yet been implemented.
+
+There is no error checking of the rsync command to make sure
+that it transferred the files ok into the local Asim cache directory.
+
+=head1 AUTHOR
+
+Carl Beckmann
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Intel Corporation 2006               *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

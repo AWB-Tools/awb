@@ -1,0 +1,532 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# Author:  Artur Klauser
+#
+
+use File::Basename;
+
+$debug = 0 || defined($ENV{ASIMSTARTER_DEBUG});
+
+
+# autoconf variables
+
+$package="@package@";
+$release="@release@";
+
+$prefix="@prefix@";
+$exec_prefix="@exec_prefix@";
+$bindir="@bindir@";
+$libdir="@libdir@";
+$libexecdir="@libexecdir@";
+$mandir="@mandir@";
+
+$sysconfdir="@sysconfdir@";
+$configdir="@configdir@";
+
+$datadir="@datadir@";
+$packagedir="@packagedir@";
+$codedir="@codedir@";
+
+$tooldir="@tooldir@";
+
+# system perl library, where Qt.so gets installed
+$perlqt_search_path="@perlqt_search_path@";
+
+# the version of Perl this installation was configured for
+$config_perl_version="@config_perl_version@";
+
+# get actual perl version as a canonical dot-separated integer string:
+$my_perl_v1 = int(                     $]                                   );
+$my_perl_v2 = int(            1000 * ( $] - $my_perl_v1 )                   );
+$my_perl_v3 = int( 1000 * ( ( 1000 * ( $] - $my_perl_v1 ) ) - $my_perl_v2 ) );
+$my_perl_version = "$my_perl_v1.$my_perl_v2.$my_perl_v3";
+
+if ($debug) {
+  print "Asimstarter: $0\n";
+
+  print "  Package = $package\n";
+  print "  Release = $release\n";
+  print "\n";
+
+  print "  Prefix = $prefix\n";
+  print "  Exec_prefix = $exec_prefix\n";
+  print "  Bindir = $bindir\n";
+  print "  Mandir = $mandir\n";
+  print "\n";
+
+  print "  Sysconfdir = $sysconfdir\n";
+  print "  Configdir = $configdir\n";
+  print "\n";
+
+  print "  Datadir = $datadir\n";
+  print "  Codedir = $codedir\n";
+  print "\n";
+}
+
+
+# setup defaults for $AWBSYSTEM and $AWBLOCAL
+
+if (! defined($ENV{AWBSYSTEM})) {
+  $ENV{AWBSYSTEM} = "$prefix";
+}
+
+# If $AWBLOCAL not defined, try to define it from other sources. The
+# following search order is used:
+#  (1) `pwd` or its nearest ancestor containing a awb.config file
+#  (2) ~/.asim/asimrc
+
+$rcfile = $ENV{HOME} . "/.asim/asimrc";
+
+# (1) CWD and ancestors
+if (! defined($ENV{AWBLOCAL})) {
+  chomp ($dir = `pwd`);
+  while ($dir) {
+    if (-e "$dir/awb.config") {
+      $ENV{AWBLOCAL} = $dir;
+      print "Using workspace ($ENV{AWBLOCAL}) ancestor or cwd\n" if $debug;
+      last;
+    }
+    # strip last directory off path
+    $dir =~ s|/+[^/]*$||;
+  }
+}
+
+# (2) ~/asim/asimrc
+if (! defined($ENV{AWBLOCAL}) && -e $rcfile ) {
+  $workspace = `grep ^Workspace= $rcfile`;
+  chomp $workspace;
+  $workspace =~ s/Workspace=//;
+  $ENV{AWBLOCAL} = $workspace;
+  print "Using workspace ($workspace) from ~/.asimrc\n" if $debug;
+}
+
+
+# Make sure its a real workspace
+
+if (! -e "$ENV{AWBLOCAL}/awb.config" ) {
+  print "\n";
+  print "Warning: No valid workspace found!!!\n";
+  print "         Check the value of \$AWBLOCAL and your ~/.asimrc file\n";
+  print "         A default value of $configdir is being used.\n";
+  print "\n";
+
+  $ENV{AWBLOCAL} = "$configdir";
+}
+
+
+# tool mappings
+%tool = (
+  "awb"                 => "tools/awb/awb2/awb2",
+  "awb2"                => "tools/awb/awb2/awb2",
+  "amc"                 => "tools/awb/amc/amc",
+  "apm-edit"            => "tools/awb/apm-edit/apm-edit",
+  "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
+  "asim-shell"          => "tools/scripts/asim-shell",
+  "asim-benchmark"      => "tools/scripts/asim-benchmark",
+  "plot-shell"          => "tools/scripts/plot-shell",
+  "asim-run"            => "tools/scripts/asim-run",
+  "asim-batch"          => "tools/scripts/asim-batch",
+  "hasim-configure"     => "tools/scripts/hasim-configure",
+  "hasim-connect"       => "tools/scripts/hasim-connect",
+  "model-coverage"      => "tools/scripts/model-coverage",
+  "regression.launcher" => "tools/scripts/regression.launcher",
+  "regression.verifier" => "tools/scripts/regression.verifier",
+  "regression.cleanup"  => "tools/scripts/regression.cleanup",
+  "summarize-stats"     => "tools/scripts/summarize-stats",
+  "sum-simpoints"       => "tools/scripts/sum-simpoints",
+  "sum-unweighted"      => "tools/scripts/sum-unweighted",
+  "asim-compare-stats"  => "tools/scripts/asim-compare-stats",
+  "grab.pl"             => "tools/scripts/grab.pl",
+  "asim-pkg-config"     => "tools/scripts/asim-pkg-config",
+  "test-xpath-function" => "tools/scripts/test-xpath-function",
+  "install-rcfile"      => "scripts/install-rcfile",
+  "fetch-trace"         => "tools/scripts/fetch-trace",
+#
+# Obsoleted tools - 
+#
+  "asim"                => "awb/asim",
+  "awb1"                => "awb/awb",
+  "awb-edit-model"      => "awb/awb-edit-model",
+  "getconfig"           => "awb/getconfig",
+  "asim_filter"         => "tools/scripts/asim_filter",
+  "asimtools.pl"        => "tools/scripts/asimtools.pl",
+  "cvs-sync"            => "tools/scripts/cvs-sync",
+  "gen-spec95-config"   => "tools/scripts/gen-spec95-config",
+  "random.pl"           => "tools/scripts/random.pl",
+  "random_mt.pl"        => "tools/scripts/random_mt.pl",
+  "random_setup_mt.pl"  => "tools/scripts/random_setup_mt.pl",
+  "reglevel.pl"         => "tools/scripts/reglevel.pl",
+  "regtest.pl"          => "tools/scripts/regtest.pl",
+  "sanity.pl"           => "tools/scripts/sanity.pl",
+  "xcheck"              => "tools/scripts/xcheck",
+#
+  "asim.R"              => "tools/scripts/asim.R",
+  "grab.R"              => "tools/scripts/grab.R",
+  "param.R"             => "tools/scripts/param.R",
+#
+# Direct use of the following is deprecated - use asim-shell instead
+#
+# "asim-admin"          => "tools/scripts/asim-admin",
+# "asimbranch"          => "tools/scripts/asimbranch",
+# "asimchanges"         => "tools/scripts/asimchanges",
+# "asimcommit"          => "tools/scripts/asimcommit",
+# "asimmerge"           => "tools/scripts/asimmerge",
+# "newbox.pl"           => "tools/scripts/newbox.pl",
+
+);
+
+($iam,$basedir) = fileparse $0;
+
+if ($iam eq "asimstarter") {
+
+# Check for install...
+
+  if (defined $ARGV[0] && $ARGV[0] =~ m/^-?-install$/) {
+    # install tool links in current directory
+    $starter = $0;
+    if ($starter !~ m|^/|) {
+      $starter = "./asimstarter";
+    }
+
+    if (! -e $starter) {
+      print STDERR "asimstarter: $starter does not exist\n";
+      exit 1;
+    }
+
+    foreach $tool (keys %tool) {
+      print "installing $tool ... ";
+      unlink "./$tool";
+      system "ln -s $starter ./$tool";
+      if ($? == 0) {
+	print "done\n";
+      } else {
+	print "error\n$!\n";
+      }
+    }
+    exit 0
+  }
+
+# Check for uninstall...
+
+  if (defined $ARGV[0] && $ARGV[0] =~ m/^-?-uninstall$/) {
+    # uninstall tool links from current directory
+    foreach $tool (keys %tool) {
+      print "uninstalling $tool ... ";
+      unlink "./$tool";
+      if ($? == 0) {
+	print "done\n";
+      } else {
+	print "error\n$!\n";
+      }
+    }
+    exit 0
+  }
+
+# Check for help...
+
+  if (defined $ARGV[0] && $ARGV[0] =~ m/^-?-help$/ ) {
+    system "perldoc $0";
+    exit 0;
+  }
+
+# Check for which...
+
+  if (defined $ARGV[0] && $ARGV[0] =~ m/^-?-which$/ ) {
+    shift @ARGV;
+    $show_which = 1;
+  } else {
+    $show_which = 0;
+  }
+  $iam = shift @ARGV;
+
+# Check if we should execute the first argument as the program
+
+  if (defined $ARGV[0] && -x $ARGV[0]) {
+    $program = shift;
+  }
+}
+
+# generic asim tool starter
+
+$RESOLVER = "$basedir/awb-resolver";
+if ( ! -x $RESOLVER) {
+  # if we can't find it where expected, lets hope its in the path
+  $RESOLVER = basename $RESOLVER;
+}
+chomp ($msg = `$RESOLVER .`);
+if ($? != 0) {
+ die "Can't find $RESOLVER - check your PATH environemt variable\n$msg\n";
+}
+
+# Add the asim perl library directories to the front of the perl library path
+
+chomp ($path = `$RESOLVER -config searchpath`);
+if ($? == 0) {
+  # OK, resolver has found it
+  my @asim_inc;
+  my $libperl;
+
+
+  foreach $dir (split ' ', $path) {
+
+    # Check new location for perl library
+    foreach $lib ("Asim", "AsimShell", "PinPoints", "PlotShell", "HAsim") {
+      $libperl = "$dir/libperl/$lib/lib";
+      if (-e $libperl) {
+        push @asim_inc, $libperl;
+      }
+    }
+
+    # Check old location for perl library
+    $libperl = "$dir/tools/libperl";
+    if (-e $libperl) {
+      push @asim_inc, $libperl;
+    }
+  }
+
+
+  # Add ASIM system perl library dir
+  if ( $my_perl_version eq $config_perl_version ) {
+    # if we are running the same version of perl this installation was configured for,
+    # use the perl system library search path from autoconf:
+    push @asim_inc, "$perlqt_search_path";
+  } else {
+    # otherwise, warn the user they are using an unsupported version,
+    # and try to guess the system library search path:
+    print STDERR "asimstarter WARNING: perl version $my_perl_version not supported, please use version $config_perl_version !\n";
+    if      (   -d    "$prefix/lib/site_perl/$my_perl_version" ) {
+      push @asim_inc, "$prefix/lib/site_perl/$my_perl_version";
+    } elsif (   -d    "$prefix/lib/perl5/site_perl/$my_perl_version" ) {
+      push @asim_inc, "$prefix/lib/perl5/site_perl/$my_perl_version";
+    } elsif (   -d    "$prefix/lib/site_perl/" ) {
+      push @asim_inc, "$prefix/lib/site_perl/";
+    } elsif (   -d    "$prefix/lib32/site_perl/" ) {
+      push @asim_inc, "$prefix/lib32/site_perl/";
+    } else {
+      print STDERR "asimstarter WARNING: perl system libraries for version $my_perl_version not found !\n";
+    }
+  }
+
+  if (defined($ENV{PERL5LIB})) {
+    push @asim_inc, $ENV{PERL5LIB};
+  }
+
+  $ENV{PERL5LIB} = join(":", @asim_inc);
+
+  print "  PERL5LIB = $ENV{PERL5LIB} \n" if ($debug);
+}
+
+# Add the asim tcl library directories to the front of the tcl library path
+
+chomp ($path = `$RESOLVER -config searchpath`);
+if ($? == 0) {
+  # OK, resolver has found it
+  my @asim_inc;
+  my $libtcl;
+
+  foreach $dir (split ' ', $path) {
+    $libtcl = "$dir/tools/libtcl";
+    if (-e $libtcl) {
+      push @asim_inc, $libtcl;
+    }
+  }
+
+  # add ASIM system tcl library dir
+  push @asim_inc, "$libdir/tcl";
+
+  if (defined($ENV{TCLLIBPATH})){
+    push @asim_inc, $ENV{TCLLIBPATH};
+  }
+
+  # figures: tcl only understands " " separators, rather then the normal
+  # ":" separators in paths; braindead as always;
+  $ENV{TCLLIBPATH} = join(" ", @asim_inc);
+
+  print "  TCLLIBPATH = $ENV{TCLLIBPATH} \n" if ($debug);
+}
+
+# Get tool from linkname...
+
+if ( defined $tool{$iam} ) {
+  $toolloc = $tool{$iam};
+  $runme = `$RESOLVER -q $toolloc`;
+  chomp $runme;
+
+  # In case of problems try old location for tool
+
+  if ($? != 0 || $runme eq "" ) {
+    $toolloc =~ s/\/scripts\//\//;
+    $runme = `$RESOLVER -q $toolloc`;
+  }
+  chomp $runme;
+
+  # if that did not succeed, check if this is a binary tool (in $tooldir)
+
+  if ($? != 0 || $runme eq "" ) {
+    if ( -x "$tooldir/$iam" ) {
+      $runme = "$tooldir/$iam";
+    } else {
+      $runme = "";
+    }
+  }
+  chomp $runme;
+
+  # bummer, we have no clue how to start this tool
+
+  if ( $runme eq "" ) {
+    print "asimstarter: Can't start tool \"$iam\"\n$runme\n";
+    exit 1;
+  }
+
+# ...or from first argument of command line
+
+} elsif ( defined $program && -x $program ) {
+  $runme = $program;
+
+# ...or we've got a problem
+
+} else {
+  print STDERR "asimstarter: Don't know how to start tool \"$iam\"\n";
+  exit 1;
+}
+
+$,=" ";
+if ($runme eq $0) {
+    print STDERR "asimstarter: Lunatic! Recursive start of $iam.\n";
+    exit 1;
+}
+
+$cmd = "$runme";
+foreach $arg (@ARGV) {
+    $arg =~ s/"/\\"/g;     # escape existion double quotes
+    $cmd .= ' "'.$arg.'"'; # put each arg under its own quote to
+                           # prevent args with spaces getting split
+}
+print "Asimstarter executing $cmd\n" if ($debug);
+if ($show_which) {
+  # only display which program would be run
+  print "$cmd\n";
+} else {
+  # execute the program
+  exec $cmd;
+}
+
+exit 0
+
+
+
+
+__END__
+
+=head1 NAME
+
+Asimstarter - trampoline used to start asim programs
+
+=head1 SYNOPSIS
+
+<asim-program> [<program arguments>]...
+    where <asim-program> is a link to asimstarter
+
+asimstarter <asim-program> [<program arguments>]...
+
+asimstarter [--install | --uninstall | --help]
+
+asimstarter --which <asim-program>
+
+
+=head1 DESCRIPTION
+
+This is a program that acts as a trampoline to start asim programs
+with a rational enviroment. Normal usage is to have a pointer from one
+of the well known asim programs, e.g., asim-shell or awb, to
+asimstarter. Asimstarter will then follow the $AWBLOCAL variable to
+find the proper version of the program and invoke it. Some
+environmental setup, e.g., a default value for $AWBLOCAL, is done as well.
+
+The format "asimstarter <asim-program> [<program arguments>]..."
+allows one to start a program by full filename without having a link
+to the program. 
+
+Running asimstarter directly will perform the following functions:
+
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --install
+
+Install links to asimstart for all the known asim programs in
+<ASIMPREFIX>/bin
+
+=item --uninstall
+
+Uninstall links to asimstart for all the known asim programs in
+<ASIMPREFIX>/bin
+
+=item --which <asim-program>
+
+Print which executable would be launched by asimstarter for <asim-program>.
+
+=item --help
+
+Get this help information.
+
+=back
+
+=head1 FILES/ENVIRONMENT
+
+=item $AWBLOCAL
+
+root of local asim files (set to a default value if undefined)
+
+=item $LIB5PERL
+
+set to .../tools/libperl in packages in AWB search path
+
+=head1 BUGS
+
+Unknown
+
+=head1 AUTHORS
+
+Artur Klauser, Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Compaq Computer Corporation, 2001    *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+
+# vim:set filetype=perl:

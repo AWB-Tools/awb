@@ -1,0 +1,333 @@
+/
+// Script to do clustered/box bars 
+//
+
+// 
+// Load parameters specific to box/clustered bars
+//
+#setifnotgiven num_lines = 1
+#setifnotgiven title = ""
+#setifnotgiven xlabel = ""
+#setifnotgiven ylabel = ""
+#setifnotgiven subtitle = ""
+#setifnotgiven legloc = "top"
+#setifnotgiven stubvert = 1
+#setifnotgiven ymaxval = 20
+#setifnotgiven yminval = 20
+#setifnotgiven stubvert = yes
+
+//
+// Generate list of available symbols
+//
+#set symbol_shapes = 1,2,3,4,5,6,7,8
+#set symbol_type = a,s,n
+#set SYMBOLS = ""
+#set FIRST = 1
+#for TYPE in @symbol_type
+  #for SHAPE in @symbol_shapes
+    #set sym_name = $strcat("sym",@SHAPE)
+    #set sym_name = $strcat(@sym_name,@TYPE)
+    #if @FIRST = 1
+      #set SYMBOLS = @sym_name
+    #else 
+      #set SYMBOLS = $addmember(@sym_name,@SYMBOLS)
+    #endif
+    #set FIRST = 0
+  #endloop
+#endloop
+
+//#proc print
+//label: SYMBOLS @SYMBOLS
+//#endproc
+
+/// Include file that contains information on how to space labels. 
+#include $spacing_var
+
+/// Read data
+#proc getdata
+file: @data
+fieldnameheader: no
+#endproc
+
+#proc print
+label: Got @NRECORDS records, @NFIELDS fields per record
+#endproc
+
+//
+// By setting width and height to 0, we're telling the routine to 
+// autoscale. 
+//
+#setifnotgiven width = $arith(@NRECORDS*0.3)
+#setifnotgiven height = 2
+
+#if @width = 0
+  #set width = $arith(@NRECORDS*0.3)
+#endif
+
+#if @height = 0
+  #set height = 2
+#endif
+
+// We can't exceed page width if we're print a ps file. 
+#if @DEVICE = "ps"
+  #if @width > 8.5
+    #set width = 8.5
+  #endif
+  #if @height > 11
+    #set height = 11
+  #endif
+#endif
+
+#proc print
+label: Width @width, height @height
+#endproc
+
+
+// compute YMAX 
+// If YMAX is zero, make it one. 
+#if @ymaxval = 0
+  #set ymaxval = 1
+#endif
+
+// Determine how to space legend.
+// Step 1: Determine number of characters in legend
+
+#shell #processrows cat @line_name
+#if @legloc like "top" || @legloc like "bottom"
+  #set LEGLEN = 0
+  #while $shellrow( ENTRY ) = 0
+    #set LEN = $len(@ENTRY)
+    #set LEGLEN = $arith(@LEN+@LEGLEN)
+  #endloop
+  #set NUMLINES = $arith(@LEGLEN/@CHARINCH)
+  #set NUMLINES = $arith(@NUMLINES/@width)
+#endif
+
+//#proc print
+//  label: Got @LEGLEN characters
+//  label: Got @NUMLINES lines
+//#endproc
+
+// Step 3: Determine plot location given legend location
+#set ymin = 1
+#set ymax = $arith(@ymin+@height)
+#set xmin = 1
+#set xmax = $arith(@xmin+@width)
+#set legheight = $arith(@NUMLINES*.3)
+
+#if @legloc = "bottom"
+  #set ymax = $arith(@ymin+@height)
+#elseif @legloc = "left" || @legloc = "right"
+  #if @legloc = "left"
+    #set xmin = 2.5
+    #set xmax = $arith(2.5+@width)
+  #else
+    #set xmin = 1
+    #set xmax = $arith(@xmin+@width)
+  #endif
+
+  #if @legheight > @height
+    #set ymax = @legheight
+    #set ymin = $arith(@ymax-@height)
+  #endif
+#endif
+
+#proc print
+  label: Got legheight @legheight
+#endproc
+
+#if @legloc = "right"
+  #set pagexmax = $arith(@xmax+2.5+.5)
+#else 
+  #set pagexmax = $arith(@xmax+.5)
+#endif
+#if @legloc = "top"
+  #set pageymax = $arith(@ymax+@legheight+.5)
+#else
+  #set pageymax = $arith(@ymax+.5)
+#endif
+
+//
+// Change Xaxis labels to something that's reasonably readeable but not too long. 
+//
+#set record_count = 1
+#set max_stub = 0
+#while @record_count <= @NRECORDS
+  #set stubname = $dataitem(@record_count,1)
+
+  #if $len(@stubname) > @max_stub
+    #set max_stub = $len(@stubname)
+  #endif
+
+  #set record_count = $arith(@record_count+1)
+#endloop
+
+#set stub_vert = 0
+#set label_length = $arith(@max_stub*@VERT_MULT)
+#set stub_spacing = $arith(@width/@NRECORDS)
+#if @label_length > @stub_spacing
+  #set stub_vert = 1
+#endif
+
+#proc print
+  label: stub_vert @stub_vert
+#endproc
+
+// 
+// Adjust height if necessary
+#if @stub_vert = 1
+  #proc print 
+    label: Adjusting for label_length
+  #set pageymax = $arith(@pageymax+@label_length)
+  #set ymax = $arith(@ymax+@label_length)
+  #set ymin = $arith(@ymin+@label_length)
+#endif
+
+//
+// Adjust pageymax for title and x/y labels
+//
+#if @title != ""
+  #set pageymax = $arith(@pageymax+0.3)
+#endif
+
+#if @xlabel != ""
+  #set pageymax = $arith(@pageymax+0.3)
+  #set xlabeladj = $arith(-1*@ymin+0.5)
+#endif
+
+#if @ylabel != ""
+  #set pagexmax = $arith(@pagexmax+0.3)
+  #set ylabeladj = $arith(-1*@xmin+0.5)
+#endif
+
+#proc print
+  label: pagexmax: @pagexmax pageymax: @pageymax
+#endproc
+
+
+/// Define page
+#proc page
+pagesize: @pagexmax @pageymax
+
+#proc print
+  label: xmin: @xmin, ymin: @ymin, xmax: @xmax, ymax: @ymax
+#endproc
+
+//
+// YMIN & YMAX with automatic YINC tic increment computation
+//
+// set up temporary area
+#proc areadef
+  yrange: @yminval @ymaxval  
+  rectangle: @xmin @ymin @xmax @ymax
+  xscaletype: categories
+  xcategories: datafield=1
+  catcompmethod: exact
+#endproc
+
+// YINC, YMIN, YMAX fiddling subroutine (or the ploticus version of such)
+#include $adjust_yaxis
+
+#proc print
+  label: YINC: @YINC  YMIN: @YMIN  YMAX: @YMAX
+#endproc
+
+// set up area
+#proc areadef
+  title: @title
+  titledetails: align=C, adjust=0,0.2
+
+  rectangle: @xmin @ymin @xmax @ymax
+  xscaletype: categories
+  xcategories: datafield=1
+  catcompmethod: exact
+  xaxis.stubs: usecategories
+  xaxis.label: @xlabel
+  xaxis.labeldetails: align=R adjust=0,@xlabeladj
+  #if @stub_vert = 1
+    xaxis.stubvert: yes
+    xaxis.stubdetails: size=6
+  #endif
+  yrange: @YMIN @YMAX   
+  yaxis.stubs: inc @YINC
+  yaxis.label: @ylabel
+  yaxis.labeldetails: align=R adjust=@ylabeladj,0
+  yaxis.grid: color=gray(0.9) width=0.5
+#endproc
+
+// initialize loop variables
+#set leglength = 0
+#if @legloc = "top"
+  #set LEGLOC = $arith(@ymax+@legheight+.3)
+  #set XLOC = $arith(@xmin+.5)
+  #set MAXCHARS = $arith(@width-1*@CHARINCH)
+#elseif @legloc = "bottom"
+  #set LEGLOC = $arith(@ymin-.5)
+  #set XLOC = @xmin
+  #set MAXCHARS = $arith(@width-1*@CHARINCH)
+#elseif @legloc = "left"
+  #set XLOC = $arith(@xmin-2.0)
+  #set LEGLOC = @ymax
+#elseif @legloc = "right"
+  #set XLOC = $arith(@xmax+.1)
+  #set LEGLOC = @ymax
+#endif
+
+#set LINES = 1
+
+#shell #processrows cat @line_name
+
+// start loop
+#while @LINES <= @num_lines
+
+  #set linefield = $arith(@LINES+1)
+  #set color = $icolor(@LINES)
+  #set res = $shellrow( leg )
+  #set sym = $nmember(@LINES,@SYMBOLS)
+
+  #set sym = $strcat(@sym,@color)
+
+  #proc lineplot
+    xfield: 1
+    yfield: @linefield
+    linedetails: color=@color
+    #if @num_lines > 1
+      legendlabel: @leg
+    #endif
+    pointsymbol: @sym
+    clip: yes
+  #endproc
+  #set LINES = $arith(@LINES+1)
+  #set strlength = $len(@leg)
+  #set leglength = $arith(@strlength+@leglength)
+
+  #if @legloc = "top" || @legloc = "bottom"
+    #if @leglength > @MAXCHARS
+      #set leglength = 0
+      #proc legend
+        format: singleline
+        location: @XLOC @LEGLOC
+        sep: 0.3
+      #endproc
+      #set LEGLOC = $arith(@LEGLOC-.15)
+    #endif
+  #endif
+
+#endloop
+
+// slap on the legend
+#if @legloc = "top" || @legloc = "bottom"
+  #if @leglength > 0
+    #proc legend
+      format: singleline
+      location: @XLOC @LEGLOC
+      sep: 0.3
+    #endproc
+  #endif
+#else 
+  #proc legend
+    location: @XLOC @LEGLOC
+  #endproc
+#endif
+
+

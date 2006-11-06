@@ -1,0 +1,211 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##################################################################################
+# 
+# Copyright (C) 2005-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+##################################################################################
+
+# Purpose: Run this script to cleanup the model build areas.
+#
+# Author: Krishna Rangan
+#
+
+use Cwd 'chdir';
+use Getopt::Long;
+use File::Basename;
+use File::Temp;
+
+use Asim;
+use Asim::Util;
+
+Asim::init();
+
+# Global information
+$SUMMARY_FILE = "run.summary";
+$ASIM_RUN_SF_VERSION = "1.0";
+$SUMMARY_FILE_GENERATOR = "asim-run";
+$SUMMARY_FILE_HEADER = "# $SUMMARY_FILE_GENERATOR $ASIM_RUN_SF_VERSION";
+$BM_ENTRY = ".. ";
+
+my $quiet      = Asim::Util::get_asimrc_val("regression.launcher", "QUIET", 0);
+my $rundir;
+my $regdir;
+my $purge;
+
+my $status = GetOptions("rundir=s"     => \$rundir,
+			"regdir=s"     => \$regdir,
+                        "purge!"       => \$purge,
+                        "quiet!"       => \$quiet,
+                       );
+
+if ( ! $status ) {
+  print "Usage: regression.cleanup  [--rundir=<regression.launcher time-stamped run directory>]\n";
+  print "                           [--regdir=<root directory for regression results>]\n";
+  print "                           [--[no]purge]\n";
+  print "                           [--[no]quiet]\n";
+  print "\n";
+  exit;
+}
+
+if ((defined $rundir && $rundir ne "") && (defined $regdir && $regdir ne "")) {
+    print "\t\tError, Cannot accept both 'rundir' and 'regdir' arguments.\n";
+    exit 1;
+}
+
+# 
+# Determine results directory or use the user specified directory.
+#
+if (defined $regdir && $regdir ne "") {
+    chomp $regdir;
+    $RESDIR = $regdir;
+}
+else {
+    $RESDIR = "$ENV{AWBLOCAL}/run/regtest";
+}
+die "Results directory \'$RESDIR\' does not exist.\n" unless ( -d $RESDIR );
+
+# Use the user specified run directory or get the newest regression directory
+if (defined $rundir && $rundir ne "") {
+    $RESDIR = $rundir;
+    chomp $RESDIR;
+    die "Cannot find run directory : $RESDIR\n" unless (-d "$RESDIR");
+}
+else {
+    if (system("ls -td $RESDIR/* > /dev/null 2>&1")) {
+	print "Cannot get cleanup directory in $RESDIR/.  Exiting.\n";
+	exit 1;
+    }
+    @reg_dirs = `ls -td $RESDIR\/*`;
+    @reg_dirs = grep /$RESDIR\/[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]/, @reg_dirs;
+    $RESDIR = $reg_dirs[0];
+    chomp $RESDIR;
+}
+
+# check for summary file - we purge or cleanup only regression directories
+my $summaryfile = "$RESDIR/$SUMMARY_FILE";
+if (! -f "$summaryfile") {
+    print "\t\t**** - Cannot find summary file : $RESDIR/$SUMMARY_FILE !\n";
+    exit 1;
+}
+
+# confirm purge directory request 
+if (defined $purge && $purge ne "") {
+    if ($purge) {
+	print "\t Are you SURE you want to remove directory : $RESDIR ? ";
+	STDOUT->flush();	
+	my $ans = <STDIN>;
+	chomp($ans);
+	exit (($ans =~ /^[Yy]/) ? remove_dir($RESDIR) : 0);
+    }
+}
+
+# verify summary file header
+open (SUMMARYFILE, $summaryfile) || die "Cannot open summary file \"$summaryfile\" to verify results.\n";
+my @summary;
+my $header = <SUMMARYFILE>;
+chomp($header);
+if ($header eq "" || !($header =~ /$SUMMARY_FILE_HEADER/)) {
+    print "\t\tSummary file \"$summaryfile\" in incorrect format !\n";
+    exit 1;
+}
+else {
+    @summary = <SUMMARYFILE>;
+    close SUMMARYFILE;
+    chomp(@summary);
+    @summary = grep(!(/^\s*\#/ | /^\s*$/), @summary);
+}
+
+my $fail = 0;
+
+# remove pre-exec output files.
+# See netbatch-pre and asim-run.
+print "REMOVING PRE-EXEC OUTPUTS \n";
+foreach $f ( glob( '##*' ) ) {
+    chomp $f;
+    if ( -f $f ) {
+	$contents = `grep netbatch-pre $f`;
+	# make sure it really is just a pre-exec output by looking for
+	# netbatch...PASS or FAIL message (see netbatch-pre):
+	if ( $contents =~ m/netbatch-pre on (.*) (PASS|FAIL):/ ) {
+            print "  HANDLING $f\n";
+            if ( $contents =~ m/netbatch-pre on (.*) FAIL:/ ) {
+		# if the pre-exec failed, rename the file to something to reflect this:
+		$newf = 'PRE.EXEC.FAILED.ON.' . $1;
+		if (system("mv -f $f $newf")) {
+		    print "\t\t**** - Unable to rename file $f \n";
+		    $fail++;
+		}
+	    } else {
+		# otherwise (the pre-exec passed), just remove the file:
+		if (system("rm -f $f")) {
+		    print "\t\t**** - Unable to remove file $f \n";
+		    $fail++;
+		}
+	    }
+	}
+    }
+}
+
+# remove model build directories
+print "REMOVING BUILDS FROM -- $RESDIR \n\n";
+
+for (my $iexp = 0; $iexp < @summary; $iexp++)
+{
+    my ($exp, $apmfile) = split(/\s+/, $summary[$iexp]);
+    
+    if (-d "$RESDIR/$exp") 
+    {
+	remove_dir("$RESDIR/$exp/BUILD");
+	remove_dir("$RESDIR/$exp/RUN");
+	for ($ibm = ++$iexp; (($ibm < @summary) && ($summary[$ibm] =~ s/^$BM_ENTRY//)); $ibm++)  {}
+	$iexp = --$ibm;
+    }
+    else 
+    {
+	print "\t\t**** - Unable to find experiment results directory $RESDIR/$exp !\n";
+	$fail++;
+    }
+}
+exit $fail;
+
+#
+# Subroutines
+#
+
+sub remove_dir
+{
+    my $dir = $_[0];
+
+    if (! (-d $dir)) {
+	print "\t\t**** - Unable to find directory $dir \n";
+	$fail++;
+	return 1;
+    }
+    
+    if (system("rm -rf $dir")) {
+	print "\t\t**** - Unable to remove directory $dir \n";
+	$fail++;
+	return 1;
+    }
+    
+    print "\t\t - Removed directory $dir \n" unless ($quiet);
+    return 0;
+}

@@ -1,0 +1,120 @@
+:
+eval 'exec perl "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# This script generates awb config files for spec95.  
+# The skip, warmup, & run parameters are based on input from Bruce Edwards &
+# Harish Patil. 
+#
+# -Shubu /SSM/, July 16, 1999
+
+
+$specSuffix = "SPEC95-AINT-"; 
+
+# specint95 and specfp95
+@bench = ("compress", 
+	  "gcc",   
+	  "go",    
+	  "ijpeg", 
+	  "li",    
+	  "m88ksim", 
+	  "vortex", 
+	  "applu", 
+	  "appsi", 
+	  "fpppp", 
+	  "hydro2d", 
+	  "mgrid", 
+	  "su2cor", 
+	  "swim",  
+	  "tomcatv", 
+	  "turb3d", 
+	  "wave5");
+
+# skip length = actual skip (3/4) + warmup (1/4)
+@skip = (2000,  #compress   
+	  400,  #gcc        
+	  400,  #go         
+	  400,  #ijpeg      
+	  400,  #li         
+	  400,  #m88ksim    
+	  400,  #vortex     
+	  250,  #applu      
+	  400,  #appsi      
+	 2000,  #fpppp      
+	  400,  #hydro2d    
+	  400,  #mgrid      
+	 2000,  #su2cor     
+	  400,  #swim       
+	 2000,  #tomcatv    
+	 2000,  #turb3d     
+	 2000); #wave5      
+
+@run = (100,	#compress   
+	100,    #gcc          
+	100, 	#go         
+	100, 	#ijpeg      
+	100, 	#li         
+	100, 	#m88ksim    
+	100, 	#vortex     
+	170, 	#applu      
+	100, 	#appsi      
+	100, 	#fpppp      
+	200, 	#hydro2d    
+	100, 	#mgrid      
+	100, 	#su2cor     
+	100, 	#swim       
+	100, 	#tomcatv    
+	100, 	#turb3d     
+	100);	#wave5      
+
+
+$i = 0; 
+
+foreach $b (@bench)
+{
+    $specname = "${specSuffix}${b}"; 
+    $filename = "${specname}.cfg"; 
+    open(specfile, ">${filename}") || die "ERROR: cannot open ${filename}"; 
+
+    printf specfile "BmAdd {\n";
+    printf specfile "  %s\n", ${specname};
+    printf specfile "  %s\n", ${specname};
+    printf specfile "  {Run of spec95 %s on the official slice}\n", ${b}; 
+    printf specfile "  aint\n"; 
+    printf specfile "  BENCHMARKDIR/aint/spec95/REF/${b}/setup\n", ${b}; 
+    printf specfile "  {-pi 10000}\n";
+    printf specfile "  {}\n"; 
+    printf specfile "  {}\n"; 
+    printf specfile "  {\n"; 
+    printf specfile "    {AwbSkip 0 %d}\n", (1000000 * $skip[$i]) * 3 / 4; 
+    printf specfile "    {AwbSample %d %d 0 1}\n", (1000000 * $skip[$i]) / 4, (1000000 * $run[$i]); 
+    printf specfile "    {AwbStats dump %s.stats}\n", ${specname};
+    printf specfile "    AwbExit\n"; 
+    printf specfile "  }\n"; 
+    printf specfile "}\n"; 
+    printf specfile "\n"; 
+
+    close(specfile); 
+
+    ${i}++; 
+}

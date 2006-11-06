@@ -1,0 +1,81 @@
+#!/bin/sh
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+# Purpose: This is an utility to filter the trace output from ASIM.
+#
+# Author : Harish Patil
+#
+# Input: stdin
+#
+# Example usage: 
+#    arana_pm -t | asim_filter 
+#
+# Requires: a text file '.asimfilter' in your HOME directory 
+#
+#   ".asimfilter" should contain a list of modules (one per line)
+#      for which you want the trace output.
+#  e.g. ~harish/.asimfilter has:
+#   IBOX
+#   PC
+#   BP
+#   LP
+#   EBOX
+#
+# Input is supposed to be in the form:
+# <cycle_no>: <module_name>
+#  ...text..
+# <cycle_no>: <module_name>
+# ...text..
+# The utility reads trace output from an ASIM model and prints
+# out certain portions of the trace as controlled by the
+# file '~/.asimfilter'.
+#
+# Only the trace output ('text') for modules listed in 
+# ~/.asimfilter will  be printed.
+
+/usr/local/bin/nawk FL="$HOME/.asimfilter" '\
+ BEGIN { \
+   print "FL = " FL; \
+   nfld = 0; \
+   while(1) { \
+     if ( (getline < FL) != 1) break; \
+     FLD[nfld]=$1; \
+     print "FLD[" nfld "]= " FLD[nfld]; \
+	 nfld++; \
+   } \
+   printit = 0; \
+  } \
+  /^[0-9]*: [A-Z]*$/ { \
+      printit = 0; \
+	  for (i = 0; i < nfld; i++) { \
+	   if(FLD[i]==$2) { \
+		printit = 1; \
+		break ; \
+		} \
+	  } \
+	} \
+	{ \
+	  if(printit) print $0; \
+	} \
+ END { \
+     print "nfld= " nfld; \
+  } \
+  '

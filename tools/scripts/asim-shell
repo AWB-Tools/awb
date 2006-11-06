@@ -1,0 +1,385 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# Author:  Joel Emer
+#
+
+use File::Basename;
+use Getopt::Long;
+use Text::ParseWords;
+
+use Asim;
+use AsimShell;
+
+#
+# Argument handling
+#
+my $status;
+
+my $repositoryDB = "";
+my $moduleDB = ".";
+
+my $workspace = "$ENV{AWBLOCAL}";
+my $package = "";
+
+my $model = $ENV{AWB_MODEL} || "";
+my $benchmark = $ENV{AWB_BENCHMARK} || "";
+
+my $module = "";
+
+my $runmode = "interactive";
+
+my $help = 0;
+my $batch = 0;
+my $interactive = 1;
+my $warnings = 1;
+my $locking = 1;
+
+my $batchfile = "";
+
+if (-e "$ENV{HOME}/.asim/asim.pack") {
+  $repositoryDB = "$ENV{HOME}/.asim/asim.pack";
+} else {
+  $repositoryDB = Asim::Sysconfdir() . "/asim/asim.pack";
+}
+
+if (defined($ENV{ASIMSHELLOPT})) {
+   unshift(@ARGV, split(" ", $ENV{ASIMSHELLOPT}));
+}
+
+$status = GetOptions( "repositoryDB=s" => \$repositoryDB,
+                      "workspace=s"    => \$workspace,
+                      "package=s"      => \$package,
+                      "model=s"        => \$model,
+                      "benchmark=s"    => \$benchmark,
+                      "module=s"       => \$module,
+                      "batch"          => \$batch,
+                      "interactive"    => \$interactive,
+                      "file=s"         => \$batchfile,
+                      "locking!"       => \$locking,
+                      "warnings!"      => \$warnings,
+                      "help"           => \$help
+                    );
+
+
+my $prog = basename($0);
+
+if (!$status) {
+  print STDERR "$prog: Illegal argument, try '$prog --help'\n";
+  exit 0;
+}
+
+if ($help) {
+  system "perldoc $0";
+  exit 0;
+}
+
+if ($batch) {
+  $interactive = 0;
+  $runmode = "batch";
+}
+
+if ($interactive) {
+  $runmode = "interactive";
+}
+
+
+#
+# Announce the shell in interactive mode
+#
+if (!$batchfile && ! @ARGV) {
+  print "Asim shell - V0.3 (" . Asim::Release() . ")\n";
+}
+
+Asim::init()
+  || die("Unable to initialize Asim::\n");
+
+
+AsimShell::init(mode => $runmode,
+                warnings => $warnings)
+  || die("Unable to intialize AsimShell::\n");
+
+
+if (! $locking) {
+  Asim::Lock::disable_locks();
+}
+
+AsimShell::set_repositoryDB($repositoryDB)
+  || warn("Failed reading in package repository database - no checkouts will be possible\n");
+
+
+AsimShell::set_workspace($workspace)
+   || die("Failed configuring workspace ($workspace)\n");
+
+
+if ($package) {
+  AsimShell::set_package($package)
+    || warn_or_die("Failed setting default package to $package\n");
+}
+
+if ($model) {
+  AsimShell::set_model($model)
+    || warn_or_die("Failed setting default model to $model\n");
+}
+
+if ($benchmark) {
+  AsimShell::set_benchmark($benchmark)
+    || warn_or_die("Failed setting default benchmark to $benchmark\n");
+}
+
+if ($module) {
+  AsimShell::set_module($module)
+    || warn_or_die("Failed setting default module to $module\n");
+}
+
+#
+# Either run the command specified on the command line, or
+# drop into interactive shell mode
+#
+if ($batchfile) {
+  my $fh;
+
+  if ($batchfile eq "-") {
+    $fh = *STDIN;
+  } else {
+    open($fh, "< $batchfile") || die("Couldn't open $batchfile");
+  }
+
+  while (<$fh>) {
+    chop;
+
+    # Skip blank lines and comments
+
+    if (/^\s*$/ || /^\s*#/) {
+        print "$_\n";
+        next;
+    }
+
+    # Process commands
+
+    print "$prog> $_\n";
+    $status = AsimShell::run_command(shellwords($_)) || exit ! $status;
+  }
+
+} elsif (@ARGV) {
+  $status = AsimShell::run_command(@ARGV);
+
+} else {
+  print "Current workspace=" . $Asim::default_workspace->rootdir(). "\n";
+
+  $status = AsimShell::shell();
+}
+
+exit !$status;
+
+
+# Die in batch mode, just warn in interactive mode
+
+sub warn_or_die {
+  my $msg = shift;
+
+  if ($runmode eq "interactive") {
+     warn($msg);
+  } else {
+     die($msg);
+  }
+}
+
+__END__
+
+=head1 NAME
+
+Asim-shell - Shell to manipulate ASIM objects
+
+=head1 SYNOPSIS
+
+asim-shell [--workspace <workspace>]
+           [--package <package>]
+           [--model <model>] 
+           [--benchmark <benchmark>] 
+           [--module <module>] 
+           [--repositoryDB <repositoryDB>] 
+           [--file <commandfile>]
+           [[--] command...]
+
+=head1 DESCRIPTION
+
+This is a program that provides a command line interface to manipulate
+various ASIM objects.  The command line provides initial default
+values for various objects that can be manipulated. The "set" command can
+be used to set or reset these values. Use the command
+"help" to list the individual commands.
+
+If Text::ReadLine::Gnu is installed then command line completion will
+be available inside the shell.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --workspace <workspace>
+
+Set current workspace to be rooted at the directory <workspace>. Impliclty
+this sets the environment variable $AWBLOCAL to be <workspace> and the
+file $AWBLOCAL/awb.config must exist.
+
+=item --package <package>
+
+Set the current package, i.e., a checked out repository, to be <package>.
+Package names are divined from the files in the AWB search path at 
+admin/packages/*, by convention these are frequently found at $AWBLOCAL/src/.
+
+=item --model <model>
+
+Set the current model to <model>, where <model> is a model
+configuration file (.apm). Defaults to environment variable $AWB_MODEL if set.
+
+=item --benchmark <benchmark>
+
+Set the current benchmark to <benchmark>, where <benchmark> is a benchmark
+configuration file (.cfg). Defaults to environment variable $AWB_BENCHMARK if set.
+
+
+=item --module <module>
+
+Set the current module to <module>, where <module> is a model .awb file.
+
+=item --repositoryDB <repositoryDB>
+
+Set the source for the information on available repositories to
+<repositoryDB>, which must point at a .pack file.
+
+=item --batch
+
+Run the script in batch mode. This mostly means that defaults will be
+provided for interactive inputs. Some defaults are, however, not
+identical to the interctive defaults, e.g., "Last chance - do you want
+to continue" questions will be ansered "yes", rather than "no".
+
+=item --interactive
+
+Reverse of --batch. This is the default.
+
+
+=item --file <commandfile>
+
+Read commands from <commandfile>. Use '-' to read commands from
+STDIN. When this option is used the command on the command line is
+ignored.
+
+=item --help
+
+Get this help information.
+
+=item [--] command...
+
+An asim-shell command. A summary of asim-shell commands can be
+obtained by invoking the 'help' command, e.g., 'asim-shell
+help'. Information on the various objects supported can be obtained by
+invoking the command 'help abstractions';
+
+Note that for asim-shell commands with options themselves the "--" in
+front of the command is not optional.
+
+=back
+
+
+=head1 EXAMPLES
+
+    % asim-shell help quickstart
+
+    % asim-shell
+    asim> set model pm/Arana/arana_aint_dev.apm
+    asim> clean model
+    asim> configure model
+    asim> build model
+    asim> run model bm/Micro/maxipc.cfg
+    asim> quit
+
+
+    % asim-shell --package=arana commit package
+
+
+    % asim-shell help
+
+    % asim-shell help code
+
+
+=head1 ENVIRONMENT VARIABLES
+
+AWBLOCAL - this variable defines the root directory of your workspace
+and is needed for asim-shell to function. It is normally set
+automatically by asimstarter.Setting it explicitly is discouraged.
+
+ASIMSHELLOPT - contains additional command line switches.
+
+=head1 FILES
+
+~/.asim/asimrc - user-specific configuration file
+
+INSTALLPREFIX/etc/asim/asimrc - global configuration file
+
+~/.asim/asim.pack - user-specific description of repositories (optional)
+
+INSTALLPREFIX/etc/asim/asim.pack - global description of repositories, which 
+is used if ~/.asim/asim.pack does not exist.
+
+
+=head1 BUGS
+
+The asim perl libraries must be in your perl path or the 'use AsimShell'
+statement won\'t work. The easiest way to make this true is to invoke
+asim-shell through asimstarter....you can also set the environment
+variable PERL5LIB.
+
+Maybe the command line format should allow one to specify commands
+with a '-e' switch and a bare word is a file to read commands from.
+
+Maybe asim-shell should also parse an environment variable and/or
+.rc file for switches.
+
+Asim-shell depends on the 'etc' directory being at $AWBSYSTEM/etc, 
+while ./configure could have put it somewhere else. We need to have
+a way of communicating where all the pieces of asim are not just
+the root.
+
+=head1 AUTHORS
+
+Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Compaq Computer Corporation, 2001    *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

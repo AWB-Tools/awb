@@ -1,0 +1,2060 @@
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##################################################################################
+# 
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+##################################################################################
+
+# Author: Srilatha (Bobbie) Manne
+# Date: Mar, 2002
+# Purpose:
+#       A run script that takes as its input a number of performance models 
+#       (as *.apm files) and a number of benchmarks (as *.cfg files).  It then 
+#       builds the performance models and runs each benchmark on each 
+#       performance model.  It uses the asim-batch script for each 
+#       specific run. The results are stored in an <exp-name> directory 
+#       provided by the user. 
+# 
+#       INPUT: A file or a space separated list of performance model apm files.
+#       INPUT: A file or a space separated list of benchmarks.  
+#       INPUT: Location of the results directory.  There will be
+#              subdirectories under the results directory for each model file
+#              specified.
+#
+
+
+use File::Basename;
+use Getopt::Long;
+use IO::Handle;
+#use Term::ReadKey;
+use Cwd 'realpath';
+# This is necessary to read the asimrc file
+use Asim;
+Asim::init();
+
+use Asim::Util;
+
+#
+# Hard coded global values.  These are not controlled by the asimrc file. 
+#
+$debug = 0;
+$BATCH_SUBMIT_COMMAND  = "nbq";
+$BATCH_STATUS_COMMAND = "nbqstat";
+$BATCH_SCR_NM = "tools/scripts/asim-batch";
+$NETBATCH_PRE_NM = "tools/scripts/netbatch-pre";
+$AWB_RESOLVER = "awb-resolver";
+$ASIM_EXEC_SCRIPT = "./run";
+$SUMMARY_FILE = "run.summary";
+$ASIM_RUN_SF_VERSION = "1.0";
+$BM_ENTRY = ".. ";
+$EXP_ENTRY = ":::";
+$BAD_BM_ENTRY = "<UNKNOWN>";
+
+# Some global information
+$TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
+if (!-e $TMP_DIR) {
+  # we can't find $TMP_DIR
+  PrintError("TMP_DIR $TMP_DIR doesn't exist\n");
+  exit 1;
+}
+
+#
+# Defaults for how to do the ASIM internal job scheduling. 
+#
+
+# How many jobs can one user have in queue before the
+# number of jobs she injects at any time is limited. 
+$MAX_RUNNING_JOBS    = Asim::Util::get_asimrc_val("asim-run", "MAX_RUNNING_JOBS",     175);          
+                                  
+# When we exceed the MAX_RUNNING_JOBS limit, how many jobs can be injected per cycle? 
+$MAX_JOBS_PER_PERIOD = Asim::Util::get_asimrc_val("asim-run", "MAX_JOBS_PER_PERIOD",   10);
+
+# Max waiting jobs before restrictions kick in.
+$MAX_WAITING_JOBS    = Asim::Util::get_asimrc_val("asim-run", "MAX_WAITING_JOBS",      10);
+
+# Max ASIM jobs (from all users) before restrictinos kick in. 
+$MAX_ASIM_JOBS       = Asim::Util::get_asimrc_val("asim-run", "MAX_ASIM_JOBS",        300);
+
+# Minimum number of seconds to wait before another sample is taken 
+$MIN_SAMPLE_PERIOD   = Asim::Util::get_asimrc_val("asim-run", "MIN_SAMPLE_PERIOD",    600);
+
+# Pool(s) where scheduling restrictions apply. 
+$RESTRICTED_POOLS    = Asim::Util::get_asimrc_val("asim-run", "RESTRICTED_POOLS",   undef);
+@RESTRICTED_POOLS    = (defined $RESTRICTED_POOLS)   ?  split (" ", $RESTRICTED_POOLS  ) : ();
+
+# The queue slot(s) that we care about scheduling. 
+$RESTRICTED_QSLOTS   = Asim::Util::get_asimrc_val("asim-run", "RESTRICTED_QSLOTS",  undef);
+@RESTRICTED_QSLOTS   = (defined $RESTRICTED_QSLOTS)  ?  split (" ", $RESTRICTED_QSLOTS ) : ();
+
+# The set of users whose jobs are NOT restricted. 
+$UNRESTRICTED_USERS  = Asim::Util::get_asimrc_val("asim-run", "UNRESTRICTED_USERS", undef);
+@UNRESTRICTED_USERS  = (defined $UNRESTRICTED_USERS) ?  split (" ", $UNRESTRICTED_USERS) : ();
+
+# The minimum amount of tmp space, in megabytes, we must have before running a netbatch job.
+$MIN_TMP_SPACE_MB    = Asim::Util::get_asimrc_val("asim-run", "MIN_TMP_SPACE_MB",      10);
+
+# Should we do the pre-execution check to determine minimum disk space?
+$ENABLE_NETBATCH_PRE = Asim::Util::get_asimrc_val("asim-run", "ENABLE_NETBATCH_PRE",    1);
+
+# Should we do a smart class based pre-execution check or a script based pre-execution check?
+$NETBATCH_PRE_USE_SMARTCLASS = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_PRE_USE_SMARTCLASS", 0);
+
+## Global variables used for scheduling. 
+
+# Number of jobs submitted this cycle.  
+$JOBS_SUBMITTED_CURRENT_CYCLE = 0;   
+
+# Global variable used to determine current pool & qslot. 
+$CURRENT_POOL = "";                  
+$CURRENT_QSLOT = "";
+
+##
+## Inputs for how to compile and run ASIM
+##
+#
+# Get the default pool to use. If none is specified, then the default netbatch pool, as
+# setup through netbatch or the NBPOOL environment variable, is used.  
+#
+my $pool       = Asim::Util::get_asimrc_val("asim-run", "POOL",           ""    );
+my $build      = Asim::Util::get_asimrc_val("asim-run", "BUILD",          1     );
+my $nuke       = Asim::Util::get_asimrc_val("asim-run", "NUKE",           1     );
+my $compress   = Asim::Util::get_asimrc_val("asim-run", "COMPRESS",       "gzip");
+my $replace    = Asim::Util::get_asimrc_val("asim-run", "REPLACE",        0     );
+my $buildbatch = Asim::Util::get_asimrc_val("asim-run", "BUILD_NETBATCH", "0"   );
+my $runbatch   = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
+#
+# Get the legal queue slots, if any.  If no legal queue slots are specified, then 
+# all queue slots specified are considered legal. 
+#
+$LEGAL_QSLOTS  = Asim::Util::get_asimrc_val("asim-run", "LEGAL_QSLOTS", undef);
+@LEGAL_QSLOTS  = (defined $LEGAL_QSLOTS) ?  split (" ", $LEGAL_QSLOTS) : ();
+
+#
+# Get the legal classes, if any.  If no classes are specified, then 
+# any user input is considered legal. 
+#
+$LEGAL_CLASSES = Asim::Util::get_asimrc_val("asim-run", "LEGAL_CLASSES", undef);
+@LEGAL_CLASSES = (defined $LEGAL_CLASSES) ? split (" ", $LEGAL_CLASSES) : ();
+
+# 
+# Get the default queue slot to use.  If none is specified, then the queue slots 
+# defaulted to by netbatch is used.  
+#
+my $queue      = Asim::Util::get_asimrc_val("asim-run", "QSLOT",         undef);
+my $class      = Asim::Util::get_asimrc_val("asim-run", "CLASS",         undef);
+
+#
+# Select the default nice command.  If left blank, then the nice level
+# is whatever the default is either in the user's shell or the netbatch 
+# command.  
+# 
+$NICEMIN       = Asim::Util::get_asimrc_val("asim-run", "NICEMIN",       "10");
+$NICEMAX       = Asim::Util::get_asimrc_val("asim-run", "NICEMAX",       "19");
+my $nicelevel  = Asim::Util::get_asimrc_val("asim-run", "NICEVAL",       undef);
+
+# 
+# Some inputs don't have defaults, and must be specified.  
+#
+my $experiments="";
+my $benchmarks="";
+#
+# Some inputs have hard coded defaults. 
+#
+my $resdir="./";
+my $dryrun   = 0;
+my $execscript=$ASIM_EXEC_SCRIPT;
+my $limit = 1;
+my $quiet = 0;
+my $verbose = 0;
+my $help = 0;
+my $delay =0;
+#
+# Additional computed variables. 
+#
+my $batch_flags = "";
+my $batch_scr_inputs = "";
+my $exps = {};
+my @exp_ordered = ();
+my $bms = {};
+my @build_models = ();
+my $thisModel;
+my @summaryArgv = @ARGV;
+
+if (defined($ENV{ASIMRUNOPT})) {
+   unshift(@ARGV, split(" ", $ENV{ASIMRUNOPT}));
+}
+
+$status = GetOptions(   "experiments=s"  => \$experiments,
+                        "benchmarks=s"   => \$benchmarks,
+                        "resdir=s"       => \$resdir,
+                        "nicelevel=i"    => \$nicelevel,
+                        "build!"         => \$build,
+                        "nuke!"          => \$nuke,
+                        "replace!"       => \$replace,
+			"compress=s"     => \$compress,
+                        "execscript=s"   => \$execscript,
+                        "buildbatch!"    => \$buildbatch,
+                        "batch!"         => \$runbatch,
+			"pool=s"         => \$pool,
+                        "queue=s"        => \$queue,
+                        "class=s"        => \$class,
+                        "dryrun!"        => \$dryrun,
+                        "limit!"         => \$limit,
+                        "quiet!"         => \$quiet,
+			"debug"          => \$debug,
+                        "verbose!"       => \$verbose,
+                        "help"           => \$help,
+                        "delay=i"        => \$delay
+                    );
+# Quiet overrides verbose...
+
+if ($quiet) {
+  $verbose = 0;
+}
+
+if ($help) {
+  system "perldoc $0";
+  exit 0;
+}
+
+
+if (! $status || 
+    ! $experiments || 
+    ! $benchmarks ) {
+
+  my $prog = basename($0);
+  
+  print STDERR "$prog: Insufficent switches specified.\n";
+  print STDERR "$prog: All of --experiments and --benchmarks switches are required.\n";
+  print STDERR "$prog: Try \"$prog --help\" for more information.\n";
+  exit 1;
+}
+
+# create a logfile and make it removable by anyone
+my $start_time = `date +%s`;
+chomp($start_time);
+my $runuser = $ENV{"USER"} ? $ENV{"USER"} : "unknown";
+chomp($runuser);
+my $asim_runlogfl = "$TMP_DIR/log\.$runuser\.$start_time\.$$";
+system ("touch $asim_runlogfl; chmod 666 $asim_runlogfl");
+
+# buildbatch overrides runbatch
+if (defined $buildbatch && $buildbatch) {
+    $runbatch = "1";
+}
+
+###########################
+# Parse experiments
+###########################
+#$experiments = `$AWB_RESOLVER $experiments` 
+#                || die ("Unable to resolve experiments file $experiments.\n");
+chomp $experiments;
+$experiments = (realpath(dirname($experiments)) . "/" . basename($experiments));
+$exps = parse_exp_file ($experiments);
+
+###########################
+# Parse benchmarks
+###########################
+#$benchmarks = `$AWB_RESOLVER $benchmarks` || \
+#               die ("Unable to resolve benchmarks file $benchmarks.\n");
+chomp $benchmarks;
+$benchmarks = (realpath (dirname($benchmarks)) . "/" . basename($benchmarks));
+parse_bm_file ($benchmarks, $exps, $bms);
+
+###########################
+# Get results directory
+###########################
+( -d $resdir ) || die ("Unable to find results directory $resdir.\n");
+chomp ($resdir);
+$resdir = realpath($resdir);
+
+###########################################################
+# Get the path of the asim-batch scripts using resolver.
+##########################################################
+$batch_scr = `$AWB_RESOLVER $BATCH_SCR_NM`;
+if ($? != 0) {
+  die "Batch script $BATCH_SCR_NM does not exist.\n";
+}
+
+# Generate a real path for batch script (no links)
+chomp ($batch_scr);
+$filename = basename($batch_scr);
+$batch_scr = realpath(dirname($batch_scr)) . "/$filename";
+( -f $batch_scr ) || die "Batch script $batch_scr does not exist.\n";
+
+
+###########################################################
+# Get the path of the Netbatch pre-exec script to test machine viability,
+# but don't bother if we're not submitting as batch jobs,
+# or if our version of netbatch is not high enough.
+##########################################################
+if ( $runbatch && $ENABLE_NETBATCH_PRE ) {
+  $nbqver = `$BATCH_SUBMIT_COMMAND -v`;
+  if ($NETBATCH_PRE_USE_SMARTCLASS == 0) {
+      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 ) ) {
+	  print "WARNING: $BATCH_SUBMIT_COMMAND version does not support pre-exec check, jobs might be lost.\n";
+      } else {
+	  $netbatch_pre_scr = `$AWB_RESOLVER $NETBATCH_PRE_NM`;
+	  if ($? != 0) {
+	      print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
+	  } else {
+	      # Generate a real path for pre-exec script (no links)
+	      chomp ($netbatch_pre_scr);
+	      $filename = basename($netbatch_pre_scr);
+	      $netbatch_pre_scr = realpath(dirname($netbatch_pre_scr)) . "/$filename";
+	      if ( ! ( -f $netbatch_pre_scr )) {
+		  print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
+	      } else {
+		  # found pre-exec script file ok?  Then add a pre-exec option to netbatch args.
+		  # for now, we'll just hardwire the minimum space requirement to 10 MB:
+		  $batch_flags = $batch_flags . "--pre-exec \"$netbatch_pre_scr -tempdir $TMP_DIR $MIN_TMP_SPACE_MB\" ";
+	      }
+	  }
+      }
+  }
+  else {
+      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 && $2 >= 3) ) {
+	  print "WARNING: $BATCH_SUBMIT_COMMAND version does not support smart class check, jobs might be lost.\n";
+      }
+      else {
+	  $batch_flags = $batch_flags . "-C \"fDS\(\'$TMP_DIR\'\)\>$MIN_TMP_SPACE_MB\" ";
+      }
+  }
+}
+##########################################################
+# Make sure that the netbatch pool specified exists. 
+##########################################################
+PrintVerbose("Checking netbatch pool....");
+if ( $runbatch && $pool ne "" ) {
+  if (system ("$BATCH_STATUS_COMMAND -P$pool > $asim_runlogfl")) {
+    # We couldn't find the pool.  Exit
+    PrintError("Unknown pool $pool.\n");
+
+    system ("cat $asim_runlogfl");
+    system ("rm -f $asim_runlogfl");
+    exit 1;
+  }
+  else {
+    $batch_flags = $batch_flags . "-P$pool ";
+  }
+}
+
+##########################################################
+# Make sure that the value specified for nice is correct
+# (i.e., integer value between 0 and 19)
+##########################################################
+PrintVerbose("Checking nice value...");
+if (defined $nicelevel) {
+  if ($nicelevel < $NICEMIN || $nicelevel > $NICEMAX) {
+    # Illegal value for nice 
+    PrintError("Unknown nice level: $nicelevel: Legal values are integer values between $NICEMIN and $NICEMAX.\n");
+    system ("rm -f $asim_runlogfl");
+    exit 1;
+  }
+  $batch_scr_inputs = $batch_scr_inputs . "-nicelevel=\"$nicelevel\" ";
+}
+    
+##########################################################
+# Make sure that the specified netbatch queue is one of the 
+# LEGAL QSLOTS.
+##########################################################
+PrintVerbose("Checking netbatch queue...");
+if ($runbatch && defined $queue) {
+  if (scalar(@LEGAL_QSLOTS) > 0) {
+    my $legal = grep /^$queue$/, @LEGAL_QSLOTS;
+    if ($legal != 1) {
+      # We couldn't find the qslot.  Exit
+      my $legal_queues=join(", ", @LEGAL_QSLOTS);
+      PrintError("Unknown queue slot $queue: Acceptable queue slots are $legal_queues.\n");
+      system ("rm -f $asim_runlogfl");
+      exit 1;
+    }
+  }
+  $batch_flags = $batch_flags . "-Q $queue ";
+}
+
+##########################################################
+# Make sure that the specified netbatch queue is one of the 
+# LEGAL CLASSES
+##########################################################
+PrintVerbose("Checking netbatch class...");
+if ($runbatch && defined $class) {
+  if (scalar(@LEGAL_CLASSES) > 0) 
+  {
+    my $legal = grep /^$queue$/, @LEGAL_CLASSES;
+    if ($legal != 1) {
+      # We couldn't find the class.  Exit
+      my $legal_classes=join(", ", @LEGAL_CLASSES);
+      PrintError("Unknown class $class: Acceptable queues are $legal_classes.\n");
+      system ("rm -f $asim_runlogfl");
+      exit 1;
+    }
+  }
+  $batch_flags = $batch_flags . "-C $class ";
+}
+
+sub generate_run_summary
+{
+    PrintVerbose("Generating run summary...");
+
+    my $exists = (-f "$resdir/$SUMMARY_FILE");
+    open(SUMMARYFILE, ">>$resdir/$SUMMARY_FILE") || die "Unable to open summary file : $resdir/$SUMMARY_FILE.\n";
+
+    my $summary;
+    foreach $name (@exp_ordered) 
+    {
+	my $model = &FullPath($exps->{"$name"}{model});
+	$summary = $summary . "\n$name\t$model\n";
+	foreach $bm (@{$bms->{$name}}) 
+	{
+	    ($bm_name = basename($bm)) =~ s/\.[a-z][a-z]*\s*$//s;
+	    # set flag if benchmark generated from a .CFX script
+	    my $isCfx = ( $bm =~ m/\.cfx\// );
+	    if ($bm =~ /\.tlist\s*$/) 
+	    {  
+		my $full_bm = &FullPath($bm);
+		if (! -f $full_bm) {
+		    $summary = $summary . "$BM_ENTRY$BAD_BM_ENTRY\n";
+		    next;
+		}
+		my @traces = parse_tlist_file($full_bm);
+		foreach my $trace (@traces) {
+		    chomp($trace);  
+		    if (!($trace =~ /\#.*/))  {
+			$trace =~ s/\s*$//;
+			my $trace_name = basename($trace);
+			$summary = $summary . "$BM_ENTRY$trace_name\n";
+		    }
+		}
+	    }
+	    else 
+	    {  
+		$tmp =$bm;
+		$tmp =~ s/.cfg_r[0-9]+/.cfg/;
+		my $full_bm = &FullPath($bm);
+		my $full_bm_without_region = &FullPath($tmp);
+                # check that the config file exists, unless it is CFX-generated:
+		if ((! -f $full_bm) && (! -f $full_bm_without_region) && (! $isCfx)) {
+		    $summary = $summary . "$BM_ENTRY$BAD_BM_ENTRY\n";	
+		    next;
+		}
+		if ((! -f $full_bm) && ( -f $full_bm_without_region)){
+		    $bm_name=~ s/.cfg//;
+		}
+		$summary = $summary . "$BM_ENTRY$bm_name\n";
+	    }
+	}
+    }
+
+    if (! $exists) {
+	PrintInfo(".... Generating summary file : $resdir/$SUMMARY_FILE\n");
+	print SUMMARYFILE "# ", basename($0), " $ASIM_RUN_SF_VERSION\n";
+    }
+    else {
+	PrintInfo(".... Adding to summary file : $resdir/$SUMMARY_FILE\n");
+    }
+
+    # generate arguments used
+    print SUMMARYFILE "\n";
+    print SUMMARYFILE "# Generated by command : ";
+    print SUMMARYFILE basename($0);
+    print SUMMARYFILE " @summaryArgv \n";
+
+    print SUMMARYFILE $summary;
+    close SUMMARYFILE;
+    return 0;
+}
+
+##########################################################
+# Walk through each model and try to build it using asim-shell
+##########################################################
+my $exit_code = generate_run_summary();
+
+foreach $name (@exp_ordered) {
+  
+  PrintInfo(".... Setting up experiment: $name\n");
+  
+  # Generate absolute path for the model associated with this name. 
+  $model = &FullPath($exps->{"$name"}{model});
+  $model_name = "";
+  ($model_name = basename($model)) =~ s/\.[a-z][a-z]*//s;
+  
+  # Try to create a subdirectory for model in results directory. 
+
+  if ( ! -d "$resdir/$name" ) {
+    # performance model directory doesn't exist, so try to make it. 
+    PrintInfo("........ Creating results directory\n\t\t$resdir/$name\n");
+
+    if (! mkdir "$resdir/$name") {
+      # Unable to mkdir, so skip this model.
+      PrintError("Unable to create directory $resdir/$name.\n",
+                 "Skipping execution of experiment $name.\n");
+      
+      $exit_code++;
+      next;
+    }
+  }
+
+  # Create the ADMIN directory for administrative information. 
+
+  if ( ! -d "$resdir/$name/ADMIN" ) {
+    if ( ! mkdir "$resdir/$name/ADMIN" ) {
+      # Unable to mkdir, so skip this model.
+      PrintError("Unable to create directory $resdir/$name/ADMIN.\n",
+                 "Skipping execution of experiment $name.\n");
+      
+      $exit_code++;
+      next;
+    }
+  }
+
+  # Create a RUN directory for the model and benchmarks currently running
+
+  if ( ! -d "$resdir/$name/RUN" ) {
+    if ( ! mkdir "$resdir/$name/RUN" ) {
+      # Unable to mkdir, so skip this model.
+      PrintError("Unable to create directory $resdir/$name/RUN.\n",
+                 "Skipping execution of experiment $name.\n");
+      
+      $exit_code++;
+      next;
+    }
+  }
+
+  # Make sure that the model files are coming from the current workspace
+
+
+  $awblocal = $ENV{AWBLOCAL} || die "AWBLOCAL not defined.\n";
+  $awblocal = `$AWB_RESOLVER $awblocal` || die "Unable to resolve $awblocal.\n";
+  chomp $awblocal;
+  $awblocal = realpath($awblocal);
+  $modelpath = substr $model, 0, length($awblocal);
+  
+  if ($awblocal ne $modelpath) {
+    # The AWBLOCAL environment variable is set to something different than
+    # where the model files are coming from.
+    PrintWarning("AWBLOCAL environment variable does not match model path.\n",
+                 "AWBLOCAL is $awblocal\n",
+                 "Model file is $model\n");
+  }
+  
+  PutEnv("AWB_MODEL", "$model");
+
+  $thisModel = Asim::Model->new($model);
+
+  # Build model unless we've been asked to not build. 
+  $local_build = $build;
+  if ($local_build == 0) {
+      if (-x "$resdir/$name/BUILD/$model_name") {
+	  print "Skipping build of $model_name\n";
+      }
+      else {
+	  # Let's try building the model
+	  $local_build = 1;
+      }
+  }
+
+  if ($local_build == 1) {
+
+      if ( -d "$resdir/$name/BUILD") {
+	  if ($nuke) {
+	      # Clean model
+	      PrintInfo("........ Nuking model $model_name\n");
+	      #
+	      # To clean model, we first have to configure it and then nuke it.  
+	      # If the model doesn't exist at all, then we can't nuke it.  Therefore, 
+	      # configuring first takes care of the case where we nuke without having
+	      # a model available. 
+	      #
+	      $thisModel->build_dir("$name");
+	      $thisModel->build_dir("$resdir");
+	      
+	      $thisModel->build_dir("$resdir/$name/BUILD");
+	
+	      if (! ($thisModel->configure("--logfile", "$asim_runlogfl"))) {
+		  PrintError("Unable to configure/nuke model $model_name.\n",
+			     "Not running benchmarks on model $model_name.\n");
+		  system ("cat $asim_runlogfl");
+		  $exit_code++;
+		  next;
+	      }
+	      
+	      if (! ($thisModel->nuke("--logfile", "$asim_runlogfl"))) {
+		  PrintError("Unable to nuke model $model_name\n",
+			     "Not running benchmarks on model $model_name.\n");
+		  system ("cat $asim_runlogfl");
+		  $exit_code++;
+		  next;
+	      }
+	  }
+	  else {
+	      PrintInfo("........ NOT Nuking model $model_name\n");
+	  }
+      }
+      else {
+	  if (! mkdir "$resdir/$name/BUILD"){
+	      # Unable to mkdir, so skip this model.
+	      PrintError("Unable to create directory $resdir/$name/BUILD.\n",
+			 "Skipping execution of experiment $name.\n");
+	      
+	      $exit_code++;
+	      next;
+	  }
+	  else {
+	      $thisModel->build_dir("$resdir/$name/BUILD");
+	  }
+      }
+
+      
+      # Configure model 
+      PrintInfo("........ Configuring model $model_name\n");
+
+      if (! ($thisModel->configure("--logfile", "$asim_runlogfl"))) {
+	  PrintError("Unable to configure model $model_name.\n",
+		     "Not running benchmarks on model $model_name.\n");
+	  system ("cat $asim_runlogfl");	  
+	  $exit_code++;
+	  next;
+      }
+
+      if (! $buildbatch) {
+	  
+	  # Determine if we've already build this model. 
+	  my $buildforced = 1;
+	  my @built = ();
+	  my $cur_model;
+	  ($cur_model = $model) =~ s/\//:/g;
+	  @built = grep (/($cur_model)$EXP_ENTRY(.*)/, @built_models);
+	  
+	  if (scalar(@built) > 1) {
+	      PrintError("It looks like I've built the same model twice.\n",
+			 "ACK!! BUG!! Get Bobbie to fix this @#$!#\n");
+	      
+	      $exit_code++;
+	      exit $exit_code;
+	  }
+
+	  if (scalar(@built) == 1) {
+	      $built[0] =~ /($cur_model)$EXP_ENTRY(.*)/;
+	      my $builtexp = $2;
+	      PrintInfo("........ Skipping build: Linking to prebuilt model $model_name in experiment $builtexp\n");
+	      if ( RunCommand ("ln -sf $resdir/$name/BUILD/../../$builtexp/BUILD/$model_name $resdir/$name/BUILD/$model_name > $asim_runlogfl 2>&1") ) {
+		  PrintWarning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
+			       "Build forced.\n");
+		  $exit_code++;
+		  next;
+	      }
+	      else {
+		  $buildforced = 0;
+	      }
+	  }
+	  
+	  if ($buildforced == 1) {
+	      # Build model (optimized)
+	      PrintInfo("........ Building model $model_name\n");
+	      if (! ($thisModel->build("--logfile", "$asim_runlogfl", "--buildopt", "'OPT=1 DEBUG=0 TRACE=1 -j4'"))) {
+		  PrintError("Unable to build model $model_name\n",
+			     "Not running benchmarks on model $model_name.\n");
+		  system ("cat $asim_runlogfl");
+		  HandleBuildFailure();	      
+		  $exit_code++;
+		  next;
+	      }	  
+	      else {
+		  HandleBuildSuccess();
+		  # Push built model onto list so that we don't build the same model multiple 
+		  # times.  Also, substitute : for / so that we don't have any problems with 
+		  # reg exps. 
+		  my $m = $model;
+		  $m =~ s/\//:/g; $m .= $EXP_ENTRY . $name;
+		  push (@built_models, $m);
+	      }
+	  }
+      }
+      else {
+	  PrintInfo("........ Submitting batch build of model $model_name and benchmarks\n");
+      }
+  }
+  
+  if ($buildbatch) {
+      # batch build the model for this experiment and run the benchmarks
+      batch_build_run($name, $build);
+  }
+  else {
+      # For each benchmark listed for the model, run benchmark on this model.  
+      # The actual run is accomplished by the asim-batch script which submits
+      # the run to netbatch. 
+      
+      run_benchmarks($name);
+  }
+}
+
+# Cleanup
+RunCommand ("rm -f $asim_runlogfl > /dev/null 2>&1");
+
+exit $exit_code;
+       
+#############################################################################
+#SUBROUTINES
+#############################################################################
+
+##
+## Submits a model build to netbatch and blocks.  If the build completed 
+## successfully, submits the benchmarks.
+##
+
+sub batch_build_run
+{
+    my $name = shift;
+    my $build = shift;
+    
+    $pid = fork();
+    
+    if ($pid == 0) 
+    {
+	open(LOGFILE, "> $resdir/$name/BUILD/batch.log") || die ("Unable to open $resdir/$name/BUILD/batch.log\n");
+	*STDOUT = *LOGFILE;
+	*STDERR = *LOGFILE;
+	    
+	if ($build == 1) 
+	{
+	    PutEnv("AWB_MODEL", "$model");
+	    PrintInfo(".... AWB_MODEL : $model\n");
+	    PrintInfo(".... Submitting model build\n");
+	    
+	    # Build model (optimized)	    
+	    if (SubmitJob("asim-shell --batch build model -- --builddir $resdir/$name/BUILD --options='OPT=1 DEBUG=0 TRACE=1 -j4'", "1")) {
+		HandleBuildFailure();
+		close LOGFILE;
+		exit 1;
+	    }
+	    
+	    PrintInfo(".... Completed model build\n");	    
+	    HandleBuildSuccess();
+	}
+	PrintInfo(".... Running benchmarks for experiment $name\n");	
+	run_benchmarks($name);
+	PrintInfo(".... Finished benchmarks for experiment $name\n");	
+	close LOGFILE;
+	exit $exit_code;
+    }
+}
+
+##
+## Run the benchamarks for the experiment (taken as an argument).
+##
+
+sub run_benchmarks 
+{
+  my $name = shift;  
+  foreach $bm (@{$bms->{$name}}) 
+  {
+      my $bm_type;
+      if    ( $bm =~ m/\.tlist\s*$/ ) { $bm_type = 'tlist'; }
+      elsif ( $bm =~ m/\.cfx\//     ) { $bm_type = 'cfx';   }
+      else                            { $bm_type = 'cfg';   }
+      
+      ($bm_name = basename($bm)) =~ s/\.[a-z][a-z]*\s*$//s;
+
+      if ( $bm_type eq 'cfg' || $bm_type eq 'cfx' ) 
+      {
+
+	  PutEnv("AWB_BENCHMARK", "$bm");
+	  
+          #    $bm = &FullPath($bm);
+	  
+	  # Determine if benchmark configuration file exists.
+	  # if this benchmark is a region of a benchmark then look for the config file
+	  # that is used for all the regions
+	  $tmp =$bm;
+	  $tmp =~ s/.cfg_r[0-9]+/.cfg/;
+	  my $full_bm = &FullPath($bm);
+	  my $full_bm_without_region = &FullPath($tmp);
+
+          # with the new CFX file/script that sets up benchmarks, the CFG file is a virtual file and 
+          # doesn't really exist, so we cannot fail when we don't find it.  We'll emit a warning until
+          # someone fixes permanently.
+	  if ((! -f $full_bm) && (! -f $full_bm_without_region) && ($bm_type eq 'cfg')) {
+	      PrintInfo("Unable to find benchmark configuration file $full_bm\n");
+	      $bm_name=~ s/.cfg//;
+	      $exit_code++;
+	      next;
+	  }
+	  
+	  #if this is a benchmark that uses regions in the config file then change the bmname to reflect the region
+	  if ((($bm_type eq 'cfx') && ($bm =~ m/.cfg_r[0-9]+/)) || ((! -f $full_bm) && ( -f $full_bm_without_region))){
+	      PrintWarning("This appears to be region of the benchmark  $full_bm_without_region.\n",
+			   "Altering the bm_name to reflect the region number.\n");
+	      $bm_name=~ s/.cfg//;
+	  }
+	  PrintInfo("........ " . ($runbatch?"Submitting":"Running") . " benchmark $bm_name for experiment $name\n");
+
+	  # Setup flag indicating that the benchmark has been submitted. 
+	  if ( -f "$resdir/$name/$bm_name.SUBMITTED" ) {
+	      PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+			   "File $resdir/$name/$bm_name.SUBMITTED already exists.\n");
+	      
+	      next;
+	  }
+
+	  if ( -f "$resdir/$name/$bm_name.RUNNING" ) {
+	      PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+			   "File $resdir/$name/$bm_name.RUNNING already exists.\n");
+	      
+	      next;
+	  }
+	  
+	  if (( -f "$resdir/$name/$bm_name.stats" ) ||
+	      ( -f "$resdir/$name/$bm_name.stats.gz") ||
+	      ( -f "$resdir/$name/$bm_name.stats.bz2")) {
+	      if ( $replace == 0 ) {
+		  PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+			       "File $resdir/$name/$bm_name.stats(.gz|.bz2)? already exists.\n");
+		  
+		  next;
+	      }
+	      else {
+		  if ((system ( "rm -f $resdir/$name/$bm_name.stats"))    ||
+		      (system ( "rm -f $resdir/$name/$bm_name.stats.gz")) ||
+		      (system ( "rm -f $resdir/$name/$bm_name.stats.bz2")) ) {
+		      PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+				   "Cannot remove file $resdir/$name/$bm_name.stats(.gz|.bz2)? .\n");
+		      
+		      next;
+		  }
+	      }
+	  }
+    
+	  # Create benchmark run directory in $resdir/$name/RUN/$bm_name.
+	  my $rundir = $resdir . "/" . "$name" . "/RUN/" . $bm_name;
+	  if ( ! -d "$rundir" ) {
+	      # Setup benchmark. 
+	      PrintInfo("........ Setting up benchmark: $bm_name for experiment $name\n");
+	      print "asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir" if ($debug);
+	      if ( RunCommand ("asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir > $asim_runlogfl 2>&1") ) {
+		  # We have an error in the setup.
+		  PrintError("Unable to setup benchmark $bm_name\n",
+			     "Not running benchmark $bm_name for experiment $name.\n");
+		  
+		  system ("cat $asim_runlogfl");
+		  $exit_code++;
+		  next;
+	      }
+# This shouldn't be needed anymore. 
+
+      # HACK: We have to determine the directory where the setup occurs.
+      # This is currently hard coded, but this code should change when AWB 
+      # is more flexible. 
+#      $setupdir = "$awblocal" . "/build/$model_name/bm/$bm_name";
+
+#      if (RunCommand ("cp -r $setupdir $resdir/$name/RUN")) {
+#        # We cannot copy over benchmark run directory for some reason.
+#        PrintError("Unable to submit benchmark $bm_name for experiment $name.\n",
+#                   "Unable to copy run directory for $bm_name\n");
+#        
+#        $exit_code++;
+#        next;
+#      }
+          if($delay)
+          {
+             RunCommand("sleep ${delay}");
+          }
+	  }
+	  else {
+	      PrintWarning("Run directory $rundir already exists. It won't be overwritten.\n");
+	      RunCommand ("rm -f $rundir/*.stats* > /dev/null 2>&1");
+	  }
+	  
+	  if ( RunCommand ("touch $resdir/$name/$bm_name.SUBMITTED") ) {
+	      PrintError("Unable to submit $bm_name for experiment $name\n",
+			 "Unable to create file $resdir/$name/$bm_name.SUBMITTED.\n");
+	      
+	      $exit_code++;
+	      next;
+	  }
+
+	  my $input = $exps->{"$name"}{params};
+	  
+	  if ( SubmitJob("$batch_scr -benchmark=$bm -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input") ) {
+	      # There was an error in the submission.
+	      $exit_code++;
+	      next;
+	  }
+      }
+      elsif ($bm_type eq "tlist") 
+      {
+	  my $full_bm = &FullPath($bm);
+	  if (! -f $full_bm) {
+	      PrintError("Unable to find benchmark tlist file $full_bm.\n");
+	      $exit_code++;
+	      next;
+	  }
+	  PrintInfo("........ " . "Begin tracelist file: $full_bm for experiment $name\n");
+	  my @traces = parse_tlist_file($full_bm);
+	  foreach my $trace (@traces) 
+	  {
+	      chomp($trace);  
+	      if (!($trace =~ /\#.*/))
+	      {
+		  $trace =~ s/\s*$//;
+		  my $trace_name = basename($trace);
+		  PrintInfo("........ " . ($runbatch ? "Submitting" : "Running") . " trace $trace_name for experiment $name\n");
+		  if (-f "$resdir/$name/$trace_name.SUBMITTED") {
+		      PrintWarning("Unable to submit trace $trace_name for experiment $name.\n",
+				   "File $resdir/$name/$trace_name.SUBMITTED already exists.\n");
+		      next;
+		  }
+		  if ( -f "$resdir/$name/$trace_name.RUNNING" ) {
+		      PrintWarning("Unable to submit benchmark $trace_name for experiment $name.\n",
+				   "File $resdir/$name/$trace_name.RUNNING already exists.\n");
+		      next;
+		  }
+		  if (( -f "$resdir/$name/$trace_name.stats" ) ||
+		      ( -f "$resdir/$name/$trace_name.stats.gz") ||
+		      ( -f "$resdir/$name/$trace_name.stats.bz2")) {
+		      if ( $replace == 0 ) {
+			  PrintWarning("Unable to submit trace $trace_name for experiment $name.\n",
+				       "File $resdir/$name/$trace_name.stats(.gz|.bz2)? already exists.\n");
+			  next;
+		      }
+		      else {
+			  if ((system ( "rm -f $resdir/$name/$trace_name.stats"))    ||
+			      (system ( "rm -f $resdir/$name/$trace_name.stats.gz")) ||
+			      (system ( "rm -f $resdir/$name/$trace_name.stats.bz2")) ) {
+			      PrintWarning("Unable to submit benchmark $trace_name for experiment $name.\n",
+					   "Cannot remove file $resdir/$name/$trace_name.stats(.gz|.bz2)? .\n");
+			      next;
+			  }
+		      }
+		  }
+		  # Create benchmark run directory in $resdir/$name/RUN/$trace_name.
+		  my $rundir = $resdir . "/" . "$name" . "/RUN/" . $trace_name;
+		  my $input = $exps->{"$name"}{params};
+		  if (! -d "$rundir") {
+		      # Setup trace run.
+		      PrintInfo("........ Setting up trace: $trace_name for experiment $name\n");
+                      my $builddir = "$resdir/$name/BUILD";
+		      if (setup_tlist_run($builddir, $model_name, $trace, $rundir, \$input)) {
+			  # We have an error in the setup.
+			  PrintError("Unable to setup trace $trace_name\n",
+				     "Not running trace $trace_name for experiment $name.\n");
+			  $exit_code++;
+			  next;
+		      }
+		  }
+		  else {
+		      PrintWarning("Run directory $rundir already exists. It won't be overwritten.\n");
+		      RunCommand ("rm -f $rundir/*.stats* > /dev/null 2>&1");
+		  }
+		  
+		  if ( RunCommand ("touch $resdir/$name/$trace_name.SUBMITTED") ) {
+		      PrintError("Unable to submit $trace_name for experiment $name\n",
+				 "Unable to create file $resdir/$name/$trace_name.SUBMITTED.\n");
+		      $exit_code++;
+		      next;
+		  }
+
+		  if ( SubmitJob("$batch_scr -benchmark=$trace_name -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input") ) {
+		      # There was an error in the submission.
+		      $exit_code++;
+		      next;
+		  }
+	      }
+	  }
+      }
+  }
+}
+
+
+
+##
+## Name: parse_exp_file
+##
+## Syntax of file: <exp name> <model file> <params>
+## Inputs: Name of file
+## Output: Hash containing name, model and params for each experiment
+## 
+sub parse_exp_file {
+  my $file = shift;
+  my $exps = {};
+  my $name;
+  my @explist;
+  my @exp;
+
+  # Get expanded list of experiments
+
+  PrintVerbose("Generating experiment list:\n");
+  @explist = read_exps($file);
+
+  # Check user is asking for a reasonable number of experiments
+
+  if ($#explist > 260) {
+    if ($limit && $#explist > 2050) {
+      PrintError("Too many experiments ($#explist) were requested\n");
+      exit 1;
+    }
+
+    my $ans = TimedQuestion("Are you SURE you want to run $#explist experiments?",
+                             "Yes", 30);
+
+    if (! ($ans =~ /^[Yy]/)) {
+      exit 1;
+    }
+  }
+  
+      
+  # Generate hash record for each experiment
+
+  foreach my $expline (@explist) {
+    print "Processing: $expline\n" if ($debug);
+    
+    @exp = split(" ", $expline);
+
+    if (scalar(@exp) < 2) {
+      PrintError("Unable to parse experiments file $file.\n",
+                 "Not enough entries in the following line:\n",
+                 "$expline\n");
+      
+      exit 1;
+    }
+
+    $name = shift(@exp);
+    if (defined($exps->{"$name"}{"model"})) {
+      PrintError("Duplicate experiment name in experiments file $file.\n",
+                 "$expline\n");
+      
+      exit 1;
+    }
+
+    PrintVerbose("$name\n");
+    
+    push(@exp_ordered, $name);
+    $exps->{"$name"}{"model"} = shift(@exp);
+    $exps->{"$name"}{"params"} = join " ", @exp;
+  }
+
+  return $exps;
+}
+
+##
+## Name: read_exps
+##
+## Inputs: File containing experiments
+##
+## Output: List of experiments
+##
+## Read in list of experiments... 
+##
+
+sub read_exps {
+ my $in = shift;
+
+ my @explist = ();
+
+ # Read in experiments...
+
+ open(EXPIN, "<$in");
+
+ # Create list of experiments
+
+ while (!eof(EXPIN)) {
+   my $exp = "";
+   
+   # Read in experiment line (handing continuation lines)
+
+   while (<EXPIN>) {
+     chomp;
+     $exp .= $_;
+     last if (! ($exp =~ /\\\s*$/));
+     $exp =~ s/ *\\\s*$/ /;
+   }
+
+   next if ($exp =~ m/^#/);
+   next if ($exp =~ m/^[\t ]*$/);
+
+   print "Raw experiment: $exp\n" if $debug;
+   
+   my @expv = split(/ +/, $exp);
+   my $name = shift @expv;
+   my $line = shift @expv;
+
+   push(@explist, exps($name, $line, @expv));
+ }
+
+ return @explist;
+}
+
+##
+## Name: exps
+##
+## Inputs: Name of experiment
+##       : Experiment line created so far
+##       : Remaining experiment parameters
+##
+## Output: List of experiments
+##
+## Do crossproduct expansion of experiments
+##
+
+sub exps {
+  my $name = shift;
+  my $line = shift;
+  my @params = @_;
+
+  if (!@params) {
+    if ($name =~ /\${.*}/) {
+      die("Experiment had unsubstituted value: $name\n");
+    }
+    
+    return "$name $line";
+  }
+
+  my $firstparam = shift @params;
+  my @exps = ();
+
+  if ($firstparam =~ /(.*)=\[(.*);(.*);(.*)\]/) {
+    my $pname = $1;
+    my $first = $2;
+    my $last = $3;
+    my $inc = $4;
+
+    for (my $i=$first; $i <= $last; $i += $inc) {
+      # TBD: Decide on format for substitution!!!
+      my $newname = $name;
+      $newname =~ s/\${$pname}/$i/;
+
+      # TBD: Make sure experiment name is unique...
+      push(@exps, exps($newname, "$line $pname=$i", @params));
+    }
+
+  } elsif ($firstparam =~ /(.*)=\[(.*)\]/) {
+    my $pname = $1;
+    my @list = split(",", $2);
+
+    foreach my $i (@list) {
+      # TBD: Decide on format for substitution!!!
+      my $newname = $name;
+      $newname =~ s/\${$pname}/$i/;
+
+      # TBD: Make sure experiment name is unique...
+      push(@exps, exps($newname, "$line $pname=$i", @params));
+    }
+
+  } else {
+    $line .= " $firstparam";
+    push(@exps, exps($name, $line, @params));
+  }
+
+  return @exps;
+}
+
+##
+## Name: parse_bm_file
+##
+## Inputs: Name of file
+##       : List of all experiments
+##       : Reference to hash for benchmarks
+##
+sub parse_bm_file {
+  my ($file) = shift;
+  my $allexps = shift;
+  my $bms = shift;
+  
+  my @allexps = keys %{$allexps};
+  my @exps = @allexps;
+
+  my $exp;
+
+  PrintVerbose("Generating benchmark list:\n");
+
+  open (BMFL, "<$file") || die "Unable to open benchmarks file $file.\n";
+  while (<BMFL>) {
+    # Skip comments and blanks
+
+    next if ( m/^#/ || m/^\s*$/);
+
+    chomp;
+
+    # Process 'experiments = ...' lines
+
+    if ( /exp[\S\s]*=\s*([\S\s]*)/ ) {
+      my $expname = $1;
+
+      @exps = ();
+
+      foreach my $exp (split (" ", $expname)) {
+        my @newexp;
+
+        # Find experiments that match $expname either 
+        # as a regexp or completely.
+
+        if ($exp =~ /^\/(.*)\/$/) {
+          @newexp = grep /${1}/, @allexps;
+        } else {
+          @newexp = grep /^${exp}$/, @allexps;
+        }
+    
+        if (! @newexp) {
+          PrintWarning("No experiment matching $exp found in list of experiments.\n");
+        }
+        
+        push(@exps, @newexp);
+      }             
+      next;
+    }
+
+    # Generate lists of experiments
+
+    foreach my $exp (@exps) {
+      PrintVerbose("$exp -> $_\n");
+      
+      push @{$bms->{$exp}}, $_;
+    }
+  }
+
+  close BMFL;
+}
+
+sub setup_tlist_run {
+    my ($builddir, $model_name, $trace, $rundir, $input) = @_;
+    my $trace_name = basename($trace);
+    
+    my $modelBinary = $builddir . "/" . $model_name;
+    if (! -f $modelBinary) {
+	PrintError("Unable to resolve model binary ($modelBinary) for trace : $trace_name.\n");
+	return 1;
+    }
+
+    if (! mkdir "$rundir") {
+	PrintError("Unable to create directory $rundir.\n",
+		   "Skipping execution of trace : $trace_name.\n");
+	return 1;
+    }
+    if (!(open(RUNFILE, ">$rundir/run"))) {
+	PrintError("Cannot create run file for trace : $trace_name.\n");
+	return 1;
+    }
+    if (!(open(AWBCMDS, ">$rundir/awbcmds"))) {
+	PrintError("Cannot create awbcmds file for trace : $trace_name.\n");
+	return 1;
+    }
+    # write the cmds file
+    print AWBCMDS "AwbStats dumponexit $trace_name.stats\n";
+    print AWBCMDS "AwbStats on\n";
+    print AWBCMDS "AwbRun inst -1\n";
+    print AWBCMDS "AwbExit\n";
+    close AWBCMDS;
+    
+    # write the run file
+    my $runtimepath = Asim::Bindir();
+    my $feederArgs = "-t $trace ";
+    if (${$input} =~ (s/\s*(nthreads)\s*=\s*(\d+)\s*/ /)) {
+	my $nthreads = $2;
+	while ($nthreads > 1) {
+	    $feederArgs .= " -t $trace ";
+	    $nthreads--;
+	}
+    }
+    print RUNFILE "#!/bin/sh\n";
+    print RUNFILE "PATH=$runtimepath:\$PATH\n";
+#    print RUNFILE "$modelBinary " . " -param stats=$trace_name.stats " . '${1+$@}' . " --feeder $feederArgs --system\n";
+    print RUNFILE "$modelBinary " . " -cf awbcmds " . '${1+$@}' . " --feeder $feederArgs --system\n";
+    close RUNFILE;
+
+    if (! chmod 0755, "$rundir/run") {
+	PrintError("Cannot set permissions for trace ($trace_name) runfile.\n");
+	return 1;
+    }
+    return 0;
+}
+
+sub parse_tlist_file {
+    my ($file) = shift;
+    my @traces;
+    
+    PrintVerbose("Parsing tlist file : $file\n");
+    open (TLIST, "<$file") || die "Unable to open tlist file $file.\n";
+    while (<TLIST>) {
+	# Skip comments and blanks
+	next if ( m/^\#/ || m/^\s*$/);
+	chomp;
+	push(@traces, $_);
+    }
+    close TLIST;
+    return @traces;
+}
+
+
+##
+## Sets an environment variable. 
+##
+sub PutEnv {
+  local($name, $value) = @_;
+  $ENV{$name} = $value;
+#  print( "$name = $ENV{"$name"} \n" );
+}
+
+##
+## Changes relative paths to absolute paths. 
+## Returns null file name if it can't figure out the path. 
+##
+sub FullPath {
+  my ($filename) = shift;
+  my ($dirname, $basename);
+
+  print "Resolving full path for: $filename\n" if $debug;
+
+  if ( $filename =~ /\$AWBLOCAL/ )
+  {
+    my $prefix = $ENV{AWBLOCAL};
+    $filename =~ s/\$AWBLOCAL/$prefix/;
+  }
+
+  # Resolve filename
+  # If it's a relative path, this attaches the full path to the filename. 
+  # It also expands ~.
+  $filename = `$AWB_RESOLVER -q $filename` || return $filename;
+  chomp ($filename);
+  $basename = basename ($filename);
+  $dirname = realpath (dirname($filename));
+  return ($dirname . "/" . $basename);
+}
+
+
+##
+## Submit a batch job
+##
+sub SubmitJob {
+  my $command = shift;
+  my $modelSubmit = shift;
+
+  if (! $runbatch) {
+    # Run command directly...
+    if (RunCommand($command)) {
+      # There was an error running the command
+      PrintError("Failure running command: $command\n");
+      return 1;
+    }
+    return 0;
+  }
+  
+  # Do batch submission after making sure we can schedule job.  Whenever the 
+  # routine returns, we can schedule a job. 
+  ScheduleJob();
+
+  if (defined $modelSubmit && $modelSubmit) {
+#	print "command is $BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags $command"; 
+      if ( RunCommand ("$BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
+	  # There was an error in the submission.      
+	  PrintError("Unable to finish command; $command\n",
+		     "Netbatch returned error.\n",
+		     "Failed Model build.\n");
+	  return 1;
+      }
+  }
+  else {
+      if (RunCommand("$BATCH_SUBMIT_COMMAND -J $resdir/$name/ADMIN/$bm_name.asimlog $batch_flags $command > $resdir/$name/$bm_name.SUBMITTED")) {
+	  # There was an error in the submission.
+	  PrintError("Unable to submit command; $command\n",
+		     "Netbatch returned error.\n");
+	  
+	  CleanupQueueProblems();
+	  return 1;
+      }
+      else {
+	  if (! $buildbatch) {
+	      system ("cat $resdir/$name/$bm_name.SUBMITTED");
+	  }
+	  PrintInfo("........ Queued up benchmark: $bm_name\n");
+      }
+  }
+  return 0;
+}
+
+##
+## Scheduler that makes sure user doesn't take over batch queues
+##
+sub ScheduleJob {
+
+  # If the current user is ASIM1, then don't limit the number of jobs it can submit. 
+  my $user = $ENV{USER} || "UNKNOWN_USER";
+  my $unrestricted = grep /^${user}$/, @UNRESTRICTED_USERS;
+  if ($unrestricted)
+  {
+    return;
+  }
+  
+  # If there are no restricted pools, then return. 
+  if ( scalar(@RESTRICTED_POOLS) == 0 ) {
+    return;
+  }
+
+  # If there are no restricted queue slots, then return. 
+  if ( scalar(@RESTRICTED_QSLOTS) == 0 ) {
+    return;
+  }
+
+  #
+  # Determine the current pool
+  #
+  if ( $CURRENT_POOL eq "") {
+    if (defined $pool) {
+      $CURRENT_POOL = $pool;
+    }
+    elsif (defined $ENV{NBPOOL}) {
+      $CURRENT_POOL = $ENV{NBPOOL};
+    }
+    else {
+      # Determine default pool using netbatch command.
+      RunCommand ("$BATCH_STATUS_COMMAND -w > $TMP_DIR/pool.$$");
+      open (POOL_FILE, "< $TMP_DIR/pool.$$");
+      while (<POOL_FILE>) {
+        if ( /NetBatch\s*QUEUE\s*status\s*-\s*pool\s*(\S+)\s*$/ ) {
+          $CURRENT_POOL = $1;
+          last;
+        }
+      }
+      # Cleanup
+      close (POOL_FILE);
+      RunCommand ("rm $TMP_DIR/pool.$$");
+    }
+  }
+
+  #
+  # Determine the current QSLOT
+  #
+  if ($CURRENT_QSLOT eq "") {
+    if (defined $queue) {
+      $CURRENT_QSLOT = $queue;
+    }
+    elsif (defined $ENV{NBQSLOT}) {
+      $CURRENT_QSLOT = $ENV{NBQSLOT};
+    }
+    else {
+      # It's difficult to determine the default qslot.  THerefore, just print warning and 
+      # return 
+      PrintWarning("Unable to determine default qslot because no -queue specified, and no environment variable NBQSLOT defined.\n");
+      PrintWarning("Cannot apply ASIM scheduler restrictions. ");
+      return;
+    }
+  }
+
+  
+  # If the current pool is not restricted, then return. 
+  my $restricted = grep /^$CURRENT_POOL$/, @RESTRICTED_POOLS;
+  if ( ! $restricted ) {
+    return;
+  }
+
+  # If the current queue slot is not restricted, then return. 
+  $restricted = grep /^$CURRENT_QSLOT$/, @RESTRICTED_QSLOTS;
+  if ( ! $restricted ) {
+    return;
+  }
+
+  #
+  # Algorithm for scheduling jobs
+  # Schedule if:
+  # a.) User has less than $MAX_WAITING_JOBS waiting jobs in queue 
+  # b.) Total ASIM jobs running is less than $MAX_ASIM_JOBS
+  # c.) If the number of jobs owned by user is > MAX_RUNNING_JOBS, then
+  #     user can submit at most $MAX_JOBS_PER_PERIOD jobs before going 
+  #     to sleep.
+  #
+
+  # Else, loop until we can submit another jobs 
+  while (1) {
+    #
+    # Check for waiting jobs
+    #
+    my $num_waiting = 0;
+
+    # nbqstat will report jobs with either the hierarchical name (using the -n argument)
+    # or the numerical slot name.  Depending on which format your asimrc file uses,
+    # we need to check BOTH formats to make sure we really know how many waiting
+    # jobs you have.
+    RunCommand ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -w -n > $TMP_DIR/wait.$$");
+    RunCommand ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -w >> $TMP_DIR/wait.$$");
+    open (WAIT_JOBS, "<$TMP_DIR/wait.$$");
+    while (<WAIT_JOBS>) {
+      chomp;
+      if ( /\s+$CURRENT_QSLOT\s+$user\s+/ ) {
+        $num_waiting++;
+      }
+    }
+    close (WAIT_JOBS);
+    RunCommand ("rm $TMP_DIR/wait.$$");
+    PrintInfo(".... Waiting Jobs for $user: $num_waiting\n");
+    
+    #
+    # Check for running jobs submitted by user.  
+    #
+    my $num_user_running = 0;
+    my $num_total_running = 0;
+    RunCommand ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -r -j > $TMP_DIR/run.$$");
+    open (RUN_JOBS, "<$TMP_DIR/run.$$");
+    while (<RUN_JOBS>) {
+      chomp;
+      if ( /[\S]+.asimlog/ ) {
+        $num_total_running++;
+        if ( /$user[\s\S]+.asimlog/ ) {
+          #        print "ASIM JOB: $_\n";
+          $num_user_running++;
+        }
+      }
+    }
+    close (RUN_JOBS);
+    RunCommand ("rm $TMP_DIR/run.$$");
+    PrintInfo(".... Running Jobs for $user: $num_user_running\n");
+    PrintInfo(".... Running Jobs for ASIM users: $num_total_running\n");
+
+    my $sleep = 0;
+
+    if ($num_waiting > $MAX_WAITING_JOBS) {
+      #
+      # Exceeding limit.... go to sleep.
+      #
+      PrintInfo("........ Number of waiting jobs ($num_waiting) exceeds limit ($MAX_WAITING_JOBS)");
+      $sleep = 1;
+    }
+
+    if ( $num_total_running > $MAX_ASIM_JOBS ) {
+      #
+      # Exceeding limit.... go to sleep.
+      #
+      PrintInfo("........ Number of running ASIM jobs ($num_total_running) exceeds $MAX_ASIM_JOBS.\n");
+      $sleep = 1;
+    }
+    
+    # If we've exceeded a given limit, then slow injection down. 
+    if (($num_user_running > $MAX_RUNNING_JOBS) && 
+        ($JOBS_SUBMITTED_CURRENT_CYCLE > $MAX_JOBS_PER_PERIOD)) {
+      #
+      # Exceeding limit.... go to sleep.
+      #
+      PrintInfo("........ Number of running ASIM jobs ($num_user_running) exceeds fast injection limit ($MAX_RUNNING_JOBS)");
+      PrintInfo("........ Only $MAX_JOBS_PER_PERIOD can be submitted at any time once this limit is reached.\n");
+      $sleep = 1;
+    }
+    
+    if ($sleep == 1)
+    {
+      SleepSamplePeriod();
+      $JOBS_SUBMITTED_CURRENT_CYCLE = 0;
+    }
+    else
+    {
+      # Schedule job
+      $JOBS_SUBMITTED_CURRENT_CYCLE++;
+      return;
+    }
+  }
+}
+  
+##
+## Cleansup if netbatch was unable to run. 
+##
+sub SleepSamplePeriod()
+{
+    my $time_stamp = `date`;
+    my $duration = rand;
+    $duration = $MIN_SAMPLE_PERIOD + int($duration * 1200);
+	
+    chomp($time_stamp);
+    PrintInfo("\t\t$time_stamp: Going to sleep for $duration seconds\n");
+    RunCommand("sleep $duration");
+    return;
+}
+
+##
+## Cleansup if netbatch was unable to run. 
+##
+sub CleanupQueueProblems {
+    system ("rm -f $resdir/$name/$bm_name.SUBMITTED");
+}
+
+##
+## Clear unneeded sideeffects of a successful batch model build.
+##
+sub HandleBuildSuccess {
+    my $buildroot = "$resdir/$name/BUILD";
+    if (RunCommand("rm -f $buildroot/$model_name.SUBMITTED $buildroot/.dirs > /dev/null 2>&1") || RunCommand("rm -rf $buildroot/.depend/ $buildroot/obj/ > /dev/null 2>&1")) {
+	PrintWarning(".... Unable to cleanup build files\n");
+    }
+}
+
+##
+## Handle a failed batch model build.
+##
+sub HandleBuildFailure {
+    system("touch $resdir/$name/$model_name.ERROR"); 
+}
+
+##
+## Print Routines
+##
+
+sub PrintInfo {
+  my $line = shift;
+ 
+  if (!$quiet) {
+    chomp $line;
+#    RunCommand("echo \'$line\'");
+    print "$line\n";
+  }
+  
+}
+
+sub PrintWarning {
+  my $line;
+  
+  print STDERR "###########################################################\n";
+
+  while ($line = shift) {
+    chomp $line;
+    print STDERR "WARNING: $line\n";
+  }
+  
+  print STDERR "###########################################################\n";
+}
+
+
+sub PrintError {
+  my $line;
+  
+  print STDERR "###########################################################\n";
+
+  while ($line = shift) {
+    chomp $line;
+    print STDERR "ERROR: $line\n";
+  }
+  
+  print STDERR "###########################################################\n";
+}
+
+
+sub PrintVerbose {
+  my $line = shift;
+
+  if ($verbose) {
+    chomp $line;
+#    RunCommand("echo \'$line\'");
+    print "$line\n";
+  }
+}
+
+
+##
+## Ask a question with a timeout
+##
+sub TimedQuestion {
+  my $prompt = shift;
+  my $default = shift;
+  my $timelimit = shift;
+  my $ans;
+  
+  print "The following question will time out in $timelimit seconds\n";
+  print "$prompt (default: $default) ";
+  STDOUT->flush();
+
+  $ans = ReadLine $timelimit;
+
+  if (!defined($ans) || $ans eq "") {
+    print "...defaulted to $default\n";
+    $ans = $default;
+  }
+  
+  return $ans;
+}
+
+
+##
+## Run a command or just print out what would be run
+##
+sub RunCommand {
+  my $command = shift;
+  
+  if ($dryrun) {
+    print "$command\n";
+    return 0;
+  }
+  
+  return system($command);
+}
+
+__END__
+
+=head1 NAME
+
+Asim-run - Program to run a set of asim experiments
+
+=head1 SYNOPSIS
+
+     % asim-run  
+          --experiments <experiments-file>  (AKA: models file)
+          --benchmarks <benchmarks-file>
+          [--resdir <results-directory>]
+          [--nicelevel <Number between Nicemin (usually 10) & Nicemax (usually 19)>]
+          [--execscript <Name of script to execute to simulate each benchmark>]
+          [--[no]build]
+          [--[no]replace]
+          [--compress none|no|gzip|gz|bzip2|bz2]
+          [--[no]batch]
+          [--pool <netbatch-poolname>] 
+          [--queue <netbatch-qslot-name>]
+          [--class <netbatch-classname>]
+          [--[no]limit]
+          [--[no]dryrun]
+          [--[no]quiet]
+          [--[no]verbose]
+          [--help]
+
+=head1 DESCRIPTION
+
+Asim-run is a program that provides a command line interface to run a
+set of asim models on an set of benchmarks. The user provides a file
+describing the models to run, the <experiments-file>, and another file
+with a list of benchmarks, the <benchmarks-file>. By default asim-run
+will build the required models and submit batch jobs for each
+experiment specified. The results of the runs are left in
+subdirectories of the <results-directory> specified by the user.
+
+asim-run creates a subdirectory for each performance model under the
+<result-dir> specified by the user. The name of the subdirectory is
+the name of the experiment (the first field in the experiments file).
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --experiments <experiments-file>
+
+Specifies the file containing the list of experiemnts (models with run
+parameters) to run. See format of file below.
+
+=item --benchmarks <benchmark-file>
+
+Specifies the file containing the list of benchmarks to run.
+See format of file below.
+
+=item --resdir <results-directory>
+
+Sets directory <results-directory> as the location to place results of
+experiment runs. The default is to use the current directory.
+<Results-directory> will end up populated with a number of
+subdirectories, one each for each of the experiment names specified in
+the <experiments-file>. asim-run does not create the results
+directory, and an error is returned if the directory does not exist.
+
+=item --nicelevel <Number between Nicemin (usually 10) & Nicemax (usually 19)>
+
+Runs the netbatch job using the nicelevel specified. The default is to
+use the nice level set by netbatch which is usually 10. The specified
+nice level has to be between the values NICEMIN (default 10) and NICEMAX
+(default 19). These NICEMIN & NICEMAX variables can be reset in the asimrc
+file. 
+
+=item --execscript <Name of script to execute to simulate each benchmark>
+
+Name of script to run when simulating an ASIM model using a benchmark. 
+The default of "run" is currently hard coded.  When a benchmark is 
+setup, it creates a shell script called "run" which is used to 
+execute the benchmark on a given model.  In general, there should 
+be no reason to change the default.  
+
+=item --[no]build
+
+Specifies whether the models are to be built or (with the [no] prefix)
+that they are already built. Default is to build all models.
+
+=item --[no]replace
+
+Specifies whether asim-run is allowed to overwrite any previous stats
+files or not. Using --noreplace is useful for restarting incompleted
+runs without the overhead of rerunning jobs that completed
+successfully, since experiments that already have stats files will not
+be run. Note that when --replace is specified, existing stats files
+are removed prior to submission of the new job. Default is NOT to
+replace any existing stats files.
+
+=item --compress none|no|gzip|gz|bzip2|bz2 
+
+Specifies compression for stats files. Default is NO compression.
+
+=item --[no]batch
+
+Specifies whether model runs should be submitted to the batch queue or
+(with the [no] prefix) to run them interatively at the user's terminal.
+Default is to run the jobs on the batch queue.
+
+=item --pool <netbatch-poolname>
+
+Specifies the name of the netbatch pool to use. Default is to use the
+netbatch default pool as specified either by the netbatch installation
+or by the NB_POOL environment variable.
+
+=item --queue <netbatch-qslotname>
+
+Specifies the name of the netbatch queue slot to use. Default is to 
+use the netbatch default queue slot. 
+
+=item --class <netbatch-classname>
+
+Specifies the name of the netbatch class to use. Default is to use the
+netbatch default class. 
+
+=item --[no]dryrun
+
+Specifies that asim-run should just print out the commands it would
+execute, but not actually execute them. The output of a --dryrun can
+be piped to a file and run as a Bourne shell script. The [no] prefix
+reverses the sense of the command.
+
+=item --[no]limit
+
+Under --limit a reasonable limit on the maximum number of jobs is
+enforced. With --nolimit any number of jobs can be run. The default to
+TO limit the number of jobs that will be run.
+
+=item --[no]quiet
+
+Specifies that asim-run should print out a minimal amount of
+information as it runs. The [no] prefix reverses the
+sense of the command. Default is NOT to be quiet.
+
+=item --[no]verbose
+
+Specified that extra information should be printed. The [no] prefix
+reverses the sense of the command. Default is NOT to be verbose.
+
+
+=item --help
+
+Get this help information.
+
+=back
+
+=head1 FILE FORMATS
+
+=head2 EXPERIMENTS FILE
+
+The experiments file consists of a file with one experiment per line
+with the following format:
+
+    <experiment-name> <model> [<model-parameters>...]
+
+where <experiment-name> is a character string that specifies that name
+of the directory where the experiment results are to be placed.
+<Model> is a full or relative (to the asim search path) filename of
+the model (.apm) file. And <model-parameters> are the command line
+switches to be passed to the run of the model. Usually these will be
+dynamic model parameters.
+
+For example:
+
+    #
+    # Experiment 1
+    #
+    pipe1                                      \
+    config/pm/pipeline/pipeline.apm            \
+    -param FORWARD_LATENCY=10                  \
+    -param BACKWARD_LATENCY=2
+    #
+    # Experiment 2
+    #
+    pipe2                                      \
+    config/pm/pipeline/pipeline.apm            \
+    -param FORWARD_LATENCY=20                  \
+    -param BACKWARD_LATENCY=2
+
+Note that lines can be commented with sharp signs (#) or
+extended to multiple lines with backslash (\).
+
+
+Experiments files also allow one to specify a range of parameters to
+create a set of experiments. Ranges are created when a switch in the
+experiment command line contains a token of one of the following
+forms:
+
+=over 4
+
+=item 1)
+
+<variable>=[<int1>;<int2>;<int3>] - in this case a set
+of experiments are created where <variable> is assigned
+values <int1>, <int1>+<int3>, <int1>+2*<int3> ... for all
+values less than <int2>
+
+
+=item 2)
+
+<variable>=[<val1>,<val2>,...<valn>] - in this case a
+set of experiments are created where <variable> is
+successively assigned values <val1>, <val2>, ... <valn>.
+
+=back
+
+To create unique experiment names, the <experiment-name> in
+such lines should contain a token of the form ${<variable>}.
+
+If ranges are specified for multiple parameters, a cross
+product of experiments is created.
+
+For example, if one uses the following experiments file:
+    #
+    # Experiment 1
+    #
+    pipe_${FORWARD_LATENCY}_${BACKWARD_LATENCY}        \
+    config/pm/pipeline/pipeline.apm                    \
+    -param FORWARD_LATENCY=[1;3;1]                     \
+    -param BACKWARD_LATENCY=[2,4]
+
+Then the following experiments will be created
+
+    pipe_1_2 ... -param FORWARD_LATENCY=1 -param BACKWARD_LATENCY=2
+    pipe_1_4 ... -param FORWARD_LATENCY=1 -param BACKWARD_LATENCY=4
+    pipe_2_2 ... -param FORWARD_LATENCY=2 -param BACKWARD_LATENCY=2
+    pipe_2_4 ... -param FORWARD_LATENCY=2 -param BACKWARD_LATENCY=4
+    pipe_3_2 ... -param FORWARD_LATENCY=3 -param BACKWARD_LATENCY=2
+    pipe_3_4 ... -param FORWARD_LATENCY=3 -param BACKWARD_LATENCY=4
+
+=head2 BENCHMARK FILE
+
+The benchmark file contains a list of benchmarks to run
+in the following format:
+
+    [experiments = <experiment> [<experiment>...]]
+    <benchmark-config> 
+    [<benchmark-config>...]
+
+
+where, <benchmark-conf> is the full or relative (to the asim search
+path) file name of a benchmark configuration (.cfg) file. The optional
+list of <experiment>s will restrict a benchmark to be run only on the
+given experiments. The experiment can be specified as a full
+experiment name or as a Perl regular expression inside slashes (/).
+
+For example:
+
+A simple file to run a set of two benchmarks:
+
+     config/bm/traces/gtrace/mcf.cfg
+     config/bm/traces/gtrace/bzip2.cfg
+
+
+A more complex file that runs two benchmarks on one file and one other
+benchmark on another file.
+
+     experiments = tanglewood_gtrace
+     config/bm/traces/gtrace/mcf.cfg
+     config/bm/traces/gtrace/bzip2.cfg
+     experiments = tanglewood_softsdv
+     config/bm/traces/softsdv/linux_1p_256m.cfg
+
+
+
+=head1 EXAMPLES
+
+To run two models on two benchmarks, one can use the following files:
+
+     tanglewood.exp:
+
+     tanglewood  config/pm/twd/twd.apm 
+     tanglewood2 config/pm/twd/twd2.apm 
+
+     spec.bms:
+
+     config/bm/traces/gtrace/mcf.cfg
+     config/bm/traces/gtrace/bzip2.cfg
+     
+
+    % asim-run --experiments=tanglwood.exp --benchmarks=spec.bms 
+
+
+The results will be a directory tree like the following:
+
+    .
+    |-- tanglewood.exp
+    |-- spec.bms
+    |-- tanglewood
+    |   |-- ADMIN
+    |   |   |-- bzip2.asimlog
+    |   |   `-- mcf.asimlog
+    |   |-- RUN
+    |   |-- mcf.stats
+    |   `-- bzip2.stats
+    `-- tanglewood2
+        |-- ADMIN
+        |   |-- bzip2.asimlog
+        |   `-- mcf.asimlog
+        |-- RUN
+        |   `-- bzip2
+        |       |-- awbcmds
+        |       |-- run
+        |       `-- stats.xml
+        |-- mcf.stats
+        `-- bzip2.ERROR
+
+Note, we've illustrated a case where the tanglewood2 run of bzip2
+resulted in an error. In this case, a .ERROR file will be left in the
+experiments directory, and the RUN directory will contain the files
+that were being used to run the benchmark.
+
+
+Additional examples can be found in the docbook documentation.
+
+=head1 OPERATION
+
+A description of the operation of asim-run can be found in the docbook
+documentation.
+
+
+=head1 ENVIRONMENT VARIABLES
+
+ASIMRUNOPT - contains additional command line switches.
+
+=head1 BUGS
+
+Control of compression should probably be under the control of the
+model itself not this program.
+
+This documentation lives in two places in two formats: docbook in the
+main documentation and perl pod in the tools itself. These need to be
+kept in sync!
+
+=head1 AUTHORS
+
+Srilatha Manne and Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Intel Corporation 2003               *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

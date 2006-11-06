@@ -1,0 +1,146 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+###############################################################
+#
+# asim-admin - Run an asim administrative tool
+#
+# Description:
+#     This script acts as a wrapper around the set of 
+#     asim administrative scripts so we only need one
+#     public script instead of many.
+#
+# Authors:
+#     Joel Emer
+# 
+###############################################################
+#
+# Map command names to actual tools and short description
+#
+%tool = (
+  "branch"              => "tools/asimbranch",
+  "check"               => "tools/asimcheck.pl",
+  "checkout"            => "tools/asimcheckout.pl",
+  "changes"             => "tools/asimchanges",
+  "commit"              => "tools/asimcommit",
+  "echo"                => "/bin/echo",
+  "merge"               => "tools/asimmerge",
+);
+
+%tooldesc = (
+  "branch"              => "Create a CVS branch",
+  "check"               => "Check if a performance model and needed packages are consistent",
+  "checkout"            => "Check out an ASIM package",
+  "commit"              => "Commit changes",
+  "merge"               => "Merge branch with mainline",
+);
+
+#
+# Make sure we at least have a command name
+#
+if ( $#ARGV < 0) {
+  Usage();
+  exit 1;
+}
+
+#
+# Find the resolver
+#
+$RESOLVER = "awb-resolver";
+
+chomp ($msg = `$RESOLVER .`);
+if ($? != 0) {
+  die "Can't find $RESOLVER - check your PATH environemt variable\n$msg\n";
+}
+
+
+#
+# Extract command name and rest of arguments
+#
+$cmd = $ARGV[0];
+if ( ! defined $tool{$cmd} ) {
+  Usage();
+  exit 1;
+}
+shift @ARGV;
+
+#
+# Run the appropriate tool
+#
+$prog = $tool{$cmd};
+$runme = `$RESOLVER -q $prog`;
+chomp $runme;
+if ( $? != 0 || $runme eq "" ) {
+  die "Can't find tool ($prog) to run comamnd \"$cmd\"\n";
+} else {
+  $,=" ";
+  $cmd = "$runme";
+  foreach $arg (@ARGV) {
+    $arg =~ s/"/\\"/g;     # escape existing double quotes
+    $cmd .= ' "'.$arg.'"'; # put each arg under its own quote to
+    # prevent args with spaces getting split
+  }
+
+  #print "executing $cmd\n";
+  exec $cmd;
+}
+
+exit 0;
+
+
+
+
+
+
+################################################################
+# Subroutines....Subroutines....Subroutines....Subroutines....
+################################################################
+
+sub Usage {
+  print STDERR <<"END";
+
+Usage:
+
+  asim-admin <asim-admin-command> [<command-specific-arguments>]
+
+  Commands:
+
+END
+
+print scalar(@tooldesc);
+
+foreach $i (sort keys %tooldesc) {
+    print STDERR "    $i \t- $tooldesc{$i}\n";
+}
+
+  print STDERR <<"END";
+
+  For help on an individual command try:
+
+       asim-admin <asim-admin-command> --help
+
+END
+
+}
+

@@ -1,0 +1,1011 @@
+:
+eval 'exec perl "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# Author:  Roger Espasa, Artur Klauser
+#
+
+use File::Basename;
+
+$RESOLVER = "awb-resolver";
+chomp ($msg = `$RESOLVER .`);
+if ($? != 0) {
+  die "Can't find $RESOLVER - check your PATH environemt variable\n$msg\n";
+}
+
+# add a few directories to perl searchpath:
+#   include path where this script is found
+$path = $0;
+$path =~ s/^[^\/]*$/./;
+$path =~ s/\/[^\/]*$//;
+unshift @INC, $path;
+#   include wherever resolver tells you asimtools.pl lives in
+chomp ($dir = `$RESOLVER tools/asimtools.pl`);
+if ($? == 0) {
+  # OK, resolver has found it
+  $dir = dirname $dir;
+  unshift @INC, $dir;
+}
+
+# Include helper files
+require "asimtools.pl";
+
+
+$| = 1;
+$VERBOSE = 1;
+
+$NUM_RETRY = 5; # command retries for cvs
+
+$SIG{'INT'} = \&user_abort;
+
+
+print <<"EofWarning";
++--------------------------------------------------------------------+
+|                                                                    |
+|                                                                    |
+| WARNING:: The use of asimcommit is now being discouraged.          |
+|                                                                    |
+|                                                                    |
+| Please try to use asim-shell instead.                              |
+|                                                                    |
+|                                                                    |
++--------------------------------------------------------------------+
+EofWarning
+
+$proceed = getinput("Are you sure you want to use asimcommit?","n");
+if ( $proceed eq "n" || $proceed eq "no" ) {
+  exit 0;
+}
+
+
+print <<"EofIntro";
++--------------------------------------------------------------------+
+|                                                                    |
+|                                                                    |
+| Welcome to the ASIM Commit Procedure !!                            |
+|                                                                    |
+|                                                                    |
+| Remember that this commit works from the top-level ASIM directory. |
+| You can not check in partial subtrees...                           |
+|                                                                    |
+|                                                                    |
++--------------------------------------------------------------------+
+EofIntro
+
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## General Variables: You might need to change this when porting to
+ ##         a different environment
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+init_tools();
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## Directory Checking...
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ #
+ # There are multiple places where you can find a pointer to the top
+ # level asim directory:
+ #  1- The most obvious is `pwd`, i.e., the directory where we are running
+ #  2- Also, the user can have the ASIMDIR variable set in the environment
+ #  3- Finally, the user can have a awb.config file located either in
+ #      3a- his home directory under .awb/ , or
+ #      3b- the directory pointed to by $ENV{'AWBLOCAL'}
+ #
+ # Here we collect all these different sources of information and try
+ # to see if they are coherent or not. We keep an array of different 
+ # directories and at the end, if we end up with more than one directory
+ # we ask the user which one to use
+ #
+ @ASIMDIRS = ();
+ @FROM = ();
+
+ # (1) Current directory
+ $dir = `pwd`;
+ $dir =~ s/asim\/.*/asim/;
+ chop $dir;
+ push(@ASIMDIRS, $dir);		
+ push(@FROM, "<current dir>");		
+
+ # (2) Environment ASIMDIR
+# r2r: this is not supported in AWB anywhere - I checked;
+# commenting out
+# $dir = $ENV{'ASIMDIR'};
+# if ( -d $dir && !grep(/$dir/,@ASIMDIRS)) {
+#  push (@ASIMDIRS, $dir);
+#  push(@FROM,"\$ASIMDIR"); 
+# }
+
+ # (3) AWBCONFIG
+ chomp ($dir = `$RESOLVER -config asimdir`);
+ if ($? != 0) {
+   die "ERROR:\n$dir\n";
+ }
+ if ( -d $dir && !grep(/$dir/,@ASIMDIRS)) {
+  push(@ASIMDIRS, $dir);
+  push(@FROM,"AWB config file"); 
+ }
+
+ # 
+ # If we collected multipled dirs during steps (1), (2) and (3), warn the user and ask
+ # him which one he wants to use. If we only have one option, just use $index to index
+ # the ASIMDIRS array.
+ #
+ $index = 0;
+ if ( $#ASIMDIRS > 0 ) {
+  print "\n\n";
+  print "I've found multiple choices of ASIM directories to commit.\n";
+  print "Which one of the following do you want to commit from: ?\n";
+  for ($i = 0; $i <= $#ASIMDIRS; $i++ ) {
+   $idx = $i+1;
+   print "\t($idx) $ASIMDIRS[$i] (from $FROM[$i])\n";
+  }
+
+  #
+  # Ask User
+  #
+  $index = getinput("Pick a number","1");
+  $index--; 
+  if ( $index < 0 || $index > $#ASIMDIRS ) {
+   die "Wrong choice.\n";
+  }
+ }
+ $ASIMDIR = $ASIMDIRS[$index];
+
+
+ #
+ # Finally, change dir to place where we have the source code
+ # to be committed
+ #
+ print "Changing dir to $ASIMDIR\n";
+ -d $ASIMDIR || die "Directory $ASIMDIR does not exist\n";
+ chdir $ASIMDIR;
+
+ #
+ # Check for a GOLD STATS directory in ASIMDIR
+ #
+ $GOLDSTATS = "$ASIMDIR/regtest/gold";
+ -d $GOLDSTATS || die "Directory $GOLDSTATS does not exist\n";
+
+ #
+ # Check for a /tmp directory
+ #
+ $TMPDIR = $ENV{'TMPDIR'};
+ if ( !-d $TMPDIR ) {
+  $TMPDIR = "/tmp"
+ }
+ if ( ! -d $TMPDIR ) {
+  die "Sorry: \$TMPDIR is not set and /tmp does not exist\n";
+ }
+
+
+ #
+ # Check for EDITOR
+ #
+ $EDITOR = $ENV{'EDITOR'};
+ if ( ! $EDITOR ) {
+  die "Please, set your \$EDITOR variable properly\n";
+ }
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 0: Set locks on the CVSROOT so no one else can execute 
+ ##          'asimcommit'. (Note that this does not prevent people from 
+ ##          running 'cvs commit' directly... But let's hope that this 
+ ##          does not happen at all. 
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+lock_repository('asim-pm');
+
+$csn = get_csn ('asim-pm');
+
+$prev_sn = $csn;
+$our_sn  = $csn + 1;
+
+
+print <<"EofStart";
++--------------------------------------------------------------------+
+|                                                                    |
+|                                                                    |
+|                                                                    |
+| Starting Commit Sequence... (Commit Serial Number $our_sn)         |
+|                                                                    |
+| Remember that this commit works from the top-level ASIM directory. |
+| You can not check in partial subtrees...                           |
+|                                                                    |
+|                                                                    |
++--------------------------------------------------------------------+
+EofStart
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 0b: Remind the user (Eric :-)) to copy his new STATS into the 
+ ##           source tree. We need to do this early on because, otherwise,
+ ##           the new stat files would not show up in the 'changes' file.
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ #
+ # Ask the user whether he has copied his new stats into the gold directory. If not,
+ # he might want us to do it for him. Because the user might still abort the commit
+ # at some later point, we have to be careful and keep a copy around of the old stats
+ # (rather, remember to check them out from the repository if the user aborts)
+ #
+ $new_goldstats = 0;
+ print "\n";
+ print "Before we proceed, do you have new STATS that you should copy into the gold/ \n";
+ print "directory ? If you forgot to do so, just answer 'y' and I will do it for you. If\n";
+ print "you have already done it, you can simply reply 'n'.\n";
+ $proceed = getinput("Copy stats ?","y");
+ if ( $proceed eq "y" || $proceed eq "yes" ) {
+  
+  #
+  # Get a path to the REGRESSION DIR
+  #
+  print "Okay... I need a path to your regression test (give me the path of the \n";
+  print "REGRESSION test directory, NOT the path of the STATS directory).\n";
+  print "Path ?: ";
+  $REGRESSIONDIR = read_path();
+  if ( ! -d $REGRESSIONDIR ) { cleanup_and_exit("Aborting: '$REGRESSIONDIR' is not a directory: $!\n"); }
+
+  #
+  # Copy the STATS
+  #
+  $new_goldstats = 1;
+  $ok = system("cp -f $REGRESSIONDIR/STATS/*.stats.gz $GOLDSTATS");
+  if ( $ok != 0 ) {
+   cleanup_and_exit("Unexpected error when copying the STATS directory into the GOLD directory: $!\n");
+  }
+ }
+
+
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 1: Execute CVS status to check that the user is up-to-date 
+ ##          with  the repository
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ #
+ # Execute 'cvs status' to see all the changes that have been made.
+ #
+ open(CVS,"cvs status 2>&1|") || cleanup_and_exit("can't launch 'cvs status': $!\n");
+
+ #
+ # Create a temporary file that will hold the status report
+ #
+ $tmpfile = "$TMPDIR/asimcommit.$$.txt";
+ open(TMP,"> $tmpfile") || cleanup_and_exit("can't open $tmpfile: $!\n");
+
+ @DANGEROUS_DIRS = (  
+		    "base",
+		    "feeders",
+		    "pm"
+		   );
+ $must_have_regression = 0;
+
+ #
+ # Parse the CVS status while enforcing the following rules:
+ #
+ #  a. No file is in the "Needs Patch" State 
+ #  b. No file is in the "Needs Checkout" State
+ #  c. If any file modified happens to be in a directory that matches the
+ #     array DANGEROUS_DIRS, then the user WILL be required to provide (:-))
+ #     a regression test to perform this commit.
+ #
+ print "1. Checking the status of your source...\n";
+ $fail = 0;
+ while ( <CVS> ) {
+
+  #print "cvs status returned: $_" if ( $VERBOSE );
+  #
+  # Bobbie seems to always get a CVS status 'abort' :-) So we better take care of it
+  #
+  if ( /abort/ ) {
+   cleanup_and_exit("Error: 'cvs status' failed on $ASIMDIR!\nSorry, commiting is not possible\n");
+  }
+  
+  # Get current directory
+  if ( /Examining (.*)/ ) {
+   $curdir = $1;
+   $curdir_printed = 0;
+   ######print "Checking $curdir\n";
+  }
+
+  # Get current file name and its status
+  if ( /File: (no file\s*)?(.*)\s+Status: (.*)/ ) {
+   $file = $2;
+   $status = $3;
+   $file =~ s/\s+$//;
+  }
+
+  # Get Working revision
+  if ( /Working revision:\s+([\d\.]+)\s+(.*)/ ) {
+   $workrev = $1;
+   $workdate = $2;
+  }
+
+  # Get Repository revision
+  if ( /Repository revision:\s+([\d\.]+)\s/ ) {
+   $reprev = $1;
+  }
+
+  #
+  # Change this to 1 if you want the really strict version of the checks
+  #
+  $STRICT_CHECK = 0;
+
+  #
+  # All information read when we get to 'Sticky Options'.
+  # Start enforcing checks
+  #
+  if ( /Sticky Options/ ) {
+   #
+   # Enforce that no file has a wrong state
+   #
+   if ( $status =~ /Needs Patch/ || $status =~ /Needs Checkout/ || ($STRICT_CHECK == 1 && $status =~ /onflict/) ) {
+    print "File: $curdir/$file has unacceptable state \"$status\"\n";
+    $fail = 1;
+   }
+   #
+   # If file is ok, then dump it to temproary file only if it
+   # is NOT already up-to-date
+   elsif ( ! ($status =~ /Up-to-date/) ) {
+    print TMP "\nDirectory $curdir\n" if ( !$curdir_printed );
+    $curdir_printed = 1;
+    printf TMP " %-25s %-20s %8s %s\n", $file, $status, $reprev, $workdate;
+
+    #
+    # Is this file in a dangerous directory ?
+    #
+    $tdir = $curdir;
+    ###print "Is file $file in dir $tdir dangerous?\n";
+    if ( $tdir ne "." && partial_match($tdir,\@DANGEROUS_DIRS) ) {
+     $must_have_regression = 1;
+     print "Changes in $tdir/$file can only be committed if validated by regression test\n";
+    }
+   }
+  }
+ }
+
+ if ( $fail ) {
+  print "\n";
+  print "Sorry, one or more files are not up-to-date with respect to the\n";
+  print "repository. Before commiting your code, you must:\n";
+  print "\n";
+  print "(1) run 'cvs update -Pd'\n";
+  print "(2) merge your changes\n";
+  print "(3) run the regression test\n\n";
+  cleanup_and_exit("");
+ }
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 2: Run the regression test
+ ##          - Build both Aint/Atf
+ ##          - Run as fast as possible some sort of regression that
+ ##            proves the thing works. The current decision is to
+ ##            run: Level R
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ chomp ($REGTESTBIN = `$RESOLVER tools/regtest.pl`);
+ if ($? != 0) {
+   die "ERROR:\n$REGTESTBIN\n";
+ }
+ ###@REGTESTRUN = ( "-level R -rparams 1" );
+ @REGTESTRUN = ( );
+
+ ##print "2. Running regression test to check AINT and ATF...\n";
+
+ foreach $run ( @REGTESTRUN ) {
+  $ok = system("$REGTESTBIN $run");
+  if ( $ok != 0 ) {
+   cleanup_and_exit("Regression test failed! Sorry, commiting is not possible\n");
+  }
+ }
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 3: Ask the user where is his regression test. With the regression
+ ##          test we will
+ ##
+ ##	     a.- Check that he does not have ERROR/PENDING files (if he does
+ ##              have some... aske whether he REALLY wants to proceed...
+ ##
+ ##          b.- Grep in all files to collect the IPC for all programs
+ ##              With all the IPCs, we will create a nice little table
+ ##              that will get added to the user 'change' information
+ ##
+ ##          c.- tar it completely, gzip' it and store it away with
+ ##              some known identifier
+ ##
+ ##
+ ## (this phase might be skipped... see the 'goto' below :-))
+ ##
+ #######################################################################
+ #######################################################################
+
+ #
+ # Try to avoid asking twice for the same path... Users get very picky these days :-)
+ #
+ if ( (! -d $REGRESSIONDIR) && $must_have_regression == 0 ) {
+  print "I need a path to the regression test that you used to validate\n";
+  print "this commit. Since your changes don't seem to affect the performance\n";
+  print "model, you can type <CR> and still successfully commit if you\n";
+  print "actually did not run the regression test (but don't get used to it :-))\n";
+  print "Path ?: ";
+  $REGRESSIONDIR = read_path();
+  if ( ! -d $REGRESSIONDIR ) { $has_tarfile = 0; goto PHASE4; }
+ }
+ elsif ( -d $REGRESSIONDIR && $must_have_regression == 0 ) {
+  print "Your changes don't seem to affect the performance model.\n";
+  print "Thus, you need not provide a regression test. However, you already\n";
+  print "gave me a path to your REGRESSION directory previously. Therefore,\n";
+  print "I will use that anyway.\n";
+ }
+ elsif ( (! -d $REGRESSIONDIR) && $must_have_regression == 1 ) {
+  print "I NEED a path to the regression test that you used to validate\n";
+  print "this commit.\n";
+  print "Path ?: ";
+  $REGRESSIONDIR = read_path();
+  if ( ! -d $REGRESSIONDIR ) { cleanup_and_exit("Aborting: '$REGRESSIONDIR' is not a directory: $!\n"); }
+ }
+ elsif ( -d $REGRESSIONDIR && $must_have_regression == 1 ) {
+  print "This commit MUST be validated with a regression test. Since you already gave me\n";
+  print "a path to the regression test I will be using that path.\n";
+ }
+ else {
+  cleanup_and_exit("Internal error: bug in asimcommit. Please report\n");
+ }
+
+ chdir $REGRESSIONDIR;
+
+ #
+ # Count number of files in ./ERROR ./DONE ./PENDING ./SUBMITTED
+ #
+ @dirlist = ( "ERROR", "DONE", "PENDING", "SUBMITTED" );
+ foreach $dir ( @dirlist ) {
+  @flist = glob "./$dir/*";
+  $fcount{$dir} = $#flist + 1;
+ }
+
+ #
+ # Make sure user is aware of what he is doing by asking for files that have
+ # not completed their execution fully successfully
+ #
+ if ( $fcount{'PENDING'} > 0 ) {
+  print "\nYou have $fcount{'PENDING'} PENDING benchmarks!!!!!!!.\n";
+  $proceed = getinput("Do you really want me to proceed anyway?","n");
+  conditional_exit($proceed);
+ }
+
+ if ( $fcount{'ERROR'} > 0 ) {
+  print "\nYou have $fcount{'ERROR'} benchmarks in the ERROR directory!!!!!!!.\n";
+  $proceed = getinput("Do you really want me to proceed anyway?","n");
+  conditional_exit($proceed);
+ }
+
+ $total = $fcount{'PENDING'} + $fcount{'ERROR'} + $fcount{'DONE'};
+ #### if ( $total != $fcount{'SUBMITTED'} ) {
+ ####  print "\nSomething strange happened: PENDING+ERROR+DONE ($total) != SUBMITTED ($fcount{'SUBMITTED'})!!!!!!!.\n";
+ ####  $proceed = getinput("Do you really want me to proceed anyway?","n");
+ ####  conditional_exit($proceed);
+ #### }
+
+ print TMP "\n\nRegression Summary: ";
+ print TMP "SUMBITTED $fcount{'SUBMITTED'} ";
+ print TMP "DONE $fcount{'DONE'} ";
+ print TMP "PENDING $fcount{'PENDING'} ";
+ print TMP "ERROR $fcount{'ERROR'}\n";
+
+ #
+ # Let's grep for the word IPC in the STATS directory
+ #
+ print "Searching for IPC's...\n";
+ open(IPC,"zgrep IPC STATS/* /dev/null |") || cleanup_and_exit("can't fork grep: $!\n");
+
+ while ( <IPC> ) {
+  if ( /Overall_IPC/ ) {
+   ( $file, $ipc ) = /\/(.*):.*Overall_IPC:\s+(\d+\.\d+)/;
+   $file =~ s/.stats.gz//;
+   $stats{$file}{'IPC'} = $ipc;
+  }
+ }
+ close IPC;
+
+ #
+ # Get the last commit IPC info. If doing a remote commit, make a local
+ # copy of $oipcfile
+ #
+ #Old ipchistory file location
+ #$oipcfile = "$CVSROOT/regtestlog/ipchist";
+
+ $oipcfile = "$ASIMDIR/admin/ipchist";
+ print "Retrieving IPC history from $oipcfile...\n";
+
+ #
+ # Make sure 'ipchist' is writeable
+ #
+ chmod 0644, "$oipcfile";
+
+ #
+ # First, find out which was the last CSN that provided IPC info
+ #
+ open(OIPC,"grep CSN $oipcfile |") || cleanup_and_exit("can't grep on $oipcfile: $!\n");
+ $_ = <OIPC>;
+ ( $high_sn ) = /== CSN[^\d]*(\d+)/;
+ close(OIPC);
+
+ #
+ # Reopen the file and
+ # scan until we get to the previous Commit Serial Number. Because there might be
+ # no IPC info for the last CSN, we might have to loop twice... (i.e. rescan the whole
+ # file)
+ #
+ open(OIPC,"$oipcfile") || cleanup_and_exit("can't open ipc history file $oipcfile: $!\n");
+ while ( <OIPC> ) {
+  next if ( ! /== CSN[^\d]*$high_sn/ );
+  last;
+ }
+
+ #
+ # Now get the interesting data points for each benchmark. 
+ # Note: if you want to add more stuff here (i.e., to collect PboxIPC for example),
+ #       just add extra 'matching' lines and store all the information in the 
+ #       'ostats' table
+ #
+ while ( <OIPC> ) {
+  ( $bench ) = /^((A|B|M|CMP|MICRO)-[^ ]*)/; 
+  ( $ipc   ) = /\sIPC\s+(\d+\.\d+)/;
+  $ostats{$bench}{'IPC'} = $ipc;
+ }
+
+ #
+ # Create a nice report of the evolution of IPC (and any other stats that you might
+ # want to collect) and add it to the TMP file we have been creating all along.
+ # We assume that there are a set of predefined fields that we always collect. These
+ # are defined in @statsfields
+ #
+ @statsfields = ( "IPC");
+
+ #
+ # Because 'stats' and 'ostats' might contain different benchmarks, we have to create
+ # a unique list of benchmarks to be printed out in the table
+ #
+ @jointbench = keys %ostats;
+ foreach $bench ( keys %stats ) {
+  if ( ! grep(/$bench/, @jointbench) ) {
+   push @jointbench, $bench;
+  }
+ }
+
+ #
+ # Note that we dump to the screen the large table... and we only dump to the TMP
+ # file the 'Overall IPC' line
+ #
+ printf TMP "\n\nIPC Variation Table:\n";
+ printf TMP "%-30s |%16s|%16s|%16s|\n","benchmark","CSN $high_sn", "Your Commit", "% Variation";
+ printf     "\n\nIPC Variation Table:\n";
+ printf     "%-30s |%16s|%16s|%16s|\n","benchmark","CSN $high_sn", "Your Commit", "% Variation";
+ foreach $bench ( sort @jointbench ) {
+  printf TMP "%-30s |", $bench;
+  printf     "%-30s |%16s|%16s|%16s|\n", $bench, " ", " ", " ";
+  foreach $field ( @statsfields ) {
+   if ( $ostats{$bench}{$field} > 0 && $stats{$bench}{$field} > 0 ) {
+    $variation = (100.0 * ($stats{$bench}{$field} - $ostats{$bench}{$field})) / $ostats{$bench}{$field};
+    $variation = sprintf "%4.1f", $variation;
+   }
+   elsif ( $ostats{$bench}{$field} > 0 && $stats{$bench}{$field} == 0 ) {
+    $variation = "ERROR";
+   }
+   elsif ( $ostats{$bench}{$field} == 0 && $stats{$bench}{$field} > 0 ) {
+    $variation = "NEW ENTRY";
+   }
+   else {
+    $variation = "    ";
+   }
+   $old =  $ostats{$bench}{$field} > 0 ? 
+	   sprintf "%.3f", $ostats{$bench}{$field} :
+	   "    ";
+   $new =  $stats{$bench}{$field} > 0 ? 
+	   sprintf "%.3f", $stats{$bench}{$field} :
+	   "    ";
+
+   printf TMP "     %5s      |     %5s      |    %5s       |\n", $old, $new, $variation if ( $field eq "IPC" );
+   printf     "   %10s%17s |     %5s      |     %5s      |    %5s       |\n", $field, " ", $old, $new, $variation;
+  }
+ }
+
+ $proceed = getinput("\n\nIs this variation acceptable to be commited in ?","n");
+ conditional_exit($proceed);
+
+ #
+ # Now, tar the whole directory tree starting at the regtest point the user
+ # has given us, gzip it and store it away
+ #
+ print "Taring and compressing your regtest directory...\n";
+
+ $tarfile_name = "reglog.CSN$our_sn.tar.gz";
+ $tarfile = "$CVSROOT/regtestlog/$tarfile_name";
+ $local_tarfile = "$TMPDIR/$tarfile_name";
+
+ $ok = system("$TAR cvf - . 2>/dev/null | $GZIP > $local_tarfile");
+ if ( $ok != 0 ) {
+   cleanup_and_exit("Unexpected error when taring the regtest " .
+                    "directory: $!\n");
+ }
+
+ #
+ # we dump the tar ball into an ftp incoming directory;
+ # some cron jobs will pick them up later and move them to their
+ # final resting place in $tarfile
+ #
+ my $ftp_server = "vssad.shr.intel.com"; 
+ my $ftp_user = "anonymous";
+ my $ftp_pass = "";
+ my $ftp_dir = "incoming/asim-regtestlog";
+
+ eval { ftp_put($local_tarfile,
+        $ftp_server,$ftp_user,$ftp_pass,$ftp_dir,$tarfile_name) };
+ if ($@) {
+   cleanup_and_exit("Unexpected error when FTPing tarfile to".
+                    " ftp://$ftp_server/$ftp_dir/$tarfile_name\n$@");
+ }
+
+ unlink $local_tarfile;
+
+ # we're finally done with the tar file
+ $has_tarfile = 1;
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 4: Prepare the 'changes' file so that the user can edit his
+ ##          changes. We must dump into changes:
+ ##
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+PHASE4:
+
+ print "4. Generating a new 'changes' file...\n";
+ #
+ # We need to close here the TMP file in case we are coming in from the
+ # 'goto' in phase 3.
+ print TMP "\n\n";
+ close TMP;
+
+ if ( $has_tarfile == 0 ) {
+  $tarfile = "No regtest provided";
+ }
+
+ #
+ # Make sure 'changes' is writeable
+ #
+ chmod 0644, "$ASIMDIR/changes";
+ system "cp $ASIMDIR/changes $TMPDIR/changes.bak.$$";
+
+ #
+ # Cat to the TMP file
+ #
+ $date = `$DATE`;
+ chop $date;
+ open(CHANGES,">> $ASIMDIR/changes") || cleanup_and_exit("can't open $ASIMDIR/changes for appending: $!\n");
+ print CHANGES "\n----------\n";
+ print CHANGES "$USER\tDate: $date\tCSN: $our_sn\tTAR: $tarfile\n\n";
+ close CHANGES;
+ system "cat $tmpfile >> $ASIMDIR/changes";
+
+ #
+ # We set this variable so that if we end up in 'cleanup_and_exit', the routine
+ # will know it has to delete the 'changes' file and restore it to its
+ # original state
+ #
+ $modchanges = 1;
+
+ #
+ # Launch a window so that the user types in an explanation for his changes
+ #
+ print "\n\n\n";
+ print "I will now launch your favorite editor on the 'changes' file\n";
+ print "so that you can type in your comments.\n";
+ print "Please type your comments at the *end* of the 'changes' file";
+ print "."; sleep 2;
+ print "."; sleep 2;
+ print ".\n"; sleep 2;
+ if ($EDITOR =~ "vim?") {
+   $EDITOR_OPTIONS = "+"; # go to end of file
+ } elsif ($EDITOR =~ "x?emacs") {
+   $EDITOR_OPTIONS = "+1000000"; # go to end of file (well, far back at least)
+ } else {
+   $EDITOR_OPTIONS = "";
+ }
+ system "$EDITOR $EDITOR_OPTIONS $ASIMDIR/changes";
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 5: Update the admin/ipchist file with new IPC info
+ ##          It's important to do this before 'cvs commit' because now
+ ##          the ipchist file is living inside asim/admin and needs to
+ ##          be commited with the rest of the source.
+ ##
+ #######################################################################
+ #######################################################################
+
+ #
+ # If we have a tarfile, it means the user provided some regression test info.
+ # Therefore, we have to update the IPC history file
+ #
+ $modipcfile = 0; 
+ if ( $has_tarfile ) {
+  open(OIPC,">> $oipcfile") || cleanup_and_exit("PLEASE INFORM EVERYBODY!: Unable to update ipc history file $oipcfile: $!\n");
+
+  print OIPC "== CSN $our_sn\n";
+  foreach $bench ( keys %stats ) {
+   next if ( ! ($bench =~ /^(A|B|M|CMP|MICRO)-/) );
+   next unless ( $stats{$bench}{'IPC'} > 0 );
+   printf OIPC "%-30s ", $bench;
+   foreach $field ( @statsfields ) {
+    $data = sprintf "%.3f", $stats{$bench}{$field};
+    print OIPC "$field $data ";
+   }
+   print OIPC "\n";
+  }
+
+  close OIPC;
+  $modipcfile = 1; 
+ }
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 6: Run 'cvs commit'
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ #
+ # Ask the user whether he really wants to commit or not
+ #
+ print "5. I am about to commit your changes. This is your last chance to\n";
+ print "abort the commit...\n";
+ $proceed = getinput("Do you really want to proceed and commit ('y'), or abort now ('n') ?","n");
+ conditional_exit($proceed);
+
+ #
+ # Ensure we are at the top level directory
+ #
+ chdir $ASIMDIR;
+
+ #
+ # Protect the script against use of '^C'
+ #
+ $SIG{INT} = \&no_ctrl_c;
+
+ #
+ # Execute 'cvs commit' to see all the changes that have been made.
+ #
+ print "Committing....\n";
+
+ # mytags is used by asimmerge and asimbranch
+ # mytags is simply a history of prior tags
+ chmod 0664, "$ASIMDIR/admin/mytags"; 
+ open(MYTAGS, ">> $ASIMDIR/admin/mytags") || 
+     cleanup_and_exit("PLEASE INFORM EVERYBODY!: " .
+		     "Unable to update $ASIMDIR/admin/mytags\n");
+ print MYTAGS "$our_sn\n"; 
+ close MYTAGS; 
+
+ # lets try to commit:
+ # cvs (remotely) has the habbit of giving up (timeout) sometimes;
+ # we keep retrying a number of times before we give up too
+ $command = "cvs commit -m\"CSN${our_sn}\"";
+ foreach $retry (1..$NUM_RETRY) {
+   $ret = system("$command") >> 8;
+   if ($ret == 0) {
+     last;
+   } else {
+     if ($retry < $NUM_RETRY) {
+       printf "Caught error during cvs commit - retrying %d more times\n",
+              $NUM_RETRY - $retry;
+       sleep 5;
+     }
+   }
+ }
+ if ($ret != 0) {
+   # command had some problem
+   cleanup_and_exit("Fatal error during cvs commit: \n".
+    "Your commit might be partially done and the state of your directory\n".
+    "is probably messed up\n".
+    "Please check your directories before retrying!\n");
+ }
+
+ #
+ # Tag this commit with its serial number
+ #
+ print "Tagging your changes...\n";
+ $command = "cvs tag CSN${our_sn}";
+ foreach $retry (1..$NUM_RETRY) {
+   $ret = system("$command") >> 8;
+   if ($ret == 0) {
+     last;
+   } else {
+     if ($retry < $NUM_RETRY) {
+       printf "Caught error during cvs tag - retrying %d more times\n",
+              $NUM_RETRY - $retry;
+       sleep 5;
+     }
+   }
+ }
+ if ($ret != 0) {
+   # command had some problem
+   cleanup_and_exit("Fatal error during cvs tag: \n".
+    "Your tag might be partially done ... try to complete manually\n".
+    "$command\n");
+ }
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## PHASE 7: Update state by increasing the CSN
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ set_csn ('asim-pm', $our_sn);
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## CLEANUP
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+ unlock_repository('asim-pm');
+
+ unlink "$TMPDIR/changes.bak.$$";
+ unlink $tmpfile  if ( $tmpfile );
+
+ print "Done\n";
+ exit 0;
+
+
+ #######################################################################
+ #######################################################################
+ ##
+ ##
+ ## END OF PROGRAM
+ ##
+ ##
+ #######################################################################
+ #######################################################################
+
+sub getinput
+{
+ my($msg) = $_[0];
+ my($val) = $_[1];
+
+ print "$msg [$val] : ";
+ $in = <STDIN>;
+
+ if ( $in ne "\n" ) {
+  chop $in;
+  return $in;
+ }
+
+ return $val;
+}
+
+sub conditional_exit
+{
+ my($yorno) = $_[0];
+
+ if ( $yorno ne "y" && $yorno ne "yes" ) {
+  cleanup_and_exit("asimcommit [Aborting]...\n");
+ }
+}
+
+sub user_abort
+{
+ my $signame = shift;
+
+ cleanup_and_exit("asimcommit [Aborting due to ^C]...\n");
+}
+
+sub no_ctrl_c
+{
+ my $signame = shift;
+
+ print STDERR "Sorry ^C is not acceptable at this point...\n";
+}
+
+sub partial_match
+{
+ my $dir = $_[0];
+ my $aref =  $_[1];
+
+ foreach $dangerdir ( @$aref ) {
+  if ( $dir =~ $dangerdir ) {
+   return 1;
+  }
+ }
+ return 0;
+}
+
+sub read_path
+{
+ my $p;
+
+ $p = <STDIN>;
+ chop $p;
+ $p =~ s/^\s+//;	## eliminate white spaces before the path
+ $p =~ s/\s+$//;	## eliminate white spaces after the path
+ if ( $p ne "" && ! -d $p ) { cleanup_and_exit("Sorry, '$p' is not a directory: $!\n"); }
+
+ return $p;
+}

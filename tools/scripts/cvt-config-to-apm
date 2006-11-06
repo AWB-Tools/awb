@@ -1,0 +1,105 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+# *****************************************************************************
+# * 
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+###############################################################################
+#
+# Convert a model v1.0 configuration (.config) to a model v2.0 configuration (.apm)
+# 
+# Usage:
+#        
+#       asimstarter <path>/cvt-config-to-apm <configfile>.config
+#
+###############################################################################
+
+#
+# Author:  Joel Emer
+#
+
+use File::Basename;
+use Getopt::Long;
+
+use Asim::Inifile;
+
+$file = $ARGV[0] || "test.config";
+
+if ( $file =~ "/Makefile.config\$") {
+  warn("You do not want to covert a Makefile");
+  exit 0;
+}
+
+if ( $file =~ "/awb.config\$") {
+  warn("You do not want to covert an awb.config file");
+  exit 0;
+}
+
+
+
+print "Converting model: $file\n";
+
+$model = Asim::Inifile->new($file) || die("Could not open file $file");
+
+$version = $model->get("Global","Version");
+if ($version != "1.0") {
+  warn("Can only update version 1.0 models");
+  exit 0;
+}
+
+# Update model version to 2.0
+
+$model->put("Global","Version","2.0");
+
+# Remember workbench but remove from [Model]
+
+$workbench = $model->get("Model","workbench");
+$model->remove("Model","workbench");
+
+# Remember system but remove from [Model]
+
+$system = $model->get("Model","system");
+$model->remove("Model","system");
+
+# Add model=Model Foundation to [Model]
+
+$model->put("Model","model","Model Foundation");
+
+# Add [Model Foundation]
+
+$model->put("Model Foundation","File","pm/model.awb");
+$model->put("Model Foundation/Requires","controller","Asim classic controller");
+$model->put("Model Foundation/Requires","system",$system);
+
+# Add [Asim Classic Controller]
+
+$model->put("Asim classic controller","File","pm/controller/classic/controller_classic.awb");
+$model->put("Asim classic controller/Requires","workbench",$workbench);
+
+# Preserve old version
+#system("cp -p $file $file.v1");
+
+# Save updated model
+$file =~ s/config$/apm/;
+print "Saving configuration: $file\n";
+
+$model->save($file);
+
+

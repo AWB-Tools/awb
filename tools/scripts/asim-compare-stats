@@ -1,0 +1,341 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+##
+## Author: Isaac Hernandez 
+## Modified by: Oscar Rosell (XML support)
+##
+## (c) 2004
+##
+
+use strict;
+use Getopt::Long;
+## XML Parser
+## For information on XML Specs go to www.w3.org
+use XML::GDOME;
+
+my %STATSFILE_0=();
+my %STATSFILE_1=();
+
+my %STATS_PERCENTAGE=();
+my %STATS_DIFF=();
+
+## $#stat_name=$[;
+## $#stat_accum=$[;
+
+my $percent=0;
+my $occurrences=0;
+my $printDefineds=1;
+my $removeHists=0;
+my $removeScalars=0;
+my $help=0;
+my @files = ();
+
+sub unknown_parameter
+{
+    ## Let's assume unknown parameters are the input files
+    push (@files, shift);
+}
+
+GetOptions( 
+             'abs_percentage=i' => \$percent
+            ,'min_occurrences=i' => \$occurrences
+            ,'remove_undefineds' =>\$printDefineds
+            ,'remove_hists' =>\$removeHists
+            ,'remove_scalars' =>\$removeScalars
+            ,'help' => \$help
+            ,'<>' => \&unknown_parameter
+            );
+
+if ($help) {
+    system "perldoc $0";
+    exit 0;
+}
+
+my @hashes = (\%STATSFILE_0, \%STATSFILE_1);
+
+if (@files < 2 || @files > 2)
+{
+    die("Must specify two files\n");
+}
+
+## Check both input files are readable
+foreach my $file_idx (0..1)
+{
+    if (!(-r $files[$file_idx]))
+    {
+        die("File $files[$file_idx] cannot be accessed\n");
+    }
+}
+
+foreach my $file_idx (0..1)
+{
+    my $file=$files[$file_idx];
+    my $decompress_cmd="";
+
+    if ($file=~/\.bz2$/)
+    {
+        ## BZIP2 compression
+        $decompress_cmd = "bzip2 -dc";
+    }
+    else 
+    {
+        if ($file=~/\.gz$/)
+        {
+            ## No problem. It's handled natively
+        }
+    }
+
+    my $xml_doc;
+    if ($decompress_cmd eq "")
+    {
+        printf STDERR ("Processing DOM tree for file $file...\n");
+        $xml_doc = XML::GDOME->createDocFromURI($file);
+    }
+    else 
+    {
+        printf STDERR ("Decompressing file $file...\n");
+        my $xml_data = `$decompress_cmd $file`;
+        printf STDERR ("Processing DOM tree for file $file...\n");
+        $xml_doc = XML::GDOME->createDocFromString($xml_data);
+    }
+
+    # Note: for some reason, getElementsByName() is painfully slow
+    # when we got several thousand nodes that match, so we use the
+    # iterator approach instead, which is way faster. Thanks to grab.pl
+    # for this info
+
+    my $root = $xml_doc->getDocumentElement();
+
+    if ($removeScalars == 0)
+    {
+        SCALARS: foreach my $node ($root->findnodes("//scalar")) 
+        {
+            my $childs = $node->getChildNodes;
+            my $num_childs = $childs->getLength;
+            my $value;
+            my $name;
+            for (my $j = 0; $j < $num_childs; $j++)
+            {
+                my $inner_node = $childs->item($j);
+
+                if ($inner_node->getNodeType == ELEMENT_NODE)
+                {
+                    if ($inner_node->getTagName eq "type")
+                    {
+                        my $child = $inner_node->getFirstChild;
+                        my $type = $child->getNodeValue();
+                        if ($type eq "string")
+                        {
+                            # SKIP THIS ONE ??
+                            next SCALARS;
+                        }
+                    }
+                    if ($inner_node->getTagName eq "name")
+                    {
+                        my $child = $inner_node->getFirstChild;
+                        $name = $child->getNodeValue();
+                    }
+                }
+                elsif ($inner_node->getNodeType == TEXT_NODE)
+                {
+                    $value = $inner_node->getNodeValue();
+                }
+            }
+            $hashes[$file_idx]->{$name}+=$value;
+        }
+    }
+
+    if ($removeHists == 0)
+    {
+        foreach my $node ($root->findnodes("//compound[child::type='histogram']"))
+        {
+            my $childs = $node->getChildNodes;
+            my $num_childs = $childs->getLength;
+            my $name;
+
+            for (my $j = 0; $j < $num_childs; $j++)
+            {
+                my $inner_node = $childs->item($j);
+
+                if ($inner_node->getNodeType == ELEMENT_NODE)
+                {
+                    if ($inner_node->getTagName eq "name")
+                    {
+                        my $child = $inner_node->getFirstChild;
+                        $name = $child->getNodeValue();
+                        last;
+                    }
+                }
+            }
+            # We got the name, yes!!
+            foreach my $row ($node->findnodes("descendant::vector[child::type='row']"))
+            {
+                my $childs = $row->getChildNodes;
+                my $num_childs = $childs->getLength;
+                my $inner_name;
+                my $value = 0;
+
+                for (my $j = 0; $j < $num_childs; $j++)
+                {
+                    my $inner_node = $childs->item($j);
+
+                    if ($inner_node->getNodeType == ELEMENT_NODE)
+                    {
+                        my $child;
+                        if ($inner_node->getTagName eq "name")
+                        {
+                            $child = $inner_node->getFirstChild;
+                            $inner_name = $child->getNodeValue();
+                        }
+                        elsif ($inner_node->getTagName eq "value")
+                        {
+                            $child = $inner_node->getFirstChild;
+                            $value = $child->getNodeValue();
+                        }
+                    }
+                }
+                # And the value
+                $inner_name = $name . "_" . $inner_name;
+                $hashes[$file_idx]->{$inner_name}+=$value;
+            }
+        }
+    }
+}
+
+printf("%60s %12s %20s %20s vs %20s\n","STAT_NAME","DIFF(\%)","DIFF(ABS)",$files[0],$files[1]);
+
+foreach my $stat (sort keys(%STATSFILE_0)) 
+{
+    my $first_val=$STATSFILE_0{$stat};
+    my $second_val=$STATSFILE_1{$stat};
+
+    if(defined($second_val) and defined($first_val)) 
+    {
+        if($first_val ne $second_val) 
+        {
+            my $diff=$first_val-$second_val;
+
+            if($second_val ne 0) 
+            {
+                my $percentage=100*($diff/$second_val);
+ 
+	            if(($first_val >= $occurrences) || ($second_val >= $occurrences)) 
+                {
+		            if(($percentage>=$percent)||(-$percentage>=$percent)) 
+                    {
+                        if ($first_val=~/\./)
+                        {
+                            ## Float value
+                            printf("%60s %11.1f%% %20.10f %20.10f vs %20.10f\n",$stat,$percentage,$diff,$first_val, $second_val);
+                        }
+                        else
+                        {
+                            printf("%60s %11.1f%% %20d %20d vs %20d\n",$stat,$percentage,$diff,$first_val, $second_val);
+                        }
+                    }
+	            }
+
+                $STATS_PERCENTAGE{$stat}=$percentage;
+                $STATS_DIFF{$stat}=$diff;
+            }
+            else 
+            {
+                if(($first_val >= $occurrences) || ($second_val >= $occurrences)) 
+                {
+                        printf("%60s %12s %20d %20d vs %20d\n",$stat,"INFINIT",$diff,$first_val, $second_val);
+                }
+
+                $STATS_PERCENTAGE{$stat}="INFINIT";
+                $STATS_DIFF{$stat}=$diff;
+            }
+        }	
+    }
+    else 
+    {
+        if($printDefineds==1) 
+        {
+            if(defined($second_val)) 
+            {
+                printf("%60s not defined in first file\n",$stat);
+            }
+            if(defined($first_val)) 
+            {
+                printf("%60s not defined in second file\n",$stat);
+            }
+        }
+    }
+}
+
+
+__END__
+
+=head1 NAME
+
+compare-stats - Compare two ASIM stats files
+
+=head1 SYNOPSYS
+
+summarize-stats [--abs_percentage=i] [--abs_difference=i] [--remove_undefineds] [--remove_scalars] [--remove_hists] <stats file A> <stats file B>
+
+=head1 DESCRIPTION
+
+Generates a summary of the differences between two ASIM statistics file.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --abs_percentage=i
+
+Show only the information for the statistics where the difference between the files
+is greater than i.
+
+=item --min_occurrences=i
+
+Display statistics information only if the number of occurrences in any of the stats 
+files is greater than i.
+
+=item --remove_undefineds
+
+Do not show the statistics that were not defined in any of the stats files.
+
+=item --remove_hists
+
+Do not show histogram information. Histogram processing takes some time so enabling this option can speed up the application.
+
+=item --remove_scalars
+
+Do not show scalar information.
+
+=back
+
+=head1 AUTHOR
+
+Isaac Hernandez 
+
+=head1 CONTRIBUTORS
+
+Oscar Rosell -- DOM support and documentation.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2004-2006 Intel Corporation
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+=cut

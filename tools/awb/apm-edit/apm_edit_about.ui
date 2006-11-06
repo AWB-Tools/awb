@@ -1,0 +1,64 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>apm_edit_about</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>apm_edit_about</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>245</width>
+            <height>144</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>about</string>
+    </property>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>TextLabel1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>221</width>
+                <height>90</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>APM Edit</string>
+        </property>
+        <property name="alignment">
+            <set>AlignCenter</set>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>PushButton6</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>100</x>
+                <y>110</y>
+                <width>51</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Ok</string>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>PushButton6</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit_about</receiver>
+        <slot>close()</slot>
+    </connection>
+</connections>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

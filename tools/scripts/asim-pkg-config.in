@@ -1,0 +1,116 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##############################################################################
+# Copyright (C) 2003-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+# Recipient is granted a non-sublicensable copyright license under
+# Intel copyrights to copy and distribute this code internally only.
+# This code is provided "AS IS" with no support and with no
+# warranties of any kind, including warranties of MERCHANTABILITY,
+# FITNESS FOR ANY PARTICULAR PURPOSE or INTELLECTUAL PROPERTY
+# INFRINGEMENT. By making any use of this code, Recipient agrees that
+# no other licenses to any Intel patents, trade secrets, copyrights
+# or other intellectual property rights are granted herein, and no
+# other licenses shall arise by estoppel, implication or by operation
+# of law. Recipient accepts all risks of use.
+##############################################################################
+
+#
+# Author:  Artur Klauser
+#
+
+use File::Basename;
+
+my $debug = 0;
+foreach my $arg (@ARGV) {
+  if ($arg eq "--debug") {
+    $debug = 1;
+  }
+}
+
+# autoconf variables
+my $package="@package@";
+my $release="@release@";
+my $prefix="@prefix@";
+my $exec_prefix="@exec_prefix@";
+my $libdir="@libdir@";
+
+my ($iam,$basedir) = fileparse $0;
+
+# check for resolver
+my $RESOLVER = "$basedir/awb-resolver";
+if ( ! -x $RESOLVER) {
+  # if we can't find it where expected, lets hope its in the path
+  $RESOLVER = basename $RESOLVER;
+}
+chomp ($msg = `$RESOLVER .`);
+if ($? != 0) {
+ die "Can't find $RESOLVER - check your PATH environemt variable\n$msg\n";
+}
+
+#
+# setup ASIM specific PKG_CONFIG_PATH for handling ASIM libraries with 
+# the generic pkg-config
+#
+
+# First, add the asim uninstalled src pkgconfig directories to the
+# front of the pkg-config search path
+my @pkgconfig;
+chomp ($path = `$RESOLVER -config searchpath`);
+if ($? == 0) {
+  # OK, resolver has found it
+  my $pkgcfgdir;
+
+  foreach $dir (split ' ', $path) {
+    my $pkgcfgdir = "$dir/pkgconfig";
+    if (-e $pkgcfgdir) {
+      push @pkgconfig, $pkgcfgdir;
+    }
+  }
+}
+
+# add installed pkgconfig directory too
+my $pkgcfgdir = "$libdir/pkgconfig";
+if (-e $pkgcfgdir) {
+  push @pkgconfig, $pkgcfgdir;
+}
+
+# append any pre-existing contents of the env variable
+if (defined($ENV{PKG_CONFIG_PATH})) {
+  push @pkgconfig, $ENV{PKG_CONFIG_PATH};
+}
+
+# finally package it up and set the env variable
+$ENV{PKG_CONFIG_PATH} = join(":", @pkgconfig);
+print "PKG_CONFIG_PATH = $ENV{PKG_CONFIG_PATH}\n" if ($debug);
+
+#
+# now execute the real pkg-config
+#
+my $cmd = "pkg-config";
+foreach my $arg (@ARGV) {
+  $arg =~ s/"/\\"/g;     # escape existing double quotes
+  $cmd .= ' "'.$arg.'"'; # put each arg under its own quote to
+                         # prevent args with spaces getting split
+}
+print "executing $cmd\n" if ($debug);
+exec $cmd;
+
+# vim:set filetype=perl:

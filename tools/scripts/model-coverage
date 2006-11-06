@@ -1,0 +1,1033 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#--------------------------------------------------------------------
+#                                                                      
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+#--------------------------------------------------------------------
+
+#
+# compute dependences between packages, models, and modules,
+# and compute code coverage for a set of model regression tests.
+#
+
+#
+# Author:  Carl Beckmann
+#
+
+use File::Spec;
+use File::Basename;
+use Getopt::Long;
+use Asim;
+use Asim::Base;
+use Asim::Util;
+use Asim::Workspace;
+use Asim::Package;
+use Asim::Package::DB;
+use Asim::Model;
+use Asim::Module;
+use Asim::Module::DB;
+use Asim::Regression;
+
+$RESOLVER = 'awb-resolver';
+
+################## HANDLE ARGUMENTS #######################
+
+$argv0 = 'model-coverage';
+
+# save the usage message as a string
+$Usage = ' [<option> ...], where <option> is zero or more of:
+		--workspace=<workspace-dir>
+		--experiments=[regression|mini_regression|nightly|daily|weekly|extended]
+		--package=<package>
+		--model=<apmfile>
+		--print=[apms|apmmissed|apmall|apmcoverage|awb...|c...|loc...]
+		--verbosity=[0|1|2|3|4]
+		--changed=<file>[,<file>...]
+		--help
+
+	The --experiments and --print arguments may contain more than one argument,
+	as a comma-separated list.
+
+	The --print arguments have the form <type><info>, where <type> is one of:
+		package		(packages),
+		exp		(experiment files),
+		apm		(model files),
+		awb		(module files),
+		c		(C++ header and implementation file),
+		loc		(lines of code in .awb, .c and .h files),
+	and <info> is one of:
+		s		(items used in the model)
+		missed		(items not used in the model)
+		all		(all such items found in the repositories)
+		coverage	(count and fraction of items covered by models)
+		changed		(items affected by any changed files)
+		escaped		(items affected by changed files, but not covered by models)
+	You can also use "--print=*" to print everything
+
+	The --verbosity argument controls how much is printed out:
+		0		(do not print section headers)
+		1		(print section headers)
+		2		(also print file counts)
+		3		(also print command line arguments)
+		4		(also print other debug information)
+';
+# end of the usage message
+
+# standard extensions for models files
+@ModelsExtensions = ( 'models', 'exp' );
+
+# the types of things we might print or compute
+@ItemTypes = ( 'package', 'exp', 'apm', 'awb', 'c', 'loc' );
+
+#
+# set default values for, and then parse, the args
+#
+$Options{'workspace'}   = undef;
+$Options{'experiments'} = 'nightly,daily,weekly,regression';
+$Options{'package'}     = '';
+$Options{'model'}       = '';
+$Options{'print'}       = 'exps,apms,awbs,awbmissed,awbcoverage,ccoverage,loccoverage';
+$Options{'verbosity'}   = 0;
+$Options{'changed'}     = '';
+
+foreach $arg ( @ARGV ) {
+  if ( $arg =~ m/^--(.*)=(.*)$/ ) {
+    $Options{$1} = $2;
+  } else {
+    if ( $arg ne '--help' ) { print STDERR "unknown option: $arg\n"; };
+    print "usage:\n\t$argv0 $Usage";
+    if ( $arg eq '--help' ) { exit 0; };
+  }
+}
+
+foreach $f ( @ItemTypes ) {
+  foreach $p ( 's', 'all', 'missed', 'coverage', 'changed', 'escaped' ) {
+    $Print{"$f$p"} = ( $Options{'print'} eq '*' );
+  }
+}
+foreach $p ( @printoptions = split(/,/, $Options{'print'}) ) {
+  $Print{$p} = 1;
+}
+
+# force section headers if you're printing more than one kind of thing:
+if ( $Options{'print'} eq '*' || ( $#printoptions && ! $Options{'verbosity'} ) ) {
+  $Options{'verbosity'} = 1;
+}
+
+if ( $Options{'verbosity'} >= 3 ) {
+  print "[ Arguments ]\n";
+  $key = 1;
+  foreach $arg ( %Options ) {
+    if ( $key ) { printf("--%s=%s\n", $arg, $Options{$arg}); };
+    $key = ! $key;
+  }
+}
+
+################## COMMON SUBROUTINES #######################
+
+#
+# use awb-resolver to resolve the location of a file in the source
+# union directory.  Return a relative path (relative to the top of the workspace).
+#
+sub ResolveRelative {
+  my($filename) = shift;
+  chomp ($filename = `$RESOLVER $filename 2>&1`);
+  if ($?) {
+    # if we were unable to resolve file, maybe print warning and return empty string:
+    if ( $Options{'verbosity'} >= 4 ) { print STDERR "$filename\n"; }
+    return undef;
+  } else {
+    my($root) = Asim::rootdir();
+    $filename =~ s/^${root}\///;
+    return $filename
+  }
+}
+
+#
+# Get the directory where a package resides.
+# If it's in the workspace, return its path relative to top of the workspace
+#
+sub GetPackageDir {
+  my($pkg) = shift;
+  my($pkgdir) = ResolveRelative( "admin/packages/$pkg" );
+  $pkgdir =~ s/\/admin\/packages\/${pkg}$//;
+  return $pkgdir;
+}
+
+#
+# Get the name of the package where the given file resides
+#
+sub GetPackageContainingFile {
+  my($filename) = shift;
+  if      ( $filename =~ m/^src\/asim-([^\/]+)\// ) {
+    return $1;
+  } elsif ( $filename =~ m/^\/p\/asim\/.*\/share\/asim\/([A-Za-z0-9_]+)\/HEAD/ ) {
+    return $1;
+  } elsif ( $Options{'verbosity'} >= 4 ) {
+    print "WARNING: cannot find package containing $filename\n";
+    return '';
+  }
+}
+
+#
+# procedure to add an item to a set,
+# i.e. add it to the list only if it is not already there.
+# First arg is the set (passed by reference as \@set),
+# second arg is the item to add.
+#
+sub SetAdd {
+  my($setptr)  = shift;
+  my($element) = shift;
+  my($el);
+  # if the element is already in the set, do nothing
+  foreach $el ( @$setptr ) {
+    if ( $el eq $element ) { return; }
+  }
+  # if it's not there, add it:
+  @$setptr = ( @$setptr, $element );
+}
+
+#
+# procedure to count the number of items in the set that match the regular expression.
+# First arg is the set (passed by reference as \@set),
+# second arg is the regular expression.
+#
+sub SetCountMatch {
+  my($setptr) = shift;
+  my($exp)    = shift;
+  my($el);
+  my($count)  = 0;
+  foreach $el ( @$setptr ) {
+    if ( $el =~ m/$exp/ ) {
+      $count++;
+    }
+  }
+  return $count;
+}
+
+#
+# return 1 if the list contains the item, 0 if not.
+# First arg is reference to a list, second arg is item to find.
+#
+sub SetContains {
+  my($setptr) = shift;
+  my($item)   = shift;
+  my($el);
+  foreach $el ( @$setptr ) {
+    if ( $el eq $item ) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+#
+# return a list whose elements are all the elements in the second list
+# that are missing from the first list.  The two input lists are
+# passed by reference.
+#
+sub SetInBnotA {
+  my($mainlistptr) = shift;
+  my($itemlistptr) = shift;
+  my(@result) = ();
+  foreach $item ( @$itemlistptr ) {
+    if ( ! SetContains( \@$mainlistptr, $item ) ) {
+      @result = ( @result, $item );
+    }
+  }
+  return @result;
+}
+
+#
+# get the list of APM models files referenced in an Experiments file.
+#
+sub GetApmsFromExp {
+  my($expfile) = $_[0];
+  my(@apms)    = ();
+  my(@words);
+  my($apmfile);
+  local(*FP);
+  # in the experiments file, the apm file is relative to the package source
+  open FP, $expfile;
+  READEXPERIMENTS: while ( <FP> ) {
+    # finish reading continuation lines
+    while ( m/\\$/ ) {
+      chomp;
+      chop;
+      $_ .= <FP>;
+    }
+    # skip empty or comment lines
+    if ( m/^\s*(#.*)?$/ ) { next READEXPERIMENTS; }
+    # the second item on a line is the APM file.
+    @words = split;
+    if ( $apmfile = ResolveRelative( $words[1] ) ) {
+      @apms = (@apms, $apmfile);
+    }
+  }
+  close FP;
+  return @apms;
+}
+
+#
+# routine to scan a single APM file.
+# Returns a list of APM files (submodels) referenced in the APM file.
+# Calls itself recursively.
+#
+sub GetApmsFromApm {
+  my($apmfile) = shift;
+  my(@apmlist) = ();
+  local(*FP);
+  open FP, $apmfile;
+  while ( <FP> ) {
+    # if you found a reference to an APM file, add to submodels list, and call self recursively
+    if ( m/File=(.*)\.apm/ ) {
+      my ( $submodel );
+      if ( $submodel = ResolveRelative( "$1.apm" ) ) {
+	SetAdd( \@apmlist, $submodel );
+	foreach $f ( GetApmsFromApm( $submodel ) ) {
+	  SetAdd( \@apmlist, $f );
+	}
+      }
+    }
+  }
+  close FP;
+  return @apmlist;
+}
+
+#
+# routine to scan a single APM file.
+# Returns a list of AWB files referenced in the APM file.
+# Does *NOT* recursively descend into submodels!!
+#
+sub GetAwbsFromApm {
+  my($apmfile) = shift;
+  my(@awblist) = ();
+  local(*FP);
+  open FP, $apmfile;
+  while ( <FP> ) {
+    # if you found a reference to an AWB file, add it to list
+    if ( m/File=(.*)\.awb/ ) {
+      my ( $awbfile );
+      if ( $awbfile = ResolveRelative( "$1.awb" ) ) {
+	SetAdd( \@awblist, $awbfile );
+      }
+    }
+  }
+  close FP;
+  return @awblist;
+}
+
+#
+# procedure to get a list of C++ source (%public and %private) files
+# referenced by an AWB file.  This also include %library files as
+# source dependencies.
+#
+sub GetSourcesFromAwb {
+  my($awb)     = shift;
+  my(@sources) = ();
+  my($awbdir);
+  my(@cfiles);
+  my($cfile);
+  my($cfileloc);
+  my($module);
+  # is there an easier way of getting the directory name from a file, in perl?
+  if ( $awb =~ m/(.*)\/.*/ ) { $awbdir=$1; } else { $awbdir='.'; }
+  # open the module file, and add all public and private files to list of sources:
+  if ( $module = Asim::Module->new( $awb ) ) {
+    #
+    # get %public and %private C files:
+    #
+    @cfiles = ( $module->public(), $module->private() );
+    foreach $cfile ( @cfiles ) {
+      $cfileloc = "$awbdir/$cfile";
+      if ( -e $cfileloc ) {
+        @sources = ( @sources, $cfileloc );
+      } elsif ( $Options{'verbosity'} >= 4 ) {
+        print "WARNING: cannot find source file $cfile in directory $awbdir\n";
+      }
+    }
+    #
+    # get %library files:
+    #
+    foreach $cfile ( $module->library() ) {
+      if ( $cfileloc = ResolveRelative( $cfile ) ) {
+        @sources = (@sources, $cfileloc);
+      }
+    }
+    #
+    # should we also include files in the %include directories?!?
+    #
+  } elsif ( $Options{'verbosity'} >= 4 ) {
+    print "WARNING: problems opening module $awb !\n";
+  }
+  return @sources;
+}
+
+#
+# print a list of items.
+# Depending on the verbosity, also print a section header,
+# and maybe even a count of the number of items.
+# The first arg is the title of the section,
+# and the second arg is a (reference to) the list of items to print.
+#
+sub PrintListSection {
+  my($title)   = shift;
+  my($listptr) = shift;
+  if ( $Options{'verbosity'} >= 1 ) {
+    print "[ $title ]\n";
+  }
+  foreach $f ( @$listptr ) {
+    print "$f\n";
+  }
+  if ( $Options{'verbosity'} >= 2 ) {
+    my($num) = $#$listptr + 1;
+    print "[ $title count ]\n$num\n";
+  }
+}
+
+#
+# print the coverage for a paticular item type, in total and by package.
+# This displays the count of the number of items used, the total number of
+# items, and the fraction of coverage (used / all).
+# It gets passed a section title, and a list of all items of that type,
+# and a second list of used items of that type.
+#
+# It uses the @AllPackages global list for the package names,
+# and the $Options global hash for the verbosity level.
+#
+sub PrintCoverageSection {
+  my($title)       = shift;
+  my($alllistptr)  = shift;
+  my($usedlistptr) = shift;
+  my($numall)  = $#$alllistptr  + 1;
+  my($numused) = $#$usedlistptr + 1;
+  my($pkg);
+  if ( $Options{'verbosity'} >= 1 ) {
+    print "[ $title ]\n+package---+-----total+-----used+--coverage+\n";
+  }
+  foreach $pkg ( @AllPackages ) {
+    my($covered) = SetCountMatch( \@$usedlistptr, '^'.GetPackageDir($pkg) );
+    my($all)     = SetCountMatch( \@$alllistptr,  '^'.GetPackageDir($pkg) );
+    if ( $all ) {
+      printf(   " %-11s %9d %9d      %0.3f\n", $pkg, $all, $covered, $covered /    $all );
+    }
+  }
+  printf( " *           %9d %9d      %0.3f\n", $numall,    $numused, $numused / $numall );
+}
+
+#
+# add a parent-child relationship to the global hash %Child2Parent.
+# This will allow you later to look up the parent, given the child.
+# (The contents of the hash is a comma-separated list of parents, the index of the hash is the child).
+# Note that a child may have many parents (and the reverse is certainly true).
+# First arg is parent, second arg is child.
+#
+sub AddChild {
+  my($parent) = shift;
+  my($child)  = shift;
+  if ( $Child2Parent{$child} ) {
+    $Child2Parent{$child} .= ',' . $parent;
+  } else {
+    $Child2Parent{$child}  =       $parent;
+  }
+}
+
+#
+# return the list of parents for the given child.
+# Uses the global hash %Child2Parent, created by the routine above.
+#
+sub GetParents {
+  my($child)   = shift;
+  my(@parents) = ();
+  if ( $Child2Parent{$child} ) {
+    @parents = split /,/, $Child2Parent{$child};
+  }
+  return @parents;
+}
+
+################## SET COMPUTATION SUBROUTINES #######################
+##
+## The following routines compute various filesets of interest,
+## returning a reference to a list containing the set.
+## They can be called multiple times, and the computation will only
+## be done the first time.  This allows the main program to "lazily
+## evaluate" these sets only when necessary, and thus not waste time
+## computing what it doesn't need, provided it uses these functions
+## rather than referencing the global arrays directly.
+##
+
+        ######## packages ########
+
+#
+# extract the actual packages used from the set of source filenames
+#
+sub GetPackageS {
+  if ( ! defined(@ActualPackages) ) {
+    my($listptr) = GetCS();
+    foreach $f ( @$listptr ) {
+      if ( $pkg = GetPackageContainingFile( $f ) ) {
+	SetAdd( \@ActualPackages, $pkg );
+      }
+    }
+    @ActualPackages = sort @ActualPackages;
+  }
+  return \@ActualPackages;
+}
+
+# "all packages" set is computed in main program
+sub GetPackageAll {
+  return \@AllPackages;
+}
+
+# get missed packages
+sub GetPackageMissed {
+  if ( ! defined(@MissedPackages) ) { @MissedPackages = SetInBnotA( GetPackageS(), GetPackageAll() ); }
+  return \@MissedPackages;
+}
+
+        ######## experiments ########
+
+# the set of experiments files in computed in the main loop
+sub GetExpS {
+  return \@ExpFiles;
+}
+
+#
+# find all experiments files in all packages,
+# and also record which APM files are used in each experiment.
+#
+sub GetExpAll {
+  if ( ! defined(@AllExp) ) {
+    my($pkglistptr) = GetPackageAll();
+    foreach $pkg ( @$pkglistptr ) {
+      foreach $type ( @Types ) {
+	foreach $ext ( @ModelsExtensions ) {
+          # FIX??? is this a sufficient search space for experiments files??
+          foreach $expfile ( glob( GetPackageDir($pkg)."/experiments/*/$type/*.$ext" ) ) {
+            SetAdd( \@AllExp, $expfile );
+	    foreach $apmfile ( GetApmsFromExp( $expfile ) ) {
+	      AddChild( $expfile, $apmfile );
+	    }
+          }
+	}
+      }
+    }
+  }
+  return \@AllExp;
+}
+
+# get missed experiments
+sub GetExpMissed {
+  if ( ! defined(@MissedExp) ) { @MissedExp = SetInBnotA( GetExpS(), GetExpAll() ); }
+  return \@MissedExp;
+}
+
+#
+# compute changed experiments.
+# Start with any changed experiments files given on the command line,
+# and add to it the dependencies from changed model files.
+#
+sub GetExpChanged {
+  if ( ! defined(@ChangedExp) ) {
+    # call this to make sure we have all the EXP->APM parent-child relationships:
+    GetExpAll();
+    @ChangedExp = @InitChangedExp;
+    my($apmlistptr) = GetApmChanged();
+    foreach $apm ( @$apmlistptr ) {
+      foreach $exp ( GetParents($apm) ) {
+	if ( $exp =~ m/\.apm$/ ) {
+	} else {
+          SetAdd( \@ChangedExp, $exp );
+	}
+      }
+    }
+  }
+  return \@ChangedExp;
+}
+
+# changed experiments that were not covered
+sub GetExpEscaped {
+  if ( ! defined(@EscapedExp) ) { @EscapedExp = SetInBnotA( GetExpS(),  GetExpChanged() ); }
+  return \@EscapedExp;
+}
+
+        ######## models ########
+
+#
+# get the list of APM models files by scanning the Experiments files
+#
+sub GetApmS {
+  if ( ! defined(@ApmFiles) ) {
+    foreach $expfile ( @ExpFiles ) {
+      foreach $apmfile ( GetApmsFromExp( $expfile ) ) {
+	SetAdd( \@ApmFiles, $apmfile );
+      }
+    }
+    @ApmFiles = sort @ApmFiles;
+  }
+  return \@ApmFiles;
+}
+
+#
+# add to the list of APM models any submodels contained within them.
+# Does not return anything.
+#
+sub GetApmSubModels {
+  my(@submodels)  = ();
+  my($apmlistptr) = GetApmS();
+  foreach $apm ( @$apmlistptr ) {
+    foreach $sub ( GetApmsFromApm( $apm ) ) {
+      SetAdd( \@submodels, $sub );
+      AddChild( $apm, $sub );
+    }
+  }
+  foreach $sub ( @submodels ) {
+    SetAdd( GetApmS(), $sub );
+  }
+}
+
+#
+# find all of the .APM files in all of the packages used:
+#
+sub GetApmAll {
+  if ( ! defined(@AllApm) ) {
+    my($pkglistptr) = GetPackageAll();
+    foreach $pkg ( @$pkglistptr ) {
+      open FP, "find ".GetPackageDir($pkg)." -name *.apm |";
+      while ( <FP> ) {
+	chomp;
+	SetAdd( \@AllApm, $_ );
+      }
+      close FP;
+    }
+  }
+  return \@AllApm;
+}
+
+# get missed models
+sub GetApmMissed {
+  if ( ! defined(@MissedApm) ) { @MissedApm = SetInBnotA( GetApmS(), GetApmAll() ); }
+  return \@MissedApm;
+}
+
+#
+# compute changed models.
+# Start with any changed APM files given on the command line,
+# and add to it the dependencies from changed module files.
+#
+sub GetApmChanged {
+  if ( ! defined(@ChangedApm) ) {
+    # call this to make sure we have all the APM->AWB
+    # parent-child relationships for the APM files used:
+    GetAwbS();
+    # we also have to scan all the APM files in the *missed* list,
+    # and add the APM->AWB parent-child relationships for other APM files:
+    my($apmlistptr) = GetApmMissed();
+    foreach $apmfile ( @$apmlistptr ) {
+      foreach $awb ( GetAwbsFromApm( $apmfile ) ) {
+	AddChild( $apmfile, $awb );
+      }
+    }
+    # now do the actual changeset calculation:
+    @ChangedApm = @InitChangedApm;
+    my($awblistptr) = GetAwbChanged();
+    foreach $awb ( @$awblistptr ) {
+      foreach $apm ( GetParents($awb) ) {
+	SetAdd( \@ChangedApm, $apm );
+	# also add any models that include this one as a submodel
+	foreach $parent ( GetParents( $apm ) ) {
+          if ( $parent =~ m/\.apm$/ ) {
+	    SetAdd( \@ChangedApm, $parent );
+	  }
+	}
+      }
+    }
+  }
+  return \@ChangedApm;
+}
+
+# changed models that were not covered
+sub GetApmEscaped {
+  if ( ! defined(@EscapedApm) ) { @EscapedApm = SetInBnotA( GetApmS(), GetApmChanged() ); }
+  return \@EscapedApm;
+}
+
+        ######## modules ########
+
+#
+# Scan each APM file used to extract AWB files used.
+# Also record the APM-AWB parent-child relationships while you're at it.
+#
+sub GetAwbS {
+  if ( ! defined(@AwbFiles) ) {
+    my($apmlistptr) = GetApmS();
+    foreach $apmfile ( @$apmlistptr ) {
+      foreach $awb ( GetAwbsFromApm( $apmfile ) ) {
+	SetAdd( \@AwbFiles, $awb );
+	# this only gets the parent-child relationships for the APM files actually used.
+	# There is an additional loop further below that gets them for the missed APM files.
+	AddChild( $apmfile, $awb );
+      }
+    }
+    @AwbFiles = sort @AwbFiles;
+  }
+  return \@AwbFiles;
+}
+
+#
+# find all of the .AWB files in all of the packages used
+#
+sub GetAwbAll {
+  if ( !defined(@AllAwb) ) {
+    my($pkglistptr) = GetPackageAll();
+    foreach $pkg ( @$pkglistptr ) {
+      # find all module files in the package directory
+      open FP, "find ".GetPackageDir($pkg)." -name *.awb|";
+      while ( <FP> ) {
+	chomp;
+	SetAdd( \@AllAwb, $_ );
+      }
+      close FP;
+    }
+  }
+  return \@AllAwb;
+}
+
+# get missed modules
+sub GetAwbMissed {
+  if ( ! defined(@MissedAwb) ) { @MissedAwb = SetInBnotA( GetAwbS(), GetAwbAll() ); }
+  return \@MissedAwb;
+}
+
+#
+# compute changed modules.
+# Start with any .awb changed files given on the command line,
+# and add to it the dependencies from changed source files.
+#
+sub GetAwbChanged {
+  if ( !defined(@ChangedAwb) ) {
+    # make sure we have all AWB-C parent-child relationships:
+    GetCAll();
+    # initialize the changeset from changes given on command line:
+    @ChangedAwb = @InitChangedAwb;
+    # the actual changeset calculation:
+    my($srclistptr) = GetCChanged();
+    foreach $src ( @$srclistptr ) {
+      foreach $awb ( GetParents($src) ) {
+	SetAdd( \@ChangedAwb, $awb );
+      }
+    }
+  }
+  return \@ChangedAwb;
+}
+
+# changed modules that were not covered
+sub GetAwbEscaped {
+  if ( ! defined(@EscapedAwb) ) { @EscapedAwb = SetInBnotA( GetAwbS(), GetAwbChanged() ); }
+  return \@EscapedAwb;
+}
+
+        ######## source files ########
+
+#
+# now scan each AWB file, and extract each CPP and H file
+# from the %public and %private declarations,
+# if you're printing that kind of coverage:
+#
+sub GetCS {
+  if ( ! defined(@SourceFiles) ) {
+    my($awblistptr) = GetAwbS();
+    foreach $awb ( @$awblistptr ) {
+      foreach $srcfile ( GetSourcesFromAwb( $awb ) ) {
+	SetAdd( \@SourceFiles, $srcfile );
+      }
+    }
+    @SourceFiles = sort @SourceFiles;
+  }
+  return \@SourceFiles;
+}
+
+#
+# get all source files used in *all* models,
+# and also get the mapping from source files back to modules.
+#
+sub GetCAll {
+  if ( !defined(@AllSourceFiles) ) {
+    my($awblistptr) = GetAwbAll();
+    foreach $awb ( @$awblistptr ) {
+      foreach $srcfile ( GetSourcesFromAwb( $awb ) ) {
+	SetAdd( \@AllSourceFiles, $srcfile );
+	AddChild( $awb, $srcfile );
+      }
+    }
+    @AllSourceFiles = sort @AllSourceFiles;
+  }
+  return \@AllSourceFiles;
+}
+
+# get missed source files
+sub GetCMissed {
+  if ( ! defined(@MissedSourceFiles) ) { @MissedSourceFiles = SetInBnotA( GetCS(), GetCAll() ); }
+  return \@MissedSourceFiles;
+}
+
+#
+# compute changed sources.
+# These are just given on the command line.
+#
+sub GetCChanged {
+  if ( !defined(@ChangedSource) ) { @ChangedSource = @InitChangedSource; }
+  return \@ChangedSource;
+}
+
+# changed source files that were not covered
+sub GetCEscaped {
+  if ( ! defined(@EscapedSource) ) { @EscapedSource = SetInBnotA( GetCS(), GetCChanged() ); }
+  return \@EscapedSource;
+}
+
+        ######## lines of code ########
+
+#
+# get raw lines-of-code data for all files.
+# Does not return anything, just fills in the global LOC hash.
+#
+sub GetLocData {
+  if ( ! defined(%LOC) ) {
+    my($awblistptr) = GetAwbAll();
+    my($srclistptr) = GetCAll();
+    foreach $f ( @$awblistptr, @$srclistptr ) {
+      if ( $f =~ m/\.a$/ ) {
+        # don't bother counting lines for library files
+	$LOC{$f} = 0;
+      } else {
+	# For now, this includes blank lines and comments.
+	$wcoutput = `wc $f`;
+	$wcoutput =~ s/^\s+//;
+	@wcout = split /\s+/, $wcoutput;
+	$LOC{$f} = $wcout[0];
+      }
+    }
+  }
+}
+
+#
+# count lines of code in AWB and C++ files in covered packages.
+# Returns a scalar, the number of lines of code covered.
+#
+sub GetLocS {
+  if ( ! defined($LocCovered) ) {
+    GetLocData();
+    my($awblistptr) = GetAwbS();
+    my($srclistptr) = GetCS();
+    $LocCovered = 0;
+    foreach $f ( @$awblistptr, @$srclistptr ) { $LocCovered += $LOC{$f}; }
+  }
+  return $LocCovered;
+}
+
+#
+# count lines of code in AWB and C++ files in all packages.
+# Returns a scalar, the number of lines of code in all source files.
+#
+sub GetLocAll {
+  if ( ! defined($LocAll) ) {
+    GetLocData();
+    my($awblistptr) = GetAwbAll();
+    my($srclistptr) = GetCAll();
+    $LocAll = 0;
+    foreach $f ( @$awblistptr, @$srclistptr ) { $LocAll     += $LOC{$f}; }
+  }
+  return $LocAll;
+}
+
+####################### MAIN PROGRAM ######################
+
+#
+# Initialize ASIM with the given workspace as the default.
+# Open a PackageDB object so we can get package information.
+# Change directories to the top of the workspace.
+# Initialize global lists.
+#
+Asim::init( $Options{'workspace'} )
+  || die "There is apparently no workspace at $Options{workspace} !\n";
+$PackageDB = Asim::Package::DB->new()
+  || die "Cannot find any packages in in workspace $Options{workspace} !\n";
+chdir Asim::rootdir();
+@Types             = split( /,/, $Options{'experiments'} );
+@AllPackages       = $PackageDB->directory();
+
+# initialize the change sets from what was given on the command line
+@InitChangedExp    = ();
+@InitChangedApm    = ();
+@InitChangedAwb    = ();
+@InitChangedSource = ();
+foreach $changed ( split( /,/, $Options{'changed'} ) ) {
+  if    ( $changed =~ m/\.apm$/ ) { SetAdd( \@InitChangedApm,    $changed ); }
+  elsif ( $changed =~ m/\.awb$/ ) { SetAdd( \@InitChangedAwb,    $changed ); }
+  else                            { SetAdd( \@InitChangedSource, $changed ); }
+}
+
+#
+# either get the APM files from the command line,
+# or search the packages for experiments files of the given type.
+#
+if ( $Options{'model'} ne '' ) {
+  ### model given on command line:
+  @ApmFiles = $Options{'model'};
+
+} else {
+  ### extract models from experiment files:
+
+  # get the type of regression tests
+  @Types = split( /,/, $Options{'experiments'} );
+  
+  #
+  # get the list of packages to search for experiments files
+  #
+  if ( $Options{'package'} ne '' ) {
+    @packages = $Options{'package'};
+  } else {
+    @packages = @AllPackages;
+  }
+  if ( $Options{'verbosity'} >= 4   ) { print "[ Debug ]\nPackages = @packages\n"; }
+  if ( $#AllPackages < 0 ) { exit; }
+
+  #
+  # get the list of Experiments files
+  #
+  foreach $pkg ( @packages ) {
+    foreach $type ( @Types ) {
+      foreach $ext ( @ModelsExtensions ) {
+        foreach $expfile ( glob( GetPackageDir($pkg)."/experiments/*/$type/*.$ext" ) ) {
+          SetAdd( GetExpS(), $expfile );
+        }
+      }
+    }
+  }
+}
+# end if $Options(model) not empty
+
+#
+# add to the list of models any submodels contained within them
+#
+GetApmSubModels();
+
+#
+# print different kinds of coverage information for the packages as a whole
+#
+if ( $Print{'packages'}      ) { PrintListSection(     'Packages used',      GetPackageS()          ); }
+if ( $Print{'packageall'}    ) { PrintListSection(     'Packages all',       GetPackageAll()        ); }
+if ( $Print{'packagemissed'} ) { PrintListSection(     'Packages missed',    GetPackageMissed()     ); }
+
+#
+# print the list of experiments files
+#
+if ( $Print{'exps'}          ) { PrintListSection(     'Experiments used',   GetExpS()              ); }
+if ( $Print{'expall'}        ) { PrintListSection(     'Experiments all',    GetExpAll()            ); }
+if ( $Print{'expmissed'}     ) { PrintListSection(     'Experiments missed', GetExpMissed()         ); }
+
+#
+# print different kinds of coverage information for the models (APMs)
+#
+if ( $Print{'apms'}          ) { PrintListSection(     'Models used',        GetApmS()              ); }
+if ( $Print{'apmall'}        ) { PrintListSection(     'Models all',         GetApmAll()            ); }
+if ( $Print{'apmmissed'}     ) { PrintListSection(     'Models missed',      GetApmMissed()         ); }
+if ( $Print{'apmcoverage'}   ) { PrintCoverageSection( 'Models coverage',    GetApmAll(), GetApmS() ); }
+
+#
+# print different kinds of coverage information for the modules (AWBs)
+#
+if ( $Print{'awbs'}          ) { PrintListSection(     'Modules used',       GetAwbS()              ); }
+if ( $Print{'awball'}        ) { PrintListSection(     'Modules all',        GetAwbAll()            ); }
+if ( $Print{'awbmissed'}     ) { PrintListSection(     'Modules missed',     GetAwbMissed()         ); }
+if ( $Print{'awbcoverage'}   ) { PrintCoverageSection( 'Modules coverage',   GetAwbAll(), GetAwbS() ); }
+
+#
+# print different kinds of coverage information for the C++ source files
+#
+if ( $Print{'cs'}            ) { PrintListSection(     'Sources used',       GetCS()                ); }
+if ( $Print{'call'}          ) { PrintListSection(     'Sources all',        GetCAll()              ); }
+if ( $Print{'cmissed'}       ) { PrintListSection(     'Sources missed',     GetCMissed()           ); }
+if ( $Print{'ccoverage'}     ) { PrintCoverageSection( 'Sources coverage',   GetCAll(),   GetCS()   ); }
+
+#
+# print out the raw LOC data for each file,
+# using a different set of files depending on what the user selected:
+#
+if ( $Print{'locs'} ) {
+  GetLocS();
+  if ( $Options{'verbosity'} >= 1 ) { print "[ LinesOfCode used ]\n"; }
+  foreach $f ( @AwbFiles, @SourceFiles ) { printf " %9d %s\n", $LOC{$f}, $f; }
+  printf " %9d *\n", $LocCovered;
+}
+
+if ( $Print{'locall'} ) {
+  GetLocAll();
+  if ( $Options{'verbosity'} >= 1 ) { print "[ LinesOfCode all ]\n"; }
+  foreach $f ( @AllAwb, @AllSourceFiles ) { printf " %9d %s\n", $LOC{$f}, $f; }
+  printf " %9d *\n", $LocAll;
+}
+
+#
+# report the LOC coverage
+#
+if ( $Print{'loccoverage'} ) {
+  GetLocS();
+  GetLocAll();
+  if ( $Options{'verbosity'} >= 1 ) {
+    print "[ LinesOfCode coverage ]\n+package---+-----total+-----used+--coverage+\n";
+  }
+  foreach $pkg ( @AllPackages ) {
+    $covered = 0;
+    foreach $f ( @SourceFiles    ) {
+      if ( GetPackageContainingFile( $f ) eq $pkg ) {
+        $covered += $LOC{$f};
+      }
+    }
+    $all     = 0;
+    foreach $f ( @AllSourceFiles ) {
+      if ( GetPackageContainingFile( $f ) eq $pkg ) {
+        $all     += $LOC{$f};
+      }
+    }
+    if ( $all ) {
+      printf(   " %-11s %9d %9d      %0.3f\n", $pkg, $all, $covered, $covered /       $all );
+    }
+  }
+  printf( " *           %9d %9d      %0.3f\n", $LocAll,  $LocCovered,  $LocCovered / $LocAll );
+}
+
+#
+# print the various change sets
+#
+if ( $Print{'cchanged'}   ) { PrintListSection( 'Sources changed',     GetCChanged()   ); }
+if ( $Print{'awbchanged'} ) { PrintListSection( 'Modules changed',     GetAwbChanged() ); }
+if ( $Print{'apmchanged'} ) { PrintListSection( 'Models changed',      GetApmChanged() ); }
+if ( $Print{'expchanged'} ) { PrintListSection( 'Experiments changed', GetExpChanged() ); }
+
+#
+# print the various escaped sets
+#
+if ( $Print{'cescaped'}   ) { PrintListSection( 'Sources escaped',     GetCEscaped()   ); }
+if ( $Print{'awbescaped'} ) { PrintListSection( 'Modules escaped',     GetAwbEscaped() ); }
+if ( $Print{'apmescaped'} ) { PrintListSection( 'Models escaped',      GetApmEscaped() ); }
+if ( $Print{'expescaped'} ) { PrintListSection( 'Experiments escaped', GetExpEscaped() ); }

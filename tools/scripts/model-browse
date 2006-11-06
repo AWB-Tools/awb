@@ -1,0 +1,405 @@
+#!/usr/intel/bin/wish
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+#
+# look at models in an ASIM source tree.
+# This extracts information about a model component from its .awb, .cpp, and .h files
+# and displays this graphically to the screen.
+#
+# C. Beckmann	1/4/06
+#
+
+#
+# global variables and constants
+#
+set FIXEDFONT    {Courier 12}	; # fixed-point font to use when displaying port names, etc.
+
+set CHARHEIGHT   12		; # for estimating text box size requirements in graphical display
+set CHARWIDTH    8		; # these are in terms of points
+
+set CANVASCOLOR  {white}
+set MODELCOLOR   {yellow}
+set SUBMODCOLOR  {orange}
+
+#
+# extract information from an AWB file
+#
+proc ReadAwbFile { filename infovar } {
+  upvar $infovar modelInfo
+  
+  # initialize the fields we will extract from AWB file
+  set modelInfo(awbfile)    $filename
+  set modelInfo(name)       {-name missing!-}
+  set modelInfo(desc)       {-description missing!-}
+  set modelInfo(attributes) {}
+  set modelInfo(provides)   {-provides nothing!-}
+  set modelInfo(requires)   {}
+  set modelInfo(public)     {}
+  set modelInfo(private)    {}
+  set modelInfo(param)      {}
+  set modelInfo(const)      {}
+  set modelInfo(inputs)     {}
+  set modelInfo(outputs)    {}
+  
+  # open the file
+  set fp [open $filename r]
+  
+  # read the file one line at a time, extracting information in between %AWB_START and %AWB_END
+  set enabled 0
+  while { [gets $fp inputline] >= 0 } {
+    # remove any leading C comment characters from the line
+    regsub {^[ \t]*\\?\*\\?[ \t]*} $inputline {} inputline
+
+    if       [regexp {^%AWB_START} $inputline] {
+      set     enabled 1
+
+    } elseif [regexp {^%AWB_END}   $inputline] {
+      set     enabled 0
+
+    } elseif $enabled                          {
+	
+      # chop off trailing whitespace (for file names)
+      regsub {[ \t]*$} $inputline {} inputline
+
+      # if %dynamic appears with another keyword, just delete it,
+      # since for now we don't distinguish between dynamic and static parameters
+      if       [regexp {(%dynamic[ \t]+%|%[a-z_]+[ \t]+%dynamic)} $inputline] {
+        regsub {%dynamic[ \t]+} $inputline {} inputline
+      }
+
+      # either append to a list, or just set a scalar value, depending what kind it is
+      if       [regexp {^%(param|dynamic|export)} $inputline] {
+        # %param, %dynamic, %export are all considered params.
+	# ignore description, but grab default value:
+	lappend modelInfo(param)     "[lindex     $inputline 1]=[lindex $inputline 2]"
+
+      } elseif [regexp {^%const}                  $inputline] {
+        # %const is similar, but grab value:
+	lappend modelInfo(const)     "[lindex     $inputline 1]=[lindex $inputline 2]"
+
+      } elseif [regexp {^%(requires|attributes)}  $inputline allmatch item] {
+	# you can have more than one of these, and more than one on a line
+	foreach value [lreplace $inputline 0 0] {
+	  lappend modelInfo($item)    $value
+	}
+
+      } elseif [regexp {^%([a-z]+)[ \t]+(.*)$}    $inputline allmatch item value] {
+	# everything else you can only have one of
+	set     modelInfo($item)      $value
+      }
+    }
+  }
+  
+  # close the file
+  close $fp
+}
+
+#
+# extract information from a model .h file
+#
+proc ReadHFile   { filename infovar } {
+  upvar $infovar modelInfo
+  
+  # open the file, or return
+  if [catch {set fp [open $filename r]}] return
+  
+  # read the file one line at a time, looking for read port and write port declarations
+  while { [gets $fp inputline] >= 0 } {
+    if [regexp {^[ \t]*(Read|Write)Port<(.*)>[ \t]+([a-zA-Z_0-9]+)[ \t]*;} \
+               $inputline allmatch kind type name                                     ] {
+      switch $kind Read {set dir inputs} Write {set dir outputs}
+      lappend modelInfo($dir) $name
+    }
+  }
+
+  # close the file
+  close $fp
+}
+
+#
+# extract information from a model .cpp file
+proc ReadCppFile { filename infovar } {
+  upvar $infovar modelInfo
+  
+  # open the file, or return
+  if [catch {set fp [open $filename r]}] return
+  
+  # read the file one line at a time, looking for read & write port .Init calls,
+  # and extract the actual port name connected to.
+  while { [gets $fp inputline] >= 0 } {
+    if [regexp {^[ \t]*([a-zA-Z_0-9]+)[ \t]*\.[ \t]*Init[ \t]*\([ \t]*\"(.*)\"} \
+               $inputline allmatch member portname                              ] {
+      if       { 0 <= [set idx [lsearch  $modelInfo(inputs)  $member]] } {
+        set modelInfo(inputs)  [lreplace $modelInfo(inputs)  $idx $idx $portname]
+      } elseif { 0 <= [set idx [lsearch  $modelInfo(outputs) $member]] } {
+        set modelInfo(outputs) [lreplace $modelInfo(outputs) $idx $idx $portname]
+      }
+    }
+  }
+
+  # close the file
+  close $fp
+}
+
+#
+# extract information from an AWB/h/cpp file triplet.
+# The name of the .h and .cpp file are taken from the %public and %private
+# declarations found in the .awb file.
+#
+proc ReadModelFiles { filenamebase infovar } {
+  upvar $infovar modelInfo
+  ReadAwbFile   $filenamebase.awb modelInfo
+  foreach fil $modelInfo(public) {
+    ReadHFile   $fil              modelInfo
+  }
+  foreach fil $modelInfo(private) {
+    ReadCppFile $fil              modelInfo
+  }
+}
+
+#
+# draw a model component's box, with text above and below it
+#
+proc DrawModelBox { canv left top width height above inside below boxcolor } {
+  global FIXEDFONT
+
+  # draw the module box:
+  $canv create rectangle ${left}p ${top}p [expr $left + $width]p [expr $top + $height]p -fill $boxcolor
+  
+  # add the name, provides, and description strings:
+  $canv create text [expr $left + ($width/2)]p ${top}p                -anchor s -text $above
+  $canv create text [expr $left + ($width/2)]p ${top}p                -anchor n -text $inside -font $FIXEDFONT
+  $canv create text [expr $left + ($width/2)]p [expr $top + $height]p -anchor n -text $below
+}
+
+#
+# draw a model components input or output ports
+#
+proc DrawModelBoxIo { canv x y ystride portlist anchor justify } {
+  global FIXEDFONT
+
+  foreach p $portlist {
+    $canv create text $x $y -text $p -anchor $anchor -justify $justify -font $FIXEDFONT
+    incr y $ystride
+  }
+}
+
+#
+# create a display of a model.
+# Draw a box, with input ports on the left, and output ports on the right.
+#
+proc DrawModel { winroot infovar } {
+  upvar $infovar modelInfo
+  global CHARHEIGHT CHARWIDTH  CANVASCOLOR MODELCOLOR SUBMODCOLOR
+  
+  # destroy any previous display window
+  if [winfo exists $winroot.mview] {destroy $winroot.mview}
+  
+  #
+  # figure out the size we need.  All sizes are in terms of font points.
+  #
+  
+  # the height of the model's box is determined by the maximum of
+  # the number of inputs, number of outputs, or number of submodules
+  set reqlines [llength $modelInfo(requires)]
+  set inplines [llength $modelInfo(inputs)  ]
+  set outlines [llength $modelInfo(outputs) ]
+  set  bhlines [expr $reqlines * 4]
+  if {$bhlines < $inplines} {set bhlines $inplines}
+  if {$bhlines < $outlines} {set bhlines $outlines}
+  if {$bhlines <         5} {set bhlines         5}
+  incr bhlines 2
+  set bheight [expr $CHARHEIGHT * $bhlines]
+  
+  # the width of the model's box is determined by the length of the requires or provides strings
+  # and the length of the name and description strings
+  set namelen [string length $modelInfo(name)    ]
+  set provlen [string length $modelInfo(provides)]
+  set desclen [string length $modelInfo(desc)    ]
+  set  bwchars   $provlen
+# if {$bwchars < $namelen} {set bwchars $namelen}
+# if {$bwchars < $desclen} {set bwchars $desclen}
+  foreach req $modelInfo(requires) {
+    set w [string length $req]
+    if {$w > $bwchars} {set bwchars $w}
+  }
+  incr bwchars 4
+  set bwidth [expr $CHARWIDTH * $bwchars]
+
+  # the canvas height is the model box height, plus space for
+  # the name above, the description below, and white space above and below that
+  set top     [expr $CHARHEIGHT * 2]
+  set bottom  [expr $CHARHEIGHT * 2]
+  set cheight [expr $top + $bheight + $bottom]
+  
+  # the canvas width is the model box width, plus space for
+  # inputs on the left, outputs on the right, and white space on either side
+  set left 10
+  foreach in $modelInfo(inputs) {
+    set l [string length $in]
+    if {$l > $left} {set left $l}
+  }
+  set left   [expr $CHARWIDTH * $left]
+  set right 10
+  foreach out $modelInfo(outputs) {
+    set l [string length $out]
+    if {$l > $right} {set right $l}
+  }
+  set right  [expr $CHARWIDTH * $right]
+  set cwidth [expr $left + $bwidth + $right]
+  
+  # create a new drawing canvas
+  canvas $winroot.mview -height ${cheight}p -width ${cwidth}p -background $CANVASCOLOR
+  pack   $winroot.mview -side left
+  
+  # draw the module box, with the name, provides, and description text
+  DrawModelBox   $winroot.mview $left $top $bwidth $bheight $modelInfo(name) $modelInfo(provides) $modelInfo(desc) $MODELCOLOR
+  DrawModelBoxIo $winroot.mview       $left                               [expr $top + (2 * $CHARHEIGHT)] $CHARHEIGHT $modelInfo(inputs)  e right
+  DrawModelBoxIo $winroot.mview [expr $left + $bwidth + (2 * $CHARWIDTH)] [expr $top + (2 * $CHARHEIGHT)] $CHARHEIGHT $modelInfo(outputs) w left
+ 
+  # for each of the required submodules, draw a box with the requires name
+  set subleft   [expr $left   + (2 * $CHARWIDTH) ]
+  set subtop    [expr $top    + (2 * $CHARHEIGHT)]
+  set subwidth  [expr $bwidth - (4 * $CHARWIDTH) ]
+  set subheight [expr            3 * $CHARHEIGHT ]
+  foreach req $modelInfo(requires) {
+    DrawModelBox $winroot.mview $subleft $subtop $subwidth $subheight {} $req {} $SUBMODCOLOR
+    incr subtop [expr 4 * $CHARHEIGHT]
+  }
+}
+
+#
+# create a text area displaying the model parameters.
+# Also create some buttons for editing the AWB, H, and CPP files.
+#
+proc DrawParams { winroot infovar } {
+  upvar $infovar modelInfo
+ 
+  # destroy any previous display window
+  if [winfo exists $winroot.pview] {destroy $winroot.pview}
+
+  # create a frame for this part of the display:
+  frame $winroot.pview
+
+  #
+  # for each of {attributes,param,const} create a text area to display them.
+  #
+  set displaylabel(param)      Parameters
+  set displaylabel(attributes) Attributes
+  set displaylabel(const)      Constants
+  foreach thing [array names displaylabel] {
+  
+    # the height is equal to the number of parameters we have.
+    # If there aren't any parameters, don't bother with this part of the display:
+    set height [llength $modelInfo($thing)]
+    if $height {
+      # create a label indicating these are the Parameters:
+      label $winroot.pview.lab$thing -text $displaylabel($thing):
+      pack  $winroot.pview.lab$thing -side top
+
+      # the width is the max length of any param name
+      set width 0
+      foreach p $modelInfo($thing) {
+	set l [string length $p]
+	if {$l > $width} {set width $l}
+      }
+
+      # create a text display area, and copy parameters into it
+      text $winroot.pview.dis$thing -height $height -width  $width
+      foreach p $modelInfo($thing) {
+	$winroot.pview.dis$thing insert end $p\n
+      }
+      pack $winroot.pview.dis$thing -side top
+    }
+    
+  }
+ 
+  #
+  # create buttons that pop you into your favorite editor for the AWB, H and C++ files
+  #
+  global env
+  button   $winroot.pview.editawb -text $modelInfo(awbfile) -command "exec $env(EDITOR) $modelInfo(awbfile) &"
+  pack     $winroot.pview.editawb -side top -expand 1 -fill x
+  foreach thing {public private} {
+    set n 0
+    foreach file $modelInfo($thing) {
+      button $winroot.pview.edit${thing}${n} -text $file -command "exec $env(EDITOR) $file &"
+      pack   $winroot.pview.edit${thing}${n} -side top   -expand 1   -fill x
+      incr   n
+    }
+  }
+
+  pack $winroot.pview -side   left    -anchor n
+}
+
+#
+# create a display of a model,
+# with the graphical display in a canvas on the left,
+# and the parameters displayed in a text area on the right.
+#
+proc DrawModelWithParams { winroot infovar } {
+  upvar $infovar modelInfo
+
+  DrawModel  $winroot modelInfo
+  DrawParams $winroot modelInfo
+}
+
+#
+# browse to open a model
+#
+proc OpenModel {} {
+  set filename [tk_getOpenFile      \
+    -defaultextension .awb          \
+    -initialdir       [pwd]         \
+    -title            {open model:} \
+    -filetypes {
+      { {AWB files}   {.awb} }
+    }
+  ]
+  # if the user didn't cancel, open the files and draw the model:
+  if { "$filename" != "" } {
+    cd                  [file dirname  $filename]
+    set filename        [file tail     $filename]
+    ReadModelFiles      [file rootname $filename] modelInfo
+    DrawModelWithParams {}                        modelInfo
+    wm title . $filename
+  }
+}
+
+#
+# display "help->about" info
+#
+proc HelpAbout {} {
+  tk_dialog .helpabout {About browse_model.tcl} {by Carl Beckmann, (c) Intel, 2006} {} 0 OK
+}
+
+##
+## main program
+##
+## Create the menu bar
+##
+menu .mainmenu
+menu .mainmenu.file -tearoff 0
+menu .mainmenu.help -tearoff 0
+.mainmenu add cascade -menu .mainmenu.file -label File
+.mainmenu add cascade -menu .mainmenu.help -label Help
+.mainmenu.file add command -label Open...  -command OpenModel
+.mainmenu.file add command -label Quit     -command exit
+.mainmenu.help add command -label About... -command HelpAbout
+. configure -menu .mainmenu

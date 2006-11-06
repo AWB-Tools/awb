@@ -1,0 +1,553 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# awbset
+#
+# setup environment for AWB and ASIM 
+# provides easy reconfigurability of source and build environments
+#
+# Usage: copy this file (awbset) into your home directory and add the
+# following line to your shell login file, e.g. ~/.cshrc:
+#     eval `~/awbset init [shell=<your_shell>]` >& /dev/null
+#     where <your_shell> is any of {sh,ash,ksh,zsh,bash,csh,tcsh}
+#                        defaults to csh
+# Customize the user configuration part of this file as you like, and then
+# source your ~/.cshrc file (which will happen automatically next time
+# you log in).
+#
+# Author:  Artur Klauser, VSSAD, (c) 2002
+#
+#
+# We are assuming the following directory structure:
+#   .../workspace/<ws1>/src/*       # the source tree
+#                      /build/*     # the build tree
+#                      /config/*    # local (private) configs
+#                      /awb.config  # AWB workspace-config file
+#   .../workspace/<ws2>/*           # same structure as <ws1> and
+#                                   # completely separated from it; 
+#                                   # its awb.config needs to be customized;
+
+# setup some default behavior that we happen to like that way:
+# this is the default workspace set upon init when no enviroment is found;
+$default_workspace = "ipf";
+#
+# when we switch to a new workspace, and we find it here, we automatically
+# also switch to this model;
+%default_model = (
+  "ipf"         => "global  ipf/ape/ape_null_gtrace",
+  "alpha"       => "global  Arana/arana_atf_dev",
+  "network"     => "global  Network/swarm"
+);
+#
+# when we switch to a new workspace, and we find it here, we automatically
+# also switch to this benchmark;
+%default_benchmark = (
+  "ipf"         => "global  Traces/GTrace/Test/test-gtrace",
+  "alpha"       => "global  Atf/Regression/Level-A/A-ATF-tpcd_q12_4pe_1",
+  "network"     => "global  Network/Swarm/swarm_random_2"
+);
+
+$basedir = "/home/$ENV{USER}/work/workspace";
+$resolver = "awb-resolver";
+
+#############################################################################
+# end of user configuration section
+#############################################################################
+
+sub Help {
+  printf STDERR << "EOF";
+
+Usage: awbset <command> [arguments]
+  commands:
+    init [flags]
+    setworkspace <workspace_name>
+    setmodel (global|local) <model_name>
+    setbenchmark (global|local) <benchmark_name>
+    whichworkspace
+    whichmodel [global|local]
+    whichbenchmark [global|local]
+    which
+    listworkspaces
+    listmodels [global|local]
+    listbenchmarks [global|local]
+    help
+
+EOF
+}
+
+if ($#ARGV < 0) {
+  die "ERROR: awbset: no command given\n";
+}
+
+$command = shift @ARGV;
+
+if ($0 !~ m|^/|) {
+  # expand relative path
+  $cwd = `pwd`;
+  chomp $cwd;
+  $0 = "$cwd/$0";
+}
+
+# hashes for information passed in/out to the shell
+%shellalias = ();
+%shellenv = ();
+%shellvar = ();
+%opt = ("shell" => "csh");
+
+# pass shell state into this script
+ParsePersistentState();
+
+if ("\L$command" eq "help") {
+  Help();
+  exit 0;
+} elsif ("\L$command" eq "init") {
+  ParseFlags(join ' ', @ARGV);
+  SetFlags();
+  if (! defined $shellenv{AWB_MODEL} || $shellenv{AWB_MODEL} eq "") {
+    SetWorkspace($default_workspace);
+  }
+} elsif ("\L$command" eq "setworkspace") {
+  $workspace = shift @ARGV;
+  if (! defined $workspace || $workspace eq "") {
+    $workspace = $default_workspace;
+  }
+  SetWorkspace($workspace);
+} elsif ("\L$command" eq "setmodel") {
+  $location = shift @ARGV;
+  $model = shift @ARGV;
+  SetModel($location, $model);
+} elsif ("\L$command" eq "setbenchmark") {
+  $location = shift @ARGV;
+  $benchmark = shift @ARGV;
+  SetBenchmark($location, $benchmark);
+} elsif ("\L$command" eq "whichworkspace") {
+  WhichWorkspace();
+  exit 0;
+} elsif ("\L$command" eq "whichmodel") {
+  WhichModel();
+  exit 0;
+} elsif ("\L$command" eq "whichbenchmark") {
+  WhichBenchmark();
+  exit 0;
+} elsif ("\L$command" eq "which") {
+  WhichWorkspace();
+  WhichModel();
+  WhichBenchmark();
+  exit 0;
+} elsif ("\L$command" eq "listworkspaces") {
+  ListWorkspaces();
+} elsif ("\L$command" eq "listmodels") {
+  $location = shift @ARGV;
+  $location = ""  if (! defined $location);
+  ListModels($location);
+} elsif ("\L$command" eq "listbenchmarks") {
+  $location = shift @ARGV;
+  $location = ""  if (! defined $location);
+  ListBenchmarks($location);
+} else {
+  printf STDERR "ERROR: awbset: unknown command $command\n";
+  Help();
+  exit 1;
+}
+
+# prepare new shell environment and helpers
+$shellenv{"AWBLOCAL"} = $shellenv{"AWB_WORKSPACE"};
+#
+# test if resolver seems to work
+chomp($restest = `$resolver -config searchpath`);
+if ($? != 0) {
+  print "can't execute resolver \"$resolver\" - fix your PATH\n";
+  exit 1;
+}
+if ($restest eq "") {
+  print "can't read awb.config file - fix your AWBLOCAL environment\n";
+  exit 1;
+}
+#
+# awb command helpers
+$shellalias{"ac"} = "asim -pm \"$shellenv{AWB_MODEL}\"".
+                        " -bm \"$shellenv{AWB_BENCHMARK}\" __ARGV__";
+$shellalias{"amc"} = "amc --model \"$shellenv{AWB_MODEL}\"".
+                        " --benchmark \"$shellenv{AWB_BENCHMARK}\" __ARGV__";
+#
+# cd helpers
+$shellalias{"src"} = "cd $shellenv{AWBLOCAL}/src/";
+$cfgbase = $shellenv{AWB_MODEL};
+$cfgbase =~ s/\.(apm|cfg)$//;
+$cfgbase =~ s/^.*\///;
+$shellalias{"bm"} = "cd $shellenv{AWBLOCAL}/build/$cfgbase/bm";
+$shellalias{"pm"} = "cd $shellenv{AWBLOCAL}/build/$cfgbase/pm";
+chomp($builddir = `$resolver -config builddir`);
+$shellalias{"bd"} = "cd $builddir";
+$shellalias{"regtest"} = "$shellenv{AWBLOCAL}/run/regtest";
+#
+# awbset helpers - now this is if you are REALLY lazy ;)
+$shellalias{"awbset"} = "$0 __ARGV__";
+$shellalias{"ar"} = "$resolver __ARGV__";
+$shellalias{"as"} = "asim-shell __ARGV__";
+$shellalias{"aw"} = "eval `awbset setworkspace __ARGV__`";
+$shellalias{"am"} = "eval `awbset setmodel global __ARGV__`";
+$shellalias{"aml"} = "eval `awbset setmodel local __ARGV__`";
+$shellalias{"ab"} = "eval `awbset setbenchmark global __ARGV__`";
+$shellalias{"abl"} = "eval `awbset setbenchmark local __ARGV__`";
+$shellalias{"ww"} = "awbset whichworkspace";
+$shellalias{"wm"} = "awbset whichmodel";
+$shellalias{"wb"} = "awbset whichbenchmark";
+$shellalias{"wa"} = "awbset which";
+$shellalias{"lw"} = "awbset listworkspaces";
+$shellalias{"lm"} = "awbset listmodels __ARGV__";
+$shellalias{"lml"} = "awbset listmodels local";
+$shellalias{"lb"} = "awbset listbenchmarks __ARGV__";
+$shellalias{"lbl"} = "awbset listbenchmarks local";
+
+# expose necessary changes to the calling shell
+ShellExpose();
+
+exit 0;
+
+#----------------------------------------------------------------------------
+
+sub ParseFlags {
+  my ($flag, $key, $value);
+  my ($flags) = shift;
+
+  foreach $flag (split /\s+/, $flags) {
+    ($key, $value) = split /\s*=\s*/, $flag;
+    $value = 1  if (! defined $value || $value eq "");
+    $opt{$key} = $value;
+  }
+}
+
+sub ParsePersistentState {
+  my ($flag, $key, $value);
+
+  # load relevant environment
+  foreach $key (keys %ENV) {
+    if ($key =~ /^AWB_/) {
+      $shellenv{$key} = $ENV{$key};
+    }
+  }
+
+  # parse flags
+  if (defined $shellenv{"AWB_FLAGS"}) {
+    ParseFlags($shellenv{"AWB_FLAGS"});
+  }
+}
+
+sub SetFlags {
+  my ($flags, $key, $value);
+
+  $flags = "";
+  foreach $key (sort keys %opt) {
+    $flags .= "$key=$opt{$key} ";
+  }
+  $flags =~ s/\s*$//;
+  $shellenv{"AWB_FLAGS"} = $flags;
+}
+
+sub SetWorkspace {
+  $workspace = shift;
+  $workspacedir = "$basedir/$workspace";
+  if (! -d $workspacedir ) {
+    printf STDERR "can't find ASIM workspace \"$workspace\"\n";
+    ListWorkspaces();
+  } else {
+    $ENV{"AWBLOCAL"} = $workspacedir;
+    $shellenv{"AWB_WORKSPACE"} = $workspacedir;
+  }
+  WhichWorkspace();
+
+  if (defined $default_model{$workspace}) {
+    my ($location, $model) = split /\s+/, $default_model{$workspace};
+    SetModel($location, $model);
+  } elsif (! defined $shellenv{"AWB_MODEL"}) {
+    $shellenv{"AWB_MODEL"} = "";
+  }
+
+  if (defined $default_benchmark{$workspace}) {
+    my ($location, $benchmark) = split /\s+/, $default_benchmark{$workspace};
+    SetBenchmark($location, $benchmark);
+  } elsif (! defined $shellenv{"AWB_BENCHMARK"}) {
+    $shellenv{"AWB_BENCHMARK"} = "";
+  }
+}
+
+sub SetModel {
+  $location = shift;
+  $model = shift;
+  $dir = GetModelDir($location);
+  if (defined $model && $model ne "") {
+    chomp($modelfile = `$resolver -q $dir/$model.apm`);
+    $modelfile =~ s/\n/ /g;
+    if (! -e $modelfile) {
+      # try old .cfg instead
+      chomp($modelfile = `$resolver -q $dir/$model.cfg`);
+      $modelfile =~ s/\n/ /g;
+    }
+    if (! -e $modelfile) {
+      printf STDERR "can't find ASIM %smodel \"$model\"\n",
+        $location eq "local" ? "local " : "";
+      ListModels($location);
+    } else {
+      $shellenv{"AWB_MODEL"} = $modelfile;
+    }
+  } else {
+    printf STDERR "no AWB %smodel specified\n",
+      $location eq "local" ? "local " : "";
+    ListModels($location);
+  }
+  WhichModel();
+}
+
+sub SetBenchmark {
+  $location = shift;
+  $benchmark = shift;
+  $dir = GetBenchmarkDir($location);
+  if (defined $benchmark && $benchmark ne "") {
+    chomp($benchmarkfile = `$resolver -q $dir/$benchmark.config`);
+    $benchmarkfile =~ s/\n/ /g;
+    if (! -e $benchmarkfile) {
+      # try old .cfg instead
+      chomp($benchmarkfile = `$resolver -q $dir/$benchmark.cfg`);
+      $benchmarkfile =~ s/\n/ /g;
+    }
+    if (! -e $benchmarkfile) {
+      printf STDERR "can't find ASIM %sbenchmark \"$benchmark\"\n",
+        $location eq "local" ? "local " : "";
+      ListBenchmarks($location);
+    } else {
+      $shellenv{"AWB_BENCHMARK"} = $benchmarkfile;
+    }
+  } else {
+    printf STDERR "no AWB %sbenchmark specified\n",
+      $location eq "local" ? "local " : "";
+    ListBenchmarks($location);
+  }
+  WhichBenchmark();
+}
+
+sub ListWorkspaces {
+  my ($file);
+
+  chdir $basedir or die "can't cd to $basedir\n";
+  printf STDERR "Possible ASIM workspace names:\n";
+  foreach $file (<*>) {
+    if (-d $file) {
+      printf STDERR "  $file\n";
+    }
+  }
+  exit 0;
+}
+
+sub GetModelDir {
+  my $location = shift;
+
+  if ("\L$location" eq "local") {
+    return "$shellenv{AWB_WORKSPACE}/config/pm";
+  } else {
+    # assume global
+    $ENV{"AWBLOCAL"} = $shellenv{AWB_WORKSPACE};
+    return "config/pm";
+  }
+}
+
+sub GetBenchmarkDir {
+  my $location = shift;
+
+  if ("\L$location" eq "local") {
+    return "$shellenv{AWB_WORKSPACE}/config/bm";
+  } else {
+    return "config/bm";
+  }
+}
+
+sub ListModels {
+  my ($file, $dir);
+  my $location = shift;
+
+  $dir = GetModelDir($location);
+  #chdir $dir or die "can't cd to $dir\n";
+  printf STDERR "Possible ASIM %smodel names for workspace $ENV{AWB_WORKSPACE}:\n",
+    $location eq "local" ? "local " : "";
+  ListModelsCore($dir,$dir);
+  exit 0;
+}
+
+sub ListModelsCore {
+  my ($file, $realfile);
+  my $dir = shift;
+  my $dropprefix = shift;
+
+  foreach $file (split ' ', `$resolver -glob "$dir/*"`) {
+    chomp $file;
+    next if $file =~ m/^(\.|\.\.|CVS|\.svn)$/;
+    chomp($realfile = `$resolver -q $file`);
+    if (-d $realfile) {
+      ListModelsCore($file,$dropprefix);
+    } elsif ($file =~ m/\.(apm|cfg)$/) {
+      $file =~ s/\.(apm|cfg)$//;
+      $file =~ s/^.\///;
+      $file =~ s/^$dropprefix\/?//;
+      printf STDERR "  $file\n";
+    }
+  }
+}
+
+sub ListBenchmarks {
+  my ($file, $dir);
+  my $location = shift;
+
+  $dir = GetBenchmarkDir($location);
+  #chdir $dir or die "can't cd to $dir\n";
+  printf STDERR "Possible ASIM %sbenchmark names for workspace $ENV{AWB_WORKSPACE}:\n",
+    $location eq "local" ? "local " : "";
+  ListBenchmarksCore($dir,$dir);
+  exit 0;
+}
+
+sub ListBenchmarksCore {
+  my ($file, $realfile);
+  my $dir = shift;
+  my $dropprefix = shift;
+
+  foreach $file (split ' ', `$resolver -glob "$dir/*"`) {
+    chomp $file;
+    next if $file =~ m/^(\.|\.\.|CVS|\.svn)$/;
+    chomp($realfile = `$resolver -q $file`);
+    if (-d $realfile) {
+      ListBenchmarksCore($file,$dropprefix);
+    } elsif ($file =~ m/\.(config|cfg)$/) {
+      $file =~ s/\.(config|cfg)$//;
+      $file =~ s/^.\///;
+      $file =~ s/^$dropprefix\/?//;
+      printf STDERR "  $file\n";
+    }
+  }
+}
+
+sub WhichWorkspace {
+  my $workspace = $shellenv{AWB_WORKSPACE};
+
+  $workspace =~ s|$basedir/||;
+  printf STDERR "ASIM workspace set to \"$workspace\"\n";
+}
+
+sub WhichModel {
+  my $workspace = $shellenv{AWB_WORKSPACE};
+  my $model = $shellenv{AWB_MODEL};
+
+  # strip config prefix
+  # local prefix
+  $model =~ s|$workspace/config/pm/||;
+  # global prefix
+  chomp($searchpath = `$resolver -config searchpath`);
+  $searchpath =~ s/\s+/|/g; # prepare for multimatch
+  $model =~ s|($searchpath)/config/pm/||;
+  # strip off trailing junk
+  $model =~ s/\.(apm|cfg)$//;
+  printf STDERR "ASIM model set to \"$model\"\n";
+}
+
+sub WhichBenchmark {
+  my $workspace = $shellenv{AWB_WORKSPACE};
+  my $benchmark = $shellenv{AWB_BENCHMARK};
+
+  # strip config prefix
+  # local prefix
+  $benchmark =~ s|$workspace/config/bm/||;
+  # global prefix
+  chomp($searchpath = `$resolver -config searchpath`);
+  $searchpath =~ s/\s+/|/g; # prepare for multimatch
+  $benchmark =~ s|($searchpath)/config/bm/||;
+  # strip off trailing junk
+  $benchmark =~ s/\.(config|cfg)$//;
+  printf STDERR "ASIM benchmark set to \"$benchmark\"\n";
+}
+
+sub ShellExpose {
+  my ($key, $value);
+
+  foreach $key (keys %shellenv) {
+    $value = $shellenv{$key};
+    ShellSetEnv($key, $value);
+  }
+  foreach $key (keys %shellvar) {
+    $value = $shellvar{$key};
+    ShellSetVar($key, $value);
+  }
+  foreach $key (keys %shellalias) {
+    $value = $shellalias{$key};
+    ShellSetAlias($key, $value);
+  }
+}
+
+sub ShellSetEnv {
+  my $envname = shift;
+  my $envvalue = shift;
+
+  if ($opt{"shell"} =~ /^(csh|tcsh)$/i) {
+    printf "setenv $envname '$envvalue';\n";
+  } elsif ($opt{"shell"} =~ /^(sh)$/i) {
+    printf "$envname='$envvalue'; export $envname;\n";
+  } elsif ($opt{"shell"} =~ /^(zsh|ksh|bash|ash)$/i) {
+    printf "export $envname='$envvalue';\n";
+  } else {
+    die "ERROR: awbset: unknown shell type \"$opt{shell}\"\n";
+  }
+}
+
+sub ShellSetVar {
+  my $varname = shift;
+  my $varvalue = shift;
+
+  if ($opt{"shell"} =~ /^(csh|tcsh)$/i) {
+    printf "set $varname='$varvalue';\n";
+  } elsif ($opt{"shell"} =~ /^(sh|zsh|ksh|bash|ash)$/i) {
+    printf "$varname='$varvalue';\n";
+  } else {
+    die "ERROR: awbset: unknown shell type \"$opt{shell}\"\n";
+  }
+}
+
+sub ShellSetAlias {
+  my $aliasname = shift;
+  my $aliasvalue = shift;
+
+  if ($opt{"shell"} =~ /^(csh|tcsh)$/i) {
+    $aliasvalue =~ s/__ARGV__/\\!*/g;
+    printf "alias $aliasname '$aliasvalue';\n";
+  } elsif ($opt{"shell"} =~ /^(zsh|ksh|bash)$/i) {
+    # zsh aliases are only one-word-at-a-time replacements and don't
+    # have a concept of positional parameters;
+    # so we use zsh functions instead;
+    $aliasvalue =~ s/__ARGV__/\$\@/g;
+    printf "function $aliasname { $aliasvalue;};\n";
+  } elsif ($opt{"shell"} =~ /^(sh|ash)$/i) {
+    # same idea as zsh, but different syntax
+    $aliasvalue =~ s/__ARGV__/\$\@/g;
+    printf "$aliasname () { $aliasvalue; };\n";
+  } else {
+    die "ERROR: awbset: unknown shell type \"$opt{shell}\"\n";
+  }
+}

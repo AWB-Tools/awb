@@ -1,0 +1,1284 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>apm_edit</class>
+<widget class="QMainWindow">
+    <property name="name">
+        <cstring>apm_edit</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>726</width>
+            <height>512</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>apm-edit</string>
+    </property>
+    <vbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <property name="margin">
+            <number>11</number>
+        </property>
+        <property name="spacing">
+            <number>6</number>
+        </property>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>Layout4</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <property name="margin">
+                    <number>0</number>
+                </property>
+                <property name="spacing">
+                    <number>6</number>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>TextLabel1</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>100</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>Name:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>Name</cstring>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enter the name of the model here</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Enter into this field the name of the model</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>Layout6</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <property name="margin">
+                    <number>0</number>
+                </property>
+                <property name="spacing">
+                    <number>6</number>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>TextLabel1_2</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>100</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>Description:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>Description</cstring>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enter a description of the model here</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Enter into this field a description of the model</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>Layout5</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <property name="margin">
+                    <number>0</number>
+                </property>
+                <property name="spacing">
+                    <number>6</number>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>TextLabel1_3</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>100</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>Attributes:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>Attributes</cstring>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enter a space separated list of attributes of the model</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Enter into this field a space separated list of attributes for the model. These attributes are used to determine the default module when the autoselect button is toggled.</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>Autoselect</cstring>
+                    </property>
+                    <property name="text">
+                        <string>Autoselect</string>
+                    </property>
+                    <property name="toggleButton">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Toggle Autoselect to cause modules to be autoselected by attribute</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>When this button is toggled, clicking on an undefined module in the "Model" pane will result in the 'best' module (based on the model attributes) to be automatically chosen.</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QSplitter">
+            <property name="name">
+                <cstring>Splitter10</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Vertical</enum>
+            </property>
+            <widget class="QListView">
+                <column>
+                    <property name="text">
+                        <string>Type</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizeable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property name="text">
+                        <string>Implementation</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizeable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+            <item>
+                <property name="text">
+                    <string>Model</string>
+                </property>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </item>
+                <property name="name">
+                    <cstring>Model</cstring>
+                </property>
+                <property name="rootIsDecorated">
+                    <bool>true</bool>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Select a module to insert or replace</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type "model". Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the "Alternative Modules" pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
+                </property>
+            </widget>
+            <widget class="QSplitter">
+                <property name="name">
+                    <cstring>Splitter9</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>Layout38</cstring>
+                    </property>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <property name="margin">
+                            <number>0</number>
+                        </property>
+                        <property name="spacing">
+                            <number>6</number>
+                        </property>
+                        <widget class="QListView">
+                            <column>
+                                <property name="text">
+                                    <string>Alternative Modules</string>
+                                </property>
+                                <property name="clickable">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="resizeable">
+                                    <bool>true</bool>
+                                </property>
+                            </column>
+                            <property name="name">
+                                <cstring>Alternatives</cstring>
+                            </property>
+                            <property name="toolTip" stdset="0">
+                                <string>Double click an alternative module to replace the current module in the model</string>
+                            </property>
+                            <property name="whatsThis" stdset="0">
+                                <string>This pane shows the possible alternatives for the module selected in the "Model" pane. The currently selected module here is described in the "Description" pane to the right. Double clicking on a module will insert the selected module into the model.</string>
+                            </property>
+                        </widget>
+                        <widget class="QPushButton">
+                            <property name="name">
+                                <cstring>cacheRefresh</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Refresh</string>
+                            </property>
+                            <property name="toolTip" stdset="0">
+                                <string>Refresh the module database cache</string>
+                            </property>
+                            <property name="whatsThis" stdset="0">
+                                <string>The list of available modules is maintained in a cache. If a newly created module is not being offered as an alternative, click here to refresh the cache.</string>
+                            </property>
+                        </widget>
+                    </vbox>
+                </widget>
+                <widget class="QLayoutWidget">
+                    <property name="name">
+                        <cstring>Layout40</cstring>
+                    </property>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <property name="margin">
+                            <number>0</number>
+                        </property>
+                        <property name="spacing">
+                            <number>6</number>
+                        </property>
+                        <widget class="QListBox">
+                            <property name="name">
+                                <cstring>Info</cstring>
+                            </property>
+                            <property name="toolTip" stdset="0">
+                                <string>Description of module selected in alternatives pane to the left</string>
+                            </property>
+                            <property name="whatsThis" stdset="0">
+                                <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+                            </property>
+                        </widget>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>Layout39</cstring>
+                            </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <property name="margin">
+                                    <number>0</number>
+                                </property>
+                                <property name="spacing">
+                                    <number>6</number>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>ParamName</cstring>
+                                    </property>
+                                    <property name="enabled">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>200</width>
+                                            <height>0</height>
+                                        </size>
+                                    </property>
+                                    <property name="text">
+                                        <string>Parameter</string>
+                                    </property>
+                                    <property name="alignment">
+                                        <set>AlignVCenter|AlignRight</set>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit">
+                                    <property name="name">
+                                        <cstring>ParamValue</cstring>
+                                    </property>
+                                    <property name="enabled">
+                                        <bool>false</bool>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>New value for this parameter</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+                                    </property>
+                                </widget>
+                                <widget class="QPushButton">
+                                    <property name="name">
+                                        <cstring>ParamChange</cstring>
+                                    </property>
+                                    <property name="enabled">
+                                        <bool>false</bool>
+                                    </property>
+                                    <property name="text">
+                                        <string>Change</string>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Change value for this parameter</string>
+                                    </property>
+                                </widget>
+                            </hbox>
+                        </widget>
+                    </vbox>
+                </widget>
+            </widget>
+        </widget>
+    </vbox>
+</widget>
+<menubar>
+    <property name="name">
+        <cstring>menubar</cstring>
+    </property>
+    <item text="&amp;File" name="fileMenu">
+        <action name="fileNewAction"/>
+        <action name="fileOpenAction"/>
+        <action name="fileSaveAction"/>
+        <action name="fileSaveAsAction"/>
+        <separator/>
+        <action name="filePrintAction"/>
+        <separator/>
+        <action name="fileExitAction"/>
+    </item>
+    <item text="&amp;Edit" name="editMenu">
+        <action name="editUndoAction"/>
+        <action name="editRedoAction"/>
+        <separator/>
+        <action name="editCutAction"/>
+        <action name="editCopyAction"/>
+        <action name="editPasteAction"/>
+        <separator/>
+        <action name="editFindAction"/>
+        <action name="editFindMissingAction"/>
+    </item>
+    <item text="Model" name="PopupMenu">
+        <action name="modelNukeAction"/>
+        <action name="modelConfigureAction"/>
+        <action name="modelBuildAction"/>
+        <separator/>
+        <action name="modelAutoBuild"/>
+        <action name="modelRefresh"/>
+    </item>
+    <item text="Module" name="moduleMenu">
+        <action name="moduleNewAction"/>
+        <separator/>
+        <action name="moduleEditAction"/>
+        <separator/>
+        <action name="InsertActionGroup"/>
+        <action name="moduleDeleteAction"/>
+    </item>
+    <item text="&amp;Help" name="helpMenu">
+        <action name="helpContentsAction"/>
+        <action name="helpIndexAction"/>
+        <separator/>
+        <action name="helpAboutAction"/>
+    </item>
+</menubar>
+<toolbars>
+    <toolbar dock="2">
+        <property name="name">
+            <cstring>Toolbar</cstring>
+        </property>
+        <property name="label">
+            <string>Toolbar</string>
+        </property>
+        <action name="fileNewAction"/>
+        <action name="fileOpenAction"/>
+        <action name="fileSaveAction"/>
+        <action name="filePrintAction"/>
+    </toolbar>
+    <toolbar dock="2">
+        <property name="name">
+            <cstring>Toolbar_2</cstring>
+        </property>
+        <property name="label">
+            <string>Toolbar_2</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>TextLabel1_4</cstring>
+            </property>
+            <property name="text">
+                <string>Search</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>Search</cstring>
+            </property>
+            <property name="minimumSize">
+                <size>
+                    <width>200</width>
+                    <height>0</height>
+                </size>
+            </property>
+        </widget>
+    </toolbar>
+    <toolbar dock="2">
+        <property name="name">
+            <cstring>Toolbar_3</cstring>
+        </property>
+        <property name="label">
+            <string>Toolbar_3</string>
+        </property>
+        <action name="helpWhatsThisAction"/>
+    </toolbar>
+</toolbars>
+<actions>
+    <action>
+        <property name="name">
+            <cstring>fileNewAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>filenew.png</iconset>
+        </property>
+        <property name="text">
+            <string>New</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;New</string>
+        </property>
+        <property name="accel">
+            <number>4194382</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileOpenAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>fileopen.png</iconset>
+        </property>
+        <property name="text">
+            <string>Open</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Open...</string>
+        </property>
+        <property name="accel">
+            <number>4194383</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileSaveAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>filesave.png</iconset>
+        </property>
+        <property name="text">
+            <string>Save</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Save</string>
+        </property>
+        <property name="accel">
+            <number>4194387</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileSaveAsAction</cstring>
+        </property>
+        <property name="text">
+            <string>Save As</string>
+        </property>
+        <property name="menuText">
+            <string>Save &amp;As...</string>
+        </property>
+        <property name="accel">
+            <number>0</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>filePrintAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>print.png</iconset>
+        </property>
+        <property name="text">
+            <string>Print</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Print...</string>
+        </property>
+        <property name="accel">
+            <number>4194384</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileExitAction</cstring>
+        </property>
+        <property name="text">
+            <string>Exit</string>
+        </property>
+        <property name="menuText">
+            <string>E&amp;xit</string>
+        </property>
+        <property name="accel">
+            <number>4194385</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editUndoAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>undo.png</iconset>
+        </property>
+        <property name="text">
+            <string>Undo</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Undo</string>
+        </property>
+        <property name="accel">
+            <number>4194394</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editRedoAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>redo.png</iconset>
+        </property>
+        <property name="text">
+            <string>Redo</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Redo</string>
+        </property>
+        <property name="accel">
+            <number>4194393</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editCutAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>editcut.png</iconset>
+        </property>
+        <property name="text">
+            <string>Cut</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Cut</string>
+        </property>
+        <property name="accel">
+            <number>4194392</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editCopyAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>editcopy.png</iconset>
+        </property>
+        <property name="text">
+            <string>Copy</string>
+        </property>
+        <property name="menuText">
+            <string>C&amp;opy</string>
+        </property>
+        <property name="accel">
+            <number>4194371</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editPasteAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>editpaste.png</iconset>
+        </property>
+        <property name="text">
+            <string>Paste</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Paste</string>
+        </property>
+        <property name="accel">
+            <number>4194390</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editFindAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>searchfind.png</iconset>
+        </property>
+        <property name="text">
+            <string>Find</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Find...</string>
+        </property>
+        <property name="accel">
+            <number>4194374</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpContentsAction</cstring>
+        </property>
+        <property name="text">
+            <string>Contents</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Contents...</string>
+        </property>
+        <property name="accel">
+            <number>0</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpIndexAction</cstring>
+        </property>
+        <property name="text">
+            <string>Index</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Index...</string>
+        </property>
+        <property name="accel">
+            <number>0</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpAboutAction</cstring>
+        </property>
+        <property name="text">
+            <string>About</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;About...</string>
+        </property>
+        <property name="accel">
+            <number>0</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleViewSourceAction</cstring>
+        </property>
+        <property name="text">
+            <string>View source</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleViewAwbAction</cstring>
+        </property>
+        <property name="text">
+            <string>View AWB</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleReplaceAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Replace</string>
+        </property>
+        <property name="toolTip">
+            <string>Replace the selected module with the module selected in the alternative modules pane</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleDeleteAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Delete</string>
+        </property>
+        <property name="toolTip">
+            <string>Delete the selected module or submodel from the model</string>
+        </property>
+        <property name="accel">
+            <number>4194372</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelAutoBuild</cstring>
+        </property>
+        <property name="text">
+            <string>Autobuild</string>
+        </property>
+        <property name="toolTip">
+            <string>Automatically build model based on attributes</string>
+        </property>
+        <property name="accel">
+            <number>4194370</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelRefresh</cstring>
+        </property>
+        <property name="text">
+            <string>Refresh</string>
+        </property>
+        <property name="statusTip">
+            <string>Refresh module database and current model</string>
+        </property>
+        <property name="accel">
+            <number>4194380</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editFindMissingAction</cstring>
+        </property>
+        <property name="text">
+            <string>Find Missing</string>
+        </property>
+        <property name="accel">
+            <number>4194381</number>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpWhatsThisAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>whatsthis.png</iconset>
+        </property>
+        <property name="text">
+            <string>What's this</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelConfigureAction</cstring>
+        </property>
+        <property name="text">
+            <string>Configure</string>
+        </property>
+        <property name="toolTip">
+            <string>Configure a model</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelBuildAction</cstring>
+        </property>
+        <property name="text">
+            <string>Build</string>
+        </property>
+        <property name="toolTip">
+            <string>Build model</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelNukeAction</cstring>
+        </property>
+        <property name="text">
+            <string>Clean</string>
+        </property>
+        <property name="toolTip">
+            <string>Clean (Nuke) model</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleNewAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;New</string>
+        </property>
+        <property name="toolTip">
+            <string>Create new module</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleEditAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Edit</string>
+        </property>
+        <property name="toolTip">
+            <string>Edit the selected module or submodel</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleAddSubmodelAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Add submodel</string>
+        </property>
+    </action>
+    <actiongroup>
+        <property name="name">
+            <cstring>InsertActionGroup</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Insert</string>
+        </property>
+        <property name="usesDropDown">
+            <bool>true</bool>
+        </property>
+        <action>
+            <property name="name">
+                <cstring>moduleInsertModuleAction</cstring>
+            </property>
+            <property name="toggleAction">
+                <bool>false</bool>
+            </property>
+            <property name="text">
+                <string>Module</string>
+            </property>
+            <property name="toolTip">
+                <string>Insert a module</string>
+            </property>
+        </action>
+        <action>
+            <property name="name">
+                <cstring>moduleInsertSubmodelAction</cstring>
+            </property>
+            <property name="toggleAction">
+                <bool>false</bool>
+            </property>
+            <property name="text">
+                <string>Submodel</string>
+            </property>
+            <property name="toolTip">
+                <string>Insert a submodel</string>
+            </property>
+        </action>
+        <action>
+            <property name="name">
+                <cstring>moduleInsertAsRootAction</cstring>
+            </property>
+            <property name="toggleAction">
+                <bool>false</bool>
+            </property>
+            <property name="text">
+                <string>As root</string>
+            </property>
+            <property name="toolTip">
+                <string>Reinsert selected module as root of model</string>
+            </property>
+        </action>
+    </actiongroup>
+</actions>
+<connections>
+    <connection>
+        <sender>fileNewAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>fileNew()</slot>
+    </connection>
+    <connection>
+        <sender>fileOpenAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>fileOpen()</slot>
+    </connection>
+    <connection>
+        <sender>fileSaveAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>fileSave()</slot>
+    </connection>
+    <connection>
+        <sender>fileSaveAsAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>fileSaveAs()</slot>
+    </connection>
+    <connection>
+        <sender>filePrintAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>filePrint()</slot>
+    </connection>
+    <connection>
+        <sender>editUndoAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editUndo()</slot>
+    </connection>
+    <connection>
+        <sender>editRedoAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editRedo()</slot>
+    </connection>
+    <connection>
+        <sender>editCutAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editCut()</slot>
+    </connection>
+    <connection>
+        <sender>editCopyAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editCopy()</slot>
+    </connection>
+    <connection>
+        <sender>editPasteAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editPaste()</slot>
+    </connection>
+    <connection>
+        <sender>editFindAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editFind()</slot>
+    </connection>
+    <connection>
+        <sender>helpIndexAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>helpIndex()</slot>
+    </connection>
+    <connection>
+        <sender>helpContentsAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>helpContents()</slot>
+    </connection>
+    <connection>
+        <sender>helpAboutAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>helpAbout()</slot>
+    </connection>
+    <connection>
+        <sender>Name</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Name_textChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>Description</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Description_textChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>Attributes</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Attributes_textChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>Model</sender>
+        <signal>contextMenuRequested(QListViewItem*,const QPoint&amp;,int)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Model_contextMenuRequested(QListViewItem*,const QPoint&amp;,int)</slot>
+    </connection>
+    <connection>
+        <sender>moduleReplaceAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleReplaceAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleViewAwbAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleViewAwbAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleViewSourceAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleViewSourceAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>Model</sender>
+        <signal>selectionChanged(QListViewItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Model_selectionChanged(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>Alternatives</sender>
+        <signal>selectionChanged(QListViewItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Alternatives_selectionChanged(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>Alternatives</sender>
+        <signal>doubleClicked(QListViewItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Alternatives_doubleClicked(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>Alternatives</sender>
+        <signal>returnPressed(QListViewItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Alternatives_returnPressed(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>modelAutoBuild</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelAutoBuild_activated()</slot>
+    </connection>
+    <connection>
+        <sender>modelRefresh</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelRefresh_activated()</slot>
+    </connection>
+    <connection>
+        <sender>editFindMissingAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>editFindMissing()</slot>
+    </connection>
+    <connection>
+        <sender>Search</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Search_textChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>helpWhatsThisAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>whatsThis()</slot>
+    </connection>
+    <connection>
+        <sender>Search</sender>
+        <signal>returnPressed()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Search_returnPressed()</slot>
+    </connection>
+    <connection>
+        <sender>moduleDeleteAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleDeleteAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>modelConfigureAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelConfigure()</slot>
+    </connection>
+    <connection>
+        <sender>modelBuildAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelBuild()</slot>
+    </connection>
+    <connection>
+        <sender>modelNukeAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelNuke()</slot>
+    </connection>
+    <connection>
+        <sender>moduleNewAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleNewAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>ParamChange</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>ParamChange_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>Info</sender>
+        <signal>selectionChanged(QListBoxItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Info_selectionChanged(QListBoxItem*)</slot>
+    </connection>
+    <connection>
+        <sender>ParamValue</sender>
+        <signal>returnPressed()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>ParamValue_returnPressed()</slot>
+    </connection>
+    <connection>
+        <sender>fileExitAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>fileExit()</slot>
+    </connection>
+    <connection>
+        <sender>cacheRefresh</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelRefresh_activated()</slot>
+    </connection>
+    <connection>
+        <sender>Model</sender>
+        <signal>doubleClicked(QListViewItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Model_doubleClicked(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>moduleEditAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleEditAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleAddSubmodelAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleAddSubmodelAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleInsertModuleAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleInsertModuleAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleInsertSubmodelAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleInsertSubmodelAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleInsertAsRootAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleInsertAsRootAction_activated()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>Name</tabstop>
+    <tabstop>Description</tabstop>
+    <tabstop>Attributes</tabstop>
+    <tabstop>Model</tabstop>
+    <tabstop>Alternatives</tabstop>
+</tabstops>
+<includes>
+    <include location="local" impldecl="in implementation">apm_edit.ui.h</include>
+</includes>
+<variables>
+    <variable access="private">module_current_pix;</variable>
+    <variable access="private">module_default_pix;</variable>
+    <variable access="private">module_missing_pix;</variable>
+    <variable access="private">module_pix;</variable>
+    <variable access="private">submodel_pix;</variable>
+</variables>
+<slots>
+    <slot>initPixmaps()</slot>
+    <slot>init()</slot>
+    <slot>fileNew()</slot>
+    <slot>fileOpen()</slot>
+    <slot>buildModel()</slot>
+    <slot>filePrint()</slot>
+    <slot>fileSave()</slot>
+    <slot>fileSaveAs()</slot>
+    <slot>fileExit()</slot>
+    <slot>editUndo()</slot>
+    <slot>editRedo()</slot>
+    <slot>editCut()</slot>
+    <slot>editCopy()</slot>
+    <slot>editPaste()</slot>
+    <slot>editFind()</slot>
+    <slot>editFindMissing()</slot>
+    <slot>modelNuke()</slot>
+    <slot>modelConfigure()</slot>
+    <slot>modelBuild()</slot>
+    <slot>modelAutoBuild_activated()</slot>
+    <slot>modelRefresh_activated()</slot>
+    <slot>moduleNewAction_activated()</slot>
+    <slot>moduleEditAction_activated()</slot>
+    <slot>moduleViewAwbAction_activated()</slot>
+    <slot>moduleViewSourceAction_activated()</slot>
+    <slot>moduleAddSubmodelAction_activated()</slot>
+    <slot>moduleInsertSubmodelAction_activated()</slot>
+    <slot>moduleReplaceAction_activated()</slot>
+    <slot>moduleInsertModuleAction_activated()</slot>
+    <slot>moduleInsertAsRootAction_activated()</slot>
+    <slot>moduleDeleteAction_activated()</slot>
+    <slot>helpIndex()</slot>
+    <slot>helpContents()</slot>
+    <slot>helpAbout()</slot>
+    <slot>Search_textChanged( const QString &amp; )</slot>
+    <slot>Search_returnPressed()</slot>
+    <slot>Name_textChanged( const QString &amp; )</slot>
+    <slot>Description_textChanged( const QString &amp; )</slot>
+    <slot>Attributes_textChanged( const QString &amp; )</slot>
+    <slot>Model_selectionChanged( QListViewItem * )</slot>
+    <slot>Model_contextMenuRequested( QListViewItem *, const QPoint &amp;, int )</slot>
+    <slot>Model_doubleClicked( QListViewItem * )</slot>
+    <slot>Alternatives_selectionChanged( QListViewItem * )</slot>
+    <slot>Alternatives_doubleClicked( QListViewItem * )</slot>
+    <slot>Alternatives_returnPressed( QListViewItem * )</slot>
+    <slot>Alternatives_returnPressed_onModule( QListViewItem * )</slot>
+    <slot>Alternatives_returnPressed_onSubmodel( QListViewItem * )</slot>
+    <slot>Info_selectionChanged( QListBoxItem * )</slot>
+    <slot>ParamValue_returnPressed()</slot>
+    <slot>ParamChange_clicked()</slot>
+    <slot returnType="int">Model_find()</slot>
+    <slot returnType="int *">Model_walk()</slot>
+    <slot>moduleDelete( QListViewItem * )</slot>
+</slots>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

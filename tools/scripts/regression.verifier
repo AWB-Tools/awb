@@ -1,0 +1,457 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##################################################################################
+# 
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+##################################################################################
+
+# Purpose: Run this script after running regression.launcher to check whether or not
+#          the regression you just run passed.
+#
+# Author: Pritpal Ahuja, Srilatha Manne
+
+use Cwd 'chdir';
+use Getopt::Long;
+use File::Basename;
+use File::Temp;
+
+use Asim;
+use Asim::Util;
+use Asim::Package;
+
+Asim::init();
+
+
+# Global information
+$SUMMARY_FILE = "run.summary";
+$ASIM_RUN_SF_VERSION = "1.0";
+$SUMMARY_FILE_GENERATOR = "asim-run";
+$SUMMARY_FILE_HEADER = "# $SUMMARY_FILE_GENERATOR $ASIM_RUN_SF_VERSION";
+$BM_ENTRY = ".. ";
+$BAD_BM_ENTRY = "<UNKNOWN>";
+
+my $rundir;
+my $regdir;
+my $package;
+my $runtype;
+my $errorlog   = Asim::Util::get_asimrc_val("regression.launcher", "ERRORLOG", 1);
+my $modelcheck = Asim::Util::get_asimrc_val("regression.launcher", "MODELCHECK", 1);
+my $quiet      = Asim::Util::get_asimrc_val("regression.launcher", "QUIET", 0);
+
+my $status = GetOptions("package=s"    => \$package,
+			"runtype=s"    => \$runtype,
+			"rundir=s"     => \$rundir,
+			"regdir=s"     => \$regdir,
+                        "errorlog!"    => \$errorlog,
+                        "modelcheck!"  => \$modelcheck,
+                        "quiet!"       => \$quiet,
+                       );
+
+if ( ! $status ) {
+  print "Usage: regression.verifier [--rundir=<regression.launcher time-stamped run directory>]\n";
+  print "                           [--regdir=<root directory for regression results>]\n";
+  print "                           [--[no]errorlog]\n";
+  print "                           [--[no]modelcheck]\n";
+  print "                           [--[no]quiet]\n";
+  print "\n";
+  exit;
+}
+
+if ((defined $rundir && $rundir ne "") && (defined $regdir && $regdir ne "")) {
+    print "\t\tError, Cannot accept both 'rundir' and 'regdir' arguments.\n";
+    exit 1;
+}
+
+if (defined $package || defined $runtype) {
+    my $emph_hash = '#' x 16;
+    print "\n$emph_hash Use of 'package' and 'runtype' args are deprecated; these will be ignored for this run. $emph_hash\n\n";
+}
+
+# 
+# Determine results directory or use the user specified directory.
+#
+if (defined $regdir && $regdir ne "") {
+    chomp $regdir;
+    $RESDIR = $regdir;
+}
+else {
+    $RESDIR = "$ENV{AWBLOCAL}/run/regtest";
+}
+die "Results directory \'$RESDIR\' does not exist.\n" unless ( -d $RESDIR );
+
+# Use the user specified run directory or get the newest regression directory
+if (defined $rundir && $rundir ne "") {
+    $RESDIR = $rundir;
+    chomp $RESDIR;
+    die "Cannot find run directory : $RESDIR\n" unless (-d "$RESDIR");
+}
+else {
+    if (system("ls -td $RESDIR/* > /dev/null 2>&1")) {
+	print "Cannot get verify directory in $RESDIR/.  Exiting.\n";
+	exit 1;
+    }
+    @reg_dirs = `ls -td $RESDIR\/*`;
+    @reg_dirs = grep /$RESDIR\/[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]/, @reg_dirs;
+    $RESDIR = $reg_dirs[0];
+    chomp $RESDIR;
+}
+
+# check for summary file
+my $summaryfile = "$RESDIR/$SUMMARY_FILE";
+if (! -f "$summaryfile") {
+    print "\t\tCannot find summary file : $RESDIR/$SUMMARY_FILE !\n";
+    exit 1;
+}
+
+# verify summary file header
+open (SUMMARYFILE, $summaryfile) || die "Cannot open summary file \"$summaryfile\" to verify results.\n";
+my @summary;
+my $header = <SUMMARYFILE>;
+chomp($header);
+if ($header eq "" || !($header =~ /$SUMMARY_FILE_HEADER/)) {
+    print "\t\tSummary file \"$summaryfile\" in incorrect format !\n";
+    exit 1;
+}
+else {
+    @summary = <SUMMARYFILE>;
+    close SUMMARYFILE;
+    chomp(@summary);
+    @summary = grep(!(/^\s*\#/ | /^\s*$/), @summary);
+}
+
+# real work
+print "VERIFYING REGRESSION RESULTS: $RESDIR\n";
+
+my $fail = 0;
+my $buildfound = 0;
+my @cvs_checked_models = ();
+
+for (my $iexp = 0; $iexp < @summary; $iexp++)
+{
+    my ($exp, $apmfile) = split(/\s+/, $summary[$iexp]);
+    my $model_name = "";
+    ($model_name = basename($apmfile)) =~ s/\.[a-z][a-z]*//s;
+    print "\t$exp:\n";
+    if ($modelcheck) 
+    {
+	# do not recheck a previously checked model
+	my $m = $apmfile;
+	$m =~ s/\//:/g;
+	if (! grep(/$m/, @cvs_checked_models)) {
+	    $fail |= !check_cvs_status($exp);
+	    push(@cvs_checked_models, $m);
+	}
+    }
+
+    my $exptotal = 0;
+    my $expfail = 0;
+    my $bm;
+    my $fbm;
+    my $ibm;
+
+    if (-d "$RESDIR/$exp") 
+    {
+	if (-d "$RESDIR/$exp/BUILD") {
+	    $buildfound = 1;
+	}
+	
+	if (-f "$RESDIR/$exp/$model_name.ERROR") {
+	    $fail = 1;
+	    print "\t\tModel build FAILED!\n";
+	    print "\t\tPass Rate:   0% (0/unknown)\n";
+	    for ($ibm = ++$iexp; (($ibm < @summary) && ($summary[$ibm] =~ s/^$BM_ENTRY//)); $ibm++) {}	    
+	}
+	else {
+	    # check each benchmark results for this (experiment, model)
+	    for ($ibm = ++$iexp; (($ibm < @summary) && ($summary[$ibm] =~ s/^$BM_ENTRY//)); $ibm++) 
+	    {
+		$bm = $summary[$ibm];
+		$fbm = "$RESDIR/$exp/$bm";
+		
+		$exptotal++;
+		
+		if ( $bm eq $BAD_BM_ENTRY ) 
+		{
+		    print "\t\tBad benchmark entry : $BAD_BM_ENTRY -- run failed!\n";
+		    $expfail++;
+		}
+		elsif ( -f "$fbm.stats"    || 
+			-f "$fbm.stats.gz" || 
+			-f "$fbm.stats.bz2" )
+		{
+		    if (! $quiet)
+		    {
+			print "\t\t$bm.stats -- OK.\n";
+		    }
+		}
+		elsif ( -f "$fbm.SUBMITTED" )
+		{
+		    print "\t\t$bm.SUBMITTED -- run not finished yet!\n";
+		    $expfail++;
+		}
+		elsif ( -f "$fbm.RUNNING" )
+		{
+		    print "\t\t$bm.RUNNING -- run not finished yet!\n";
+		    $expfail++;
+		}
+		elsif ( -f "$fbm.ERROR" )
+		{
+		    print "\t\t$bm.ERROR -- run failed!\n";
+		    if ($errorlog)
+		    {
+			show_errorlog("$fbm.ERROR");
+		    }
+		    $expfail++;
+		}
+		else
+		{
+		    print "\t\t$bm -- no status or stat file found! FAIL!\n";
+		    $expfail++;
+		}
+	    }
+	    if ($expfail != 0)
+	    {
+		$fail = 1;
+	    }
+	    if ($exptotal != 0) 
+	    {
+		printf "\t\tPass Rate: %4.0f%% (%i/%i)\n",  100*($exptotal-$expfail)/$exptotal, $exptotal-$expfail, $exptotal;
+	    }
+	    else 
+	    {
+		print "\t\tNo benchmarks found! \n";
+	    }
+	}
+        print "\n";
+	$iexp = --$ibm;
+    }
+    else 
+    {
+	$fail = 1;
+	print "\t\t**** - Unable to find experiment results directory $RESDIR/$exp - FAIL!\n";
+	print "\t\tPass Rate:   0% (0/unknown)\n";
+    }
+}
+
+if ($buildfound) 
+{
+    print "**** Please run regression.cleanup to remove build and run files. \n";
+}
+
+if ( $fail == 0 )
+{
+  print "Regression PASSED!\n";
+  exit 0;
+}
+else
+{
+  print "Regression FAILED!\n";
+  exit 1;
+}
+
+#
+# Subroutines
+#
+
+#
+# check the repository status of files involved in the build
+#
+sub check_cvs_status
+{
+  my $exp  = $_[0];
+  my $fail = 0;
+  
+  # the following hashes are indexed by package name,
+  # and give the location of the package,
+  # and a list of files used in the model:
+  my %package_location;
+  my %package_files;
+  
+  $build_directory = "$RESDIR/$exp/BUILD";
+  if(! (-d $build_directory)) {
+     print "Could not find model directory $build_directory \n";
+     return 0;
+  }
+
+  open BUILD_LIST, "cd ${build_directory}; find . |" || die "Cannot get model files list\n";
+  while(<BUILD_LIST>)
+  {
+    chomp;
+    $rel_link_file = $_;
+
+    $link_file = "${build_directory}/${rel_link_file}";
+
+    if( -l ${link_file} )
+    {
+      # in case of symbolic links to other symbolic links,
+      # iterate until you find the actual file at the end:
+      $fail = 0;
+      chomp($cwd = `pwd`);
+      $linked_to_file = $link_file;
+      while ( -l $linked_to_file ) {
+        $_ = `file $linked_to_file`;
+        chomp;
+        @file_names= split(/: symbolic link to /,$_);
+        $linked_to_file=$file_names[1];
+        if (! defined($linked_to_file) ) {
+          print "\t\tMODEL PROBLEM: No target for symbolic link in build tree - ${rel_link_file}\n";
+          $fail = 1;
+        }
+	# do this to follow relative paths properly:
+	chdir                                     dirname($linked_to_file);
+	chomp(            $linked_to_dir = `pwd` );
+	$linked_to_file = $linked_to_dir . '/' . basename($linked_to_file);
+      }
+      chdir $cwd;
+      if ( $fail )
+      {
+        # handled above
+      }
+      elsif(-d ($linked_to_file))
+      {
+        # ignore the directories that are linked
+      }
+      elsif(($linked_to_file) =~ /\S*lib\S*\.a/)
+      {
+        # ignore static libraries
+      }
+      elsif(($linked_to_file) =~ /\S*lib\S*\.so/)
+      {
+        # ignore dynamic libraries
+      }
+      else
+      {
+	# add the package-relative path for this file to its package's file list:
+	if ( $linked_to_file =~ m/(^.*\/src\/asim-[A-Za-z0-9_\-]+)\/(.*)$/ ) {
+	  my $pkgloc  = $1;
+	  my $relpath = $2;
+	  $pkgloc            =~ m/^.*\/src\/asim-([A-Za-z0-9_\-]+)/;
+	  my $pkgname = $1;
+	  $package_location{$pkgname} = $pkgloc;
+	  if ( !           $package_files{$pkgname} ) {
+	                   $package_files{$pkgname} = [];
+	  }
+	  my $pkgfileref = $package_files{$pkgname};
+	  push @$pkgfileref, $relpath;
+	}
+      }
+    }
+  }
+  
+  #
+  # now go through the list of model files, sorted by package,
+  # and check to make sure we did not forget to add the file
+  # to revision control
+  #
+  foreach my $pkgname ( keys %package_location ) {
+    my $pkgloc  = $package_location{$pkgname};
+    my $pkgfileref = $package_files{$pkgname};
+    my $package = Asim::packageDB()->get_package_by_dirname( $pkgloc )
+      || die "could not open package $pkgname\n";
+    
+    # skip this check for shared packages:
+    if ( ! $package->isprivate() ) { next }
+    
+    # add to the list of source files the corresponding .awb files.
+    # FIX?!?  For now, this just does a simple thing of looking for .awb files
+    # with the same root name as each source file!!
+    my @awbs = ();
+    foreach my $src ( @$pkgfileref ) {
+      if ( $src =~ m/\.cpp$/ ) {
+        (my $awb = $src) =~ s/\.cpp$/.awb/;
+	if ( -e "$pkgloc/$awb" ) { push @awbs, $awb }
+      }
+    }
+    @$pkgfileref = ( @$pkgfileref, @awbs );
+    
+    # make sure all the files exist in the given repository:
+    my @missing_files = $package->files_missing_from_repository( @$pkgfileref );
+    if ( @missing_files ) {
+      print "\t\tMODEL_PROBLEM: Files missing from repository:\n";
+      foreach my $missing ( @missing_files ) { print "\t\t\t$missing\n" }
+      $fail = 1;
+    }
+  }
+
+  return ! $fail;
+}
+
+sub show_errorlog
+{
+  my $file = shift;
+  my $line;
+  my $host;
+  my @filestats;
+  my $mtime;
+  my $cycle;
+  my @context;
+
+  if (! -r $file)
+  {
+    print "Error file $file was not readable\n";
+    return;
+  }
+
+  # Show host where job was run (parses expected output of asim-batch)
+
+  $line = `grep 'rlogin to machine' $file | tail --lines=1`;
+  chomp $line;
+  if ($line =~ /rlogin to machine (.*)/)
+  {
+    $host = $1;
+  }
+  else 
+  {
+    $host = "(unknown)";
+  }
+
+  @filestats = stat($file);
+  $mtime = $filestats[9];
+
+  print("\t\t\tRun on host $host on " . localtime($mtime)  . "\n");
+
+
+  # Show last cycle run (parses expected format from -pc switch)
+
+  $line = `grep Cycle $file | tail --lines=1`;
+  if ($line =~ /cycle:\s*(\d+)/i)
+  {
+    $cycle = $1;
+  }
+  else 
+  {
+    $cycle = "(unknown)";
+  }
+
+  print("\t\t\tLast cycle executed: $cycle\n");
+
+
+  # Show last few lines of log file
+
+  @context = `tail --lines=4 $file`;
+  foreach my $l (@context)
+  {
+    chomp $l;
+    print("\t\t\t\t >>> $l\n") if ($l ne "");
+  }
+
+  print("\n");
+}

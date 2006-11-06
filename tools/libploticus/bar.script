@@ -1,0 +1,496 @@
+//
+// Script to do clustered/stacked bars 
+//
+
+// 
+// Load parameters specific to stacked/clustered bars
+//
+#setifnotgiven num_stack = 1
+#setifnotgiven num_bar = 1
+#setifnotgiven title = ""
+#setifnotgiven xlabel = ""
+#setifnotgiven ylabel = ""
+#setifnotgiven subtitle = ""
+#setifnotgiven legloc = "top"
+#setifnotgiven stubvert = 1
+#setifnotgiven ymaxval = 100
+#setifnotgiven yminval = 0
+#setifnotgiven stubvert = yes
+
+/// Include file that contains information on how to space labels. 
+#include $spacing_var
+
+/// Read data
+#proc getdata
+file: @data
+fieldnameheader: no
+#endproc
+
+#set num_cluster = @NRECORDS
+#setifnotgiven width = $arith(@NRECORDS*@num_bar*0.3)
+#setifnotgiven height = 2
+
+#if @width = 0
+  #set width = $arith(@NRECORDS*@num_bar*0.2)
+#endif
+
+#if @height = 0
+  #set height = 2
+#endif
+
+
+#proc print
+label: Got @NRECORDS records, @NFIELDS fields per record
+#endproc
+
+
+// Adjust width and height if they are too large.
+// Max is 7.5 & 8 because we have 1 in margins. 
+//#if @width > 7.5
+//  #set width = 7.5
+//#endif
+//#if @height > 8
+//  #set height = 8
+//#endif
+
+#proc print
+  label: Width @width, Height @height
+#endproc
+
+// compute XMAX (number of records+1 for bar graphs)
+#set XMAXVAL = $arith(@NRECORDS+1)
+#set YINC = $arith(@ymaxval-@yminval/5)
+
+
+// Determine how to space legend.
+// Step 1: Determine number of characters in legend
+#set LEGLEN = 0
+#if @num_stack > 1
+  #shell #processrows cat @stack_name
+  #while $shellrow( entry ) = 0
+    #set LEN = $len(@entry)
+    #set LEGLEN = $arith(@LEN+@LEGLEN)
+  #endloop
+#elseif @num_bar > 1
+  #shell #processrows cat @bar_name
+  #while $shellrow( entry ) = 0
+    #set LEN = $len(@entry)
+    #set LEGLEN = $arith(@LEN+@LEGLEN)
+  #endloop
+#endif
+
+//#proc print
+//label: Got @LEGLEN characters
+//#endproc
+
+// Step 2: Determine how much space legend takes
+#set CHARINCH = 8
+#if @legloc like "top" || @legloc like "bottom"
+  #set NUMLINES = $arith(@LEGLEN/@CHARINCH)
+  #set NUMLINES = $arith(@NUMLINES/@width)
+#endif
+#if @legloc = "left" || @legloc = "right"
+  #set NUMLINES = $arith(@LEGLEN/@CHARINCH)
+#endif
+  
+//#proc print
+//label: Got @NUMLINES lines
+//#endproc
+
+// Step 3: Determine plot location given legend location
+#set ymin = 0.25
+#set ymax = $arith(@ymin+@height)
+#set xmin = 1
+#set xmax = $arith(@xmin+@width)
+#set legheight = $arith(@NUMLINES*.18)
+
+#set Yadjust = 0
+#if @num_cluster > 1
+  #if @num_stack > 1
+    #set Yadjust = 0.5
+  #endif
+#endif
+
+#set ymin = $arith(@ymin+@Yadjust)
+//#proc print
+//  label: Ymin = @ymin after Yadjust
+//#endproc
+  
+
+#if @legloc = "top"
+//  #if $arith(@ymax+@legheight) > 10
+//    #set ymax = $arith(10-@legheight)
+//  #endif
+#elseif @legloc = "bottom"
+  #set ymax = $arith(@ymin+@height)
+#elseif @legloc = "left" || @legloc = "right"
+  #if @legloc = "left"
+    #set xmin = 2.5
+    #set xmax = $arith(2.5+@width)
+  #else
+    #set xmin = 1
+    #set xmax = $arith(@xmin+@width)
+  #endif
+
+  #if @legheight > @height
+    #set ymax = @legheight
+    #set ymin = $arith(@ymax-@height)
+//#proc print
+//  label: Ymin = @ymin after legheight
+//#endproc
+  #endif
+#endif
+
+#if @legloc = "right"
+  #set pagexmax = $arith(@xmax+2.5+.5)
+#else 
+  #set pagexmax = $arith(@xmax+.5)
+#endif
+#if @legloc = "top"
+  #set pageymax = $arith(@ymax+@legheight+.5)
+#else
+  #set pageymax = $arith(@ymax+.5)
+#endif
+
+
+// Determine width of bars given plotting area. 
+#set bwidth = $arith(@xmax-@xmin/@NRECORDS/@num_bar*.65)
+
+//
+// Determine the longest cluster name so that we can adjust the height of 
+// plot accordingly. 
+//
+#set record_count = 1
+#set max_cluster_label = 0
+//
+// 0 indicates no cluster labeling, 1 indicates labels, and 2 indicates vertical labels.
+#set cluster_label = 0
+#if @num_cluster > 1
+  #set cluster_label = 1
+  #while @record_count <= @NRECORDS
+    #set stubname = $dataitem(@record_count,1)
+//    #proc print
+//      label: Nextclusterlabel @stubname
+//    #endproc
+
+    #if $len(@stubname) > @max_cluster_label
+      #set max_cluster_label = $len(@stubname)
+    #endif
+
+    #set record_count = $arith(@record_count+1)
+  #endloop
+
+  #set cluster_name_length = $arith(@max_cluster_label*@VERT_MULT)
+  #set cluster_spacing = $arith(@bwidth*@num_bar)
+  #if @cluster_name_length > @cluster_spacing
+    #set cluster_label = 2
+  #endif
+#endif
+
+//#proc print
+//  label: Max cluster label length @max_cluster_label
+//  label: cluster_label = @cluster_label
+//#endproc
+
+//
+// Determine longest bar name.  This, along with the width of 
+// each bar, will determine whether we do vertical or horizontal
+// bar names. 
+//
+#set max_bar_label = 0
+// 0 indicates no labeling, 1 indicates labels, and 2 indicates vertical labels.
+#set bar_label = 0
+#if @num_stack > 1 
+  #if @num_bar > 1 
+    #set bar_label = 1
+    // Bar names end up as legend if we don't have anything stacked.
+    #shell #processrows cat @bar_name
+    #while $shellrow ( bname ) = 0
+      #if $len(@bname) > @max_bar_label
+        #set max_bar_label = $len(@bname)
+      #endif
+    #endloop
+    // Determine the length of each bar.
+    #set bar_name_length = $arith(@max_bar_label*@VERT_MULT)
+    #if @bar_name_length > @bwidth
+      #set bar_label = 2
+    #endif
+  #endif
+#endif
+
+//#proc print
+//  label: Max bar label length @max_bar_label
+//  label: bar_label = @bar_label
+//#endproc
+
+//
+// Adjust height of page for vertical stubs, if necessary.
+//
+#set label_adjust = 0
+#if @cluster_label = 2
+  #set label_adjust = $arith(@max_cluster_label*@VERT_MULT)
+//  #proc print 
+//    label: Adjust for cluster @label_adjust
+//  #endpfoc
+#endif
+
+#if @bar_label = 2
+  #set vert_bar_adjust = $arith(@max_bar_label*@VERT_MULT)
+  #set label_adjust = $arith(@label_adjust+@vert_bar_adjust)
+//  #proc print 
+//    label: Adjust for bar @vert_bar_adjust
+//  #endpfoc
+#endif  
+
+//
+// Adjust page for labels. 
+#include $adjust_page
+
+//
+// YMIN & YMAX with automatic YINC tic increment computation
+//
+// set up temporary area
+#proc areadef
+  yrange: @yminval @ymaxval  
+  xrange: 0 @XMAXVAL
+  rectangle: @xmin @ymin @xmax @ymax
+#endproc
+// YINC, YMIN, YMAX fiddling subroutine (or the ploticus version of such)
+#include $adjust_yaxis
+
+//
+// set up plotting area
+//
+#proc areadef
+  title: @title
+  titledetails: align=C
+  xrange: 0 @XMAXVAL
+  yrange: @YMIN @YMAX
+  xaxis.label: @xlabel
+  xaxis.labeldetails: align=R 
+  xaxis.labeldistance: @xlabeladj
+
+  #if @cluster_label > 0
+    xaxis.stubs: datafields=1
+    #if @cluster_label = 2
+      xaxis.stubvert: yes
+    #endif
+    #if @bar_label = 0
+      // No bar labels.
+      xaxis.stubdetails: size=@stubsize, adjust=0.-0.2
+    #endif
+    #if @bar_label = 1
+      // Adjust for horizontal bar labels.
+      xaxis.stubdetails: adjust=0,-0.5 size=@stubsize
+    #endif
+    #if @bar_label = 2
+      // Adjust for vertical bar labels
+      xaxis.stubdetails: adjust=0,-@vert_bar_adjust size=@stubsize
+    #endif
+  #else 
+    xaxis.tics: none
+  #endif
+
+  yaxis.stubs: inc @YINC
+  yaxis.label: @ylabel
+  yaxis.labeldetails: align=R 
+  yaxis.labeldistance: @ylabeladj
+  yaxis.grid: color=gray(0.9) width=0.5        
+  rectangle: @xmin @ymin @xmax @ymax
+#endproc
+
+// initialize loop variables
+#set leglength = 0
+#if @legloc = "top"
+  #set LEGLOC = $arith(@ymax+@legheight+.3)
+  #set XLOC = $arith(@xmin+.5)
+  #set MAXCHARS = $arith(@width-1*@CHARINCH)
+#elseif @legloc = "bottom"
+  #set LEGLOC = $arith(@ymin-.5)
+  #set XLOC = @xmin
+  #set MAXCHARS = $arith(@width-1*@CHARINCH)
+#elseif @legloc = "left"
+  #set XLOC = $arith(@xmin-2.0)
+  #set LEGLOC = @ymax
+  #set MAXCHARS = @CHARINCH
+#elseif @legloc = "right"
+  #set XLOC = $arith(@xmax+.1)
+  #set LEGLOC = @ymax
+  #set MAXCHARS = @CHARINCH
+#endif
+
+#set I = 2
+#set IBAR = 0
+#set colornum = 1
+
+#set LABELSTART = $arith(@num_bar/2*@bwidth)
+//#proc print
+//  label: LABELSTART: @LABELSTART
+//#endproc
+//#proc print
+//  label: LEGLOC: @LEGLOC, XLOCP @XLOC
+//#endproc
+
+#if @num_stack > 1
+  // The legend comes from the stack, so open this file. 
+  #shell #processrows cat @stack_name
+#else
+  #if  @num_bar > 1
+    #shell #processrows cat @bar_name
+  #endif
+#endif
+
+// start loop
+#while @IBAR < @num_bar
+  // set vars for this iteration
+  // The legend and color depend on whether we have stacked elements or not
+  #set IBAR = $arith(@IBAR+1)
+  #set ISTACK = 1
+
+  // If we have bars or stacks, then we have a legend.  Get it. 
+  #if @num_bar > 1 || @num_stack > 1
+    #set res = $shellrow( LEGLABEL )
+//    #proc print
+//      label: LEGENDLABEL BARLOOP @LEGLABEL
+//    #endproc
+  #endif
+
+  
+  #if @num_stack > 1
+    #set colornum = 1
+    #set COLOR = $icolor(@colornum)
+  #else
+    #set COLOR = $icolor(@colornum)
+  #endif
+
+  #set strlength = $len(@LEGLABEL)
+  #set leglength = $arith(@strlength+@leglength)
+
+  // do bars
+  #proc bars
+    lenfield: @I
+    #if @num_bar > 1
+      cluster: @IBAR / @num_bar
+    #endif
+    color: @COLOR
+    truncate: yes
+   
+    // If we're stacking, then only set label for first bar in cluster
+    #if @num_stack = 1 || @IBAR = 1
+        legendlabel: @LEGLABEL
+    #endif
+    barwidth: @bwidth
+  #endproc
+
+  #set colornum = $arith(@colornum+1)
+  #set I = $arith(@I+1)
+
+  #while @ISTACK < @num_stack
+
+    #set ISTACK = $arith(@ISTACK+1)
+    #set var = $shellrow( LEGLABEL )
+//    #proc print
+//      label: LEGENDLABEL IN STACK @LEGLABEL
+//    #endproc
+    #set COLOR = $icolor(@colornum)
+    
+    // We only set legend for first bar of stacked elements.
+    // 
+    #if @IBAR = 1
+      #set strlength = $len(@LEGLABEL)
+      #set leglength = $arith(@strlength+@leglength)
+    #endif
+        
+    #proc bars
+      lenfield: @I
+      #if @num_bar > 1
+        cluster: @IBAR / @num_bar
+      #endif
+      color: @COLOR
+      truncate: yes
+
+      // We only do a legend for the first bar 
+      #if @IBAR = 1
+          legendlabel: @LEGLABEL
+      #endif
+      barwidth: @bwidth
+      stackfields: *
+    #endproc
+
+    #set colornum = $arith(@colornum+1)
+    #set I = $arith(@I+1)
+
+    #if @leglength > @MAXCHARS
+      #set leglength = 0
+      #proc legend
+        format: singleline
+        location: @XLOC @LEGLOC
+        sep: 0.3
+      #endproc
+      #set LEGLOC = $arith(@LEGLOC-.15)
+    #endif
+  #endloop
+
+  #if @leglength > @MAXCHARS
+    #set leglength = 0
+    #proc legend
+      format: singleline
+      location: @XLOC @LEGLOC
+      sep: 0.3
+    #endproc
+    #set LEGLOC = $arith(@LEGLOC-.15)
+  #endif
+
+#endloop
+
+//proc print 
+//  label: Slapping legend
+//endproc
+
+// slap on the legend
+#if @leglength > 0
+  #proc legend
+  format: singleline
+  location: @XLOC @LEGLOC
+  sep: 0.3
+#endif
+
+// label each bar.
+#if @num_stack > 1
+  #set IBAR = 0
+  #shell #processrows cat @bar_name
+  #while @IBAR < @num_bar
+    //
+//    #proc print
+//      label: We're here
+//    #endproc
+
+    #set ICLUST = 1
+    #set var = $shellrow( barlabel )
+    #set barlabel_list = @barlabel
+    #while @ICLUST < @num_cluster
+
+      #set barlabel_list = $strcat(@barlabel_list,\n)
+      #set barlabel_list = $strcat(@barlabel_list,@barlabel)
+      #set ICLUST = $arith(@ICLUST+1)
+
+    #endloop
+
+    #set xadjust = $arith(@IBAR*@bwidth-@LABELSTART)
+    #set yadjust = $arith(@IBAR*.1*-1)
+    #proc xaxis
+      stubdetails: size=@stubsize adjust=@xadjust,-.1
+      #if @bar_label = 2
+        stubvert: yes
+      #endif
+      stubs: list @barlabel_list
+    #endproc
+    #set IBAR = $arith(@IBAR+1)
+//    #proc print
+//      label: barlabel_list @barlabel_list
+//    #endproc
+
+  #endloop
+#endif
+
+

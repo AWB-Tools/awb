@@ -1,0 +1,84 @@
+#!/usr/intel/bin/perl -w
+#
+# Pre-exec test for netbatch.
+#
+# Usage:
+#	netbatch-pre [options]
+# where [options] are one or more of:
+#	-tempdir <directory_name> <min_space_in_megabytes>
+#
+# Verifies that we have enough space in the given temp directories to run a job,
+# else returns a negative error code to prevent netbatch from running
+# the job on this machine.  Also prints out which machine we're on,
+# so we know what to fix when this fails.
+#
+# At least one -tempdir argument must be given, more than one can be given.
+#
+# Called by asim-run.
+#
+# C. Beckmann, A. Klimkin		1/24/2006	(c) Intel
+#
+use strict;
+use Filesys::Df;
+
+my $this = 'netbatch-pre on ' . `hostname`;
+chomp $this;
+
+my @TempSpaces = ();
+my %Min;
+my %Space;
+
+# process command line args
+while ( my $arg = shift ) {
+  if ( $arg eq '-tempdir' ) {
+    my $dir = shift;
+    my $min = shift;
+    @TempSpaces = ( @TempSpaces, $dir );
+    $Min{$dir} = $min * 1024;	# convert megabytes to 1k-blocks
+    $Space{$dir} = 0;
+  } else {
+    print STDERR "$this ERROR: unknown option $arg\n";
+    exit -1;
+  }
+}
+
+# check command line arguments
+if ( $#TempSpaces < 0 ) {
+  print STDERR "$this ERROR: no -tempdir arguments given\n";
+  exit -1;
+}
+
+# actual space available in each directory
+while ( my ($dir, $min) = each %Min ) {
+  # actual space available in each directory
+  my $fobj = df($dir, 1024);	# get number of 1k-blocks
+  my $free = 0;
+  if (defined $fobj) {
+      $free = $fobj->{bavail};
+      if ( $free < $min ) {
+	  die "$this FAIL: not enough room on $dir ( $free 1K-blocks )\n";
+      }
+      print "$this PASS: enough room on $dir ( $free 1K-blocks )\n";
+  }
+  else {
+      die "$this FAIL: unable to compute free space on $dir ( $free 1K-blocks )\n";      
+  }
+}
+
+exit 0;
+Copyright (C) 2006 Intel Corporation
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+

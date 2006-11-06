@@ -1,0 +1,79 @@
+: # -*-Perl-*-
+eval 'exec perl -w "$0" ${1+"$@"}'
+    if 0;
+
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+
+use Asim;
+use strict;
+
+##
+## Generate a generic cfg file for a single-threaded trace,
+## with a run script that checks a given parameter for a given value.
+##
+## This is just like single.cfx, except that the first two "subdirectories"
+## specify a parameter name and value to check after the simulator completes.
+##
+## Example usages in an asim-run benchmarks file:
+##
+##	tools/scripts/bm/tracecache/single-check-param.cfx/fetched/1234/cpu2000_78_99228p_301.apsi_0017.P6_9909.cfg
+##                                                        ^       ^     ^                                     ^
+##                                                        |       |     |                                     |
+##                                                        < param>< val><--------- name of the trace --------->
+##
+##	tools/scripts/bm/tracecache/single-check-param.cfx/committed/567890/p/asim/benchmarks/traces/LIT/regression/hello.cfg
+##                                                        ^         ^      ^                                            ^
+##                                                        |         |      |                                            |
+##                                                        < param  >< val ><---- absolute path prefix of the trace ----->
+##
+## Carl Beckmann	8/4/2006
+##
+
+# get path to required setup script
+chomp( my $SETUP = `awb-resolver tools/scripts/bm/tracecache/single-check-param.setup` );
+
+# get the argument string, which follows the --emit arg, remove the ".cfg" suffix
+die "unknown trace path" if ( $ARGV[0] ne '--emit' );
+(my $arg_string = $ARGV[1]) =~ s/\.cfg$//;
+my @arg_list = split '/', $arg_string;
+
+# strip the directory off to get a name:
+my $trace_name = $arg_list[$#arg_list];
+$#arg_list--;
+
+# get the parameter name, value, and directory tree:
+(my $param_name, my $param_val, my @trace_path) = @arg_list;
+my @tree = @arg_list;
+
+# if the trace argument looks like a path, rather than a simple name,
+# we need to prepend a '/' which gets stripped by the caller:
+my $trace_path = $trace_name;
+if ( $#trace_path >= 0 ) { $trace_path = '/' . join( '/', @trace_path ) . '/' . $trace_path; }
+
+# now generate the virtual .cfg file:
+my $gcfg = Asim::GenCFG->new();
+$gcfg->add(name   => $trace_name,
+	   info   => "single trace $trace_path with parameter value check",
+	   tree   => \@tree,
+           feeder => 'archlib',
+           setup  => "$SETUP $param_name $param_val $trace_path",
+           );
+$gcfg->action(@ARGV);

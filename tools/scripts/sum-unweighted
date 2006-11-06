@@ -1,0 +1,493 @@
+: # -*-Perl-*-
+eval 'exec perl -w "$0" ${1+"$@"}'
+    if 0;
+
+#
+# Copyright (C) 2004-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Michael Adler
+#
+
+#
+# sum-unweighted <stats files>
+#
+# Add together the time spent in multiple regions.  This is not a
+# SimPoints projection!  All it does is sum all the fields in multiple
+# runs together as though the runs were a single longer region.
+#
+
+use strict;
+
+use File::Basename;
+use Getopt::Long;
+
+my $help = 0;
+
+my $status = GetOptions(
+                        "help"  => \$help
+                       );
+
+if ($help) {
+    system "perldoc $0";
+    exit 0;
+}
+
+if ($#ARGV < 0) {
+    print STDERR "Usage:  sum-unweighted <stats files>\n";
+    exit(1);
+}
+
+
+sub comma_separated
+{
+    my $i = shift;
+    1 while $i =~ s/(.*\d)(\d\d\d)/$1,$2/;
+    return $i;
+}
+
+##
+## Convert a line of percentages relative to a number instructions to
+## absolute numbers.
+##
+sub getPctInstrs($\@) {
+    my ($t, $nFetch) = @_;
+    $t =~ s/%//g;
+    my @n = split(/\s+/, $t);
+    foreach my $i (0 .. $#n) {
+        $n[$i] *= (${$nFetch}[$i] / 100.0);
+    }
+    return @n;
+}
+
+sub getPctCycles($$) {
+    my ($t, $nCycles) = @_;
+    $t =~ s/%//g;
+    my @n = split(/\s+/, $t);
+    foreach my $i (0 .. $#n) {
+        $n[$i] *= ($nCycles / 100.0);
+    }
+    return @n;
+}
+
+##
+## Return an array for a memory or cache stat with the first element being
+## the text tag.  The second element is the total traffic.  If they exist
+## the third and fourth elements are reads and writes.
+##
+## The first argument to the function is the line from the stats summary.
+## The second argument is a multiplier for each of the values.  It might be
+## cycles for bytes/cycle or instrs/1000 for stats that are per 1000
+## instructions.
+##
+sub getMem($$) {
+    my ($t, $multiplier) = @_;
+
+    # Get the tag for the line
+    my $tag = $t;
+    $tag =~ s/:.*//;
+
+    # Get total, read and write times as an array
+    $t =~ s/^.*: \s+//;
+    $t =~ s/[a-z()+]//g;
+    my @m = split(/\s+/, $t);
+    foreach my $i (0 .. $#m) {
+        $m[$i] *= $multiplier;
+    }
+
+    # Return one array with the tag as the first element
+    unshift(@m, $tag);
+    return @m;
+}
+
+my $totSamples = 0;
+my $totCycles;
+my $totTime;
+my $totFreq;
+my $totNonIdleCycles;
+my $totNonIdleCommits;
+my $totCpuSliceMap;
+my @totFetch;
+my @totCommit;
+my $totCommits;
+my @totIdle;
+my @totTimer;
+my @totKInstrs;
+my @totMemTraffic;
+my @totRcMiss;
+my @totMcMiss;
+my @totDcMiss;
+my @totIcMiss;
+my $totWorkload;
+my $totTxnAll;
+my $totTxnNew;
+
+foreach my $stats (@ARGV) {
+    if (! -e "$stats") {
+        printf STDERR "File not found: %s\n", $stats;
+        exit(1);
+    }
+
+    my $cycles;
+    my $time;
+    my $freq;
+    my $nonIdleCycles;
+    my $nonIdleCommits;
+    my $cpuSliceMap;
+    my @nFetch;
+    my @nCommit;
+    my $nCommits;
+    my @nIdle;
+    my @nTimer;
+    my @kInstrs;
+    my @memTraffic;
+    my @rcMiss;
+    my @mcMiss;
+    my @dcMiss;
+    my @icMiss;
+    my $workload;
+    my $txnAll;
+    my $txnNew;
+
+    open(STATS, "summarize-stats --quick $stats |");
+    while (<STATS>) {
+        chomp;
+
+        /^Cycles:/ && do {
+            my $t = $_;
+            $t =~ s/[a-zA-Z:,()@]//g;
+            $t =~ s/^ +//;
+            ($cycles, $time, $freq) = split(/\s+/, $t);
+        };
+
+        /^Overall non-idle IPC:/ && do {
+            my $t = $_;
+            $t =~ s/[A-Za-z:()\/,-]//g;
+            $t =~ s/^\s+//;
+            my @v = split(/\s+/, $t);
+            $nonIdleCycles = $v[1];
+            $nonIdleCommits = $v[0] * $v[1];
+        };
+
+        /^CPU\/Slice/ && do {
+            # Just a string showing CPU/slice mapping
+            $cpuSliceMap = $_;
+        };
+
+        /^Fetched / && do {
+            my $t = $_;
+            $t =~ s/^Fetched +//;
+            @nFetch = split(/\s+/, $t);
+        };
+
+        /^Commit / && do {
+            my $t = $_;
+            $t =~ s/^Commit +//;
+            @nCommit = getPctInstrs($t, @nFetch);
+            foreach my $i (0 .. $#nCommit) {
+                $nCommits += $nCommit[$i];
+            }
+        };
+
+        /^Idle Loop / && do {
+            my $t = $_;
+            $t =~ s/^Idle Loop +//;
+            @nIdle = getPctCycles($t, $cycles);
+        };
+
+        /^Timer Intr / && do {
+            my $t = $_;
+            $t =~ s/^Timer Intr +//;
+            @nTimer = getPctCycles($t, $cycles);
+        };
+
+        /^Kernel / && do {
+            my $t = $_;
+            $t =~ s/^Kernel +//;
+            @kInstrs = getPctInstrs($t, @nCommit);
+        };
+
+        /^Simpoint weight/ && do {
+            my $w = $_;
+            $w =~ s/^Simpoint weight: *//;
+            if ($w != 1) {
+                printf STDERR "SimPoint weight must be 1 for unweighted sums.\n";
+                exit(1);
+            }
+        };
+
+        /^Simpoint time/ && do {
+            printf STDERR "${stats} looks like a SimPoints run.\n";
+            exit(1);
+        };
+
+        /^Memory Traffic \(b/ && do {
+            my $t = $_;
+            @memTraffic = getMem($t, $cycles);
+        };
+
+        /^RCache Misses/ && do {
+            my $t = $_;
+            @rcMiss = getMem($t, $nCommits / 1000.0);
+        };
+
+        /^MCache Misses/ && do {
+            my $t = $_;
+            @mcMiss = getMem($t, $nCommits / 1000.0);
+        };
+
+        /^DCache Misses/ && do {
+            my $t = $_;
+            @dcMiss = getMem($t, $nCommits / 1000.0);
+        };
+
+        /^ICache Misses/ && do {
+            my $t = $_;
+            @icMiss = getMem($t, $nCommits / 1000.0);
+        };
+
+        /^Workload:/ && do {
+            $workload = $_;
+            $workload =~ s/.*: \s+//;
+        };
+
+        /^Transactions: / && do {
+            $txnAll = $_;
+            $txnAll =~ s/.*: \s+//;
+            $txnAll =~ s/ .*$//;
+        };
+
+        /^New Order Transactions: / && do {
+            $txnNew = $_;
+            $txnNew =~ s/.*: \s+//;
+            $txnNew =~ s/ .*$//;
+        };
+    }
+
+    ##
+    ## Fields have all been parsed.  Now add them to the total counters.
+    ##
+    $totCycles += $cycles;
+    $totTime += $time;
+
+    if (defined($totFreq) && ($totFreq != $freq)) {
+        printf STDERR "Core frequences must match.\n";
+        exit(1);
+    }
+    $totFreq = $freq;
+
+    if (defined($nonIdleCycles)) {
+        $totNonIdleCycles += $nonIdleCycles;
+        $totNonIdleCommits += $nonIdleCommits;
+    }
+    if (defined($txnAll)) {
+        $totTxnAll += $txnAll;
+        $totTxnNew += $txnNew;
+    }
+
+    if (defined($nCommit[0])) {
+        $totCommits += $nCommits;
+
+        for my $i (0 .. $#nCommit) {
+            $totFetch[$i] += $nFetch[$i];
+            $totCommit[$i] += $nCommit[$i];
+            $totIdle[$i] += $nIdle[$i];
+            $totTimer[$i] += $nTimer[$i];
+            if (defined($kInstrs[$i])) {
+                $totKInstrs[$i] += $kInstrs[$i];
+            }
+        }
+    }
+
+    ## Sum memory/cache traffic
+    if (defined($memTraffic[0])) {
+        $totMemTraffic[0] = $memTraffic[0];
+        $totRcMiss[0] = $rcMiss[0];
+        $totMcMiss[0] = $mcMiss[0];
+        $totDcMiss[0] = $dcMiss[0];
+        $totIcMiss[0] = $icMiss[0];
+
+        foreach my $i (1 .. 3) {
+            $totMemTraffic[$i] += $memTraffic[$i] if (defined($memTraffic[$i]));
+            $totRcMiss[$i] += $rcMiss[$i] if (defined($rcMiss[$i]));
+            $totMcMiss[$i] += $mcMiss[$i] if (defined($mcMiss[$i]));
+            $totDcMiss[$i] += $dcMiss[$i] if (defined($dcMiss[$i]));
+            $totIcMiss[$i] += $icMiss[$i] if (defined($icMiss[$i]));
+        }
+    }
+
+    if (defined($totCpuSliceMap)) {
+        if ($totCpuSliceMap ne $cpuSliceMap) {
+            printf STDERR "CPU/Slice map must be identical in all summaries.\n";
+            exit(1);
+        }
+    }
+    else {
+        $totCpuSliceMap = $cpuSliceMap;
+    }
+
+    if (defined($totWorkload)) {
+        if ($totWorkload ne $workload) {
+            printf STDERR "Workload name must be identical in all summaries.\n";
+            exit(1);
+        }
+    }
+    else {
+        $totWorkload = $workload;
+    }
+
+    $totSamples += 1;
+}
+
+printf "Cycles:                %s  (%0.5f seconds @ %sGHz)\n",
+    comma_separated($totCycles), $totTime, $totFreq;
+
+printf "Total Stats Files:     %d\n", $totSamples;
+
+if ($totCycles > 0) {
+    my $ipc = ${totCommits} / ${totCycles};
+    printf "Overall IPC:           %.3f\n", ${ipc};
+
+    if (defined($totNonIdleCycles)) {
+        printf "Overall non-idle IPC:  %.3f\n",
+            $totNonIdleCommits / $totNonIdleCycles;
+    }
+
+    # Figure out the number of active CPUs by parsing the CPU/Slice line...
+    my @t = split(/\s+/, $totCpuSliceMap);
+    my $activeCPUs = $#t;
+    my $avgIPC = $ipc /$activeCPUs;
+#    printf "Overall non-idle IPC:  %.3f\n", non_idle_ipc();
+    printf "Average per core IPC:  %.3f\n", ${avgIPC};
+}
+
+if (defined($totCommit[0])) {
+    my $nCpus = $#totCommit + 1;
+
+    print "\n${totCpuSliceMap}\n\n";
+
+    print "IPC       ";
+    for my $cpu (0 .. $nCpus - 1) {
+        printf "   %6.3f", $totCommit[$cpu] / $totCycles;
+    }
+    print "\n";
+
+    print "Fetched   ";
+    for my $cpu (0 .. $nCpus - 1) {
+        printf " %8.3G", $totFetch[$cpu];
+    }
+    print "\n";
+
+    print "     <<<< Percentages of fetched instructions >>>>\n";
+
+    print "Commit    ";
+    for my $cpu (0 .. $nCpus - 1) {
+        printf "  %6.2f%%", 100.0 * $totCommit[$cpu] / $totFetch[$cpu];
+    }
+
+    if (defined($totIdle[0])) {
+        print "\n     <<<< Percentages of total cycles >>>>\n";
+
+        print "Idle Loop ";
+        for my $cpu (0 .. $nCpus - 1) {
+            printf "  %6.2f%%", 100.0 * $totIdle[$cpu] / $totCycles;
+        }
+        print "\n";
+
+        print "Timer Intr";
+        for my $cpu (0 .. $nCpus - 1) {
+            printf "  %6.2f%%", 100.0 * $totTimer[$cpu] / $totCycles;
+        }
+        print "\n";
+    }
+
+    if (defined($totKInstrs[0])) {
+        print "     <<<< Percentages of total instructions >>>>\n";
+
+        print "Kernel    ";
+        for my $cpu (0 .. $nCpus - 1) {
+            printf "  %6.2f%%", 100.0 * $totKInstrs[$cpu] / $totCommit[$cpu];
+        }
+        print "\n";
+    }
+}
+
+if (defined($totMemTraffic[0])) {
+    print "\n";
+    printf "%s:          %8.3f (%6.3f read + %6.3f write)\n",
+        $totMemTraffic[0],
+        $totMemTraffic[1] / $totCycles,
+        $totMemTraffic[2] / $totCycles,
+        $totMemTraffic[3] / $totCycles;
+    printf "Memory Traffic (GB/second):            %8.3f (%6.3f read + %6.3f write)\n",
+        $totMemTraffic[1] / $totTime / 1024 / 1024 / 1024,
+        $totMemTraffic[2] / $totTime / 1024 / 1024 / 1024,
+        $totMemTraffic[3] / $totTime / 1024 / 1024 / 1024;
+
+    printf "%s:  %8.3f (%6.3f read + %6.3f write)\n",
+        $totRcMiss[0],
+        $totRcMiss[1] * 1000 / $totCommits,
+        $totRcMiss[2] * 1000 / $totCommits,
+        $totRcMiss[3] * 1000 / $totCommits;
+    printf "%s:  %8.3f (%6.3f read + %6.3f write)\n",
+        $totMcMiss[0],
+        $totMcMiss[1] * 1000 / $totCommits,
+        $totMcMiss[2] * 1000 / $totCommits,
+        $totMcMiss[3] * 1000 / $totCommits;
+    printf "%s:  %8.3f\n",
+        $totDcMiss[0],
+        $totDcMiss[1] * 1000 / $totCommits;
+    printf "%s:  %8.3f\n",
+        $totIcMiss[0],
+        $totIcMiss[1] * 1000 / $totCommits;
+}
+
+print "\n";
+if (defined($totWorkload)) {
+    printf "Workload:              %s\n", $totWorkload;
+}
+if (defined($totTxnAll)) {
+    printf "tpmC:            %14.0f\n", 0.45 * $totTxnAll * 60.0 / $totTime;
+    printf "Transactions:           %7d", $totTxnAll;
+    printf "  (%.0f / second)\n", $totTxnAll / $totTime;
+    printf "New Order Transactions: %7d", $totTxnNew;
+    printf "  (%.0f / second)\n", $totTxnNew / $totTime;
+}
+
+=head1 NAME
+
+sum-unweighted - Combine several stats files as though they were a single run
+
+=head1 SYNOPSYS
+
+sum-unweighted <stats files>
+
+=head1 DESCRIPTION
+
+This is not a SimPoints sum!  The script combines several stats files
+as though they were executed as a single run.
+
+=head1 AUTHOR
+
+Michael Adler
+
+=head1 COPYRIGHT
+
+Copyright (C) 2004-2006 Intel Corporation
+
+=cut

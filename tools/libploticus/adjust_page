@@ -1,0 +1,36 @@
+#set pageymax = $arith(@label_adjust+@pageymax)
+// 
+// Adjust ymin and ymax based on vertical stubs.
+//
+#set ymax = $arith(@ymax+@label_adjust)
+#set ymin = $arith(@ymin+@label_adjust)
+
+//
+// Adjust pageymax for title and x/y labels
+//
+#if @title != ""
+  #set pageymax = $arith(@pageymax+0.3)
+#endif
+
+#if @xlabel != ""
+  #set pageymax = $arith(@pageymax+0.3)
+  #set xlabeladj = $arith(@ymin-0.2)
+#endif
+
+#if @ylabel != ""
+  #set pagexmax = $arith(@pagexmax+0.3)
+  #set ylabeladj = $arith(@xmin-0.2)
+#endif
+
+#proc print
+  label: pagexmax @pagexmax, pageymax @pageymax
+#endproc 
+
+// Define page
+#proc page
+  pagesize: @pagexmax @pageymax
+#endproc
+
+#proc print
+label: xmin: @xmin, ymin: @ymin, xmax: @xmax, ymax, @ymax
+#endproc

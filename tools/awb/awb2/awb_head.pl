@@ -1,5 +1,10 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+##################################################################################
 #
-# Copyright (C) 2001-2006 Intel Corporation
+# Copyright (C) 2002-2006 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,10 +21,12 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 #
-[Global]
-Description=Asim Base Library
-CSN=CSN-simcore-2217
-Name=simcore
-Tag=HEAD
-Lock=asim-simcore
-Buildorder=1
+##################################################################################
+
+# Author: Joel Emer
+# Date: October 2002
+# Purpose:
+#       A GUI interface to find, build and run models
+#
+
+

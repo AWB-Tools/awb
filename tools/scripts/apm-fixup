@@ -1,0 +1,199 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2003-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Joel Emer
+#
+
+use File::Basename;
+use Getopt::Long;
+
+use Asim;
+
+#
+# Argument handling
+#
+my $status;
+
+my $help = 0;
+
+$status = GetOptions( "help"           => \$help
+                    );
+
+
+if (!$status) {
+  my $prog = basename($0);
+  print STDERR "$prog: Illegal argument, try '$prog --help'\n";
+  exit 0;
+}
+
+if ($help) {
+  system "perldoc $0";
+  exit 0;
+}
+
+my $apmfile = $ARGV[0];
+my $inifile;
+
+Asim::init()
+  || die("Unable to initialize Asim::\n");
+
+# Get all the module names....
+
+my $moduleDB = Asim::Module::DB->new();
+my @module_types = $moduleDB->module_types();
+my @modules = ();
+my %modname;
+my @grouplist;
+
+
+foreach my $t (@module_types) {
+  push(@modules, $moduleDB->find($t));
+}
+
+foreach my $m (@modules) {
+  $modname{$m->name()} = $m;
+#  print $m->name() . "\n";
+}
+
+foreach my $apmfile (@ARGV) {
+  print "Opening... $apmfile\n";
+  $inifile = Asim::Inifile->new($apmfile);
+
+  my $m;
+  my $f;
+
+  foreach my $g ($inifile->get_grouplist()) {
+    my $m = $modname{$g};
+  
+    if (defined($m)) {
+      my $f = $inifile->get($g, "File");
+      my $mf = $m->filename();
+      
+      if (defined($f) && ($f =~ /.awb$/) && ($f ne $mf)) {
+        print "Fixup: $f ---> $mf\n";
+        $inifile->put($g, "File", $mf);
+      }
+    }
+  }
+
+  my $newfile = $inifile->filename() . ".new";
+  
+  $inifile->save($newfile);
+  print "Saved...$newfile\n";
+}
+
+
+
+
+exit !$status;
+
+
+# Die in batch mode, just warn in interactive mode
+
+sub warn_or_die {
+  my $msg = shift;
+
+  die($msg);
+}
+
+__END__
+
+=head1 NAME
+
+Apm-fixup - Fix broken apm files
+
+=head1 SYNOPSIS
+
+apm-fixup   [--help]
+           <apm-file>...
+
+=head1 DESCRIPTION
+
+This is a program that parses through an model (.apm) file and fixes
+pointers to module (.awb) files that might have been moved.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --help
+
+Get this help information.
+
+=item [--] <apm-file>...
+
+An modle (.apm) file to fix
+
+=back
+
+
+=head1 EXAMPLES
+
+    % ./apm-fixup apm-test.apm
+    Opening... apm-test.apm
+    Fixup: pm/model-junk.awb ---> pm/model.awb
+    Fixup: pm/isa/ipf-junk/ipf_inst.awb ---> pm/isa/ipf/ipf_inst.awb
+    Saved...apm-test.apm.new
+
+    % diff apm-test2.apm*
+    13c13
+    < File=pm/model-junk.awb
+    ---
+    > File=pm/model.awb
+    49c49
+    < File=pm/isa/ipf-junk/ipf_inst.awb
+    ---
+    > File=pm/isa/ipf/ipf_inst.awb
+
+
+=head1 ENVIRONMENT
+
+    This program uses the Asim perl modules, so they
+    must be in your perl library path. You can force
+    this with a command linke the following:
+
+    % setenv PERL5LIB <worksapce>/src/asim-core/tools/libperl
+
+=head1 BUGS
+
+Only fixes moved .awb files - not moved submodels.
+
+=head1 AUTHORS
+
+Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Intel Corporation, 2003              *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

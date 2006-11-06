@@ -1,0 +1,44 @@
+#!/bin/sh
+
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# run a model, then check its stats file
+# to make sure the given parameter had the given value.
+#
+# This is a template "run" script, used by single-check-param.cfx.
+#
+# Carl Beckmann	8/4/2006
+#
+PATH=/p/asim/i386_linux24/bin:$PATH
+TRACENAME=@tracename@
+
+# run the model, after printing the exact commands used:
+echo $model $genFlags --feeder -t $TRACENAME $feedFlags --system $sysFlags
+$model $genFlags --feeder -t $TRACENAME $feedFlags --system $sysFlags
+
+# we need the asim environment before using grab.pl:
+source /p/asim/scripts/setup/setup-asim.sh
+
+# extract the parameter from the stats file, and fail if its value differs from expected:
+value=`grab.pl -filename @tracename@.stats -parameters @paramname@ | grep unknown_benchmark | sed -e 's/unknown_benchmark[ \t]*//' -e 's/[ \t]*$//'`
+case $value in @paramvalue@) exit 0;; esac
+echo "TEST FAILED: expected @paramname@ = @paramvalue@ but got $value"
+exit 1

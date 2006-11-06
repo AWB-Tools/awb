@@ -1,0 +1,160 @@
+//
+// this script adjust the y-axis to look reasonable
+//
+// Assumptions (inputs):
+// YMIN, YMAX have been set and a plotting area is defined with them
+//
+// Output:
+//   * YINC: will be automatically computed based on YMAX-YMIN and to
+//           give resonably rounded intervals
+//   * YMIN & YMAX: will be adjusted to fall on integer multiples of  YINC
+//                  such that they fall exactly onto tic marks;
+//
+
+//
+// compute a good YINC, but don't draw anything
+//
+#set yaxis_debug = 0
+
+#if @yaxis_debug = 1
+  #proc print
+    label: YMIN: @YMIN  YMAX: @YMAX
+  #endproc
+#endif
+
+#set YMAX = $formatfloat(@YMAX, "%.12f")
+#set YMIN = $formatfloat(@YMIN, "%.12f")
+
+#if @YMAX < .000000000001
+  #proc print
+    label: ERROR: Can't plot this because Maximum Y value is < 1E-12
+  #endproc
+  #return
+#endif
+
+#if @YMAX > 1000000000000
+  #proc print
+    label: ERROR: Can't plot this because Maximum Y values is > 1E+12
+  #endproc
+  #return
+#endif
+
+#if @yaxis_debug = 1
+  #proc print
+    label: YMIN: @YMIN  YMAX: @YMAX
+  #endproc
+#endif
+
+#set diff = $arith(@YMAX-@YMIN)
+#set diff = $formatfloat(@diff, "%.12f")
+
+#if @yaxis_debug = 1
+  #proc print
+    label: diff=@diff
+  #endproc
+#endif
+
+#set ADJUSTVAL = 1
+
+#if @diff > 100000000
+  #set ADJUSTVAL = 1000000
+#endif
+
+#if @diff < .00001
+  #set ADJUSTVAL = .000000001
+#endif
+
+#set YMIN = $arith(@YMIN/@ADJUSTVAL)
+#set YMAX = $arith(@YMAX/@ADJUSTVAL)
+
+#set YMAX = $formatfloat(@YMAX, "%.12f")
+#set YMIN = $formatfloat(@YMIN, "%.12f")
+
+#if @yaxis_debug = 1
+  #proc print
+    label: YMIN=@YMIN, YMAX=@YMAX
+  #endproc
+#endif
+
+#proc areadef
+  yrange: @YMIN @YMAX
+  rectangle: @xmin @ymin @xmax @ymax
+  xscaletype: categories
+  xcategories: datafield=1
+  catcompmethod: exact
+#endproc
+
+#proc yaxis
+  stubs: incremental
+  tics: none
+  stubomit: *
+#endproc
+
+//
+// ploticus is rather silly; it can produce floats of form xE+/-y - but
+// its own $arith() function can't handle them anymore ?!
+//
+#if $contains("eE", @YINC) != 0
+  #set YINC = $formatfloat(@YINC, "%.12f")
+#endif
+
+//
+// now align YMIN and YMAX to integer multiples of YINC
+//
+#if @yaxis_debug = 1
+  #proc print
+    label: low YINC: @YINC  YMIN: @YMIN  YMAX: @YMAX
+  #endproc
+#endif
+//
+// $numgroup() is numerically instable at the border points, ie.
+// applying it to an already rounded value keeps changing it;
+// so we have to check for that manually...
+//
+// handle YMIN
+//
+#set k = $arith(@YMIN/@YINC)
+#set kint = $formatfloat(@k, "%1.0f")
+#if @k != @kint
+  #set YMIN = $numgroup(@YMIN, @YINC, low)
+  #if @yaxis_debug = 1
+    #proc print
+      label: rounding YMIN low
+    #endproc
+  #endif
+#endif
+//
+// handle YMAX
+//
+#set k = $arith(@YMAX/@YINC)
+#set kint = $formatfloat(@k, "%1.0f")
+#if @k != @kint
+  #set YMAX = $numgroup(@YMAX, @YINC, high)
+  #if @yaxis_debug = 1
+    #proc print
+      label: rounding YMAX high
+    #endproc
+  #endif
+#endif
+
+// Adjust numbers back if necessary. 
+#set YMAX = $formatfloat(@YMAX, "%.12f")
+#set YMIN = $formatfloat(@YMIN, "%.12f")
+#set YINC = $formatfloat(@YINC, "%.12f")
+
+#set YINC = $arith(@YINC*@ADJUSTVAL)
+#set YMIN = $arith(@YMIN*@ADJUSTVAL)
+#set YMAX = $arith(@YMAX*@ADJUSTVAL)
+
+// Adjust everything to a nice format
+#set YMAX = $formatfloat(@YMAX, "%.12f")
+#set YMIN = $formatfloat(@YMIN, "%.12f")
+#set YINC = $formatfloat(@YINC, "%.12f")
+
+#if @yaxis_debug = 1
+  #proc print
+    label: YINC: @YINC  YMIN: @YMIN  YMAX: @YMAX
+  #endproc
+#endif
+
+
