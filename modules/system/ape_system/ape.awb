@@ -1,0 +1,44 @@
+/*
+ *Copyright (C) 2004-2006 Intel Corporation
+ *
+ *This program is free software; you can redistribute it and/or
+ *modify it under the terms of the GNU General Public License
+ *as published by the Free Software Foundation; either version 2
+ *of the License, or (at your option) any later version.
+ *
+ *This program is distributed in the hope that it will be useful,
+ *but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *GNU General Public License for more details.
+ *
+ *You should have received a copy of the GNU General Public License
+ *along with this program; if not, write to the Free Software
+ *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+******************************************************************
+Awb module specification
+******************************************************************
+
+%AWB_START
+
+%name APE
+%desc APE - Asinine Plugin Exerciser 
+%provides system
+%requires packages tarati_system basesystem instfeeder ape_driver isa
+%requires software_context hardware_context warmup_manager 
+%public ape.h
+%private ape.cpp
+%param MAX_INST_BUF_SZ 1024 "maximum number of instruction buffer entries"
+%param %dynamic MAX_IDLE_CYCLES 256  "maximum number of allowable idle cycles (progress assurance)"
+
+%library lib/libasim/libasim.a
+%library lib/libdral/libdral.a
+
+--- some code requires that to be defined ---
+%export NUM_HWCS_PER_CPU       16 "Number of hardware contexts per CPU"
+%export MAX_TOTAL_NUM_CPUS       1 "Max Number of CPUS"
+%export MAX_TOTAL_NUM_HWCS       1 "Max Number of hardware contexts"
+%param %dynamic SIMULATED_REGION_WEIGHT 10000 "The weight of the benchmark section from 1-10000"
+%param %dynamic SIMULATED_REGION_INSTRS_REPRESENTED 0 "Total instructions per CPU in benchmark represented by this region"
+%AWB_END

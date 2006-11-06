@@ -1,0 +1,137 @@
+#
+# Copyright (C) 2004-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+##############################################################################
+#
+# AWB Makefile
+#
+# $REPLACE$PmName
+# $REPLACE$PmDesc
+#
+##############################################################################
+
+#-----------------------------------------------------------------------------
+# set defaults for make configuration
+#-----------------------------------------------------------------------------
+GNU = $REPLACE$GNU
+OPT = $REPLACE$OPT
+DEBUG = $REPLACE$DEBUG
+STATIC = $REPLACE$STATIC
+WARN = $REPLACE$WARN
+PAR = $REPLACE$PAR
+COMMON_LFLAGS:=$REPLACE$COMMON_LFLAGS
+LOCAL_LFLAGS:=$REPLACE$LOCAL_LFLAGS
+LOCAL_CFLAGS:=$REPLACE$LOCAL_CFLAGS
+USE_TCL=yes
+#-----------------------------------------------------------------------------
+# top-level make configuration
+#-----------------------------------------------------------------------------
+include $REPLACE$MAKEFILECONFIG
+
+#-----------------------------------------------------------------------------
+# includes
+#-----------------------------------------------------------------------------
+ASIM_INCDIRS=$REPLACE$INCDIRS
+INCDIRS=$(ASIM_INCDIRS)
+
+#-----------------------------------------------------------------------------
+# TARGET and required components
+#-----------------------------------------------------------------------------
+TARGET=$REPLACE$TARGET
+SUBDIRS=$REPLACE$SUBDIRS
+SUBTARGETS=$REPLACE$SUBTARGETS
+OBJS=$REPLACE$OBJS
+OOBJS:=$(addprefix obj/, $(OBJS))
+
+#-----------------------------------------------------------------------------
+# paths to sources
+#-----------------------------------------------------------------------------
+VPATH=$REPLACE$VPATH
+
+#-----------------------------------------------------------------------------
+# build rules
+#-----------------------------------------------------------------------------
+.PHONY: all
+all : $(TARGET)
+
+$(TARGET) : $(OOBJS) $(SUBTARGETS)
+	@rm -f $(TARGET)
+	ar -q $(TARGET).a $(OOBJS) $(SUBTARGETS) 
+	@echo done building $(TARGET).a
+
+# generate both .o files and .d files for #include dependencies;
+# we create all .o file in a separate obj/ directory;
+# we move the .d files into a separate .depend/ directory;
+# Note1: Ccache compilations leave the .d in . so we move it to obj/
+# Note2: GEM cxx -MD is broken and needs the sed fix!
+obj/%.o : %.cpp .dirs
+	$(CXX) $(MKDEPEND) -c -o $@ $(CFLAGS) $(INCDIRS) $<
+	@dfile=$(notdir $(basename $@)).d; if [ -e $$dfile ]; then mv $$dfile obj/$$dfile; fi
+	@sed -e 's/^\([^/]*\.o:\)/obj\/\1/' $(DEPEND_FILE) > .depend/$(notdir $(basename $@)).d
+	@rm -f $(DEPEND_FILE)
+
+#-----------------------------------------------------------------------------
+# Generate documentation with Doxygen
+#-----------------------------------------------------------------------------
+.PHONY: dox
+dox: src/base/asim_doxy_model.dox
+	doxygen src/base/asim_doxy_model.dox
+	@echo "Doxygen output is at `pwd`/dox/html/index.html"
+
+#-----------------------------------------------------------------------------
+# utility rules
+#-----------------------------------------------------------------------------
+$(SUBTARGETS): $(SUBDIRS)
+	@true # dummy rule to force make to check target after building subdir
+
+.PHONY: $(SUBDIRS)
+$(SUBDIRS) : 
+	@$(MAKE) -C $@ $(MAKECMDGOALS)
+
+#
+# .dirs rule confirms that required directories have been built and creates
+# target file ".dirs" instead of being a .PHONY rule.  Use "echo > .dirs"
+# to create the file instead of touch.  touch seemed to have a strange
+# property that the mtime of the created file could be a second later than
+# touch ran.  This caused .dirs to appear to be built after some .o files.
+#
+.dirs: .depend obj
+	@if [ ! -e .dirs ] ; then echo > .dirs ; fi
+.depend obj:
+	@mkdir $@
+	@rm -f .dirs
+
+.PHONY: clean
+clean : $(SUBDIRS)
+	rm -rf obj dox .depend .dirs cxx_repository
+
+.PHONY: realclean
+realclean : $(SUBDIRS) clean
+	rm -f $(TARGET)
+
+.PHONY: nuke
+nuke :  realclean
+	rm -rf *
+
+#-----------------------------------------------------------------------------
+# include all generated dependencies (unless *clean* goal)
+#-----------------------------------------------------------------------------
+ifneq ($(findstring clean, $(MAKECMDGOALS)), clean)
+-include .depend/*.d
+endif

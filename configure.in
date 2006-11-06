@@ -1,0 +1,810 @@
+#
+# Copyright (C) 2001-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+# Process this file with autoconf to produce a configure script.
+# This is the configure.in file for asim-simcore.
+
+AC_INIT([ASIM simcore], [1.3a], [carl.j.beckmann@intel.com], [asim-simcore])
+AC_PREREQ(2.59) dnl required autoconf version
+AC_CONFIG_SRCDIR([admin/packages/simcore])
+
+# Installation defaults
+# AC_PREFIX_DEFAULT(/usr/local)
+AC_PREFIX_PROGRAM(asimstarter)
+
+AC_CONFIG_AUX_DIR(scripts)
+
+AM_INIT_AUTOMAKE([1.8.3 foreign subdir-objects]) dnl automake version + options
+AM_CONFIG_HEADER(include/config.h)
+
+# prevent casual installer from having to deal with Makefile.in etc.
+# getting regenerated; this could happen due to timestamp issues of
+# the files coming out of the repository;
+AM_MAINTAINER_MODE
+
+
+#
+# Some defines from the ASIM core to be able to include syntax.h
+# (This is code is borrowed and Bourne-shellified from Makefile.config)
+# (... and its quite ugly ...)
+#
+HOSTOS=`uname -s`
+HOSTMACHINE=`uname -m`
+HOSTOSRELEASE=`uname -r`
+HOSTOSRELEASE_SUBST=`echo $HOSTOSRELEASE | tr ".)(-" "____"`
+
+#
+# get the perl version.
+# Needed in FIND_PERLGUI.
+# Export it so asimstarter knows which is the good version of perl.
+#
+PERLVERSION=`perl --version | grep 'This is perl' | sed -e 's/.*, v//' -e 's/ built.*//'`
+config_perl_version=$PERLVERSION
+AC_SUBST(config_perl_version)
+
+#
+# FIND_QT(<dirs>)
+#
+
+AC_DEFUN([FIND_MOC],[
+    AC_MSG_CHECKING("for Qt moc")
+
+    for dir in $1
+    do
+        if test -f $dir/moc
+        then
+            QTMOCDIR=$dir
+            AC_MSG_RESULT("found in $QTMOCDIR")
+            break
+        else
+            if test -f $dir/bin/moc
+            then
+                QTMOCDIR=$dir/bin
+                AC_MSG_RESULT("found in $QTMOCDIR")
+                break
+            fi
+        fi
+    done
+])
+
+AC_DEFUN([FIND_UIC],[
+    AC_MSG_CHECKING("for Qt uic")
+
+    for dir in $1
+    do
+        if test -f $dir/uic
+        then
+            QTUICDIR=$dir
+            AC_MSG_RESULT("found in $QTUICDIR")
+            break
+        else
+            if test -f $dir/bin/uic
+            then
+                QTUICDIR=$dir/bin
+                AC_MSG_RESULT("found in $QTUICDIR")
+                break
+            fi
+        fi
+    done
+])
+
+AC_DEFUN([FIND_QT_LIBS],[
+    AC_MSG_CHECKING("for Qt 3.x.x libraries")
+
+    QTLIBS="qt"
+
+    for dir in $1
+    do
+        for i in $QTLIBS
+        do
+            if test -f $dir/lib$i.a -o -f $dir/lib$i.so
+            then
+                QTLIBDIR=$dir
+                AC_MSG_RESULT("found in $QTLIBDIR")
+                QT=$i
+                break 2
+            else
+                if test -f $dir/lib/lib$i.a -o -f $dir/lib/lib$i.so
+                then
+                    QTLIBDIR=$dir/lib
+                    AC_MSG_RESULT("found in $QTLIBDIR")
+                    QT=$i
+                    break 2
+                fi
+            fi
+        done
+    done
+])
+
+AC_DEFUN([FIND_QT_INCLUDES],[
+    AC_MSG_CHECKING("for Qt 3.x.x include files")
+
+    for dir in $1
+    do
+        if test -f $dir/qwidget.h
+        then
+            QTINCDIR=$dir
+            AC_MSG_RESULT("found in $QTINCDIR")
+            break
+        else
+            if test -f $dir/include/qwidget.h
+            then
+                QTINCDIR=$dir/include
+                AC_MSG_RESULT("found in $QTINCDIR")
+                break
+            fi
+        fi
+    done
+])
+
+AC_DEFUN([FIND_QT], [
+    qt_available=1;
+
+    AC_SUBST(QT)
+
+    FIND_MOC($with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/bin /bin /usr/local /usr/X11R6)
+    if test "X$QTMOCDIR" = "X"; then
+        echo ""
+        echo "Qt's moc not found! If you have installed Qt in an"
+        echo "unusual place, please use the \"--with-qt-moc=\"" option
+        echo ""
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo "You don't have QT Library available in this system. Remember"
+        echo "you cannot compile libagt, StripChartViewer and 2Dreams"
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo ""
+        qt_available=0;
+    fi
+
+    dnl
+    dnl find uic
+    dnl
+
+    FIND_UIC($with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/bin /bin /usr/local /usr/X11R6)
+    if test "X$QTUICDIR" = "X"; then
+        echo ""
+        echo "Qt's uic not found! If you have installed Qt in an"
+        echo "unusual place, please use the \"--with-qt-uic=\"" option
+        echo ""
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo "You don't have QT Library available in this system. Remember"
+        echo "you cannot compile libagt, StripChartViewer and 2Dreams"
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo ""
+        qt_available=0;
+    fi
+
+    dnl
+    dnl find qt libraries
+    dnl
+
+    FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/lib /usr/local/lib /usr/X11R6/lib /usr/lib/qt3/lib64)
+    if test "X$QTLIBDIR" = "X"
+    then
+        echo ""
+        echo "Qt libs not found! If you have installed Qt in an"
+        echo "unusual place, please use the \"--with-qt-libs=\"" option
+        echo ""
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo "You don't have QT Library available in this system. Remember"
+        echo "you cannot compile libagt, StripChartViewer and 2Dreams"
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo ""
+        qt_available=0;
+    else
+        QTLIBOBJ="-lqt"
+        QTLIBDIR="-L$QTLIBDIR"
+    fi
+
+    dnl 
+    dnl find qt headers
+    dnl
+
+    FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/local/include /usr/X11R6/include/qt3)
+    if test "X$QTINCDIR" = "X"
+    then
+        echo ""
+        echo "Qt headers not found! If you have installed Qt in an"
+        echo "unusual place, please use the \"--with-qt-includes=\"" option
+        echo ""
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo "You don't have QT Library available in this system. Remember"
+        echo "you cannot compile libagt, StripChartViewer and 2Dreams"
+        echo "****************************************************************"
+        echo "****************************************************************"
+        echo ""
+        qt_available=0;
+    else
+        QTINCDIR="-I$QTINCDIR"
+    fi    
+])
+
+AC_DEFUN([FIND_GUI], [
+
+    AC_PATH_XTRA
+
+    FIND_QT
+
+    if test $qt_available = 1 
+    then
+        AC_SUBST(QTINCDIR)
+        AC_SUBST(QTLIBDIR)
+        AC_SUBST(QTLIBOBJ)
+        AC_SUBST(QTUICDIR)
+        AC_SUBST(QTMOCDIR)
+
+        dnl Configuring AGT defines
+
+        case $host in
+        alpha*) 
+       	    X_EXTRA_LIBS="-lXext -lX11" ;;
+        i?86*)
+	    X_EXTRA_LIBS="-ldl -lGL -lXext -lX11 -lXinerama -lXrender" ;;
+        ia64*)
+	    X_EXTRA_LIBS="-ldl -lGL -lXext -lX11 -lXinerama -lXrender" ;;
+        x86_64*)
+	    X_EXTRA_LIBS="-ldl -lGL -lXext -lX11 -lXinerama -lXrender" ;;
+        *)
+            echo "This architecture is not supported" ;
+            exit ;;
+        esac
+    
+        AC_SUBST(X_EXTRA_LIBS)
+    fi
+
+])
+
+#
+# FIND_PERLGUI(<dirs>)
+#
+# Get the perl system library location, where Qt.so is to be found.
+# We should really try to extract this from INSTALLSITELIB in libperl/Asim/Makefile,
+# but for now it's hardwired here, as a function of the Linux and Perl versions.
+#
+AC_DEFUN([FIND_PERLGUI], [
+
+    AC_PATH_XTRA
+    AC_MSG_CHECKING(for PerlQt)
+
+    case $HOSTOS in
+      Linux) ;;
+      *)     AC_MSG_ERROR(This OS version $HOSTOS is not supported)
+             exit ;;
+    esac
+
+    case $HOSTOSRELEASE in
+      2.4*)
+	case $PERLVERSION in
+	  5.6*)  perlqt_search_suff=/lib/perl5/site_perl/$PERLVERSION ;;
+	  5.8*)  perlqt_search_suff=/lib/site_perl ;;
+	esac ;;
+      2.6*)
+	case $PERLVERSION in
+	  5.6*)  perlqt_search_suff=/lib/site_perl/$PERLVERSION ;;
+	  5.8*)  perlqt_search_suff=/lib32/site_perl ;;
+	esac ;;
+      *)
+        AC_MSG_ERROR(This OS version $HOSTOSRELEASE is not supported)
+    esac
+
+    if test -d $prefix$perlqt_search_suff
+    then
+        perlqt_search_path='${prefix}'$perlqt_search_suff ;
+        AC_MSG_RESULT(found in $perlqt_search_path)
+    else
+        AC_MSG_ERROR(PerlQt not found)
+    fi
+
+    AC_SUBST(perlqt_search_path)
+
+])
+
+#
+# with arguments
+#
+
+AC_ARG_WITH(qt-dir,        [  --with-qt-dir=DIR          qt-dir in DIR])
+AC_ARG_WITH(qt-moc,        [  --with-qt-moc=DIR          qt-moc in DIR])
+AC_ARG_WITH(qt-uic,        [  --with-qt-uic=DIR          qt-uic in DIR])
+AC_ARG_WITH(qt-includes,   [  --with-qt-includes=DIR     qt-includes in DIR])
+AC_ARG_WITH(qt-libs,       [  --with-qt-libs=DIR         qt-libs in DIR])
+AC_ARG_WITH(stlport-dir,   [  --with-stlport-dir=DIR     stlport-dir in DIR])
+
+
+#
+# compile switches
+#
+# --enable-warning
+#
+AC_ARG_ENABLE([warning],
+      AC_HELP_STRING([--enable-warning=ARG],
+                     [warning level [[ARG=no|warn|error]] (default=warn)]),
+      asim_cv_enable_warning=$enableval,
+      asim_cv_enable_warning=warn)
+
+AC_CACHE_CHECK([which warning level to use],
+      asim_cv_enable_warning,
+      asim_cv_enable_warning=warn)
+
+if test $asim_cv_enable_warning = yes; then
+    asim_cv_enable_warning=warn
+fi
+if test $asim_cv_enable_warning = no; then
+    WARNFLAGS="-Wformat"
+fi
+if test $asim_cv_enable_warning = warn -o $asim_cv_enable_warning = error; then
+    WARNFLAGS="-Wall -W -Wshadow -Wcast-align -Wcast-qual -Winline -Wold-style-cast -Wredundant-decls -Wnon-virtual-dtor -ansi"
+fi
+if test $asim_cv_enable_warning = error; then
+    WARNFLAGS="${WARNFLAGS} -Werror"
+fi
+AC_SUBST(WARNFLAGS)
+
+#
+# --enable-optimize
+#
+AC_ARG_ENABLE([optimize],
+      AC_HELP_STRING([--enable-optimize=ARG],
+                     [optimizations [[ARG=no|yes|high]] (default=yes)]),
+      asim_cv_enable_optimize=$enableval,
+      asim_cv_enable_optimize=yes)
+
+AC_CACHE_CHECK([if optimizations should be used] ,
+      asim_cv_enable_optimize,
+      asim_cv_enable_optimize=yes)
+
+if test $asim_cv_enable_optimize = no; then
+    OPTFLAGS="-g -O0 -fno-inline -DQT_DEBUG -DQT_FATAL_ASSERT"
+fi
+if test $asim_cv_enable_optimize = yes; then
+    OPTFLAGS="-g -O2 -DQT_DEBUG -DQT_FATAL_ASSERT"
+fi
+if test $asim_cv_enable_optimize = high; then
+    OPTFLAGS="-g -O3 -finline-limit=1200 -funroll-loops -fexpensive-optimizations -frerun-loop-opt -DQT_NO_DEBUG -DQT_NO_CHECK"
+fi
+AC_SUBST(OPTFLAGS)
+
+#
+# --enable-distcc
+#
+AC_ARG_ENABLE([distcc],
+      AC_HELP_STRING([--enable-distcc=ARG],
+                     [use distcc compiler [[ARG=no|yes]] (default=no)]),
+      asim_cv_enable_distcc=$enableval,
+      asim_cv_enable_distcc=no)
+
+AC_CACHE_CHECK([if distcc compiler should be used] ,
+      asim_cv_enable_distcc,
+      asim_cv_enable_distcc=no)
+
+#
+# --enable-xmlgdome
+#
+AC_ARG_ENABLE([xmlgdome],
+      AC_HELP_STRING([--enable-xmlgdome=ARG],
+                     [use XML gdome library [[ARG=no|yes]] (default=no)]),
+      asim_cv_enable_xmlgdome=$enableval,
+      asim_cv_enable_xmlgdome=no)
+
+AC_CACHE_CHECK([if XML gdome library should be used] ,
+      asim_cv_enable_xmlgdome,
+      asim_cv_enable_xmlgdome=no)
+
+
+# --------------------------------------------------------------------------
+#  XML support:
+# 
+#    The following libraries are required:
+#      libxml2   XML, XPath          http://www.xmlsoft.org/
+#      gdome2    DOM 2.0             http://phd.cs.unibo.it/gdome2/
+#      gmetadom  DOM C++ bindings    http://gmetadom.sourceforge.net/
+# 
+#    The following libraries are also recommended:
+#      libxslt   XSLT 1.0            http://xmlsoft.org/XSLT/
+# 
+# --------------------------------------------------------------------------
+if test $asim_cv_enable_xmlgdome = yes; then
+  XML_CFLAGS=`gmetadom-config --module=gdome_cpp_smart --cflags`
+  XML_LFLAGS=`gmetadom-config --module=gdome_cpp_smart --libs`
+  AC_SUBST(XML_CFLAGS)
+  AC_SUBST(XML_LFLAGS)
+fi
+
+
+
+#
+# --enable-pthreads
+#
+AC_ARG_ENABLE([pthreads],
+      AC_HELP_STRING([--enable-pthreads=ARG],
+                     [use pthreads library [[ARG=no|yes]] (default=no)]),
+      asim_cv_enable_pthreads=$enableval,
+      asim_cv_enable_pthreads=no)
+if test $asim_cv_enable_pthreads != "no"; then
+        asim_pthreads="-DASIM_PTHREADS"
+fi
+AC_SUBST([asim_pthreads])
+
+AC_CACHE_CHECK([if pthread library should be used] ,
+      asim_cv_enable_pthreads,
+      asim_cv_enable_pthreads=no)
+
+# 
+# Check if they have defined the STLPort directory
+#
+if test -z $with_stlport_dir; then
+  STLPORTINC=""
+else
+  AC_MSG_CHECKING("for STLPort")
+  if test ! -d $with_stlport_dir; then
+    AC_MSG_ERROR(STLPort not found at $with_stlport_dir)
+  fi
+  STLPORTINC="-I$with_stlport_dir/stlport"
+  AC_MSG_RESULT(Using STLPort at $with_stlport_dir)
+fi
+AC_SUBST(STLPORTINC)
+
+# pull all flags together
+AM_CXXFLAGS='$(WARNFLAGS) $(OPTFLAGS) $(ASIMCOREFLAGS) $(ASIMCOREINCS)'
+AM_LDFLAGS='$(ASIMCORELIBS)'
+AC_SUBST(AM_CXXFLAGS)
+AC_SUBST(AM_LDFLAGS)
+
+# This is the asim package name
+AC_SUBST(package)
+package=simcore
+
+# This is the release tag out of the package file.
+# The tag is assumed to be in a line that looks like: Tag=<tagname>
+AC_SUBST(release)
+release=`grep '^Tag=' ./admin/packages/$package | sed 's/Tag=//'`
+
+
+# This is the directory for configuration data
+configdir='${sysconfdir}/asim/ws/${release}'
+AC_SUBST(configdir)
+
+
+# This is where architecture independent info is placed
+packagedir='${datadir}/asim'
+AC_SUBST(packagedir)
+
+# This is where a copy of the package is placed
+codedir='${packagedir}/${package}/${release}'
+AC_SUBST(codedir)
+
+
+# This is where architecture dependent info is placed
+tooldir='${libexecdir}/asim/${release}'
+AC_SUBST(tooldir)
+
+
+# Checks for programs.
+if test x${CXXFLAGS+set} = x; then
+    dnl prevent AC_PROG_CXX from setting CXXFLAGS to -O -g flags
+    CXXFLAGS=""
+fi
+
+# check if we should use distcc or not
+
+if test $asim_cv_enable_distcc = "yes"; then
+    distcc="distcc gcc"
+    distcxx="distcc g++"
+else
+    distcc=""
+fi
+
+AC_PROG_CC("$distcc" gcc cc)
+AC_PROG_CXX("$distcxx" g++ cxx)
+
+AC_PROG_LN_S
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+# tools for building libraries
+AC_DISABLE_SHARED
+AC_PROG_LIBTOOL
+
+# Check for perl version
+
+AC_MSG_CHECKING(for a perl version >= 5.6)
+perlok=`perl -e 'if ("$]" >= 5.006) { print "yes\n";} else {print "no\n"}'`
+if test "$perlok" = "yes" ; then
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_ERROR(Wrong perl version - need at least version 5.6)
+fi
+
+# Check for perl packages
+# TBD
+
+# Check for tcl version
+# TBD
+
+# Handle gui-based stuff
+
+AC_ARG_ENABLE([gui],
+      AC_HELP_STRING([--enable-gui=ARG],
+         [build qt gui-based programs [[ARG=no|yes]] (default=yes)]),
+      asim_cv_enable_gui=$enableval,
+      asim_cv_enable_gui=yes)
+
+if test "$asim_cv_enable_gui" = "yes" 
+then
+    NO_GUI=''
+    FIND_GUI()
+else
+    NO_GUI='#'
+    qt_available=0
+fi
+AC_SUBST(NO_GUI)
+    
+
+# Handle perlgui-based stuff
+
+AC_ARG_ENABLE([perlgui],
+      AC_HELP_STRING([--enable-perlgui=ARG],
+         [build perlgui-based programs [[ARG=no|yes]] (default=same as --enable-gui)]),
+      asim_cv_enable_perlgui=$enableval,
+      asim_cv_enable_perlgui=$asim_cv_enable_gui)
+
+case $HOSTMACHINE in
+  i?64*)
+      asim_cv_enable_perlgui="no" 
+esac
+
+if test "$asim_cv_enable_perlgui" = "yes" 
+then
+    NO_PERLGUI=''
+    FIND_PERLGUI()
+else
+    NO_PERLGUI='#'
+fi
+AC_SUBST(NO_PERLGUI)
+    
+
+# Define LINK... 
+
+LINK="ar -r"
+AC_SUBST(LINK)
+
+
+#
+# some glob libraries do not support tilde and brace expansion
+#
+AC_MSG_CHECKING(for define of GLOB_TILDE)
+AC_TRY_COMPILE(
+  [#include <glob.h>],
+  [int foo = GLOB_TILDE;],
+  have_glob_brace=1,
+  have_glob_brace=0
+)
+if test $have_glob_brace = 1 ; then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  AC_MSG_WARN(No ~ substitution available for filename paths)
+  AC_DEFINE(GLOB_TILDE, 0,
+    [stub out GLOB_TILDE if not defined by system headers])
+fi
+AC_MSG_CHECKING(for define of GLOB_BRACE)
+AC_TRY_COMPILE(
+  [#include <glob.h>],
+  [int foo = GLOB_BRACE;],
+  have_glob_brace=1,
+  have_glob_brace=0
+)
+if test $have_glob_brace = 1 ; then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  AC_MSG_WARN(No {} substitution available for filename paths)
+  AC_DEFINE(GLOB_BRACE, 0,
+    [stub out GLOB_BRACE if not defined by system headers])
+fi
+
+if test $HOSTOS = "OSF1" ; then
+  AC_DEFINE(HOST_DUNIX, 1,
+    [system is DigitalUnix Alpha])
+  if test $GNU != 1 ; then
+    ASIMCORELIBS="-L/proj/vssad/local/alpha/lib -ltcl -lX11 -lrt -lm -lmld -lbfd -liberty_gcoff -lst -lmld -lexc -lintl"
+    # cxx on Tru64 needs this to compile standard iostream right
+    ASIMCOREFLAGS="-DHOST_DUNIX -D__USE_STD_IOSTREAM -DHASH_NAMESPACE=std -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES"
+    ASIMCOREINCS="-I/usr/local/include"
+    AC_DEFINE(__USE_STD_IOSTREAM, 1,
+      [convince DigitalUnix CXX to follow C++ IOstream standard])
+    AC_DEFINE(HASH_NAMESPACE, std,
+      [Hash namespace in DigitalUnix CXX is std])
+  else
+    AC_DEFINE(HASH_NAMESPACE, __gnu_cxx, [Hash namespace in GNU CXX is __gnu_cxx])
+    ASIMCORELIBS="-L/proj/vssad/local/alpha/lib -ltcl -lX11 -lrt -lm -lmld -lbfd -liberty -lst -lmld -lexc -lintl"
+    ASIMCOREINCS="-idirafter /usr/local/include"
+    ASIMCOREFLAGS="-DHOST_DUNIX -DHASH_NAMESPACE=__gnu_cxx -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES"
+  fi
+  AC_SUBST(ASIMCOREFLAGS)
+  AC_SUBST(ASIMCORELIBS)
+  AC_SUBST(ASIMCOREINCS)
+else
+  if test $HOSTOS = "FreeBSD" ; then
+    case $HOSTMACHINE in
+      i?86) 
+        ASIMCOREFLAGS="-DHOST_FREEBSD_X86 -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES" ;
+        AC_DEFINE(HOST_FREEBSD_X86, 1, [system is FreeBSD x86]) ;;
+      *)    
+        ASIMCOREFLAGS="-DHOST_FREEBSD -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES" ;
+        AC_DEFINE(HOST_FREEBSD, 1, [system is FreeBSD (other)]) ;;
+    esac
+    
+    ASIMCORELIBS="-L/usr/local/lib -L/usr/X11R6/lib -ltcl -lX11 -lm" ;
+    ASIMCOREINCS="-L/usr/local/lib -L/usr/X11R6/lib -ltcl -lX11 -lm" ;
+  else
+    AC_DEFINE(HOST_LINUX, 1, [system is Linux])
+    AC_DEFINE(HASH_NAMESPACE, __gnu_cxx, [Hash namespace in GNU CXX is __gnu_cxx])
+
+# cannot use AC_DEFINE for the following, since autoheader does not
+# support variables in the first argument of AC_DEFINE
+    case $HOSTMACHINE in
+      i?86) 
+        ASIMCOREFLAGS="-DHOST_LINUX_X86 -DLINUX_$HOSTOSRELEASE_SUBST -D__STDC_LIMIT_MACROS -DHASH_NAMESPACE=__gnu_cxx -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES" ;
+        ASIMCORELIBS="-L/usr/X11R6/lib -lX11 -ldl -lm"
+        ASIMCOREINCS="-idirafter /usr/local/include" ;
+        AC_DEFINE(HOST_LINUX_X86, 1, [system is Linux x86]) ;;
+      x86_64) 
+        ASIMCOREFLAGS="-DHOST_LINUX_X86 -DLINUX_$HOSTOSRELEASE_SUBST -D__STDC_LIMIT_MACROS -DHASH_NAMESPACE=__gnu_cxx -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES" ;
+        ASIMCORELIBS="-L/usr/X11R6/lib64 -lX11 -ldl -lm"
+        ASIMCOREINCS="-idirafter /usr/local/include" ;
+        AC_DEFINE(HOST_LINUX_X86, 1, [system is Linux x86-64]) ;;
+      ia64) 
+        ASIMCOREFLAGS="-DHOST_LINUX_IA64 -DLINUX_$HOSTOSRELEASE_SUBST -DHASH_NAMESPACE=__gnu_cxx -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES" ;
+        ASIMCORELIBS="-L/usr/X11R6/lib -lX11 -ldl -lm" ;
+        ASIMCOREINCS="-idirafter /usr/local/include" ;
+        AC_DEFINE(HOST_LINUX_IA64, 1, [system is Linux IA64]) ;;
+    esac
+  fi
+  AC_SUBST(ASIMCOREFLAGS)
+  AC_SUBST(ASIMCORELIBS)
+  AC_SUBST(ASIMCOREINCS)
+fi
+
+#
+# libtool on SUSE x86_64 installations does not look for -lpopt in the right place,
+# so we define this conditional, used in the makefiles for awb-resolver, amc, and dbtest,
+# which forces an explicit link command not using libtool
+#
+AM_CONDITIONAL(X86_64_LIBTOOL_HACK, test x$SYSTOKEN = xx86_64_linux26)
+
+# Checks for libraries.
+AC_CHECK_LIB(popt, poptGetContext)
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h limits.h unistd.h)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_MODE_T
+AC_TYPE_SIZE_T
+AC_TYPE_SIGNAL
+AC_STRUCT_TM
+
+# Checks for library functions.
+AC_CHECK_FUNCS(getcwd mkdir regcomp rmdir strdup strerror strtol strtoul)
+
+# setup all files that need to be generated
+# top level
+AC_CONFIG_FILES(Makefile)
+
+# etc
+AC_CONFIG_FILES(etc/awb.config.template)
+
+# lib top level
+AC_CONFIG_FILES(lib/Makefile)
+
+# lib/libasim
+AC_CONFIG_FILES(lib/libasim/Makefile lib/libasim/include/Makefile)
+AC_CONFIG_FILES(lib/libasim/pkgconfig/libasim.pc)
+AC_CONFIG_FILES(lib/libasim/pkgconfig/libasim-uninstalled.pc)
+libasimDir="lib/libasim"
+libasimIncDir="$libasimDir/include/asim"
+libasimSrcDir="$libasimDir/src"
+if test $asim_cv_enable_xmlgdome = yes; then
+  xmlout="xmlout-gdome"
+else
+  xmlout="xmlout-nolib"
+fi
+AC_CONFIG_LINKS($libasimIncDir/xmlout.h:$libasimIncDir/$xmlout.h)
+AC_CONFIG_LINKS($libasimSrcDir/xmlout.cpp:$libasimSrcDir/$xmlout.cpp)
+
+# lib/libdral
+AC_CONFIG_FILES(lib/libdral/Makefile lib/libdral/include/Makefile)
+AC_CONFIG_FILES(lib/libdral/pkgconfig/libdral.pc)
+AC_CONFIG_FILES(lib/libdral/pkgconfig/libdral-uninstalled.pc)
+
+# lib/libawb
+AC_CONFIG_FILES(lib/libawb/Makefile)
+
+# libperl
+AC_CONFIG_FILES(libperl/Makefile)
+AC_CONFIG_FILES(libperl/Asim/lib/Asim.pm)
+# run perl MakeMaker at configure time, not make time,
+# to create the makefiles in the libperl tree:
+AC_CONFIG_COMMANDS( libperl/Asim/Makefile                                        ,
+		[cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix; cd ../..], 
+		                        		       [prefix=$prefix  ])
+AC_CONFIG_COMMANDS( libperl/AsimShell/Makefile                                   ,
+		[cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		                        		       [prefix=$prefix  ])
+AC_CONFIG_COMMANDS( libperl/PinPoints/Makefile                                   ,
+		[cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		                        		       [prefix=$prefix  ])
+AC_CONFIG_COMMANDS( libperl/PlotShell/Makefile                                   ,
+		[cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		                        		       [prefix=$prefix  ])
+
+# tools top level
+AC_CONFIG_FILES(tools/Makefile)
+
+# tools/dreams
+
+if test $qt_available = 1; then
+    AC_CONFIG_FILES(lib/libagt/Makefile lib/libagt/include/Makefile)
+    AC_CONFIG_FILES(lib/libdraldb/Makefile lib/libdraldb/include/Makefile)
+    AC_CONFIG_FILES(tools/dreams/Makefile)
+    AC_CONFIG_FILES(tools/dreams/dbtest/Makefile tools/dreams/dbtest/src/Makefile)
+    # tools/lib/libdreams
+    # AC_CONFIG_FILES(tools/lib/libdreams/Makefile)
+    # tools/dreams/dralTranslator
+    # dralServerFilesLink=""
+    # for i in $(ls base/dral* | cut -d '/' -f 2)
+    # do
+    #    dralServerFilesLink=$dralServerFilesLink$srcdir/tools/lib/libdreams/$i":"base/$i" "
+    # done
+    # AC_CONFIG_LINKS($dralServerFilesLink)
+else
+    echo ""
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo "You don't have the QT Library configured. Therefore,"
+    echo "StripChartViewer, 2Dreams, ligdreams, dralTranslator and libagt"
+    echo "will not be compiled"
+    echo "*******************************************************************"
+    echo "*******************************************************************"
+    echo ""
+fi
+# tools/scripts
+AC_CONFIG_FILES(tools/scripts/Makefile)
+AC_CONFIG_FILES(tools/scripts/asimstarter, [chmod +x tools/scripts/asimstarter])
+AC_CONFIG_FILES(tools/scripts/asim-pkg-config, [chmod +x tools/scripts/asim-pkg-config])
+
+# tools/awb
+AC_CONFIG_FILES(tools/awb/Makefile)
+AC_CONFIG_FILES(tools/awb/amc/Makefile)
+AC_CONFIG_FILES(tools/awb/awb-resolver/Makefile)
+AC_CONFIG_FILES(tools/awb/awb2/Makefile)
+AC_CONFIG_FILES(tools/awb/apm-edit/Makefile)
+AC_CONFIG_FILES(tools/awb/awb-wizard/Makefile)
+
+# now generate all files
+AC_OUTPUT

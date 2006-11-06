@@ -1,0 +1,33 @@
+==============================================================================
+                                ASIM TARATI
+==============================================================================
+
+The code in this directory implements the linkage between an ASIM system
+and the Tarati (ASIM external interface) server.
+
+For more information on Tarati, see the tarati directory.
+
+What is it
+----------
+
+The ASIM Tarati linkage implements helpers for interfacing an ASIM system
+to a Tarati server, e.g. registration of ASIM's Tarati Services. It also
+contains the code for the Services themselves.
+ASIM Tarati implements the following abstractions:
+
+System:
+  The ASIM System - Tarati Server interface class with a small, well
+  defined interface:
+    // constructor
+    AsimTaratiSystem (ASIM_SYSTEM system);
+    // check for work
+    void Work(void);
+  The AsimTaratiSystem class registers/unregisters all ASIM Tarati
+  Services on startup/shutdown and allows the Tarati Server to get control
+  during normal operation if there is some work for it to be done.
+
+Services and Methods:
+  All ASIM Tarati Services (subclassed from Service) and their
+  associated Methods (subclassed from Method) are implemented here.
+  This is the code that provides assess to ASIM's functionality via the
+  Tarati interface.

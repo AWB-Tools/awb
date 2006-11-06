@@ -1,0 +1,48 @@
+/*
+ *Copyright (C) 2006 Intel Corporation
+ *
+ *This program is free software; you can redistribute it and/or
+ *modify it under the terms of the GNU General Public License
+ *as published by the Free Software Foundation; either version 2
+ *of the License, or (at your option) any later version.
+ *
+ *This program is distributed in the hope that it will be useful,
+ *but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *GNU General Public License for more details.
+ *
+ *You should have received a copy of the GNU General Public License
+ *along with this program; if not, write to the Free Software
+ *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+********************************************************************
+* Awb module specification
+********************************************************************
+
+%AWB_START
+
+%name Asim classic controller for x86 (ptv, stats, thread, knobs support)
+%desc Asim classic controller for x86 (ptv, stats, thread, knobs support)
+%provides controller
+%requires workbench
+%requires awb_stub
+%requires perfchecker
+
+%public control_x86e.h 
+%private main_x86e.cpp args_x86.h args_x86.cpp
+%private control_x86e.cpp schedule.h schedule.cpp
+
+%attributes model smac
+%const  MAX_PROCS        4  "Max number of processors"
+%const  MAX_CORES        16 "Max number of cores" 
+%const  MAX_THREADS      4  "Max number of threads" 
+
+%param %dynamic STOP_THREAD 0 "Stop simulation when first thread finishes"
+
+%library lib/willy/libarchlib.a
+%library lib/willy/libarisim.a
+%library lib/willy/libsupport.a
+%library lib/willy/libptlib.a
+
+%AWB_END

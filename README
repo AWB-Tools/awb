@@ -1,0 +1,14 @@
+
+
+This is the core libraries and utilites for using the Asim modeling
+infrastructure. 
+
+For installation information see the INSTALL file.
+
+For developers: To reconfigure the autoconfigure script use the following:
+
+   # aclocal
+   # autoheader
+   # automake -a -c --foreign
+   # autoconf
+   # ./configure

@@ -1,0 +1,54 @@
+/*
+ *Copyright (C) 2003-2006 Intel Corporation
+ *
+ *This program is free software; you can redistribute it and/or
+ *modify it under the terms of the GNU General Public License
+ *as published by the Free Software Foundation; either version 2
+ *of the License, or (at your option) any later version.
+ *
+ *This program is distributed in the hope that it will be useful,
+ *but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *GNU General Public License for more details.
+ *
+ *You should have received a copy of the GNU General Public License
+ *along with this program; if not, write to the Free Software
+ *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+******************************************************************
+Awb module specification
+******************************************************************
+
+%AWB_START
+
+%name XML-RPC
+%desc XML-RPC Library based on xmlrpc++
+%provides xmlrpc
+
+--------------------------------------------------------------------------
+xmlrpm++ library
+--------------------------------------------------------------------------
+we make the main header file public; since that includes secondary
+header files, we also need to make those private in order for them to
+get put in the build tree;
+--------------------------------------------------------------------------
+%public xmlrpc++/src/XmlRpc.h
+%private xmlrpc++/src/base64.h
+%private xmlrpc++/src/XmlRpcClient.h
+%private xmlrpc++/src/XmlRpcDispatch.h
+%private xmlrpc++/src/XmlRpcException.h
+%private xmlrpc++/src/XmlRpcServerConnection.h
+%private xmlrpc++/src/XmlRpcServer.h
+%private xmlrpc++/src/XmlRpcServerMethod.h
+%public  xmlrpc++/src/XmlRpcSocket.h
+%private xmlrpc++/src/XmlRpcSource.h
+%private xmlrpc++/src/XmlRpcUtil.h
+%private xmlrpc++/src/XmlRpcValue.h
+--------------------------------------------------------------------------
+
+--- this module has its own Makefile and is compiled into a library ---
+%makefile Makefile.template
+%target libXmlRpc.a
+
+%AWB_END

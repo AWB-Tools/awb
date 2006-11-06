@@ -1,0 +1,144 @@
+
+ASIM quickstart...
+
+Asim is comprised of a set of "packages" that contain the source for
+either asim utilities or models. To use asim one must install at least
+the asim "core" package (the one that contains this file) in either a 
+system-wide place (like /usr/local or /proj/asim) or a private spot 
+(like ~/asim). Shell scripts, binaries and other shared files are placed
+there. After the asim "core" is installed the "asim-shell" program can
+be used to access the other asim packages from their CVS repositories.
+The other packages can then be used privately by the person that checked
+them out or installed in the same place as core was installed and shared
+by all the users with access to them.
+
+
+Prerequisites
+-------------
+
+   To run the asim tools you need:
+
+        perl 5.6.0 or later with the following packages:
+            Bundle::libnet
+            Term:ReadLine::Gnu (optional)
+
+
+        tcl 8.0 exactly with the following packages:
+            bwidget
+
+
+        qt 3.0 or later for some gui tools
+            (configure with --enable-gui=no to avoid building these tools)
+
+        TODO: configuration instructions...
+
+
+   To actually build and run models you also need:
+
+        gcc-3.01 or later
+        libxml2   XML, XPath          http://www.xmlsoft.org/
+        gdome2    DOM 2.0             http://phd.cs.unibo.it/gdome2/
+        gmetadom  DOM C++ bindings    http://gmetadom.sourceforge.net/
+
+
+
+System Installation
+-------------------
+
+   1) Unpack asim-core-<release>.tar.gz (the tarball containing this file)
+
+
+   2) Pick a directory, which we'll call <AWBSYSTEM> to install asim - 
+      something like /proj/asim or /usr/local or for a single user ~/asim. 
+
+
+   3) Do the following:
+
+      % cd asim-core
+      % ./configure --prefix=<AWBSYSTEM> [--enable-gui=no]
+      % make 
+      % make install
+
+      
+   4) Install asim model sources from other tarballs as needed, e.g., 
+
+      asim-feeder-<release>.tar.gz     - instruction feeders
+      asim-ipf-<release>.tar.gz        - ipf machine models
+      asim-nework-<release>.tar.gz     - intra-cpu network models
+      
+
+
+User Startup
+------------
+
+   0) Make sure <AWBSYSTEM> from above is in your path
+
+   1) Create a workspace with
+
+       % asim-shell new workspace ~/asim-dev
+
+   2a) Add a shard model package to your work space
+
+       % asim-shell add public_package
+       [1] core/HEAD
+       [2] core/core-V1_2
+       [3] feeder/HEAD
+       [4] feeder/feeder-V1_2
+       [5] ipf/HEAD
+       [6] ipf/ipf-V1_0
+       [7] network/HEAD
+       Select public package to add to path []: 5
+       Checking package dependency: feeder/HEAD
+       A package (feeder/HEAD) we depend on is not available
+       Would you like to use the global version [no]?: yes
+       Checking package dependency: core/HEAD
+
+   or 
+
+   2b) Check out a model into your workspace
+
+       % asim-shell checkout package
+       [1] core/HEAD
+       [2] core/core-V1_2
+       [3] feeder/HEAD
+       [4] feeder/feeder-V1_2
+       [5] ipf/HEAD
+       [6] ipf/ipf-V1_0
+       [7] network/HEAD
+       Pick repository []: 7
+       Repostitory user you want to do the checkout (e.g., your login name) [anonymous]:
+       ....
+       Do you want to add it [no]?: yes
+
+
+   3) Use new workspace
+
+       % asim-shell
+       asim-shell> help
+
+       --- try playing with the existing models
+
+       asim-shell> awb 
+
+       --- try checking out model to work on (*)
+
+       asim-shell> checkout package core
+       ......
+       asim-shell> .... make source changes ....
+       asim-shell> update package core
+       ......
+       asim-shell> commit package core
+       ......
+
+       --- quit and do some real work
+
+       asim-shell> exit
+
+
+
+(*) actually checking out packages reqiures you do have set
+    up your ssh keys on asim.intel.com ...see ASIM docs on 
+	http://asim.intel.com
+    You can save repeatedly typing your password by running under ssh-agent2.
+
+

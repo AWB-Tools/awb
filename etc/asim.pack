@@ -1,0 +1,123 @@
+#
+# Copyright (C) 2001-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+##############################################################################
+# Asim packages
+#
+##############################################################################
+    
+[Global]
+Version=1.1
+Name=Asim Packages
+Description=Software package dependencies for Asim performance models
+
+###### Asim trunk
+[asim]
+Description=Asim Core
+Method=svn
+Access=https://asim.csail.mit.edu/svn/asim
+Module=asim-asim
+Tag=HEAD
+Target=asim-asim
+Changes=changes
+
+[asim/HEAD]
+Description=Asim Core
+Method=svn
+Access=https://asim.csail.mit.edu/svn/asim
+Module=asim-asim
+Tag=HEAD
+Target=asim-asim
+Changes=changes
+
+###### Hasim trunk
+[hasim]
+Description=Hardware Asim Model
+Method=svn
+Access=https://hasim.csail.mit.edu/svn/hasim
+Module=asim-hasim
+Tag=HEAD
+Target=asim-hasim
+Changes=changes
+
+[hasim/HEAD]
+Description=Hardware Asim Model
+Method=svn
+Access=https://hasim.csail.mit.edu/svn/hasim
+Module=asim-hasim
+Tag=HEAD
+Target=asim-hasim
+Changes=changes
+
+###### Hasim-mips trunk
+[hasim-mips]
+Description=Hardware Asim Model for MIPS
+Method=svn
+Access=https://hasim.csail.mit.edu/svn/hasim-mips
+Module=asim-hasim-mips
+Tag=HEAD
+Target=asim-hasim-mips
+Changes=changes
+
+[hasim-mips/HEAD]
+Description=Hardware Asim Model for MIPS
+Method=svn
+Access=https://hasim.csail.mit.edu/svn/hasim-mips
+Module=asim-hasim-mips
+Tag=HEAD
+Target=asim-hasim-mips
+Changes=changes
+
+###### Feeder
+[feeder]
+Description=Instruction Feeders
+Method=svn
+Access=http://asim.intel.com:81/svn/feeder
+Module=asim-feeder
+Tag=HEAD
+Target=asim-feeder
+Changes=changes
+
+[feeder/HEAD]
+Description=ASIM Instruction Feeders Library
+Method=svn
+Access=http://asim.intel.com:81/svn/feeder
+Module=asim-feeder
+Tag=HEAD
+Target=asim-feeder
+Changes=changes
+
+
+######### Dreams tools
+
+[dreams]
+Description=Dreams Visualization Tools
+Method=svn
+Access=http://asim.intel.com:81/svn/dreams
+Module=asim-dreams
+Target=asim-dreams
+Changes=changes
+
+[dreams/HEAD]
+Description=Dreams Visualization Tools
+Method=svn
+Access=http://asim.intel.com:81/svn/dreams
+Module=asim-dreams
+Target=asim-dreams
+Changes=changes

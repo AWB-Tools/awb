@@ -1,0 +1,152 @@
+#
+# Copyright (C) 2003-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+##########################################################################
+#
+# XML-RPC makefile. This file is used by awb to build the xmlrpc library.
+# This makefile is generated for:
+#   $REPLACE$PmName
+#   $REPLACE$PmDesc
+#
+# Author: Artur Klauser
+#
+##########################################################################
+
+#-----------------------------------------------------------------------------
+# set defaults for make configuration
+#-----------------------------------------------------------------------------
+GNU = $REPLACE$GNU
+OPT = $REPLACE$OPT
+DEBUG = $REPLACE$DEBUG
+STATIC = $REPLACE$STATIC
+WARN = $REPLACE$WARN
+PAR = $REPLACE$PAR
+COMMON_LFLAGS:=$REPLACE$COMMON_LFLAGS
+LOCAL_LFLAGS:=$REPLACE$LOCAL_LFLAGS
+LOCAL_CFLAGS:=$REPLACE$LOCAL_CFLAGS
+
+#-----------------------------------------------------------------------------
+# top-level make configuration
+#-----------------------------------------------------------------------------
+include $REPLACE$MAKEFILECONFIG
+
+#-----------------------------------------------------------------------------
+# includes and defines
+#-----------------------------------------------------------------------------
+ASIM_INCDIRS=$REPLACE$INCDIRS
+SRCDIR=src
+
+#-----------------------------------------------------------------------------
+# TARGET and required components
+#-----------------------------------------------------------------------------
+TARGET=$REPLACE$TARGET
+CLIENTS=atalk TclTalk
+CLIENTBASE=taratiClient
+
+#-----------------------------------------------------------------------------
+# paths to sources
+#-----------------------------------------------------------------------------
+VPATH=$(SRCDIR)
+
+#-----------------------------------------------------------------------------
+# configuration for using multiple compilers
+#-----------------------------------------------------------------------------
+INCLUDES = $(ASIM_INCDIRS) -I.
+
+##
+## Files to be compiled
+##
+CXXNAMES = XmlRpcClient XmlRpcDispatch XmlRpcServerConnection XmlRpcServer \
+           XmlRpcServerMethod XmlRpcSocket XmlRpcSource XmlRpcUtil XmlRpcValue
+src_prefix = src/xmlrpc++/src
+CXXPNAMES := $(addprefix $(src_prefix)/, $(CXXNAMES))
+CXXOBJS := $(addsuffix .o, $(notdir $(CXXPNAMES)))
+CXXOOBJS := $(addprefix obj/, $(CXXOBJS))
+
+CLIENTOBJS := $(addsuffix .o, $(notdir $(CLIENTS)))
+CLIENTOOBJS := $(addprefix obj/, $(CLIENTOBJS))
+CLIENTBASEOBJS := $(addsuffix .o, $(notdir $(CLIENTBASE)))
+CLIENTBASEOOBJS := $(addprefix obj/, $(CLIENTBASEOBJS))
+#-----------------------------------------------------------------------------
+# build rules
+#-----------------------------------------------------------------------------
+.PHONY: all
+all : dirs $(TARGET) $(CLIENTS)
+
+$(TARGET): $(CXXOOBJS)
+	@rm -f $(TARGET)
+	@ar rcv $@ $(CXXOOBJS)
+ifeq ($(GNU),0)
+	-@ar rc $@ cxx_repository/*.o
+endif
+
+# generate both .o files and .d files for #include dependencies;
+# we create all .o file in a separate obj/ directory;
+# we move the .d files into a separate .depend/ directory;
+# Note1: Ccache compilations leave the .d in . so we move it to obj/
+# Note2: GEM cxx -MD is broken and needs the sed fix!
+$(CXXOOBJS): obj/%.o: $(src_prefix)/%.cpp
+	$(CXX) $(MKDEPEND) -c -o $@ $(CFLAGS) $(INCLUDES) $<
+	@dfile=$(notdir $(basename $@)).d; if [ -e $$dfile ]; then mv $$dfile obj/$$dfile; fi
+	@sed -e 's/^\([^/]*\.o:\)/obj\/\1/' $(DEPEND_FILE) > .depend/$(notdir $(basename $@)).d
+	@rm -f $(DEPEND_FILE)
+
+#----------------------------------------------------------------
+# hack to also build the clients
+#----------------------------------------------------------------
+$(CLIENTS): % : obj/%.o $(TARGET) $(CLIENTBASEOOBJS)
+	$(CXX) -o $@ $(CFLAGS) $(INCLUDES) $< $(CLIENTBASEOOBJS) $(TARGET) -L/proj/vssad/local/i386_linux24/lib -ltcl8.4
+
+$(CLIENTOOBJS) $(CLIENTBASEOOBJS) : obj/%.o: src/%.cpp
+	$(CXX) $(MKDEPEND) -c -o $@ $(CFLAGS) $(INCLUDES) $<
+	@dfile=$(notdir $(basename $@)).d; if [ -e $$dfile ]; then mv $$dfile obj/$$dfile; fi
+	@sed -e 's/^\([^/]*\.o:\)/obj\/\1/' $(DEPEND_FILE) > .depend/$(notdir $(basename $@)).d
+	@rm -f $(DEPEND_FILE)
+
+#-----------------------------------------------------------------------------
+# utility rules
+#-----------------------------------------------------------------------------
+.PHONY: dirs
+dirs: .depend obj
+.depend obj:
+	@mkdir $@
+
+.PHONY: clean
+clean :
+	@rm -rf obj
+	@rm -rf .depend
+	@rm -rf cxx_repository
+
+.PHONY: realclean
+realclean : clean
+	rm -f $(TARGET)
+
+.PHONY: nuke
+nuke :  realclean
+	rm -rf *
+
+install:
+	
+
+#-----------------------------------------------------------------------------
+# include all generated dependencies (unless *clean* goal)
+#-----------------------------------------------------------------------------
+ifneq ($(findstring clean, $(MAKECMDGOALS)), clean)
+-include .depend/*.d
+endif

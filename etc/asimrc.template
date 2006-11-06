@@ -1,0 +1,510 @@
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+[Global]
+Workspace=
+# 
+# Purpose: Temporary directory used by all ASIM scripts. 
+# Type: String containing absolute path to directory. 
+# Default: /tmp
+#
+# TMP_DIR=/tmp_proj
+TMP_DIR=
+
+#***********************************************************************
+# Regression launcher is layered on top of asim-run.  It uses asim-run 
+# to submit a number of models & benchmarks to the batch system.  The 
+# input PACKAGES defines the packages to evaluate, and the input RUNTYPE
+# defines the type of run to perform.  For example, regression.launcher
+# is used to run both general checkin regression and nightly regression.  
+# The actual actual benchmarks and models to run for the given RUNTYPE
+# and PACKAGE are defined in the <RUNTYPE>.models and <RUNTYPE>.benchmarks 
+# files within the package.  
+#***********************************************************************
+#
+# Default values for regression.launcher script
+#
+[regression.launcher]
+
+# 
+# Purpose: Which packages do we run. 
+# Type: String containing packages separated by spaces
+# 
+# Default: network ipf
+# PACKAGES= network ipf
+PACKAGES=
+
+# 
+# Purpose: Defines the type of run to perform. 
+# Type: String containing a predefined runtype
+# 
+# To run the models and benchmarks for checkin regression..
+# 
+# Default: regression
+# RUNTYPE=regression
+RUNTYPE=
+
+# 
+# Purpose: Defines the style of run to perform.  Style could be
+#	pruned or list (use all experiments for the runs).
+# Type: String containing a predefined runstyle
+# 
+# Default: list
+# RUNSTYLE=list
+RUNSTYLE=
+
+# 
+# Purpose: Defines the type of stats compress to perform.  This 
+#          overrides the default used within asim-run. 
+# Type: String of type none|gzip|bzip2
+# 
+# Default: gzip
+# COMPRESS=gzip
+COMPRESS=
+
+# 
+# Purpose: Defines the queue slot to use for launching regressions. 
+#          This overrides the default used within asim-run.  If no 
+#          queue slot is specified, then the asim-run default queue
+#          slot is used.  
+# Type: String
+#
+# Default: NONE
+# QSLOT=/fast
+QSLOT=
+
+# 
+# Purpose: Space separated list of run commands to pass onto asim-run.  
+#          This is used to override some of the defaults in asim-run 
+#          when running regression.  For example, to tell asim-run to 
+#          NOT build the model, specify:
+#          EX: ASIMRUN_COMMANDS=-nobuild
+#          
+#          
+#          
+# Type: String
+#
+# Default: NONE
+# ASIMRUN_COMMANDS=-nobuild -noreplace
+ASIMRUN_COMMANDS=
+
+#***********************************************************************
+# asim-run is the script used for submitting a large number of ASIM
+# experiments.  It uses the netbatch queue system to batch submissions.  
+# The following variables are used by asim-run to setup the default 
+# run configuration.  asim-run also has a built in scheduler to enable 
+# it to get around some of the shortcomings of netbatch.  This scheduler
+# can be easily disabled by leaving some of the variables blank.  
+# Documentation is provided below on how this is accomplished.  
+#***********************************************************************
+#
+[asim-run]
+#
+#***********************************************************************
+# Bounds and defaults for the nice level used when submitting ASIM jobs
+#***********************************************************************
+#
+#
+# Purpose: The minimum "nice" value used when submitting a 
+#          job to netbatch. 
+# Type: Integer
+#
+# Default: 10
+# EX: NICEMIN=10
+NICEMIN=
+
+#
+# Purpose: The maximum "nice" value used when submitting a 
+#          job to netbatch. 
+# Type: Integer
+#
+# Default: 19
+# EX: NICEMAX=19
+NICEMAX=
+
+#
+# Purpose: The default "nice" value to use when submitting 
+#          ASIM jobs.  If you want to use the Netbatch default
+#          nice level, then leave this value blank.  If you set the
+#          nice level and don't use the Netbatch default, then 
+#          the level chosen must be between NICEMIN and NICEMAX.
+# Type: Integer
+#
+# Default: NULL
+# EX: NICEVAL=18
+NICEVAL=
+
+
+#***********************************************************************
+# Bounds and defaults for the netbatch pools and queues
+#***********************************************************************
+
+#
+# Purpose: Legal netbatch queues for job submission.  If you do not
+#          want to check for legal queue slots, then leave the value
+#          blank.  However, if you specify a QSLOT and leave LEGAL_QSLOTS
+#          blank, then no check is done to determine if that's a legal 
+#          queue slot value or not. 
+# Type: String of queue slots separated by spaces.  If you don't
+#       want to check for legal queue slots, then leave this value blank. 
+#
+#
+# Default: NULL
+# LEGAL_QSLOTS=/slow/asim /fast
+LEGAL_QSLOTS=
+
+#
+# Purpose: The netbatch queue slot to use for ASIM jobs. If you want to 
+#          use the one netbatch defaults to, then leave this value blank.  
+#
+#          WARNING: If you don't specify a default qslot, and the NBQSLOT
+#                   environment variable is not set, it is difficult to 
+#                   figure out which queue netbatch is using for job 
+#                   submission.  Therefore, the asim-run scheduler will
+#                   not restrict jobs.  
+#          
+# Type: String
+#
+# Default: NULL
+# QSLOT=/slow/asim
+QSLOT=
+
+#
+# Purpose: The netbatch pool to use for ASIM jobs.  If no pool is specified 
+#          (by leaving the value blank), then the default NETBATCH pool or 
+#          the pool specified by the user's environment variable NBPOOL 
+#          is used.  
+# Type: String
+# EX: POOL=shr_linux
+#
+# Default: NULL
+# POOL=shr_linux
+POOL=
+
+#
+# Purpose: Legal netbatch classes for job submission.  If you do not
+#          want to check for legal classes, then leave this value blank. 
+#          However, if you leave this blank, then no check is is done to 
+#          determine if the user has specified a legal class.
+# Type: String of classes separated by spaces.  
+#      
+#
+# Default: NULL
+# LEGAL_CLASSES=FOO BAR
+LEGAL_CLASSES=
+
+#
+# Purpose: The default netbatch class to use for ASIM jobs. 
+#          If no default class is specified (by leaving this value blank),
+#          then the default NETBATCH class will be used. 
+# Type: String
+#
+# Default: NULL
+# CLASS=FOO
+CLASS=
+
+#
+# Purpose: Should the netbatch queue be used for submission of jobs? 
+#          If the value is set to 0, then jobs will be submitted serially
+#          to the local machine. 
+# Type: Boolean
+#
+# Default: 1 
+# USE_NETBATCH=1
+USE_NETBATCH=
+
+#
+# Purpose: Should the netbatch queue be used for model build? 
+#          If the value is set to 0, then model build will be submitted serially
+#          to the local machine. 
+# Type: Boolean
+#
+# Default: 0 
+# BUILD_NETBATCH=0
+BUILD_NETBATCH=
+
+#
+# Purpose: Should the model used for submitting jobs be built?  
+#          If true, then the the model will be built using OPT=1, DEBUG=0
+#          and TRACE=1.  Note that the same model file might be used for
+#          multiple experiments (by changing some of the dynamic parameters). 
+#          If so, asim-run will only build the model once.  If the value 
+#          is false, then asim-run assumes that there is an executable 
+#          already with that model name.  For example, if the model configuration
+#          file is called foo.apm, then the executable will be called foo, and
+#          will be located under the directory $AWBLOCAL/build/foo
+# Type: Boolean
+#
+# Default: 1
+# BUILD=1
+BUILD=
+
+#
+# Purpose: Defines the type of compression to be used on the resulting stats
+#          files
+# Type: String
+# Legal Values: none|no|gzip|gz|bzip2|bz2
+#
+# Default: gzip
+# COMPRESS=gzip
+COMPRESS=
+
+#
+# Purpose: Indicates if existing stats files should be replaced if they are found 
+#          in the results directory.  If true, then all benchmarks for all experiments 
+#          will be rerun, regardless of whether there are existing stats for the 
+#          benchmark or not.  If false, any benchmarks with existing stats files 
+#          will NOT be rerun.  In general, REPLACE should be 0.  This allows the user
+#          to run asim-run multiple times in the same results area so that asim-run
+#          can fill in the missing stats files.  In our experience, about 5-10% of 
+#          all netbatch submitted jobs die, and this allows a clean way to ensure 
+#          that all jobs finish. 
+#          
+# Type: Boolean
+# 
+# Default: 0
+# REPLACE=0
+REPLACE=
+
+#***********************************************************************
+# asim-run has a built in scheduler to work around some issues with netbatch. 
+# Certain pools (RESTRICTED_POOLS) and certain queues (RESTRICTED_QSLOTS) 
+# are restricted, which means additional ASIM scheduling restrictions apply.  
+# The scheduler forces asim-run to go to sleep for a random sleep period and 
+# try again afterwards if any of the following conditions are true: 
+# 
+# 1.) The number of running ASIM jobs (from all ASIM users) exceeds 
+#     MAX_ASIM_JOBS. 
+# 2.) The specific user has more than MAX_WAITING_JOBS waiting
+# 3.) The number of running jobs for the current user exceeds MAX_RUNNING_JOBS 
+#     AND the user has submitted more then MAX_JOBS_PER_PERIOD
+# 
+# The sleep period is randomized to be a value between MIN_SAMPLE_PERIOD and
+# MIN_SAMPLE_PERIOD + 1200 seconds.  
+#
+# If you don't want the asim-run scheduler to engage, then leave RESTRICTED_POOLS 
+# and/or RESTRICTED_QSLOTS blank. Note that by default, the asim scheduler is
+# disabled. 
+# 
+#***********************************************************************
+
+#
+# Purpose: Defines the netbatch pools which the asim-run internal scheduler 
+#          cares about.  Leave this item blank if you don't care to have any
+#          restricted pools.  This will automatically disable the ASIM 
+#          scheduler restrictions. 
+# Type: String of pools separated by spaces.
+#
+# EX: RESTRICTED_POOLS=iap shr_linux
+# 
+# Default: NULL
+# RESTRICTED_POOLS=shr_linux
+RESTRICTED_POOLS=
+
+#
+# Purpose: Defines the netbatch queue slots that are restricted by the 
+#          asim-run internal scheduler.  Leave this blank if you don't 
+#          care to have any restricted queue slots.  This will automatically
+#          disable the ASIM scheduler. 
+# Type: String of queue slots separated by spaces
+#
+# EX: RESTRICTED_QSLOTS= /fast /slow/asim
+#
+# Default: NULL
+# RESTRICTED_QSLOTS=/slow/asim
+RESTRICTED_QSLOTS=
+
+#
+# Purpose: Defines a list of users whose jobs WILL NOT be restricted by the 
+#          asim-run scheduler.  For example, the user (ASIM1) who runs nightly
+#          regression jobs is unrestricted in their use of the netbatch queue. 
+#          Leave this value blank if restrictions apply to all ASIM users. 
+# Type: String of user names separated by spaces
+#
+# Default: NULL
+# UNRESTRICTED_USERS=ASIM1
+UNRESTRICTED_USERS=
+
+
+#
+# Purpose: Max number of jobs the user can have waiting before 
+#          scheduling restrictions apply.
+# Type: Integer value
+#
+# Default: 10
+# MAX_WAITING_JOBS=10
+MAX_WAITING_JOBS=
+
+#
+# Purpose: Max number of running ASIM jobs before scheduling restrictions apply. 
+# Type: Integer value
+#
+# Default: 300
+# MAX_ASIM_JOBS=300
+MAX_ASIM_JOBS=
+
+#
+# Purpose: Max number of running ASIM jobs by current user before scheduling 
+#          restrictions apply. 
+# Type: Integer value
+#
+# asim-run Default: 175
+# MAX_RUNNING_JOBS=175
+MAX_RUNNING_JOBS=
+
+#
+# Purpose: Max number of running ASIM jobs that current user can submit this scheduling
+#          period.  This restriction only applies if we've already exceeded 
+#          MAX_RUNNING_JOBS. 
+# Type: Integer value
+#
+# Default: 10
+# MAX_JOBS_PER_PERIOD=10
+MAX_JOBS_PER_PERIOD=
+
+#
+# Purpose: The minimum amount of a time the asim-run scheduler sleeps before trying again 
+#          to submit jobs.  The actual amount of sleep time is randomized to be between
+#          the minimum and minimum + 1200 seconds.  
+# Type: Integer value
+#
+# Default: 600
+# MIN_SAMPLE_PERIOD=600
+MIN_SAMPLE_PERIOD=
+
+#***********************************************************************
+# asim-run arranges for netbatch to run a script on each machine before
+# submitting the actual simulation command, to make sure that enough
+# local disk space is available.  The minimum disk space to check for
+# can be controlled by a parameter here, and this check can also be disabled.
+#***********************************************************************
+
+#
+# Purpose: enforce a minum /tmp disk space availability before sumbitting
+#          a netbatch job to a particular machine.  This parameter gives
+#          the minimum disk space, in megabytes.
+# Type:    Integer
+# Default: 10
+# MIN_TMP_SPACE_MB=10
+MIN_TMP_SPACE_MB=
+
+#
+# Purpose: Enable or disable the pre-execution check prior to running
+#          netbatch jobs.
+# Type:    Boolean
+# Default: 1
+# ENABLE_NETBATCH_PRE=1
+ENABLE_NETBATCH_PRE=
+
+#
+# Purpose: Use Smart class or a script based pre-execution check (prior to running
+#          netbatch jobs).
+# Type:    Boolean
+# Default: 0
+# NETBATCH_PRE_USE_SMARTCLASS=0
+NETBATCH_PRE_USE_SMARTCLASS=
+
+
+#***********************************************************************#
+# asim-batch is invoked by asim-run to submit one asim job, i.e., run
+# one benchmark for one model file.  The number of times asim-batch is 
+# called is equal to the the number of experiments/benchmarks combinations 
+# asim-run is given.  For example, if asim-run is given two experiments and 
+# 20 benchmarks, then asim-batch is invoked 20 times.  
+#
+# asim-batch does 4 primary tasks:
+# 1.) sets up a clean, repeateable environment for running jobs so that 
+#     on a failure, the failures can be repeated. 
+# 2.) Keeps track of which jobs ran cleanly and which jobs failed in the
+#     results directory. 
+# 3.) Documents how to repeat the run of the failed jobs. 
+# 4.) Logs all jobs being run to a common log file (for the purposes of
+#     determining machine usage, etc).  
+#
+#***********************************************************************
+#
+[asim-batch]
+#
+# Purpose: asim-run wipes out the user environment and sets up a default environment
+#          which is the same for all ASIM users.  The SAVED_ENV_VARS value is
+#          used to tell ASIM run which additional environment variables to save from
+#          the user's current environment so that ASIM will run correctly. 
+#          
+# Type: Space separated string 
+#
+# Default: LD_LIBRARY_PATH
+# SAVED_ENV_VARS=LD_LIBRARY_PATH
+SAVED_ENV_VARS=
+
+#
+# Purpose: Defines the type of compression to be used on the resulting stats
+#          files.  If asim-batch is called through asim-run, then the COMPRESS
+#          value provided to asim-run overrides the default given here.  
+# Type: String
+# Legal Values: none|no|gzip|gz|bzip2|bz2
+#
+# Default: gzip
+# COMPRESS=gzip
+COMPRESS=
+
+#
+# Purpose: Provides the name of a log file to use for storing information about 
+#          the current ASIM job.  Information stored is the current date stamp, 
+#          name of experiment, name of benchmarks, and the wall time it took
+#          to run.  Data is accumulated in this file for all ASIM jobs run.  
+#          If the file is NULL, then no log is kept.  It is highly 
+#          recommended that every site keep a log since it provides useful 
+#          information on machine usage, etc.  
+# Type: String
+#
+# Default: NONE
+# ASIM_LOG=/home/ASIM1/BigSis.log
+ASIM_LOG=
+
+#***********************************************************************#
+# fetch-trace is invoked by benchmark .cfg files or .cfx scripts used by
+# asim-run and awb when setting up benchmarks.  It fetches trace files into
+# a local disk cache, and allows portability to remote sites that do not
+# have the main trace disk mounted locally.
+#
+#***********************************************************************
+#
+[fetch-trace]
+# the master trace list for DPG traces
+# DPG_MASTER_TLIST=/nfs/site/proj/dpg/arch/trace_lists/05Q3ww36/Master.tlist
+DPG_MASTER_TLIST=
+
+# the trace fetch program for DPG traces
+# DPG_FETCH_TRACE=/nfs/site/proj/dpg/arch/bin/fetch_trace
+DPG_FETCH_TRACE=
+
+# a regular expression to recognize DPG trace file absolute paths
+# DPG_TRACE_PATTERN=^\/fs..\/(psc|wmt|nhm)\.arch\.traces.*/traces
+DPG_TRACE_PATTERN=
+
+# the master trace list for Asim traces
+# ASIM_MASTER_TLIST=/p/asim/benchmark/Master.tlist
+ASIM_MASTER_TLIST=
+
+# location of the local disk cache for Asim traces
+# ASIM_TRACE_CACHE=/p/asim-benchmarks/trace_cache
+ASIM_TRACE_CACHE=
+
+# the server to rsync Asim traces from
+# ASIM_TRACE_SERVER=asim.intel.com
+ASIM_TRACE_SERVER=

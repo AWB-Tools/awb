@@ -1,0 +1,23 @@
+The structure of the library directories is such
+
+lib/libname/src - source (.cpp) files
+
+lib/libname/include/asim - header files
+
+
+When you include the header files in any file, make sure it's of this form:
+
+#include "asim/header.h"
+
+and then have the following switch in the compile line:
+
+-Ilib/libname/include
+
+
+The makefiles expect to look for header files in an asim directory, and if
+you decide to not follow the convention, life will become more difficult for
+you, your library, and me.  Thank you.
+
+
+
+Eric

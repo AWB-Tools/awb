@@ -1,0 +1,24 @@
+This diretory contains an Asim Perl module. Normally
+the Makefile used to create this directory will be 
+created automatically by ../Makefile, and the perl 
+module itself will in installed in ${prefix}/lib/perl5,
+where ${prefix} is as specified at ./configure time.
+
+See ../README for instructions on installing the
+modules in a different location.
+
+To install just one of the perl modules in a 
+different place you can use the standard
+perl module build procedure:
+
+ % perl Makefile.PL PREFIX=<install prefix>
+ % make
+ % make install
+
+
+
+NOTE:
+
+When adding a module to this perl library remember
+to add it to ./MANIFEST as well, or it won't get
+installed.

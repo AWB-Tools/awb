@@ -1,0 +1,1069 @@
+/*
+ *Copyright (C) 2004-2006 Intel Corporation
+ *
+ *This program is free software; you can redistribute it and/or
+ *modify it under the terms of the GNU General Public License
+ *as published by the Free Software Foundation; either version 2
+ *of the License, or (at your option) any later version.
+ *
+ *This program is distributed in the hope that it will be useful,
+ *but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *GNU General Public License for more details.
+ *
+ *You should have received a copy of the GNU General Public License
+ *along with this program; if not, write to the Free Software
+ *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+/**
+ * @file
+ * @author David Goodwin & Joel Emer
+ * @brief Asim argument parsing
+ */
+
+// generic
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <iostream>
+
+// ASIM core
+#include "asim/syntax.h"
+#include "asim/atoi.h"
+#include "asim/port.h"
+#include "asim/mesg.h"
+#include "asim/profile.h"
+#include "asim/state.h"
+#include "asim/registry.h"
+#include "asim/trace.h"
+#include "asim/ioformat.h"
+#include "asim/xcheck.h"
+#include "asim/param.h"
+
+// ASIM public modules
+#include "asim/provides/controller.h"
+
+// ASIM local module
+#include "args_x86.h"
+
+
+static int ParseVariables (char **argv, UINT32 argc);
+
+// Arguments partitioned into awb's, system's and feeder's
+UINT32 origArgc, awbArgc, sysArgc, fdArgc, fdArgcMax, knobsArgc;
+char **origArgv, **awbArgv, **sysArgv, **fdArgv, **knobsArgv;
+
+extern char *StatsFileName;
+// somebody should clean up what we have allocated here!
+class ARGS_JANITOR_CLASS {
+  public:
+    ARGS_JANITOR_CLASS() {
+        awbArgv = NULL;
+        sysArgv = NULL;
+        fdArgv  = NULL;
+	knobsArgv = NULL;
+	StatsFileName = NULL;
+    }
+    ~ARGS_JANITOR_CLASS() {
+        if (awbArgv) {
+            delete [] awbArgv;
+        }
+        if (sysArgv) {
+            delete [] sysArgv;
+        }
+        if (fdArgv) {
+            delete [] fdArgv;
+        }
+        if (knobsArgv) {
+            delete [] knobsArgv;
+        }
+	if (StatsFileName) {
+	    delete StatsFileName;
+        }
+    }
+};
+static ARGS_JANITOR_CLASS argsJanitor;
+
+// Partition arguments into awb's, system's and feeder's.
+void
+PartitionArgs (INT32 argc, char **argv)
+{
+    origArgc = argc;
+    origArgv = argv;
+
+    awbArgc = sysArgc = fdArgc = knobsArgc = 0;
+
+    ASSERTX(awbArgv == NULL);
+    awbArgv = new char *[argc+1];   
+    ASSERTX(sysArgv == NULL);
+    sysArgv = new char *[argc+1];   
+    ASSERTX(fdArgv == NULL);
+    fdArgcMax = argc;
+    fdArgv = new char *[fdArgcMax+1];    
+    ASSERTX(knobsArgv == NULL);
+    knobsArgv = new char *[argc+1]; 
+
+    //
+    // Partition...
+    
+    bool feederArgs = false;
+    bool systemArgs = false;
+    bool knobsArgs = false;
+    for (INT32 i = 1; i < argc; i++) 
+    {
+        // --         following args are awb's
+        // --feeder   following args are feeder's
+        // --system   following args are system's
+        // --knobs    following args are knobs
+
+        if (strcmp(argv[i], "--") == 0) 
+	{
+            feederArgs = systemArgs = knobsArgs = false;
+        }
+        else if (strcmp(argv[i], "--feeder") == 0) 
+	{
+            feederArgs = true;
+            systemArgs = false;
+	    knobsArgs = false;
+        }
+        else if (strcmp(argv[i], "--system") == 0) 
+	{
+            feederArgs = false;
+            systemArgs = true;
+	    knobsArgs = false;
+        }
+	else if (strcmp(argv[i], "--knobs") == 0) 
+	{
+            feederArgs = false;
+            systemArgs = false;
+	    knobsArgs = true;
+        }
+        // a real argument, we handle -h and -t here since we want
+        // them to have an immediate effect.
+        else 
+	{
+            if (feederArgs) 
+	    {
+                if (strcmp(argv[i], "-repeat") == 0)
+                {
+                    int repeatCount = atoi_general(argv[++i]);
+
+                    // we need to allocate more space for fdArgv array
+                    char **fdArgvNew = new char * [fdArgcMax + repeatCount + 1];
+                    for (UINT32 i = 0; i < fdArgc; i++)
+                    {
+                        fdArgvNew[i] = fdArgv[i];
+                    }
+                    delete [] fdArgv;
+                    fdArgv = fdArgvNew;
+                    fdArgcMax += repeatCount;
+                    
+                    for (int cnt = repeatCount; cnt > 0; cnt--)
+                    {
+                        fdArgv[fdArgc++] = fdArgv[fdArgc-1];
+                    }
+                }
+                else
+                {
+                    fdArgv[fdArgc++] = argv[i];
+                }
+            }
+            else if (systemArgs) 
+	    {
+                sysArgv[sysArgc++] = argv[i];
+            }
+	    else if (knobsArgs) 
+	    {
+                knobsArgv[knobsArgc++] = argv[i];
+            }
+            else 
+	    {
+		int incr = ParseVariables(&argv[i], argc - i); 
+
+		if (incr == -1)
+		{
+		    awbArgv[awbArgc++] = argv[i];
+		}
+		else
+		{
+		    i += incr; 
+		}
+            }
+        }
+    }
+    awbArgv[awbArgc] = NULL;
+    sysArgv[sysArgc] = NULL;
+    fdArgv[fdArgc] = NULL;
+    knobsArgv[knobsArgc] = NULL;
+}
+
+int parseTraceCmd(const char *progName, const char *command, string &regex, int &level)
+{
+    if(*command != '/')
+    {
+        // no regex given, match every name
+        regex = ".*";
+        level = 1;
+        return(0);
+    }
+
+    regex = command;
+    int pos = regex.size() - 1;
+    // the last char should be '0', '1', or '2'
+    if(regex[pos] != '0' && regex[pos] != '1' && regex[pos] != '2')
+    {
+        // If a level was not given, defaul to 1.
+        level = 1;
+    }
+    else
+    {
+        level = regex[pos] - '0';
+        pos--;
+
+        if(regex[pos] != '=') {
+            Usage((char *)progName, stdout);
+            cout << "\nExpected -tr [/regex/[=012]]" << endl;
+            exit(-1);
+        }
+        pos--;
+    }
+
+    // remove the '/' at front and back
+    if(regex[pos] != '/' || regex[0] != '/')
+    {
+        Usage((char *)progName, stdout);
+        cout << "\nExpected -tr [/regex/[=012]]" << endl;
+        exit(-1);
+    }
+    regex.erase(pos);
+    regex.erase(0,1);
+
+    return(1);
+}
+
+// Parse command line arguments
+// Return -1 if no argument is consumed, 0 if one argument consumed, 1 if two, 2 if three ...
+static int
+ParseVariables(char **argv, UINT32 argc)
+{
+    int incr = 0; 
+
+    // -h           print usage
+    if (strcmp(argv[0], "-h") == 0) 
+    {
+        Usage(argv[0], stdout);
+        exit(0);
+    }
+    else if (strcmp(argv[0], "-t") == 0) 
+    {
+        traceOn = true; 
+    }
+    // -tr </regex/=[012]>		set trace regular expression (see trace.h)
+    // FIXME: This argument is also parsed in ParseEvents
+    // Temporal hack to make the ports' trace statements work
+    // Ramon Matas-Navarro
+    else if (strcmp(argv[0], "-tr") == 0)
+    {
+        string regex;
+        int level;
+
+        if(argc > 1)
+            incr += parseTraceCmd(argv[0], argv[1], regex, level);
+        else
+            incr += parseTraceCmd(argv[0], " ", regex, level);
+        
+        TRACEABLE_CLASS::EnableTraceByRegex(regex, level);
+    }
+    else if (strcmp(argv[0], "-p") == 0)
+    {
+        profileOn = true; 
+    }
+    else if (strcmp(argv[0], "-w") == 0)
+    {
+        warningsOn = true; 
+    }
+    else if (strcmp(argv[0], "-rps") == 0) 
+    {
+        registerPortStats = true; 
+    }
+    // -tm <n>		set trace mask (see trace.h)
+    else if (strcmp(argv[0], "-tm") == 0) 
+    {
+        traceMask = atoi_general(argv[++incr]); 
+    }
+    else if (strcmp(argv[0], "-tms") == 0) 
+    {
+        traceMask = find_trace_opt(argv[++incr]);
+    }
+    else if (strcmp(argv[0], "-listmasks") == 0) 
+    {
+        print_trace_masks(cout);
+        exit(0);
+    }
+    else if (strcmp(argv[0], "-listnames") == 0)
+    {
+        printTraceNames = true;
+    }
+    else if (strcmp(argv[0], "-ppc") == 0) 
+    {
+        profilePc = atoi_general(argv[++incr]); 
+    }
+    // -batch        batch workbench
+    //
+    else if (strcmp(argv[0], "-batch") == 0) 
+    {
+        ASIMERROR ("ASIM no longer supports the -batch flag\n")
+    }
+    // -awb          interactive architect's workbench
+    //
+    else if (strcmp(argv[0], "-awb") == 0) 
+    {
+        ASIMERROR ("ASIM no longer supports the -awb flag" <<
+                   " for interactive Cycledisplay mode\n")
+    }
+    // -cf          file holding commands for awb to execute after initializing
+    //
+    else if ((strcmp(argv[0], "-cf") == 0))
+    {
+        awbCmdFile = argv[++incr];
+    }
+    // -wb <w>      use workbench 'w' instead of built-in workbench
+    //
+    else if ((strcmp(argv[0], "-wb") == 0))
+    {
+        overrideWorkbench = argv[++incr];
+    }
+    // -s <f>
+    else if ((strcmp(argv[0], "-s") == 0))
+    {
+        extern char *StatsFileName;
+	
+        StatsFileName = new char[strlen(argv[incr+1])+1];  
+        strcpy(StatsFileName, argv[incr+1]); 
+        ++incr;
+    }
+
+    else if ((strcmp(argv[0], "-snrfile") == 0))
+    {
+        extern char *CheckPointFileName;
+
+        CheckPointFileName = new char[strlen(argv[incr+1])+1];
+        strcpy(CheckPointFileName, argv[incr+1]);
+        ++incr;
+    }
+
+    // debug on
+    else if ((strcmp(argv[0], "-d") == 0))
+    {
+        debugOn = true; 
+    }
+    // dynamic parameters
+    else if ((strcmp(argv[0], "-param") == 0))
+    {
+        char * name;
+        char * eq;
+        char * value;
+
+        name = argv[1];
+        eq = index(argv[1], '=');
+        if ( ! eq )
+        {
+            ASIMERROR("Invalid parameter specification in '"
+                      << argv[0] << " " << argv[1] << "'" << endl
+                      << "    Correct syntax: -param <name>=<value>" << endl);
+        }
+        else
+        {
+            value = eq + 1;
+            *eq = '\0';
+            if ( ! SetParam(name, value))
+            {
+                *eq = '=';
+                ASIMERROR("Don't know about dynamic parameter "
+                          << name << endl
+                          << "    ignoring command line portion '"
+                          << argv[0] << " " << argv[1]  << "'" << endl);
+            }
+            *eq = '=';
+        }
+        incr = 1;
+    }
+    // -listparams           list dynamic parameters
+    else if (strcmp(argv[0], "-listparams") == 0) 
+    {
+        ListParams();
+        exit(0);
+    }
+    else
+    {	
+        return -1; 
+    }
+    
+    return incr; 
+}
+
+// Parse command line arguments, 
+// return false if there is a parse error.
+bool 
+ParseEvents(INT32 argc, char **argv)
+{
+    for (INT32 i = 0; i < argc; i++) 
+    {
+        // -n <n>       run simulation for 'n' nanoseconds
+        if ((strcmp(argv[i], "-n") == 0) && (argc > (i+1))) {
+            CMD_Exit(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -c <n>       run simulation for 'n' cycles
+        else if ((strcmp(argv[i], "-c") == 0) && (argc > (i+1))) {
+            CMD_Exit(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -i <n>       run simulation for 'n' insts.
+        else if ((strcmp(argv[i], "-i") == 0) && (argc > (i+1))) {
+            CMD_Exit(ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -m <n>       run simulation for 'n' insts.
+        else if ((strcmp(argv[i], "-m") == 0) && (argc > (i+1))) {
+            CMD_Exit(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -xcheck <file>		Activate Cross-check going to file <file> (see xcheck.h)
+        else if ((strcmp(argv[i], "-xcheck") == 0) && (argc > (i+1))) 
+        {
+            ActivateCrossChecking(argv[++i]);
+        }
+        // -tr </regex/=[012]>		set trace regular expression (see trace.h)
+        // This has to happen here instead of in ParseVariables so that the
+        // -tr and -tr[cin] arguments are processed in the correct order.
+        else if (strcmp(argv[i], "-tr") == 0)
+        {
+            string regex;
+            int level;
+
+            if(argc > (i+1))
+                i += parseTraceCmd(argv[i], argv[i + 1], regex, level);
+            else
+                parseTraceCmd(argv[i], " ", regex, level);
+
+            TRACEABLE_CLASS::EnableTraceByRegex(regex, level);
+        }
+        //--------------------------------------------------------------------
+        // turning things on 'by instruction'
+        //--------------------------------------------------------------------
+        // -tsi <n>     turn on tracing after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-tsi") == 0) && (argc > (i+1))) {
+            CMD_Debug(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -tri <n>     Take all traces that were turned on by -tr
+        //              and turn them on after <n> insts instead of now.
+        else if (strcmp(argv[i], "-tri") == 0 && (argc > (i+1)))
+        {
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(),
+                      ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -ti </regex/=[012]> <n>     turn on tracing after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-ti") == 0) && (argc > (i+1))) {
+            string regex;
+            int level;
+            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level),
+                      ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -ssi <n>     turn on stats after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-ssi") == 0) && (argc > (i+1))) {
+            CMD_Stats(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -esi <n>     turn on events after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-esi") == 0) && (argc > (i+1))) {
+            ASSERT(runWithEventsOn,"You are trying to generate events in a "
+              "model not compiled with events. Build the model with EVENTS=1");
+            CMD_Events(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -csi <n>     turn on stripCharts after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-csi") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -psi <n>     turn on profiling after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-psi") == 0) && (argc > (i+1))) {
+            CMD_Profile(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+	    // -ptsi <n>     turn on pipetrace after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-ptsi") == 0) && (argc > (i+1))) {
+            CMD_Ptv(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -di <n>     dump state after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-di") == 0) && (argc > (i+1))) {
+            CMD_SaveCheckpoint(ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -ri <n>     restore state after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-ri") == 0) && (argc > (i+1))) {
+            CMD_LoadCheckpoint(ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+
+        //--------------------------------------------------------------------
+        // turning things off 'by instruction'
+        //--------------------------------------------------------------------
+        // -tei <n>     turn off tracing after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-tei") == 0) && (argc > (i+1))) {
+            CMD_Debug(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -sei <n>     turn off stats after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-sei") == 0) && (argc > (i+1))) {
+            CMD_Stats(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -eei <n>     turn off events after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-eei") == 0) && (argc > (i+1))) {
+            CMD_Events(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -cei <n>     turn off stripCharts after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-cei") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -pei <n>     turn off profiling after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-pei") == 0) && (argc > (i+1))) {
+            CMD_Profile(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -ptei <n>     turn off pipetrace after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-ptei") == 0) && (argc > (i+1))) {
+            CMD_Ptv(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        //--------------------------------------------------------------------
+        // turning things on 'by macro instruction'
+        //--------------------------------------------------------------------
+        // -tsm <n>     turn on tracing after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-tsm") == 0) && (argc > (i+1))) {
+            CMD_Debug(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -trm <n>     Take all traces that were turned on by -tr
+        //              and turn them on after <n> Macro insts instead of now.
+        else if (strcmp(argv[i], "-trm") == 0 && (argc > (i+1))) 
+        {
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
+                      ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -tm </regex/=[012]> <n>     turn on tracing after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-tm") == 0) && (argc > (i+1))) {
+            string regex;
+            int level;
+            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
+                      ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -ssm <n>     turn on stats after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-ssm") == 0) && (argc > (i+1))) {
+            CMD_Stats(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -esm <n>     turn on events after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-esm") == 0) && (argc > (i+1))) {
+            ASSERT(runWithEventsOn,"You are trying to generate events in a "
+              "model not compiled with events. Build the model with EVENTS=1");
+            CMD_Events(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -csm <n>     turn on stripCharts after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-csm") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -psm <n>     turn on profiling after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-psm") == 0) && (argc > (i+1))) {
+            CMD_Profile(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -dm <n>     dump state after committing 'n' macro insts.
+        //
+        else if ((strcmp(argv[i], "-dm") == 0) && (argc > (i+1))) {
+            CMD_SaveCheckpoint(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -rm <n>     restore state after committing 'n' macro insts.
+        //
+        else if ((strcmp(argv[i], "-rm") == 0) && (argc > (i+1))) {
+            CMD_LoadCheckpoint(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+
+        //--------------------------------------------------------------------
+        // turning things off 'by macro instruction'
+        //--------------------------------------------------------------------
+        // -tem <n>     turn off tracing after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-tem") == 0) && (argc > (i+1))) {
+            CMD_Debug(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -sem <n>     turn off stats after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-sem") == 0) && (argc > (i+1))) {
+            CMD_Stats(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -eem <n>     turn off events after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-eem") == 0) && (argc > (i+1))) {
+            CMD_Events(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -cem <n>     turn off stripCharts after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-cem") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -pem <n>     turn off profiling after committing 'n' insts.
+        //
+        else if ((strcmp(argv[i], "-pem") == 0) && (argc > (i+1))) {
+            CMD_Profile(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }        
+        //--------------------------------------------------------------------
+        // turning things on 'by cycle'
+        //--------------------------------------------------------------------
+        // -tsc <n>     turn on tracing on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-tsc") == 0) && (argc > (i+1))) {
+            CMD_Debug(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -trc <n>     Take all traces that were turned on by -tr
+        //              and turn them on at time <n> instead of now.
+        else if (strcmp(argv[i], "-trc") == 0 && (argc > (i+1)))
+        {
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(),
+                      ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -tc <n>     turn on tracing on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-tc") == 0) && (argc > (i+1))) {
+            string regex;
+            int level;
+            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level),
+                      ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -ssc <n>     turn on stats on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-ssc") == 0) && (argc > (i+1))) {
+            CMD_Stats(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -e           turn events on on cycle 0
+        else if ((strcmp(argv[i], "-e") == 0))
+        {
+            ASSERT(runWithEventsOn,"You are trying to generate events in a "
+              "model not compiled with events. Build the model with EVENTS=1");
+            CMD_Events(true, ACTION_CYCLE_ONCE, 0);
+            // That's the same as -esc 0
+        }
+        // -esc <n>     turn on events on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-esc") == 0) && (argc > (i+1))) {
+            ASSERT(runWithEventsOn,"You are trying to generate events in a "
+              "model not compiled with events. Build the model with EVENTS=1");
+            CMD_Events(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -csc <n>     turn on stripCharts on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-csc") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -psc <n>     turn on profiling on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-psc") == 0) && (argc > (i+1))) {
+            CMD_Profile(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -ptsc <n>     turn on pipetrace on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-ptsc") == 0) && (argc > (i+1))) {
+            CMD_Ptv(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -dc <n>     dump state after cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-dc") == 0) && (argc > (i+1))) {
+            CMD_SaveCheckpoint(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -rc <n>     restore state after cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-rc") == 0) && (argc > (i+1))) {
+            CMD_LoadCheckpoint(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+
+        //--------------------------------------------------------------------
+        // turning things off 'by cycle'
+        //--------------------------------------------------------------------
+        // -tec <n>     turn off tracing on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-tec") == 0) && (argc > (i+1))) 
+        {
+            CMD_Debug(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -sec <n>     turn off stats on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-sec") == 0) && (argc > (i+1))) {
+            CMD_Stats(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -eec <n>     turn off events on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-eec") == 0) && (argc > (i+1))) {
+            CMD_Events(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -cec <n>     turn off stripCharts on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-cec") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -pec <n>     turn off profiling on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-pec") == 0) && (argc > (i+1))) 
+        {
+            CMD_Profile(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -ptec <n>     turn off pipetrace on cycle 'n'
+        //
+        else if ((strcmp(argv[i], "-ptec") == 0) && (argc > (i+1))) 
+        {
+            CMD_Ptv(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        //--------------------------------------------------------------------
+        // turning things on 'by nanosecond'
+        //--------------------------------------------------------------------
+        // -tsn <n>     turn on tracing on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-tsn") == 0) && (argc > (i+1))) {
+            CMD_Debug(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -trn <n>     Take all traces that were turned on by -tr
+        //              and turn them on at time <n> instead of now.
+        else if (strcmp(argv[i], "-trn") == 0 && (argc > (i+1)))
+        {
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(),
+                      ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -tn </regex/=[012]> <n>     turn on tracing on nanosecond 'n'.
+        //
+        else if ((strcmp(argv[i], "-tn") == 0) && (argc > (i+1))) {
+            string regex;
+            int level;
+            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level),
+                      ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -ssn <n>     turn on stats on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-ssn") == 0) && (argc > (i+1))) {
+            CMD_Stats(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -esn <n>     turn on events on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-esn") == 0) && (argc > (i+1))) {
+            ASSERT(runWithEventsOn,"You are trying to generate events in a "
+              "model not compiled with events. Build the model with EVENTS=1");
+            CMD_Events(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -csn <n>     turn on stripCharts on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-csn") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -psn <n>     turn on profiling on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-psn") == 0) && (argc > (i+1))) {
+            CMD_Profile(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -ptsn <n>     turn on pipetrace on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-ptsn") == 0) && (argc > (i+1))) {
+            CMD_Ptv(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }        
+        // -dn <n>     dump state after nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-dn") == 0) && (argc > (i+1))) {
+            CMD_SaveCheckpoint(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -rn <n>     restore state after nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-rn") == 0) && (argc > (i+1))) {
+            CMD_LoadCheckpoint(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+
+        //--------------------------------------------------------------------
+        // turning things off 'by nanosecond'
+        //--------------------------------------------------------------------
+        // -ten <n>     turn off tracing on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-ten") == 0) && (argc > (i+1))) 
+        {
+            CMD_Debug(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -sen <n>     turn off stats on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-sen") == 0) && (argc > (i+1))) {
+            CMD_Stats(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -een <n>     turn off events on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-eec") == 0) && (argc > (i+1))) {
+            CMD_Events(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -cen <n>     turn off stripCharts on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-cec") == 0) && (argc > (i+1))) {
+            CMD_Stripchart(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -pen <n>     turn off profiling on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-pen") == 0) && (argc > (i+1))) 
+        {
+            CMD_Profile(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }        
+        // -pten <n>     turn off pipetrace on nanosecond 'n'
+        //
+        else if ((strcmp(argv[i], "-pten") == 0) && (argc > (i+1))) 
+        {
+            CMD_Ptv(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        //--------------------------------------------------------------------
+        // -pc <n>       indicate progress every <n> cycles
+        //
+        else if ((strcmp(argv[i], "-pc") == 0) && (argc > (i+1))) 
+        {
+            CMD_Progress(AWBPROG_CYCLE, "", ACTION_CYCLE_PERIOD,
+                         atoi_general(argv[++i]));
+        }
+        // -pi <n>       indicate progress info every <n> committed insts.
+        //
+        else if ((strcmp(argv[i], "-pi") == 0) && (argc > (i+1))) 
+        {
+            CMD_Progress(AWBPROG_INST, "", ACTION_INST_PERIOD,
+                         atoi_general(argv[++i]));
+        }
+        // -pn <n>       indicate progress info every <n> nanoseconds.
+        //
+        else if ((strcmp(argv[i], "-pn") == 0) && (argc > (i+1))) 
+        {
+            CMD_Progress(AWBPROG_NANOSECOND, "", ACTION_NANOSECOND_PERIOD,
+                         atoi_general(argv[++i]));
+        }
+        // -sn <n>       emit stats file every <n> nanoseconds
+        //
+        else if ((strcmp(argv[i], "-sn") == 0) && (argc > (i+1))) 
+        {
+            CMD_EmitStats(ACTION_NANOSECOND_PERIOD, atoi_general(argv[++i]));
+        }
+        // -sc <n>       emit stats file every <n> cycles
+        //
+        else if ((strcmp(argv[i], "-sc") == 0) && (argc > (i+1))) 
+        {
+            CMD_EmitStats(ACTION_CYCLE_PERIOD, atoi_general(argv[++i]));
+        }
+        // -si <n>       emit stats every <n> committed insts.
+        //
+        else if ((strcmp(argv[i], "-si") == 0) && (argc > (i+1)))
+        {
+            CMD_EmitStats(ACTION_INST_PERIOD, atoi_general(argv[++i]));
+        }
+        else if ((strcmp(argv[i], "-skc") == 0) && (argc > (i+1)))
+        {
+            ++i;
+            long int inst_val = 0;
+            char * dup_str = argv[i];
+            while(dup_str != NULL)
+            {
+                inst_val = strtol(dup_str, NULL, 10);
+                dup_str = strstr(dup_str, ",");
+                if(dup_str)
+                {
+			dup_str = strpbrk(dup_str, "0123456789"); // try to find the first digit
+                }
+                CMD_EmitStats(ACTION_INST_ONCE, inst_val);		
+            }
+	    //CMD_EmitStats(ACTION_INST_ONCE, atoi_general(argv[++i]));
+       }
+       else if ((strcmp(argv[i], "-ski") == 0) && (argc > (i+1)))
+       {
+            ++i;
+            long int inst_val = 0;
+            char * dup_str = argv[i];
+            while(dup_str != NULL)
+            {
+                inst_val = strtol(dup_str, NULL, 10);
+                dup_str = strstr(dup_str, ",");
+                if(dup_str)
+                {
+                        dup_str = strpbrk(dup_str, "0123456789"); // try to find the first digit
+                }
+                CMD_EmitStats(ACTION_INST_ONCE, inst_val);
+                CMD_ResetStats(ACTION_INST_ONCE, inst_val);
+            }
+        }
+        else if ((strcmp(argv[i], "-skp") == 0) && (argc > (i+1)))
+        {
+            ++i;
+            CMD_EmitStats(ACTION_INST_PERIOD, atoi_general(argv[i]));
+            CMD_ResetStats(ACTION_INST_PERIOD, atoi_general(argv[i]));
+        }
+     	 	
+        // -sm <n>       emit stats every <n> committed macro insts.
+        //
+        else if ((strcmp(argv[i], "-sm") == 0) && (argc > (i+1)))
+        {
+            CMD_EmitStats(ACTION_MACROINST_PERIOD, atoi_general(argv[++i]));
+        }
+        // -rsc <n>       reset stat on cycle <n>
+        //
+        else if ((strcmp(argv[i], "-rsc") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+        }
+        // -rsn <n>       reset stat on nanosecond <n>
+        //
+        else if ((strcmp(argv[i], "-rsn") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+        }
+        // -rsi <n>       reset stat on instruction <n>
+        //
+        else if ((strcmp(argv[i], "-rsi") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_INST_ONCE, atoi_general(argv[++i]));
+        }
+        // -rsm <n>       reset stat on macro instruction <n>
+        //
+        else if ((strcmp(argv[i], "-rsm") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+        }
+        // -rscp <n>       reset stat every <n> cycles
+        //
+        else if ((strcmp(argv[i], "-rscp") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_CYCLE_PERIOD, atoi_general(argv[++i]));
+        }
+        // -rsnc <n>       reset stat every <n> nanoseconds
+        //
+        else if ((strcmp(argv[i], "-rsnp") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_NANOSECOND_PERIOD, atoi_general(argv[++i]));
+        }
+        // -rsip <n>       reset stat every <n> instructions
+        //
+        else if ((strcmp(argv[i], "-rsip") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_INST_PERIOD, atoi_general(argv[++i]));
+        }
+        // -rsmp <n>       reset stat every <n> macro instructions
+        //
+        else if ((strcmp(argv[i], "-rsmp") == 0) && (argc > (i+1))) 
+        {
+            CMD_ResetStats(ACTION_MACROINST_PERIOD, atoi_general(argv[++i]));
+        }        
+        else 
+        {
+            ASIMWARNING("Unknown flag, " << argv[i] << endl);
+            return(false);
+        }
+    }
+    return(true);
+}
+
+
+void
+Usage (char *exec, FILE *file)
+/*
+ * Dump general stand-alone usage, and then specific usage for the feeder
+ * and system.
+ */
+{
+    ostringstream os;
+
+    os << "\nUsage: " << exec
+       << " <arg1> <arg2> .. --feeder <feeder args> --system <system args>\n"
+       << "\n" << exec << " flags:\n"
+       << "\t-h\t\t\tPrint this help\n"
+       << "\n"
+// following two flags are no longer supported (needed)
+//       << "\t-batch\t\t\tTurn on batch architect's workbench\n"
+//       << "\t-awb\t\t\tTurn on interactive architect's workbench\n"
+       << "\t-cf <c>\t\t\tFile holding commands for awb to execute after init\n"
+       << "\t-wb <w>\t\t\tUse workbench 'w' instead of built-in workbench\n"
+       << "\n"
+       << "\t-n <n>\t\t\tRun simulation for <n> nanoseconds\n"
+       << "\t-c <n>\t\t\tRun simulation for <n> cycles\n"
+       << "\t-i <n>\t\t\tRun simulation for <n> committed insts/uops.\n"
+       << "\t-m <n>\t\t\tRun simulation for <n> committed macro insts.\n"
+       << "\t-s <f>\t\t\tDump statistics to file 'f' on exit\n"
+       << "\n"
+       << "\t-t\t\t\tTurn on instruction tracing\n"
+       << "\t-tm\t\t\tSet Trace Mask\n"
+       << "\t-tms\t\t\tSet Trace Mask using a comma-separated String\n"
+       << "\t-tr [</regex/[=012]]>\tSet trace level by regular expression. Can be given multiple times.\n"
+       << "\t\t\t\tIf not specified, the trace level will default to 1 and the regex to .*\n"
+       << "\t-rbs\t\t\tDump Buffer Stats in Stats file\n"
+       << "\t-rps\t\t\tDump Port Stats in Stats file\n"
+       << "\tTurning various things on and off:\n"
+       << "\t\tSyntax: -[drcepst(pt)][se][cinm] <n>\n"
+       << "\t\t\t1st char:\n"
+       << "\t\t\t\tc ... stripChart\n"
+       << "\t\t\t\te ... Events\n"
+       << "\t\t\t\tp ... Profiling\n"
+       << "\t\t\t\ts ... Stats\n"
+       << "\t\t\t\tt ... Tracing\n"
+       << "\t\t\t\tt ... Dumping\n"
+       << "\t\t\t\tt ... Restoring\n"
+       << "\t\t\t\tpt ... PipeTrace\n"
+       << "\t\t\t2nd char:\n"
+       << "\t\t\t\ts ... Start\n"
+       << "\t\t\t\te ... End\n"
+       << "\t\t\t3rd char:\n"
+       << "\t\t\t\tc ... Cycle\n"
+       << "\t\t\t\ti ... commited Instructions\n"
+       << "\t\t\t\tn ... nanoseconds\n"
+       << "\t\t\t\tm ... Macro Instructions (equivalent to i on non-x86uop simulators)\n"
+       << "\t\t\t<n>: ........ # of cycles or instructions or nanoseconds or macro instructions\n"
+       << "\n"
+       << "\t\t\t-t[cinm] [</regex/[=012]]> <n>\n"
+       << "\t\t\t\tLike -tr but delay the effect.\n"
+       << "\t\t\t-tr[cinm] <n>\n"
+       << "\t\t\t\tDelay the effect of all previous -tr commands until time <n>.\n"
+       << "\t\tExample:\n"
+       << "\t\t\t-tsc 1000 ... start tracing at cycle 1000\n"
+       << "\n"
+       << "\t-p <n>\t\t\tTurn profiling on\n"
+       << "\t-d <n>\t\t\tTurn warnings and debug information on\n"
+       << "\t-e \t\t\tTurn events on\n"
+       << "\n"
+       << "\t-pc <n>\t\t\tIndicate progress info every <n> cycles\n"
+       << "\t-pi <n>\t\t\tIndicate progress info every <n> committed insts.\n"
+       << "\t-pn <n>\t\t\tIndicate progress info every <n> nanoseconds.\n"
+       << "\n"
+       << "\t-sc <n>\t\t\tEmit stats file every <n> cycles\n"
+       << "\t-sn <n>\t\t\tEmit stats file every <n> nanoseconds\n"
+       << "\t-si <n>\t\t\tEmit stats file every <n> instructions\n"
+       << "\t-sm <n>\t\t\tEmit stats file every <n> macro instructions\n"
+       << "\n"
+       << "\t-rsc <n>\t\t\tReset stats on cycle <n>\n"
+       << "\t-rsi <n>\t\t\tReset stats on instruction <n>\n"
+       << "\t-rsm <n>\t\t\tReset stats on macro instruction <n>\n"
+       << "\t-rsn <n>\t\t\tReset stats on nanosecond <n>\n"
+       << "\tAdding a p after the previous flags (for instance -rscp) will reset stats periodically after <n> events.\n"
+       << "\n"
+       << "\t-param <name>=<value>\tdefine dynamic parameter <name> = <value>\n"
+       << "\t-listparams\t\tlist all registered dynamic parameters\n"
+       << "\t-listmasks\t\tlist the possible mask strings\n"
+       << "\t-listnames\t\tlist the possible traceable object names\n"
+       << "\n"
+       << "\t-xcheck <file>\t\tGenerate output for cross-checking to file <file>\n"
+       << "\n\n\tWARNING! The nanosecond options are meaningless if running a model without a clockserver system!\n"
+       << endl;
+
+    fputs (os.str().c_str(), file);
+    CMD_Usage(file);
+}

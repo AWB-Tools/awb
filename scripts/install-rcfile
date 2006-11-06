@@ -1,0 +1,267 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+# *****************************************************************
+# *                                                               *
+# Copyright (C) 2003-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Joel Emer
+#
+
+use File::Basename;
+use Getopt::Long;
+
+use Asim::Inifile;
+
+#
+# Debugging
+#
+my $debug = 0;
+
+#
+# Argument handling
+#
+my $status;
+my $source;
+my $target;
+
+my $sourceini;
+my $targetini;
+
+my $copy = 1;
+my $mode = "0755";
+my $D_switch;
+my $help = 0;
+
+$status = GetOptions( "copy"           => \$copy,
+                      "mode=s"         => \$mode,
+                      "D"              => \$D_switch,
+                      "help"           => \$help
+                    );
+
+
+if (!$status) {
+  usage();
+}
+
+if ($help) {
+  system "perldoc $0";
+  exit 0;
+}
+
+if ($#ARGV < 1) {
+  usage();
+}
+
+$source = $ARGV[0];
+$target = $ARGV[1];
+
+print "Source = $source\n" if $debug;
+print "Target = $target\n" if $debug;
+
+if (! -e $source) {
+  die("No source file - $source\n");
+}
+
+if (! -e $target) {
+  system("cp $source $target") == 0
+    || die("Failed to copy $source to $target\n");
+  exit(0);
+}
+
+#
+# Read in ini-style files
+#
+$sourceini = Asim::Inifile->new($source) 
+  || die("Failed to read $source\n");
+
+$targetini = Asim::Inifile->new($target)
+  || die("Failed to read $target\n");
+
+
+#
+# Save old rcfile with suffix .save
+#
+system("cp $target $target.save") == 0
+  || die("Copy from $target to $target failed\n");
+
+
+#
+# Save new rcfile with suffix .default
+#
+system("cp $source $target.default") == 0
+  || die("Copy from $source to $target.default failed with $status");
+
+
+#
+# For each item in each group in the new rcfile, see
+# if in the old rcfile that item existed and had a
+# value - if so updated to that value.
+#
+for my $g ($sourceini->get_grouplist()) {
+  print "Group - $g\n" if $debug;
+
+  for my $i ($sourceini->get_itemlist($g)) {
+    print "  Item = $i..." if $debug;
+    if (my $val = $targetini->get($g, $i)) {
+      print "updated\n" if $debug;
+      $sourceini->put($g, $i, $val);
+    } else {
+      print "\n" if $debug;
+    }
+  }
+}
+
+#
+# Save new version of rcfile
+#
+$sourceini->save($target);
+
+system("chmod $mode $target");
+
+exit !$status;
+
+
+sub usage {
+  my $prog = basename($0);
+  print STDERR "$prog: Syntax problem encountered, try '$prog --help'\n";
+  exit 0;
+}	
+
+__END__
+
+=head1 NAME
+
+install-rcfile - install an rcfile
+
+=head1 SYNOPSIS
+
+install-shell [--copy]
+              [--mode <chmod-mode>]
+              [-D]
+              [--help]
+	   <source-rcfile> <target-rcfile>
+
+=head1 DESCRIPTION
+
+This is a program that is designed to help with the problem of
+re-installing an rcfile, e.g., /etc/asim/asimrc, when the
+file has already been changed by the user, and you would like
+to keep the users updates, while at the same time removing 
+obsolete entries and installing a new rcfile with documentation 
+and default values for groups and items that did not previously exist.
+
+This program operates on windows ini file style files that
+are used as rcfile configuration files. See Asim::Inifile
+for more details.
+
+Assuming we want to update an rcfile /etc/asim/asimrc with the
+new version of the rcfile at ./asimrc. The program operates as 
+follows:
+
+   % install-rcfile ./asimrc /etc/asim/asimrc
+
+If the target file (/etc/asim/asimrc) does not exist then the
+new version (./asimrc) is simply copied to the new file.
+
+If, however, there is already a target file, the following 
+alorithm is applied:
+
+  1) Copy the existing asimrc file /etc/asim/asimrc.save
+
+  2) Copy the new asimrc file to /etc/asim/asimrc.default
+
+  3) Create a new asimrc via the following algorithm:
+
+       a) Start with the new rcfile, i.e., ./asimrc
+
+       b) For each entry in this file check if there is a
+       correponding entry in previously existing rcfile, i.e.,
+       asimrc.save. If so, update the entry with the value 
+       from asimrc.save.
+
+       c) Install this as the new rcfile, /etc/asim/asimrc.
+
+The result should be the files /etc/asim/asimrc.save, which contains
+the old version of the rcfile, /etc/asim/asimrc.default, which contains
+the new default rcfile and /etc/asim/asimrc, which contains the new
+version of the rcfile, but with items whose values were not defaulted
+in the previous version changed to their previously assigned values.
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --copy
+
+Switch (-c) for compatibility with standard install programs. 
+Does nothing.
+
+=item --mode <chmod-mode>
+
+Set mode of target file to <chmod-mode>.
+
+=item -D
+
+For compatibilty with standard install programs. Does nothing.
+
+=item --help
+
+Get this help information.
+
+=back
+
+
+=head1 EXAMPLES
+
+=head1 BUGS
+
+User added comments and the file structure of the old rcfile 
+are lost, since the new rcfile reflects the stucture of the
+new default rcfile.
+
+There is no provision for preserving user added changes when 
+the name of a group or an item within a group has changed.
+
+Several switches available on standard install programs are
+not implememented.
+
+This program depends on Asim::Inifile, which must be in the
+perl library path (or $PERL5LIB).
+
+=head1 AUTHORS
+
+Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Intel Corporation, 2003              *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

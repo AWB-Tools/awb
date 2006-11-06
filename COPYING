@@ -1,0 +1,46 @@
+INTEL CONFIDENTIAL
+Copyright 1998-2006 Intel Corporation (except as noted below), All Rights Reserved.
+
+The source code contained or described herein and all documents related to the source code
+("Material") are owned by Intel Corporation or its suppliers or licensors. Title to the
+Material remains with Intel Corporation or its suppliers and licensors. The Material may
+contain trade secrets and proprietary and confidential information of Intel Corporation and
+its suppliers and licensors, and is protected by worldwide copyright and trade secret laws
+and treaty provisions. No part of the Material may be used, copied, reproduced, modified,
+published, uploaded, posted, transmitted, distributed, or disclosed in any way without
+Intels prior express written permission. 
+
+No license under any patent, copyright, trade secret or other intellectual property right is
+granted to or conferred upon you by disclosure or delivery of the Materials, either expressly,
+by implication, inducement, estoppel or otherwise. Any license under such intellectual property
+rights must be express and approved by Intel in writing.
+
+
+Portions of this software are copyright (c) 2001 Nathan L. Binkert.
+
+Portions of this software are copyright (c) 2002-2003 Chris Morley
+
+Portions of this software are copyright (c) Dirk Grunwald and Artur Klauser,
+University of Colorado at Boulder.
+
+Portions of this software are copyright (c) Free Software Foundation.
+
+See embedded source code comments for applicable copyright notices.
+
+
+This software is released under the GNU General Public License.
+See the file LICENSE in this directory for the terms and conditions under which
+this software is released.
+
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

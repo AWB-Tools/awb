@@ -1,0 +1,288 @@
+/**
+@file
+@author Artur Klauser
+@brief User Documentation for XMLOut Objects
+@see @ref XMLOut_Documentation "XML Output Documentation"
+@ingroup XMLOut
+*/
+/**
+@defgroup XMLOut XML Output
+*/
+/**
+@page XMLOut_Documentation XMLOut User Documentation
+@author Artur Klauser
+@ingroup XMLOut
+
+@par Introduction
+<b>XMLOut Objects</b> provide a simplified way for generating XML
+formatted output documents without requiring the user to be an XML
+guru. The XMLOut interface is streamlined for linearized document
+creation in a top-down depth-first manner. This is the same order that
+the XML document will eventually be represented in in its output file
+and is a fairly natural and straightforward output model. XMLOut
+internally uses an underlying XML DOM (library) to perform operations
+on the XML document.
+
+@par What is XML
+The <a href="http://www.w3.org/XML/"><b>eXtensible Markup Language</b>
+(XML)</a> is a standardized representation of tree structured
+information. XML is an open format and its underlying standard only
+describes the low-level syntactic document structure. It does not
+describe the high-level syntax or the semantics of the information
+represented.  For example, HTML conforms to the XML standard
+(actually, XHTML to be correct). The following briefly describes
+what defines an XML document:
+<ul>
+<li> A document is a hierarchical collection of tags. The document has
+     exactly one root element (tag).
+<li> Each tag is a character string, e.g. a word, surrounded by angle
+     brackets "&lt;" and ">" (e.g. &lt;html>).
+<li> Each tag comes in two flavors, a start tag (e.g. &lt;html>) and an
+     end tag (&lt;/html>), where the end tag is always the start tag with
+     a preceding "/" forward slash. Start and end tags have to be
+     properly nested, like blocks in a programming language. A short
+     form or combined tag (start and end) is the slash appended to
+     the end (&lt;html/>). This form can be used if the end tag would
+     immediately follow the start tag, i.e. &lt;html/> is a short form for
+     &lt;html>&lt;/html>.
+<li> A tag can have attributes (e.g. &lt;body bgcolor="white">). Each
+     attribute is written in the form name="value", where the quotes
+     around the value are mandatory. Each attribute name may appear
+     only once in the tag. There can be an arbitrary number of
+     different attributes with each tag.
+</ul>
+XML does <b>not</b> define the actual tag names or the contents of the
+document in any way.  For example, the fact that HTML documents have &lt;html>
+and &lt;body> tags is of no concern to XML. 
+
+@par
+A document that conforms to this basic XML standard is called a <b>well
+formed XML</b> document. Any XML parser can process well formed
+documents. Even though the data or parts of the data in the document
+might not be useful to the application trying to process the document,
+the document is sufficiently well structured to allow a parser to pick
+out the relevant pieces and ignore the rest.
+
+@par
+XML documents can also have an associated
+<a href="http://www.w3.org/TR/REC-xml#dt-doctype"><b>Document Type
+Definition</b> (DTD)</a> which is a formal description of the valid
+document contents. A DTD is vaguely similar to an [E]BNF description
+of a programming language, albeit it uses a different syntax. It
+describes which tag names are valid, which order they can be nested
+in, and what the valid attributes and attribute values are for those
+tags. The DTD describes a set of higher-level syntactic and semantic
+constraints on a specific XML document. A document that conforms to a
+specific DTD is said to be a <b>valid XML</b> document with respect to
+this DTD. Note that validity is strictly stronger than well
+formedness.  Given the XML document and its DTD, a validating parser
+can easily determine whether the XML document is valid or not. One
+tool to check documents for their validity is
+<a href="man:xmllint>xmllint</a> (part of libxml2).
+
+@par What is DOM
+The XML standard only defines the structure of a document
+representation. The <a href="http://www.w3.org/DOM/"><b>Document Object
+Model</b> (DOM)</a> defines a programmatic interface to XML documents.
+We use the DOM interface to XML documents in order to process them.
+Typically, a DOM interface consists of an XML parser (library) that
+reads an XML document, parses it into an internal representation, and
+exports a standardized DOM interface to this data.
+
+@par
+The DOM standard provides an object oriented, language independent
+interface for XML documents. A document is represented as a
+hierarchical collection of nodes and DOM provides methods to navigate
+and manipulate this node tree. Each node is of a particular <b>node
+type</b>. At the highest level, the document is represented by exactly
+one <b>document node</b>. The document node contains some meta
+information about the document and the document's root element. An
+<b>element node</b> corresponds to an XML tag and all its contents,
+i.e. everything between and including the start and end tag. An
+element node has children and a parent node, just like any other node.
+Element nodes also have a collection of attributes and define the
+associated accessor and manipulator methods for them. These attributes
+correspond to the attributes of the XML start tag. Note that
+attributes are not children of their associated element nodes. Another
+important node type is the <b>text node</b> which correspond to plain
+text between the start and end tags. Text nodes do not have children.
+
+@par
+DOM becomes important when XML documents need to be queried or
+generated programmatically. XMLOut uses DOM internally to build up the
+XML representation of the output document and eventually write it out.
+
+@par Using XMLOut
+XMLOut provides a wrapper layer on top of a pure DOM interface. It
+provides a simplified way for generating XML documents in a linear
+fashion. This means that the document is built up by adding a sequence
+of nodes, one at a time, which builds up the XML tree in a depth-first
+order.  XMLOut provides the concept of a <b>current node</b>.  Each
+node is added as child node of the current node. When a new element
+node is added, the current node moves to this element and all
+following nodes are added as children of this element.  After
+everything has been added to an element, the element node can be
+"closed", which moves the current node back to its parent node. This
+behavior achieves a depth first traversal of the XML document tree.
+
+@par
+When a new XMLOut object is created, it is associated with an output
+file.  Typically, output to this file is only generated after all
+manipulation is completed and the XMLOut object is destroyed. For the
+purpose of debugging, however, synchronous output can be turned on
+with XMLOut::SetDebug(). If debugging is turned on, the output file
+will be recreated after <b>every</b> operation on the XMLOut object.
+Note that this has performance implications and should only be used
+for debugging problems related to XMLOut that cause the application to
+crash and thus not write any output. Please refer to the XMLOut class
+documentation for further information on manipulator methods for
+adding node types. The main set of manipulators are
+<ul>
+<li> XMLOut::AddElement() to add an element (child) node to the current node
+<li> XMLOut::CloseElement() to move the current node back to its parent
+<li> XMLOut::AddAttribute() to add an attribute to the current node
+<li> XMLOut::AddText() to add a text (child) node to the current node
+<li> XMLOut::AddCDATA() to add a CDATA section (child) node to the current node
+<li> XMLOut::AddComment() to add a comment (child) node to the current node
+<li> XMLOut::AddProcessingInstruction() to add a processing instruction;
+     processing instructions are added to the beginning of the
+     document rather than the current node
+</ul>
+
+@par
+A simple example for using XMLOut. Lets assume we want to generate the
+following XML document:
+@code
+<asim-stats>
+  <scalar>
+    <type>uint</type>
+    <name>foo</name>
+    <desc>the foo stat for this simulation</desc>
+    12.345
+  <scalar>
+</asim-stats>
+@endcode
+This could be achieved by the following code sequence:
+@code
+#include "xmlout.h"
+
+XMLOut * xmlOut = new XMLOut("myfile.xml", "asim-stats"); // filename and root element
+// <asim-stats> is the root element and current node
+
+xmlOut->AddElement("scalar"); // <scalar> added as child of current node (<asim-stats>) and becomes current node
+xmlOut->AddElement("type");   // <type> becomes current node
+xmlOut->AddText("uint");      // text node "uint" added as child of <type>
+xmlOut->CloseElement();       // close <type>, <scalar> is current node again
+xmlOut->AddElement("name");   // <name> becomes current node
+xmlOut->AddText("foo");       // add text "foo" as child of <name>
+xmlOut->CloseElement();       // close <name>, <scalar> is current node again
+xmlOut->AddElement("desc");   // <desc> becomes current node
+xmlOut->AddText("the foo stat for this simulation");  // add text node to <desc>
+xmlOut->CloseElement();       // close <desc>, <scalar is current node again
+xmlOut->AddText("12.345");    // add text "12.345" as child of <scalar>
+xmlOut->CloseElement();       // close <scalar>, back to <asim-stats> as current node
+
+delete xmlOut;                // write out XML tree to file and delete object
+@endcode
+
+@par Required software for ASIM XML
+ASIM depends on external libraries for the low level XML parser and DOM
+interfaces - the beauty of other people developing, maintaining, and
+fixing bugs in this code is undeniable. The following is a list of
+requirements in order to successfully compile and link ASIM with these
+support libraries:
+<dl>
+<dt><a href="http://www.xmlsoft.org/">libxml2</a></dt>
+<dd>XML, XPath: Basic XML standards, XML parser, XPath query language etc.
+</dd>
+<dt><a href="http://phd.cs.unibo.it/gdome2/">gdome2</a></dt>
+<dd>DOM 2.0: A C language XML interface corresponding to DOM level 2.0.
+</dd>
+<dt><a href="http://gmetadom.sourceforge.net/">gmetadom</a></dt>
+<dd>DOM C++: C++ bindings for the gdome2 (libgdome) library.
+    Note that gmetadom-config needs to be in your path for the Makefile to
+    figure out what the correct include file directories and libraries are when
+    compiling against this stack of libraries.
+</dd>
+<dt><a href="http://www.tjmather.com/xml-gdome/">XML-GDOME</a></dt>
+<dd>DOM perl: Perl bindings for the gdome2 (libgdome) library. This is not
+    strictly required for compiling ASIM, however, stats file post processing
+    (with grab.pl) requires this perl module to be present in the PERL5LIB.
+</dd>
+</dl>
+
+@par
+The following libraries are also recommended:
+<dl>
+<dt><a href="http://www.w3.org/Style/XSL/">libxslt</a></dt>
+<dd>XSLT 1.0: An eXtensible Stylesheet Language Transformations (XSLT) engine
+to process XML documents with XSL(T) stylesheets. This is very handy to
+automatically rewrite one XML document into another XML document of a different
+format, e.g. to turn an ASIM stats file into an HTML page.
+</dd>
+</dl>
+
+@par Useful tools for XML
+Even though XML is a fairly new development and still changing at a rapid pace,
+there exists a plethora of tools for it already. Only a few are mentioned here.
+<ul>
+<li>Since XML is a plain text format, you can use your
+    <a href="man:vim">favorite text editor</a> to look at XML files
+    :-), but it might be a bit tedious if you have large files.
+<li>Both <a href="http://www.microsoft.com/windows/ie/">IE 5.5</a>
+    (or greater) and <a href="http://browsers.netscape.com/browsers/6/">
+    Netscape 6 (Mozilla)</a> have XML support of varying degree. Both
+    understand XSLT stylesheets and include XSLT engines to transform
+    XML documents on the fly. Speed and functionality currently vary
+    from version to version, platform to platform. For IE, you should
+    install the newest MSXML DLLs to get the best support. Also note
+    that some Windows tools (like RealOne) use the same DLLs as IE,
+    thus provide the same support for XML.
+    <a href="http://www.konqueror.org/">Konqueror</a>, when used with
+    the Mozilla rendering engine (rather than KHTML) has the same XML
+    support as the underlying Mozilla.
+<li><a href="man:xmllint">xmllint</a> (part of libxml2) is a validating parser
+    that can check if your XML document is valid with respect to its DTD. It
+    also has a non-validating mode, and some pretty printing functionality. I
+    like the <b>-shell</b> flag which pops you into an interactive mode that
+    lets you browse around in an XML document with typical shell-like commands
+    such as ls, cd, pwd, cat, etc. The interactive mode also evaluates XPath
+    expressions, which can come in handy for ironing out those XSLT bugs.
+<li><a href="man:xsltproc">xsltproc</a> (part of libxslt) is a command line XSL
+    transformation engine. You can specify which stylesheet should be applied
+    to an XML document or use the XSL stylesheet referenced in the XML
+    document.
+<li><a href="man:mlview">mlview</a>
+    (<a href="http://www.freesoftware.fsf.org/mlview/">available from
+    FSF</a>) is an XML document viewer and editor. If you give it a
+    DTD, it can validate the document and will not allow you to
+    produce anything but a valid XML document when editing one.
+</ul>
+
+@par Additional information on XML and related standards
+XML and its related standards are developed by the
+<a href="http://www.w3.org/">World Wide Web Consortium (W3C)</a>.
+Following is a list of some of the related standards as of this
+writing:
+<ul>
+<li><a href="http://www.w3.org/TR/2000/REC-xml-20001006">XML 1.0</a>,
+    the mother of all specifications related to the eXtensible Markup
+    Language (XML).
+<li><a href="http://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/">
+    DOM Level 2 Core</a> for programmatic manipulation of XML
+    documents with the Document Object Model (DOM).
+<li><a href="http://www.google.com/search?q=SAX%20Parser">SAX</a>
+    is a Simple API for XML (SAX) documents. Its basically describes a
+    standardized call-back interface to an XML parser. Its
+    functionality is smaller than DOM, but it has less overhead and
+    can process streaming documents, whereas DOM needs the whole
+    document before it can do anything.
+<li><a href="http://www.w3.org/TR/xslt">XSLT 1.0</a> is a
+    specification for a transformation language on XML documents with
+    eXtensible Stylesheet Language Transformations (XSLT).
+<li><a href="http://www.w3.org/TR/xpath">XPath 1.0</a> is a supporting
+    standard for specifying subsets and collections of nodes in an XML
+    document. It is used for example by XSTL to specify nodes in the
+    XML tree.
+</ul>
+*/

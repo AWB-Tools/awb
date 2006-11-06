@@ -1,0 +1,20 @@
+This diretory contains several subdirectoris containing
+Asim Perl modules. To build those modules and
+install them in the ${prefix} specified at 
+./configure time, type:
+
+  % make
+  % make install
+
+To install in a different location you can do the 
+following:
+
+ % make clean
+ % make prefix=<install prefix>
+ % make
+ % make install
+
+
+For instructions on building and installing an
+individual module see the README in the module
+subirectory.

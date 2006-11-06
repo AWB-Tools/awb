@@ -1,0 +1,11 @@
+
+This directory contains the base files that can be used by any model. 
+
+Rules for files included here:
+
+    1) Files here should not depend on any particular type module being in
+       the model, some exceptions apply....
+
+    2) All files here should get tested in the model in:
+            asim-core/config/pm/sample/test.apm
+
