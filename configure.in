@@ -18,11 +18,11 @@
 #
 
 # Process this file with autoconf to produce a configure script.
-# This is the configure.in file for asim-simcore.
+# This is the configure.in file for asim.
 
-AC_INIT([ASIM simcore], [1.3a], [carl.j.beckmann@intel.com], [asim-simcore])
+AC_INIT([ASIM Core], [1.3a], [carl.j.beckmann@intel.com], [asim-asim])
 AC_PREREQ(2.59) dnl required autoconf version
-AC_CONFIG_SRCDIR([admin/packages/simcore])
+AC_CONFIG_SRCDIR([admin/packages/asim])
 
 # Installation defaults
 # AC_PREFIX_DEFAULT(/usr/local)
@@ -475,7 +475,7 @@ AC_SUBST(AM_LDFLAGS)
 
 # This is the asim package name
 AC_SUBST(package)
-package=simcore
+package=asim
 
 # This is the release tag out of the package file.
 # The tag is assumed to be in a line that looks like: Tag=<tagname>
