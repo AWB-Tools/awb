@@ -22802,8 +22802,9 @@ echo "$as_me: error: This OS version $HOSTOS is not supported" >&2;}
 echo "$as_me: error: This OS version $HOSTOSRELEASE is not supported" >&2;}
    { (exit 1); exit 1; }; }
     esac
-
-    if test -d $prefix$perlqt_search_suff
+# Temporary hack to get things working
+#    if test -d $prefix$perlqt_search_suff
+    if test -d "/usr/lib/perl5/vendor_perl/5.8.7/i586-linux-thread-multi/Qt"
     then
         perlqt_search_path='${prefix}'$perlqt_search_suff ;
         echo "$as_me:$LINENO: result: found in $perlqt_search_path" >&5
