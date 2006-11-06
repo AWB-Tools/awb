@@ -54,7 +54,7 @@ my $help = 0;
 my $batch = 0;
 my $interactive = 1;
 my $warnings = 1;
-my $locking = 1;
+my $locking = 0;
 
 my $batchfile = "";
 
