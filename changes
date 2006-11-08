@@ -120,3 +120,30 @@ Directory .
 Updated with changes in simcore up to revision number 2227
 
 Joel
+
+----------
+jsemer      Date: Wed Nov  8 10:31:07 EST 2006  CSN: CSN-asimcore-8
+                  Wed Nov  8 15:31:07 UTC 2006
+
+
+Directory admin/packages
+ asim                      Locally Removed             7 
+ asimcore                  Locally Added               - 
+
+Directory libperl/Asim/lib/Asim/Workspace
+ Template.pm               Locally Modified            6 
+
+Directory lib/libasim/src
+ xmlout-nolib-gz.cpp       Locally Added               0 
+
+Directory etc
+ asim.pack                 Locally Modified            6 
+
+Directory .
+ configure                 Locally Modified            7 
+ configure.in              Locally Modified            7 
+
+
+Change name to asimcore.
+
+Joel

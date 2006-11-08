@@ -119,13 +119,12 @@ VERSION=1.1
 SPLASH=1
 
 [Vars]
-private=src/asim-
-shared=$Asim::datadir/asim/
-components={private,asim}
+private=src
+shared=$Asim::datadir
 
 [Paths]
 # Directory containing ASIM source tree
-ASIMDIR=\$(shared)asim/$Asim::release
+ASIMDIR=\$(shared)/asimcore/$Asim::release
 
 # Directory containing actual benchmarks
 BENCHMARKDIR=$Asim::datadir/benchmarks
@@ -134,7 +133,7 @@ BENCHMARKDIR=$Asim::datadir/benchmarks
 #BUILDDIR=build
 
 # Path where we search for ASIM files
-SEARCHPATH=\$(private)private:\$(shared)asim/$Asim::release
+SEARCHPATH=\$(private)/private:\$(shared)/asimcore/$Asim::release
 
 [Package]
 # Configure flags for all packages in this workspace

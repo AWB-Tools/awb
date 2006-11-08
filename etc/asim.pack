@@ -18,6 +18,7 @@
 #
 
 ##############################################################################
+#
 # Asim packages
 #
 ##############################################################################
@@ -28,49 +29,52 @@ Name=Asim Packages
 Description=Software package dependencies for Asim performance models
 
 ###### Asim trunk
-[asim]
+
+[asimcore]
 Description=Asim Core
 Method=svn
 Access=https://asim.csail.mit.edu/svn/asim
-Module=asim-asim
+Module=undefined
 Tag=HEAD
-Target=asim-asim
+Target=asimcore
 Changes=changes
 
-[asim/HEAD]
+[asimcore/HEAD]
 Description=Asim Core
 Method=svn
 Access=https://asim.csail.mit.edu/svn/asim
-Module=asim-asim
+Module=undefined
 Tag=HEAD
-Target=asim-asim
+Target=asimcore
 Changes=changes
 
 ###### Hasim trunk
+
 [hasim]
 Description=Hardware Asim Model
 Method=svn
-Access=https://hasim.csail.mit.edu/svn/hasim
-Module=asim-hasim
+Access=https://asim.csail.mit.edu/svn/hasim
+Module=undefined
 Tag=HEAD
-Target=asim-hasim
+Target=hasim
 Changes=changes
 
 [hasim/HEAD]
 Description=Hardware Asim Model
 Method=svn
-Access=https://hasim.csail.mit.edu/svn/hasim
-Module=asim-hasim
+Access=https://asim.csail.mit.edu/svn/hasim
+Module=undefined
 Tag=HEAD
-Target=asim-hasim
+Target=hasim
 Changes=changes
 
 ###### Hasim-mips trunk
+
 [hasim-mips]
 Description=Hardware Asim Model for MIPS
 Method=svn
-Access=https://hasim.csail.mit.edu/svn/hasim-mips
-Module=asim-hasim-mips
+Access=https://asim.csail.mit.edu/svn/hasim-mips
+Module=hasim-mips
 Tag=HEAD
 Target=asim-hasim-mips
 Changes=changes
@@ -78,13 +82,14 @@ Changes=changes
 [hasim-mips/HEAD]
 Description=Hardware Asim Model for MIPS
 Method=svn
-Access=https://hasim.csail.mit.edu/svn/hasim-mips
-Module=asim-hasim-mips
+Access=https://asim.csail.mit.edu/svn/hasim-mips
+Module=undefined
 Tag=HEAD
-Target=asim-hasim-mips
+Target=hasim-mips
 Changes=changes
 
 ###### Feeder
+
 [feeder]
 Description=Instruction Feeders
 Method=svn

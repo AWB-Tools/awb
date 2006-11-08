@@ -18,8 +18,8 @@
 #
 [Global]
 Description=Asim Base Library
-CSN=CSN-asim-7
-Name=asim
+CSN=CSN-asimcore-8
+Name=asimcore
 Tag=HEAD
-Lock=asim-asim
+Lock=asim-asimcore
 Buildorder=1
