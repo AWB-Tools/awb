@@ -85,11 +85,11 @@ sub create {
     #
     mkpath "$path/src";
 
-    $dir = "$path/src/asim-private/config/bm/private";
+    $dir = "$path/src/private/config/bm/private";
     mkpath $dir;
     system "echo 'Directory for private benchmark configuration files' >$dir/README";
 
-    $dir = "$path/src/asim-private/config/pm/private";
+    $dir = "$path/src/private/config/pm/private";
     mkpath $dir;
     system "echo 'Directory for private model configuration files' >$dir/README";
 
@@ -120,11 +120,11 @@ SPLASH=1
 
 [Vars]
 private=src
-shared=$Asim::datadir
+shared=$Asim::packagedir
 
 [Paths]
 # Directory containing ASIM source tree
-ASIMDIR=\$(shared)/asimcore/$Asim::release
+ASIMDIR=\$(shared)/$Asim::package/$Asim::release
 
 # Directory containing actual benchmarks
 BENCHMARKDIR=$Asim::datadir/benchmarks
@@ -133,7 +133,7 @@ BENCHMARKDIR=$Asim::datadir/benchmarks
 #BUILDDIR=build
 
 # Path where we search for ASIM files
-SEARCHPATH=\$(private)/private:\$(shared)/asimcore/$Asim::release
+SEARCHPATH=\$(private)/private:\$(shared)/$Asim::package/$Asim::release
 
 [Package]
 # Configure flags for all packages in this workspace
