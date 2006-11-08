@@ -22,13 +22,13 @@ VERSION=1.1
 SPLASH=1
 
 [Vars]
-private=src/asim-
-shared=@prefix@/share/asim/
-components={pm,asim,feeder}
+private=src
+shared=@prefix@/share/asim
+components={@package@}
 
 [Paths]
 # Directory containing ASIM source tree
-ASIMDIR=$(shared)asim/@release@
+ASIMDIR=$(shared)/@package@/@release@
 
 # Directory containing actual benchmarks
 BENCHMARKDIR=@prefix@/share/benchmarks
@@ -37,7 +37,7 @@ BENCHMARKDIR=@prefix@/share/benchmarks
 #BUILDDIR=build
 
 # Path where we search for ASIM files
-SEARCHPATH=$(private)$(components):$(shared)asim/@release@
+SEARCHPATH=$(private)/$(components):$(shared)/@package@/@release@
 
 [Build]
 # Compiler (GEM | GNU)

@@ -172,3 +172,15 @@ Directory libperl/Asim/lib/Asim/Workspace
 Fixed up template creation for new workspaces.
 
 Joel
+
+----------
+emer        Date: Wed Nov  8 18:00:26 EST 2006  CSN: CSN-asimcore-12
+                  Wed Nov  8 23:00:26 UTC 2006
+
+
+Directory etc
+ awb.config.template.in    Locally Modified           11 
+
+Fixed awb.config template to match new package name.
+
+Joel
