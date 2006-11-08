@@ -892,7 +892,7 @@ template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
   //
   lineState	*GetLRUState(UINT64 index);
   lineState	*GetMRUState(UINT64 index);
-  lineState *GetVictimState(UINT64 index);
+  lineState *GetVictimState(UINT64 index, bool invalidFirst=true);
   
   //
   // Functions to update the LRU information according to your favorite scheme. 
@@ -1315,19 +1315,24 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
 template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
          class T, bool WithData, template <UINT8,UINT32> class VictimPolicy, class INFO>
 line_state<NumObjectsPerLine,INFO> *
-gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::GetVictimState(UINT64 index)
+gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::GetVictimState(UINT64 index, bool invalidFirst)
 {
     UINT32 way;
     UINT64 reserved_mask = 0;
 
-    // Search for an invalid way that should be the first to be victimized
+    // Search for an invalid way that should be the first to be
+    // victimized (only if invalidFirst is set!)
     for (UINT16 i = 0; i < NumWays; ++i)
     {
-        if (TagArray[index][i].GetStatus()==S_INVALID)
-        {
-            return &(TagArray[index][i]);
-        }
-        if (TagArray[index][i].GetStatus()==S_RESERVED)
+        if(invalidFirst)
+	{
+            if (TagArray[index][i].GetStatus()==S_INVALID)
+            {
+                return &(TagArray[index][i]);
+            }
+	}
+        
+	if (TagArray[index][i].GetStatus()==S_RESERVED)
         {
             reserved_mask = reserved_mask | (1<<i);
         }

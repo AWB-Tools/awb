@@ -413,6 +413,19 @@ AC_CACHE_CHECK([if XML gdome library should be used] ,
       asim_cv_enable_xmlgdome,
       asim_cv_enable_xmlgdome=no)
 
+#
+# --enable-xml-gz
+#
+AC_ARG_ENABLE([xmlgz],
+      AC_HELP_STRING([--enable-xmlgz=ARG],
+                     [use XML gdome library [[ARG=no|yes]] (default=no)]),
+      asim_cv_enable_xmlgz=$enableval,
+      asim_cv_enable_xmlgz=no)
+
+AC_CACHE_CHECK([if XML compression options should be used] ,
+    asim_cv_enable_xmlgz,
+    asim_cv_enable_xmlgz=no)
+
 
 # --------------------------------------------------------------------------
 #  XML support:
@@ -732,7 +745,11 @@ libasimSrcDir="$libasimDir/src"
 if test $asim_cv_enable_xmlgdome = yes; then
   xmlout="xmlout-gdome"
 else
-  xmlout="xmlout-nolib"
+  if test $asim_cv_enable_xmlgz = yes; then
+    xmlout="xmlout-nolib-gz"
+  else
+    xmlout="xmlout-nolib"
+  fi
 fi
 AC_CONFIG_LINKS($libasimIncDir/xmlout.h:$libasimIncDir/$xmlout.h)
 AC_CONFIG_LINKS($libasimSrcDir/xmlout.cpp:$libasimSrcDir/$xmlout.cpp)

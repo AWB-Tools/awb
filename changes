@@ -11,3 +11,112 @@ Directory tools/scripts
 Temporarily disable package locking since we have no lock
 manager at this time.
 
+
+----------
+jsemer      Date: Wed Nov  8 09:45:19 EST 2006  CSN: CSN-asim-7
+                  Wed Nov  8 14:45:19 UTC 2006
+
+
+Directory .
+ configure                 Locally Modified            6 
+ Makefile.in               Locally Modified            6 
+ configure.in              Locally Modified            6 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified            6 
+
+Directory libperl
+ Makefile.in               Locally Modified            6 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified            6 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified            6 
+
+Directory libperl/Asim/lib/Asim
+ UnionDir.pm               Locally Modified            6 
+ Package.pm                Locally Modified            6 
+
+Directory libperl
+ Makefile.am               Locally Modified            6 
+
+Directory tools
+ Makefile.in               Locally Modified            6 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified            6 
+ regression.verifier       Locally Modified            6 
+ asim-run                  Locally Modified            6 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified            6 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified            6 
+
+Directory tools/awb
+ Makefile.in               Locally Modified            6 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified            6 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified            6 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified            6 
+
+Directory tools/dreams
+ Makefile.in               Locally Modified            6 
+
+Directory tools/dreams/dbtest
+ Makefile.in               Locally Modified            6 
+
+Directory tools/dreams/dbtest/src
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libdraldb
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libdraldb/include
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libasim
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libasim/include
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libasim/include/asim
+ xmlout-nolib-gz.h         Locally Added               0 
+ cache.h                   Locally Modified            6 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libagt
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libagt/include
+ Makefile.in               Locally Modified            6 
+
+Directory lib
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libdral
+ Makefile.in               Locally Modified            6 
+
+Directory lib/libdral/include
+ Makefile.in               Locally Modified            6 
+
+Directory etc
+ asimrc.template           Locally Modified            6 
+
+Directory .
+ aclocal.m4                Locally Modified            6 
+
+
+Updated with changes in simcore up to revision number 2227
+
+Joel

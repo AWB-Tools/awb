@@ -849,11 +849,10 @@ Return true if this package is private, i.e., is in the directory
 sub isprivate {
   my $self = shift;
 
-  my $asimdir = $Asim::default_workspace->rootdir();
+  my $srcdir = $Asim::default_workspace->src_dir();
   my $location = $self->location();
-  my $name = $self->name();
 
-  if ( $location =~ /${asimdir}\/src\/asim\-/ ) {
+  if ( $location =~ /${srcdir}/ ) {
       return 1;
   }
 

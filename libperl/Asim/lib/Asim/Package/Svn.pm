@@ -541,6 +541,9 @@ sub increment_csn {
   # get the current serial number tag:
   my $csn = $self->csn();
   
+  # Force an update to ensure revision no. & csn no. are in sync
+  system("svn update");
+
   # open a temporary file to read the repository status
   my $location = $self->location();
   my $tmp_svn_status = "/tmp/asim-shell-svn-status.$$";

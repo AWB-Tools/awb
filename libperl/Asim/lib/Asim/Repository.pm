@@ -22,6 +22,10 @@ package Asim::Repository;
 use warnings;
 use strict;
 
+our $DEBUG =  0
+           || defined($ENV{ASIM_DEBUG})
+           || defined($ENV{ASIM_DEBUG_REPOSITORY});
+
 
 =head1 NAME
 
@@ -113,16 +117,16 @@ Perform the following manual steps:
 
 4) Add the package to the asim core package and re-install it.
 
-       a) Add package to $AWBLOCAL/src/asim-core/etc/asim.pack file.
+       a) Add package to <workspace>/src/asim-simcore/etc/asim.pack file.
 
-       b) Check in changes to asim-core.
+       b) Check in changes to asim-simcore.
 
-       c) Reinstall asim-core. Probably that means:
+       c) Reinstall asim-simcore. Probably that means:
                ./configure
                make
                make install
 
-          Check $AWBLOCAL/src/asim-core/INSTALL if you want to be sure.
+          Check <workspace>/src/asim-simcore/INSTALL if you want to be sure.
 
 
 5) Import the package with something similar to:
@@ -170,7 +174,7 @@ return 1;
 
 ################################################################
 
-=item ($dir, $module) = $repository-E<gt>checkout([$user])
+=item $dir = $repository-E<gt>checkout([$user])
 
 Check out a repository. 
 Returns the directory the result was checked out into.
@@ -185,25 +189,35 @@ sub checkout {
 
   my $method = $archive->{method};
 
-  my $package_dir;
-  my $status;
-
   my $access = $archive->{access} || return 0;
   my $tag    = $archive->{tag}    || return 0;
   my $module = $archive->{module} || return 0;
   my $target = $archive->{target} || return 0;
 
-  my $targetdir = $Asim::default_workspace->rootdir() . "/src";
-  $package_dir = "$targetdir/$target";
+  my $targetdir = $self->_checkoutbasedir();
+  my $package_dir = $self->checkoutdir();
 
-# # First check if the target dir exists
+  my $status;
+
+  # First check if the target dir exists
   # and if it is writable
-  if (-d "$targetdir" && -w "$targetdir") {
-     print "Beginning checkout\n";
 
-     $package_dir = "$targetdir/$target";
+  if (! -d "$targetdir" || ! -w "$targetdir") {
+    print "Error: Malformed workspace. \n";
+    print "Check if src directory is present and if it is writable.\n";
+    return undef;
+  }
 
-     if ( $method eq "cvs") {
+  # Remove pre-existing package
+
+  if (-d $package_dir) {
+    print "Removing old version of package\n";
+    system("rm -rf $package_dir");
+  }
+
+  print "Beginning checkout\n";
+
+  if ( $method eq "cvs") {
 
     # Do a checkout via CVS
 
@@ -226,7 +240,7 @@ sub checkout {
     }
     printf STDERR "Executing: %s\n", $cmd;
     $status = system($cmd);
-   
+
 
     if ($status) {
       if ($user eq "anonymous" &&
@@ -268,11 +282,6 @@ sub checkout {
 
     # Do a 'checkout' via a copy of a publically available version
 
-    if (-d $package_dir) {
-      system("rm -rf $package_dir.backup");
-      system("mv $package_dir $package_dir.backup");
-    }
-
     # Force / at end of access
     $access =~ s-([^/])$-$1/-;
 
@@ -291,78 +300,73 @@ sub checkout {
       $url =~ s/anonymous/$user/;
     }
 
-    my $cmd ="(cd $targetdir; bk clone $url $module)";
+    my $cmd ="(cd $targetdir; bk clone $url $target)";
     printf STDERR "Executing: %s\n", $cmd;
     $status = system($cmd);
 
   } elsif ( $method eq "svn" ) {
-    print "Package is in a SVN repository \n";
 
     my $url = "$access";
-    #    if ($user ne "anonymous") {
-    #      $url =~ s/anonymous/$user/;
-    #    }
 
     # By default, checkout latest revision
     # Elsif tag specified, get the corresponding revision no.
     # since tag no. = revision no. for svn
 
     if ($tag eq "HEAD") {
+
+      # Head checkout
+
       $url.="/trunk";
-      my $cmd ="(cd $targetdir; svn checkout --username $user $url $module)";
+      my $cmd ="(cd $targetdir; svn checkout --username $user $url $target)";
       printf STDERR "Executing: %s\n", $cmd;
       $status = system($cmd);
-    } 
-    else {
-       my $tmp_svn_list = "/tmp/asim-shell-svn-list.$$";  
-       my $tmp_url = "$url/tags/$tag";  
-       system ("svn list $tmp_url > $tmp_svn_list 2>&1");
-       CORE::open(TMP, "< $tmp_svn_list");
-     
-       while (<TMP>) {  
-           if (/non-existent/) {
- 	      # Pick up the corresponding revision no.
-              my @tmp;
-              $url.="/trunk";
-	      @tmp = split(/-/,$tag); # Tag:CSN-axp-no.
-	      # Pick up the revision no.
-	      if ($tmp[0] =~ /CSN/) {
-		my $cmd ="(cd $targetdir; svn checkout -r $tmp[2] --username $user $url $module)";
-		printf STDERR "Executing: %s\n", $cmd;
-		$status = system($cmd);
-	      }
-	      # Else pick up that date
-	      else {
-		my $date ="{\"$tag\"}";
-		my $cmd ="(cd $targetdir; svn checkout -r $date --username $user $url $module)";
-		printf STDERR "Executing: %s\n", $cmd;
-		$status = system($cmd);
-	      }
-           }
-	   else {
-	      # Pick up the tag directory
-              $url.="/tags/$tag";
-              my $cmd ="(cd $targetdir; svn checkout --username $user $url $module)";
-              printf STDERR "Executing: %s\n", $cmd;
-              $status = system($cmd);
-    	   }
-	   last;
-       }
-
-       CORE::close(TMP);
-       system ("rm $tmp_svn_list");
-     }
     } else {
-         die "Error: Asim::Repository->checkout() - Unimplemented checkout method ($method)\n";
-      }
-   }
 
-    # Throw an error if workspace is malformed
-    else {
-      print "Error: Malformed workspace. \n";
-      print "Check if src directory is present and if it is writable.\n";
+      # Non-head checkout
+
+      my $tmp_svn_list = "/tmp/asim-shell-svn-list.$$";  
+      my $tmp_url = "$url/tags/$tag";  
+      system ("svn list $tmp_url > $tmp_svn_list 2>&1");
+      CORE::open(TMP, "< $tmp_svn_list");
+
+      while (<TMP>) {  
+        if (/non-existent/) {
+          # Pick up the corresponding revision no.
+          my @tmp;
+          $url.="/trunk";
+          @tmp = split(/-/,$tag); # Tag:CSN-axp-no.
+          # Pick up the revision no.
+          if ($tmp[0] =~ /CSN/) {
+            my $cmd ="(cd $targetdir; svn checkout -r $tmp[2] --username $user $url $target)";
+            printf STDERR "Executing: %s\n", $cmd;
+            $status = system($cmd);
+          } else {
+          # Else pick up that date
+            my $date ="{\"$tag\"}";
+            my $cmd ="(cd $targetdir; svn checkout -r $date --username $user $url $target)";
+            printf STDERR "Executing: %s\n", $cmd;
+            $status = system($cmd);
+          }
+        } else {
+          # Pick up the tag directory
+          $url.="/tags/$tag";
+          my $cmd ="(cd $targetdir; svn checkout --username $user $url $target)";
+          printf STDERR "Executing: %s\n", $cmd;
+          $status = system($cmd);
+        }
+        last;
+      }
+
+      CORE::close(TMP);
+      system ("rm $tmp_svn_list");
     }
- 
+  } else {
+    ierror("Error: Asim::Repository->checkout() - Unimplemented checkout method ($method)\n");
+    return undef;
+  }
+
+  print("Package checked out at $package_dir\n") if ($DEBUG);
+
   #
   # Change the permissions on the directory just checked out,
   # to keep it private to the current user:
@@ -376,7 +380,7 @@ sub checkout {
 
   #
   # We return the base directory so that the caller can 
-  # see if it is in the path...
+  # see if it is in the path...since we do not add it.
   #
   return $package_dir;
 }
@@ -384,7 +388,7 @@ sub checkout {
 
 ################################################################
 
-=item ($dir, $module) = $repository-E<gt>checkoutdir()
+=item $checkoutdir = $repository-E<gt>checkoutdir()
 
 Returns the directory the repository would be checked out into.
 
@@ -394,15 +398,21 @@ Returns the directory the repository would be checked out into.
 
 sub checkoutdir {
   my $self = shift;
-  my $archive = $self;
-
   my $target_dir;
-  my $package_dir;
 
-  $target_dir = $archive->{target} || return ();
-  $package_dir = $Asim::default_workspace->rootdir() . "/src/$target_dir";
+  $target_dir = $self->{target} || return undef;
 
-  return $package_dir;
+  # Note:
+  #  Portions of checkout depend on exactly this concatentation...
+
+  return $self->_checkoutbasedir() . "/$target_dir";
+}
+
+
+sub _checkoutbasedir {
+  my $self = shift;
+
+  return $Asim::default_workspace->src_dir();
 }
 
 ################################################################

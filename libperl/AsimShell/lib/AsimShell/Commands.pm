@@ -272,6 +272,7 @@ sub add_path {
 	#
 	# No! - Well package is not going to be in path path so we cannot do anything more...
 	#
+        print "NOT adding $targetdir to ASIM SEARCHPATH\n";
 	return 0;
       }
     }

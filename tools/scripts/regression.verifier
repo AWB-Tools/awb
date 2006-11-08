@@ -72,12 +72,12 @@ if ( ! $status ) {
   print "                           [--[no]modelcheck]\n";
   print "                           [--[no]quiet]\n";
   print "\n";
-  exit;
+  exit 4;
 }
 
 if ((defined $rundir && $rundir ne "") && (defined $regdir && $regdir ne "")) {
     print "\t\tError, Cannot accept both 'rundir' and 'regdir' arguments.\n";
-    exit 1;
+    exit 4;
 }
 
 if (defined $package || defined $runtype) {
@@ -141,6 +141,7 @@ else {
 print "VERIFYING REGRESSION RESULTS: $RESDIR\n";
 
 my $fail = 0;
+my $running = 0;
 my $buildfound = 0;
 my @cvs_checked_models = ();
 
@@ -163,6 +164,7 @@ for (my $iexp = 0; $iexp < @summary; $iexp++)
 
     my $exptotal = 0;
     my $expfail = 0;
+    my $exprunning = 0;
     my $bm;
     my $fbm;
     my $ibm;
@@ -205,12 +207,12 @@ for (my $iexp = 0; $iexp < @summary; $iexp++)
 		elsif ( -f "$fbm.SUBMITTED" )
 		{
 		    print "\t\t$bm.SUBMITTED -- run not finished yet!\n";
-		    $expfail++;
+		    $exprunning++;
 		}
 		elsif ( -f "$fbm.RUNNING" )
 		{
 		    print "\t\t$bm.RUNNING -- run not finished yet!\n";
-		    $expfail++;
+		    $exprunning++;
 		}
 		elsif ( -f "$fbm.ERROR" )
 		{
@@ -231,8 +233,13 @@ for (my $iexp = 0; $iexp < @summary; $iexp++)
 	    {
 		$fail = 1;
 	    }
+	    if ($exprunning != 0)
+	    {
+		$running = 1;
+	    }
 	    if ($exptotal != 0) 
 	    {
+		$expfail += $exprunning;
 		printf "\t\tPass Rate: %4.0f%% (%i/%i)\n",  100*($exptotal-$expfail)/$exptotal, $exptotal-$expfail, $exptotal;
 	    }
 	    else 
@@ -258,13 +265,19 @@ if ($buildfound)
 
 if ( $fail == 0 )
 {
-  print "Regression PASSED!\n";
-  exit 0;
+    if ($running == 0) {
+	print "Regression PASSED!\n";
+	exit 0;	
+    }
+    else {
+	print "Regression RUNNING!\n";
+	exit 2;
+    }
 }
 else
 {
-  print "Regression FAILED!\n";
-  exit 1;
+    print "Regression FAILED!\n";
+    exit 1;
 }
 
 #

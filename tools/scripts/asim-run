@@ -110,6 +110,9 @@ $UNRESTRICTED_USERS  = Asim::Util::get_asimrc_val("asim-run", "UNRESTRICTED_USER
 # The minimum amount of tmp space, in megabytes, we must have before running a netbatch job.
 $MIN_TMP_SPACE_MB    = Asim::Util::get_asimrc_val("asim-run", "MIN_TMP_SPACE_MB",      10);
 
+# Number of times to auto requeue jobs in netbatch
+$NETBATCH_AUTO_REQUEUE = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_AUTO_REQUEUE",   0);
+
 # Should we do the pre-execution check to determine minimum disk space?
 $ENABLE_NETBATCH_PRE = Asim::Util::get_asimrc_val("asim-run", "ENABLE_NETBATCH_PRE",    1);
 
@@ -354,6 +357,13 @@ if ( $runbatch && $pool ne "" ) {
   else {
     $batch_flags = $batch_flags . "-P$pool ";
   }
+}
+##########################################################
+# Add auto-requeue to netbatch if specified.
+##########################################################
+PrintVerbose("Checking auto requeue....");
+if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
+    $batch_flags = $batch_flags . " --autoreq \"$NETBATCH_AUTO_REQUEUE:NBErr\" ";
 }
 
 ##########################################################

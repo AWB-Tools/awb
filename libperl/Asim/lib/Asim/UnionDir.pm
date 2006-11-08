@@ -270,6 +270,8 @@ sub listdir {
 
   my $curdir;
   my %list;
+  my @namelist;
+
 
   foreach my $p ($self->path()) {
     $curdir = "$p/$dir";
@@ -289,7 +291,10 @@ sub listdir {
     }
   }
 
-  return (sort keys %list);
+  @namelist = (sort keys %list);
+  print "Uniondir::listdir: " . join(",", @namelist) . "\n" if ($DEBUG);
+
+  return @namelist;
 }
 
 ################################################################

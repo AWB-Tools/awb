@@ -419,6 +419,14 @@ ENABLE_NETBATCH_PRE=
 # NETBATCH_PRE_USE_SMARTCLASS=0
 NETBATCH_PRE_USE_SMARTCLASS=
 
+#
+# Purpose: Specify number of times to auto requeue jobs in netbatch
+#          
+# Type:    Integer
+# Default: 0
+# NETBATCH_AUTO_REQUEUE=0
+NETBATCH_AUTO_REQUEUE=
+
 
 #***********************************************************************#
 # asim-batch is invoked by asim-run to submit one asim job, i.e., run
