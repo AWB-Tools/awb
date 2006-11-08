@@ -33,7 +33,7 @@ Description=Software package dependencies for Asim performance models
 [asimcore]
 Description=Asim Core
 Method=svn
-Access=https://asim.csail.mit.edu/svn/asim
+Access=https://asim.csail.mit.edu/svn/asimcore
 Module=undefined
 Tag=HEAD
 Target=asimcore
@@ -42,7 +42,7 @@ Changes=changes
 [asimcore/HEAD]
 Description=Asim Core
 Method=svn
-Access=https://asim.csail.mit.edu/svn/asim
+Access=https://asim.csail.mit.edu/svn/asimcore
 Module=undefined
 Tag=HEAD
 Target=asimcore

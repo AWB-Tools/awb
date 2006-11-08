@@ -147,3 +147,16 @@ Directory .
 Change name to asimcore.
 
 Joel
+
+----------
+jsemer      Date: Wed Nov  8 11:03:34 EST 2006  CSN: CSN-asimcore-9
+                  Wed Nov  8 16:03:34 UTC 2006
+
+
+Directory etc
+ asim.pack                 Locally Modified            8 
+
+
+Changed asimcore repository location from .../svn/asim to .../asim/asimcore
+
+Joel
