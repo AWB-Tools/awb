@@ -19833,7 +19833,7 @@ ac_x_header_dirs='
 /usr/openwin/share/include'
 
 if test "$ac_x_includes" = no; then
-  # Guess where to find include files, by looking for Intrinsic.h.
+  # Guess where to find include files, by looking for Xlib.h.
   # First, try using that file with no special directory specified.
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -19841,7 +19841,7 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 _ACEOF
 if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
@@ -19868,7 +19868,7 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
   for ac_dir in $ac_x_header_dirs; do
-  if test -r "$ac_dir/X11/Intrinsic.h"; then
+  if test -r "$ac_dir/X11/Xlib.h"; then
     ac_x_includes=$ac_dir
     break
   fi
@@ -19882,18 +19882,18 @@ if test "$ac_x_libraries" = no; then
   # See if we find them without any special options.
   # Don't add to $LIBS permanently.
   ac_save_LIBS=$LIBS
-  LIBS="-lXt $LIBS"
+  LIBS="-lX11 $LIBS"
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 int
 main ()
 {
-XtMalloc (0)
+XrmInitialize ()
   ;
   return 0;
 }
@@ -21216,7 +21216,7 @@ echo "${ECHO_T}\"found in $QTUICDIR\"" >&6
     echo "$as_me:$LINENO: checking \"for Qt 3.x.x libraries\"" >&5
 echo $ECHO_N "checking \"for Qt 3.x.x libraries\"... $ECHO_C" >&6
 
-    QTLIBS="qt"
+    QTLIBS="qt-mt qt"
 
     for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/lib /usr/local/lib /usr/X11R6/lib /usr/lib/qt3/lib64
     do
@@ -21257,7 +21257,7 @@ echo "${ECHO_T}\"found in $QTLIBDIR\"" >&6
         echo ""
         qt_available=0;
     else
-        QTLIBOBJ="-lqt"
+        QTLIBOBJ="-l$QT"
         QTLIBDIR="-L$QTLIBDIR"
     fi
 
@@ -22515,41 +22515,36 @@ fi
     echo "$as_me:$LINENO: checking for PerlQt" >&5
 echo $ECHO_N "checking for PerlQt... $ECHO_C" >&6
 
-    case $HOSTOS in
-      Linux) ;;
-      *)     { { echo "$as_me:$LINENO: error: This OS version $HOSTOS is not supported" >&5
-echo "$as_me: error: This OS version $HOSTOS is not supported" >&2;}
-   { (exit 1); exit 1; }; }
-             exit ;;
-    esac
+    perlprefixes="$prefix /usr"
+    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
+    perlarch="/ i386-linux-thread-multi i686-linux"
 
-    case $HOSTOSRELEASE in
-      2.4*)
-	case $PERLVERSION in
-	  5.6*)  perlqt_search_suff=/lib/perl5/site_perl/$PERLVERSION ;;
-	  5.8*)  perlqt_search_suff=/lib/site_perl ;;
-	esac ;;
-      2.6*)
-	case $PERLVERSION in
-	  5.6*)  perlqt_search_suff=/lib/site_perl/$PERLVERSION ;;
-	  5.8*)  perlqt_search_suff=/lib32/site_perl ;;
-	esac ;;
-      *)
-        { { echo "$as_me:$LINENO: error: This OS version $HOSTOSRELEASE is not supported" >&5
-echo "$as_me: error: This OS version $HOSTOSRELEASE is not supported" >&2;}
-   { (exit 1); exit 1; }; }
-    esac
+    for p in $perlprefixes
+    do
+        for d in $perllibs
+        do
+            for a in $perlarch
+            do
+                if test -f $p/$d/$a/Qt.pm
+                then
+                    echo "$as_me:$LINENO: result: found in $p/$d" >&5
+echo "${ECHO_T}found in $p/$d" >&6
+                    perlqt_search_path=$p/$d
+                    break 2
+                fi
+            done
+        done
+    done
 
-    if test -d $prefix$perlqt_search_suff
+    if test "X$perlqt_search_path" = "X"
     then
-        perlqt_search_path='${prefix}'$perlqt_search_suff ;
-        echo "$as_me:$LINENO: result: found in $perlqt_search_path" >&5
-echo "${ECHO_T}found in $perlqt_search_path" >&6
-    else
-        { { echo "$as_me:$LINENO: error: PerlQt not found" >&5
-echo "$as_me: error: PerlQt not found" >&2;}
-   { (exit 1); exit 1; }; }
+        echo ""
+        echo "****************************************************************"
+        echo "PerlQt not found!"
+        echo "****************************************************************"
+        echo ""
     fi
+
 
 
 

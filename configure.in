@@ -107,7 +107,7 @@ AC_DEFUN([FIND_UIC],[
 AC_DEFUN([FIND_QT_LIBS],[
     AC_MSG_CHECKING("for Qt 3.x.x libraries")
 
-    QTLIBS="qt"
+    QTLIBS="qt-mt qt"
 
     for dir in $1
     do
@@ -214,7 +214,7 @@ AC_DEFUN([FIND_QT], [
         echo ""
         qt_available=0;
     else
-        QTLIBOBJ="-lqt"
+        QTLIBOBJ="-l$QT"
         QTLIBDIR="-L$QTLIBDIR"
     fi
 
@@ -289,34 +289,35 @@ AC_DEFUN([FIND_PERLGUI], [
     AC_PATH_XTRA
     AC_MSG_CHECKING(for PerlQt)
 
-    case $HOSTOS in
-      Linux) ;;
-      *)     AC_MSG_ERROR(This OS version $HOSTOS is not supported)
-             exit ;;
-    esac
+    perlprefixes="$prefix /usr"
+    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
+    perlarch="/ i386-linux-thread-multi i686-linux"
 
-    case $HOSTOSRELEASE in
-      2.4*)
-	case $PERLVERSION in
-	  5.6*)  perlqt_search_suff=/lib/perl5/site_perl/$PERLVERSION ;;
-	  5.8*)  perlqt_search_suff=/lib/site_perl ;;
-	esac ;;
-      2.6*)
-	case $PERLVERSION in
-	  5.6*)  perlqt_search_suff=/lib/site_perl/$PERLVERSION ;;
-	  5.8*)  perlqt_search_suff=/lib32/site_perl ;;
-	esac ;;
-      *)
-        AC_MSG_ERROR(This OS version $HOSTOSRELEASE is not supported)
-    esac
+    for p in $perlprefixes
+    do
+        for d in $perllibs
+        do
+            for a in $perlarch
+            do
+                if test -f $p/$d/$a/Qt.pm
+                then
+                    AC_MSG_RESULT(found in $p/$d)
+                    perlqt_search_path=$p/$d
+                    break 2
+                fi
+            done
+        done
+    done
 
-    if test -d $prefix$perlqt_search_suff
+    if test "X$perlqt_search_path" = "X"
     then
-        perlqt_search_path='${prefix}'$perlqt_search_suff ;
-        AC_MSG_RESULT(found in $perlqt_search_path)
-    else
-        AC_MSG_ERROR(PerlQt not found)
-    fi
+        echo ""
+        echo "****************************************************************"
+        echo "PerlQt not found!"
+        echo "****************************************************************"
+        echo ""
+    fi    
+
 
     AC_SUBST(perlqt_search_path)
 
