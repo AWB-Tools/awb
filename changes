@@ -184,3 +184,20 @@ Directory etc
 Fixed awb.config template to match new package name.
 
 Joel
+
+----------
+pellauer    Date: Wed Dec 20 11:10:17 EST 2006  CSN: CSN-asimcore-13
+                  Wed Dec 20 16:10:17 UTC 2006
+
+
+Directory .
+ configure                 Locally Modified           12 
+ configure.in              Locally Modified           12 
+
+Directory lib/libasim/include/asim
+ trace.h                   Locally Modified           12 
+
+
+Added better checking for QT, also added assert.h so that it builds on Debian.
+
+Michael

@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <pthread.h>
+#include <assert.h>
 #include <asim/regexobj.h>
 
 // Include support for the old trace format.
