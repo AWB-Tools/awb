@@ -416,3 +416,16 @@ Updating with simcore changes (rev. 2238)
 
 - Added --disable-64bit option to configure, to allow building 32-bit binaries
 on x86_64 systems.
+
+----------
+spartha1    Date: Tue Mar 13 17:46:41 EDT 2007  CSN: CSN-asimcore-24
+                  Tue Mar 13 21:46:41 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           23 
+
+Updating with simcore changes (rev. 2239)
+
+- in batch mode, update, configure and build are attempted on all packages and 
+any error is reported at the end.

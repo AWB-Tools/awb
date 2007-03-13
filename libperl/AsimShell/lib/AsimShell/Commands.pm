@@ -1031,13 +1031,37 @@ sub configure_and_build_packages {
 
   @plist = sort { $a->buildorder() <=> $b->buildorder() } @plist;
 
+  my @failed_packs = ();
+  
   for my $p (@plist) {
     print "Building package " . $p->name() . "\n\n";
 
-    $p->configure() || return undef;
-    $p->build()     || return undef;
-
+    my $status = $p->configure();
+    if (!defined($status) || ($status == 0)) {
+	if (Asim::mode() eq "batch") {
+	    push(@failed_packs, $p->name());
+	}
+	else {
+	    return undef;
+	}
+    }
+    else {
+	$status = $p->build();
+	if (!defined($status) || ($status == 0)) {	
+	    if (Asim::mode() eq "batch") {
+		push(@failed_packs, $p->name());
+	    }
+	    else {
+		return undef;
+	    }
+	}
+    }
     print "\n";
+  }
+  
+  if (scalar @failed_packs) {
+      print "Failed to configure and build packages: " . join(", ", @failed_packs) . "\n\n";
+      return undef;
   }
 
   return 1;
@@ -1300,22 +1324,35 @@ sub update_all_packages {
   #
   # Do a CVS update on each package
   #
+  my @failed_packs = ();
   for my $p (@plist) {
-    print "Updating package " . $p->name() . "\n\n";
-
-    $p->update()    || return undef;
-
-    print "\n";
+      print "Updating package " . $p->name() . "\n\n";
+      
+      my $status = $p->update();
+      if (!defined($status) || ($status == 0)) {
+	  if (Asim::mode() eq "batch") {
+	      push(@failed_packs, $p->name());
+	  }
+	  else {
+	      return undef;
+	  }
+      }
+      print "\n";
   }
-
+  
   #
   # Optionally configure and build each package
   #
-
   if ($build) {
     configure_and_build_packages(@plist) || return undef;
   }
 
+  if (scalar @failed_packs) {
+      print "*** Failed to update packages: " . join(", ", @failed_packs) . "\n";
+      print "*** Build is incomplete." . "\n";
+      return undef;
+  }
+  
   return 1;
 }
 
