@@ -34,6 +34,9 @@
 
 using namespace std;
 
+#define DEFAULT_MAX_BANDWIDTH 8
+#define DEFAULT_MAX_LATENCY 8
+
 
 #if NUM_PTHREADS > 1
   #include <pthread.h>
@@ -114,13 +117,13 @@ class RateMatcher: public asim_clockable_class
 //************************************************************************************************
 
 template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
-class ReadRateMatcher: public ReadPort<T,W,L>, public RateMatcher
+class ReadRateMatcher: public ReadPort<T>, public RateMatcher
 {
     
   public:
   
     ReadRateMatcher(ASIM_CLOCKABLE _clockable):
-        ReadPort<T,W,L>(),
+        ReadPort<T>(),
         RateMatcher(_clockable)
     {
         // Nothing.
@@ -163,7 +166,7 @@ ReadRateMatcher<T,W,L>::Read(T& data, UINT64 cycle)
 {
 
     cs_lock(port_mutex);
-    bool ret = ReadPort<T,W,L>::Read(data, cycle);
+    bool ret = ReadPort<T>::Read(data, cycle);
     cs_unlock(port_mutex);
     
     return ret;
@@ -242,7 +245,7 @@ ReadRateMatcher<T,W,L>::getConnectedRateMatchers()
     if(listCreated) return connectedRateMatchers;
 
     // Access the BasePort list of connected ports    
-    list<BasePort*> connectedPorts = ReadPort<T,W,L>::BasePort::connectedPorts;
+    list<BasePort*> connectedPorts = ReadPort<T>::BasePort::connectedPorts;
     VERIFY(connectedPorts.size() > 0, "No WriteRateMatcher connected to ReadRateMatcher " << id);
     
     for(list<BasePort*>::iterator it = connectedPorts.begin(); it != connectedPorts.end(); it++)
@@ -264,7 +267,7 @@ ReadRateMatcher<T,W,L>::getConnectedRateMatchers()
 //************************************************************************************************
 
 template<class T, int F = 1, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
-class WriteRateMatcher: public WritePort<T,F,W,L>, public RateMatcher
+class WriteRateMatcher: public WritePort<T,F>, public RateMatcher
 {
     
   private:
@@ -277,7 +280,7 @@ class WriteRateMatcher: public WritePort<T,F,W,L>, public RateMatcher
   public:
   
     WriteRateMatcher(ASIM_CLOCKABLE _clockable):
-        WritePort<T,F,W,L>(),
+        WritePort<T,F>(),
         RateMatcher(_clockable),
         currentPosition(0),
         Dummy(T())
@@ -447,7 +450,7 @@ WriteRateMatcher<T,F,W,L>::Clock(UINT64 cycle)
     for(INT32 i = 0; i < currentPosition; i++)
     {                
         // Move the data to the internal WritePort buffer.
-        WritePort<T,F,W,L>::Write(internalBuffer[i], cycle);
+        WritePort<T,F>::Write(internalBuffer[i], cycle);
         
         // Release smart pointer.
         internalBuffer[i] = Dummy;
@@ -468,7 +471,7 @@ WriteRateMatcher<T,F,W,L>::getConnectedRateMatchers()
 
     if(listCreated) return connectedRateMatchers;
     
-    list<BasePort*> connectedPorts = WritePort<T,F,W,L>::BasePort::connectedPorts;
+    list<BasePort*> connectedPorts = WritePort<T,F>::BasePort::connectedPorts;
     VERIFY(connectedPorts.size() > 0, "No ReadRateMatcher connected to WriteRateMatcher " << id);
     
     for(list<BasePort*>::iterator it = connectedPorts.begin(); it != connectedPorts.end(); it++)

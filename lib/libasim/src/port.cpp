@@ -163,7 +163,7 @@ BasePort::ConnectPorts(int rdPort, int port, int index,
             // with different latencies on each end or it is a monocast port
             // with different latencies defined on each side.
             // Let's assert that we are not on the second case.
-            VERIFY((index !=0), "Port with different latencies deffined on write"
+            VERIFY((index !=0), "Port with different latencies defined on write"
                     " and read end. \n");
             // We are in from of a multicast multilatency port.
             // Mark-it on the write side.
@@ -175,7 +175,7 @@ BasePort::ConnectPorts(int rdPort, int port, int index,
 
     //the bandwidth is defined in the port, but not the buffer yet so we have to
     //pass it down
-    i[rdPort]->CreateStorage(i[rdPort]->Latency,i[rdPort]->Bandwidth);
+    i[rdPort]->CreateStorage(i[rdPort]->Latency, i[rdPort]->Bandwidth);
 
     i[rdPort]->Connected = true;
     if (i[port]->GetType() == BasePort::PeekType)
@@ -301,13 +301,11 @@ BasePort::ConnectAll()
     
             if (i[num]->GetType() == BasePort::ReadType)
             {
-//                i[num]->CreateStorage();
                 numReadPorts++;
             }
     
             if (i[num]->GetType() == BasePort::PeekType)
             {
-//                i[num]->CreateStorage();
                 numPeekPorts++;
             }
 
@@ -320,7 +318,6 @@ BasePort::ConnectAll()
     
             if (i[num]->GetType() == BasePort::ReadPhaseType)
             {
-//                i[num]->CreateStorage();
                 numReadPhasePorts++;
                 numReadPorts++;
             }

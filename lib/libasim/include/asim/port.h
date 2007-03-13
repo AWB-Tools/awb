@@ -32,8 +32,6 @@
 // ASIM core
 #include "asim/syntax.h"
 #include "asim/mesg.h"
-// not sure why we need to include module.h, but if not, we need string.h
-//#include "asim/module.h"
 #include "asim/vector.h"
 #include "asim/trace.h"
 #include "asim/item.h"
@@ -44,7 +42,7 @@
 extern bool registerPortStats;
 
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 class BufferStorage;
 
 /////////////////////////////////////////////////////////////////////////
@@ -81,7 +79,7 @@ private:
 
   // Needed to notify the connection structure via event.
   virtual void EventConnect(int bufNum, int destination);
-  virtual bool CreateStorage(UINT32 latency,UINT32 bandwidth);
+  virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 protected:
   // These three variable define how to identify an endpoint and how
@@ -151,12 +149,9 @@ public:
 
 
 ///////////////////////////////////////////////////////////////////
-// class BufferStorage<T,W,L,S>
+// class BufferStorage<T,S>
 //
-#define DEFAULT_MAX_BANDWIDTH 8
-#define DEFAULT_MAX_LATENCY 8
-
-template<class T, int W, int L, int S = 0>
+template<class T, int S = 0>
 class BufferStorage
 {
 private:
@@ -167,12 +162,12 @@ protected:
   // For events purposes, every single Port needs to have an unique identifier.
   UINT16 myEventEdgeId;
   
-  static const int DefaultBandwidth = W;
+//  static const int DefaultBandwidth = W;
   // if S == 0, assume programmer does not want to worry about sizing
   // buffer, so double the size to cover for round trip latency.  If S
   // > 0, assume programmer wants to set the size for optization or a
   // much longery return latency
-  static const int DefaultLatency = (S == 0 ? CEIL_POW2(L + 1) : CEIL_POW2(L + S));
+//  static const int DefaultLatency = (S == 0 ? CEIL_POW2(L + 1) : CEIL_POW2(L + S));
 
   struct CycleEntry
   {
@@ -236,7 +231,7 @@ public:
 
   bool IsFull(int i) const;
   bool IsEmpty(int i) const;
-  bool CreateStorage(UINT32 latency,UINT32 bandwidth) ;
+  bool CreateStorage(UINT32 latency, UINT32 bandwidth) ;
 
   INT16 GetEventEdgeId() const { return myEventEdgeId; }
   void SetEventEdgeId(const UINT16 id) { myEventEdgeId = id; }
@@ -245,8 +240,7 @@ public:
 
   int GetBandwidth() const;
   int GetLatency() const;
-  int GetDefaultBandwidth() const { return DefaultBandwidth; }
-  int GetDefaultLatency() const { return DefaultLatency; }
+  int GetBufferSize() const;
   UINT64 GetLastAccessed() const{ return LastAccessed; }
   UINT64 GetLastWritten() const{ return LastWritten; }
   void SetLastAccessed(UINT64 c) { LastAccessed = c; }
@@ -272,14 +266,14 @@ public:
 
 };
 
-template <class T, int W, int L, int S = 0>
-class Storage : public BufferStorage<T,W,L,S>
+template <class T, int S = 0>
+class Storage : public BufferStorage<T,S>
 {};
 
 ///////////////////////////////////////////////////////////////////
-// class WriteRemotePort<T, F, W, L> : public WritePort
+// class WriteRemotePort<T, F> : public WritePort
 /*
-template<class T, int F = 1, int W = DEFAULT_MAX_BANDWIDTH, int L = REMOTE_MAX_LATENCY>
+template<class T, int F = 1>
 class WriteRemotePort : protected WritePort
 {
     public:
@@ -290,13 +284,13 @@ class WriteRemotePort : protected WritePort
 }
 */
 ///////////////////////////////////////////////////////////////////
-// class WritePort<T, F, W, L> : public BasePort
+// class WritePort<T, F> : public BasePort
 //
-template<class T, int F = 1, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
+template<class T, int F = 1>
 class WritePort : public BasePort
 {
 private:
-  Storage<T,W,L> *Buffer[F];
+  Storage<T> *Buffer[F];
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -328,13 +322,15 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-// class WriteSkidPort<T, W, L, S> : public BasePort
+// class WriteSkidPort<T, S> : public BasePort
 //
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY, int S = 0>
+template<class T, int S = 0>
 class WriteSkidPort : public BasePort
 {
 private:
-  Storage<T,W,L,(S == 0 ? (L+L) : (L+S))> *Buffer;
+// The sizing of Skid ports currently does not work!  The value of S is not
+// used! Eric
+  Storage<T,S> *Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -353,13 +349,13 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-// class WriteStallPort<T, W, L> : public BasePort
+// class WriteStallPort<T> : public BasePort
 //
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
+template<class T>
 class WriteStallPort : public BasePort
 {
 private:
-  Storage<T,W,L> *Buffer;
+  Storage<T> *Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -382,14 +378,14 @@ public:
 
 
 ///////////////////////////////////////////////////////////////////
-// class ReadPort<T, W, L> : public BasePort
+// class ReadPort<T> : public BasePort
 //
 // ReadPort must read the buffer endpoint EVERY cycle
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
+template<class T>
 class ReadPort : public BasePort
 {
 private:
-  Storage<T,W,L> Buffer;
+  Storage<T> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -397,7 +393,7 @@ private:
   // among buffers.  Maybe that should be done.
   virtual void *GetBuffer();
   void SetBufferInfo();
-  virtual bool CreateStorage(UINT32 latency,UINT32 bandwidth);
+  virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 public:
   bool Read(T& data, UINT64 cycle);
@@ -416,15 +412,15 @@ public:
 
 
 ///////////////////////////////////////////////////////////////////
-// class ReadSkidPort<T, W, L, S> : public BasePort
+// class ReadSkidPort<T, S> : public BasePort
 //
 // ReadBuffer doesn't have to read the buffer endpoint every cycle.
 // It can treat the buffer like a skid buffer
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY, int S = 0>
+template<class T, int S = 0>
 class ReadSkidPort : public BasePort
 {
 private:
-  Storage<T,W,L,S> Buffer;
+  Storage<T,S> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -432,7 +428,7 @@ private:
   // among buffers.  Maybe that should be done.
   virtual void *GetBuffer();
   void SetBufferInfo();
-  virtual bool CreateStorage(UINT32 latency,UINT32 bandwidth);
+  virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 public:
   bool Read(T& data, UINT64 cycle);
@@ -448,15 +444,15 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-// class ReadStallPort<T, W, L, S> : public BasePort
+// class ReadStallPort<T, S> : public BasePort
 //
 // ReadBuffer doesn't have to read the buffer endpoint every cycle.
 // It can treat the buffer like a skid buffer
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
+template<class T>
 class ReadStallPort : public BasePort
 {
 private:
-  Storage<T,W,L> Buffer;
+  Storage<T> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -464,7 +460,7 @@ private:
   // among buffers.  Maybe that should be done.
   virtual void *GetBuffer();
   void SetBufferInfo();
-  virtual bool CreateStorage(UINT32 latency,UINT32 bandwidth);
+  virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 
 public:
@@ -479,13 +475,13 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-// class PeekPort<T, W, L> : public BasePort
+// class PeekPort<T> : public BasePort
 //
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY>
+template<class T>
 class PeekPort : public BasePort
 {
 private:
-  Storage<T,W,L> *Buffer;
+  Storage<T> *Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -493,7 +489,7 @@ private:
   // among buffers.  Maybe that should be done.
   virtual void *GetBuffer();
   virtual void SetBuffer(void *buf, int rdPortNum);
-  virtual bool CreateStorage(UINT32 latency,UINT32 bandwidth);
+  virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 public:
   void PeekReset();
@@ -505,13 +501,13 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-// class WritePhasePort<T, F, W, L> : public BasePort
+// class WritePhasePort<T, F> : public BasePort
 //
-template<class T, int F = 1, int W = DEFAULT_MAX_BANDWIDTH, int L = DEFAULT_MAX_LATENCY*2>
+template<class T, int F = 1>
 class WritePhasePort : public BasePort
 {
 private:
-  Storage<T,W,L> *Buffer[F];
+  Storage<T> *Buffer[F];
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -545,16 +541,16 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-// class ReadPhasePort<T, W, L> : public BasePort
+// class ReadPhasePort<T> : public BasePort
 //
 // ReadPhasePort must read the buffer endpoint EVERY phase
-template<class T, int W = DEFAULT_MAX_BANDWIDTH, int L = 2*DEFAULT_MAX_LATENCY>
+template<class T>
 class ReadPhasePort : public BasePort
 {
 
 private:
 
-  Storage<T,W,L> Buffer;
+  Storage<T> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
   // happy passing void and doing a cast, but C++ programmers cringe.
@@ -563,7 +559,7 @@ private:
   virtual void *GetBuffer();
   void SetBufferInfo();
 
-  virtual bool CreateStorage(UINT32 latency,UINT32 bandwidth);
+  virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 public:
 
@@ -680,7 +676,6 @@ BasePort::SetLatency(int lat)
   if (IsConnected() || Latency >= 0)
     return false;
   Latency = lat * VBOX_CLOCK_RATIO;
-  //  VERIFYX(Latency <= Store.DefaultLatency);
   return true;
 }    
 #else 
@@ -690,7 +685,6 @@ BasePort::SetLatency(int lat)
   if (IsConnected() || Latency >= 0)
     return false;
   Latency = lat;
-  //  VERIFYX(Latency <= Store.DefaultLatency);
   return true;
 }
 #endif 
@@ -747,7 +741,7 @@ BasePort::GetBuffer()
   return NULL;
 }
 inline bool
-BasePort::CreateStorage(UINT32 latency,UINT32 bandwidth)
+BasePort::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
   ASSERT(false, "You cannot call CreateStorage on this class type (" << GetName() << ")\n");
   return false;
@@ -806,53 +800,54 @@ operator>=(const BasePort& l, const BasePort& r)
 
 
 /////////////////////////////////
-// class BufferStorage<T, W, L>
+// class BufferStorage<T>
 //
 
 // Private members
 // Buffer storage should never be copied;
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline
-BufferStorage<T,W,L,S>::BufferStorage(const BufferStorage& s)
+BufferStorage<T,S>::BufferStorage(const BufferStorage& s)
 { operator=(s); }
 
-template<class T, int W, int L, int S>
-inline const BufferStorage<T,W,L,S>&
-BufferStorage<T,W,L,S>::operator=(const BufferStorage& s)
+template<class T, int S>
+inline const BufferStorage<T,S>&
+BufferStorage<T,S>::operator=(const BufferStorage& s)
 { ASSERT(false, "Cannot copy buffer storage!"); return *this; }
 
 // Protected members
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::IsFull(int index) const
+BufferStorage<T,S>::IsFull(int index) const
 { 
     return ((Store[index].End - Store[index].Start) >= Bandwidth);
 }    
 
 //{ return (Store[index].Start == 0) && (Store[index].End >= Bandwidth); }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::IsEmpty(int index) const
+BufferStorage<T,S>::IsEmpty(int index) const
 { 
     return ((bool)!Store || (Store[index].Start == Store[index].End)); 
 }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::CreateStorage(UINT32 latency,UINT32 bandwidth) 
+BufferStorage<T,S>::CreateStorage(UINT32 latency, UINT32 bandwidth) 
 {
     //The port will be inited right after this step, but we are about
     //to give the write port the handle to the buffer so we need to
     //allocate space now 
-    Latency=latency;
-    Bandwidth=bandwidth;
+
+    Latency = latency;
+    Bandwidth = bandwidth;
 
     //We need to have at least one entry and when the latency ==1 we
     //need to be able to let the read port read an empty slot on
     //startup and we will write the other entry that cycle
-    Store = new CycleEntry[(Latency+1)];
-    BufferSize=Latency+1;
+    Store = new CycleEntry[(Latency + 1)];
+    BufferSize = Latency + 1;
 
     //Make sure that memory was allocated
     ASSERT(Store, "No storage was created!!");
@@ -873,27 +868,25 @@ BufferStorage<T,W,L,S>::CreateStorage(UINT32 latency,UINT32 bandwidth)
         }
     }  
     //set the write index to be the last buffer entry
-    WriteIndex=BufferSize-1;
+    WriteIndex = BufferSize - 1;
     return true;
 }
 
 // Public Members
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline
-BufferStorage<T,W,L,S>::BufferStorage()
+BufferStorage<T,S>::BufferStorage()
   : Dummy(T()), Enabled(false), active(true), stalled(false), ReadIndex(0), WriteIndex(1), 
     CycleRowRead(-1), PeekReadIndex(0), SequentialWrites(0)
 {
 
   //initialize the entry pointer to null so that valgrind passes if we never connect this port
   Store=NULL;  
-//CreateStorage();
-
 }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline
-BufferStorage<T,W,L,S>::~BufferStorage()
+BufferStorage<T,S>::~BufferStorage()
 {
     if(Store)
     {
@@ -909,57 +902,54 @@ BufferStorage<T,W,L,S>::~BufferStorage()
     }
 }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline int
-BufferStorage<T,W,L,S>::GetBandwidth() const
+BufferStorage<T,S>::GetBandwidth() const
 { return Bandwidth; }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline int
-BufferStorage<T,W,L,S>::GetLatency() const
+BufferStorage<T,S>::GetLatency() const
 { return Latency; }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
+inline int
+    BufferStorage<T,S>::GetBufferSize() const
+{ return BufferSize; }
+
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::IsEnabled() const
+BufferStorage<T,S>::IsEnabled() const
 { return Enabled; }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline void
-BufferStorage<T,W,L,S>::SetActive(bool a)
+BufferStorage<T,S>::SetActive(bool a)
 { active = a; }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline void
-BufferStorage<T,W,L,S>::SetStalled(bool s)
+BufferStorage<T,S>::SetStalled(bool s)
 { stalled = s; }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::IsStalled() const 
+BufferStorage<T,S>::IsStalled() const 
 { return stalled;}
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline void
-BufferStorage<T,W,L,S>::PeekReset()
+BufferStorage<T,S>::PeekReset()
 { PeekReadIndex = ReadIndex; PeekStart = 0; }
 
 // Enable storage.  Returns true on success (state was successfully
 // changed to enabled) and false on failure (buffer storage was
 // already enabled).
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::SetEnable(int bw, int lat, const char* portName)
+BufferStorage<T,S>::SetEnable(int bw, int lat, const char* portName)
 {
   if (!Enabled) {
-    ASSERT((bw <= DefaultBandwidth),
-      "Attempt to make the bandwidth of port " << portName
-      << " larger than the default maximum size!");
-
-    ASSERT((lat <= DefaultLatency),
-     "Attempt to make the latency("<< lat << ") of port " << portName
-     << " larger than the default maximum(" << DefaultLatency << ") size!");
-
     Bandwidth = bw;
     Latency = lat;
     Enabled = true;
@@ -974,15 +964,15 @@ BufferStorage<T,W,L,S>::SetEnable(int bw, int lat, const char* portName)
 // already been read out this cycle.  So, it could return that there's something
 // to read, but because the full bandwidth has already been read out this cycle,
 // the port won't allow any more items to be read.  Is this really needed now?  Eric
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::SomethingToRead(UINT64 cycle) const
+BufferStorage<T,S>::SomethingToRead(UINT64 cycle) const
 {
   int ri = ReadIndex;
 
   // move ri to the first location that might have data.
   while (IsEmpty(ri) && (ri != WriteIndex)) {
-    if (++ri >= DefaultLatency)
+    if (++ri >= BufferSize)
       ri = 0;
   }
 
@@ -1001,9 +991,9 @@ BufferStorage<T,W,L,S>::SomethingToRead(UINT64 cycle) const
 }
 
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::Read(T& data, UINT64 cycle, const char* portName, bool relaxAsserts)
+BufferStorage<T,S>::Read(T& data, UINT64 cycle, const char* portName, bool relaxAsserts)
 {
     // if no data, return false.  I don't think this first condidtion
     // should ever be true since we're always advancing readindex at t
@@ -1083,9 +1073,9 @@ BufferStorage<T,W,L,S>::Read(T& data, UINT64 cycle, const char* portName, bool r
     return true;
 }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::Write(const T& data, UINT64 cycle, const char* portName)
+BufferStorage<T,S>::Write(const T& data, UINT64 cycle, const char* portName)
 {
     if (((UINT64)Store[WriteIndex].CycleWritten) != cycle) 
     {
@@ -1166,16 +1156,16 @@ BufferStorage<T,W,L,S>::Write(const T& data, UINT64 cycle, const char* portName)
     return true;
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline INT64
-BufferStorage<T,F,W,L>::LatestWrite(){
+BufferStorage<T,F>::LatestWrite(){
     return (Store[WriteIndex].CycleWritten);
 }
 
 // Generate an event only in the case of ASIM_ITEM 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-BufferStorage<T,F,W,L>::Notify(const ASIM_ITEM& data)
+BufferStorage<T,F>::Notify(const ASIM_ITEM& data)
 {
     if (runWithEventsOn && data && data->GetEventsEnabled())
     {
@@ -1183,9 +1173,9 @@ BufferStorage<T,F,W,L>::Notify(const ASIM_ITEM& data)
     }
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-BufferStorage<T,F,W,L>::Notify(const ASIM_ITEM_CLASS& data)
+BufferStorage<T,F>::Notify(const ASIM_ITEM_CLASS& data)
 {
     if (runWithEventsOn && data.GetEventsEnabled())
     {
@@ -1193,22 +1183,22 @@ BufferStorage<T,F,W,L>::Notify(const ASIM_ITEM_CLASS& data)
     }
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-BufferStorage<T,F,W,L>::Notify(const ASIM_SILENT_ITEM& data) 
+BufferStorage<T,F>::Notify(const ASIM_SILENT_ITEM& data) 
 { 
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-BufferStorage<T,F,W,L>::Notify(const ASIM_SILENT_ITEM_CLASS& data) 
+BufferStorage<T,F>::Notify(const ASIM_SILENT_ITEM_CLASS& data) 
 { 
 }
 
 // Other-wise do nothing
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-BufferStorage<T,F,W,L>::Notify(...)
+BufferStorage<T,F>::Notify(...)
 {
     // Note: If you get a compile warning on this line with something like:
     //
@@ -1220,9 +1210,9 @@ BufferStorage<T,F,W,L>::Notify(...)
     // This error may also manifest itself by a SEGFLT.
 }
 
-template<class T, int W, int L, int S>
+template<class T, int S>
 inline bool
-BufferStorage<T,W,L,S>::PeekNext(T& data, UINT64 cycle)
+BufferStorage<T,S>::PeekNext(T& data, UINT64 cycle)
 {
   // move PeekReadIndex to the first location that might have data.
   while ((PeekStart == Store[PeekReadIndex].End) && (PeekReadIndex != WriteIndex)) {
@@ -1259,34 +1249,34 @@ ConfigPort::GetType() const
 { return ConfigType; }
 
 ///////////////////////////
-// class ReadPort<T, W, L>
+// class ReadPort<T>
 //
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPort<T,W,L>::Read(T& data, UINT64 cycle)
+ReadPort<T>::Read(T& data, UINT64 cycle)
 { return Buffer.Read(data, cycle, GetName()); }
 
-template <class T, int W, int L>
+template <class T>
 inline const BasePort::PortType
-ReadPort<T,W,L>::GetType() const
+ReadPort<T>::GetType() const
 { return ReadType; }
 
-template <class T, int W, int L>
+template <class T>
 inline void *
-ReadPort<T,W,L>::GetBuffer()
+ReadPort<T>::GetBuffer()
 {   
     return reinterpret_cast<void *>(&Buffer); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPort<T,W,L>::CreateStorage(UINT32 latency,UINT32 bandwidth)
+ReadPort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
-    //cout<<"Create storage for"<<Name<<endl;
-    return Buffer.CreateStorage(latency,bandwidth);
+    return Buffer.CreateStorage(latency, bandwidth);
 }
-template <class T, int W, int L>
+
+template <class T>
 inline void
-ReadPort<T,W,L>::SetBufferInfo()
+ReadPort<T>::SetBufferInfo()
 {
   ASSERT(Bandwidth > 0,
     "Port " << GetName() << " bandwidth not set.");
@@ -1296,47 +1286,46 @@ ReadPort<T,W,L>::SetBufferInfo()
   Buffer.SetEnable(Bandwidth, Latency, GetName());
 }
 
-template <class T, int W, int L>
+template <class T>
 inline INT16
-ReadPort<T,W,L>::GetEventEdgeId()
+ReadPort<T>::GetEventEdgeId()
 { return Buffer.GetEventEdgeId(); }
 
 
 ///////////////////////////
 // class ReadSkidPort<T, Storage>
 //
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline bool
-ReadSkidPort<T,W,L,S>::Read(T& data, UINT64 cycle)
+ReadSkidPort<T,S>::Read(T& data, UINT64 cycle)
 { return Buffer.Read(data, cycle, GetName(), true); }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline bool
-ReadSkidPort<T,W,L,S>::SomethingToRead(UINT64 cycle) const
+ReadSkidPort<T,S>::SomethingToRead(UINT64 cycle) const
 { return Buffer.SomethingToRead(cycle); }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline const BasePort::PortType
-ReadSkidPort<T,W,L,S>::GetType() const
+ReadSkidPort<T,S>::GetType() const
 { return ReadType; }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline void *
-ReadSkidPort<T,W,L,S>::GetBuffer()
+ReadSkidPort<T,S>::GetBuffer()
 {   
     return reinterpret_cast<void *>(&Buffer); }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline bool
-ReadSkidPort<T,W,L,S>::CreateStorage(UINT32 latency,UINT32 bandwidth)
+ReadSkidPort<T,S>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
-    //cout<<"Create storage for"<<Name<<endl;
-
-    return Buffer.CreateStorage(latency,bandwidth);
+    return Buffer.CreateStorage(latency, bandwidth);
 }
-template <class T, int W, int L, int S>
+
+template <class T, int S>
 inline void
-ReadSkidPort<T,W,L,S>::SetBufferInfo()
+ReadSkidPort<T,S>::SetBufferInfo()
 {
   ASSERT(Bandwidth > 0,
     "Port " << GetName() << " bandwidth not set.");
@@ -1346,56 +1335,55 @@ ReadSkidPort<T,W,L,S>::SetBufferInfo()
   Buffer.SetEnable(Bandwidth, Latency, GetName());
 }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline INT16
-ReadSkidPort<T,W,L,S>::GetEventEdgeId()
+ReadSkidPort<T,S>::GetEventEdgeId()
 { return Buffer.GetEventEdgeId(); }
 
 
 ///////////////////////////
 // class ReadStallPort<T, Storage>
 //
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadStallPort<T,W,L>::Read(T& data, UINT64 cycle)
+ReadStallPort<T>::Read(T& data, UINT64 cycle)
 {
     //  we need to relax the asserts here since this port
     //  does not need to be read every cycle
     return Buffer.Read(data, cycle, GetName(), true); 
 }
 
-template <class T, int W, int L>
+template <class T>
 inline const BasePort::PortType
-ReadStallPort<T,W,L>::GetType() const
+ReadStallPort<T>::GetType() const
 { return ReadType; }
 
-template <class T, int W, int L>
+template <class T>
 inline void
-ReadStallPort<T,W,L>::SetStalled(bool s)
+ReadStallPort<T>::SetStalled(bool s)
 { return Buffer.SetStalled(s); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadStallPort<T,W,L>::IsStalled()
+ReadStallPort<T>::IsStalled()
 { return Buffer.IsStalled(); }
 
-template <class T, int W, int L>
+template <class T>
 inline void *
-ReadStallPort<T,W,L>::GetBuffer()
+ReadStallPort<T>::GetBuffer()
 {  
     return reinterpret_cast<void *>(&Buffer); }
-template <class T, int W, int L>
+template <class T>
 
 inline bool
-ReadStallPort<T,W,L>::CreateStorage(UINT32 latency,UINT32 bandwidth)
+ReadStallPort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
-    //cout<<"Create storage for"<<Name<<endl;
-
-    return Buffer.CreateStorage(latency,bandwidth);
+    return Buffer.CreateStorage(latency, bandwidth);
 }
-template <class T, int W, int L>
+
+template <class T>
 inline void
-ReadStallPort<T,W,L>::SetBufferInfo()
+ReadStallPort<T>::SetBufferInfo()
 {
   ASSERT(Bandwidth > 0,
     "Port " << GetName() << " bandwidth not set.");
@@ -1405,33 +1393,33 @@ ReadStallPort<T,W,L>::SetBufferInfo()
   Buffer.SetEnable(Bandwidth, Latency, GetName());
 }
 
-template <class T, int W, int L>
+template <class T>
 inline INT16
-ReadStallPort<T,W,L>::GetEventEdgeId()
+ReadStallPort<T>::GetEventEdgeId()
 { return Buffer.GetEventEdgeId(); }
 
 ///////////////////////////
 // class ReadRemotePort<T, Storage>
 //
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPort<T,W,L>::IsActive()
+ReadPort<T>::IsActive()
 { return Buffer.IsActive(); }
 
-template <class T, int W, int L>
+template <class T>
 inline void
-ReadPort<T,W,L>::Deactivate()
+ReadPort<T>::Deactivate()
 { Buffer.SetActive(false); }
 
-template <class T, int W, int L>
+template <class T>
 inline UINT64
-ReadPort<T,W,L>::GetLastAccessed()
+ReadPort<T>::GetLastAccessed()
 { return Buffer.GetLastAccessed(); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPort<T,W,L>::ReadRemote(T& data, UINT64 cycle)
+ReadPort<T>::ReadRemote(T& data, UINT64 cycle)
 { 
   UINT64 okayToRead = (cycle <= 2*(UINT32)GetLatency()) ? (UINT32)GetLatency() : (cycle - (UINT32)GetLatency() - 1);
   int timeout=10000000;
@@ -1458,11 +1446,11 @@ ReadPort<T,W,L>::ReadRemote(T& data, UINT64 cycle)
 }
 
 ////////////////////////////
-// class WritePhasePort<T,F,W,L>
+// class WritePhasePort<T,F>
 //
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline
-WritePhasePort<T,F,W,L>::WritePhasePort()
+WritePhasePort<T,F>::WritePhasePort()
   : Buffer(), Fanout(F)
     // TO DO: Do we need Fanout above?  I don't think so, only setfanout below
     // TO DO: init Buffer array to NULL - Eric
@@ -1470,9 +1458,9 @@ WritePhasePort<T,F,W,L>::WritePhasePort()
   SetFanout(F);
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline bool
-WritePhasePort<T,F,W,L>::Write(T data, UINT64 cycle)
+WritePhasePort<T,F>::Write(T data, UINT64 cycle)
 { 
   VERIFYX(IsConnected());
   UINT64 internal_cycle = cycle*2;
@@ -1484,9 +1472,9 @@ WritePhasePort<T,F,W,L>::Write(T data, UINT64 cycle)
   return true;
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline bool
-WritePhasePort<T,F,W,L>::Write(T data, PHASE ph)
+WritePhasePort<T,F>::Write(T data, PHASE ph)
 { 
   VERIFYX(IsConnected());
   UINT64 internal_cycle = ph.getPhaseNum();
@@ -1498,9 +1486,9 @@ WritePhasePort<T,F,W,L>::Write(T data, PHASE ph)
   return true;
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline bool
-WritePhasePort<T,F,W,L>::Write(T data, UINT64 cycle, CLK_EDGE ed)
+WritePhasePort<T,F>::Write(T data, UINT64 cycle, CLK_EDGE ed)
 { 
   VERIFYX(IsConnected());
   UINT64 internal_cycle = cycle*2 + ed;
@@ -1512,19 +1500,19 @@ WritePhasePort<T,F,W,L>::Write(T data, UINT64 cycle, CLK_EDGE ed)
   return true;
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline const BasePort::PortType
-WritePhasePort<T,F,W,L>::GetType() const
+WritePhasePort<T,F>::GetType() const
 { return WritePhaseType; }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-WritePhasePort<T,F,W,L>::SetBuffer(void *buf, int rdPortNum)
-{ VERIFYX(rdPortNum <= Fanout); Buffer[rdPortNum] = reinterpret_cast< Storage<T,W,L>* >(buf); }
+WritePhasePort<T,F>::SetBuffer(void *buf, int rdPortNum)
+{ VERIFYX(rdPortNum <= Fanout); Buffer[rdPortNum] = reinterpret_cast< Storage<T>* >(buf); }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-WritePhasePort<T,F,W,L>::EventConnect(int bufNum, int destination)
+WritePhasePort<T,F>::EventConnect(int bufNum, int destination)
 {
     if (runWithEventsOn)
     {
@@ -1534,9 +1522,9 @@ WritePhasePort<T,F,W,L>::EventConnect(int bufNum, int destination)
     }
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline int
-WritePhasePort<T,F,W,L>::GetLatency() const
+WritePhasePort<T,F>::GetLatency() const
 {
   // If this assert fails it may mean:
   // - You are asking the latency of a 
@@ -1545,80 +1533,81 @@ WritePhasePort<T,F,W,L>::GetLatency() const
   return Latency; 
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline INT16
-WritePhasePort<T,F,W,L>::GetEventEdgeId()
+WritePhasePort<T,F>::GetEventEdgeId()
 { return Buffer[0]->GetEventEdgeId(); }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 bool
-WritePhasePort<T,F,W,L>::SetLatency(int lat)
+WritePhasePort<T,F>::SetLatency(int lat)
 { return BasePort::SetLatency(lat*2); }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 bool
-WritePhasePort<T,F,W,L>::SetLatencyPhases(int lat)
+WritePhasePort<T,F>::SetLatencyPhases(int lat)
 { return BasePort::SetLatency(lat); }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 bool
-WritePhasePort<T,F,W,L>::Config(int bw, int lat)
+WritePhasePort<T,F>::Config(int bw, int lat)
 { return BasePort::Config(bw, 2*lat); }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 bool
-WritePhasePort<T,F,W,L>::InitConfig(const char *name, int bw, int lat, int nodeId)
+WritePhasePort<T,F>::InitConfig(const char *name, int bw, int lat, int nodeId)
 { return BasePort::InitConfig(name, bw, 2*lat, nodeId); }
 
 
 ///////////////////////////
-// class ReadPhasePort<T, W, L>
+// class ReadPhasePort<T>
 //
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPhasePort<T,W,L>::Read(T& data, UINT64 cycle)
+ReadPhasePort<T>::Read(T& data, UINT64 cycle)
 { 
     UINT64 internal_cycle = cycle * 2;
     return Buffer.Read(data, internal_cycle, GetName());
 }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPhasePort<T,W,L>::Read(T& data, PHASE ph)
+ReadPhasePort<T>::Read(T& data, PHASE ph)
 { 
     UINT64 internal_cycle = ph.getPhaseNum();
     return Buffer.Read(data, internal_cycle, GetName());
 }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPhasePort<T,W,L>::Read(T& data, UINT64 cycle, CLK_EDGE ed)
+ReadPhasePort<T>::Read(T& data, UINT64 cycle, CLK_EDGE ed)
 { 
     UINT64 internal_cycle = cycle * 2 + ed;
     return Buffer.Read(data, internal_cycle, GetName());
 }
 
-template <class T, int W, int L>
+template <class T>
 inline const BasePort::PortType
-ReadPhasePort<T,W,L>::GetType() const
+ReadPhasePort<T>::GetType() const
 { return ReadPhaseType; }
 
-template <class T, int W, int L>
+template <class T>
 inline void *
-ReadPhasePort<T,W,L>::GetBuffer()
+ReadPhasePort<T>::GetBuffer()
 {  return reinterpret_cast<void *>(&Buffer); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-ReadPhasePort<T,W,L>::CreateStorage(UINT32 latency,UINT32 bandwidth)
+ReadPhasePort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
-    //cout<<"Create storage for"<<Name<<endl;
-
-    return Buffer.CreateStorage(latency,bandwidth);
+    // Previously, it used DEFAULT_MAX_LATENCY * 2 to size the array, but when
+    // done dynamically, this wasn't used.  What should it be?  Eric
+    return Buffer.CreateStorage(latency * 2, bandwidth);
 }
-template <class T, int W, int L>
+
+template <class T>
 inline void
-ReadPhasePort<T,W,L>::SetBufferInfo()
+ReadPhasePort<T>::SetBufferInfo()
 {
   ASSERT(Bandwidth > 0,
     "Port " << GetName() << " bandwidth not set.");
@@ -1628,37 +1617,37 @@ ReadPhasePort<T,W,L>::SetBufferInfo()
   Buffer.SetEnable(Bandwidth, Latency, GetName());
 }
 
-template <class T, int W, int L>
+template <class T>
 inline INT16
-ReadPhasePort<T,W,L>::GetEventEdgeId()
+ReadPhasePort<T>::GetEventEdgeId()
 { return Buffer.GetEventEdgeId(); }
 
-template <class T, int W, int L>
+template <class T>
 bool
-ReadPhasePort<T,W,L>::SetLatency(int lat)
+ReadPhasePort<T>::SetLatency(int lat)
 { return BasePort::SetLatency(lat*2); }
 
-template <class T, int W, int L>
+template <class T>
 bool
-ReadPhasePort<T,W,L>::SetLatencyPhases(int lat)
+ReadPhasePort<T>::SetLatencyPhases(int lat)
 { return BasePort::SetLatency(lat); }
 
-template <class T, int W, int L>
+template <class T>
 bool
-ReadPhasePort<T,W,L>::Config(int bw, int lat)
+ReadPhasePort<T>::Config(int bw, int lat)
 { return BasePort::Config(bw, 2*lat); }
 
-template <class T, int W, int L>
+template <class T>
 bool
-ReadPhasePort<T,W,L>::InitConfig(const char *name, int bw, int lat, int nodeId)
+ReadPhasePort<T>::InitConfig(const char *name, int bw, int lat, int nodeId)
 { return BasePort::InitConfig(name, bw, 2*lat, nodeId); }
 
 ////////////////////////////
-// class WritePort<T,F,W,L>
+// class WritePort<T,F>
 //
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline
-WritePort<T,F,W,L>::WritePort()
+WritePort<T,F>::WritePort()
   : Buffer(), Fanout(F)
     // TO DO: Do we need Fanout above?  I don't think so, only setfanout below
     // TO DO: init Buffer array to NULL - Eric
@@ -1666,9 +1655,9 @@ WritePort<T,F,W,L>::WritePort()
   SetFanout(F);
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline bool
-WritePort<T,F,W,L>::Write(T data, UINT64 cycle)
+WritePort<T,F>::Write(T data, UINT64 cycle)
 { 
   VERIFYX(IsConnected()); 
   for (int f = 0; f < Fanout; f++) {
@@ -1679,15 +1668,15 @@ WritePort<T,F,W,L>::Write(T data, UINT64 cycle)
   return true;
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline bool
-WritePort<T,F,W,L>::WriteRemote(T data, UINT64 cycle)
-{ 
+WritePort<T,F>::WriteRemote(T data, UINT64 cycle)
+{
   VERIFYX(IsConnected()); 
   for (int f = 0; f < Fanout; f++) {
       int timeout=1000000;
       int wi = 
-          (Buffer[f]->GetWriteIndex() == (Buffer[f]->GetDefaultLatency() - 1)) ? 0 : Buffer[f]->GetWriteIndex() + 1;
+          (Buffer[f]->GetWriteIndex() == (Buffer[f]->GetBufferSize() - 1)) ? 0 : Buffer[f]->GetWriteIndex() + 1;
       while(! (Buffer[f]->IsEmpty(wi))){
           //this assert is actually in the Buffer[f]->Write()
           //function, but in threaded mode it may fire due to excess slippage
@@ -1703,9 +1692,9 @@ WritePort<T,F,W,L>::WriteRemote(T data, UINT64 cycle)
   return true;
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline INT64
-WritePort<T,F,W,L>::LatestWrite()
+WritePort<T,F>::LatestWrite()
 {
   VERIFYX(IsConnected()); 
   return (Buffer[0]->LatestWrite());
@@ -1713,37 +1702,37 @@ WritePort<T,F,W,L>::LatestWrite()
 
 
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-WritePort<T,F,W,L>::Deactivate()
+WritePort<T,F>::Deactivate()
 {
   Buffer[0]->SetActive(false); 
 }
 
     
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-WritePort<T,F,W,L>::SetLastAccessed(UINT64 c)
+WritePort<T,F>::SetLastAccessed(UINT64 c)
 {
   VERIFYX(IsConnected()); 
   Buffer[0]->SetLastAccessed(c);
 }
 
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline const BasePort::PortType
-WritePort<T,F,W,L>::GetType() const
+WritePort<T,F>::GetType() const
 { return WriteType; }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-WritePort<T,F,W,L>::SetBuffer(void *buf, int rdPortNum)
+WritePort<T,F>::SetBuffer(void *buf, int rdPortNum)
 { VERIFYX(buf);
- VERIFYX(rdPortNum <= Fanout); Buffer[rdPortNum] = reinterpret_cast< Storage<T,W,L>* >(buf); }
+ VERIFYX(rdPortNum <= Fanout); Buffer[rdPortNum] = reinterpret_cast< Storage<T>* >(buf); }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline void
-WritePort<T,F,W,L>::EventConnect(int bufNum, int destination)
+WritePort<T,F>::EventConnect(int bufNum, int destination)
 {
     if (runWithEventsOn)
     {
@@ -1753,9 +1742,9 @@ WritePort<T,F,W,L>::EventConnect(int bufNum, int destination)
     }
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline int
-WritePort<T,F,W,L>::GetLatency() const
+WritePort<T,F>::GetLatency() const
 {
   // If this assert fails it may mean:
   // - You are asking the latency of a 
@@ -1764,17 +1753,17 @@ WritePort<T,F,W,L>::GetLatency() const
   return Latency; 
 }
 
-template <class T, int F, int W, int L>
+template <class T, int F>
 inline INT16
-WritePort<T,F,W,L>::GetEventEdgeId()
+WritePort<T,F>::GetEventEdgeId()
 { return Buffer[0]->GetEventEdgeId(); }
 
 ////////////////////////////
-// class WriteSkidPort<T,W,L,S>
+// class WriteSkidPort<T,S>
 //
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline
-WriteSkidPort<T,W,L,S>::WriteSkidPort()
+WriteSkidPort<T,S>::WriteSkidPort()
   : Buffer(NULL)
 {
   // can't have a Fanout with Skid port, but need to specify a value
@@ -1782,24 +1771,24 @@ WriteSkidPort<T,W,L,S>::WriteSkidPort()
   SetFanout(1);
 }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline bool
-WriteSkidPort<T,W,L,S>::Write(T data, UINT64 cycle)
+WriteSkidPort<T,S>::Write(T data, UINT64 cycle)
 { return IsConnected() && Buffer->Write(data, cycle, GetName()); }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline const BasePort::PortType
-WriteSkidPort<T,W,L,S>::GetType() const
+WriteSkidPort<T,S>::GetType() const
 { return WriteType; }
 
-template <class T, int W, int L, int S>
+template <class T, int S>
 inline void
-WriteSkidPort<T,W,L,S>::SetBuffer(void *buf, int rdPortNum)
-{ Buffer = reinterpret_cast< Storage<T,W,L,S>* >(buf); }
+WriteSkidPort<T,S>::SetBuffer(void *buf, int rdPortNum)
+{ Buffer = reinterpret_cast< Storage<T,S>* >(buf); }
 
-template  <class T, int W, int L, int S>
+template  <class T, int S>
 inline void
-WriteSkidPort<T,W,L,S>::EventConnect(int bufNum, int destination)
+WriteSkidPort<T,S>::EventConnect(int bufNum, int destination)
 {
     if (runWithEventsOn)
     {
@@ -1809,11 +1798,11 @@ WriteSkidPort<T,W,L,S>::EventConnect(int bufNum, int destination)
 }
 
 ////////////////////////////
-// class WriteStallPort<T,W,L>
+// class WriteStallPort<T>
 //
-template <class T, int W, int L>
+template <class T>
 inline
-WriteStallPort<T,W,L>::WriteStallPort()
+WriteStallPort<T>::WriteStallPort()
   : Buffer(NULL)
 {
   // can't have a Fanout with Stall port, but need to specify a value
@@ -1821,29 +1810,29 @@ WriteStallPort<T,W,L>::WriteStallPort()
   SetFanout(1);
 }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-WriteStallPort<T,W,L>::Write(T data, UINT64 cycle)
+WriteStallPort<T>::Write(T data, UINT64 cycle)
 { return IsConnected() && Buffer->Write(data, cycle, GetName()); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-WriteStallPort<T,W,L>::IsStalled()
+WriteStallPort<T>::IsStalled()
 { return Buffer->IsStalled(); }
 
-template <class T, int W, int L>
+template <class T>
 inline const BasePort::PortType
-WriteStallPort<T,W,L>::GetType() const
+WriteStallPort<T>::GetType() const
 { return WriteType; }
 
-template <class T, int W, int L>
+template <class T>
 inline void
-WriteStallPort<T,W,L>::SetBuffer(void *buf, int rdPortNum)
-{ Buffer = reinterpret_cast< Storage<T,W,L>* >(buf); }
+WriteStallPort<T>::SetBuffer(void *buf, int rdPortNum)
+{ Buffer = reinterpret_cast< Storage<T>* >(buf); }
 
-template <class T, int W, int L>
+template <class T>
 inline void
-WriteStallPort<T,W,L>::EventConnect(int bufNum, int destination)
+WriteStallPort<T>::EventConnect(int bufNum, int destination)
 {
     if (runWithEventsOn)
     {
@@ -1854,57 +1843,56 @@ WriteStallPort<T,W,L>::EventConnect(int bufNum, int destination)
 
 
 ///////////////////////////
-// class PeekPort<T, W, L>
+// class PeekPort<T>
 //
-template <class T, int W, int L>
+template <class T>
 inline void
-PeekPort<T,W,L>::PeekReset()
+PeekPort<T>::PeekReset()
 { VERIFYX(Buffer); Buffer->PeekReset(); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-PeekPort<T,W,L>::PeekNext(T& data, UINT64 cycle)
+PeekPort<T>::PeekNext(T& data, UINT64 cycle)
 { return Buffer->PeekNext(data, cycle); }
 
-template <class T, int W, int L>
+template <class T>
 inline const BasePort::PortType
-PeekPort<T,W,L>::GetType() const
+PeekPort<T>::GetType() const
 { return PeekType; }
 
-template <class T, int W, int L>
+template <class T>
 inline void *
-PeekPort<T,W,L>::GetBuffer()
+PeekPort<T>::GetBuffer()
 { return reinterpret_cast<void *>(&Buffer); }
 
-template <class T, int W, int L>
+template <class T>
 inline bool
-PeekPort<T,W,L>::CreateStorage(UINT32 latency,UINT32 bandwidth)
+PeekPort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
-    //cout<<"Create storage for"<<Name<<endl;
-
-    return Buffer.CreateStorage(latency,bandwidth);
+    return Buffer.CreateStorage(latency, bandwidth);
 }
-template <class T, int W, int L>
+
+template <class T>
 inline INT16
-PeekPort<T,W,L>::GetEventEdgeId()
+PeekPort<T>::GetEventEdgeId()
 { return Buffer.GetEventEdgeId(); }
 
-template <class T, int W, int L>
+template <class T>
 inline void
-PeekPort<T,W,L>::SetBuffer(void *buf, int rdPortNum)
-{ Buffer = reinterpret_cast< Storage<T,W,L>* >(buf); }
+PeekPort<T>::SetBuffer(void *buf, int rdPortNum)
+{ Buffer = reinterpret_cast< Storage<T>* >(buf); }
 
 
 
 // Orig. PeekPort
 ///////////////////////////////////////////////////////////////////
-// class PeekPort<T,W,L> : public BasePort
+// class PeekPort<T> : public BasePort
 //
-template<class T, int W, int L>
+template<class T>
 class OrigPeekPort : public BasePort
 {
 private:
-  const Storage<T,W,L> *Buffer;
+  const Storage<T> *Buffer;
 
 public:
   class ConstIterator

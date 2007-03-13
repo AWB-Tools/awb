@@ -491,3 +491,27 @@ operations performed by generic .cfx scripts, and simplify benchmark
 configurations by allowing setup and run scripts to be given inline
 with the configuration data.
 Also fixed a bug in multi.cfx.
+
+----------
+spartha1    Date: Tue Mar 13 18:28:22 EDT 2007  CSN: CSN-asimcore-28
+                  Tue Mar 13 22:28:22 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ rate_matcher.h            Locally Modified           27 
+ port.h                    Locally Modified           27 
+
+Directory lib/libasim/src
+ port.cpp                  Locally Modified           27 
+
+Updating with simcore changes (rev. 2243)
+
+- For well over a year, the port code has been dynamically allocating
+the storage associated with each read port. Since it's now doing it
+dynamically (it used to be statically allocated), 2 assertions that
+were checking the static size were irrelevant and removed.
+
+Furthermore, there was no longer any need to specify a static size
+in any port declaration if the port's bandwidth or latency exceeded
+the default static size. So, all of these template parameters were
+removed to make the code easier to read and understand.
