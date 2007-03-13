@@ -97,6 +97,7 @@ AMTAR = @AMTAR@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@
 AR = @AR@
+ARCHFLAGS = @ARCHFLAGS@
 ASIMCOREFLAGS = @ASIMCOREFLAGS@
 ASIMCOREINCS = @ASIMCOREINCS@
 ASIMCORELIBS = @ASIMCORELIBS@
@@ -227,7 +228,7 @@ tooldir = @tooldir@
 amc_SOURCES = amc.cpp
 AM_CPPFLAGS = -I$(top_srcdir)/lib
 @X86_64_LIBTOOL_HACK_FALSE@amc_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
-@X86_64_LIBTOOL_HACK_TRUE@amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -L/usr/X11R6/lib64 -lpopt
+@X86_64_LIBTOOL_HACK_TRUE@amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -lpopt
 EXTRA_DIST = doxygen.config
 all: all-am
 
@@ -519,7 +520,7 @@ clean-local:
 
 # maybe explicitly link this, avoiding use of broken libtool:
 @X86_64_LIBTOOL_HACK_TRUE@amc: $(amc_OBJECTS)
-@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o amc $(amc_OBJECTS) $(amc_LDADD)
+@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o amc $(ARCHFLAGS) $(amc_OBJECTS) $(amc_LDADD)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

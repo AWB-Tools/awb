@@ -20,11 +20,11 @@
 bin_PROGRAMS = awb-resolver
 awb_resolver_SOURCES = awb-resolver.cpp
 AM_CPPFLAGS = -I$(top_srcdir)/lib
+
 if X86_64_LIBTOOL_HACK
-awb_resolver_LDFLAGS = -L/usr/X11R6/lib64 -lm -lX11 -ldl -lgcc_s -lpopt
-awb_resolver_LIBS    = $(top_builddir)/lib/libawb/.libs/libawb.a /usr/intel/pkgs/gcc/3.4.3/lib64/libstdc++.so
+awb_resolver_LDADD = -lgcc_s -lpopt $(top_builddir)/lib/libawb/.libs/libawb.a
 else
-awb_resolver_LDADD   = $(top_builddir)/lib/libawb/libawb.la -lpopt
+awb_resolver_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
 endif
 
 EXTRA_DIST = doxygen.config
@@ -42,5 +42,5 @@ clean-local:
 # maybe explicitly link this, avoiding use of broken libtool:
 if X86_64_LIBTOOL_HACK
 awb-resolver: $(awb_resolver_OBJECTS)
-	$(CXXLD) -o awb-resolver $(awb_resolver_LDFLAGS) $(awb_resolver_OBJECTS) $(awb_resolver_LIBS)
+	$(CXXLD) -o awb-resolver $(ARCHFLAGS) $(awb_resolver_OBJECTS) $(awb_resolver_LDADD)
 endif

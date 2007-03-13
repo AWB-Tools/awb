@@ -21,7 +21,7 @@ tool_PROGRAMS = amc
 amc_SOURCES = amc.cpp
 AM_CPPFLAGS = -I$(top_srcdir)/lib
 if X86_64_LIBTOOL_HACK
-amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -L/usr/X11R6/lib64 -lpopt
+amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -lpopt
 else
 amc_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
 endif
@@ -41,5 +41,5 @@ clean-local:
 # maybe explicitly link this, avoiding use of broken libtool:
 if X86_64_LIBTOOL_HACK
 amc: $(amc_OBJECTS)
-	$(CXXLD) -o amc $(amc_OBJECTS) $(amc_LDADD)
+	$(CXXLD) -o amc $(ARCHFLAGS) $(amc_OBJECTS) $(amc_LDADD)
 endif

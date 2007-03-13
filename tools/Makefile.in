@@ -82,6 +82,7 @@ AMTAR = @AMTAR@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@
 AR = @AR@
+ARCHFLAGS = @ARCHFLAGS@
 ASIMCOREFLAGS = @ASIMCOREFLAGS@
 ASIMCOREINCS = @ASIMCOREINCS@
 ASIMCORELIBS = @ASIMCORELIBS@
@@ -209,7 +210,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 tooldir = @tooldir@
-SUBDIRS = scripts awb dreams
+SUBDIRS = scripts awb
 all: all-recursive
 
 .SUFFIXES:

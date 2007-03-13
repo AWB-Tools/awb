@@ -73,6 +73,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_awb_resolver_OBJECTS = awb-resolver.$(OBJEXT)
 awb_resolver_OBJECTS = $(am_awb_resolver_OBJECTS)
 @X86_64_LIBTOOL_HACK_FALSE@awb_resolver_DEPENDENCIES = $(top_builddir)/lib/libawb/libawb.la
+@X86_64_LIBTOOL_HACK_TRUE@awb_resolver_DEPENDENCIES = $(top_builddir)/lib/libawb/.libs/libawb.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/scripts/depcomp
 am__depfiles_maybe = depfiles
@@ -96,6 +97,7 @@ AMTAR = @AMTAR@
 AM_CXXFLAGS = @AM_CXXFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@
 AR = @AR@
+ARCHFLAGS = @ARCHFLAGS@
 ASIMCOREFLAGS = @ASIMCOREFLAGS@
 ASIMCOREINCS = @ASIMCOREINCS@
 ASIMCORELIBS = @ASIMCORELIBS@
@@ -225,9 +227,8 @@ target_alias = @target_alias@
 tooldir = @tooldir@
 awb_resolver_SOURCES = awb-resolver.cpp
 AM_CPPFLAGS = -I$(top_srcdir)/lib
-@X86_64_LIBTOOL_HACK_TRUE@awb_resolver_LDFLAGS = -L/usr/X11R6/lib64 -lm -lX11 -ldl -lgcc_s -lpopt
-@X86_64_LIBTOOL_HACK_TRUE@awb_resolver_LIBS = $(top_builddir)/lib/libawb/.libs/libawb.a /usr/intel/pkgs/gcc/3.4.3/lib64/libstdc++.so
 @X86_64_LIBTOOL_HACK_FALSE@awb_resolver_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
+@X86_64_LIBTOOL_HACK_TRUE@awb_resolver_LDADD = -lgcc_s -lpopt $(top_builddir)/lib/libawb/.libs/libawb.a
 EXTRA_DIST = doxygen.config
 all: all-am
 
@@ -519,7 +520,7 @@ clean-local:
 
 # maybe explicitly link this, avoiding use of broken libtool:
 @X86_64_LIBTOOL_HACK_TRUE@awb-resolver: $(awb_resolver_OBJECTS)
-@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o awb-resolver $(awb_resolver_LDFLAGS) $(awb_resolver_OBJECTS) $(awb_resolver_LIBS)
+@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o awb-resolver $(ARCHFLAGS) $(awb_resolver_OBJECTS) $(awb_resolver_LDADD)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -17,4 +17,4 @@
 # 
 #
 
-SUBDIRS=scripts awb dreams
+SUBDIRS=scripts awb

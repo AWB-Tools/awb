@@ -330,3 +330,89 @@ option --altexepath that specifies an area to look for
 pre-built models. This option is meaningful only in 
 combination with nobuild option. Each model is looked in 
 the location after adding model_name/pm to the path specified.
+
+----------
+spartha1    Date: Tue Mar 13 17:43:00 EDT 2007  CSN: CSN-asimcore-23
+                  Tue Mar 13 21:43:00 UTC 2007
+
+
+Directory .
+ configure                 Locally Modified           22 
+ Makefile.in               Locally Modified           22 
+ configure.in              Locally Modified           22 
+
+Directory libperl
+ Makefile.in               Locally Modified           22 
+
+Directory tools
+ Makefile.in               Locally Modified           22 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified           22 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified           22 
+ Makefile.am               Locally Modified           22 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified           22 
+
+Directory tools/awb
+ Makefile.in               Locally Modified           22 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified           22 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified           22 
+ Makefile.am               Locally Modified           22 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified           22 
+
+Directory tools
+ Makefile.am               Locally Modified           22 
+
+Directory tools/dreams
+ Makefile.in               Locally Modified           22 
+
+Directory tools/dreams/dbtest
+ Makefile.in               Locally Modified           22 
+
+Directory tools/dreams/dbtest/src
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libdraldb
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libdraldb/include
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libasim
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libasim/include
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libagt
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libagt/include
+ Makefile.in               Locally Modified           22 
+
+Directory lib
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libdral
+ Makefile.in               Locally Modified           22 
+
+Directory lib/libdral/include
+ Makefile.in               Locally Modified           22 
+
+Updating with simcore changes (rev. 2238)
+
+- Added --disable-64bit option to configure, to allow building 32-bit binaries
+on x86_64 systems.
