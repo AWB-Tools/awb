@@ -314,3 +314,19 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2236)
 
 - changed semantics of nobuild option. Nobuild really wont build.
+
+----------
+spartha1    Date: Tue Mar 13 16:48:39 EDT 2007  CSN: CSN-asimcore-22
+                  Tue Mar 13 20:48:39 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified           21 
+
+Updating with simcore changes (rev. 2237)
+
+- addresses second part of mantis #571. Added an 
+option --altexepath that specifies an area to look for 
+pre-built models. This option is meaningful only in 
+combination with nobuild option. Each model is looked in 
+the location after adding model_name/pm to the path specified.

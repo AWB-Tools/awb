@@ -222,6 +222,7 @@ if (defined($ENV{ASIMRUNOPT})) {
 $status = GetOptions(   "experiments=s"  => \$experiments,
                         "benchmarks=s"   => \$benchmarks,
                         "resdir=s"       => \$resdir,
+			"altexepath=s"   => \$altexepath,
                         "nicelevel=i"    => \$nicelevel,
                         "build!"         => \$build,
                         "nuke!"          => \$nuke,
@@ -656,7 +657,40 @@ foreach $name (@exp_ordered) {
 	  print "Skipping build of $model_name\n";
       }
       else {
-	  PrintWarning("Model \'$resdir/name/BUILD/$model_name\' does not exist and no build specified.  Runs will not be scheduled on this model.\n");
+	  # if user requested looking for the configured & built models
+	  # elsewhere, look there.
+	  if (defined $altexepath && $altexepath ne "") {
+	      $model_alternate_path = $altexepath . "/$model_name/pm/";	# default is $awblocal/build
+	      if (-x "$model_alternate_path/$model_name") {
+		  if (!(-d "$resdir/$name/BUILD")) {
+		      if (!(mkdir "$resdir/$name/BUILD")) {
+			  # Unable to mkdir, so skip this model.
+			  PrintError("Unable to create directory $resdir/$name/BUILD to link pre-built model.",
+				     "Runs will not be scheduled on this model.\n");
+			  $exit_code++;
+			  next;
+		      }
+		  }
+		  # Found the model in the alternate location.  We need to
+		  # setup the link for the configured model & binary,
+		  # otherwise setting up benchmark will fail.
+		  if (RunCommand ("ln -sf $model_alternate_path\/* $resdir/$name/BUILD/ > $asim_runlogfl 2>&1") ) {
+		      PrintError("Linking to pre-built model \'$model_alternate_path\/$model_name\' failed.",
+				 "Runs will not be scheduled on this model.\n");
+		  }
+		  else {
+		      PrintInfo("........ Using pre-built model \'$model_alternate_path\/$model_name\' to schedule runs\n");
+		  }
+	      }
+	      else {
+		  PrintError("Model \'$model_name\' not found in \`$model_alternate_path\/$model_name\' and no build specified.",
+			     "Runs will not be scheduled on this model.\n");
+	      }
+	  }
+	  else {
+	      PrintError("No pre-built model \'$model_name\' found and no build or alternate model location specified.",
+			 "Runs will not be scheduled on this model.\n");
+	  }
       }
   }
 
@@ -1810,6 +1844,7 @@ Asim-run - Program to run a set of asim experiments
           [--nicelevel <Number between Nicemin (usually 10) & Nicemax (usually 19)>]
           [--execscript <Name of script to execute to simulate each benchmark>]
           [--[no]build]
+          [--altexepath <Alternate location of pre-built model(s)>]
           [--[no]replace]
           [--compress none|no|gzip|gz|bzip2|bz2]
           [--[no]batch]
@@ -1881,6 +1916,12 @@ be no reason to change the default.
 
 Specifies whether the models are to be built or (with the [no] prefix)
 that they are already built. Default is to build all models.
+
+=item --altexepath <Alternate location of pre-built model(s)>
+
+Look for pre-built models from this area.  This option is meaningful only in
+combination with nobuild option.  Each model is looked in the location after
+adding model_name/pm/ to the path specified.
 
 =item --[no]replace
 
