@@ -290,3 +290,15 @@ Directory etc
 Updating with simcore changes (rev. 2234)
 
 - support for using seperate pool, class, queue netbatch params for build and run.
+
+----------
+spartha1    Date: Tue Mar 13 16:43:07 EDT 2007  CSN: CSN-asimcore-20
+                  Tue Mar 13 20:43:07 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified           19 
+
+Updating with simcore changes (rev. 2235)
+
+Fixed the problem of modified locked files not being recognized during a commit

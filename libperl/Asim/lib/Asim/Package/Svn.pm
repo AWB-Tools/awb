@@ -279,6 +279,13 @@ sub status {
       $path = $5;
    }
 
+   ## for modified locked files
+   elsif (/^(M)\s+(K)\s*(\d+)\s+(\d+)\s+(\S+)\s+(\S+)/) {
+      $status = 'Locally Modified';
+      $reprev = $3;  
+      $path = $6;
+   }
+   
    elsif (/^(\?)\s+(\S+)/) {
       $path = $2;
       $file = basename($path);
@@ -295,13 +302,13 @@ sub status {
       $path = $2;
    }
 
-    # Will not enter this loop
-    # since --no-ignore option is not passed to status
+   # Will not enter this loop
+   # since --no-ignore option is not passed to status
    elsif (/^(I)\s+(\S+)/) {
       $status = 'Unknown';
       $path = $2;
    }
-
+    
    $dir = dirname($path);  # Indicates the dir
    $file = basename($path);# Indicates the file 
    if (-d "$location/$path") {
@@ -541,12 +548,13 @@ sub increment_csn {
   # get the current serial number tag:
   my $csn = $self->csn();
   
-  # Force an update to ensure revision no. & csn no. are in sync
-  system("svn update");
-
   # open a temporary file to read the repository status
   my $location = $self->location();
   my $tmp_svn_status = "/tmp/asim-shell-svn-status.$$";
+ 
+  # Force an update to ensure revision no. & csn no. are in sync
+  system("cd $location; svn update");
+
   system("cd $location;svn status -v > $tmp_svn_status 2>&1");
 
   if (!CORE::open(SVN,"< $tmp_svn_status") ) {
