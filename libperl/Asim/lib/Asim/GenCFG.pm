@@ -312,6 +312,10 @@ Enumerate all CFG files at path and below.
 
 The root of the path to search.
 
+=item printFlags
+
+Print the genflags field if nonzero.
+
 =back 4
 
 =cut
@@ -322,6 +326,7 @@ sub enum {
     my $self = shift;
     my $path = shift;
     $path = '' if (! defined($path));
+    my $printFlags = shift;
 
     # Walk the "directory" entries
     my @p = split('/', $path);
@@ -333,7 +338,7 @@ sub enum {
         $h = $h->{h}{$p[$i]};
     }
 
-    $h->enum_r($dbgName);
+    $h->enum_r($dbgName, $printFlags);
 }
 
 ################################################################
@@ -399,6 +404,10 @@ Emit a CFG file.
 
 List all CFG files below root.
 
+=item --listflags <root>
+
+List all CFG files below root and the genflags field for the CFG file.
+
 =item --dir <root>
 
 List level below root.
@@ -419,7 +428,10 @@ sub action {
         $self->emit($args[1]);
     }
     elsif ($args[0] eq '--list') {
-        $self->enum($args[1]);
+        $self->enum($args[1], 0);
+    }
+    elsif ($args[0] eq '--listflags') {
+        $self->enum($args[1], 1);
     }
     elsif ($args[0] eq '--dir') {
         $self->dir($args[1]);
@@ -441,7 +453,11 @@ sub usage {
     print STDERR "    --emit <CFG>\n";
     print STDERR "      Emit CFG file.\n\n";
     print STDERR "    --list <path>\n";
-    print STDERR "      List all available CFG files under path.\n";
+    print STDERR "      List all available CFG files under path.\n\n";
+    print STDERR "    --listflags <path>\n";
+    print STDERR "      List all available CFG files under path along with the genflags field.\n";
+    print STDERR "      This is used by awb as a quick method of finding whether a workload\n";
+    print STDERR "      has multiple regions.\n\n";
     print STDERR "    --dir <path>\n";
     print STDERR "      Treat path like a directory and list the level below it.\n";
     exit(-1);
@@ -454,19 +470,24 @@ sub usage {
 sub enum_r {
     my $self = shift;
     my $prefix = shift;
+    my $printFlags = shift;
 
     $prefix = '' if (! defined($prefix));
 
     if (defined($self->{w})) {
         foreach my $w (sort {"$a" cmp "$b"} keys %{$self->{w}}) {
             my $wrk = \%{$self->{w}{$w}};
-            print "${prefix}${w}.cfg\n";
+            print "${prefix}${w}.cfg";
+            if ($printFlags) {
+                print " {$$wrk{genflags}}";
+            }
+            print "\n";
         }
     }
 
     if (defined($self->{h})) {
         foreach my $h (sort {"$a" cmp "$b"} keys %{$self->{h}}) {
-            $self->{h}{$h}->enum_r("${prefix}${h}/");
+            $self->{h}{$h}->enum_r("${prefix}${h}/", $printFlags);
         }
     }
 }

@@ -121,12 +121,77 @@ sub set_run_switches {
 
 
 #
+# Helper function for benchmark_regions.  Cache information about an entire
+# CFX file's pseudo directory with one call invocation of the script.  This
+# makes awb run much faster.
+#
+
+our %regions_cache = ();
+
+sub update_cfx_region_cache {
+  my $cfxBase = shift;
+  my $cfx = shift;
+  my $args = shift;
+
+  # In the typical case we don't need to know the true number of regions --
+  # just whether there are multiple regions.  CFX scripts can answer this
+  # without having to read each CFG file.  Since awb will likely ask about
+  # all workloads in the directory we populate the cache for everything.
+  my $cfxdir = $args;
+  $cfxdir =~ s/\/.*$//;
+  my $expireTime = time() + 60 + rand() * 60;
+  open(CFX, "${cfx} --listflags |") || die("Open ${cfx} failed");
+  while (<CFX>) {
+    chomp($_);
+    my $wrk = $_;
+    $wrk =~ s/ .*//g;
+    $wrk = "${cfxBase}/${wrk}";
+    my $isMulti = 0;
+    if (($_ =~ /--queryregions/) || ($_ =~ /--regions/)) {
+      $isMulti = 2;
+    }
+    $regions_cache{$wrk}[0] = $isMulti;
+    $regions_cache{$wrk}[1] = $expireTime;
+    $regions_cache{$wrk}[2] = 0;
+  }
+  close(CFX);
+}
+
+sub check_region_cache {
+  my $cfg = shift;
+  my $computeRegions = shift;
+
+  #
+  # Maintain a hash of previous requests since the GUI makes frequent repeated
+  # requests and looking up the number of regions is slow.
+  #
+  if (exists($regions_cache{$cfg})) {
+    # Array element [2] is 1 if the true number of regions is stored in the hash.
+    # The incoming request is either 0 or 1.  This test makes sure that the true
+    # number of regions is returned when needed.  We do this because computing
+    # the true number of regions is expensive and sometimes the GUI just needs
+    # to know whether a workloads has 1 or multiple regions.
+    if ($computeRegions <= $regions_cache{$cfg}[2]) {
+      # Cache entries are valid for a limited time case config. changes
+      # Use a random number to avoid invalidating all entries in a directory at
+      # once.
+      if (time() < $regions_cache{$cfg}[1]) {
+        return (1, $regions_cache{$cfg}[0]);
+      }
+    }
+  }
+
+  return (0, 0);
+}
+
+#
 # Return the number of regions in a benchmark.  If $computeRegions is true
 # then return an exact number, otherwise just return a non-zero value for
 # benchmarks with regions.  For some configurations the setup program must
 # be run to determine the number of regions, which may be slow.  Pass
 # 0 for $computeRegions unless you need to know the exact number.
 #
+
 sub benchmark_regions {
   my $cfg = shift;
   my $computeRegions = shift;
@@ -135,14 +200,27 @@ sub benchmark_regions {
     return 0;
   }
 
+  my ($valid, $value) = check_region_cache($cfg, $computeRegions);
+  if ($valid) {
+    return $value;
+  }
+
   my $path = '';
   my $cfgFile = '';
 
   if ($cfg =~ /\.cfx/) {
     # Script generated cfg file
-    my ($cfx, $args) = cfx_split($cfg);
-    $cfx = $Asim::default_workspace->resolve("$cfx");
+    my ($cfxBase, $args) = cfx_split($cfg);
+    my $cfx = $Asim::default_workspace->resolve("$cfxBase");
     return 0 if (!defined($cfx) || $cfx eq '');
+
+    if (! $computeRegions) {
+      update_cfx_region_cache($cfxBase, $cfx, $args);
+      ($valid, $value) = check_region_cache($cfg, $computeRegions);
+      if ($valid) {
+          return $value;
+      }
+    }
 
     $cfgFile = "${cfx} --emit ${args} |";
     $path = "${cfx}/${args}";
@@ -197,7 +275,12 @@ sub benchmark_regions {
   }
   close(CFG);
 
+  # Make valid time somewhat random to keep all entries from invalidating at once
+  $regions_cache{$cfg}[1] = time() + 60 + rand() * 60;
+  $regions_cache{$cfg}[2] = 1;
+
   if ($nRegions > 0) {
+    $regions_cache{$cfg}[0] = $nRegions;
     return $nRegions;
   }
 
@@ -215,6 +298,8 @@ sub benchmark_regions {
       # Caller doesn't need an exact (slow) answer.  Just indicate .cfg
       # file has regions.
       #
+      $regions_cache{$cfg}[0] = 2;
+      $regions_cache{$cfg}[2] = 0;
       return 2;
     }
 
@@ -232,9 +317,11 @@ sub benchmark_regions {
     if ($nRegions eq '' || $nRegions =~ /[^0-9]/) {
         print "Unexpected response for --queryregions, ${cfg}\n";
     }
+    $regions_cache{$cfg}[0] = $nRegions;
     return $nRegions;
   }
 
+  $regions_cache{$cfg}[0] = 0;
   return 0;
 }
 
@@ -259,8 +346,16 @@ sub cfx_split {
 ##
 ## List of subdirectory built by a CFG generator script.
 ##
+our %cfx_cache = ();
+
 sub cfx_list_dir {
   my $dir = shift;
+
+  # Cache CFX directory listings since the GUI asks for them repeatedly and
+  # looking up the directory is slow.  They expire after a while.
+  if (exists($cfx_cache{$dir}) && (time() < $cfx_cache{$dir}[1])) {
+      return @{$cfx_cache{$dir}[0]};
+  }
 
   my ($cfx, $args) = cfx_split($dir);
 
@@ -282,6 +377,10 @@ sub cfx_list_dir {
       close(CFX);
     }
   }
+
+  # Cache the result
+  $cfx_cache{$dir}[0] = \@result;
+  $cfx_cache{$dir}[1] = time() + 60 + rand() * 60;
 
   return @result;
 }
