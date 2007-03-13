@@ -429,3 +429,20 @@ Updating with simcore changes (rev. 2239)
 
 - in batch mode, update, configure and build are attempted on all packages and 
 any error is reported at the end.
+
+----------
+spartha1    Date: Tue Mar 13 17:54:22 EDT 2007  CSN: CSN-asimcore-25
+                  Tue Mar 13 21:54:22 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ state.h                   Locally Modified           24 
+
+Directory modules/system/basesystem_classic
+ basesystem_classic.cpp    Locally Modified           24 
+
+Updating with simcore changes (rev. 2240)
+
+- Added a StrValue method to the ASIM_STATE_CLASS
+- This will be used to parse string parameters when adding
+extra information to the default ADF files in basesystem_classic.cpp

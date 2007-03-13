@@ -152,6 +152,9 @@ ASIM_SYSTEM_CLASS::InitEvents (void)
                 if (state->Type() == STATE_UINT) {
                     osParam << "$param{'" << name << "'} = "
                         << state->IntValue() << ";" << endl;
+               } else if (state->Type() == STATE_STRING && (name != "ADF_DEFAULT")) {
+                    osParam << "$param{'" << name << "'} = \""
+                        << state->StrValue() << "\";" << endl;
                 } else {
                     osParam << "# param " << name
                             << " has unsupported type" << endl;

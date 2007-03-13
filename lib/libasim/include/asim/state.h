@@ -590,6 +590,10 @@ class ASIM_STATE_CLASS
             return((type == STATE_UINT) ? (double)SumIntArray(u.iPtr, size) :
                                           SumFpArray(u.fPtr, size));
         }
+        string StrValue (void) const
+        {
+            return *u.sPtr;
+        }
 
         /*
          * For vector array's return the value of the specified element.
