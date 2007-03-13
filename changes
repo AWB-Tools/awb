@@ -548,3 +548,15 @@ Make a call to myPowerModel.PowerPostProcessing() at the end
 of a simulation interval to force power computation. This feature makes
 it possible to compute power periodically (instead of every cycle) and still
 be assured that at end-of-run, total power is represeneted.
+
+----------
+spartha1    Date: Tue Mar 13 18:43:03 EDT 2007  CSN: CSN-asimcore-31
+                  Tue Mar 13 22:43:03 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified           30 
+
+Updating with changes in simcore (rev. 2246)
+
+- support for specifying nebatch expressions for class arguments.

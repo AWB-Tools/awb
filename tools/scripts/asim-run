@@ -283,6 +283,20 @@ if (defined $buildbatch && $buildbatch) {
     $runbatch = "1";
 }
 
+# handle netbatch expressions
+if (defined $class) {
+    @class_array = split(" ", $class);
+    if (scalar(@class_array) > 1) {
+	$class = "\"$class\"";
+    }
+}
+if (defined $class_build) {
+    @class_array = split(" ", $class_build);
+    if (scalar(@class_array) > 1) {
+	$class_build = "\"$class_build\"";
+    }
+}
+
 ###########################
 # Parse experiments
 ###########################
