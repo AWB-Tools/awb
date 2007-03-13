@@ -226,3 +226,17 @@ Directory libperl/AsimShell/lib/AsimShell
 Updating with simcore changes (rev. 2230)
 
 - Command completion for commands that take multiple packages as arguments
+
+----------
+spartha1    Date: Tue Mar 13 16:30:35 EDT 2007  CSN: CSN-asimcore-16
+                  Tue Mar 13 20:30:35 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified           15 
+
+Updating with simcore changes (rev. 2231)
+
+- You can now check out a specific version from a BitKeeper repository
+using the same syntax as for SVN and CVS, i.e.
+"checkout package <packagename>/<tag_or_version_number>"

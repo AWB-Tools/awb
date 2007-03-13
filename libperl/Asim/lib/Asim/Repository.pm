@@ -300,7 +300,12 @@ sub checkout {
       $url =~ s/anonymous/$user/;
     }
 
-    my $cmd ="(cd $targetdir; bk clone $url $target)";
+    my $cmd;
+    if ($tag eq "HEAD") {
+      $cmd ="(cd $targetdir; bk clone $url $target)";
+    } else {
+      $cmd ="(cd $targetdir; bk clone -r$tag $url $target)";
+    }
     printf STDERR "Executing: %s\n", $cmd;
     $status = system($cmd);
 
