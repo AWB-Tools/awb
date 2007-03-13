@@ -43,7 +43,7 @@ my $gcfg = Asim::GenCFG->new();
 # get name of the test and the trace names, which follows the --emit arg:
 die "unknown trace name" if ( $ARGV[0] ne '--emit' );
 my @trace_names = split '/', $ARGV[1];
-(my $name = @trace_names[$#trace_names]) =~ s/\.cfg$//;
+(my $name = $trace_names[$#trace_names]) =~ s/\.cfg$//;
 $#trace_names--;
 
 # get the locations of the traces to cache them from

@@ -426,7 +426,8 @@ sub help_code {
                     "Asim/Base.pm",
                     "Asim/Nightly.pm",
                     "Asim/Regression.pm",
-
+                    "Asim/GenCFG.pm",
+                    "Asim/GenCFG/Auto.pm",
                   );
 
     $item = Asim::choose_name("Choose perl module", @choices);

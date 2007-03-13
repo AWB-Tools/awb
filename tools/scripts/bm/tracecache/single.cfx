@@ -1,7 +1,3 @@
-: # -*-Perl-*-
-eval 'exec perl -w "$0" ${1+"$@"}'
-    if 0;
-
 #
 # Copyright (C) 2006 Intel Corporation
 # 
@@ -21,64 +17,7 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 # 
 #
 
-
-use Asim;
-use strict;
-
-##
-## Generate a generic cfg file for a single-threaded trace.
-##
-## Whatever follows the --emit argument is either the name or the absolute path prefix
-## of a trace.  Either way, it passes this argument (without the .cfg extension) to the
-## setup script, single.setup, which uses fetch-trace to resolve the location of the trace,
-## and fetch it into the local trace cache if necessary.
-##
-## Example usages in an asim-run benchmarks file:
-##
-##	tools/scripts/bm/tracecache/singlepath.cfx/cpu2000_78_99228p_301.apsi_0017.P6_9909.cfg
-##                                                 ^                                     ^
-##                                                 |                                     |
-##                                                 <--------- name of the trace --------->
-##
-##	tools/scripts/bm/tracecache/singlepath.cfx/p/asim/benchmarks/traces/LIT/tejas_micros/exe/asm/div2/div2.cfg
-##                                                ^                                                          ^
-##                                                |                                                          |
-##                                                <----------- absolute path prefix of the trace ------------>
-##
-## This is not intended to be used with awb, since the --dir and --list arguments
-## do not work  (since it's a generic script, there is no way of knowing a priori
-## which config files it can possibly generate).  Hence it lives in tools/scripts rather
-## than in config/bm.
-##
-## Carl Beckmann	7/25/2006
-##
-
-# get path to required setup script
-chomp( my $SETUP = `awb-resolver tools/scripts/bm/tracecache/single.setup` );
-
-# get absolute path of the trace, which follows the --emit arg:
-die "unknown trace path" if ( $ARGV[0] ne '--emit' );
-(my $trace_path = $ARGV[1]) =~ s/\.cfg$//;
-
-# strip the directory off to get a name:
-(my $trace_name = $trace_path) =~ s/^.*\///;
-
-# get the directory tree as an array:
-my @tree = split '/', $trace_path;
-$#tree--;
-
-# if the trace argument looks like a path, rather than a simple name,
-# we need to prepend a '/' which gets stripped by the caller:
-if ( $trace_path =~ m/\// ) {
-  $trace_path = '/' . $trace_path;
-}
-
-# now generate the virtual .cfg file:
-my $gcfg = Asim::GenCFG->new();
-$gcfg->add(name   => $trace_name,
-	   info   => "single trace $trace_path",
-	   tree   => \@tree,
-           feeder => 'archlib',
-           setup  => "$SETUP $trace_path",
-           );
-$gcfg->action(@ARGV);
+#!/usr/intel/bin/perl
+use Asim::GenCFG::Auto;
+# use default setup and run scripts:
+Asim::GenCFG::Auto::Generate();

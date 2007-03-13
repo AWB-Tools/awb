@@ -461,3 +461,33 @@ Directory etc
 Updating with simcore changes (rev. 2241)
 
 - support for specifying EXTRA_NBQ_FLAGS param.
+
+----------
+spartha1    Date: Tue Mar 13 18:24:53 EDT 2007  CSN: CSN-asimcore-27
+                  Tue Mar 13 22:24:53 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified           26 
+
+Directory libperl/Asim/lib/Asim
+ GenCFG/                   Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/GenCFG
+ Auto.pm                   Locally Added               0 
+
+Directory tools/scripts/bm/tracecache
+ single.cfx                Locally Modified           26 
+ single.setup              Locally Removed            26 
+ multi.cfx                 Locally Modified           26 
+
+Directory tools/scripts
+ asim-run                  Locally Modified           26 
+
+Updating with simcore changes (rev. 2242)
+
+- Added another perl module Asim::GenCFG::Auto to encapsulate the common
+operations performed by generic .cfx scripts, and simplify benchmark
+configurations by allowing setup and run scripts to be given inline
+with the configuration data.
+Also fixed a bug in multi.cfx.
