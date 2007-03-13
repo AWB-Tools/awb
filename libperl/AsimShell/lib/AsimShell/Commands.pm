@@ -896,19 +896,20 @@ sub use_package {
 
 sub delete_package {
 
-  my $name = shift;
-  my $package = get_package($name) || return ();
+  while ( my $name = shift ) {
+    my $package = get_package($name) || return ();
 
-  if (! $package->isprivate() ) {
-    shell_error("Cannot delete public packages\n");
-    return ();
-  }
+    if (! $package->isprivate() ) {
+      shell_error("Cannot delete public packages\n");
+      return ();
+    }
 
-  $package->print_not_up_to_date();
+    $package->print_not_up_to_date();
 
-  if (Asim::choose_yes_or_no("Really delete checked out package","n","y")) {
-    $package->destroy();
-    rehash_packages();
+    if (Asim::choose_yes_or_no("Really delete checked out package $name","n","y")) {
+      $package->destroy();
+      rehash_packages();
+    }
   }
 
   return 1;
@@ -986,34 +987,40 @@ sub add_dependent_packages {
   return 1;
 }
 
-
+#
+# configure, make, build, or install one or more packages,
+# returning 1 if all succeeded.
+#
 sub configure_package {
-  my $name = shift;
-  my $package = get_package($name) || return ();
-
-  return $package->configure();
+  while ( my $name = shift ) {
+    my $package = get_package($name) || return undef;
+    $package->configure()            || return undef;
+  }
+  return 1;
 }
 
-
 sub make_package {
-  my $name = shift;
-  my $package = get_package($name) || return ();
-
-  return $package->build();
+  while ( my $name = shift ) {
+    my $package = get_package($name) || return undef;
+    $package->build()                || return undef;
+  }
+  return 1;
 }
 
 sub build_package {
-  my $name = shift;
-  my $package = get_package($name) || return ();
-
-  return configure_and_build_packages($package);
+  while ( my $name = shift ) {
+    my $package = get_package($name)       || return undef;
+    configure_and_build_packages($package) || return undef;
+  }
+  return 1;
 }
 
 sub install_package {
-  my $name = shift;
-  my $package = get_package($name) || return ();
-
-  return $package->install();
+  while ( my $name = shift ) {
+    my $package = get_package($name) || return undef;
+    $package->install()              || return undef;
+  }
+  return 1;
 }
 
 #
@@ -1224,11 +1231,14 @@ sub edit_package {
   return 1;
 }
 
-
+#
+# update one or more packages, returning 1 if all succeeded.
+#
 sub update_package {
   my $name;
   my $build = 1;
   my $status;
+  my @build_list = ();
   local @ARGV = @_;
 
   # Parse options
@@ -1236,21 +1246,29 @@ sub update_package {
   $status = GetOptions( "build!" => \$build);
   return undef if (!$status);
 
-  # Model is remaining argument
+  # remaining argument(s) is (are) package name(s)
+  while ( $name = shift @ARGV ) {
 
-  $name = shift @ARGV;
+    # handle special case of "all packages"
+    if (defined($name) && ($name eq "*" || $name eq "all")) {
+      return update_all_packages($build);
+    }
 
-  if (defined($name) && ($name eq "*" || $name eq "all")) {
-    return update_all_packages($build);
+    # normal case: update a single package
+    my $package = get_package($name) || return undef;
+    if (!$package->isprivate()) {
+      shell_error("Cannot update a non-private package\n")  && return undef;
+    }
+    $package->update()      || return undef;
+    if ($build) {
+      # if we are also building, add the package to the list of ones to build
+      push @build_list, $package;
+    }
   }
-
-  my $package = get_package($name) || return undef;
-
-  if (!$package->isprivate()) {
-    shell_error("Cannot update a non-private package\n")  && return undef;
-  }
-  $package->update()    || return undef;
-  if ($build) {
+  
+  # if updating more than one package, and building,
+  # do the builds after you have checked everything out.
+  while ( my $package = shift @build_list ) {
     $package->configure() || return undef;
     $package->build()     || return undef;
   }
@@ -1301,25 +1319,23 @@ sub update_all_packages {
   return 1;
 }
 
+#
+# commit one or more packages, returning 1 if all succeeded
+#
 sub commit_package {
-  my $name;
-  my $package;
   my $deps = 1;
-  my $status;
   local @ARGV = @_;
 
   # Parse options
+  my $status = GetOptions( "dependent!" => \$deps) || return undef;
 
-  $status = GetOptions( "dependent!" => \$deps);
-  return 0 if (!$status);
-
-  # Package name is remaining argument
-
-  $name = shift @ARGV;
-
-  $package = get_package($name) || return ();
-
-  return $package->commit(!$deps);
+  # Package names are remaining arguments
+  while ( my $name = shift @ARGV ) {
+    my $package = get_package($name) || return undef;
+    $package->commit(!$deps)         || return undef;
+  }
+  
+  return 1;
 }
 
 
@@ -1430,11 +1446,11 @@ sub shell_package {
 }
 
 sub show_package {
-  my $name = shift;
-  my $package = get_package($name) || return ();
-
-  $package->dump();
-
+  while ( my $name = shift ) {
+    my $package = get_package($name) || return ();
+    $package->dump();
+    if ( @_ ) { print "\n" }
+  }
   return 1;
 }
 
@@ -1467,28 +1483,27 @@ sub get_package {
 # i.e. modified, needs-update, etc.
 #
 sub status_package {
+  local @ARGV = @_;
+  my $verbose = 0;
 
-  # get the list of packages to print status on:
-  my @packages    = ();
-  my $verbose     = 0;
-  my $allpackages = 0;
-  while ( my $arg = shift ) {
-    if ( $arg eq '--verbose' ) {
-      $verbose = 1;
-    } elsif ( $arg eq 'all' || $arg eq '*' ) {
-      $allpackages = 1;
-    } else {
-      push @packages, $arg;
+  # Parse options
+  my $status = GetOptions( "verbose!" => \$verbose) || return undef;
+  
+  # get the list of packages
+  my @packages;
+  if ( ! @ARGV ) {
+    # if no package argument given, use default package
+    if ( ! $default_package ) {
+      print "status package command requires a package name argument!\n";
+      return undef;
     }
-  }
-  if ( $allpackages ) {
+    @packages = ( $default_package->name() );
+  } elsif ( $ARGV[0] eq 'all' || $ARGV[0] eq '*' ) {
+    # if all packages, get a directory of all packages
     @packages = $default_packageDB->directory();
-  } elsif ( ! @packages ) {
-    if ( $default_package ) {
-      @packages = ( $default_package->name() );
-    } else {
-      shell_error("No package or default package defined\n") && return 0;
-    }
+  } else {
+    # otherwise, use an explicit list (better not contain 'all' !!)
+    @packages = @ARGV;
   }
 
   # print status for each package in turn

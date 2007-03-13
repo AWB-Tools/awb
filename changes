@@ -201,3 +201,17 @@ Directory lib/libasim/include/asim
 Added better checking for QT, also added assert.h so that it builds on Debian.
 
 Michael
+
+----------
+spartha1    Date: Tue Mar 13 16:12:45 EDT 2007  CSN: CSN-asimcore-14
+                  Tue Mar 13 20:12:45 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           13 
+
+Updating with simcore changes (rev. 2229)
+
+- Changed a number of package commands to take multiple packages
+as arguments: delete, show, update, commit, configure, build, and
+make commands can all take one or more package arguments now.
