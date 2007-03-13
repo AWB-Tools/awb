@@ -146,8 +146,17 @@ sub update {
   my $self = shift;
 
   my $location = $self->location();
-  print "Updating package from BK repository \n";
+  
+  # we cannot do a bk pull unless we have all our local changes checked in locally
+  my $local_changes = `cd $location; bk sfiles -vc`;
+  if ( $local_changes ne '' ) {
+      Asim::Package::ierror( "Cannot pull from BK repository until the following changes are checked in locally:\n" .
+                             "\n" . $local_changes . "\n" .
+                             "Please execute \"bk citool\" to check your changes in locally first!\n" );
+      return undef;
+  }
 
+  print "Updating package from BK repository \n";
   my   $retcode  = system "cd $location; bk pull";
   if ( $retcode != 0 ) {
       Asim::Package::ierror( "BitKeeper \"pull\" command returned error code: $retcode\n" );

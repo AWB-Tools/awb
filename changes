@@ -240,3 +240,17 @@ Updating with simcore changes (rev. 2231)
 - You can now check out a specific version from a BitKeeper repository
 using the same syntax as for SVN and CVS, i.e.
 "checkout package <packagename>/<tag_or_version_number>"
+
+----------
+spartha1    Date: Tue Mar 13 16:33:19 EDT 2007  CSN: CSN-asimcore-17
+                  Tue Mar 13 20:33:19 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ BitKeeper.pm              Locally Modified           16 
+
+Updating with simcore changes (rev. 2232)
+
+User now gets an error message with instructions on what to do
+if he tries to update a BK package with changes that have not been
+checked in locally.
