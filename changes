@@ -215,3 +215,14 @@ Updating with simcore changes (rev. 2229)
 - Changed a number of package commands to take multiple packages
 as arguments: delete, show, update, commit, configure, build, and
 make commands can all take one or more package arguments now.
+----------
+spartha1    Date: Tue Mar 13 16:26:52 EDT 2007  CSN: CSN-asimcore-15
+                  Tue Mar 13 20:26:52 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Completion.pm             Locally Modified           14 
+
+Updating with simcore changes (rev. 2230)
+
+- Command completion for commands that take multiple packages as arguments

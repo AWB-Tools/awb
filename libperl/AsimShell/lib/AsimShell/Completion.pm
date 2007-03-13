@@ -49,6 +49,23 @@ our $default_benchmark;
 our $default_module;
 
 #
+# return 1 if the given command is a package
+# command that takes multiple packages as arguments
+#
+sub is_multi_package_command {
+  my $cmd = shift;
+  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make))$/ );
+}
+
+#
+# return 1 if the package command takes "all" as an argument
+#
+sub package_command_takes_all_arg {
+  my $cmd = shift;
+  return ( $cmd =~ m/^((status)|(update))$/ );
+}
+
+#
 # Utility function to help parsing
 #
 sub attempted_completion {
@@ -115,8 +132,7 @@ sub attempted_completion {
       return (max_common($text, @list), @list);
 
   } elsif ($prefix =~ /checkout package\s$/ ||
-           $prefix =~ /use package\s$/      ||
-           $prefix =~ /status package\s$/   ) {
+           $prefix =~ /use package\s$/      ) {
     #
     # Handle packages that can be checked out
     #
@@ -150,9 +166,22 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
+  } elsif ($prefix =~ /^\s*(\w+)\s+package(\s+\w+)*\s$/ && is_multi_package_command( $1 ) ) {
+    #
+    # Handle commands that take one or more package names as arguments
+    #
+    my @packages = $default_packageDB->directory();
+    # "all" is only valid as first argument
+    if ($prefix =~ /^\s*(\w+)\s+package\s$/ && package_command_takes_all_arg( $1 ) ) {
+      push(@packages, "all");
+    }
+    @list = grep /^$text/, @packages;
+
+    return (max_common($text, @list), @list);
+
   } elsif ($prefix =~ /package\s$/) {
     #
-    # Handle package names
+    # Handle commands that take a single package name
     #
     my @packages = $default_packageDB->directory();
     if ($prefix =~ /update package/) {
