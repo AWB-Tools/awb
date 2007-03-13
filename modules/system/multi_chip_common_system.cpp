@@ -331,6 +331,8 @@ ASIM_MULTI_CHIP_SYSTEM_CLASS::SYS_Execute(
         trackCycle = sys_cycle;
         
     }
+
+    myPowerModel.PowerPostProcessing(); // compute power at end of interval
     
     T1(SYS_Cycle() << ": SYS_Execute hit marker " << 
        commitWatchMarker << " " << SYS_CommittedMarkers() - start_marker << " times");

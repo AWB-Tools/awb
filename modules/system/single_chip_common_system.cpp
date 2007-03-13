@@ -289,6 +289,8 @@ ASIM_COMMON_SYSTEM_CLASS::SYS_Execute(
         trackCycle = SYS_Cycle(); 
     }
 
+    myPowerModel.PowerPostProcessing(); // compute power at end of interval
+
     T1(SYS_Cycle() << ": SYS_Execute hit marker " << commitWatchMarker <<
           " " << SYS_CommittedMarkers() - start_marker << " times");
     if (SYS_CommittedMarkers() > stop_marker) {

@@ -40,6 +40,8 @@ class POWER_MODEL_CLASS
  public:
   POWER_MODEL_CLASS(){};
   ~POWER_MODEL_CLASS(){};
+
+  void PowerPostProcessing(){};
 };
 
 

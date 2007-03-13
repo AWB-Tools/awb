@@ -327,6 +327,8 @@ ASIM_COMMON_SYSTEM_CLASS::SYS_Execute(
         
     }
 
+    myPowerModel.PowerPostProcessing(); // compute power at end of interval
+
     TRACE(Trace_Sys, printf(FMT64U": SYS_Execute hit marker "FMT32D
                             " "FMT64D" times\n", SYS_Cycle(),
                             commitWatchMarker, SYS_CommittedMarkers() - start_marker));
