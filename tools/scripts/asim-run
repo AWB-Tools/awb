@@ -82,6 +82,10 @@ if (!-e $TMP_DIR) {
 # How many jobs can one user have in queue before the
 # number of jobs she injects at any time is limited. 
 $MAX_RUNNING_JOBS    = Asim::Util::get_asimrc_val("asim-run", "MAX_RUNNING_JOBS",     175);          
+
+# How many jobs can one user have in queue before the
+# number of jobs she injects at any time is limited. 
+$EXTRA_NBQ_FLAGS   = Asim::Util::get_asimrc_val("asim-run", "EXTRA_NBQ_FLAGS",     undef);          
                                   
 # When we exceed the MAX_RUNNING_JOBS limit, how many jobs can be injected per cycle? 
 $MAX_JOBS_PER_PERIOD = Asim::Util::get_asimrc_val("asim-run", "MAX_JOBS_PER_PERIOD",   10);
@@ -367,6 +371,9 @@ if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
 ########
 # Maintain separate build and run netbatch flags because they could
 # potentially use different pools and args
+if (defined $EXTRA_NBQ_FLAGS) {
+    $batch_flags = $batch_flags . " $EXTRA_NBQ_FLAGS ";
+}
 $batch_flags_build = $batch_flags;
 ########
 ##########################################################

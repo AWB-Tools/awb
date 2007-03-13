@@ -446,3 +446,18 @@ Updating with simcore changes (rev. 2240)
 - Added a StrValue method to the ASIM_STATE_CLASS
 - This will be used to parse string parameters when adding
 extra information to the default ADF files in basesystem_classic.cpp
+
+----------
+spartha1    Date: Tue Mar 13 17:56:43 EDT 2007  CSN: CSN-asimcore-26
+                  Tue Mar 13 21:56:43 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified           25 
+
+Directory etc
+ asimrc.template           Locally Modified           25 
+
+Updating with simcore changes (rev. 2241)
+
+- support for specifying EXTRA_NBQ_FLAGS param.

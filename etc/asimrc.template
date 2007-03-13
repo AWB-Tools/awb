@@ -275,6 +275,16 @@ BUILD=
 COMPRESS=
 
 #
+# Purpose: To add any needed custom netbatch qualifiers
+#
+# Type: String
+# Legal Values: Legal netbatch qualifiers
+#
+# Default: none
+# EXTRA_NBQ_FLAGS=
+EXTRA_NBQ_FLAGS=
+
+#
 # Purpose: Indicates if existing stats files should be replaced if they are found 
 #          in the results directory.  If true, then all benchmarks for all experiments 
 #          will be rerun, regardless of whether there are existing stats for the 
