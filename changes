@@ -275,3 +275,18 @@ having to invoke the CFX file twice.
 - Cache the result of CFX queries for 1 minute in awb. The awb GUI
 is constantly probing the CFX file, even with mouse events. The cache
 greatly improves performance.
+
+----------
+spartha1    Date: Tue Mar 13 16:40:33 EDT 2007  CSN: CSN-asimcore-19
+                  Tue Mar 13 20:40:33 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified           18 
+
+Directory etc
+ asimrc.template           Locally Modified           18 
+
+Updating with simcore changes (rev. 2234)
+
+- support for using seperate pool, class, queue netbatch params for build and run.

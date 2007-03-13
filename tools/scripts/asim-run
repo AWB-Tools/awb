@@ -136,6 +136,7 @@ $CURRENT_QSLOT = "";
 # setup through netbatch or the NBPOOL environment variable, is used.  
 #
 my $pool       = Asim::Util::get_asimrc_val("asim-run", "POOL",           ""    );
+my $pool_build = Asim::Util::get_asimrc_val("asim-run", "POOL_BUILD",     ""    );
 my $build      = Asim::Util::get_asimrc_val("asim-run", "BUILD",          1     );
 my $nuke       = Asim::Util::get_asimrc_val("asim-run", "NUKE",           1     );
 my $compress   = Asim::Util::get_asimrc_val("asim-run", "COMPRESS",       "gzip");
@@ -149,6 +150,9 @@ my $runbatch   = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   
 $LEGAL_QSLOTS  = Asim::Util::get_asimrc_val("asim-run", "LEGAL_QSLOTS", undef);
 @LEGAL_QSLOTS  = (defined $LEGAL_QSLOTS) ?  split (" ", $LEGAL_QSLOTS) : ();
 
+$LEGAL_QSLOTS_BUILD  = Asim::Util::get_asimrc_val("asim-run", "LEGAL_QSLOTS_BUILD", undef);
+@LEGAL_QSLOTS_BUILD  = (defined $LEGAL_QSLOTS_BUILD) ?  split (" ", $LEGAL_QSLOTS_BUILD) : ();
+
 #
 # Get the legal classes, if any.  If no classes are specified, then 
 # any user input is considered legal. 
@@ -156,12 +160,22 @@ $LEGAL_QSLOTS  = Asim::Util::get_asimrc_val("asim-run", "LEGAL_QSLOTS", undef);
 $LEGAL_CLASSES = Asim::Util::get_asimrc_val("asim-run", "LEGAL_CLASSES", undef);
 @LEGAL_CLASSES = (defined $LEGAL_CLASSES) ? split (" ", $LEGAL_CLASSES) : ();
 
+$LEGAL_CLASSES_BUILD = Asim::Util::get_asimrc_val("asim-run", "LEGAL_CLASSES_BUILD", undef);
+@LEGAL_CLASSES_BUILD = (defined $LEGAL_CLASSES_BUILD) ? split (" ", $LEGAL_CLASSES_BUILD) : ();
+
 # 
 # Get the default queue slot to use.  If none is specified, then the queue slots 
 # defaulted to by netbatch is used.  
 #
 my $queue      = Asim::Util::get_asimrc_val("asim-run", "QSLOT",         undef);
 my $class      = Asim::Util::get_asimrc_val("asim-run", "CLASS",         undef);
+
+# 
+# Get the default queue slot to use for build.  If none is specified, then
+# the queue slots defaulted to by netbatch is used.
+#
+my $queue_build = Asim::Util::get_asimrc_val("asim-run", "QSLOT_BUILD",   undef);
+my $class_build = Asim::Util::get_asimrc_val("asim-run", "CLASS_BUILD",   undef);
 
 #
 # Select the default nice command.  If left blank, then the nice level
@@ -192,6 +206,7 @@ my $delay =0;
 # Additional computed variables. 
 #
 my $batch_flags = "";
+my $batch_flags_build = ""; 
 my $batch_scr_inputs = "";
 my $exps = {};
 my @exp_ordered = ();
@@ -342,6 +357,18 @@ if ( $runbatch && $ENABLE_NETBATCH_PRE ) {
   }
 }
 ##########################################################
+# Add auto-requeue to netbatch if specified.
+##########################################################
+PrintVerbose("Checking auto requeue....");
+if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
+    $batch_flags = $batch_flags . " --autoreq \"$NETBATCH_AUTO_REQUEUE:NBErr\" ";
+}
+########
+# Maintain separate build and run netbatch flags because they could
+# potentially use different pools and args
+$batch_flags_build = $batch_flags;
+########
+##########################################################
 # Make sure that the netbatch pool specified exists. 
 ##########################################################
 PrintVerbose("Checking netbatch pool....");
@@ -358,29 +385,27 @@ if ( $runbatch && $pool ne "" ) {
     $batch_flags = $batch_flags . "-P$pool ";
   }
 }
-##########################################################
-# Add auto-requeue to netbatch if specified.
-##########################################################
-PrintVerbose("Checking auto requeue....");
-if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
-    $batch_flags = $batch_flags . " --autoreq \"$NETBATCH_AUTO_REQUEUE:NBErr\" ";
-}
+if ($buildbatch) {
+    if ($pool_build ne "" ) {
+	PrintVerbose("Checking netbatch build pool....");	
+	if (system ("$BATCH_STATUS_COMMAND -P$pool_build > $asim_runlogfl")) {
+	    # We couldn't find the pool.  Exit
+	    PrintError("Unknown build pool $pool_build.\n");
 
-##########################################################
-# Make sure that the value specified for nice is correct
-# (i.e., integer value between 0 and 19)
-##########################################################
-PrintVerbose("Checking nice value...");
-if (defined $nicelevel) {
-  if ($nicelevel < $NICEMIN || $nicelevel > $NICEMAX) {
-    # Illegal value for nice 
-    PrintError("Unknown nice level: $nicelevel: Legal values are integer values between $NICEMIN and $NICEMAX.\n");
-    system ("rm -f $asim_runlogfl");
-    exit 1;
-  }
-  $batch_scr_inputs = $batch_scr_inputs . "-nicelevel=\"$nicelevel\" ";
+	    system ("cat $asim_runlogfl");
+	    system ("rm -f $asim_runlogfl");
+	    exit 1;
+	}
+	else {
+	    $batch_flags_build = $batch_flags_build . "-P$pool_build ";
+	}
+    }
+    else {
+	if (defined $pool && $pool ne "") {
+	    $batch_flags_build = $batch_flags_build . "-P$pool ";
+	}
+    }
 }
-    
 ##########################################################
 # Make sure that the specified netbatch queue is one of the 
 # LEGAL QSLOTS.
@@ -399,7 +424,26 @@ if ($runbatch && defined $queue) {
   }
   $batch_flags = $batch_flags . "-Q $queue ";
 }
-
+if ($buildbatch) {
+    if (defined $queue_build) {
+	if (scalar(@LEGAL_QSLOTS_BUILD) > 0) {
+	    my $legal = grep /^$queue_build$/, @LEGAL_QSLOTS_BUILD;
+	    if ($legal != 1) {
+		# We couldn't find the qslot.  Exit
+		my $legal_queues=join(", ", @LEGAL_QSLOTS_BUILD);
+		PrintError("Unknown build queue slot $queue: Acceptable queue slots are $legal_queues.\n");
+		system ("rm -f $asim_runlogfl");
+		exit 1;
+	    }
+	}
+	$batch_flags_build = $batch_flags_build . "-Q $queue_build ";
+    }
+    else {
+	if (defined $queue && $queue ne "") {
+	    $batch_flags_build = $batch_flags_build . "-Q $queue ";
+	}
+    }
+}
 ##########################################################
 # Make sure that the specified netbatch queue is one of the 
 # LEGAL CLASSES
@@ -408,7 +452,7 @@ PrintVerbose("Checking netbatch class...");
 if ($runbatch && defined $class) {
   if (scalar(@LEGAL_CLASSES) > 0) 
   {
-    my $legal = grep /^$queue$/, @LEGAL_CLASSES;
+    my $legal = grep /^$class$/, @LEGAL_CLASSES;
     if ($legal != 1) {
       # We couldn't find the class.  Exit
       my $legal_classes=join(", ", @LEGAL_CLASSES);
@@ -419,6 +463,43 @@ if ($runbatch && defined $class) {
   }
   $batch_flags = $batch_flags . "-C $class ";
 }
+if ($buildbatch) {
+    if (defined $class_build) {
+	if (scalar(@LEGAL_CLASSES_BUILD) > 0) 
+	{
+	    my $legal = grep /^$class_build$/, @LEGAL_CLASSES_BUILD;
+	    if ($legal != 1) {
+		# We couldn't find the class.  Exit
+		my $legal_classes=join(", ", @LEGAL_CLASSES_BUILD);
+		PrintError("Unknown build class $class_build: Acceptable queues are $legal_classes.\n");
+		system ("rm -f $asim_runlogfl");
+		exit 1;
+	    }
+	}
+	$batch_flags_build = $batch_flags_build . "-C $class_build ";
+    }
+    else {
+	if (defined $class && $class ne "") {
+	    $batch_flags_build = $batch_flags_build . "-C $class ";
+	}
+    }
+}
+
+##########################################################
+# Make sure that the value specified for nice is correct
+# (i.e., integer value between 0 and 19)
+##########################################################
+PrintVerbose("Checking nice value...");
+if (defined $nicelevel) {
+  if ($nicelevel < $NICEMIN || $nicelevel > $NICEMAX) {
+    # Illegal value for nice 
+    PrintError("Unknown nice level: $nicelevel: Legal values are integer values between $NICEMIN and $NICEMAX.\n");
+    system ("rm -f $asim_runlogfl");
+    exit 1;
+  }
+  $batch_scr_inputs = $batch_scr_inputs . "-nicelevel=\"$nicelevel\" ";
+}
+    
 
 sub generate_run_summary
 {
@@ -1370,8 +1451,8 @@ sub SubmitJob {
   ScheduleJob();
 
   if (defined $modelSubmit && $modelSubmit) {
-#	print "command is $BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags $command"; 
-      if ( RunCommand ("$BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
+#      print "BUILD -- command is $BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags_build $command"; 
+      if ( RunCommand ("$BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags_build $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
 	  # There was an error in the submission.      
 	  PrintError("Unable to finish command; $command\n",
 		     "Netbatch returned error.\n",
@@ -1380,6 +1461,7 @@ sub SubmitJob {
       }
   }
   else {
+#      print "RUN -- command is $BATCH_SUBMIT_COMMAND -J $resdir/$name/ADMIN/$bm_name.asimlog $batch_flags $command";
       if (RunCommand("$BATCH_SUBMIT_COMMAND -J $resdir/$name/ADMIN/$bm_name.asimlog $batch_flags $command > $resdir/$name/$bm_name.SUBMITTED")) {
 	  # There was an error in the submission.
 	  PrintError("Unable to submit command; $command\n",

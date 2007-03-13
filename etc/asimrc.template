@@ -154,6 +154,11 @@ NICEVAL=
 # Bounds and defaults for the netbatch pools and queues
 #***********************************************************************
 
+# It is possible to use one set of (pool, class and queue) netbatch params
+# for model build and another set for model runs.  If model build params are
+# blank, and a batch build is invoked, the values default to those specified
+# for runs.
+
 #
 # Purpose: Legal netbatch queues for job submission.  If you do not
 #          want to check for legal queue slots, then leave the value
@@ -167,6 +172,7 @@ NICEVAL=
 # Default: NULL
 # LEGAL_QSLOTS=/slow/asim /fast
 LEGAL_QSLOTS=
+LEGAL_QSLOTS_BUILD=
 
 #
 # Purpose: The netbatch queue slot to use for ASIM jobs. If you want to 
@@ -183,6 +189,7 @@ LEGAL_QSLOTS=
 # Default: NULL
 # QSLOT=/slow/asim
 QSLOT=
+QSLOT_BUILD=
 
 #
 # Purpose: The netbatch pool to use for ASIM jobs.  If no pool is specified 
@@ -195,6 +202,7 @@ QSLOT=
 # Default: NULL
 # POOL=shr_linux
 POOL=
+POOL_BUILD=
 
 #
 # Purpose: Legal netbatch classes for job submission.  If you do not
@@ -207,6 +215,7 @@ POOL=
 # Default: NULL
 # LEGAL_CLASSES=FOO BAR
 LEGAL_CLASSES=
+LEGAL_CLASSES_BUILD=
 
 #
 # Purpose: The default netbatch class to use for ASIM jobs. 
@@ -217,6 +226,7 @@ LEGAL_CLASSES=
 # Default: NULL
 # CLASS=FOO
 CLASS=
+CLASS_BUILD=
 
 #
 # Purpose: Should the netbatch queue be used for submission of jobs? 
