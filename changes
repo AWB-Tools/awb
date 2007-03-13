@@ -515,3 +515,16 @@ Furthermore, there was no longer any need to specify a static size
 in any port declaration if the port's bandwidth or latency exceeded
 the default static size. So, all of these template parameters were
 removed to make the code easier to read and understand.
+
+----------
+spartha1    Date: Tue Mar 13 18:30:20 EDT 2007  CSN: CSN-asimcore-29
+                  Tue Mar 13 22:30:20 UTC 2007
+
+
+Directory tools/scripts
+ model-browse              Locally Modified           28 
+
+Updating with simcore changes (rev. 2244)
+
+- fixed model browser GUI to understand multiple %public and %private
+lines in awb files

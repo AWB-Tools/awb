@@ -93,7 +93,7 @@ proc ReadAwbFile { filename infovar } {
         # %const is similar, but grab value:
 	lappend modelInfo(const)     "[lindex     $inputline 1]=[lindex $inputline 2]"
 
-      } elseif [regexp {^%(requires|attributes)}  $inputline allmatch item] {
+      } elseif [regexp {^%(requires|attributes|public|private)}  $inputline allmatch item] {
 	# you can have more than one of these, and more than one on a line
 	foreach value [lreplace $inputline 0 0] {
 	  lappend modelInfo($item)    $value
