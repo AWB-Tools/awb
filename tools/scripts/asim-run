@@ -651,18 +651,16 @@ foreach $name (@exp_ordered) {
   $thisModel = Asim::Model->new($model);
 
   # Build model unless we've been asked to not build. 
-  $local_build = $build;
-  if ($local_build == 0) {
+  if ($build == 0) {
       if (-x "$resdir/$name/BUILD/$model_name") {
 	  print "Skipping build of $model_name\n";
       }
       else {
-	  # Let's try building the model
-	  $local_build = 1;
+	  PrintWarning("Model \'$resdir/name/BUILD/$model_name\' does not exist and no build specified.  Runs will not be scheduled on this model.\n");
       }
   }
 
-  if ($local_build == 1) {
+  if ($build == 1) {
 
       if ( -d "$resdir/$name/BUILD") {
 	  if ($nuke) {
@@ -792,8 +790,9 @@ foreach $name (@exp_ordered) {
       # For each benchmark listed for the model, run benchmark on this model.  
       # The actual run is accomplished by the asim-batch script which submits
       # the run to netbatch. 
-      
-      run_benchmarks($name);
+      if (($build == 1) || (-x "$resdir/$name/BUILD/$model_name")) {
+	  run_benchmarks($name);
+      }
   }
 }
 
@@ -840,9 +839,14 @@ sub batch_build_run
 	    PrintInfo(".... Completed model build\n");	    
 	    HandleBuildSuccess();
 	}
-	PrintInfo(".... Running benchmarks for experiment $name\n");	
-	run_benchmarks($name);
-	PrintInfo(".... Finished benchmarks for experiment $name\n");	
+	if (($build == 1) || (-x "$resdir/$name/BUILD/$model_name")) {	
+	    PrintInfo(".... Running benchmarks for experiment $name\n");
+	    run_benchmarks($name);
+	    PrintInfo(".... Finished benchmarks for experiment $name\n");
+	}
+	else {
+	    PrintInfo(".... Model \'$resdir/name/BUILD/$model_name\' does not exist and no build specified.  Runs will not be scheduled on this model.\n");
+	}
 	close LOGFILE;
 	exit $exit_code;
     }

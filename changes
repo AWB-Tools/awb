@@ -302,3 +302,15 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2235)
 
 Fixed the problem of modified locked files not being recognized during a commit
+
+----------
+spartha1    Date: Tue Mar 13 16:45:46 EDT 2007  CSN: CSN-asimcore-21
+                  Tue Mar 13 20:45:46 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified           20 
+
+Updating with simcore changes (rev. 2236)
+
+- changed semantics of nobuild option. Nobuild really wont build.
