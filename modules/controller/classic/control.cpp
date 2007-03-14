@@ -752,17 +752,20 @@ CONTROLLER_BASE_EXTERNAL_FUNCTION(
     IFEEDER_BASE_CLASS::AllDone();
     IFEEDER_BASE_CLASS::DeleteAllFeeders();
     delete asimSystem;
+    asimSystem = NULL;
 
     // delete controller work list
     if (ctrlWorkList)
     {
         delete ctrlWorkList;
+	ctrlWorkList = NULL;
     }
 
     // delete the schedule
     if (schedule)
     {
         delete schedule;
+	schedule = NULL;
     }
     
     // we just un-initialized it

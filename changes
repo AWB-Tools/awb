@@ -690,3 +690,15 @@ Directory lib/libasim/include/asim
 Updating with simcore changes (rev. 2250)
 
 Only include cctype on C++ compilations.
+----------
+spartha1    Date: Wed Mar 14 01:02:41 EDT 2007  CSN: CSN-asimcore-36
+                  Wed Mar 14 05:02:41 UTC 2007
+
+
+Directory modules/controller/classic
+ args_x86.cpp              Locally Modified           35 
+ control.cpp               Locally Modified           35 
+
+Updating with simcore changes (rev. 2251)
+
+- minor changes for improved readability & robustness

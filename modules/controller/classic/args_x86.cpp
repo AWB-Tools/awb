@@ -131,20 +131,18 @@ CONTROLLER_X86_CLASS::PartitionOneArg (INT32 argc, char *argv[], INT32 &i)
 int
 CONTROLLER_X86_CLASS::ParseVariables(char **argv, UINT32 argc)
 {
-    // first see if the parent class can parse it:
-    int incr = theController.CONTROLLER_CLASS::ParseVariables(argv, argc);
-    if ( incr >= 0 ) {
-    	return incr;
-    }
-    // if not, try these additional extensions:
+    // options specific to this derived class:
     if ((strcmp(argv[0], "-snrfile") == 0))
     {
-        CheckPointFileName = new char[strlen(argv[incr+1])+1];
-        strcpy(CheckPointFileName, argv[incr+1]);
+        CheckPointFileName = new char[strlen(argv[1])+1];
+        strcpy(CheckPointFileName, argv[1]);
         return 1;
     }
-    // unknown argument?  Just return -1:
-    return -1; 
+    else
+    {
+        // not one of the above?  then handle it in the parent class:
+        return theController.CONTROLLER_CLASS::ParseVariables(argv, argc);
+    }
 }
 
 // Parse command line arguments, 
