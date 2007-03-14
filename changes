@@ -759,3 +759,19 @@ be copied verabatim into config files for use with -cfg.
 
 This change was made to the classic controller base class, so any controller
 based on it will inherit this feature.
+----------
+spartha1    Date: Wed Mar 14 01:15:47 EDT 2007  CSN: CSN-asimcore-40
+                  Wed Mar 14 05:15:47 UTC 2007
+
+
+Directory tools/awb/amc
+ amc.cpp                   Locally Modified           39 
+ amc.h                     Locally Modified           39 
+
+Directory lib/libawb
+ model_builder.cpp         Locally Modified           39 
+ model_builder.h           Locally Modified           39 
+
+Updating with simcore changes (rev. 2255)
+
+- initial steps towards supporting persist qualifier for model configure.

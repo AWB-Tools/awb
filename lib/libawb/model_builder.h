@@ -142,6 +142,8 @@ class ModelBuilder {
         }
     } makefile;
 
+    int persist_configureOpt;
+
   public:
     // constructors / destructors
     ModelBuilder(const Workspace & theWorkspace, const Model & theModel,
@@ -150,7 +152,7 @@ class ModelBuilder {
 
     // top level driver methods
     /// Create the complete build tree (aka. 'configure').
-    bool CreateBuildTree (void);
+    bool CreateBuildTree (int persist = 0);
     /// Remove all files in the build tree.
     bool NukeBuildTree (void);
     /// Run make on an existing build tree.

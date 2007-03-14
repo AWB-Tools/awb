@@ -58,7 +58,7 @@ ModelBuilder::ModelBuilder (
     model(theModel),
     buildDir(theBuildDir)
 {
-    // nada
+    persist_configureOpt = 0;
 }
 
 /**
@@ -74,8 +74,10 @@ ModelBuilder::~ModelBuilder()
  * of the build tree.
  */
 bool ///< returns true for success, false otherwise
-ModelBuilder::CreateBuildTree (void)
+ModelBuilder::CreateBuildTree (int persist)
 {
+    persist_configureOpt = persist;
+
     // during this build tree configuration process, several methods
     // collect information for later methods to use; so before we start we
     // need to clear all this information;
@@ -448,7 +450,17 @@ ModelBuilder::CopyFileToBuildTree (
     bool fileExists = FileExists (sourceFileFullName);
 
     if (fileExists) {
-        symlink (sourceFileFullName.c_str(), destFileName.c_str());
+	if (persist_configureOpt) {
+	    if (link(sourceFileFullName.c_str(), destFileName.c_str()) == -1) {
+		perror(" WARNING: Creating hard link failed "); 
+		cout << " src: '" << sourceFileFullName.c_str() << "'" << ", dest: '" 
+		     << destFileName.c_str() << "'" <<endl;
+		return false;
+	    }
+	}
+	else {
+	    symlink (sourceFileFullName.c_str(), destFileName.c_str());
+	}
         return true;
     } else {
         cout << "WARNING: can not copy source file" << endl;

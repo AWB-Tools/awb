@@ -49,6 +49,7 @@ class AMC {
     string modelExecutable;
     string runDir;
     string runOptions;
+    int    persist_configureOption;
 
   public:
     // constructors / destructors

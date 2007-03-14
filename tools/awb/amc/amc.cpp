@@ -48,6 +48,7 @@ AMC::AMC(void)
     builder = NULL;
     benchmark = NULL;
     runner = NULL;
+    persist_configureOption = 0;
 }
 
 /**
@@ -95,6 +96,7 @@ AMC::ProcessCommandLine (
     char * c_modelExecutable = NULL;
     char * c_runDir = NULL;
     char * c_runOptions = NULL;
+    int  * c_persist_configureOption = NULL;
     const char ** commands = NULL;
 
     struct poptOption helpOptionsTable[] = {
@@ -127,6 +129,9 @@ AMC::ProcessCommandLine (
         { "runopt", '\0', POPT_ARG_STRING,
           &c_runOptions, 0,
           "options passed on to benchmark run", "<options>" },
+        { "persist", '\0', POPT_ARG_NONE,
+          &c_persist_configureOption, 0,
+          "Create hard links to build sources during model configure", "<options>" },
 //        { "nodynamicparams", '\0', POPT_ARG_NONE,
 //          &noDynamicParams, 0,
 //          "configure all parameters as static", NULL },
@@ -204,6 +209,9 @@ AMC::ProcessCommandLine (
     if (c_runOptions) {
         runOptions = c_runOptions;
     }
+    if (c_persist_configureOption) {
+	persist_configureOption = 1;
+    }
     if (c_runDir) {
         runDir = c_runDir;
         // make absolute path - just in case
@@ -228,7 +236,7 @@ AMC::ProcessCommandLine (
         } else if (command == "configure") {
             cout << "Configuring build tree" << endl;
             SetupModelBuilder(optContext);
-            bool success = builder->CreateBuildTree();
+            bool success = builder->CreateBuildTree(persist_configureOption);
             if ( ! success) {
                 cerr << "Error creating build tree for model "
                      << modelFileName << endl;
