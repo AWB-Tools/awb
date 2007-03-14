@@ -841,3 +841,18 @@ Directory tools/awb/awb2
 Small changes to support Hasim running benchmarks. 
 
 Michael
+
+----------
+jsemer      Date: Wed Mar 14 15:02:24 EDT 2007  CSN: CSN-asimcore-43
+                  Wed Mar 14 19:02:24 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified           42 
+
+
+
+
+Some more small changes for hasim-configure command-line options.
+
+Michael

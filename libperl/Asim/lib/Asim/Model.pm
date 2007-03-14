@@ -1005,7 +1005,7 @@ sub nuke {
   # determine correct command (Asim v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" nuke";
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure -nuke $filename";
+      $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -nuke";
   }
 
   return _process_command($cmd,%args);
@@ -1037,7 +1037,7 @@ sub configure {
   # determine correct command (Asim v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" configure";
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure -configure $filename";
+      $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -configure";
   }
 
   return _process_command($cmd,%args);
@@ -1076,7 +1076,7 @@ sub build {
   # determine correct command (Asim v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" build";
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure --buildopt=\"$buildopt\" -build $filename ";
+      $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" -build";
   }
 
   return _process_command($cmd,%args);
