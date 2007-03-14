@@ -48,7 +48,6 @@ class DYNAMIC_ARRAY_CLASS
     ~DYNAMIC_ARRAY_CLASS();
 
     void Init(UINT32 elem);
-    bool IsInitialized(void) const;
 
     DATA& operator[](UINT32 idx) const;
 
@@ -93,14 +92,6 @@ DYNAMIC_ARRAY_CLASS<DATA>::Init(UINT32 elem)
     data = new DATA[elem];
 
     VERIFY(data != NULL, "Out of memory");
-};
-
-
-template <class DATA>
-inline bool
-DYNAMIC_ARRAY_CLASS<DATA>::IsInitialized(void) const
-{
-    return (nElements != 0);
 };
 
 

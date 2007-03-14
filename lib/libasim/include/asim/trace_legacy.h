@@ -101,7 +101,7 @@ do { \
    TTMSG:  conditional tracing, implied endl
 
 */
-#if MAX_PTHREADS > 1
+#if NUM_PTHREADS > 1
 #define TTRACE(b) \
 do { \
     get_thread_safe_log().ts() << std::dec << pthread_self() << ": " <<  b << endl; \

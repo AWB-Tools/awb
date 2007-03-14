@@ -775,3 +775,53 @@ Directory lib/libawb
 Updating with simcore changes (rev. 2255)
 
 - initial steps towards supporting persist qualifier for model configure.
+----------
+spartha1    Date: Wed Mar 14 03:08:44 EDT 2007  CSN: CSN-asimcore-41
+                  Wed Mar 14 07:08:44 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ trace.h                   Locally Modified           40 
+ smp.h                     Locally Modified           40 
+ pool_allocated_object.h   Locally Modified           40 
+ clockserver.h             Locally Modified           40 
+ rate_matcher.h            Locally Modified           40 
+ mm.h                      Locally Modified           40 
+ dynamic_array.h           Locally Modified           40 
+ port.h                    Locally Modified           40 
+ mmptr.h                   Locally Modified           40 
+ clockable.h               Locally Modified           40 
+ trace_legacy.h            Locally Modified           40 
+ syntax.h                  Locally Modified           40 
+
+Directory lib/libasim/src
+ smp.cpp                   Locally Modified           40 
+ clockserver.cpp           Locally Modified           40 
+
+Directory modules/model/test_model/test_board
+ test_board.cpp            Locally Modified           40 
+
+Directory modules/system
+ multi_chip_common_system.h Locally Modified           40 
+ single_chip_clockserver_system.h Locally Modified           40 
+ multi_chip_common_system.awb Locally Modified           40 
+ single_chip_common_system.cpp Locally Modified           40 
+ single_chip_clockserver_system.awb Locally Modified           40 
+ single_chip_common_system.h Locally Modified           40 
+ single_chip_common_system.awb Locally Modified           40 
+
+Directory modules/system/ape_system
+ ape.cpp                   Locally Modified           40 
+ ape.h                     Locally Modified           40 
+ ape.awb                   Locally Modified           40 
+
+Directory modules/system/system_minimal
+ system_mini.cpp           Locally Modified           40 
+ system_mini.h             Locally Modified           40 
+ system_mini.awb           Locally Modified           40 
+
+Directory modules/system
+ multi_chip_common_system.cpp Locally Modified           40 
+ single_chip_clockserver_system.cpp Locally Modified           40 
+
+Backing out changes made in rev. 34 and 35.

@@ -63,13 +63,13 @@
 #include "asim/smp.h"
 #include "asim/event.h"
 #include "asim/phase.h"
-#include "asim/dynamic_array.h"
 
 using namespace std;
 
+#define MAX_CLOCKSERVER_THREADS 40
 
 // Forward declaration of the CLOCKABLE classes
-typedef class ASIM_CLOCKABLE_CLASS *ASIM_CLOCKABLE;
+typedef class asim_clockable_class ASIM_CLOCKABLE_CLASS, *ASIM_CLOCKABLE;
 typedef class ClockRegistry CLOCK_REGISTRY_CLASS, *CLOCK_REGISTRY;
 typedef class RateMatcher RATE_MATCHER_CLASS, *RATE_MATCHER;
 
@@ -333,7 +333,7 @@ class ClockCallBackPhase: public ClockCallBackInterface
 };
 
 
-typedef ClockCallBack<ASIM_CLOCKABLE_CLASS> ClockCallBackClockable;
+typedef ClockCallBack<asim_clockable_class> ClockCallBackClockable;
 
 
 /**
@@ -342,11 +342,16 @@ typedef ClockCallBack<ASIM_CLOCKABLE_CLASS> ClockCallBackClockable;
  * WARNING: don't remove the volatile qualifiers, they are important
  * for thread synchronization !!
  **/
-class ASIM_CLOCKSERVER_THREAD_CLASS
+typedef class asim_clockserver_thread_class
 {
     
   private:
-    ASIM_SMP_THREAD_HANDLE tHandle;
+    
+    // Unique thread id
+    static ATOMIC_CLASS currentId;
+    volatile UINT32 uniqueThreadId;    
+    
+    volatile bool pthread_created;
     
     // Current list of work
     list<CLOCK_CALLBACK_INTERFACE> tasks;
@@ -356,43 +361,36 @@ class ASIM_CLOCKSERVER_THREAD_CLASS
     pthread_attr_t thread_attr;
         
     // Code executed by the pthread 
-    static void * ThreadWork(void* param);
+    static void * threadWork(void* param);
   
-    volatile bool threadActive;
-    volatile bool threadForceExit;
-    
   public:
-    ASIM_CLOCKSERVER_THREAD_CLASS(ASIM_SMP_THREAD_HANDLE tHandle) :
-        tHandle(tHandle),
-        threadActive(false),
-        threadForceExit(false),
-        tasks_completed(true)
-    {};
     
-    ~ASIM_CLOCKSERVER_THREAD_CLASS()
+    asim_clockserver_thread_class()
     {
-        VERIFY(!ThreadActive(), "Thread " << GetThreadId() << " not stopped!");
+        uniqueThreadId = currentId++;
+        pthread_created = false;
+        tasks_completed = true;
     }
     
-    inline ASIM_SMP_THREAD_HANDLE GetAsimThreadHandle() const
+    ~asim_clockserver_thread_class()
     {
-        return tHandle;
+        VERIFY(!pthread_created, "Thread " << uniqueThreadId << " not stopped!");
     }
-
+    
     /** Returns the unique identifier of this thread */
-    inline UINT32 GetThreadId()
+    inline UINT32 getUniqueThreadId()
     {
-        return GetAsimThreadHandle()->GetThreadId();
+        return uniqueThreadId;
     }
     
     /** Returns true if the pthread is created */
-    inline bool ThreadActive()
+    inline bool threadCreated()
     {
-        return threadActive;
+        return pthread_created;
     }
     
     /** Method to add a new task to be executed by the pthread */
-    inline void AssignTask(CLOCK_CALLBACK_INTERFACE task)
+    inline void assignTask(CLOCK_CALLBACK_INTERFACE task)
     {
         // WARNING! (only for multithreaded clocking)
         // It is not necessary to get the lock since we are using a
@@ -403,9 +401,9 @@ class ASIM_CLOCKSERVER_THREAD_CLASS
     }
     
     /** Returns true if all the assigned tasks have been completed */
-    inline bool CheckAllTasksCompleted()
+    inline bool checkAllTasksCompleted()
     {
-        ASSERTX(ThreadActive());
+        ASSERTX(pthread_created);
 
         // Wait for the thread to complete the tasks
         pthread_mutex_lock(&finish_cond_mutex);
@@ -419,11 +417,11 @@ class ASIM_CLOCKSERVER_THREAD_CLASS
     }
     
     /** Tell the thread he can start to execute the current list of tasks */
-    void PerformTasksSequential();
+    void performTasksSequential();
     
-    inline void PerformTasksThreaded()
+    inline void performTasksThreaded()
     {
-        ASSERTX(ThreadActive());
+        ASSERTX(pthread_created);
 
         // Restart the thread waiting for the condition
         pthread_mutex_lock(&task_list_mutex);
@@ -433,8 +431,8 @@ class ASIM_CLOCKSERVER_THREAD_CLASS
     }
 
     // Functions to create and destroy the pthread and synchronization devices
-    void CreatePthread();
-    bool DestroyPthread();
+    bool createPthread();
+    bool destroyPthread();
 
   public:
     
@@ -460,7 +458,7 @@ class ASIM_CLOCKSERVER_THREAD_CLASS
          - Execute all the items in the list
          - Release the lock
     */
-    inline CLOCK_CALLBACK_INTERFACE GetNextWorkItem()
+    inline CLOCK_CALLBACK_INTERFACE getNextWorkItem()
     {
         CLOCK_CALLBACK_INTERFACE cb = NULL;
         if(tasks.size() > 0)
@@ -471,9 +469,14 @@ class ASIM_CLOCKSERVER_THREAD_CLASS
         
         return cb;
     }
-};
-
-typedef ASIM_CLOCKSERVER_THREAD_CLASS* ASIM_CLOCKSERVER_THREAD;
+    
+    void setCreatedThread()
+    {
+        pthread_created = true;
+    }
+        
+    
+} ASIM_CLOCKSERVER_THREAD_CLASS, *ASIM_CLOCKSERVER_THREAD;
 
 
 /**
@@ -625,7 +628,7 @@ class ClockRegistry
  * to clock server. Each main loop, the clock server clocks every
  * module.
  **/
-class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
+typedef class asim_clock_server_class : public TRACEABLE_CLASS
 {
     
   private:
@@ -633,21 +636,22 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
     /** Holds all the clock domains */
     list<CLOCK_DOMAIN> lDomain;
   
-    /** Clocking thread assigned by default */
-    ASIM_CLOCKSERVER_THREAD defaultThread;
-
-    /** Clockserver threads array */
-    DYNAMIC_ARRAY_CLASS<ASIM_CLOCKSERVER_THREAD> threads;
-    
-    /** List of created threads */
-    list<ASIM_CLOCKSERVER_THREAD> lThreads;
-    
     /** True if only one clock domain have been created */
     bool uniqueClockDomain;
   
     /** False if we want to disable the unique clock domain optimization */
     bool uniqueDomainOptimization;
         
+    /** Clocking thread assigned by default */
+    ASIM_CLOCKSERVER_THREAD defaultThread;
+    bool default_used;
+    
+    /** Clockserver threads array */
+    ASIM_CLOCKSERVER_THREAD threads[MAX_CLOCKSERVER_THREADS];
+    
+    /** List of created threads */
+    list<ASIM_CLOCKSERVER_THREAD> lThreads;
+    
     /** Threaded clocking? */
     bool threaded;
     UINT32 max_pthreads;
@@ -681,9 +685,6 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
         just to delete them at the end */
     list<pthread_mutex_t*> lCreatedMutexs;
     
-    /** Add an Asim thread to the available threads */
-    ASIM_CLOCKSERVER_THREAD MapThread(ASIM_SMP_THREAD_HANDLE tHandle);
-
     void AddTimeEvent(UINT64 time, CLOCK_REGISTRY freq);
 
     /** Internal method to register the write rate matchers
@@ -724,8 +725,8 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
    
   public:
   
-    ASIM_CLOCK_SERVER_CLASS();
-    ~ASIM_CLOCK_SERVER_CLASS();
+    asim_clock_server_class();
+    ~asim_clock_server_class();
     
     
     /** Accessors (used by the clockserver system) */
@@ -769,12 +770,14 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
 
     void SetThreadedClocking(bool _threaded)
     {
-        if (ASIM_SMP_CLASS::GetMaxThreads() > 1)
-        {
-            threaded = _threaded;
-        }
+        threaded = _threaded;
     }
 
+    void SetMaxPthreads(UINT32 _max_pthreads)
+    {
+        max_pthreads = _max_pthreads;
+    }
+    
     void SetUniqueDomainOptimization(bool active)
     {
         uniqueDomainOptimization = active;
@@ -784,26 +787,17 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
     UINT64 Clock();   
     
     /** Clock domain related functions */
-    void NewClockDomain(
-        string domainName,
-        list<float> freq,
-        ASIM_SMP_THREAD_HANDLE tHandle = NULL);
+    void newClockDomain(string domainName, list<float> freq, INT32 threadId);
     
-    void SetReferenceClockDomain(string referenceDomain);
+    void setReferenceClockDomain(string referenceDomain);
     
-    CLOCK_DOMAIN RegisterClock(
-        ASIM_CLOCKABLE m,
-        string domainName,
-        UINT32 skew,
-        ASIM_SMP_THREAD_HANDLE tHandle = NULL);
-    CLOCK_DOMAIN RegisterClock(
-        ASIM_CLOCKABLE m,
-        string domainName,
-        CLOCK_CALLBACK_INTERFACE cb,
-        UINT32 skew,
-        ASIM_SMP_THREAD_HANDLE tHandle = NULL);
+    CLOCK_DOMAIN RegisterClock(ASIM_CLOCKABLE m, string domainName,
+                               UINT32 skew, INT32 threadId);
+    CLOCK_DOMAIN RegisterClock(ASIM_CLOCKABLE m, string domainName,
+                               CLOCK_CALLBACK_INTERFACE cb, UINT32 skew,
+                               INT32 threadId);
     
-    void SetDomainFrequency(string domainName, float freq);
+    void setDomainFrequency(string domainName, float freq);
         
     
     /** Rate matchers related functions */
@@ -815,9 +809,8 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
         just before the first cycle occurs */
     void DralTurnOn(void);
 
-};
+} ASIM_CLOCK_SERVER_CLASS, *ASIM_CLOCK_SERVER;
 
-typedef class ASIM_CLOCK_SERVER_CLASS *ASIM_CLOCK_SERVER;
 
 #endif /* _CLOCK_SERVER_ */
 

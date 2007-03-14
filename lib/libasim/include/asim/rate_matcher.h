@@ -27,7 +27,6 @@
 // C++/STL
 #include <string>
 #include <sstream>
-#include <pthread.h>
 
 // ASIM core
 #include "asim/clockable.h"
@@ -39,7 +38,8 @@ using namespace std;
 #define DEFAULT_MAX_LATENCY 8
 
 
-#if MAX_PTHREADS > 1
+#if NUM_PTHREADS > 1
+  #include <pthread.h>
   #define cs_lock(p)   pthread_mutex_lock(p);
   #define cs_unlock(p) pthread_mutex_unlock(p);  
 #else
@@ -51,7 +51,7 @@ using namespace std;
 // Class RateMatcher
 //************************************************************************************************
 
-class RateMatcher: public ASIM_CLOCKABLE_CLASS
+class RateMatcher: public asim_clockable_class
 {
 
     protected:
@@ -70,7 +70,7 @@ class RateMatcher: public ASIM_CLOCKABLE_CLASS
     public:
     
       RateMatcher(ASIM_CLOCKABLE _clockable)
-        : ASIM_CLOCKABLE_CLASS(NULL),
+        : asim_clockable_class(NULL),
           listCreated(false),
           initialized(false),
           clockable(_clockable)

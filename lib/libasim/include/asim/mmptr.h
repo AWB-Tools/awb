@@ -67,8 +67,6 @@ class mmptr
     }
 #endif
 
-    Type *operator=(const mmptr &mmp) const { return ptr; }
-
     mmptr &operator=(Type *p) {
         if (p != ptr) {
             del();

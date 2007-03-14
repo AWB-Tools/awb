@@ -35,7 +35,6 @@
 #include "asim/state.h"
 #include "asim/config.h"
 #include "asim/stateout.h"
-#include "asim/smp.h"
 
 // ASIM public modules
 #include "asim/provides/basesystem.h"
@@ -45,6 +44,7 @@
 #include "asim/provides/power_model.h"
 
 void RegisterSimulatorConfiguration(ASIM_REGISTRY reg);
+
 
 
 typedef class ASIM_COMMON_SYSTEM_CLASS * ASIM_COMMON_SYSTEM;

@@ -35,7 +35,6 @@
 #include "asim/state.h"
 #include "asim/config.h"
 #include "asim/stateout.h"
-#include "asim/smp.h"
 
 // ASIM public modules
 #include "asim/provides/basesystem.h"

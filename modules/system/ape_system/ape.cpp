@@ -578,8 +578,6 @@ SYS_Init (
     return(NULL);
   }
   
-  ASIM_SMP_CLASS::Init(MAX_PTHREADS, LIMIT_PTHREADS);
-
   ape = new ASIM_APE_CLASS("APE");
   ape->InitModule();
 
