@@ -12,7 +12,7 @@ chomp (my $path = `pwd`);
 
 # global constants
 my $logfile = "/dev/null";
-my $script_name = "create_asim_benchmark_file.pl";
+my $script_name = "create-benchmark-file";
 my @params = ( "tag", "tlist", "flist", "outfile", "logfile");
 
 # global variables

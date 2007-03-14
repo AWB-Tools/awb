@@ -717,3 +717,14 @@ Updating with simcore changes (rev. 2252)
 added tool "create-benchmark-file". run this tool without a command line to
 see its usage. it is used for creating .benchmark file from a tlist or from
 the trace_list tool. this works well with the fetch-trace tool.
+----------
+spartha1    Date: Wed Mar 14 01:09:26 EDT 2007  CSN: CSN-asimcore-38
+                  Wed Mar 14 05:09:26 UTC 2007
+
+
+Directory tools/scripts
+ create-benchmark-file     Locally Modified           37 
+
+Updating with simcore changes (rev. 2253)
+
+minor fix.
