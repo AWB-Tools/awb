@@ -1155,6 +1155,8 @@ public:
     }
 };
 
+extern CONTROL_TRACEABLE_CLASS controlTraceable;
+
 #define ASIM_XMSG(x) \
 ({ \
        T1_AS(&controlTraceable, __FILE__ << ":" << __LINE__ << ": " <<  x); \

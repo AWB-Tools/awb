@@ -598,3 +598,16 @@ Updating with simcore changes (rev. 2247)
 - Refactored the controllers to use a common base module
 (controller_classic.awb) which can be specialized using plugin "algorithm"
 modules tha %provide a controller_alg.
+
+----------
+spartha1    Date: Tue Mar 13 23:49:33 EDT 2007  CSN: CSN-asimcore-33
+                  Wed Mar 14 03:49:33 UTC 2007
+
+
+Directory modules/controller/classic
+ control.h                 Locally Modified           32 
+
+Updating with simcore changes (rev. 2248)
+
+controlTraceable global defined in control.cpp, referenced in control.h
+but no extern was defined for other modules. I assume this change is correct.
