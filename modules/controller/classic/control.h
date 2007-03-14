@@ -1093,6 +1093,7 @@ class CONTROLLER_CLASS {
 
     void PartitionArgs   ( INT32 argc,   char *argv[]           );
     void PartitionOneArg ( INT32 argc,   char *argv[], INT32 &i );
+    void ParseConfigFile ( char *cfg_file_name                  );
     void Usage           ( char *exec,   FILE *file             );
     bool ParseEvents     ( INT32 argc,   char *argv[]           );
     bool ParseOneEvent   ( INT32 argc,   char *argv[], INT32 &i );
@@ -1104,9 +1105,10 @@ class CONTROLLER_CLASS {
     char *StatsFileName; 
 
     // command line argument handling
-    UINT32   origArgc,   awbArgc,   sysArgc,    fdArgc;
-    char   **origArgv, **awbArgv, **sysArgv,  **fdArgv;
-    bool                            systemArgs, feederArgs;
+    UINT32   origArgc,   awbArgc,    sysArgc,    fdArgc;
+    UINT32               awbArgcMax, sysArgcMax, fdArgcMax;
+    char   **origArgv, **awbArgv,  **sysArgv,  **fdArgv;
+    bool                             systemArgs, feederArgs;
 
     // 'ctrlWorkList' contains new work items that the controller needs to
     // schedule.  The performance model and awb puts things on the list.

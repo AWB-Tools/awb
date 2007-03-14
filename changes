@@ -728,3 +728,34 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2253)
 
 minor fix.
+----------
+spartha1    Date: Wed Mar 14 01:11:53 EDT 2007  CSN: CSN-asimcore-39
+                  Wed Mar 14 05:11:53 UTC 2007
+
+
+Directory modules/controller/classic
+ control.h                 Locally Modified           38 
+ args.cpp                  Locally Modified           38 
+
+Updating with simcore changes (rev. 2254)
+
+- Added the ability to specify command line args in a file,
+using the syntax
+
+-cfg <filename>
+
+This arguments file can have one or multiple arguments on a line, or 
+comments starting with hash (#),and config files can recursively call
+ other config files.
+
+This option should work in --feeder, --system or awb args sections,
+or you could have a single file containing both --feeder and --system
+sections.
+
+Argument values may contain double-quoted (") sections, and the quote
+characters are stripped before further parsing by the simulator, as they
+would be in the shell. Thus any arg lists currently in .models files can
+be copied verabatim into config files for use with -cfg.
+
+This change was made to the classic controller base class, so any controller
+based on it will inherit this feature.

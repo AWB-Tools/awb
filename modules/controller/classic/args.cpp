@@ -18,7 +18,7 @@
  
 /**
  * @file
- * @author David Goodwin & Joel Emer
+ * @author David Goodwin, Joel Emer & Carl Beckmann
  * @brief Asim argument parsing
  */
 
@@ -89,22 +89,21 @@ CONTROLLER_CLASS::~CONTROLLER_CLASS() {
 //
 // Partition arguments into awb's, system's and feeder's.
 //
-static UINT32 fdArgcMax;
 void
 CONTROLLER_CLASS::PartitionArgs (INT32 argc, char *argv[])
 {
     origArgc = argc;
     origArgv = argv;
 
-    awbArgc = sysArgc = fdArgc = 0;
+    awbArgc    = sysArgc    = fdArgc    = 0;
+    awbArgcMax = sysArgcMax = fdArgcMax = argc;
 
     ASSERTX(awbArgv == NULL);
-    awbArgv = new char *[argc+1];   
+    awbArgv = (char **)malloc( (awbArgcMax + 1) * sizeof(char *) );
     ASSERTX(sysArgv == NULL);
-    sysArgv = new char *[argc+1];   
+    sysArgv = (char **)malloc( (sysArgcMax + 1) * sizeof(char *) );
     ASSERTX(fdArgv == NULL);
-    fdArgcMax = argc;
-    fdArgv = new char *[fdArgcMax+1];    
+    fdArgv  = (char **)malloc( ( fdArgcMax + 1) * sizeof(char *) );
 
     //
     // Partition...
@@ -147,21 +146,21 @@ CONTROLLER_CLASS::PartitionOneArg (INT32 argc, char *argv[], INT32 &i)
         // them to have an immediate effect.
         else 
         {
-            if (feederArgs) 
+            // if the command is -cfg <filename> then
+	    // parse the file, which will recursively call this to handle each arg in the file...
+	    if (strcmp(argv[i], "-cfg") == 0)
+	    {
+	    	theController.ParseConfigFile( argv[++i] );
+	    }
+	    else if (feederArgs) 
             {
                 if (strcmp(argv[i], "-repeat") == 0)
                 {
                     int repeatCount = atoi_general(argv[++i]);
 
                     // we need to allocate more space for fdArgv array
-                    char **fdArgvNew = new char * [fdArgcMax + repeatCount + 1];
-                    for (UINT32 i = 0; i < fdArgc; i++)
-                    {
-                        fdArgvNew[i] = fdArgv[i];
-                    }
-                    delete [] fdArgv;
-                    fdArgv = fdArgvNew;
                     fdArgcMax += repeatCount;
+                    fdArgv = (char **)realloc( fdArgv, (fdArgcMax + 1) * sizeof(char *) );
                     
                     for (int cnt = repeatCount; cnt > 0; cnt--)
                     {
@@ -191,6 +190,86 @@ CONTROLLER_CLASS::PartitionOneArg (INT32 argc, char *argv[], INT32 &i)
                 }
             }
         }
+}
+
+// copy an argument value out of one string into another.
+// this copies a sequence of non-white-space characters.
+// If the string contains a quote, it copies anything in
+// between quotes, but omits the quote characters.
+// It returns a pointer to the newly allocated string,
+// and advances the source string pointer.
+static char *scan_arg_value( char * &source )
+{
+  const unsigned MAXWORD = 1024;
+  char buf[MAXWORD], *s, *b;
+  enum {normal, quote, esc, done} state;
+  for ( s = source, b = buf, state = normal; *s && state != done; s++ ) {
+    switch ( state ) {
+      case normal:
+        if      ( isspace( *s ) ) { *b++ = '\0'; state = done;   }
+	else if ( *s == '"'     ) {              state = quote;  }
+	else                      { *b++ = *s;                   }
+	break;
+      case quote:
+        if      ( *s == '\\'    ) { *b++ = *s;   state = esc;    }
+	else if ( *s == '"'     ) {              state = normal; }
+	else                      { *b++ = *s;                   }
+	break;
+      case esc:                     *b++ = *s;   state = quote;
+	break;
+    }
+  }
+  unsigned len = b - buf;
+  char *dest = (char *)malloc( len+1 );   // allocate storage for the string
+  ASSERTX( dest );
+  strncpy( dest, buf, len );              // copy the string including any opening and closing quotes
+  source = s;                             // advance the source string pointer
+  return dest;
+}
+
+//
+// Handle a "-cfg <filename>" command line argument
+// by parsing the arguments in the named file.
+// This is called from PartitionOneArg(), and also calls PartitionOneArg()
+// recursively to handle each argument in the file.
+//
+// It first reads in the entire file, and builds an argc,argv-like list
+// of arguments contained in the file, then it processes them all in a
+// loop similar to the one in PartitionArgs().
+//
+void
+CONTROLLER_CLASS::ParseConfigFile( char *cfg_file_name )
+{
+    const INT32 MAXARGS = 4096;
+    char *argv[MAXARGS];
+    INT32 argc = 0;
+    //
+    // parse the input file and build and argv list
+    //
+    ifstream cfg_file( cfg_file_name );       // open the input file
+    while ( cfg_file.good() ) {               // do for each line in the file:
+        const INT32 MAXLINE = 256;
+        char  *p, nextline[MAXLINE];
+	cfg_file.getline( nextline, MAXLINE );
+	for ( p = nextline; *p; ) {	        // parse each word on a line:
+	    while ( *p && isspace( *p ) ) p++;    // skip leading white space
+	    if ( *p == '#' ) break;               // if it's a comment, ignore rest of line
+	    argv[argc++] = scan_arg_value( p );   // copy the next word from the input line
+	    ASSERTX( argc < MAXARGS );
+	}                                       // end parse each word
+    }                                         // end for each line
+    //
+    // process the argv list
+    //
+    awbArgcMax += argc;                       // first allocate more storage
+    sysArgcMax += argc;                       // in the argv arrays
+    fdArgcMax  += argc;
+    awbArgv = (char **)realloc( awbArgv, (awbArgcMax + 1) * sizeof(char *) );
+    sysArgv = (char **)realloc( sysArgv, (sysArgcMax + 1) * sizeof(char *) );
+    fdArgv  = (char **)realloc(  fdArgv, ( fdArgcMax + 1) * sizeof(char *) );
+    for (int i = 0; i < argc; i++) {          // now process the args
+        theController.PartitionOneArg( argc, argv, i );
+    }
 }
 
 int
@@ -886,9 +965,8 @@ CONTROLLER_CLASS::Usage (char *exec, FILE *file)
        << "\n" << exec << " flags:\n"
        << "\t-h\t\t\tPrint this help\n"
        << "\n"
-// following two flags are no longer supported (needed)
-//       << "\t-batch\t\t\tTurn on batch architect's workbench\n"
-//       << "\t-awb\t\t\tTurn on interactive architect's workbench\n"
+       << "\t-cfg <file>\t\tRead additional flags from configuration file <file>\n"
+       << "\n"
        << "\t-cf <c>\t\t\tFile holding commands for awb to execute after init\n"
        << "\t-wb <w>\t\t\tUse workbench 'w' instead of built-in workbench\n"
        << "\n"
