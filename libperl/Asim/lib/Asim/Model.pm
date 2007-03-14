@@ -1152,17 +1152,11 @@ sub setup {
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" " .
       "--benchmark=$benchmark --rundir=\"$rundir\" setup";
   if ($self->type() eq "HAsim") {
-      _process_error("hasim-configure does not yet support 'setup'\n");
-      return 0;
+    $cmd = "hasim-configure  --model=$filename --builddir=\"$builddir\" " .
+           "--benchmark=$benchmark --rundir=\"$rundir\" -setup";
   }
 
-  if (defined($logfile)) {
-      $status = system("$cmd > $logfile 2>&1");
-  } else {
-      $status = system("$cmd");
-  }
-  
-  return ! $status;
+  return _process_command($cmd,%args);
 }
 
 ################################################################
@@ -1200,7 +1194,8 @@ sub run {
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" " . 
       "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" run";
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure -run $filename";
+    $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" " . 
+      "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" -run";
   }
 
   return _process_command($cmd,%args);

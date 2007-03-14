@@ -825,3 +825,19 @@ Directory modules/system
  single_chip_clockserver_system.cpp Locally Modified           40 
 
 Backing out changes made in rev. 34 and 35.
+
+----------
+pellauer    Date: Wed Mar 14 14:45:28 EDT 2007  CSN: CSN-asimcore-42
+                  Wed Mar 14 18:45:28 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified           41 
+
+Directory tools/awb/awb2
+ awb_util.pm               Locally Modified           41 
+
+
+Small changes to support Hasim running benchmarks. 
+
+Michael

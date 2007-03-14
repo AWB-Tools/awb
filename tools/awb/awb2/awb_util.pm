@@ -626,6 +626,7 @@ sub get_params_model()
             undef,
             "No support",
             "HAsim does not yet support parameters\n");
+    return ();
   }
 
   open(RUN, "amc --model $model_file --benchmark $benchmark --runopt \"$run_switches -listparams\" run |")
@@ -669,21 +670,18 @@ sub edit_benchmark {
 
 sub setup_benchmark
 {
-  my $w;
-
   return undef if (! defined($model));
   return undef if (! defined($benchmark));
 
-  $w = awb_runlog(0,0,1);
+  my $w = awb_runlog(0,0,1);
+  my $builddir = $model->build_dir();
+  my $rundir   = $model->run_dir($benchmark);
 
-  if ($model->type() eq "HAsim") {
-    Qt::MessageBox::information(
-            undef,
-            "No support",
-            "HAsim does not yet support 'setup' command\n");
-  }
-
-  $w->run("amc --model $model_file --benchmark $benchmark setup");
+  my $cmd = $model->setup($benchmark,
+			  "--builddir" => $builddir,
+			  "--rundir" => $rundir,
+			  "--getcommand" => 1);
+  $w->run($cmd);
 
   return 1;
 }
