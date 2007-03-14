@@ -38,42 +38,44 @@
 *   ASIM_CLOCKSERVER_THREAD_CLASS
 *******************************************************************************/
 
-// The first thread id must be 1 (0 is the master thread, don't use it!)
-ATOMIC_CLASS ASIM_CLOCKSERVER_THREAD_CLASS::currentId = 1;
-
-bool ASIM_CLOCKSERVER_THREAD_CLASS::createPthread()
+void
+ASIM_CLOCKSERVER_THREAD_CLASS::CreatePthread()
 {
-    VERIFYX(!pthread_created);
+    VERIFYX(!ThreadActive());
 
     // Initialize synchronization devices
-    if(pthread_cond_init(&wait_condition, NULL)!=0) return false;
-    if(pthread_mutex_init(&task_list_mutex, NULL)!=0) return false;
-    if(pthread_cond_init(&finish_condition, NULL)!=0) return false;
-    if(pthread_mutex_init(&finish_cond_mutex, NULL)!=0) return false;
+    VERIFYX(!pthread_cond_init(&wait_condition, NULL));
+    VERIFYX(!pthread_mutex_init(&task_list_mutex, NULL));
+    VERIFYX(!pthread_cond_init(&finish_condition, NULL));
+    VERIFYX(!pthread_mutex_init(&finish_cond_mutex, NULL));
 
     // Initialize thread attributes
     pthread_attr_init(&thread_attr);
     pthread_attr_setscope(&thread_attr, PTHREAD_SCOPE_SYSTEM);
     
-    if(pthread_create(&thread, &thread_attr, ASIM_CLOCKSERVER_THREAD_CLASS::threadWork,
-                      (void *)this)!=0) return false;
+    threadForceExit = false;
+
+    ASIM_SMP_CLASS::CreateThread(
+        &thread,
+        &thread_attr,
+        ASIM_CLOCKSERVER_THREAD_CLASS::ThreadWork,
+        this,
+        GetAsimThreadHandle());
 
     // Wait the pthread to be initialized
     // We are serializing the pthread creation this way
-    while(!pthread_created);
-    
-    return true;
+    while(!ThreadActive());
 }
 
-bool ASIM_CLOCKSERVER_THREAD_CLASS::destroyPthread()
+bool ASIM_CLOCKSERVER_THREAD_CLASS::DestroyPthread()
 {
-    VERIFYX(pthread_created);
+    VERIFYX(ThreadActive());
 
     bool return_value = true;
     UINT32* status;
     
-    // Mark as terminated
-    pthread_created = false;
+    // Force exit
+    threadForceExit = true;
 
     // Restart the thread (it will destroy itself)
     pthread_mutex_lock(&task_list_mutex);
@@ -84,6 +86,9 @@ bool ASIM_CLOCKSERVER_THREAD_CLASS::destroyPthread()
     // Wait until it finishes (return value is meaningless)
     return_value &= pthread_join(thread,(void**) &status);
       
+    // Mark as terminated
+    threadActive = false;
+
     // Destroy synchronization devices
     pthread_cond_destroy(&wait_condition);
     pthread_mutex_destroy(&task_list_mutex);
@@ -93,19 +98,15 @@ bool ASIM_CLOCKSERVER_THREAD_CLASS::destroyPthread()
     return return_value;
 }
 
-void * ASIM_CLOCKSERVER_THREAD_CLASS::threadWork(void* param)
+void * ASIM_CLOCKSERVER_THREAD_CLASS::ThreadWork(void* param)
 {
     
     ASIM_CLOCKSERVER_THREAD parent = (ASIM_CLOCKSERVER_THREAD)param;
     VERIFYX(parent != NULL);
 
-    // Set the unique thread id
-    INT32 thread_id = set_asim_thread_id(parent->getUniqueThreadId());    
-    VERIFYX(thread_id == (INT32)parent->getUniqueThreadId());
+    cout << "Pthread " << parent->GetThreadId() << " created." << endl;
     
-    cout << "Pthread " << thread_id << " created." << endl;
-    
-    parent->setCreatedThread();
+    parent->threadActive = true;
     
     // Before enter the loop lock the task_list_mutex to avoid any race condition
     pthread_mutex_lock(&(parent->task_list_mutex));
@@ -122,7 +123,7 @@ void * ASIM_CLOCKSERVER_THREAD_CLASS::threadWork(void* param)
         }
 
         // Check if we have to exit...
-        if(!parent->pthread_created)
+        if(parent->threadForceExit)
         {
             // Not needed, for sanity...
             parent->tasks_completed = true;
@@ -133,11 +134,11 @@ void * ASIM_CLOCKSERVER_THREAD_CLASS::threadWork(void* param)
             pthread_exit(0);
         }
         
-        CLOCK_CALLBACK_INTERFACE cb = parent->getNextWorkItem();
+        CLOCK_CALLBACK_INTERFACE cb = parent->GetNextWorkItem();
         while(cb != NULL)
         {              
             cb->Clock();
-            cb = parent->getNextWorkItem();
+            cb = parent->GetNextWorkItem();
         }
 
         // Tell the master thread that all the work is done
@@ -152,14 +153,14 @@ void * ASIM_CLOCKSERVER_THREAD_CLASS::threadWork(void* param)
 }
 
 /** Execute sequentially the current list of tasks */
-void ASIM_CLOCKSERVER_THREAD_CLASS::performTasksSequential()
+void ASIM_CLOCKSERVER_THREAD_CLASS::PerformTasksSequential()
 {
-    ASSERTX(!pthread_created);
+    ASSERTX(!ThreadActive());
 
     // Not needed
     //tasks_completed  = false;
 
-    CLOCK_CALLBACK_INTERFACE cb = getNextWorkItem();
+    CLOCK_CALLBACK_INTERFACE cb = GetNextWorkItem();
     while(cb != NULL)
     {
 
@@ -169,7 +170,7 @@ void ASIM_CLOCKSERVER_THREAD_CLASS::performTasksSequential()
         );
         
         cb->Clock();
-        cb = getNextWorkItem();
+        cb = GetNextWorkItem();
     }
 
     //tasks_completed  = true;
@@ -182,8 +183,10 @@ void ASIM_CLOCKSERVER_THREAD_CLASS::performTasksSequential()
 /** 
  * Constructor.
  **/
-ASIM_CLOCK_SERVER_CLASS::asim_clock_server_class()
-    : uniqueDomainOptimization(true),
+ASIM_CLOCK_SERVER_CLASS::ASIM_CLOCK_SERVER_CLASS()
+    : defaultThread(NULL),
+      uniqueClockDomain(false),
+      uniqueDomainOptimization(true),
       threaded(false),
       max_pthreads(0),
       referenceClockRegitry(NULL),
@@ -192,13 +195,7 @@ ASIM_CLOCK_SERVER_CLASS::asim_clock_server_class()
       random_seed(0),
       bDumpProfile(false)
 {    
-    SetTraceableName("asim_clock_server_class");
-    
-    // Create the default asim thread and initialize the thread array
-    defaultThread = new ASIM_CLOCKSERVER_THREAD_CLASS();
-    default_used = false;
-    
-    for(UINT32 i = 0; i < MAX_CLOCKSERVER_THREADS; ++i) threads[i] = NULL;
+    SetTraceableName("ASIM_CLOCK_SERVER_CLASS");
 }
 
 
@@ -206,7 +203,7 @@ ASIM_CLOCK_SERVER_CLASS::asim_clock_server_class()
  * Destructor. Erases the ClockRegistry entries, the domains, the threads
  * and the callbacks internally created.
  **/
-ASIM_CLOCK_SERVER_CLASS::~asim_clock_server_class()
+ASIM_CLOCK_SERVER_CLASS::~ASIM_CLOCK_SERVER_CLASS()
 {
 
     list<CLOCK_DOMAIN>::iterator iter_dom;
@@ -234,18 +231,13 @@ ASIM_CLOCK_SERVER_CLASS::~asim_clock_server_class()
     for(iter_threads = lThreads.begin(); iter_threads != lThreads.end();
         ++iter_threads)
     {
-        if((*iter_threads)->threadCreated())
+        if((*iter_threads)->ThreadActive())
         {
-            (*iter_threads)->destroyPthread();
+            (*iter_threads)->DestroyPthread();
         }
         delete *iter_threads;
     }
     
-    if(!default_used)
-    {
-        delete defaultThread;
-    }
-
     list<pthread_mutex_t*>::iterator iter_mutexs;
     for(iter_mutexs = lCreatedMutexs.begin(); iter_mutexs != lCreatedMutexs.end();
         ++iter_mutexs)
@@ -253,7 +245,6 @@ ASIM_CLOCK_SERVER_CLASS::~asim_clock_server_class()
         pthread_mutex_destroy(*iter_mutexs);
         delete *iter_mutexs;
     }
-
 }
 
 
@@ -321,7 +312,7 @@ void ASIM_CLOCK_SERVER_CLASS::DumpProfile()
                 {
                     ASIM_CLOCKABLE mCurrent = (*iterModule).first;
         
-                    TTMSG(Trace_Sys, "~asim_clock_server_class: Logging " <<
+                    TTMSG(Trace_Sys, "~ASIM_CLOCK_SERVER_CLASS: Logging " <<
                         mCurrent->ProfileId());
         
                     if(mCurrent->GetCycles() != 0)
@@ -363,17 +354,44 @@ void ASIM_CLOCK_SERVER_CLASS::DumpProfile()
 }
 
 
+ASIM_CLOCKSERVER_THREAD
+ASIM_CLOCK_SERVER_CLASS::MapThread(ASIM_SMP_THREAD_HANDLE tHandle)
+{
+    if (! threads.IsInitialized())
+    {
+        // Initialize the local thread ID to clockserver thread mapping array
+        // the first time any thread reference is seen.
+        threads.Init(ASIM_SMP_CLASS::GetMaxThreads());
+        for (UINT32 i = 0; i < ASIM_SMP_CLASS::GetMaxThreads(); i++)
+        {
+            threads[i] = NULL;
+        }
+    }
+
+    // Map Asim thread handle to a clockserver thread
+    ASIM_CLOCKSERVER_THREAD thread = threads[tHandle->GetThreadId()];
+    if (thread == NULL)
+    {
+        // Create a new thread (will be the default one for this domain)
+        thread = new ASIM_CLOCKSERVER_THREAD_CLASS(tHandle);
+        threads[tHandle->GetThreadId()] = thread;
+        lThreads.push_back(thread);
+    }
+
+    return thread;
+}
+
+
 /**
  * Create a new clock domain.
  *
  **/
-void ASIM_CLOCK_SERVER_CLASS::newClockDomain(string domainName, list<float> freq,
-                                             INT32 threadId)
+void
+ASIM_CLOCK_SERVER_CLASS::NewClockDomain(
+    string domainName,
+    list<float> freq,
+    ASIM_SMP_THREAD_HANDLE tHandle)
 {
-    
-    VERIFY(threadId < MAX_CLOCKSERVER_THREADS,
-           "Increase constant MAX_CLOCKSERVER_THREADS.");
-
     // Check that the given clock domain doesn't exist
     list<CLOCK_DOMAIN>::iterator iter_dom = lDomain.begin();
     for( ; (iter_dom != lDomain.end()) && ((*iter_dom)->name!=domainName);
@@ -381,26 +399,29 @@ void ASIM_CLOCK_SERVER_CLASS::newClockDomain(string domainName, list<float> freq
     VERIFY(iter_dom == lDomain.end(), "Clocking domain " << domainName <<
            " already exists!");
 
-    // A negative threadId results in the use of the default clockserver thread
-    ASIM_CLOCKSERVER_THREAD thread = defaultThread;
-    if(threadId >= 0)
+    ASIM_CLOCKSERVER_THREAD thread;
+    if (tHandle != NULL)
     {
-        thread = threads[threadId];
-        if(thread == NULL)
-        {
-            // Create a new thread (will be the default one for this domain)
-            thread = new ASIM_CLOCKSERVER_THREAD_CLASS();
-            threads[threadId] = thread;
-            lThreads.push_back(thread);
-        }
+        thread = MapThread(tHandle);
     }
     else
     {
-        if(!default_used)
+        if (!defaultThread)
         {
-            default_used = true;
-            lThreads.push_back(defaultThread);
+            ASIM_SMP_THREAD_HANDLE defaultHandle;
+            if (threaded)
+            {
+                defaultHandle = new ASIM_SMP_THREAD_HANDLE_CLASS();
+            }
+            else
+            {
+                // Not threaded.  Just use the primary thread.
+                defaultHandle = ASIM_SMP_CLASS::GetMainThreadHandle();
+            }
+            defaultThread = MapThread(defaultHandle);
         }
+
+        thread = defaultThread;
     }
     
     // Create the clock domain (with its default thread)
@@ -430,7 +451,7 @@ void ASIM_CLOCK_SERVER_CLASS::newClockDomain(string domainName, list<float> freq
  * as reference (the first in creation order)
  *
  **/
-void ASIM_CLOCK_SERVER_CLASS::setReferenceClockDomain(string referenceDomain)
+void ASIM_CLOCK_SERVER_CLASS::SetReferenceClockDomain(string referenceDomain)
 {
     
     VERIFY(lDomain.size() > 0, "No clock domain has been created!");
@@ -487,7 +508,7 @@ ASIM_CLOCK_SERVER_CLASS::RegisterWriterRateMatcherClock( RATE_MATCHER wrm,
     	if(pcrCurrent->nSkew == skew) 
         {
             ClockCallBackClockable* cb =
-                new ClockCallBackClockable(wrm, &asim_clockable_class::Clock);
+                new ClockCallBackClockable(wrm, &ASIM_CLOCKABLE_CLASS::Clock);
             lCreatedCallbacks.push_back(cb);
             pair<ASIM_CLOCKABLE, CLOCK_CALLBACK_INTERFACE> p(wrm, cb);
             
@@ -521,16 +542,20 @@ ASIM_CLOCK_SERVER_CLASS::RegisterWriterRateMatcherClock( RATE_MATCHER wrm,
  * @param skew % of the reference cycle that must be skewed the clock
  *             of the clocked element. It's value must be between 0 and 99
  **/
-CLOCK_DOMAIN ASIM_CLOCK_SERVER_CLASS::RegisterClock(ASIM_CLOCKABLE m,
-                            string domainName, UINT32 skew, INT32 threadId)
+CLOCK_DOMAIN
+ASIM_CLOCK_SERVER_CLASS::RegisterClock(
+    ASIM_CLOCKABLE m,
+    string domainName,
+    UINT32 skew,
+    ASIM_SMP_THREAD_HANDLE tHandle)
 {
 
     // Create a callback using the default asim_clockable virtual Clock method
     ClockCallBackClockable* cb =
-        new ClockCallBackClockable(m, &asim_clockable_class::Clock);
+        new ClockCallBackClockable(m, &ASIM_CLOCKABLE_CLASS::Clock);
     lCreatedCallbacks.push_back(cb);
     
-    return RegisterClock(m, domainName, cb, skew, threadId);
+    return RegisterClock(m, domainName, cb, skew, tHandle);
 }
 
 
@@ -544,14 +569,16 @@ CLOCK_DOMAIN ASIM_CLOCK_SERVER_CLASS::RegisterClock(ASIM_CLOCKABLE m,
  * @param skew % of the reference cycle that must be skewed the clock
  *             of the clocked element. It's value must be between 0 and 99
  **/
-CLOCK_DOMAIN ASIM_CLOCK_SERVER_CLASS::RegisterClock(ASIM_CLOCKABLE m,
-                string domainName, CLOCK_CALLBACK_INTERFACE cb, UINT32 skew,
-                INT32 threadId)
+CLOCK_DOMAIN
+ASIM_CLOCK_SERVER_CLASS::RegisterClock(
+    ASIM_CLOCKABLE m,
+    string domainName,
+    CLOCK_CALLBACK_INTERFACE cb,
+    UINT32 skew,
+    ASIM_SMP_THREAD_HANDLE tHandle)
 {
 
     VERIFYX(m!=NULL && skew < 100);
-    VERIFY(threadId < MAX_CLOCKSERVER_THREADS,
-           "Increase constant MAX_CLOCKSERVER_THREADS.");
     
     // Find the clock domain
     list<CLOCK_DOMAIN>::iterator iter_dom = lDomain.begin();
@@ -563,16 +590,9 @@ CLOCK_DOMAIN ASIM_CLOCK_SERVER_CLASS::RegisterClock(ASIM_CLOCKABLE m,
     
     // A negative threadId results in the use of the default domain thread
     ASIM_CLOCKSERVER_THREAD thread = domain->defaultThread;
-    if(threadId >= 0)
+    if(tHandle != NULL)
     {
-        thread = threads[threadId];
-        if(thread == NULL)
-        {
-            // Create a new thread
-            thread = new ASIM_CLOCKSERVER_THREAD_CLASS();
-            threads[threadId] = thread;
-            lThreads.push_back(thread);
-        }
+        thread = MapThread(tHandle);
     }
     
     // IMPORTANT: Assign the thread to the module only if the module was not
@@ -668,7 +688,7 @@ CLOCK_DOMAIN ASIM_CLOCK_SERVER_CLASS::RegisterClock(ASIM_CLOCKABLE m,
  * Change the working frequency of the given clock domain.
  *
  **/
-void ASIM_CLOCK_SERVER_CLASS::setDomainFrequency(string domainName, float freq)
+void ASIM_CLOCK_SERVER_CLASS::SetDomainFrequency(string domainName, float freq)
 {
 
     CLOCK_DOMAIN domain = 0;
@@ -895,9 +915,6 @@ void ASIM_CLOCK_SERVER_CLASS::InitClockServer(void)
     // Init the random state
     initstate(random_seed, (char*)random_state, CLOCKSERVER_RANDOM_STATE_LENGTH);
 
-    // Initialize global thread identifier
-    init_asim_thread_id();
-    
     if(threaded)
     {
         
@@ -909,8 +926,7 @@ void ASIM_CLOCK_SERVER_CLASS::InitClockServer(void)
         list<ASIM_CLOCKSERVER_THREAD>::iterator iter_threads = lThreads.begin();
         for( ; iter_threads != lThreads.end(); ++iter_threads)
         {
-            bool ok = (*iter_threads)->createPthread();
-            VERIFY(ok, "Error creating pthread.");
+            (*iter_threads)->CreatePthread();
         }
     }
     
@@ -1123,14 +1139,14 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::ThreadedClock()
                     iter_threads = lThreads.begin();
                 for( ; iter_threads != lThreads.end(); ++iter_threads)
                 {
-                    (*iter_threads)->performTasksThreaded();
+                    (*iter_threads)->PerformTasksThreaded();
                 }
 
                 // Cycle-by-cycle barrier: wait for all threads to finish
                 iter_threads = lThreads.begin();
                 for( ; iter_threads != lThreads.end(); )
                 {
-                    if((*iter_threads)->checkAllTasksCompleted())
+                    if((*iter_threads)->CheckAllTasksCompleted())
                         ++iter_threads;
                 }
             }
@@ -1142,7 +1158,7 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::ThreadedClock()
                     iter_threads = lThreads.begin();
                 for( ; iter_threads != lThreads.end(); ++iter_threads)
                 {
-                    (*iter_threads)->performTasksSequential();
+                    (*iter_threads)->PerformTasksSequential();
                 }
 
             }
@@ -1180,7 +1196,7 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::ThreadedClock()
         for( ; iter != endM; ++iter)
         {
             (*iter).second->currentCycle = currentEvent->nCycle;
-            (*iter).first->GetClockingThread()->assignTask((*iter).second);
+            (*iter).first->GetClockingThread()->AssignTask((*iter).second);
         }
 
         // We insert all the WriterRateMatcher that must be clocked at
@@ -1198,7 +1214,7 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::ThreadedClock()
             // redefining GetClockingThread in the rate matcher
             VERIFYX(dynamic_cast<RATE_MATCHER>((*iter).first)!=NULL);
             dynamic_cast<RATE_MATCHER>((*iter).first)->GetClockingThread()->
-                assignTask((*iter).second);
+                AssignTask((*iter).second);
         }
         
     }

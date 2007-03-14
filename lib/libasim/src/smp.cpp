@@ -27,52 +27,102 @@
 #include <iostream>
 #include "asim/mesg.h"
 
-using namespace std;
+
+ATOMIC32_CLASS ASIM_SMP_THREAD_HANDLE_CLASS::threadUidGen = 0;
+
+ASIM_SMP_THREAD_HANDLE ASIM_SMP_CLASS::mainThread;
+pthread_key_t ASIM_SMP_CLASS::threadLocalKey;
+UINT32 ASIM_SMP_CLASS::maxThreads = 0;
+ATOMIC32_CLASS ASIM_SMP_CLASS::activeThreads = 0;
 
 
-// Some globals for threads.  we don't want to be passing a object's owner's
-// threadID all, and if there's an obvious way to have distinct IDs available,
-// I'm overlooking it.
-
-pthread_key_t asim_thread_id_key;
-
-void free_asim_thread_id(void * arg)
+ASIM_SMP_THREAD_HANDLE_CLASS::ASIM_SMP_THREAD_HANDLE_CLASS()
+    : threadCreateArg(NULL),
+      threadNumber(-1)
 {
-    INT32 * id = (INT32 * )arg;
+    threadId = threadUidGen++;
+};
 
-    delete id;
-}
 
-void init_asim_thread_id()
-{    
-    int rval = pthread_key_create(&asim_thread_id_key, free_asim_thread_id);
-    
-    VERIFYX(rval==0);
-}
-
-INT32 get_asim_thread_id()
+void
+ASIM_SMP_THREAD_HANDLE_CLASS::NoteThreadStart()
 {
-    INT32 * id = NULL;        
+    VERIFYX(! threadLive++);
+};
 
-    id = (INT32 *)pthread_getspecific(asim_thread_id_key);
 
-    if(id==NULL)  // This means that thread 0, master, was calling.
+
+void
+ASIM_SMP_CLASS::Init(
+    UINT32 staticMaxThreads,
+    UINT32 dynamicMaxThreads)
+{
+    //
+    // Dynamic maximum number of threads configured in the model.  If
+    // dynamicMaxThreads is 0 then use staticMaxThreads.
+    //
+    if (dynamicMaxThreads > 0)
     {
-        return 0;
+        VERIFYX(dynamicMaxThreads <= staticMaxThreads);
+        maxThreads = dynamicMaxThreads;
     }
-   
-    return *id;
+    else
+    {
+        maxThreads = staticMaxThreads;
+    }
+
+    mainThread = new ASIM_SMP_THREAD_HANDLE_CLASS();
+    VERIFY(mainThread->GetThreadId() == 0, "ASIM_SMP_CLASS::Init() called more than once");
 }
 
-INT32 set_asim_thread_id(UINT32 uniqueThreadID)
+
+void
+ASIM_SMP_CLASS::CreateThread(
+    pthread_t *thread,
+    pthread_attr_t *attr,
+    void *(*start_routine)(void *),
+    void *arg,
+    ASIM_SMP_THREAD_HANDLE threadHandle)
 {
-    INT32 * id = new INT32;  //will free this with free_asim_thread_id()_
-    *id = (INT32)uniqueThreadID;
+    threadHandle->start_routine = start_routine;
+    threadHandle->threadCreateArg = arg;
+    threadHandle->threadNumber = activeThreads++;
 
-    VERIFYX(pthread_getspecific(asim_thread_id_key) == NULL);
-    int rval = pthread_setspecific(asim_thread_id_key, (void *)id);
-    VERIFYX(rval==0);
-    
-    return *id;
+    VERIFY(UINT32(threadHandle->threadNumber) < ASIM_SMP_CLASS::GetMaxThreads(),
+           "Thread limit exceeded (" << ASIM_SMP_CLASS::GetMaxThreads() << ")");
+
+    VERIFYX(0 == pthread_create(thread, attr, &ThreadEntry, threadHandle));
 }
 
+
+void *
+ASIM_SMP_CLASS::ThreadEntry(void *arg)
+{
+    //
+    // All threads enter through this function...
+    //
+
+    ASIM_SMP_THREAD_HANDLE threadHandle = ASIM_SMP_THREAD_HANDLE(arg);
+    threadHandle->NoteThreadStart();
+
+    VERIFYX(0 == pthread_key_create(&threadLocalKey, NULL));
+    VERIFYX(0 == pthread_setspecific(threadLocalKey, threadHandle));
+
+    // Call the real entry function
+    return (*(threadHandle->start_routine))(threadHandle->threadCreateArg);
+}
+
+
+ASIM_SMP_THREAD_HANDLE
+ASIM_SMP_CLASS::GetThreadHandle(void)
+{
+    ASIM_SMP_THREAD_HANDLE threadHandle =
+        (ASIM_SMP_THREAD_HANDLE) pthread_getspecific(threadLocalKey);
+
+    if (threadHandle == NULL)
+    {
+        threadHandle = mainThread;
+    }
+
+    return threadHandle;
+}

@@ -31,6 +31,7 @@
 #include "asim/module.h"
 #include "asim/config.h"
 #include "asim/state.h"
+#include "asim/smp.h"
 
 /*
  * ASIM_SYSTEM

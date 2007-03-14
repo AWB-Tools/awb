@@ -174,8 +174,8 @@ protected:
     // cycle written
     INT64 CycleWritten;
 
-    int Start;
-    int End;
+      ATOMIC_INT32 Start;
+      ATOMIC_INT32 End;
     T *Data;
   } *Store;
   const T Dummy;
@@ -1048,7 +1048,7 @@ BufferStorage<T,S>::Read(T& data, UINT64 cycle, const char* portName, bool relax
         CycleRowRead = (INT64)cycle;
     }
          
-    entry.Start++;
+    entry.Start += 1;
 
     // if we're reading this port, it must be active.  To be ultra safe, this
     // should be the first line in this method.  However, it's probably safe to
@@ -1137,7 +1137,7 @@ BufferStorage<T,S>::Write(const T& data, UINT64 cycle, const char* portName)
     ASSERT(IsStalled() == false, "Trying to write port " << portName << " while it's stalled!\n");
 
     entry.Data[entry.End] = data;
-    entry.End++;
+    entry.End += 1;
     
     // Automatic Events notify
     // Note: If you get a compile warning on this line with something like:

@@ -49,7 +49,7 @@ ASIM_BOARD_CLASS::ASIM_BOARD_CLASS (
     {
         os.str("");                                
         os << "TEST_" << i;
-        newClockDomain(os.str(), (float)i + 1.0);
+        NewClockDomain(os.str(), (float)i + 1.0);
     }
     
 }
