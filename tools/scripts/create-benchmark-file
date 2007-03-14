@@ -1,0 +1,273 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Author: Brian Slechta
+# 
+# Description: Run with no command line paramters to see description
+#
+
+chomp (my $path = `pwd`);
+
+# global constants
+my $logfile = "/dev/null";
+my $script_name = "create_asim_benchmark_file.pl";
+my @params = ( "tag", "tlist", "flist", "outfile", "logfile");
+
+# global variables
+my %got_param;
+my %param_val;
+
+parse_parameters(@ARGV);
+check_parameters();
+
+convert();
+
+close INFILE;
+close OUTFILE;
+close LOGFILE;
+
+exit 0;
+
+
+sub print_usage;
+sub parse_parameters;
+sub check_parameters;
+sub oprint;
+sub convert;
+sub convert_tlist;
+sub convert_tag;
+sub convert_flist;
+
+
+#==============================================================================
+#==============================================================================
+#==============================================================================
+
+sub print_usage
+{
+    print "\n\tusage:\n\t$script_name -<param1>=<val1> ...\n";
+
+    print "\n\tdescription:\n";
+    print "\tthis is just a simple script to create an asim-run benchmark file\n";
+    print "\tusing a tlist, a tag, or the output of a previous trace_list command.\n";
+    print "\tit will create a benchmarks file (to stdout or specified outfile)\n";
+    print "\tusing single.cfx.\n";
+    
+    print "\n\tparamter options are:\n";
+    foreach my $param (@params)
+    {
+        print "\t$param\n";
+    }
+    print "\n";
+
+    print "\n\trequirements:\n\t$script_name needs at least 1 input parameter\n";
+    
+    print "\n\texamples:\n";
+    print "\t$script_name -tag=specjbb2k -outfile=out.benchmarks\n";
+    print "\t$script_name -tlist=my.tlist\n";
+    print "\t$script_name -flist=trace_list_out.txt\n";
+
+    print "\n";
+}
+
+sub parse_parameters # (@args)
+{
+    my (@args) = @_;
+    
+    if($#args < 0) {
+        print_usage();        
+        exit 0;
+    }
+
+    $num_args = $#args + 1;
+    for (my $ii = 0; $ii < $num_args; ++$ii) {
+        $arg = shift;
+        $found = 0;
+
+        foreach $param (@params) {
+            if ($arg =~ /^-$param=(.*)/) {
+                $got_param{$param} = 1;
+                $param_val{$param} = $1;
+                $found = 1;
+            }
+            elsif ($arg =~ /^-$param$/) {
+                $got_param{$param} = 1;
+                $found = 1;
+            }
+        }
+
+        if (!$found) {
+            #print LOGFILE "bad parameter = \"$arg\"\n";
+            print "bad parameter = \"$arg\"\n";
+            print_usage();        
+            exit 0;
+        }
+    }
+
+    foreach $key (keys %got_param) {
+        if ($param_val{$key}) {
+            #if ($DEBUG) { print LOGFILE "debug: param=$key, val=$param_val{$key}\n"; };
+        }
+        else {
+            #if ($DEBUG) { print LOGFILE "debug: param=$key\n"; };
+        }
+    }
+
+}
+
+sub check_parameters
+{
+    # open the infile
+    my $in_count = 0;
+    if ($got_param{"tag"})
+    {
+        defined $param_val{"tag"} ||  die;
+        if ($got_param{"tag"} =~ /\S+/)
+        {
+            # there is at least one non space character
+        }
+        else 
+        {
+            die;
+        }
+        ++$in_count;
+    }
+    elsif ($got_param{"tlist"})
+    {
+        ++$in_count;
+        open (INFILE, "<".$param_val{"tlist"}) || die "$!";
+    }
+    elsif ($got_param{"flist"})
+    {
+        ++$in_count;
+        open (INFILE, "<".$param_val{"flist"}) || die "$!";
+    }
+
+    # make sure we only had one infile
+    if ($in_count != 1)
+    {
+        print "need exactly one of tag, tlist, or flist as input\n";
+        print_usage();        
+        exit 0;
+    }
+
+    # create the file output if it exists
+    if ($got_param{"outfile"})
+    {
+        defined $param_val{"outfile"} || die;
+        open OUTFILE, ">".$param_val{"outfile"} || die "$!";
+    }
+
+    # create the logfile output
+    if ($got_param{"logfile"})
+    {
+        defined $param_val{"logfile"} || die;
+        my $logfile = ">".$param_val{"logfile"};
+        open (LOGFILE, $logfile) || die "could not open $logfile for writing: $!";
+    }
+    else
+    {
+        my $logfile = ">/dev/null";
+        open (LOGFILE, $logfile) || die "could not open $logfile for writing: $!";
+    }
+}
+
+# print the output
+sub oprint
+{
+    if ($got_param{"outfile"})
+    {
+        defined $param_val{"outfile"} || die;
+        print OUTFILE @_;
+    }
+    else
+    {
+        print @_;
+    }
+}
+
+sub convert
+{
+    if ($got_param{"tlist"})
+    {
+        convert_tlist();
+    }
+    elsif ($got_param{"flist"})
+    {
+        convert_flist();
+    }
+    elsif ($got_param{"tag"})
+    {
+        convert_tag();
+    }
+}
+
+sub convert_tlist
+{
+    foreach my $line (<INFILE>)
+    {
+        chomp $line;
+
+        if ($line =~ /\s*\#/)
+        {
+            # ignore
+        }
+        elsif ($line =~ /\s*\/?(\S*)/)
+        {
+            # there is some non-whitespace.  good.
+            oprint "tools/scripts/bm/tracecache/single.cfx/$1.cfg\n";
+        }
+        else
+        {
+            # all white space
+        }
+    }
+}
+
+sub convert_tag
+{
+    my @list = `trace_list $param_val{"tag"}`;
+
+    process_flist(@list);
+}
+
+sub convert_flist
+{
+    my @list = <INFILE>;
+
+    process_flist(@list);
+}
+
+
+sub process_flist # (@flist)
+{
+    my @flist = @_;
+
+    my $last_was_ptag = 0;
+    foreach my $line (@flist)
+    {
+        if ($line =~ /^ptag:/)
+        {
+            $last_was_ptag = 1;
+        }
+        else 
+        {
+            if ($last_was_ptag)
+            {
+                # this line should be a file path
+                if ($line =~ /\s*\/(.*)/)
+                {
+                    oprint "tools/scripts/bm/tracecache/single.cfx/$1.cfg\n";
+                }
+                else
+                {
+                    # not a file path!  ignore
+                }
+            }
+
+            $last_was_ptag = 0;
+        }
+    }
+}

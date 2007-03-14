@@ -163,6 +163,7 @@ if (! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "test-xpath-function" => "tools/scripts/test-xpath-function",
   "install-rcfile"      => "scripts/install-rcfile",
   "fetch-trace"         => "tools/scripts/fetch-trace",
+  "create-benchmark-file" => "tools/scripts/create-benchmark-file",
 #
 # Obsoleted tools - 
 #

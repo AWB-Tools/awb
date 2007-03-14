@@ -702,3 +702,18 @@ Directory modules/controller/classic
 Updating with simcore changes (rev. 2251)
 
 - minor changes for improved readability & robustness
+
+----------
+spartha1    Date: Wed Mar 14 01:06:26 EDT 2007  CSN: CSN-asimcore-37
+                  Wed Mar 14 05:06:26 UTC 2007
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified           36 
+ create-benchmark-file     Locally Added               0 
+
+Updating with simcore changes (rev. 2252)
+
+added tool "create-benchmark-file". run this tool without a command line to
+see its usage. it is used for creating .benchmark file from a tlist or from
+the trace_list tool. this works well with the fetch-trace tool.
