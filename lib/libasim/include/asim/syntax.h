@@ -37,7 +37,9 @@
 // stdint.h is generic, move this out of ifdef eventually!
 #include <stdint.h>
 #include <limits.h>
+#if defined(c_plusplus)
 #include <cctype>
+#endif
 
 typedef  int8_t              INT8;
 typedef uint8_t             UINT8;
