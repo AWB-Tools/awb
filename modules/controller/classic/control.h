@@ -17,8 +17,8 @@
  */
 /**
  * @file
- * @author David Goodwin
- * @brief
+ * @author David Goodwin, Carl Beckmann
+ * @brief  Base class for Asim-classic family of controllers
  */
 
 #ifndef _AWBCMD_
@@ -34,13 +34,14 @@
 #include "asim/provides/awb_stub.h"
 
 
+/********************************************************************/
+
 enum EXIT_CONDITION {THREAD_END};
 
 extern void CheckExitConditions(EXIT_CONDITION ec);
 
-/*******************************************************************/
-
-/*
+/*******************************************************************
+ *
  * Times when actions can occur.
  *
  * ACTION_NANOSECOND_ONCE   : Action occurs once at the specified nanosecond
@@ -182,15 +183,12 @@ extern void CMD_ScheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger =A
 extern void CMD_UnscheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
 
 
-
 /********************************************************************
  *
  * Global system object.
  *
  ********************************************************************/
-
 extern ASIM_SYSTEM asimSystem;
-
 
 
 
@@ -212,8 +210,74 @@ typedef class CMD_WORKLIST_CLASS *CMD_WORKLIST;
 typedef class CMD_WORKITEM_CLASS *CMD_WORKITEM;
 typedef class CMD_ACK_CLASS *CMD_ACK;
 
-// ASIM local module
-#include "schedule.h"
+
+/*******************************************************************/
+
+
+//
+// the CMD_SCHEDULE_CLASS used to be in the private header file schedule.h,
+// but was moved here so that controllers that use this base class
+// can see it an override it as necessary
+//
+typedef class CMD_SCHEDULE_CLASS *CMD_SCHEDULE;
+
+/*
+ * CMD_SCHEDULE
+ *
+ * Schedule of events and the cycle or committed instruction that they
+ * should occur at.
+ */
+class CMD_SCHEDULE_CLASS
+{
+    private:
+        /*
+         * Four lists of work items containing actions waiting for a
+         * certain cycle, a certain number of committed instructions,
+         * certain number of nanoseconds and packets. All of them are sorted.
+         */        
+        CMD_WORKLIST cycleList;
+        CMD_WORKLIST instList;
+        CMD_WORKLIST nanosecondList;        
+        CMD_WORKLIST packetList;
+        CMD_WORKLIST macroInstList;
+
+        
+    public:
+        // constructors / destructors
+        CMD_SCHEDULE_CLASS ();
+        ~CMD_SCHEDULE_CLASS ();
+
+        /*
+         * Return the next event item that should be handled. Return NULL
+         * if there is no action ready.
+         */
+        CMD_WORKITEM ReadyEvent (UINT64 currentNanosecond, UINT64 currentCycle, UINT64 currentInst, UINT64 currentMacroInst, UINT64 currentPacket);
+
+        /*
+         * Schedule 'item' as specified by 'trig' and 'cnt'.
+         */
+        void Schedule (CMD_WORKITEM item, UINT64 currentNanosecond, UINT64 currentCycle, UINT64 currentInst, UINT64 currentMacroInst, UINT64 currentPacket);
+
+        /*
+         * Return the cycles or number of committed instructions at which
+         * the next event should occur.
+         */
+        UINT64 NanosecondForNextEvent (UINT64 currentNanosecond);
+        UINT64 CycleForNextEvent (UINT64 currentCycle);
+        UINT64 InstForNextEvent (UINT64 currentInst);
+        UINT64 PacketForNextEvent (UINT64 currentInst);
+        UINT64 MacroInstForNextEvent (UINT64 currentMacroInst);
+
+        /*
+         * Clear progress work items from the schedule.
+         */
+        void ClearNanosecondProgress (void);
+        void ClearCycleProgress (void);
+        void ClearInstProgress (void);
+        void ClearPacketProgress (void);
+        void ClearMacroInstProgress (void);
+
+};
 
 
 /********************************************************************/
@@ -379,7 +443,7 @@ class CMD_WORKITEM_CLASS
 typedef class CMD_INIT_CLASS *CMD_INIT;
 class CMD_INIT_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         /*
          * Arguments for the feeder and system.
          */
@@ -441,7 +505,7 @@ class CMD_STOP_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_PROGRESS_CLASS *CMD_PROGRESS;
 class CMD_PROGRESS_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         AWB_PROGRESSTYPE type;
         char *args;
         
@@ -495,7 +559,7 @@ class CMD_RESETSTATS_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_DEBUG_CLASS *CMD_DEBUG;
 class CMD_DEBUG_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         bool on;
         
     public:
@@ -514,7 +578,7 @@ class CMD_DEBUG_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_TRACE_CLASS *CMD_TRACE;
 class CMD_TRACE_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         TRACEABLE_DELAYED_ACTION regex;
         
     public:
@@ -539,7 +603,7 @@ class CMD_TRACE_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_STATS_CLASS *CMD_STATS;
 class CMD_STATS_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         bool on;
         
     public:
@@ -559,7 +623,7 @@ class CMD_STATS_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_EVENTS_CLASS *CMD_EVENTS;
 class CMD_EVENTS_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         bool on;
         
     public:
@@ -579,7 +643,7 @@ class CMD_EVENTS_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_STRIPCHART_CLASS *CMD_STRIPCHART;
 class CMD_STRIPCHART_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         bool on;
         
     public:
@@ -599,7 +663,7 @@ class CMD_STRIPCHART_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_PROFILE_CLASS *CMD_PROFILE;
 class CMD_PROFILE_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         bool on;
         
     public:
@@ -634,7 +698,7 @@ class CMD_EXIT_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_EXECUTE_CLASS *CMD_EXECUTE;
 class CMD_EXECUTE_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         UINT64 nanoseconds;
         UINT64 cycles;
         UINT64 insts;
@@ -665,7 +729,7 @@ class CMD_EXECUTE_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDBEGIN_CLASS *CMD_THDBEGIN;
 class CMD_THDBEGIN_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -684,7 +748,7 @@ class CMD_THDBEGIN_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDEND_CLASS *CMD_THDEND;
 class CMD_THDEND_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -703,7 +767,7 @@ class CMD_THDEND_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDUNBLOCK_CLASS *CMD_THDUNBLOCK;
 class CMD_THDUNBLOCK_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -723,7 +787,7 @@ class CMD_THDUNBLOCK_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDBLOCK_CLASS *CMD_THDBLOCK;
 class CMD_THDBLOCK_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         ASIM_INST inst;
         
@@ -743,7 +807,7 @@ class CMD_THDBLOCK_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDSKIP_CLASS *CMD_THDSKIP;
 class CMD_THDSKIP_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         UINT64 insts;
         INT32 markerID;
@@ -766,7 +830,7 @@ class CMD_THDSKIP_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDSCHED_CLASS *CMD_THDSCHED;
 class CMD_THDSCHED_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -786,7 +850,7 @@ class CMD_THDSCHED_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDUNSCHED_CLASS *CMD_THDUNSCHED;
 class CMD_THDUNSCHED_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -806,7 +870,7 @@ class CMD_THDUNSCHED_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDHOOK_CLASS *CMD_THDHOOK;
 class CMD_THDHOOK_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -826,7 +890,7 @@ class CMD_THDHOOK_CLASS : public CMD_WORKITEM_CLASS
 typedef class CMD_THDUNHOOK_CLASS *CMD_THDUNHOOK;
 class CMD_THDUNHOOK_CLASS : public CMD_WORKITEM_CLASS
 {
-    private:
+    protected:
         ASIM_THREAD thread;
         
     public:
@@ -980,4 +1044,127 @@ class CMD_WORKLIST_CLASS
 };
 
 
-#endif /* _CMD_ */
+
+/********************************************************************
+ *
+ * The following is a singleton object class that represents the controller.
+ * Its methods are the worker routines for the software interface defined
+ * by the routines above.  Those routines call these methods as virtual
+ * functions via the singleton object pointer, allowing derived classes
+ * to override any methods they need to change.
+ *
+ ********************************************************************/
+
+class CONTROLLER_CLASS {
+  public:
+    CONTROLLER_CLASS();
+    ~CONTROLLER_CLASS();
+
+    // primary entry point for the code
+    int main(INT32 argc, char *argv[], char *envp[]);
+    void PrintInfo();
+
+    // Command API, accessible by other modules
+    void CheckExitConditions(EXIT_CONDITION ec);
+    void CMD_SchedulerLoop (void);
+    bool CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **allEnvp);
+    void CMD_Usage (FILE *file);
+    ASIM_STATELINK CMD_StateList (void);
+    void CMD_Start (void);
+    void CMD_Stop (CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Progress (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_EmitStats (CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_ResetStats (CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Exit (CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Debug (bool on, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Trace (TRACEABLE_DELAYED_ACTION act, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Stats (bool on, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Events (bool on, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Stripchart (bool on, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_Profile (bool on, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_ThreadBegin (ASIM_THREAD thread);
+    void CMD_ThreadEnd (ASIM_THREAD thread);
+    void CMD_ThreadBlock (ASIM_THREAD thread, ASIM_INST inst);
+    void CMD_ThreadUnblock (ASIM_THREAD thread);
+    void CMD_SkipThread (ASIM_THREAD thread, UINT64 insts, INT32 markerID,
+                        	CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_ScheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+    void CMD_UnscheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger =ACTION_NOW, UINT64 n =0);
+
+    void PartitionArgs   ( INT32 argc,   char *argv[]           );
+    void PartitionOneArg ( INT32 argc,   char *argv[], INT32 &i );
+    void Usage           ( char *exec,   FILE *file             );
+    bool ParseEvents     ( INT32 argc,   char *argv[]           );
+    bool ParseOneEvent   ( INT32 argc,   char *argv[], INT32 &i );
+    int  ParseVariables  ( char *argv[], UINT32 argc            );
+    int  parseTraceCmd   ( const char *progName, const char *command, string &regex, int &level );
+
+  protected:
+    // TraceFileName (in debugger mode)
+    char *StatsFileName; 
+
+    // command line argument handling
+    UINT32   origArgc,   awbArgc,   sysArgc,    fdArgc;
+    char   **origArgv, **awbArgv, **sysArgv,  **fdArgv;
+    bool                            systemArgs, feederArgs;
+
+    // 'ctrlWorkList' contains new work items that the controller needs to
+    // schedule.  The performance model and awb puts things on the list.
+    CMD_WORKLIST ctrlWorkList;
+    // Schedule of events that need to be performed.
+    CMD_SCHEDULE schedule;
+
+  friend class CMD_START_CLASS;
+  friend class CMD_STOP_CLASS;
+  friend class CMD_EXIT_CLASS;
+    // True if the performance model is stopped. When stopped time doesn't
+    // advance, so no actions are performance.
+    volatile bool pmStopped;
+    // True if the performance model is exiting. The exit command has been
+    // received and we are going through final cleanup operations.
+    volatile bool pmExiting;
+    // True if the performance model has been initialized.
+    bool pmInitialized;
+};
+
+
+/*******************************************************************
+ *
+ * This is the processing for the performance model itself.
+ *
+ ******************************************************************/
+
+CMD_ACK PmProcessEvent (CMD_WORKITEM workItem);
+
+
+/********************************************************************
+ * trace macros for the controller
+ *
+ * this used to be in control.cpp.  I'm not sure if it's quite safe to put here...
+ *
+ *********************************************************************/
+
+using namespace std;
+
+class CONTROL_TRACEABLE_CLASS : public TRACEABLE_CLASS
+{
+public:
+    CONTROL_TRACEABLE_CLASS()
+    {
+        SetTraceableName("Control");
+    }
+};
+
+#define ASIM_XMSG(x) \
+({ \
+       T1_AS(&controlTraceable, __FILE__ << ":" << __LINE__ << ": " <<  x); \
+})
+//#undef ASIM_XMSG
+//#define ASIM_XMSG(x) do{ TTRACE(x); exit(1); }while(0)
+
+#define DMSG(x) \
+({ \
+       T1_UNCOND(__FILE__ << ":" << __LINE__ << ": " <<  x); \
+})
+
+#endif /* __CONTROL_H__ */

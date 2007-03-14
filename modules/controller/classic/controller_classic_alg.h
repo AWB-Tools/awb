@@ -1,5 +1,5 @@
 /*
- *Copyright (C) 2004-2006 Intel Corporation
+ *Copyright (C) 1999-2006 Intel Corporation
  *
  *This program is free software; you can redistribute it and/or
  *modify it under the terms of the GNU General Public License
@@ -15,26 +15,28 @@
  *along with this program; if not, write to the Free Software
  *Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 /**
  * @file
- * @author David Goodwin
- * @brief Main ASIM initialiaztion and driver - interface between
- * ASIM's controller, performance model, and visualizer.
+ * @author Carl Beckmann
+ * @brief
  */
 
-#ifndef _ARGS_
-#define _ARGS_
+#ifndef __CONTROL_CLASSIC_ALG_H__
+#define __CONTROL_CLASSIC_ALG_H__
 
-// ASIM core
-#include "asim/syntax.h"
+// ASIM modules 
+#include "asim/provides/controller.h"
 
-extern void PartitionArgs (INT32 argc, char **argv);
-extern void Usage (char *exec, FILE *file);
-extern bool ParseEvents (INT32 argc, char **argv);
 
-// Arguments partitioned into awb's, system's and feeder's
 
-extern UINT32 origArgc, awbArgc, sysArgc, fdArgc, knobsArgc;
-extern char **origArgv, **awbArgv, **sysArgv, **fdArgv, **knobsArgv;
+//
+// The single controller instance
+// The "Asim classic controller" uses as its implementation the controller
+// base class directly, so there is nothing here to override
+//
+typedef CONTROLLER_CLASS ACTUAL_CONTROLLER_CLASS;
+extern                   ACTUAL_CONTROLLER_CLASS theController;
 
-#endif
+
+#endif /* __CONTROL_CLASSIC_ALG_H__ */

@@ -23,21 +23,30 @@ File=controllerTclBeamer
 Name=TclBeamer Controller
 Description=Controller with AWB TclBeamer (requires Tarati)
 SaveParameters=0
+Type=Asim
 
 [Model]
 DefaultAttributes=tclbeamer
-model=Asim classic controller
-
+model=Asim classic controller base
 
 [AWB TclBeamer]
-File=pm/controller/classic/awb_taratiTclBeamer.awb
+File=modules/controller/classic/awb_taratiTclBeamer.awb
+Packagehint=simcore
 
-[Asim classic controller/Requires]
-workbench=Simple Workbench
-awb_stub=AWB TclBeamer
 
 [Asim classic controller]
-File=pm/controller/classic/controller_classic.awb
+File=modules/controller/classic/controller_classic_alg.awb
+Packagehint=simcore
 
 [Simple Workbench]
-File=pm/controller/workbench/simple/simpleWb.awb
+File=modules/controller/workbench/simple/simpleWb.awb
+Packagehint=simcore
+
+[Asim classic controller base]
+File=modules/controller/classic/controller_classic.awb
+Packagehint=simcore
+
+[Asim classic controller base/Requires]
+workbench=Simple Workbench
+awb_stub=AWB TclBeamer
+controller_alg=Asim classic controller

@@ -560,3 +560,41 @@ Directory tools/scripts
 Updating with changes in simcore (rev. 2246)
 
 - support for specifying nebatch expressions for class arguments.
+----------
+spartha1    Date: Tue Mar 13 23:45:08 EDT 2007  CSN: CSN-asimcore-32
+                  Wed Mar 14 03:45:08 UTC 2007
+
+
+Directory config/pm
+ controllerNativeTcl.apm   Locally Modified           31 
+ controllerTclBeamer.apm   Locally Modified           31 
+
+Directory modules/controller/classic
+ schedule.h                Locally Removed            31 
+ args.h                    Locally Removed            31 
+ args_x86.cpp              Locally Modified           31 
+ main.cpp                  Locally Modified           31 
+ control_x86.cpp           Locally Modified           31 
+ control.h                 Locally Modified           31 
+ schedule.cpp              Locally Modified           31 
+ args.cpp                  Locally Modified           31 
+ controller_classic_alg.awb Locally Added               0 
+ main_x86e.cpp             Locally Modified           31 
+ control_x86e.h            Locally Modified           31 
+ args_x86.h                Locally Removed            31 
+ controller_classic.awb    Locally Modified           31 
+ controller_classic_alg.h  Locally Added               0 
+ controller_x86.awb        Locally Modified           31 
+ controller_x86_alg.h      Locally Added               0 
+ control.cpp               Locally Modified           31 
+ controller_x86e.awb       Locally Modified           31 
+ controller_x86e_alg.h     Locally Added               0 
+ main_x86.cpp              Locally Modified           31 
+ control_x86.h             Locally Modified           31 
+ control_x86e.cpp          Locally Modified           31 
+
+Updating with simcore changes (rev. 2247)
+
+- Refactored the controllers to use a common base module
+(controller_classic.awb) which can be specialized using plugin "algorithm"
+modules tha %provide a controller_alg.

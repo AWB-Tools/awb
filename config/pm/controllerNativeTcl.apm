@@ -23,21 +23,30 @@ File=controllerNativeTcl
 Name=Native TCL Controller
 Description=Classic AWB Controller (native built-in TCL)
 SaveParameters=0
+Type=Asim
 
 [Model]
 DefaultAttributes=
-model=Asim classic controller
+model=Asim classic controller base
 
-
-[Asim classic controller/Requires]
-workbench=Simple Workbench
-awb_stub=AWB Native TCL
 
 [Asim classic controller]
-File=pm/controller/classic/controller_classic.awb
+File=modules/controller/classic/controller_classic_alg.awb
+Packagehint=simcore
 
 [AWB Native TCL]
-File=pm/controller/classic/awb.awb
+File=modules/controller/classic/awb.awb
+Packagehint=simcore
 
 [Simple Workbench]
-File=pm/controller/workbench/simple/simpleWb.awb
+File=modules/controller/workbench/simple/simpleWb.awb
+Packagehint=simcore
+
+[Asim classic controller base/Requires]
+workbench=Simple Workbench
+awb_stub=AWB Native TCL
+controller_alg=Asim classic controller
+
+[Asim classic controller base]
+File=modules/controller/classic/controller_classic.awb
+Packagehint=simcore

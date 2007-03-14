@@ -19,7 +19,7 @@
 
 /**
  * @file
- * @author David Goodwin
+ * @author David Goodwin, Carl Beckmann
  * @brief
  */
 
@@ -38,6 +38,9 @@
 #include "asim/provides/instfeeder_interface.h"
 #include "asim/provides/controller.h"
 #include "asim/provides/context_scheduler.h"
+// we need this so we can statically know the type of "theController"
+// in the API functions declared using CONTROLLER_BASE_EXTERNAL_FUNCTION
+#include "asim/provides/controller_alg.h"
 
 //PTV and stats
 #include <signal.h>
@@ -47,11 +50,11 @@
 #include "knob.h"
 
 bool pipetrace_quiet_mode_on=true;
-static Knob<int> histo("histo", "Create stats file with histogram output", true);
+Knob<bool> histo("histo", "Create stats file with histogram output", true);
 //Willy Perfchecker
-static Knob<int> perf_max_msgs("perf_max_msgs", "Max num of perfchecker messages output in stats file", 100);
-static Knob<int> perfchecker_rulemask("perfchecker_rulemask", "enable bitmask for: <erules> <rules> <implicit>", RULEMASK_ALL);
-static Knob<int> perfchecker_window("perfchecker_window", "Window (in cycles) before records are forcibly considered closed for perfchecker evaluation", 20000);
+Knob<int> perf_max_msgs("perf_max_msgs", "Max num of perfchecker messages output in stats file", 100);
+Knob<int> perfchecker_rulemask("perfchecker_rulemask", "enable bitmask for: <erules> <rules> <implicit>", RULEMASK_ALL);
+Knob<int> perfchecker_window("perfchecker_window", "Window (in cycles) before records are forcibly considered closed for perfchecker evaluation", 20000);
 
 /*
  * These are definitions used for the following special knobs to support
@@ -96,30 +99,26 @@ call_perf_activate_all(void)
 {
         perf_activate_all(1);
 }
-static Knob<void> perf_activate_all_mods("perf_activate_all_mods", "Activate all perfchecker modules", call_perf_activate_all);
+Knob<void> perf_activate_all_mods("perf_activate_all_mods", "Activate all perfchecker modules", call_perf_activate_all);
 
 static void
 call_perf_deactivate_all(void)
 {
         perf_activate_all(0);
 }
-static Knob<void> perf_deactivate_all_mods("perf_deactivate_all_mods", "Deactivate all perfchecker modules", call_perf_deactivate_all);
+Knob<void> perf_deactivate_all_mods("perf_deactivate_all_mods", "Deactivate all perfchecker modules", call_perf_deactivate_all);
 
-static int perf_force = 0;
-static void
-set_perf_force(void)
+void set_perf_force(void)
 {
-        perf_force = 1;
+        theController.perf_force = 1;
 }
-static Knob<void> force("force", "Force perfchecker modules to ignore deactivation by missing pipetrace pattern matches", set_perf_force);
+Knob<void> force("force", "Force perfchecker modules to ignore deactivation by missing pipetrace pattern matches", set_perf_force);
 
-static int perf_explain = 0;
-static void
-set_perf_explain(void)
+void set_perf_explain(void)
 {
-        perf_explain = 1;
+        theController.perf_explain = 1;
 }
-static Knob<void> explain("explain", "Verbose perfchecker output for reasons modules enabled/disabled", set_perf_explain);
+Knob<void> explain("explain", "Verbose perfchecker output for reasons modules enabled/disabled", set_perf_explain);
 
 // Perfplot stuff ykulbak-s
 Knob<char*>  perfplot_file("perfp_file", "Perfplot output file name", 0);
@@ -128,118 +127,39 @@ Knob<char*>  perfplot_stats("perfp_stats", "Perfplot stats to print", 0);
 Knob<char*>  perfplot_firing_stat("perfp_firing_stat", "The stat by which Perfplot firing is triggered", 0);
 Knob<uint32> perfplot_start_from_end("perfp_start_from_end" , "Start perfplot this many instructions before the end; 0 to disable", (uint32) 0);
 
-FILE *perfplotfp;
-bool perfplot_enabled = true;
+static FILE *perfplotfp;
+static bool perfplot_enabled = true;
 
 // ykulbak-e
 
-FILE *pclogfp;
+static FILE *pclogfp;
 
-
-
-using namespace std;
-
-class CONTROL_TRACEABLE_CLASS : public TRACEABLE_CLASS
-{
-public:
-    CONTROL_TRACEABLE_CLASS()
-    {
-        SetTraceableName("Control");
-    }
-};
-
-CONTROL_TRACEABLE_CLASS controlTraceable;
-
-#define ASIM_XMSG(x) \
-({ \
-       T1_AS(&controlTraceable, __FILE__ << ":" << __LINE__ << ": " <<  x); \
-})
-//#undef ASIM_XMSG
-//#define ASIM_XMSG(x) do{ TTRACE(x); exit(1); }while(0)
-
-#define DMSG(x) \
-({ \
-       T1_UNCOND(__FILE__ << ":" << __LINE__ << ": " <<  x); \
-})
-
-CMD_ACK PmProcessEvent (CMD_WORKITEM workItem);
-
-/*
- * The system being simulated.
- */
-ASIM_SYSTEM asimSystem;
-
-/*
- * 'ctrlWorkList' contains new work items that the controller needs to
- * schedule.  The performance model and awb puts things on the list.
- */
-static CMD_WORKLIST ctrlWorkList;
-
-/*
- * Schedule of events that need to be performed.
- */
-static CMD_SCHEDULE schedule;
-
-/*
- * True if the performance model is stopped. When stopped time doesn't
- * advance, so no actions are performance.
- */
-static volatile bool pmStopped = true;
-
-/*
- * True if the performance model is exiting. The exit command has been
- * received and we are going through final cleanup operations.
- */
-static volatile bool pmExiting = false;
-
-/*
- * True if the performance model has been initialized.
- */
-static bool pmInitialized = false;
-
-// TraceFileName (in debugger mode)
-char *StatsFileName = NULL; 
-char *CheckPointFileName = NULL;
-extern bool stripsOn;
 
 /*Pipetrace and stats
  */
 bool pipetrace_closed = false;
 uint32 instrs_retired[MAX_THREADS*MAX_CORES*MAX_PROCS];
 
-// Funtion called when an exit condition is reached
-void
-CheckExitConditions(EXIT_CONDITION ec)
-{
-    switch(ec)
-    {
-        case THREAD_END:
-            if(STOP_THREAD==1)
-                ctrlWorkList->Add(new CMD_EXIT_CLASS(ACTION_NOW,0));
-            break;
-        default: ;
-    }
-}
 
 // SIGABRT handler
-void abort_handler (int signum) 
+static void abort_handler (int signum) 
 {
       ASIM_XMSG("Signal:" << signum << " called dumping ptv and stats..." );
       signal(signum, SIG_DFL) ; // reset sig
-      DumpStats(1) ;
+      theController.DumpStats(1) ;
 }
 
 
 //function for on_exit to use when dumping stats
-void DumpStatsOnExit (int exitStatus, void *arg)
+static void DumpStatsOnExit (int exitStatus, void *arg)
 {
-    DumpStats(exitStatus);
+    theController.DumpStats(exitStatus);
 }
 
 
 // Function to call onexit to dump ptv/stats.
 void
-DumpStats (int err_occurred)
+CONTROLLER_X86_CLASS::DumpStats (int err_occurred)
 /*
  * Dump PTV/stats
  */
@@ -278,7 +198,7 @@ DumpStats (int err_occurred)
 
 //Function to return the next token in the feeder config file.
 string
-getword(
+CONTROLLER_X86_CLASS::getword(
     FILE *fp, 
     int *linenum)
 {
@@ -316,10 +236,7 @@ getword(
     return token;
 }
 
-void
-CMD_Perfplot (CMD_ACTIONTRIGGER trigger, UINT64 n);
-
-void Perfplot_Init() {
+void CONTROLLER_X86_CLASS::Perfplot_Init() {
     // Perfplot Init
     if (perfplot_file) {
         CMD_ACTIONTRIGGER trigger = ACTION_NEVER;
@@ -356,36 +273,14 @@ void Perfplot_Init() {
 }
 
 bool
-CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **allEnvp)
+CONTROLLER_X86_CLASS::CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **allEnvp)
 /*
  * Initialize the performance model. Return false
  * if error.
  */
 {
-    ASIM_XMSG("CMD_Init...");
-
-    //
-    // Initially there is no system...
-
-    asimSystem = NULL;
-    
-    //
-    // Create controller work list.
-
-    ctrlWorkList = new CMD_WORKLIST_CLASS;  
-    
-    //
-    // Create the schedule...
-
-    schedule = new CMD_SCHEDULE_CLASS; 		
-    
-    // Initialize the performance model
-    CMD_ACK ack = PmProcessEvent(
-        new CMD_INIT_CLASS(fdArgc, fdArgv, pmArgc, pmArgv, allEnvp));
-
-    pmInitialized = ack->Success();
-    delete ack->WorkItem();
-    delete ack;
+    // invoke base class CMD_Init routine
+    theController.CONTROLLER_CLASS::CMD_Init(fdArgc, fdArgv, pmArgc, pmArgv, allEnvp);
  
     // Trap signals to dump ptv etc
     signal(SIGABRT, abort_handler) ;
@@ -434,73 +329,7 @@ CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **all
 
 
 void
-CMD_Usage (FILE *file)
-/*
- * Print the usage info for the feeder and system.
- */
-{
-    ASIM_XMSG("CMD_Usage...");
-
-    //
-    // This command function just calls the usage function directly.
-
-    SYS_Usage(file);
-    IFEEDER_Usage(file);
-}
-
-
-
-/*******************************************************************
- *                                                                  
- *  Most of the following routines add 'command' events to the 
- *  controller work list. They are processed by the scheduler.
- *
- ******************************************************************/
-
-
-void
-CMD_Start (void)
-/*
- * Start the performance model running.
- */
-{
-    ASIM_XMSG("CMD_Start...");
-
-    //
-    // We have to clear 'pmStopped' ourselves, since the controller thread
-    // can't (it's blocked since 'pmStopped' is true)
-
-    pmStopped = false;
-
-    //
-    // Generate the start work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_START_CLASS);	
-    asimSystem->SYS_Break();
-}
-
-
-void
-CMD_Stop (CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to stop the performance model.
- */
-{
-    ASIM_XMSG("CMD_Stop...");
-
-    //
-    // Generate the stop work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_STOP_CLASS(trigger, n));  
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_Progress (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_Progress (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger, UINT64 n)
 /*
  * Create an action to show progress of the performance model.
  */
@@ -512,13 +341,13 @@ CMD_Progress (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger, UINT
     // performance model so that it will return control to the controller
     // if it is executing.
     
-    ctrlWorkList->Add(new CMD_PROGRESS_CLASS(type, args, trigger, n)); 
+    ctrlWorkList->Add(new CMD_PROGRESS_X86_CLASS(type, args, trigger, n)); 
     asimSystem->SYS_Break();
 }
 
 
 void
-CMD_Perfplot (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_Perfplot (CMD_ACTIONTRIGGER trigger, UINT64 n)
 /*
  * Create an action to show progress of the performance model.
  */
@@ -536,7 +365,7 @@ CMD_Perfplot (CMD_ACTIONTRIGGER trigger, UINT64 n)
 
 
 void
-CMD_EmitStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_EmitStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
 /*
  * Create an action to emit stats of the performance model.
  */
@@ -548,12 +377,12 @@ CMD_EmitStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
     // performance model so that it will return control to the controller
     // if it is executing.
     
-    ctrlWorkList->Add(new CMD_EMITSTATS_CLASS(trigger, n)); 
+    ctrlWorkList->Add(new CMD_EMITSTATS_X86_CLASS(trigger, n)); 
     asimSystem->SYS_Break();
 }
 
 void
-CMD_ResetStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_ResetStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
 /*
  * Create an action to reset stats of the performance model.
  */
@@ -565,14 +394,15 @@ CMD_ResetStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
     // performance model so that it will return control to the controller
     // if it is executing.
 
-    ctrlWorkList->Add(new CMD_RESETSTATS_CLASS(trigger, n)); 
+    ctrlWorkList->Add(new CMD_RESETSTATS_X86_CLASS(trigger, n)); 
     asimSystem->SYS_Break();
 }
+
 /*
  * Save a checkpoint file on the trigger
  */
 void 
-CMD_SaveCheckpoint (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_SaveCheckpoint (CMD_ACTIONTRIGGER trigger, UINT64 n)
 {
     ASIM_XMSG( "CMD_SaveCheckPoint...");
     ctrlWorkList->Add(new CMD_DUMPCHECKPOINT_CLASS(trigger, n));
@@ -583,7 +413,7 @@ CMD_SaveCheckpoint (CMD_ACTIONTRIGGER trigger, UINT64 n)
  * Load a checkpoint file on the trigger
  */
 void 
-CMD_LoadCheckpoint (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_LoadCheckpoint (CMD_ACTIONTRIGGER trigger, UINT64 n)
 {
     ASIM_XMSG( "CMD_LoadCheckPoint...");
     ctrlWorkList->Add(new CMD_LOADCHECKPOINT_CLASS(trigger, n));
@@ -592,60 +422,7 @@ CMD_LoadCheckpoint (CMD_ACTIONTRIGGER trigger, UINT64 n)
 }
 
 void
-CMD_Debug (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to turn 'on' or off debugging as specified by 'trigger'
- * and 'n'.
- */
-{
-    ASIM_XMSG("CMD_Debug...");
-    
-    //
-    // Generate the debug work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_DEBUG_CLASS(on, trigger, n)); 
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_Trace (TRACEABLE_DELAYED_ACTION act, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to turn 'on' or off debugging as specified by 'trigger'
- * and 'n'.
- */
-{
-    ASIM_XMSG("CMD_Trace...");
-
-    //
-    // Generate the debug work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_TRACE_CLASS(act, trigger, n));
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_Stats (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to turn 'on' or off stats as specified by 'trigger'
- * and 'n'.
- */
-{
-    ASIM_XMSG("CMD_Stats...");
-    
-    //
-    // Generate the debug work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-    ctrlWorkList->Add(new CMD_STATS_CLASS(on, trigger, n)); 
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_Ptv (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_X86_CLASS::CMD_Ptv (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
 /*
  * Create an action to turn 'on' or off ptv as specified by 'trigger'
  * and 'n'.
@@ -660,233 +437,10 @@ CMD_Ptv (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Events (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to turn 'on' or off events as specified by 'trigger'
- * and 'n'.
- */
-{
-    ASIM_XMSG("CMD_Events...");
-    
-    //
-    // Generate the debug work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_EVENTS_CLASS(on, trigger, n)); 
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_Stripchart (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to turn 'on' or off stripcharts as specified by 'trigger'
- * and 'n'.
- */
-{
-    ASIM_XMSG("CMD_Stripchart...");
-    //
-    // Generate the debug work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_STRIPCHART_CLASS(on, trigger, n)); 
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_Profile (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to turn 'on' or off profiling as specified by 'trigger'
- * and 'n'.
- */
-{
-    ASIM_XMSG("CMD_Profile...");
-    
-    //
-    // Generate the profile work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_PROFILE_CLASS(on, trigger, n));
-    asimSystem->SYS_Break();
-}
-
-
-ASIM_STATELINK
-CMD_StateList (void)
-/*
- * Return a list of all the exposed performance model state. This cannot be
- * called until the model has been initialized, or an error will occur.
- */
-{
-    if (!pmInitialized)
-        ASIMERROR("CMD_StateList called on uninitialized performance model.\n");
-
-    STATE_ITERATOR_CLASS iter(asimSystem, true);
-    ASIM_STATELINK pmState = NULL;
-    ASIM_STATE state;
-
-    while ((state = iter.Next()) != NULL) {
-        pmState = new ASIM_STATELINK_CLASS(state, pmState, false);
-    }
-
-    return(pmState);
-}
-
-
-void 
-CMD_ThreadBegin (ASIM_THREAD thread)
-/*
- * Called by feeder to inform that a new thread is available to be
- * schedule on the performance model.
- */
-{
-    ASIM_XMSG("CMD_ThreadBegin...");
-
-    //
-    // Generate the new-thread work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_THDBEGIN_CLASS(thread));
-    if (asimSystem != NULL)
-    {
-        asimSystem->SYS_Break();
-    }
-}
-
-
-void 
-CMD_ThreadEnd (ASIM_THREAD thread)
-/*
- * Called by feeder to inform that a thread is ending.
- */
-{
-    ASIM_XMSG("CMD_ThreadEnd...");
-
-    //
-    // Generate the thread-end work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-    ctrlWorkList->Add(new CMD_THDEND_CLASS(thread));        
-    asimSystem->SYS_Break();
-}
-
-void 
-CMD_ThreadUnblock (ASIM_THREAD thread)
-/*
- * Called by feeder to inform that a thread is available again to be
- * re-scheduled on the performance model.
- */
-{
-    ASIM_XMSG("CMD_ThreadUnblock...");
-
-    //
-    // Generate the thread-unblock work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_THDUNBLOCK_CLASS(thread));
-    asimSystem->SYS_Break();
-}
-
-
-void 
-CMD_ThreadBlock (ASIM_THREAD thread, ASIM_INST inst)
-/*
- * Called by feeder to inform that a thread is blocking.
- */
-{
-    ASIM_XMSG("CMD_ThreadBlock...");
-
-    //
-    // Generate the thread-block work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_THDBLOCK_CLASS(thread, inst));
-    asimSystem->SYS_Break();
-}
-
-void
-CMD_SkipThread (ASIM_THREAD thread, UINT64 insts, INT32 markerID, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Skip 'insts' instructions in 'thread'.
- */
-{
-    ASIM_XMSG("CMD_SkipThread...");
-    
-    //
-    // Generate the debug work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_THDSKIP_CLASS(thread, insts, markerID, trigger, n));
-    asimSystem->SYS_Break();
-}
-
-
-void
-CMD_ScheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Schedule 'thread' on the performance model.
- */
-{
-    ASIM_XMSG("CMD_ThreadSchedule...");
-    
-    //
-    // Generate the scheduling work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_THDSCHED_CLASS(thread, trigger, n));
-    asimSystem->SYS_Break();
-}
-
-
-void
-CMD_UnscheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Unschedule 'thread' on the performance model.
- */
-{
-    ASIM_XMSG("CMD_ThreadUnschedule...");
-    
-    //
-    // Generate the unscheduling work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_THDUNSCHED_CLASS(thread, trigger, n));
-    asimSystem->SYS_Break();
-}
-
-
-
-void
-CMD_Exit (CMD_ACTIONTRIGGER trigger, UINT64 n)
-/*
- * Create an action to exit the performance model.
- */
-{
-    ASIM_XMSG( "CMD_Exit... trigger " << trigger << " n=" << n );
-    
-    //
-    // Generate the exit work item for the controller and break the
-    // performance model so that it will return control to the controller
-    // if it is executing.
-
-    ctrlWorkList->Add(new CMD_EXIT_CLASS(trigger, n));
-    asimSystem->SYS_Break();
-}
-
-
 /**********************************************************************/
 
 void
-CMD_SchedulerLoop (void)
+CONTROLLER_X86_CLASS::CMD_SchedulerLoop (void)
 /*
  * Controller scheduler loop. Maintains a list of the next "action" that
  * needs to be performed by the performance model or by the controller
@@ -1092,25 +646,7 @@ CMD_SchedulerLoop (void)
  ******************************************************************/
 
 void
-CMD_START_CLASS::CmdAction (void)
-{
-    ASIM_XMSG("CMD_START_CLASS::CmdAction");
-    pmStopped = false;
-    AWB_Progress(AWBPROG_START);
-}
-
-
-void
-CMD_STOP_CLASS::CmdAction (void)
-{
-    ASIM_XMSG("CMD_STOP_CLASS::CmdAction");
-    pmStopped = true;
-    AWB_Progress(AWBPROG_STOP);
-}
-
-
-void
-CMD_PROGRESS_CLASS::CmdAction (void)
+CMD_PROGRESS_X86_CLASS::CmdAction (void)
 {
     ASIM_XMSG("CMD_PROGRESS_CLASS::CmdAction");
     //
@@ -1132,7 +668,7 @@ CMD_PERFPLOT_CLASS::CmdAction (void)
 
 
 void
-CMD_EMITSTATS_CLASS::CmdAction (void)
+CMD_EMITSTATS_X86_CLASS::CmdAction (void)
 {
     ostringstream statsFileName;
 
@@ -1181,18 +717,18 @@ void
 CMD_LOADCHECKPOINT_CLASS::CmdAction (void)
 {
 //    ASSERT(0,"Load check point not finished");
-     IFEEDER_BASE_CLASS::LoadAllFeederState(CheckPointFileName,FUNCTIONAL_MODEL_DUMP_ALL_STATE);
+     IFEEDER_BASE_CLASS::LoadAllFeederState(theController.CheckPointFileName,FUNCTIONAL_MODEL_DUMP_ALL_STATE);
 
 }
 void
 CMD_DUMPCHECKPOINT_CLASS::CmdAction (void)
 {
-    IFEEDER_BASE_CLASS::DumpAllFeederState(CheckPointFileName,FUNCTIONAL_MODEL_DUMP_ALL_STATE);
+    IFEEDER_BASE_CLASS::DumpAllFeederState(theController.CheckPointFileName,FUNCTIONAL_MODEL_DUMP_ALL_STATE);
 
 }
 
 void
-CMD_RESETSTATS_CLASS::CmdAction (void)
+CMD_RESETSTATS_X86_CLASS::CmdAction (void)
 {
     ASIM_XMSG("CMD_RESETSTATS resetting all stats");
 
@@ -1208,120 +744,6 @@ CMD_RESETSTATS_CLASS::CmdAction (void)
 }
 
 
-void
-CMD_THDBEGIN_CLASS::CmdAction (void)
-{
-    ASIM_XMSG("CMD_THDBEGIN_CLASS::CmdAction");
-    ostringstream os;
-    if (thread)
-    {
-        os << "{" << thread->TUid() << " THREAD__" << fmt_p((void*)thread) << "}";
-    }
-    AWB_Progress(AWBPROG_THREADBEGIN, os.str().c_str());
-}
-
-
-void
-CMD_THDEND_CLASS::CmdAction (void)
-{
-    ASIM_XMSG("CMD_THDEND_CLASS::CmdAction");
-    ostringstream os;
-    if (thread)
-    {
-        os << "{" << thread->TUid() << " THREAD__" << fmt_p((void*)thread) << "}";
-    }
-    else
-    {
-        os << "{ THREAD__NULL }";
-    }
-    AWB_Progress(AWBPROG_THREADEND, os.str().c_str());
-}
-
-void
-CMD_THDUNBLOCK_CLASS::CmdAction (void)
-{
-    ASIM_XMSG("CMD_THDUNBLOCK_CLASS::CmdAction");
-    ostringstream os;
-    os << "{" << thread->TUid() << " THREAD__" << fmt_p((void*)thread) << "}";
-    AWB_Progress(AWBPROG_THREADUNBLOCK, os.str().c_str());
-}
-
-
-void
-CMD_THDBLOCK_CLASS::CmdAction (void)
-{
-    ASIM_XMSG("CMD_THDBLOCK_CLASS::CmdAction");
-    ostringstream os;
-    os << "{" << thread->TUid() << " THREAD__" << fmt_p((void*)thread) << "}";
-    AWB_Progress(AWBPROG_THREADBLOCK, os.str().c_str());
-}
-
-void
-CMD_EXIT_CLASS::CmdAction (void)
-{    
-    ASIM_XMSG("CMD Exiting performance model...");
-
-    // indicate to command processing loop to exit
-    pmExiting = true;
-}
-
-
-/*******************************************************************
- *
- *
- *
- *******************************************************************/
-
-void
-CMD_PROGRESS_CLASS::Schedule (CMD_SCHEDULE schedule, UINT64 currentNanosecond, UINT64 currentCycle, UINT64 currentInst, UINT64 currentMacroInst, UINT64 currentPacket)
-{
-    ASIM_XMSG("CMD_PROGRESS_CLASS::Schedule");
-    //
-    // If 'type' is a clearing progress action, then we clear
-    // progress events from the schedule.
-
-    if (type == AWBPROG_CLEARNANOSECOND) {
-        schedule->ClearNanosecondProgress();
-    }
-    else if (type == AWBPROG_CLEARCYCLE) {
-        schedule->ClearCycleProgress();
-    }
-    else if (type == AWBPROG_CLEARINST) {
-        schedule->ClearInstProgress();
-    }
-    else if (type == AWBPROG_CLEARMACROINST) {
-        schedule->ClearMacroInstProgress();
-    }
-    else if (type == AWBPROG_CLEARPACKET) {
-        schedule->ClearPacketProgress();
-    }
-    else {
-        schedule->Schedule(this, currentNanosecond, currentCycle, currentInst, currentMacroInst, currentPacket);
-    }
-}
-
-/*******************************************************************
- *
- * This is the processing for the performance model itself.
- *
- ******************************************************************/
-
-
-CMD_ACK
-PmProcessEvent (CMD_WORKITEM workItem)
-/*
- * Performance model processes the event and returns the status
- */
-{
-    ASIM_XMSG("PmProcessEvent");
-    fflush(stdout);
-    fflush(stderr);
-
-    CMD_ACK ack = workItem->PmAction();
-    
-    return (ack);
-}
-
 /*******************************************************************
  *
  * Performance model thread actions
@@ -1330,7 +752,7 @@ PmProcessEvent (CMD_WORKITEM workItem)
 
 
 CMD_ACK
-CMD_INIT_CLASS::PmAction (void)
+CMD_INIT_X86_CLASS::PmAction (void)
 /*
  * Initialize the performance model by initializing the instruction feeder
  * and the system. If either fails to initialize correctly, indicate
@@ -1378,7 +800,7 @@ CMD_INIT_CLASS::PmAction (void)
                 for (;;)
                   {
                     knob_name = ""; // Notice this if getword throws error
-                    knob_name = getword(fp, &linenum);
+                    knob_name = theController.getword(fp, &linenum);
                     fdArgvCfg[fdArgcCfg] = strdup(knob_name.c_str()); 
                     fdArgcCfg++;
                   }
@@ -1406,56 +828,6 @@ CMD_INIT_CLASS::PmAction (void)
     return(new CMD_ACK_CLASS(this, success));
 }
 
-
-CMD_ACK
-CMD_DEBUG_CLASS::PmAction (void)
-/*
- * We should provide an interface here to allow the feeder and performance
- * model to activate/deactivate whatever debugging facilities they want
- * to. For now we just turn the trace on or off.
- */
-{
-    ASIM_XMSG("CMD PmAction DEBUG: Turning trace " << (on ? "on" : "off")
-         << "..." );
-    traceOn = on; 
-    return(new CMD_ACK_CLASS(this, true));
-}
-
-CMD_ACK
-CMD_TRACE_CLASS::PmAction (void)
-{
-    ASIM_XMSG("CMD PmAction TRACE: Enabling delayed traces...");
-    if(regex) {
-        regex->go();
-    }
-    return(new CMD_ACK_CLASS(this, true));
-}
-
-CMD_ACK
-CMD_STATS_CLASS::PmAction (void)
-{
-    ASIM_XMSG("CMD PmAction STATS: Turning stats " << (on ? "on" : "off")
-             << "..." );
-
-    statsOn = on; 
-
-    STATE_ITERATOR_CLASS iter(asimSystem, true);
-    ASIM_STATE state;
-   
-    if(statsOn)
-    {
-        while ((state = iter.Next()) != NULL) {
-            state->Unsuspend();
-        }
-    }
-    else
-    {
-        while ((state = iter.Next()) != NULL) {
-            state->Suspend();
-        }
-    }
-    return(new CMD_ACK_CLASS(this, true));
-}
 
 CMD_ACK
 CMD_PTV_CLASS::PmAction (void)
@@ -1493,51 +865,7 @@ CMD_PTV_CLASS::PmAction (void)
 
 
 CMD_ACK
-CMD_EVENTS_CLASS::PmAction (void)
-{
-    ASIM_XMSG("CMD PmAction EVENTS: Turning events " << (on ? "on" : "off")
-             << "...");
-    eventsOn = on;
-    if (on)
-    {
-        DRALEVENT(TurnOn());
-        if (firstTurnedOn)
-        {
-            firstTurnedOn = false;
-            DRALEVENT(StartActivity(ASIM_CLOCKABLE_CLASS::GetClockServer()->getFirstDomainCycle()));
-        }
-        ASIM_CLOCKABLE_CLASS::GetClockServer()->DralTurnOn();
-    }
-    else
-    {
-        DRALEVENT(TurnOff());
-    }
-
-    return(new CMD_ACK_CLASS(this, true));
-}
-
-CMD_ACK
-CMD_STRIPCHART_CLASS::PmAction (void)
-{
-    ASIM_XMSG("CMD PmAction STRIPCHART: Turning stripchart "
-             << (on ? "on" : "off") << "...");
-    stripsOn = on; 
-    return(new CMD_ACK_CLASS(this, true));
-}
-
-
-CMD_ACK
-CMD_PROFILE_CLASS::PmAction (void)
-{
-    ASIM_XMSG("CMD PmAction PROFILE: Turning profile " << (on ? "on" : "off")
-             << "..." );
-    profileOn = on; 
-    return(new CMD_ACK_CLASS(this, true));
-}
-
-
-CMD_ACK
-CMD_EXECUTE_CLASS::PmAction (void)
+CMD_EXECUTE_X86_CLASS::PmAction (void)
 /*
  * Execute for until 'cycle' or committed 'inst'.
  */
@@ -1547,72 +875,3 @@ CMD_EXECUTE_CLASS::PmAction (void)
     bool success = asimSystem->SYS_Execute(nanoseconds, cycles, insts, macroinsts, packets);
     return(new CMD_ACK_CLASS(this, success));
 }
-
-
-CMD_ACK
-CMD_THDSKIP_CLASS::PmAction (void)
-/*
- * Skip the feeder...
- */
-{
-    ASIM_XMSG("CMD PmAction THDSKIP: Skipping " << insts
-             << " insts or until marker " << markerID
-             << "..." ); 
-
-    UINT64 actual = thread->IFeeder()->Skip(thread->IStreamHandle(),
-                                            insts,
-                                            markerID);
-    if (actual != insts && markerID < 0)
-        ASIMWARNING("CMD_THDSKIP for " << insts
-            << "... only skipped " << actual << endl);
-    return(new CMD_ACK_CLASS(this, true));
-}
-
-
-CMD_ACK
-CMD_THDSCHED_CLASS::PmAction (void)
-/*
- * Schedule the 'thread'
- */
-{
-    ASIM_XMSG("CMD PmAction THDSCHED: Scheduling...");
-    bool success = asimSystem->SYS_ScheduleThread(thread);
-    return(new CMD_ACK_CLASS(this, success));
-}
-
-
-CMD_ACK
-CMD_THDUNSCHED_CLASS::PmAction (void)
-/*
- * Unschedule the 'thread'
- */
-{
-    ASIM_XMSG("CMD PmAction THDUNSCHED: Unscheduling...");
-    bool success = asimSystem->SYS_UnscheduleThread(thread);
-    return(new CMD_ACK_CLASS(this, success));
-}
-
-CMD_ACK
-CMD_THDUNBLOCK_CLASS::PmAction (void)
-/*
- * Unblock the 'thread'
- */
-{
-    ASIM_XMSG("PmAction THDUNBLOCK: Un-blocking...");
-    bool success = asimSystem->SYS_UnblockThread(thread);
-    return(new CMD_ACK_CLASS(this, success));
-}
-
-
-CMD_ACK
-CMD_THDBLOCK_CLASS::PmAction (void)
-/*
- * Block the 'thread'
- */
-{
-    ASIM_XMSG("PmAction THDBLOCK: Blocking..." );
-    bool success = asimSystem->SYS_BlockThread(thread, inst);
-    return(new CMD_ACK_CLASS(this, success));
-}
-
-

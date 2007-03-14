@@ -17,28 +17,26 @@
  */
 
 ********************************************************************
-* Awb module specification
+* Awb module specification, for Asim "x86" version of classic controller
+*
+* Copyright (c) 1999-2006 Intel Corporation, all rights reserved
 ********************************************************************
 
 %AWB_START
 
 %name Asim classic controller for x86 (ptv support)
-%desc Asim classic controller for x86 (ptv support)
-%provides controller
-%requires workbench
-%requires awb_stub
+%desc Asim classic controller algorithm for x86 (ptv support)
+%provides controller_alg
 %requires perfchecker
 
-%public control_x86.h 
-%private main_x86.cpp args_x86.h args_x86.cpp
-%private control_x86.cpp schedule.h schedule.cpp
+%public  controller_x86_alg.h
+%private control_x86.h control_x86.cpp main_x86.cpp args_x86.cpp
 
 %attributes model smac
 %const  MAX_PROCS        4  "Max number of processors"
 %const  MAX_CORES        16 "Max number of cores" 
 %const  MAX_THREADS      4  "Max number of threads" 
 
-%param %dynamic STOP_THREAD 0 "Stop simulation when first thread finishes"
 %param %dynamic pt          ""  "Pipetrace filename"
 %param %dynamic pt_dump     ""  "Pipetrace filename dump on fail"
 %param %dynamic pipetrace_dump_max     20000  "Pipetrace dump max size"

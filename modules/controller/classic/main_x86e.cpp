@@ -40,15 +40,13 @@
 
 // ASIM public modules
 #include "asim/provides/controller.h"
-
-// ASIM local module
-#include "args_x86.h"
-
-static void PrintInfo();
+// we need this so we can statically know the type of "theController"
+// in the API functions declared using CONTROLLER_BASE_EXTERNAL_FUNCTION
+#include "asim/provides/controller_alg.h"
 
 
 int
-main (INT32 argc, char *argv[], char *envp[])
+CONTROLLER_X86E_CLASS::main (INT32 argc, char *argv[], char *envp[])
 /*
  * Main program for standalone version of asim.
  */
@@ -63,7 +61,7 @@ main (INT32 argc, char *argv[], char *envp[])
     cout.sync_with_stdio();
     cerr.sync_with_stdio();
 
-    PrintInfo();
+    theController.PrintInfo();
 
     // Initialize awb
     //
@@ -80,13 +78,13 @@ main (INT32 argc, char *argv[], char *envp[])
     //
     // Partition arguments for awb, system, and feeder.
 
-    PartitionArgs(argc, argv);
+    theController.PartitionArgs(argc, argv);
 
     //
     // Initialize by calling the controller,
     // it will initialize system and feeder.
     //
-    if (!CMD_Init(fdArgc, fdArgv, sysArgc, sysArgv, knobsArgv, envp)) {
+    if (!theController.CMD_Init(fdArgc, fdArgv, sysArgc, sysArgv, knobsArgv, envp)) {
         cout << "Performance model failed to initialize use -h to get options" << endl;
         return(1);
     }
@@ -94,8 +92,8 @@ main (INT32 argc, char *argv[], char *envp[])
     //
     // Parse awb's arguments.
     //
-    if (!ParseEvents(awbArgc, awbArgv)) {
-        Usage(argv[0], stdout);
+    if (!theController.ParseEvents(awbArgc, awbArgv)) {
+        theController.Usage(argv[0], stdout);
         return(1);
     }
 
@@ -128,16 +126,7 @@ main (INT32 argc, char *argv[], char *envp[])
 
     //
     // Let the system execute until our scheduled options are complete.
-    CMD_SchedulerLoop();
+    theController.CMD_SchedulerLoop();
 
     return(0);
 }
-
-
-void
-PrintInfo()
-{
-    cout << "ASIM, Copyright (c) 1999 - 2006, Intel Corporation" << endl
-         << "Developed by VSSAD, Maintained and Enhanced by the AMI Group" << endl << endl;
-}
-

@@ -20,7 +20,7 @@
 
 /**
  * @file
- * @author David Goodwin & Joel Emer
+ * @author David Goodwin, Joel Emer, Carl Beckmann
  * @brief ASIM Main
  */
 
@@ -37,22 +37,32 @@
 #include "asim/trackmem.h"
 #include "asim/ioformat.h"
 
-
 // ASIM public modules
 #include "asim/provides/controller.h"
-
-// ASIM local module
-#include "args.h"
+// we need this so we can statically know the type of "theController"
+// in the API functions declared using CONTROLLER_BASE_EXTERNAL_FUNCTION
+#include "asim/provides/controller_alg.h"
 
 
 static void PrintInfo();
 
 
+//
+// Main program for standalone version of asim.
+// This just calls the worker routine provided by the base class or its derivative.
+//
 int
 main (INT32 argc, char *argv[], char *envp[])
-/*
- * Main program for standalone version of asim.
- */
+{
+  // just instantiate the classic controller, and call its main:
+  theController.main( argc, argv, envp );
+}
+
+
+//
+// Main program for standalone version of asim, the Asim "classic" controller.
+//
+int CONTROLLER_CLASS::main(INT32 argc, char *argv[], char *envp[])
 {
     // force line buffering for reasonable synchronization of stderr and
     // stdout in batch runs
@@ -64,7 +74,7 @@ main (INT32 argc, char *argv[], char *envp[])
     cout.sync_with_stdio();
     cerr.sync_with_stdio();
 
-    PrintInfo();
+    theController.PrintInfo();
 
     // Initialize awb
     //
@@ -80,22 +90,20 @@ main (INT32 argc, char *argv[], char *envp[])
 
     //
     // Partition arguments for awb, system, and feeder.
-    PartitionArgs(argc, argv);
+    theController.PartitionArgs(argc, argv);
 
     //
     // Initialize by calling the controller,
     // it will initialize system and feeder.
-    //
-    if (!CMD_Init(fdArgc, fdArgv, sysArgc, sysArgv, envp)) {
+    if (!theController.CMD_Init(fdArgc, fdArgv, sysArgc, sysArgv, envp)) {
         cout << "Performance model failed to initialize" << endl;
         return(1);
     }
 
     //
     // Parse awb's arguments.
-    //
-    if (!ParseEvents(awbArgc, awbArgv)) {
-        Usage(argv[0], stdout);
+    if (!theController.ParseEvents(awbArgc, awbArgv)) {
+        theController.Usage(argv[0], stdout);
         return(1);
     }
 
@@ -105,14 +113,14 @@ main (INT32 argc, char *argv[], char *envp[])
 
     //
     // Let the system execute until our scheduled options are complete.
-    CMD_SchedulerLoop();
+    theController.CMD_SchedulerLoop();
 
     return(0);
 }
 
 
 void
-PrintInfo()
+CONTROLLER_CLASS::PrintInfo()
 {
     cout << "ASIM, Copyright (c) 1999 - 2006, Intel Corporation" << endl
          << "Developed by VSSAD, Maintained and Enhanced by the AMI Group" << endl << endl;

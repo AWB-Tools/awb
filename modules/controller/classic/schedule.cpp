@@ -32,9 +32,6 @@
 // ASIM public modules
 #include "asim/provides/controller.h"
 
-// ASIM local module
-#include "schedule.h"
-
 /*******************************************************************/
 
 

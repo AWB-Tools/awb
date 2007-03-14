@@ -1,0 +1,48 @@
+********************************************************************
+* Awb module specification, for Asim "classic" controller
+*
+* Copyright (c) 1994-2006 Intel Corporation, all rights reserved
+********************************************************************
+
+%AWB_START
+
+%name Asim classic controller
+%desc Asim classic controller algorithm
+%provides controller_alg
+
+%public controller_classic_alg.h
+
+%attributes model
+%AWB_END
+********************************************************************
+* Awb module specification, for Asim "classic" controller
+*
+* Copyright (c) 1994-2006 Intel Corporation, all rights reserved
+********************************************************************
+
+%AWB_START
+
+%name Asim classic controller
+%desc Asim classic controller algorithm
+%provides controller_alg
+
+%public controller_classic_alg.h
+
+%attributes model
+%AWB_END
+********************************************************************
+* Awb module specification, for Asim "classic" controller
+*
+* Copyright (c) 1994-2006 Intel Corporation, all rights reserved
+********************************************************************
+
+%AWB_START
+
+%name Asim classic controller
+%desc Asim classic controller algorithm
+%provides controller_alg
+
+%public controller_classic_alg.h
+
+%attributes model
+%AWB_END

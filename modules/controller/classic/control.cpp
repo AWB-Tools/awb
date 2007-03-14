@@ -19,7 +19,7 @@
 
 /**
  * @file
- * @author David Goodwin
+ * @author David Goodwin, Carl Beckmann
  * @brief
  */
 
@@ -36,76 +36,39 @@
 // ASIM public modules
 #include "asim/provides/instfeeder_interface.h"
 #include "asim/provides/controller.h"
-
-using namespace std;
-
-class CONTROL_TRACEABLE_CLASS : public TRACEABLE_CLASS
-{
-public:
-    CONTROL_TRACEABLE_CLASS()
-    {
-        SetTraceableName("Control");
-    }
-};
+// we need this so we can statically know the type of "theController"
+// in the API functions declared using CONTROLLER_BASE_EXTERNAL_FUNCTION
+#include "asim/provides/controller_alg.h"
 
 CONTROL_TRACEABLE_CLASS controlTraceable;
-
-#define ASIM_XMSG(x) \
-({ \
-       T1_AS(&controlTraceable, __FILE__ << ":" << __LINE__ << ": " <<  x); \
-})
-//#undef ASIM_XMSG
-//#define ASIM_XMSG(x) do{ TTRACE(x); exit(1); }while(0)
-
-#define DMSG(x) \
-({ \
-       T1_UNCOND(__FILE__ << ":" << __LINE__ << ": " <<  x); \
-})
-
-CMD_ACK PmProcessEvent (CMD_WORKITEM workItem);
 
 /*
  * The system being simulated.
  */
 ASIM_SYSTEM asimSystem;
 
-/*
- * 'ctrlWorkList' contains new work items that the controller needs to
- * schedule.  The performance model and awb puts things on the list.
- */
-static CMD_WORKLIST ctrlWorkList;
-
-/*
- * Schedule of events that need to be performed.
- */
-static CMD_SCHEDULE schedule;
-
-/*
- * True if the performance model is stopped. When stopped time doesn't
- * advance, so no actions are performance.
- */
-static volatile bool pmStopped = true;
-
-/*
- * True if the performance model is exiting. The exit command has been
- * received and we are going through final cleanup operations.
- */
-static volatile bool pmExiting = false;
-
-/*
- * True if the performance model has been initialized.
- */
-static bool pmInitialized = false;
-
-// TraceFileName (in debugger mode)
-char *StatsFileName = NULL; 
-
 extern bool stripsOn;
 
+/*
+ * Statically instantiate the single controller instance
+ */
+ACTUAL_CONTROLLER_CLASS theController;
+
+//
+// the following macro creates both the interface function that is callable
+// from other modules, as well as the header for like-named class method
+// that implements it.
+//
+#define CONTROLLER_BASE_EXTERNAL_FUNCTION( __rettype__ , __funcname__ , __formals__ , __actuals__ ) \
+  extern __rettype__ __funcname__ __formals__ { \
+    return theController . __funcname__ __actuals__ ; \
+  } \
+  __rettype__ CONTROLLER_CLASS:: __funcname__ __formals__
 
 // Funtion called when an exit condition is reached
-void
-CheckExitConditions(EXIT_CONDITION ec)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CheckExitConditions, (EXIT_CONDITION ec), (ec)
+)
 {
     switch(ec)
     {
@@ -117,8 +80,11 @@ CheckExitConditions(EXIT_CONDITION ec)
     }
 }
 
-bool
-CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **allEnvp)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  bool, CMD_Init,
+  (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **allEnvp),
+  (       fdArgc,        fdArgv,        pmArgc,        pmArgv,        allEnvp)
+)
 /*
  * Initialize the performance model. Return false
  * if error.
@@ -154,8 +120,9 @@ CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, char **pmArgv, char **all
 }
 
 
-void
-CMD_Usage (FILE *file)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Usage, (FILE *file), (file)
+)
 /*
  * Print the usage info for the feeder and system.
  */
@@ -179,8 +146,9 @@ CMD_Usage (FILE *file)
  ******************************************************************/
 
 
-void
-CMD_Start (void)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Start, (void), ()
+)
 /*
  * Start the performance model running.
  */
@@ -203,8 +171,11 @@ CMD_Start (void)
 }
 
 
-void
-CMD_Stop (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Stop,
+  (CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (                  trigger,        n)
+)
 /*
  * Create an action to stop the performance model.
  */
@@ -220,8 +191,11 @@ CMD_Stop (CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Progress (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Progress,
+  (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (                 type,       args,                   trigger,        n)
+)
 /*
  * Create an action to show progress of the performance model.
  */
@@ -238,8 +212,11 @@ CMD_Progress (AWB_PROGRESSTYPE type, char *args, CMD_ACTIONTRIGGER trigger, UINT
 }
 
 
-void
-CMD_EmitStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_EmitStats,
+  (CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (                  trigger,        n)
+)
 /*
  * Create an action to emit stats of the performance model.
  */
@@ -255,8 +232,11 @@ CMD_EmitStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_ResetStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_ResetStats,
+  (CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (                  trigger,        n)
+)
 /*
  * Create an action to reset stats of the performance model.
  */
@@ -272,8 +252,11 @@ CMD_ResetStats (CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Debug (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Debug,
+  (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (     on,                   trigger,        n)
+)
 /*
  * Create an action to turn 'on' or off debugging as specified by 'trigger'
  * and 'n'.
@@ -291,8 +274,11 @@ CMD_Debug (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
 }
 
 
-void
-CMD_Trace (TRACEABLE_DELAYED_ACTION act, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Trace,
+  (TRACEABLE_DELAYED_ACTION act, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (                         act,                   trigger,        n)
+)
 /*
  * Create an action to turn 'on' or off debugging as specified by 'trigger'
  * and 'n'.
@@ -309,8 +295,11 @@ CMD_Trace (TRACEABLE_DELAYED_ACTION act, CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Stats (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Stats,
+  (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (     on,                   trigger,        n)
+)
 /*
  * Create an action to turn 'on' or off stats as specified by 'trigger'
  * and 'n'.
@@ -326,8 +315,11 @@ CMD_Stats (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Events (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Events,
+  (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (     on,                   trigger,        n)
+)
 /*
  * Create an action to turn 'on' or off events as specified by 'trigger'
  * and 'n'.
@@ -344,8 +336,11 @@ CMD_Events (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Stripchart (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Stripchart,
+  (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (     on,                   trigger,        n)
+)
 /*
  * Create an action to turn 'on' or off stripcharts as specified by 'trigger'
  * and 'n'.
@@ -361,8 +356,11 @@ CMD_Stripchart (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_Profile (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Profile,
+  (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (     on,                   trigger,        n)
+)
 /*
  * Create an action to turn 'on' or off profiling as specified by 'trigger'
  * and 'n'.
@@ -380,8 +378,9 @@ CMD_Profile (bool on, CMD_ACTIONTRIGGER trigger, UINT64 n)
 }
 
 
-ASIM_STATELINK
-CMD_StateList (void)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  ASIM_STATELINK, CMD_StateList, (void), ()
+)
 /*
  * Return a list of all the exposed performance model state. This cannot be
  * called until the model has been initialized, or an error will occur.
@@ -402,8 +401,9 @@ CMD_StateList (void)
 }
 
 
-void 
-CMD_ThreadBegin (ASIM_THREAD thread)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_ThreadBegin, (ASIM_THREAD thread), (thread)
+)
 /*
  * Called by feeder to inform that a new thread is available to be
  * schedule on the performance model.
@@ -424,8 +424,9 @@ CMD_ThreadBegin (ASIM_THREAD thread)
 }
 
 
-void 
-CMD_ThreadEnd (ASIM_THREAD thread)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_ThreadEnd, (ASIM_THREAD thread), (thread)
+)
 /*
  * Called by feeder to inform that a thread is ending.
  */
@@ -440,8 +441,9 @@ CMD_ThreadEnd (ASIM_THREAD thread)
     asimSystem->SYS_Break();
 }
 
-void 
-CMD_ThreadUnblock (ASIM_THREAD thread)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_ThreadUnblock, (ASIM_THREAD thread), (thread)
+)
 /*
  * Called by feeder to inform that a thread is available again to be
  * re-scheduled on the performance model.
@@ -459,8 +461,11 @@ CMD_ThreadUnblock (ASIM_THREAD thread)
 }
 
 
-void 
-CMD_ThreadBlock (ASIM_THREAD thread, ASIM_INST inst)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_ThreadBlock,
+  (ASIM_THREAD thread, ASIM_INST inst),
+  (            thread,           inst)
+)
 /*
  * Called by feeder to inform that a thread is blocking.
  */
@@ -476,8 +481,11 @@ CMD_ThreadBlock (ASIM_THREAD thread, ASIM_INST inst)
     asimSystem->SYS_Break();
 }
 
-void
-CMD_SkipThread (ASIM_THREAD thread, UINT64 insts, INT32 markerID, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_SkipThread,
+  (ASIM_THREAD thread, UINT64 insts, INT32 markerID, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (            thread,        insts,       markerID,                   trigger,        n)
+)
 /*
  * Skip 'insts' instructions in 'thread'.
  */
@@ -494,8 +502,11 @@ CMD_SkipThread (ASIM_THREAD thread, UINT64 insts, INT32 markerID, CMD_ACTIONTRIG
 }
 
 
-void
-CMD_ScheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_ScheduleThread,
+  (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (            thread,                   trigger,        n)
+)
 /*
  * Schedule 'thread' on the performance model.
  */
@@ -512,8 +523,11 @@ CMD_ScheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n)
 }
 
 
-void
-CMD_UnscheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_UnscheduleThread,
+  (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (            thread,                   trigger,        n)
+)
 /*
  * Unschedule 'thread' on the performance model.
  */
@@ -531,8 +545,11 @@ CMD_UnscheduleThread (ASIM_THREAD thread, CMD_ACTIONTRIGGER trigger, UINT64 n)
 
 
 
-void
-CMD_Exit (CMD_ACTIONTRIGGER trigger, UINT64 n)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_Exit,
+  (CMD_ACTIONTRIGGER trigger, UINT64 n),
+  (                  trigger,        n)
+)
 /*
  * Create an action to exit the performance model.
  */
@@ -551,8 +568,9 @@ CMD_Exit (CMD_ACTIONTRIGGER trigger, UINT64 n)
 
 /**********************************************************************/
 
-void
-CMD_SchedulerLoop (void)
+CONTROLLER_BASE_EXTERNAL_FUNCTION( 
+  void, CMD_SchedulerLoop, (void), ()
+)
 /*
  * Controller scheduler loop. Maintains a list of the next "action" that
  * needs to be performed by the performance model or by the controller
@@ -761,7 +779,7 @@ void
 CMD_START_CLASS::CmdAction (void)
 {
     ASIM_XMSG("CMD_START_CLASS::CmdAction");
-    pmStopped = false;
+    theController.pmStopped = false;
     AWB_Progress(AWBPROG_START);
 }
 
@@ -770,7 +788,7 @@ void
 CMD_STOP_CLASS::CmdAction (void)
 {
     ASIM_XMSG("CMD_STOP_CLASS::CmdAction");
-    pmStopped = true;
+    theController.pmStopped = true;
     AWB_Progress(AWBPROG_STOP);
 }
 
@@ -887,7 +905,7 @@ CMD_EXIT_CLASS::CmdAction (void)
     ASIM_XMSG("CMD Exiting performance model...");
 
     // indicate to command processing loop to exit
-    pmExiting = true;
+    theController.pmExiting = true;
 }
 
 

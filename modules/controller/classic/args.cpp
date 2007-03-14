@@ -43,47 +43,55 @@
 
 // ASIM public modules
 #include "asim/provides/controller.h"
+// we need this so we can statically know the type of "theController"
+// in the API functions declared using CONTROLLER_BASE_EXTERNAL_FUNCTION
+#include "asim/provides/controller_alg.h"
 
-// ASIM local module
-#include "args.h"
+//
+// notice how we call all CONTROLLER_CLASS methods indirectly via theController.
+// Although this is verbose, it allows us to get the effect of virtual functions
+// (so that if CONTROLLER_CLASS is subclassed, we call the derived class methods)
+// without the overhead of virtual functions (no virtual function pointers, and the
+// compiler can resolve the function addresses statically).
+//
 
 
-static int ParseVariables (char **argv, UINT32 argc);
+//
+// allocate and clean up argument lists here in the
+// controller base class constructor and destructor
+// (there used to be a janitor class here)
+//
+CONTROLLER_CLASS::CONTROLLER_CLASS() {
+    awbArgv = NULL;
+    sysArgv = NULL;
+    fdArgv  = NULL;
+    StatsFileName = NULL;
+    pmStopped     = true;
+    pmExiting     = false;
+    pmInitialized = false;
+}
 
-// Arguments partitioned into awb's, system's and feeder's
-UINT32 origArgc, awbArgc, sysArgc, fdArgc, fdArgcMax;
-char **origArgv, **awbArgv, **sysArgv, **fdArgv;
-
-extern char *StatsFileName;
-// somebody should clean up what we have allocated here!
-class ARGS_JANITOR_CLASS {
-  public:
-    ARGS_JANITOR_CLASS() {
-        awbArgv = NULL;
-        sysArgv = NULL;
-        fdArgv  = NULL;
-	StatsFileName = NULL;
+CONTROLLER_CLASS::~CONTROLLER_CLASS() {
+    if (awbArgv) {
+        delete [] awbArgv;
     }
-    ~ARGS_JANITOR_CLASS() {
-        if (awbArgv) {
-            delete [] awbArgv;
-        }
-        if (sysArgv) {
-            delete [] sysArgv;
-        }
-        if (fdArgv) {
-            delete [] fdArgv;
-        }
-	if (StatsFileName) {
-	    delete StatsFileName;
-        }
+    if (sysArgv) {
+        delete [] sysArgv;
     }
-};
-static ARGS_JANITOR_CLASS argsJanitor;
+    if (fdArgv) {
+        delete [] fdArgv;
+    }
+    if (StatsFileName) {
+	delete StatsFileName;
+    }
+}
 
+//
 // Partition arguments into awb's, system's and feeder's.
+//
+static UINT32 fdArgcMax;
 void
-PartitionArgs (INT32 argc, char **argv)
+CONTROLLER_CLASS::PartitionArgs (INT32 argc, char *argv[])
 {
     origArgc = argc;
     origArgv = argv;
@@ -101,10 +109,22 @@ PartitionArgs (INT32 argc, char **argv)
     //
     // Partition...
     
-    bool feederArgs = false;
-    bool systemArgs = false;
+    feederArgs = false;
+    systemArgs = false;
     for (INT32 i = 1; i < argc; i++) 
     {
+        theController.PartitionOneArg( argc, argv, i );
+    }
+    awbArgv[awbArgc] = NULL;
+    sysArgv[sysArgc] = NULL;
+    fdArgv[fdArgc] = NULL;
+}
+
+// Partition arguments into awb's, system's and feeder's,
+// one single loop iteration.
+void
+CONTROLLER_CLASS::PartitionOneArg (INT32 argc, char *argv[], INT32 &i)
+{
         // --         following args are awb's
         // --feeder   following args are feeder's
         // --system   following args are system's
@@ -159,7 +179,7 @@ PartitionArgs (INT32 argc, char **argv)
             }
             else 
             {
-                int incr = ParseVariables(&argv[i], argc - i); 
+                int incr = theController.ParseVariables(&argv[i], argc - i); 
 
                 if (incr == -1)
                 {
@@ -171,13 +191,10 @@ PartitionArgs (INT32 argc, char **argv)
                 }
             }
         }
-    }
-    awbArgv[awbArgc] = NULL;
-    sysArgv[sysArgc] = NULL;
-    fdArgv[fdArgc] = NULL;
 }
 
-int parseTraceCmd(const char *progName, const char *command, string &regex, int &level) 
+int
+CONTROLLER_CLASS::parseTraceCmd(const char *progName, const char *command, string &regex, int &level) 
 {
     if(*command != '/') 
     {
@@ -223,8 +240,8 @@ int parseTraceCmd(const char *progName, const char *command, string &regex, int 
 
 // Parse command line arguments
 // Return -1 if no argument is consumed, 0 if one argument consumed, 1 if two, 2 if three ...
-static int
-ParseVariables(char **argv, UINT32 argc)
+int
+CONTROLLER_CLASS::ParseVariables(char **argv, UINT32 argc)
 {
     int incr = 0; 
 
@@ -321,8 +338,6 @@ ParseVariables(char **argv, UINT32 argc)
     // -s <f>
     else if ((strcmp(argv[0], "-s") == 0))
     {
-        extern char *StatsFileName;
-	
         StatsFileName = new char[strlen(argv[incr+1])+1];  
         strcpy(StatsFileName, argv[incr+1]); 
         ++incr;
@@ -380,10 +395,25 @@ ParseVariables(char **argv, UINT32 argc)
 // Parse command line arguments, 
 // return false if there is a parse error.
 bool 
-ParseEvents(INT32 argc, char **argv)
+CONTROLLER_CLASS::ParseEvents(INT32 argc, char **argv)
 {
     for (INT32 i = 0; i < argc; i++) 
     {
+        // parse a single argument.  Call it via theController,
+	// which might be a overridden version of the routine below.
+        if ( ! theController.ParseOneEvent (argc, argv, i) ) {
+	    return false;
+	}
+    }
+    return true;
+}
+
+// Parse command line arguments, 
+// return false if there is a parse error.
+// Advance the argument pointer i, passed by reference.
+bool
+CONTROLLER_CLASS::ParseOneEvent (INT32 argc, char *argv[], INT32 &i)
+{
         // check if tracing was enabled
         if(strncmp(argv[i], "-t", 2) == 0)
         {
@@ -393,19 +423,19 @@ ParseEvents(INT32 argc, char **argv)
 
         // -n <n>       run simulation for 'n' nanoseconds
         if ((strcmp(argv[i], "-n") == 0) && (argc > (i+1))) {
-            CMD_Exit(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Exit(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -c <n>       run simulation for 'n' cycles
         else if ((strcmp(argv[i], "-c") == 0) && (argc > (i+1))) {
-            CMD_Exit(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Exit(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -i <n>       run simulation for 'n' insts.
         else if ((strcmp(argv[i], "-i") == 0) && (argc > (i+1))) {
-            CMD_Exit(ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Exit(ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -m <n>       run simulation for 'n' insts.
         else if ((strcmp(argv[i], "-m") == 0) && (argc > (i+1))) {
-            CMD_Exit(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Exit(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -xcheck <file>		Activate Cross-check going to file <file> (see xcheck.h)
         else if ((strcmp(argv[i], "-xcheck") == 0) && (argc > (i+1))) 
@@ -421,9 +451,9 @@ ParseEvents(INT32 argc, char **argv)
             int level;
 
             if(argc > (i+1))
-                i += parseTraceCmd(argv[i], argv[i + 1], regex, level);
+                i += theController.parseTraceCmd(argv[i], argv[i + 1], regex, level);
             else
-                parseTraceCmd(argv[i], " ", regex, level);
+                theController.parseTraceCmd(argv[i], " ", regex, level);
 
             TRACEABLE_CLASS::EnableTraceByRegex(regex, level);
         }
@@ -433,13 +463,13 @@ ParseEvents(INT32 argc, char **argv)
         // -tsi <n>     turn on tracing after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-tsi") == 0) && (argc > (i+1))) {
-            CMD_Debug(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -tri <n>     Take all traces that were turned on by -tr
         //              and turn them on after <n> insts instead of now.
         else if (strcmp(argv[i], "-tri") == 0 && (argc > (i+1))) 
         {
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
                       ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -ti </regex/=[012]> <n>     turn on tracing after committing 'n' insts.
@@ -447,31 +477,31 @@ ParseEvents(INT32 argc, char **argv)
         else if ((strcmp(argv[i], "-ti") == 0) && (argc > (i+1))) {
             string regex;
             int level;
-            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
+            i += theController.parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
                       ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -ssi <n>     turn on stats after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-ssi") == 0) && (argc > (i+1))) {
-            CMD_Stats(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -esi <n>     turn on events after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-esi") == 0) && (argc > (i+1))) {
             ASSERT(runWithEventsOn,"You are trying to generate events in a "
               "model not compiled with events. Build the model with EVENTS=1");
-            CMD_Events(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -csi <n>     turn on stripCharts after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-csi") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -psi <n>     turn on profiling after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-psi") == 0) && (argc > (i+1))) {
-            CMD_Profile(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         //--------------------------------------------------------------------
         // turning things off 'by instruction'
@@ -479,27 +509,27 @@ ParseEvents(INT32 argc, char **argv)
         // -tei <n>     turn off tracing after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-tei") == 0) && (argc > (i+1))) {
-            CMD_Debug(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -sei <n>     turn off stats after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-sei") == 0) && (argc > (i+1))) {
-            CMD_Stats(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -eei <n>     turn off events after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-eei") == 0) && (argc > (i+1))) {
-            CMD_Events(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -cei <n>     turn off stripCharts after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-cei") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -pei <n>     turn off profiling after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-pei") == 0) && (argc > (i+1))) {
-            CMD_Profile(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(false, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
 
         //--------------------------------------------------------------------
@@ -508,13 +538,13 @@ ParseEvents(INT32 argc, char **argv)
         // -tsm <n>     turn on tracing after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-tsm") == 0) && (argc > (i+1))) {
-            CMD_Debug(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -trm <n>     Take all traces that were turned on by -tr
         //              and turn them on after <n> Macro insts instead of now.
         else if (strcmp(argv[i], "-trm") == 0 && (argc > (i+1))) 
         {
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
                       ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -tm </regex/=[012]> <n>     turn on tracing after committing 'n' insts.
@@ -522,31 +552,31 @@ ParseEvents(INT32 argc, char **argv)
         else if ((strcmp(argv[i], "-tm") == 0) && (argc > (i+1))) {
             string regex;
             int level;
-            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
+            i += theController.parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
                       ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -ssm <n>     turn on stats after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-ssm") == 0) && (argc > (i+1))) {
-            CMD_Stats(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -esm <n>     turn on events after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-esm") == 0) && (argc > (i+1))) {
             ASSERT(runWithEventsOn,"You are trying to generate events in a "
               "model not compiled with events. Build the model with EVENTS=1");
-            CMD_Events(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -csm <n>     turn on stripCharts after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-csm") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -psm <n>     turn on profiling after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-psm") == 0) && (argc > (i+1))) {
-            CMD_Profile(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(true, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         //--------------------------------------------------------------------
         // turning things off 'by macro instruction'
@@ -554,27 +584,27 @@ ParseEvents(INT32 argc, char **argv)
         // -tem <n>     turn off tracing after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-tem") == 0) && (argc > (i+1))) {
-            CMD_Debug(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -sem <n>     turn off stats after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-sem") == 0) && (argc > (i+1))) {
-            CMD_Stats(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -eem <n>     turn off events after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-eem") == 0) && (argc > (i+1))) {
-            CMD_Events(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -cem <n>     turn off stripCharts after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-cem") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -pem <n>     turn off profiling after committing 'n' insts.
         //
         else if ((strcmp(argv[i], "-pem") == 0) && (argc > (i+1))) {
-            CMD_Profile(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(false, ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
 
 
@@ -584,13 +614,13 @@ ParseEvents(INT32 argc, char **argv)
         // -tsc <n>     turn on tracing on cycle 'n'
         //
         else if ((strcmp(argv[i], "-tsc") == 0) && (argc > (i+1))) {
-            CMD_Debug(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -trc <n>     Take all traces that were turned on by -tr
         //              and turn them on at time <n> instead of now.
         else if (strcmp(argv[i], "-trc") == 0 && (argc > (i+1))) 
         {
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
                       ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -tc <n>     turn on tracing on cycle 'n'
@@ -598,21 +628,21 @@ ParseEvents(INT32 argc, char **argv)
         else if ((strcmp(argv[i], "-tc") == 0) && (argc > (i+1))) {
             string regex;
             int level;
-            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
+            i += theController.parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
                       ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -ssc <n>     turn on stats on cycle 'n'
         //
         else if ((strcmp(argv[i], "-ssc") == 0) && (argc > (i+1))) {
-            CMD_Stats(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -e           turn events on on cycle 0
         else if ((strcmp(argv[i], "-e") == 0))
         {
             ASSERT(runWithEventsOn,"You are trying to generate events in a "
               "model not compiled with events. Build the model with EVENTS=1");
-            CMD_Events(true, ACTION_CYCLE_ONCE, 0);
+            theController.CMD_Events(true, ACTION_CYCLE_ONCE, 0);
             // That's the same as -esc 0
         }
         // -esc <n>     turn on events on cycle 'n'
@@ -620,17 +650,17 @@ ParseEvents(INT32 argc, char **argv)
         else if ((strcmp(argv[i], "-esc") == 0) && (argc > (i+1))) {
             ASSERT(runWithEventsOn,"You are trying to generate events in a "
               "model not compiled with events. Build the model with EVENTS=1");
-            CMD_Events(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -csc <n>     turn on stripCharts on cycle 'n'
         //
         else if ((strcmp(argv[i], "-csc") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -psc <n>     turn on profiling on cycle 'n'
         //
         else if ((strcmp(argv[i], "-psc") == 0) && (argc > (i+1))) {
-            CMD_Profile(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(true, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         //--------------------------------------------------------------------
         // turning things off 'by cycle'
@@ -639,28 +669,28 @@ ParseEvents(INT32 argc, char **argv)
         //
         else if ((strcmp(argv[i], "-tec") == 0) && (argc > (i+1))) 
         {
-            CMD_Debug(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -sec <n>     turn off stats on cycle 'n'
         //
         else if ((strcmp(argv[i], "-sec") == 0) && (argc > (i+1))) {
-            CMD_Stats(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -eec <n>     turn off events on cycle 'n'
         //
         else if ((strcmp(argv[i], "-eec") == 0) && (argc > (i+1))) {
-            CMD_Events(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -cec <n>     turn off stripCharts on cycle 'n'
         //
         else if ((strcmp(argv[i], "-cec") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -pec <n>     turn off profiling on cycle 'n'
         //
         else if ((strcmp(argv[i], "-pec") == 0) && (argc > (i+1))) 
         {
-            CMD_Profile(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(false, ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         //--------------------------------------------------------------------
         // turning things on 'by nanosecond'
@@ -668,13 +698,13 @@ ParseEvents(INT32 argc, char **argv)
         // -tsn <n>     turn on tracing on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-tsn") == 0) && (argc > (i+1))) {
-            CMD_Debug(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -trn <n>     Take all traces that were turned on by -tr
         //              and turn them on at time <n> instead of now.
         else if (strcmp(argv[i], "-trn") == 0 && (argc > (i+1))) 
         {
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(), 
                       ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -tn </regex/=[012]> <n>     turn on tracing on nanosecond 'n'.
@@ -682,31 +712,31 @@ ParseEvents(INT32 argc, char **argv)
         else if ((strcmp(argv[i], "-tn") == 0) && (argc > (i+1))) {
             string regex;
             int level;
-            i += parseTraceCmd(argv[0], argv[i + 1], regex, level);
-            CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
+            i += theController.parseTraceCmd(argv[0], argv[i + 1], regex, level);
+            theController.CMD_Trace(new TRACEABLE_DELAYED_ACTION_CLASS(regex, level), 
                       ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -ssn <n>     turn on stats on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-ssn") == 0) && (argc > (i+1))) {
-            CMD_Stats(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -esn <n>     turn on events on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-esn") == 0) && (argc > (i+1))) {
             ASSERT(runWithEventsOn,"You are trying to generate events in a "
               "model not compiled with events. Build the model with EVENTS=1");
-            CMD_Events(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -csn <n>     turn on stripCharts on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-csn") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -psn <n>     turn on profiling on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-psn") == 0) && (argc > (i+1))) {
-            CMD_Profile(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(true, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         //--------------------------------------------------------------------
         // turning things off 'by nanosecond'
@@ -715,135 +745,135 @@ ParseEvents(INT32 argc, char **argv)
         //
         else if ((strcmp(argv[i], "-ten") == 0) && (argc > (i+1))) 
         {
-            CMD_Debug(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Debug(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -sen <n>     turn off stats on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-sen") == 0) && (argc > (i+1))) {
-            CMD_Stats(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stats(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -een <n>     turn off events on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-eec") == 0) && (argc > (i+1))) {
-            CMD_Events(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Events(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -cen <n>     turn off stripCharts on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-cec") == 0) && (argc > (i+1))) {
-            CMD_Stripchart(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Stripchart(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -pen <n>     turn off profiling on nanosecond 'n'
         //
         else if ((strcmp(argv[i], "-pen") == 0) && (argc > (i+1))) 
         {
-            CMD_Profile(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_Profile(false, ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         //--------------------------------------------------------------------
         // -pc <n>       indicate progress every <n> cycles
         //
         else if ((strcmp(argv[i], "-pc") == 0) && (argc > (i+1))) 
         {
-            CMD_Progress(AWBPROG_CYCLE, "", ACTION_CYCLE_PERIOD,
+            theController.CMD_Progress(AWBPROG_CYCLE, "", ACTION_CYCLE_PERIOD,
                          atoi_general(argv[++i]));
         }
         // -pi <n>       indicate progress info every <n> committed insts.
         //
         else if ((strcmp(argv[i], "-pi") == 0) && (argc > (i+1))) 
         {
-            CMD_Progress(AWBPROG_INST, "", ACTION_INST_PERIOD,
+            theController.CMD_Progress(AWBPROG_INST, "", ACTION_INST_PERIOD,
                          atoi_general(argv[++i]));
         }
         // -pn <n>       indicate progress info every <n> nanoseconds.
         //
         else if ((strcmp(argv[i], "-pn") == 0) && (argc > (i+1))) 
         {
-            CMD_Progress(AWBPROG_NANOSECOND, "", ACTION_NANOSECOND_PERIOD,
+            theController.CMD_Progress(AWBPROG_NANOSECOND, "", ACTION_NANOSECOND_PERIOD,
                          atoi_general(argv[++i]));
         }
         // -sn <n>       emit stats file every <n> nanoseconds
         //
         else if ((strcmp(argv[i], "-sn") == 0) && (argc > (i+1))) 
         {
-            CMD_EmitStats(ACTION_NANOSECOND_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_EmitStats(ACTION_NANOSECOND_PERIOD, atoi_general(argv[++i]));
         }
         // -sc <n>       emit stats file every <n> cycles
         //
         else if ((strcmp(argv[i], "-sc") == 0) && (argc > (i+1))) 
         {
-            CMD_EmitStats(ACTION_CYCLE_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_EmitStats(ACTION_CYCLE_PERIOD, atoi_general(argv[++i]));
         }
         // -si <n>       emit stats every <n> committed insts.
         //
         else if ((strcmp(argv[i], "-si") == 0) && (argc > (i+1)))
         {
-            CMD_EmitStats(ACTION_INST_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_EmitStats(ACTION_INST_PERIOD, atoi_general(argv[++i]));
         }
         // -sm <n>       emit stats every <n> committed macro insts.
         //
         else if ((strcmp(argv[i], "-sm") == 0) && (argc > (i+1)))
         {
-            CMD_EmitStats(ACTION_MACROINST_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_EmitStats(ACTION_MACROINST_PERIOD, atoi_general(argv[++i]));
         }
         // -rsc <n>       reset stat on cycle <n>
         //
         else if ((strcmp(argv[i], "-rsc") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_CYCLE_ONCE, atoi_general(argv[++i]));
         }
         // -rsn <n>       reset stat on nanosecond <n>
         //
         else if ((strcmp(argv[i], "-rsn") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_NANOSECOND_ONCE, atoi_general(argv[++i]));
         }
         // -rsi <n>       reset stat on instruction <n>
         //
         else if ((strcmp(argv[i], "-rsi") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_INST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -rsm <n>       reset stat on macro instruction <n>
         //
         else if ((strcmp(argv[i], "-rsm") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_MACROINST_ONCE, atoi_general(argv[++i]));
         }
         // -rscp <n>       reset stat every <n> cycles
         //
         else if ((strcmp(argv[i], "-rscp") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_CYCLE_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_CYCLE_PERIOD, atoi_general(argv[++i]));
         }
         // -rsnc <n>       reset stat every <n> nanoseconds
         //
         else if ((strcmp(argv[i], "-rsnp") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_NANOSECOND_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_NANOSECOND_PERIOD, atoi_general(argv[++i]));
         }
         // -rsip <n>       reset stat every <n> instructions
         //
         else if ((strcmp(argv[i], "-rsip") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_INST_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_INST_PERIOD, atoi_general(argv[++i]));
         }
         // -rsmp <n>       reset stat every <n> macro instructions
         //
         else if ((strcmp(argv[i], "-rsmp") == 0) && (argc > (i+1))) 
         {
-            CMD_ResetStats(ACTION_MACROINST_PERIOD, atoi_general(argv[++i]));
+            theController.CMD_ResetStats(ACTION_MACROINST_PERIOD, atoi_general(argv[++i]));
         }        
         else 
         {
             ASIMWARNING("Unknown flag, " << argv[i] << endl);
             return(false);
         }
-    }
+
     return(true);
 }
 
 
 void
-Usage (char *exec, FILE *file)
+CONTROLLER_CLASS::Usage (char *exec, FILE *file)
 /*
  * Dump general stand-alone usage, and then specific usage for the feeder
  * and system.
@@ -929,5 +959,5 @@ Usage (char *exec, FILE *file)
        << endl;
 
     fputs (os.str().c_str(), file);
-    CMD_Usage(file);
+    theController.CMD_Usage(file);
 }

@@ -17,28 +17,32 @@
  */
 
 ********************************************************************
-* Awb module specification
+* Awb module specification, for Asim "x86 extended" version of classic controller
+*
+* Copyright (c) 1999-2006 Intel Corporation, all rights reserved
 ********************************************************************
 
 %AWB_START
 
-%name Asim classic controller for x86 (ptv, stats, thread, knobs support)
+%name Asim classic controller for x86 extended
 %desc Asim classic controller for x86 (ptv, stats, thread, knobs support)
-%provides controller
-%requires workbench
-%requires awb_stub
+%provides controller_alg
 %requires perfchecker
 
-%public control_x86e.h 
-%private main_x86e.cpp args_x86.h args_x86.cpp
-%private control_x86e.cpp schedule.h schedule.cpp
+%public  controller_x86e_alg.h 
+%private main_x86e.cpp args_x86.cpp
+%private control_x86e.h control_x86e.cpp control_x86.h control_x86.cpp
 
 %attributes model smac
 %const  MAX_PROCS        4  "Max number of processors"
 %const  MAX_CORES        16 "Max number of cores" 
 %const  MAX_THREADS      4  "Max number of threads" 
 
-%param %dynamic STOP_THREAD 0 "Stop simulation when first thread finishes"
+%param %dynamic pt          ""  "Pipetrace filename"
+%param %dynamic pt_dump     ""  "Pipetrace filename dump on fail"
+%param %dynamic stats       ""  "PT Stats filename"
+%param %dynamic pt_ascii    0   "Output pipetrace in ascii"
+%param %dynamic WILLY_STYLE_STATS 0 "Create Willy Style Stats File"
 
 %library lib/willy/libarchlib.a
 %library lib/willy/libarisim.a
