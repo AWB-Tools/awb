@@ -856,3 +856,14 @@ Directory libperl/Asim/lib/Asim
 Some more small changes for hasim-configure command-line options.
 
 Michael
+
+----------
+emer        Date: Wed Mar 21 17:10:57 EDT 2007  CSN: CSN-asimcore-44
+                  Wed Mar 21 21:10:57 UTC 2007
+
+
+Directory etc
+ asim.pack                 Locally Modified           43 
+
+
+Added ofdm project.

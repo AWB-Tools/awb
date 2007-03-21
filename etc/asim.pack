@@ -88,6 +88,26 @@ Tag=HEAD
 Target=hasim-mips
 Changes=changes
 
+###### OFDM trunk
+
+[ofdm]
+Description=OFDM design
+Method=svn
+Access=https://asim.csail.mit.edu/svn/ofdm
+Module=undefined
+Tag=HEAD
+Target=odfm
+Changes=changes
+
+[ofdm/HEAD]
+Description=OFDM design
+Method=svn
+Access=https://asim.csail.mit.edu/svn/ofdm
+Module=undefined
+Tag=HEAD
+Target=odfm
+Changes=changes
+
 ###### Feeder
 
 [feeder]
