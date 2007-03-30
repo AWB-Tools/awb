@@ -142,8 +142,11 @@ class ModelBuilder {
         }
     } makefile;
 
+    // create hard links during model configure if set
     int persist_configureOpt;
-
+    
+    int dirWalkDepth;
+    
   public:
     // constructors / destructors
     ModelBuilder(const Workspace & theWorkspace, const Model & theModel,
@@ -165,6 +168,8 @@ class ModelBuilder {
         const string & outputFile);
     void AppendUnique (StringList & container, const string & newValue);
     bool CopyFileToBuildTree (const string & source, const string & dest);
+    bool HardCopyFileToBuildTree (const string & source, const string & dest);
+    bool HardCopyDirToBuildTree (const string & source, const string & dest);
     string MakePath (const ResultPath resultPath,
         const string & sourceModule, const string & modulePath,
         const string & fileName, const ExportType exportType);

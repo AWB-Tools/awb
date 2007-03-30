@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 // generic (C++)
 #include <iostream>
@@ -59,6 +60,7 @@ ModelBuilder::ModelBuilder (
     buildDir(theBuildDir)
 {
     persist_configureOpt = 0;
+    dirWalkDepth = 0;
 }
 
 /**
@@ -431,6 +433,117 @@ ModelBuilder::AppendUnique (
 }
 
 /**
+ * Hard copy a file from source to destination.  
+ * Must handle non-directory source files.
+ *
+ * @return true on success, false otherwise
+ */
+bool
+ModelBuilder::HardCopyFileToBuildTree(const string & sourceFileName, 
+				      const string & destFileName)
+{
+    int nlevels = 0, size = 0;
+    char buffer[256];	    
+    string symlinkFileName;
+    string sourceFileFullName = sourceFileName;
+    
+    while (FileIsSymLink(sourceFileFullName)) {
+	if (++nlevels > 8) {
+	    cout << " WARNING: Creating hard link failed : Symbolic link too deep on ";
+	    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
+		 << destFileName.c_str() << "'" <<endl;
+	    return false;
+	}
+	size = readlink(sourceFileFullName.c_str(), buffer, 256);
+	if (size < 0) {
+	    perror(" WARNING: Creating hard link failed : Cannot resolve symbolic link ");
+	    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
+		 << destFileName.c_str() << "'" <<endl;
+	    return false;
+	}
+	else if (size >= 256) {
+	    cout << " WARNING: Creating hard link failed : Link name too long on ";
+	    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
+		 << destFileName.c_str() << "'" <<endl;
+	    return false;
+	}
+	buffer[size] = '\0';
+	symlinkFileName = buffer;
+	if (IsAbsolutePath(symlinkFileName)) {
+	    sourceFileFullName = symlinkFileName;
+	}
+	else {
+	    sourceFileFullName = FileJoin(FileDirName(sourceFileFullName), symlinkFileName);
+	}
+    }
+
+    if (link(sourceFileFullName.c_str(), destFileName.c_str()) == -1) {
+	perror(" WARNING: Creating hard link failed "); 
+	symlink (sourceFileFullName.c_str(), destFileName.c_str());
+	cout << " Created symbolic link between src: '" << sourceFileFullName.c_str() << "'" << ", dest: '" 
+	     << destFileName.c_str() << "'" << endl;
+    }
+    return true;
+}
+
+/**
+ * Copy a dir from source to destination and create destination
+ * directory if necessary.
+ *
+ * @return true on success, false otherwise
+ */
+bool
+ModelBuilder::HardCopyDirToBuildTree(const string & sourceFileName, 
+				     const string & destFileName)
+{
+    // Is recursion too deep?
+    struct _depthChecker {
+	int &depth;
+	_depthChecker(int &d) : depth(d){
+	    depth++;
+	}
+	~_depthChecker() {
+	    depth--;
+	}
+    } depthChecker(dirWalkDepth);
+    if (dirWalkDepth > 16) {
+	cout << "ERROR: Cannot descend into src '" << sourceFileName << "', to create dest: '"
+	     << destFileName << "'.  Recursion too deep." << endl;
+	return false;
+    }
+    ////////////////////
+
+    DIR *dir;
+    struct dirent *dirEnt;
+
+    if ((dir = opendir(sourceFileName.c_str())) == 0) {
+	perror(" WARNING: Creating hard link failed : Cannot open dir to read ");
+	cout << " src: " << sourceFileName << "'" << ", dest: '" 
+	     << destFileName.c_str() << "'" <<endl;
+	return false;
+    }
+
+    MakeDir(destFileName);
+    
+    while ((dirEnt = readdir(dir)) != 0) {
+	string thisSource = FileJoin(sourceFileName, dirEnt->d_name);
+	string thisDest = FileJoin(destFileName, dirEnt->d_name);
+	if (FileIsDirectory(thisSource)) {
+	    if ((strcmp(dirEnt->d_name, ".") == 0) || (strcmp(dirEnt->d_name, "..") == 0) || (strcmp(dirEnt->d_name, ".svn") == 0)) {
+		continue;
+	    }
+	    HardCopyDirToBuildTree(thisSource, thisDest);
+	}
+	else {
+	    HardCopyFileToBuildTree(thisSource, thisDest);
+	}
+    }
+    closedir(dir);
+    
+    return true;
+}
+
+/**
  * Copy a file from source to destination and create destination
  * directory if necessary.
  *
@@ -451,43 +564,11 @@ ModelBuilder::CopyFileToBuildTree (
 
     if (fileExists) {
 	if (persist_configureOpt) {
-	    int nlevels = 0, size = 0;
-	    char buffer[256];	    
-	    string symlinkFileName;
-	    while (FileIsSymLink(sourceFileFullName)) {
-		cout << "link: " << sourceFileFullName << endl;
-		if (++nlevels > 8) {
-		    cout << " WARNING: Creating hard link failed : Symbolic link too deep on ";
-		    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
-			 << destFileName.c_str() << "'" <<endl;
-		    return false;
-		}
-		size = readlink(sourceFileFullName.c_str(), buffer, 256);
-		if (size < 0) {
-		    perror(" WARNING: Creating hard link failed : Cannot resolve symbolic link ");
-		    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
-			 << destFileName.c_str() << "'" <<endl;
-		    return false;
-		}
-		else if (size >= 256) {
-		    cout << " WARNING: Creating hard link failed : Link name too long on ";
-		    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
-			 << destFileName.c_str() << "'" <<endl;
-		    return false;
-		}
-		symlinkFileName = buffer;
-		if (IsAbsolutePath(symlinkFileName)) {
-		    sourceFileFullName = symlinkFileName;
-		}
-		else {
-		    sourceFileFullName = FileJoin(FileDirName(sourceFileFullName), symlinkFileName);
-		}
+	    if (FileIsDirectory(sourceFileFullName)) {	// creating hard links to directories may not work
+		return (HardCopyDirToBuildTree(sourceFileFullName, destFileName));
 	    }
-	    if (link(sourceFileFullName.c_str(), destFileName.c_str()) == -1) {
-		perror(" WARNING: Creating hard link failed "); 
-		symlink (sourceFileFullName.c_str(), destFileName.c_str());
-		cout << " Created symbolic link between src: '" << sourceFileFullName.c_str() << "'" << ", dest: '" 
-		     << destFileName.c_str() << "'" << endl;
+	    else {
+		HardCopyFileToBuildTree(sourceFileFullName, destFileName);
 	    }
 	}
 	else {

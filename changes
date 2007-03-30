@@ -952,3 +952,17 @@ Directory lib/libawb
 Updating with simcore changes (rev. 2256)
 
 - supported handling of sym links in persist configure option.
+
+----------
+spartha1    Date: Fri Mar 30 15:44:04 EDT 2007  CSN: CSN-asimcore-47
+                  Fri Mar 30 19:44:04 UTC 2007
+
+
+Directory lib/libawb
+ model_builder.cpp         Locally Modified           46 
+ model_builder.h           Locally Modified           46 
+
+Updating with simcore changes (rev. 2257)
+
+- supported linking of directories with persist qualifier.
+- persist option to model configure is functional now.
