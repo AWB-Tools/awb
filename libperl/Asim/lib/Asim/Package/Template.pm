@@ -158,7 +158,7 @@ sub create_regtest {
   #
   # Create empty ipchist file
   #
-  _touch($location/$IPCHIST);
+  _touch("$location/$IPCHIST");
 
   $self->regtest(1);
   $self->save();

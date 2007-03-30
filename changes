@@ -1328,3 +1328,15 @@ Updating with simcore changes (rev. 2284)
 
 added ModNumberDyn as a non-templated version of ModNumber. This can be used
 without knowing the constraints at compile time.
+
+----------
+spartha1    Date: Fri Mar 30 18:17:57 EDT 2007  CSN: CSN-asimcore-69
+                  Fri Mar 30 22:17:57 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Template.pm               Locally Modified           68 
+
+Updating with simcore changes (rev. 2285)
+
+Minor fix to the new package command.
