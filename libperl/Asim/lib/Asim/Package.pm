@@ -85,7 +85,7 @@ our $IPCHIST       = "admin/ipchist";
 our $CONFIG_BM     = "config/bm";
 our $CONFIG_PM     = "config/pm";
 
-our $PM            = "model";
+our $PM            = "modules";
 
 our $GOLDSTATS     = "regtest/gold";
 
@@ -312,7 +312,7 @@ sub open {
   Asim::Package::Cvs::set_type      ( $self ) ||
   Asim::Package::BitKeeper::set_type( $self ) ||
   Asim::Package::Svn::set_type      ( $self ) ||
-  ierror( "cannot determine package/repository type" );
+  ierror( "Cannot determine package/repository type\n" );
 
   return $self;
 
@@ -840,7 +840,7 @@ sub type {
 =item $package-E<gt>isprivate()
 
 Return true if this package is private, i.e., is in the directory
-<ASIMLOCAL>/src/asim-<package>
+<ASIMLOCAL>/src/
 
 =cut
 

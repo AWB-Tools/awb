@@ -83,7 +83,7 @@ sub create {
   my $where = shift
     || $Asim::default_workspace->rootdir() . "/src";
 
-  my $root = "$where/asim-$package";
+  my $root = "$where/$package";
 
   if (-e $root) {
     ierror("A file already exists at $root - No package created\n");

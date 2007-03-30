@@ -1252,3 +1252,22 @@ Updating with simcore changes (rev. 2277)
 
 added a check when ports are connected to make sure
 the template data type is the same for the read and write sides of the port.
+
+----------
+spartha1    Date: Fri Mar 30 17:50:34 EDT 2007  CSN: CSN-asimcore-64
+                  Fri Mar 30 21:50:34 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Template.pm               Locally Modified           63 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified           63 
+
+Updating with simcore changes (rev. 2278)
+
+Updated new package creation to reflect new conventions:
+package directory does not begin asim-
+modules are put in directory named modules/
+
+Joel
