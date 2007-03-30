@@ -325,45 +325,50 @@ sub checkout {
       my $cmd ="(cd $targetdir; svn checkout --username $user $url $target)";
       printf STDERR "Executing: %s\n", $cmd;
       $status = system($cmd);
+
+    } elsif ( $tag =~ /CSN-([a-z0-9_\-]+)-([0-9]+)/ ) {
+
+      # Non-head checkout,
+      # where tag is of the form "CSN-<packagename>-<number>".
+      # Extract <number> and check out that revision:
+
+      my $cmd ="(cd $targetdir; svn checkout -r $2 --username $user $url/trunk $target)";
+      printf STDERR "Executing: %s\n", $cmd;
+      $status = system($cmd);
+
     } else {
 
-      # Non-head checkout
+      # Non-head checkout,
+      # where tag is a general string.
+      # Look in both "tags" and "branches" to find the label and check that one out:
+      
+      my $is_tag_or_branch = 0;
+      foreach my $subdir ( 'tags', 'branches' ) {
 
-      my $tmp_svn_list = "/tmp/asim-shell-svn-list.$$";  
-      my $tmp_url = "$url/tags/$tag";  
-      system ("svn list $tmp_url > $tmp_svn_list 2>&1");
-      CORE::open(TMP, "< $tmp_svn_list");
-
-      while (<TMP>) {  
-        if (/non-existent/) {
-          # Pick up the corresponding revision no.
-          my @tmp;
-          $url.="/trunk";
-          @tmp = split(/-/,$tag); # Tag:CSN-axp-no.
-          # Pick up the revision no.
-          if ($tmp[0] =~ /CSN/) {
-            my $cmd ="(cd $targetdir; svn checkout -r $tmp[2] --username $user $url $target)";
+	open LIST, "svn list $url/$subdir |";
+	while ( <LIST> ) {
+          if ( m/^$tag\// ) {
+            # Pick up the tag directory
+            my $cmd ="(cd $targetdir; svn checkout --username $user $url/$subdir/$tag $target)";
             printf STDERR "Executing: %s\n", $cmd;
             $status = system($cmd);
-          } else {
-          # Else pick up that date
-            my $date ="{\"$tag\"}";
-            my $cmd ="(cd $targetdir; svn checkout -r $date --username $user $url $target)";
-            printf STDERR "Executing: %s\n", $cmd;
-            $status = system($cmd);
+            $is_tag_or_branch = 1;
+	    last;
           }
-        } else {
-          # Pick up the tag directory
-          $url.="/tags/$tag";
-          my $cmd ="(cd $targetdir; svn checkout --username $user $url $target)";
-          printf STDERR "Executing: %s\n", $cmd;
-          $status = system($cmd);
-        }
-        last;
+	}
+	close LIST;
+	
+      }
+      
+      # couldn't find it in either tags or branches?
+      # Tag must be a date, so try checking out using it as a date string:
+      if ( ! $is_tag_or_branch ) {
+	my $date ="{\"$tag\"}";
+	my $cmd ="(cd $targetdir; svn checkout -r $date --username $user $url/trunk $target)";
+	printf STDERR "Executing: %s\n", $cmd;
+	$status = system($cmd);
       }
 
-      CORE::close(TMP);
-      system ("rm $tmp_svn_list");
     }
   } else {
     ierror("Error: Asim::Repository->checkout() - Unimplemented checkout method ($method)\n");

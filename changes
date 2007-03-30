@@ -1224,3 +1224,15 @@ Updating with simcore changes (rev. 2273)
 
 Added the "commit package all" command to commit all packages in workspace.
 Removed some comments.
+
+----------
+spartha1    Date: Fri Mar 30 17:46:29 EDT 2007  CSN: CSN-asimcore-62
+                  Fri Mar 30 21:46:29 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified           61 
+
+Updating with simcore changes (rev. 2275)
+
+- Fixed the ability to check out from a tag or branch in SVN
