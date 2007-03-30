@@ -444,18 +444,50 @@ ModelBuilder::CopyFileToBuildTree (
     MakeDir (FileHead (destFileName));
     unlink (destFileName.c_str());
 
-    const string sourceFileFullName = sourceTree.FullName (sourceFileName);
+    string sourceFileFullName = sourceTree.FullName (sourceFileName);
 
     bool fileIsEmpty = sourceFileFullName.empty();
     bool fileExists = FileExists (sourceFileFullName);
 
     if (fileExists) {
 	if (persist_configureOpt) {
+	    int nlevels = 0, size = 0;
+	    char buffer[256];	    
+	    string symlinkFileName;
+	    while (FileIsSymLink(sourceFileFullName)) {
+		cout << "link: " << sourceFileFullName << endl;
+		if (++nlevels > 8) {
+		    cout << " WARNING: Creating hard link failed : Symbolic link too deep on ";
+		    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
+			 << destFileName.c_str() << "'" <<endl;
+		    return false;
+		}
+		size = readlink(sourceFileFullName.c_str(), buffer, 256);
+		if (size < 0) {
+		    perror(" WARNING: Creating hard link failed : Cannot resolve symbolic link ");
+		    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
+			 << destFileName.c_str() << "'" <<endl;
+		    return false;
+		}
+		else if (size >= 256) {
+		    cout << " WARNING: Creating hard link failed : Link name too long on ";
+		    cout << " src: " << sourceFileFullName.c_str() << "'" << ", dest: '" 
+			 << destFileName.c_str() << "'" <<endl;
+		    return false;
+		}
+		symlinkFileName = buffer;
+		if (IsAbsolutePath(symlinkFileName)) {
+		    sourceFileFullName = symlinkFileName;
+		}
+		else {
+		    sourceFileFullName = FileJoin(FileDirName(sourceFileFullName), symlinkFileName);
+		}
+	    }
 	    if (link(sourceFileFullName.c_str(), destFileName.c_str()) == -1) {
 		perror(" WARNING: Creating hard link failed "); 
-		cout << " src: '" << sourceFileFullName.c_str() << "'" << ", dest: '" 
-		     << destFileName.c_str() << "'" <<endl;
-		return false;
+		symlink (sourceFileFullName.c_str(), destFileName.c_str());
+		cout << " Created symbolic link between src: '" << sourceFileFullName.c_str() << "'" << ", dest: '" 
+		     << destFileName.c_str() << "'" << endl;
 	    }
 	}
 	else {

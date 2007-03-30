@@ -940,3 +940,15 @@ assigned by the SMP class.
 Note: no parallel models tested yet. This is all infrastructure change.
 
 Only include cctype on C++ compilations.
+
+----------
+spartha1    Date: Fri Mar 30 15:41:25 EDT 2007  CSN: CSN-asimcore-46
+                  Fri Mar 30 19:41:25 UTC 2007
+
+
+Directory lib/libawb
+ model_builder.cpp         Locally Modified           45 
+
+Updating with simcore changes (rev. 2256)
+
+- supported handling of sym links in persist configure option.
