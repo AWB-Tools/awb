@@ -1026,6 +1026,7 @@ sub configure {
   my $self = shift;
   my %args = @_;
   my $builddir = $args{"--builddir"} || $self->build_dir();
+  my $persist = $args{"--persist"} || undef;
 
   $self->build_dir($builddir);
 
@@ -1035,7 +1036,13 @@ sub configure {
   print "Asim::Model - configure model\n" if $debug;
 
   # determine correct command (Asim v. Hasim)
-  my $cmd = "amc --model=$filename --builddir=\"$builddir\" configure";
+  my $cmd;
+  if (defined $persist && $persist) {
+      $cmd = "amc --persist --model=$filename --builddir=\"$builddir\" configure";
+  }
+  else {
+      $cmd = "amc --model=$filename --builddir=\"$builddir\" configure";
+  }
   if ($self->type() eq "HAsim") {
       $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -configure";
   }
