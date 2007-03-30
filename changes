@@ -1370,3 +1370,16 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2287)
 
 Fixing the error in the new package command
+
+----------
+spartha1    Date: Fri Mar 30 18:31:54 EDT 2007  CSN: CSN-asimcore-72
+                  Fri Mar 30 22:31:54 UTC 2007
+
+
+Directory tools/scripts
+ rsync-traces              Locally Added               0 
+ rsync.pl                  Locally Removed            71 
+
+Updating with simcore changes (rev. 2288)
+
+- renamed rsync.pl to rsync-traces
