@@ -62,7 +62,7 @@ sub is_multi_package_command {
 #
 sub package_command_takes_all_arg {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(update))$/ );
+  return ( $cmd =~ m/^((status)|(update)|(commit))$/ );
 }
 
 #
@@ -184,7 +184,7 @@ sub attempted_completion {
     # Handle commands that take a single package name
     #
     my @packages = $default_packageDB->directory();
-    if ($prefix =~ /update package/) {
+    if ($prefix =~ /update package/ || /commit package/) {
       push(@packages, "all");
     }
     @list = grep /^$text/, @packages;

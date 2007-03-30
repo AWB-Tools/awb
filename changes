@@ -1207,3 +1207,20 @@ Updating with simcore changes (rev. 2272).
 
 - got rid of false warning on "unknown flags" that are actually recognized
 but are in class CONTROLLER_X86_CLASS and not CONTROLLER_CLASS.
+
+----------
+spartha1    Date: Fri Mar 30 17:43:01 EDT 2007  CSN: CSN-asimcore-61
+                  Fri Mar 30 21:43:01 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Completion.pm             Locally Modified           60 
+ Commands.pm               Locally Modified           60 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified           60 
+
+Updating with simcore changes (rev. 2273)
+
+Added the "commit package all" command to commit all packages in workspace.
+Removed some comments.

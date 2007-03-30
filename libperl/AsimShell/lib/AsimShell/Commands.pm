@@ -1368,6 +1368,12 @@ sub commit_package {
 
   # Package names are remaining arguments
   while ( my $name = shift @ARGV ) {
+
+    # handle special case of "all packages"
+    if (defined($name) && ($name eq "*" || $name eq "all")) {
+      return commit_all_packages($deps);
+    }
+
     my $package = get_package($name) || return undef;
     $package->commit(!$deps)         || return undef;
   }
@@ -1375,6 +1381,38 @@ sub commit_package {
   return 1;
 }
 
+
+# Commits all packages in workspace
+
+sub commit_all_packages {
+  my $deps = shift;
+  my @plist;
+
+  #
+  # Generate list of checked-out packages
+  #
+  foreach my $pname ($default_packageDB->directory()) {
+    my $p = get_package($pname);
+
+    if ($p->isprivate()) {
+      push(@plist, $p);
+    } else {
+      print "Skipping public package $pname\n";
+    }
+  }
+
+  #
+  # Do a commit on each package
+  #
+  for my $p (@plist) {
+        print "Commiting package " . $p->name() . "\n\n";
+
+	$p->commit(!$deps) || return undef;
+	print "\n";
+  }
+
+  return 1;
+}
 
 sub release_package {
   my $name = shift if (defined($_[1]));

@@ -149,8 +149,6 @@ sub commit {
 
     if (! $p->check_stage()) {
       $stop_commit = 1;
-      #unlockall(@all);
-      #return ();
     }
   }
 
