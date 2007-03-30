@@ -1193,3 +1193,17 @@ Updating with simcore changes (rev. 2270)
 
 - Properly handle "Locally Added" and "Locally Removed" file status
 for BitKeeper files
+
+----------
+spartha1    Date: Fri Mar 30 17:40:14 EDT 2007  CSN: CSN-asimcore-60
+                  Fri Mar 30 21:40:14 UTC 2007
+
+
+Directory modules/controller/classic
+ args_x86.cpp              Locally Modified           59 
+
+Skipping  simcore rev. 2271 since similar changes are already in place.
+Updating with simcore changes (rev. 2272). 
+
+- got rid of false warning on "unknown flags" that are actually recognized
+but are in class CONTROLLER_X86_CLASS and not CONTROLLER_CLASS.

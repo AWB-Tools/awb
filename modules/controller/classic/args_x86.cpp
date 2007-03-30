@@ -152,18 +152,11 @@ bool
 CONTROLLER_X86_CLASS::ParseOneEvent (INT32 argc, char *argv[], INT32 &i)
 {
         //--------------------------------------------------------------------
-        // first try the parent class:
-        //--------------------------------------------------------------------
-        bool ok = theController.CONTROLLER_CLASS::ParseOneEvent (argc, argv, i);
-        if ( ok ) {
-            return ok;
-        }
-        //--------------------------------------------------------------------
         // if that fails, try parsing these additional arguments:
         //--------------------------------------------------------------------
         // -ptsi <n>     turn on pipetrace after committing 'n' insts.
         //
-	else if ((strcmp(argv[i], "-ptsi") == 0) && (argc > (i+1))) {
+	if ((strcmp(argv[i], "-ptsi") == 0) && (argc > (i+1))) {
             CMD_Ptv(true, ACTION_INST_ONCE, atoi_general(argv[++i]));
         }
         // -di <n>     dump state after committing 'n' insts.
@@ -291,6 +284,12 @@ CONTROLLER_X86_CLASS::ParseOneEvent (INT32 argc, char *argv[], INT32 &i)
             ++i;
             CMD_EmitStats(ACTION_INST_PERIOD, atoi_general(argv[i]));
             CMD_ResetStats(ACTION_INST_PERIOD, atoi_general(argv[i]));
+        }
+        //--------------------------------------------------------------------
+        // if all else fails, try the parent class:
+        //--------------------------------------------------------------------
+        else {
+            return theController.CONTROLLER_CLASS::ParseOneEvent (argc, argv, i);
         }
 
     return(true);
