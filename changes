@@ -1236,3 +1236,19 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2275)
 
 - Fixed the ability to check out from a tag or branch in SVN
+
+----------
+spartha1    Date: Fri Mar 30 17:48:43 EDT 2007  CSN: CSN-asimcore-63
+                  Fri Mar 30 21:48:43 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ port.h                    Locally Modified           62 
+
+Directory lib/libasim/src
+ port.cpp                  Locally Modified           62 
+
+Updating with simcore changes (rev. 2277)
+
+added a check when ports are connected to make sure
+the template data type is the same for the read and write sides of the port.

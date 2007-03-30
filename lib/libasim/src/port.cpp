@@ -138,6 +138,11 @@ bool
 BasePort::ConnectPorts(int rdPort, int port, int index, 
 		      asim::Vector<BasePort*>::Iterator i)
 {
+    // ensure that the data types of the endpoints match:
+    VERIFY( i[port]->GetDataType() == i[rdPort]->GetDataType(),
+            "Data type mismatch when connecting ports (" <<
+            i[port]->GetName()                           << ")\n" );
+
     if (i[rdPort]->GetBandwidth() > 0)
     {
         VERIFY(i[port]->GetBandwidth() <= 0 || 

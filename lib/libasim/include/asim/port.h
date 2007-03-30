@@ -28,6 +28,7 @@
 // generic
 #include <stdio.h>
 //#include <string.h>
+#include <typeinfo>
 
 // ASIM core
 #include "asim/syntax.h"
@@ -82,6 +83,10 @@ private:
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
 
 protected:
+  // this is used to ensure the endpoints of a connected port have the same type,
+  // and is implemented in derived classes:
+  virtual const type_info &GetDataType() = 0;
+
   // These three variable define how to identify an endpoint and how
   // its connection to the other endpoint should be handled.
   char *Scope;
@@ -319,6 +324,10 @@ public:
   INT64 LatestWrite();
   void SetLastAccessed(UINT64);
   void Deactivate();
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -346,6 +355,10 @@ public:
   virtual void EventConnect(int bufNum, int destination);
 
   virtual const PortType GetType() const;
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -373,6 +386,10 @@ public:
   virtual void EventConnect(int bufNum, int destination);
 
   virtual const PortType GetType() const;
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 
@@ -408,6 +425,10 @@ public:
 
   UINT64 GetLastAccessed();
   bool IsActive();
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 
@@ -441,6 +462,10 @@ public:
   virtual const PortType GetType() const;
 
   INT16 GetEventEdgeId();
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -472,6 +497,10 @@ public:
   bool IsStalled();
 
   INT16 GetEventEdgeId();
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -498,6 +527,10 @@ public:
   virtual const PortType GetType() const;
 
   INT16 GetEventEdgeId();
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -538,6 +571,10 @@ public:
   bool Config(int bw, int lat);
   bool InitConfig(const char *name, int bw, int lat, int nodeId = 0 );  
   
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -576,6 +613,10 @@ public:
   bool Config(int bw, int lat);
   bool InitConfig(const char *name, int bw, int lat, int nodeId = 0 );  
   
+
+protected:
+  // this is used to ensure the endpoints of a connected port have the same type:
+  virtual const type_info &GetDataType() { return typeid( T ); };
 };
 
 
@@ -586,6 +627,11 @@ class ConfigPort : public BasePort
 {
 public:
   virtual const PortType GetType() const;
+
+protected:
+  // not really used, but we have to implement it.
+  // We'll return the type id of ourself:
+  virtual const type_info &GetDataType() { return typeid( ConfigPort ); };
 };
 
 
