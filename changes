@@ -1113,3 +1113,21 @@ Directory lib/libasim/src
 Updating with simcore changes (rev. 2266)
 
 Need to include <unistd.h> on RedHat.
+
+----------
+spartha1    Date: Fri Mar 30 16:57:40 EDT 2007  CSN: CSN-asimcore-56
+                  Fri Mar 30 20:57:40 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified           55 
+
+Directory tools/scripts
+ asim-run                  Locally Modified           55 
+
+Updating with simcore changes (rev. 2267)
+
+added support for distcc in asim-run. added support for ccache and distcc in
+awb. Makefile.config should also support CCACHE and DISTCC variables for this
+the model to build with distcc/ccache. asim-run will use --builddistcc
+command line option or key off of asimrc variable BUILD_DISTCC.

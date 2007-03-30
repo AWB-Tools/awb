@@ -140,14 +140,15 @@ $CURRENT_QSLOT = "";
 # Get the default pool to use. If none is specified, then the default netbatch pool, as
 # setup through netbatch or the NBPOOL environment variable, is used.  
 #
-my $pool       = Asim::Util::get_asimrc_val("asim-run", "POOL",           ""    );
-my $pool_build = Asim::Util::get_asimrc_val("asim-run", "POOL_BUILD",     ""    );
-my $build      = Asim::Util::get_asimrc_val("asim-run", "BUILD",          1     );
-my $nuke       = Asim::Util::get_asimrc_val("asim-run", "NUKE",           1     );
-my $compress   = Asim::Util::get_asimrc_val("asim-run", "COMPRESS",       "gzip");
-my $replace    = Asim::Util::get_asimrc_val("asim-run", "REPLACE",        0     );
-my $buildbatch = Asim::Util::get_asimrc_val("asim-run", "BUILD_NETBATCH", "0"   );
-my $runbatch   = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
+my $pool        = Asim::Util::get_asimrc_val("asim-run", "POOL",           ""    );
+my $pool_build  = Asim::Util::get_asimrc_val("asim-run", "POOL_BUILD",     ""    );
+my $build       = Asim::Util::get_asimrc_val("asim-run", "BUILD",          1     );
+my $nuke        = Asim::Util::get_asimrc_val("asim-run", "NUKE",           1     );
+my $compress    = Asim::Util::get_asimrc_val("asim-run", "COMPRESS",       "gzip");
+my $replace     = Asim::Util::get_asimrc_val("asim-run", "REPLACE",        0     );
+my $buildbatch  = Asim::Util::get_asimrc_val("asim-run", "BUILD_NETBATCH", "0"   );
+my $builddistcc = Asim::Util::get_asimrc_val("asim-run", "BUILD_DISTCC",   "0"   );
+my $runbatch    = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
 #
 # Get the legal queue slots, if any.  If no legal queue slots are specified, then 
 # all queue slots specified are considered legal. 
@@ -236,6 +237,8 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
 			"compress=s"     => \$compress,
                         "execscript=s"   => \$execscript,
                         "buildbatch!"    => \$buildbatch,
+                        "buildopt=s"     => \$buildopt,
+                        "builddistcc!"  => \$builddistcc,
 			"persist!"       => \$persist,
                         "batch!"         => \$runbatch,
 			"pool=s"         => \$pool,
@@ -284,6 +287,35 @@ system ("touch $asim_runlogfl; chmod 666 $asim_runlogfl");
 # buildbatch overrides runbatch
 if (defined $buildbatch && $buildbatch) {
     $runbatch = "1";
+}
+
+
+# make sure this is defined
+if (!defined $builddistcc) {
+    $builddistcc = 0;
+}
+
+# buildbatch build options
+if (!defined $buildopt) {
+    if ($builddistcc)
+    {   
+        $buildopt = "'DISTCC=1 OPT=1 DEBUG=0 TRACE=1 -j'";  
+    }
+    else
+    {               
+        $buildopt = "'OPT=1 DEBUG=0 TRACE=1 -j4'";
+    }
+}
+else
+{
+    if ($builddistcc)
+    {   
+        $buildopt = "'DISTCC=1 -j ".$buildopt."'";
+    }
+    else
+    {               
+        $buildopt = "'".$buildopt."'";
+    }
 }
 
 # handle netbatch expressions
@@ -864,7 +896,8 @@ foreach $name (@exp_ordered) {
 	  if ($buildforced == 1) {
 	      # Build model (optimized)
 	      PrintInfo("........ Building model $model_name\n");
-	      if (! ($thisModel->build("--logfile", "$asim_runlogfl", "--buildopt", "'OPT=1 DEBUG=0 TRACE=1 -j4'"))) {
+              
+	      if (! ($thisModel->build("--logfile", "$asim_runlogfl", "--buildopt", $buildopt))) {
 		  PrintError("Unable to build model $model_name\n",
 			     "Not running benchmarks on model $model_name.\n");
 		  system ("cat $asim_runlogfl");
@@ -947,7 +980,7 @@ sub batch_build_run
 	    PrintInfo(".... Submitting model build\n");
 	    
 	    # Build model (optimized)	    
-	    if (SubmitJob("asim-shell --batch build model -- --builddir $model_buildarea --options='OPT=1 DEBUG=0 TRACE=1 -j4'", "1")) {
+	    if (SubmitJob("asim-shell --batch build model -- --builddir $model_buildarea --options=$buildopt", "1")) {
 		HandleBuildFailure();
 		close LOGFILE;
 		exit 1;

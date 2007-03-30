@@ -1111,6 +1111,8 @@ sub build_options {
     $options{"TRACE"} = "Debugging Trace Code";
     $options{"EVENTS"} = "Event Log Code";
     $options{"PROFILE"} = "Instruction Profiling Code";
+    $options{"DISTCC"} = "Use distcc with gcc";
+    $options{"CCACHE"} = "Use ccache with gcc";
   }
 
 
