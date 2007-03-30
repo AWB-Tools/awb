@@ -1013,3 +1013,17 @@ Updating with simcore changes (rev. 2261)
 new .cfx script allows benchmark-specific adjustments to simulation
 parameters. it works just like single.cfx except you can add model, feeder,
 and system flag overrides on a per benchmark basis.
+
+----------
+spartha1    Date: Fri Mar 30 16:39:15 EDT 2007  CSN: CSN-asimcore-51
+                  Fri Mar 30 20:39:15 UTC 2007
+
+
+Directory tools/scripts/bm/tracecache
+ single-with-params.cfx    Locally Modified           50 
+
+Updating with simcore changes (rev. 2262)
+
+fixed .cfx script to pass feeder params *after* the "-t <bm>" param. feeder
+commands are typically modifications of the prior trace passed on the command
+line.

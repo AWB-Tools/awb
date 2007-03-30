@@ -103,7 +103,7 @@ cp -f \@RUNSCRIPT@ \$2/run
 my $RunScriptTemplate =
 "#!/bin/sh
 PATH=\$PATH:/p/asim/i386_linux24/bin
-command=\"\$model $model_params \$genFlags --feeder $feeder_params -t $actual_trace_name \$feedFlags --system $system_params \$sysFlags\"
+command=\"\$model $model_params \$genFlags --feeder -t $actual_trace_name $feeder_params \$feedFlags --system $system_params \$sysFlags\"
 echo \$command
 eval \$command
 ";
