@@ -214,20 +214,27 @@ sub status {
       } elsif ( $changed ) {
         $status = 'Locally Modified';
       } elsif ( $pending ) {
-        $status = 'Needs Update';
+        if ( $dirfile =~ m/^BitKeeper\/deleted/ ) {
+          $status = 'Locally Removed';
+        } else {
+          $status = 'Locally Added';
+        }
       } elsif ( $extra ) {
         $status = 'Unknown';
       } elsif ( $junk ) {
         # I don't know about this !!?!
         $status = 'Zombie';
       }
-      # FIX: what about "Locally Added" ??
-      # FIX: what about "Locally Deleted" ??
       
       # parse directory and file, removing "/SCCS/s." from the path:
       if      ( $dirfile =~ m/^(.*)SCCS\/s\.(.*)$/ ) {
 	$file = $2;
         ($dir = $1) =~ s/\/$//;
+        # locally removed files are a special case:
+        if ( $dirfile =~ m/BitKeeper\/deleted\/SCCS\/s\.\.del\-(.*)\~[0-9a-f]+/ ) {
+          $file = $1;
+          $dir = '?';
+        }
       } elsif ( $dirfile =~ m/^(.*)\/(.*)$/ ) {
         # not a repository file, in a subdirectory
 	$file = $2;

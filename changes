@@ -1180,3 +1180,16 @@ Leaving "the/rest/of/the/path" to be substituted as @BENCHMARKPATH@.
 See "asim-shell help code" on GenCFG::Auto for details.
 
 Updated "single-check-param.cfx" to use this new feature.
+
+----------
+spartha1    Date: Fri Mar 30 17:25:44 EDT 2007  CSN: CSN-asimcore-59
+                  Fri Mar 30 21:25:44 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ BitKeeper.pm              Locally Modified           58 
+
+Updating with simcore changes (rev. 2270)
+
+- Properly handle "Locally Added" and "Locally Removed" file status
+for BitKeeper files
