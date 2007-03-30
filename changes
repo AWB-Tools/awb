@@ -1101,3 +1101,15 @@ We'll need to add exponential backoff.
 - Disable events for multithreaded models. Obviously this will have to
 be fixed.
 - Fix mismatched malloc/free in args.
+
+----------
+spartha1    Date: Fri Mar 30 16:54:49 EDT 2007  CSN: CSN-asimcore-55
+                  Fri Mar 30 20:54:49 UTC 2007
+
+
+Directory lib/libasim/src
+ mesg.cpp                  Locally Modified           54 
+
+Updating with simcore changes (rev. 2266)
+
+Need to include <unistd.h> on RedHat.
