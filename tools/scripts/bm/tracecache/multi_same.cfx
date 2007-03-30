@@ -1,0 +1,20 @@
+#!/usr/intel/bin/perl
+#
+# Generic benchmark configuration script,
+# where the same trace is used by multiple threads.
+# Used in a .benchmarks file as follows:
+#   /path/to/this/script.cfx/number_of_threads/path/to/trace/files.cfg
+#
+use Asim::GenCFG::Auto;
+
+# extract the number of threads and benchmark path from the arg string
+my $num_threads = Asim::GenCFG::Auto::ShiftPath();
+
+# The default setup script already contains one -t <trace> arg.
+# We'll pass the other N-1 trace arguments as extra feeder flags.
+my $feed_flags = '';
+for (my $i=1; $i<$num_threads; $i++) {
+  $feed_flags .= ' -t @BENCHMARKNAME@';
+}
+
+Asim::GenCFG::Auto::Generate( feedflags => $feed_flags );

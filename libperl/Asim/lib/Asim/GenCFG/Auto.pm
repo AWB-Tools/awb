@@ -6,7 +6,7 @@
 # 
 # @author Carl Beckmann
 #
-# Copyright (c) 2006 Intel Corporation, all rights reserved.
+# Copyright (c) 2006-7 Intel Corporation, all rights reserved.
 # THIS PROGRAM IS AN UNPUBLISHED WORK FULLY PROTECTED BY COPYRIGHT LAWS AND
 # IS CONSIDERED A TRADE SECRET BELONGING TO THE INTEL CORPORATION.
 #
@@ -121,9 +121,9 @@ our $SUBST_NAME;
 our $SUBST_RUNSCRIPT = 'run';
 our $SetupScriptTemplate;
 our $RunScriptTemplate;
+our @VirtualPath;
 
-sub Generate {
-  die "unknown trace path" if ( $ARGV[0] ne '--emit' );
+BEGIN {
   Asim::init();
 
   ##
@@ -140,8 +140,12 @@ sub Generate {
   ($SUBST_NAME = $SUBST_PATH) =~ s/^.*\///;
 
   # get the directory tree as an array:
-  my @tree = split '/', $SUBST_PATH;
-  $#tree--;
+  @VirtualPath = split '/', $SUBST_PATH;
+  $#VirtualPath--;
+}
+
+sub Generate {
+  die "unknown trace path" if ( $ARGV[0] ne '--emit' );
 
   # if the trace argument looks like a path, rather than a simple name,
   # we need to prepend a '/' which gets stripped by the caller:
@@ -157,7 +161,7 @@ sub Generate {
     name         => $SUBST_NAME,
     info         => $SUBST_NAME,
     file         => $SUBST_NAME,
-    tree         => \@tree,
+    tree         => \@VirtualPath,
     feeder       => 'archlib',
     setup_script => $SetupScriptTemplate,
     run_script   => $RunScriptTemplate
@@ -299,7 +303,55 @@ sub TemplateSubstitutions {
 
 ################################################################
 
-=back
+=head2 The ShiftPath() command
+
+The ShiftPath() command is used to get "hidden" arguments passed to the .cfx script as part of
+the virtual path.  For example, if you want to create a .cfx script that is used as follows:
+
+=over 4
+
+your/script.cfx/arg1/arg2/actual/path/to/benchmark.cfg
+
+=back 4
+
+then you would call GenCFG::Auto::ShiftPath() once to get "arg1", another time to get "arg2",
+and then "/actual/path/to/benchmark" would be left over to be substituted as @BENCHMARPATH@.
+
+=cut
+
+sub ShiftPath {
+  my @path    = split '/', $SUBST_PATH;
+  my $ret     = shift @path;
+  $SUBST_PATH = join  '/', @path;
+  return $ret;
+}
+
+################################################################
+
+=head2 The ChopName(<regex>) command
+
+The ChopName() command is used to get "hidden" arguments passed to the .cfx script as part of
+the virtual name.  For example, if you want to create a .cfx script that is used as follows:
+
+=over 4
+
+your/script.cfx/actual/path/to/benchmark@args.cfg
+
+=back 4
+
+then you would call GenCFG::Auto::ChopName( '@.*$' ) once to get "args" off the end of the name,
+leaving "/actual/path/to/benchmark" to be substituted as @BENCHMARPATH@, and "benchmark" to be
+subsituted as @BENCHMARKNAME@.
+
+=cut
+
+sub ChopName {
+  my $regex = shift;
+  $SUBST_NAME =~ s/($regex)//;
+  return $1;
+}
+
+################################################################
 
 =head1 AUTHORS
 
@@ -307,7 +359,7 @@ Carl Beckmann
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2006
+Copyright (c) Intel Corporation, 2006-7
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.

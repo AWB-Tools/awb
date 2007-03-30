@@ -1150,3 +1150,33 @@ recursive attempts to clear the pointer if the destructor checks the
 pointer and tries to clear it. (E.g. Removing an object from a list.)
 Changed the code to decrement the ref count, clear the pointer and then
 call the destructor if the ref count is 0.
+
+----------
+spartha1    Date: Fri Mar 30 17:23:45 EDT 2007  CSN: CSN-asimcore-58
+                  Fri Mar 30 21:23:45 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/GenCFG
+ Auto.pm                   Locally Modified           57 
+
+Directory tools/scripts/bm/tracecache
+ single-check-param.cfx    Locally Modified           57 
+ multi_same.cfx            Locally Added               0 
+
+Updating with simcore changes (rev. 2269)
+
+- Added a function "ShiftPath()" to Asim::GenCFG::Auto, to make it easy to
+extract parameters passed as part of the virtual path using cfx scripts,
+for example:
+
+my/script.cfx/param1/param2/the/rest/of/the/path.cfg
+
+In the cfx script you can now easily extract these parameters:
+
+$param1 = Asim::GenCFG::Auto::ShiftPath();
+$param2 = Asim::GenCFG::Auto::ShiftPath();
+
+Leaving "the/rest/of/the/path" to be substituted as @BENCHMARKPATH@.
+See "asim-shell help code" on GenCFG::Auto for details.
+
+Updated "single-check-param.cfx" to use this new feature.

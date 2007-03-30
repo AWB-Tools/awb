@@ -24,6 +24,7 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 
 use Asim;
 use strict;
+use Asim::GenCFG::Auto;
 
 ##
 ## Generate a generic cfg file for a single-threaded trace,
@@ -50,30 +51,11 @@ use strict;
 # get path to required setup script
 chomp( my $SETUP = `awb-resolver tools/scripts/bm/tracecache/single-check-param.setup` );
 
-# get the argument string, which follows the --emit arg, remove the ".cfg" suffix
-die "unknown trace path" if ( $ARGV[0] ne '--emit' );
-(my $arg_string = $ARGV[1]) =~ s/\.cfg$//;
-my @arg_list = split '/', $arg_string;
+# get the parameter name and value:
+my $param_name = Asim::GenCFG::Auto::ShiftPath();
+my $param_val  = Asim::GenCFG::Auto::ShiftPath();
 
-# strip the directory off to get a name:
-my $trace_name = $arg_list[$#arg_list];
-$#arg_list--;
-
-# get the parameter name, value, and directory tree:
-(my $param_name, my $param_val, my @trace_path) = @arg_list;
-my @tree = @arg_list;
-
-# if the trace argument looks like a path, rather than a simple name,
-# we need to prepend a '/' which gets stripped by the caller:
-my $trace_path = $trace_name;
-if ( $#trace_path >= 0 ) { $trace_path = '/' . join( '/', @trace_path ) . '/' . $trace_path; }
-
-# now generate the virtual .cfg file:
-my $gcfg = Asim::GenCFG->new();
-$gcfg->add(name   => $trace_name,
-	   info   => "single trace $trace_path with parameter value check",
-	   tree   => \@tree,
-           feeder => 'archlib',
-           setup  => "$SETUP $param_name $param_val $trace_path",
-           );
-$gcfg->action(@ARGV);
+Asim::GenCFG::Auto::Generate(
+  info   => "single trace \@BENCHMARKNAME\@ with parameter value check",
+  setup  => "$SETUP $param_name $param_val \@BENCHMARKPATH\@",
+);
