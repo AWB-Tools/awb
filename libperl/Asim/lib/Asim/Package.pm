@@ -312,10 +312,27 @@ sub open {
   Asim::Package::Cvs::set_type      ( $self ) ||
   Asim::Package::BitKeeper::set_type( $self ) ||
   Asim::Package::Svn::set_type      ( $self ) ||
-  ierror( "Cannot determine package/repository type\n" );
+  Asim::Package::set_type           ( $self );
 
   return $self;
 
+}
+
+
+################################################################
+
+=item Asim::Package::set_type( $package )
+
+Set the object's package type to Unknown and return 1.
+
+=cut
+
+################################################################
+
+sub set_type {
+  my $self = shift;
+  $self->{type} = "unknown";
+  return 1;
 }
 
 
