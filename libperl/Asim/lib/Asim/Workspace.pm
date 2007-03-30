@@ -475,7 +475,7 @@ Return the awb build directory
 sub build_dir {
   my $self = shift;
 
-  return $self->rootdir() . "/build";
+  return $self->rootdir() . "/build/default";
 }
 
 

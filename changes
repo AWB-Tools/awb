@@ -1027,3 +1027,26 @@ Updating with simcore changes (rev. 2262)
 fixed .cfx script to pass feeder params *after* the "-t <bm>" param. feeder
 commands are typically modifications of the prior trace passed on the command
 line.
+
+----------
+spartha1    Date: Fri Mar 30 16:41:31 EDT 2007  CSN: CSN-asimcore-52
+                  Fri Mar 30 20:41:31 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Workspace.pm              Locally Modified           51 
+
+Directory tools/scripts
+ asim-run                  Locally Modified           51 
+
+Updating with simcore changes (rev. 2263)
+
+- several additions to the asim build area:
+1. added an option to specify the build location. In conjunction with
+nobuild option, this can be used to pickup models from an alternate
+location. 
+2. delineated build and run directories. Resdir can reside in a 
+seperate space from the build directory.
+3. changed the default model build location of amc to asim-root/build/default.
+4. changed default result directory for asim-run from '.' to asim-root/build/default.
+5. removed altexepath. Buildarea option is meaningful in both build and nobuild option.

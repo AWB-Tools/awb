@@ -50,6 +50,7 @@ use Asim;
 Asim::init();
 
 use Asim::Util;
+use Asim::Workspace;
 
 #
 # Hard coded global values.  These are not controlled by the asimrc file. 
@@ -198,7 +199,7 @@ my $benchmarks="";
 #
 # Some inputs have hard coded defaults. 
 #
-my $resdir="./";
+my $buildarea = undef;
 my $dryrun   = 0;
 my $execscript=$ASIM_EXEC_SCRIPT;
 my $limit = 1;
@@ -226,7 +227,7 @@ if (defined($ENV{ASIMRUNOPT})) {
 $status = GetOptions(   "experiments=s"  => \$experiments,
                         "benchmarks=s"   => \$benchmarks,
                         "resdir=s"       => \$resdir,
-			"altexepath=s"   => \$altexepath,
+			"buildarea=s"    => \$buildarea,
                         "nicelevel=i"    => \$nicelevel,
                         "build!"         => \$build,
                         "nuke!"          => \$nuke,
@@ -297,6 +298,18 @@ if (defined $class_build) {
     }
 }
 
+# create space for model builds if specified
+if (defined $buildarea && $buildarea ne "" && $build == 1) {
+    $buildarea = realpath($buildarea);
+    if (! -d $buildarea) {
+	if (! mkdir "$buildarea") {
+	    # Unable to mkdir.
+	    PrintError("Unable to create directory $buildarea.\n");
+	    exit 1;
+	}
+    }
+}
+
 ###########################
 # Parse experiments
 ###########################
@@ -318,6 +331,7 @@ parse_bm_file ($benchmarks, $exps, $bms);
 ###########################
 # Get results directory
 ###########################
+$resdir = $Asim::default_workspace->build_dir() unless (defined $resdir);
 ( -d $resdir ) || die ("Unable to find results directory $resdir.\n");
 chomp ($resdir);
 $resdir = realpath($resdir);
@@ -680,9 +694,15 @@ foreach $name (@exp_ordered) {
       else {
 	  # if user requested looking for the configured & built models
 	  # elsewhere, look there.
-	  if (defined $altexepath && $altexepath ne "") {
-	      $model_alternate_path = $altexepath . "/$model_name/pm/";	# default is $awblocal/build
-	      if (-x "$model_alternate_path/$model_name") {
+	  if (defined $buildarea && $buildarea ne "") {
+	      my $model_alternate_path = undef;
+	      if (-x "$buildarea/$name/pm/$model_name") {
+		  $model_alternate_path = $buildarea . "/$name/pm/";
+	      }
+	      elsif (-x "$buildarea/$name/$model_name") {
+		  $model_alternate_path = $buildarea . "/$name/";
+	      }
+	      if (defined $model_alternate_path) {
 		  if (!(-d "$resdir/$name/BUILD")) {
 		      if (!(mkdir "$resdir/$name/BUILD")) {
 			  # Unable to mkdir, so skip this model.
@@ -704,20 +724,38 @@ foreach $name (@exp_ordered) {
 		  }
 	      }
 	      else {
-		  PrintError("Model \'$model_name\' not found in \`$model_alternate_path\/$model_name\' and no build specified.",
+		  PrintError("Model \'$model_name\' not found in \`$buildarea\' and no build specified.",
 			     "Runs will not be scheduled on this model.\n");
+		  $exit_code++;
+		  next;
 	      }
 	  }
 	  else {
 	      PrintError("No pre-built model \'$model_name\' found and no build or alternate model location specified.",
 			 "Runs will not be scheduled on this model.\n");
+	      $exit_code++;
+	      next;
 	  }
       }
   }
 
   if ($build == 1) {
-
-      if ( -d "$resdir/$name/BUILD") {
+      if (defined $buildarea && $buildarea ne "") {
+	  $model_buildarea = "$buildarea/$name";
+	  if (!(-d "$resdir/$name/BUILD")) {
+	      if (!(mkdir "$resdir/$name/BUILD")) {
+		  # Unable to mkdir, so skip this model.
+		  PrintError("Unable to create directory $resdir/$name/BUILD to link model built in \`$buildarea/$name\`.",
+			     "Runs will not be scheduled on this model.\n");
+		  $exit_code++;
+		  next;
+	      }
+	  }
+      }
+      else {
+	  $model_buildarea = "$resdir/$name/BUILD";
+      }
+      if ( -d "$model_buildarea") {
 	  if ($nuke) {
 	      # Clean model
 	      PrintInfo("........ Nuking model $model_name\n");
@@ -727,10 +765,7 @@ foreach $name (@exp_ordered) {
 	      # configuring first takes care of the case where we nuke without having
 	      # a model available. 
 	      #
-	      $thisModel->build_dir("$name");
-	      $thisModel->build_dir("$resdir");
-	      
-	      $thisModel->build_dir("$resdir/$name/BUILD");
+	      $thisModel->build_dir("$model_buildarea");
 	
 	      if (! ($thisModel->configure("--logfile", "$asim_runlogfl"))) {
 		  PrintError("Unable to configure/nuke model $model_name.\n",
@@ -753,16 +788,16 @@ foreach $name (@exp_ordered) {
 	  }
       }
       else {
-	  if (! mkdir "$resdir/$name/BUILD"){
+	  if (! mkdir "$model_buildarea"){
 	      # Unable to mkdir, so skip this model.
-	      PrintError("Unable to create directory $resdir/$name/BUILD.\n",
+	      PrintError("Unable to create directory $model_buildarea.\n",
 			 "Skipping execution of experiment $name.\n");
 	      
 	      $exit_code++;
 	      next;
 	  }
 	  else {
-	      $thisModel->build_dir("$resdir/$name/BUILD");
+	      $thisModel->build_dir("$model_buildarea");
 	  }
       }
 
@@ -779,8 +814,7 @@ foreach $name (@exp_ordered) {
       }
 
       if (! $buildbatch) {
-	  
-	  # Determine if we've already build this model. 
+	  # Determine if we've already built this model. 
 	  my $buildforced = 1;
 	  my @built = ();
 	  my $cur_model;
@@ -790,7 +824,6 @@ foreach $name (@exp_ordered) {
 	  if (scalar(@built) > 1) {
 	      PrintError("It looks like I've built the same model twice.\n",
 			 "ACK!! BUG!! Get Bobbie to fix this @#$!#\n");
-	      
 	      $exit_code++;
 	      exit $exit_code;
 	  }
@@ -799,7 +832,23 @@ foreach $name (@exp_ordered) {
 	      $built[0] =~ /($cur_model)$EXP_ENTRY(.*)/;
 	      my $builtexp = $2;
 	      PrintInfo("........ Skipping build: Linking to prebuilt model $model_name in experiment $builtexp\n");
-	      if ( RunCommand ("ln -sf $resdir/$name/BUILD/../../$builtexp/BUILD/$model_name $resdir/$name/BUILD/$model_name > $asim_runlogfl 2>&1") ) {
+	      if (defined $buildarea && $buildarea ne "") {
+		  # model is configured in build area, just link binary.
+		  if ( RunCommand ("ln -sf $buildarea/$builtexp/$model_name $model_buildarea/$model_name > $asim_runlogfl 2>&1") ) {  
+		      PrintWarning("Unable to link to prebuilt model $model_name in build area in experiment $builtexp\n",
+				   "Build forced.\n");
+		      $exit_code++;
+		      next;
+		  }
+		  # model is not configured in $resdir, link all.
+		  if (RunCommand ("ln -sf $resdir/$name/BUILD/../../$builtexp/BUILD/* $resdir/$name/BUILD/ > $asim_runlogfl 2>&1") ) {
+		      PrintWarning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
+				   "Build forced.\n");
+		      $exit_code++;
+		      next;
+		  }
+	      }
+	      elsif (RunCommand ("ln -sf $resdir/$name/BUILD/../../$builtexp/BUILD/$model_name $resdir/$name/BUILD/$model_name > $asim_runlogfl 2>&1") ) {
 		  PrintWarning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
 			       "Build forced.\n");
 		  $exit_code++;
@@ -823,6 +872,13 @@ foreach $name (@exp_ordered) {
 	      }	  
 	      else {
 		  HandleBuildSuccess();
+		  # if we configured and built the model elsewhere, link all to $resdir.
+		  if (defined $buildarea && $buildarea ne "")  {
+		      if (RunCommand ("ln -sf $model_buildarea\/* $resdir/$name/BUILD/ > $asim_runlogfl 2>&1") ) {
+			  PrintError("Linking to built model in \'$model_buildarea\/$model_name\' failed.",
+				     "Runs will not be scheduled on this model.\n");
+		      }
+		  }
 		  # Push built model onto list so that we don't build the same model multiple 
 		  # times.  Also, substitute : for / so that we don't have any problems with 
 		  # reg exps. 
@@ -832,13 +888,16 @@ foreach $name (@exp_ordered) {
 	      }
 	  }
       }
-      else {
-	  PrintInfo("........ Submitting batch build of model $model_name and benchmarks\n");
-      }
   }
-  
+
   if ($buildbatch) {
       # batch build the model for this experiment and run the benchmarks
+      if ($build == 1) {
+	  PrintInfo("........ Submitting batch build of model $model_name and benchmarks\n");
+      }
+      else {
+	  PrintInfo("........ Submitting benchmarks for $name\n");
+      }
       batch_build_run($name, $build);
   }
   else {
@@ -846,6 +905,7 @@ foreach $name (@exp_ordered) {
       # The actual run is accomplished by the asim-batch script which submits
       # the run to netbatch. 
       if (($build == 1) || (-x "$resdir/$name/BUILD/$model_name")) {
+	  PrintInfo("........ Submitting benchmarks for $name\n");
 	  run_benchmarks($name);
       }
   }
@@ -885,7 +945,7 @@ sub batch_build_run
 	    PrintInfo(".... Submitting model build\n");
 	    
 	    # Build model (optimized)	    
-	    if (SubmitJob("asim-shell --batch build model -- --builddir $resdir/$name/BUILD --options='OPT=1 DEBUG=0 TRACE=1 -j4'", "1")) {
+	    if (SubmitJob("asim-shell --batch build model -- --builddir $model_buildarea --options='OPT=1 DEBUG=0 TRACE=1 -j4'", "1")) {
 		HandleBuildFailure();
 		close LOGFILE;
 		exit 1;
@@ -893,6 +953,12 @@ sub batch_build_run
 	    
 	    PrintInfo(".... Completed model build\n");	    
 	    HandleBuildSuccess();
+	    if (defined $buildarea && $buildarea ne "")  {
+		if (RunCommand ("ln -sf $model_buildarea\/* $resdir/$name/BUILD/ >> $resdir/$name/BUILD/batch.log 2>&1") ) {
+		    PrintError("Linking to built model in \'$model_buildarea\/$model_name\' failed.",
+			       "Runs will not be scheduled on this model.\n");
+		}
+	    }
 	}
 	if (($build == 1) || (-x "$resdir/$name/BUILD/$model_name")) {	
 	    PrintInfo(".... Running benchmarks for experiment $name\n");
@@ -1745,7 +1811,7 @@ sub CleanupQueueProblems {
 ## Clear unneeded sideeffects of a successful batch model build.
 ##
 sub HandleBuildSuccess {
-    my $buildroot = "$resdir/$name/BUILD";
+    my $buildroot = "$model_buildarea";
     if (RunCommand("rm -f $buildroot/$model_name.SUBMITTED $buildroot/.dirs > /dev/null 2>&1") || RunCommand("rm -rf $buildroot/.depend/ $buildroot/obj/ > /dev/null 2>&1")) {
 	PrintWarning(".... Unable to cleanup build files\n");
     }
@@ -1756,6 +1822,7 @@ sub HandleBuildSuccess {
 ##
 sub HandleBuildFailure {
     system("touch $resdir/$name/$model_name.ERROR"); 
+    system("touch $model_buildarea/$model_name.ERROR"); 
 }
 
 ##
@@ -1865,7 +1932,7 @@ Asim-run - Program to run a set of asim experiments
           [--nicelevel <Number between Nicemin (usually 10) & Nicemax (usually 19)>]
           [--execscript <Name of script to execute to simulate each benchmark>]
           [--[no]build]
-          [--altexepath <Alternate location of pre-built model(s)>]
+          [--buildarea <Alternate location to build models or look for pre-built model(s)>]
           [--[no]replace]
           [--compress none|no|gzip|gz|bzip2|bz2]
           [--[no]batch]
@@ -1938,11 +2005,12 @@ be no reason to change the default.
 Specifies whether the models are to be built or (with the [no] prefix)
 that they are already built. Default is to build all models.
 
-=item --altexepath <Alternate location of pre-built model(s)>
+=item --buildarea <Alternate location to build models or look for pre-built model(s)>
 
-Look for pre-built models from this area.  This option is meaningful only in
-combination with nobuild option.  Each model is looked in the location after
-adding model_name/pm/ to the path specified.
+If build is specified, build models in this area.  If nobuild is specified,
+look for pre-built models in this area.  Each model is first looked after
+adding exp_name/pm/model_name to the path specified; if no model is found,
+just adding exp_name/model_name to the path specified is tried.
 
 =item --[no]replace
 
