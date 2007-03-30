@@ -24,7 +24,6 @@
 #include <iostream>
 #include <sstream>
 #include <pthread.h>
-#include <assert.h>
 #include <asim/regexobj.h>
 
 // Include support for the old trace format.
@@ -316,7 +315,7 @@ inline void TRACEABLE_CLASS::SetTraceOn(bool enabled)
 
 inline void TRACEABLE_CLASS::Trace(std::ostringstream &out) const
 {
-#if NUM_PTHREADS > 1
+#if MAX_PTHREADS > 1
     get_thread_safe_log().ts() << std::dec << pthread_self() << ": " <<  out.str() << endl;
 #else
     std::cout << out.str() << std::endl;

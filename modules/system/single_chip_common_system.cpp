@@ -340,6 +340,8 @@ SYS_Init(
         return(NULL);
     }
 
+    ASIM_SMP_CLASS::Init(MAX_PTHREADS, LIMIT_PTHREADS);
+
     common_system = new ASIM_COMMON_SYSTEM_CLASS("COMMON_SYSTEM", feederThreads);
     T1_AS(common_system, "Initializing performance model."); 
     common_system->InitModule();

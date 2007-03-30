@@ -186,6 +186,8 @@ SYS_Init(
         return(NULL);
     }
 
+    ASIM_SMP_CLASS::Init(MAX_PTHREADS, LIMIT_PTHREADS);
+
     common_system = new ASIM_SYSTEM_CLASS("COMMON_SYSTEM");
     common_system->InitModule();
     return(common_system);

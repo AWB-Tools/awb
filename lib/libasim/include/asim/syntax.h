@@ -37,6 +37,9 @@
 // stdint.h is generic, move this out of ifdef eventually!
 #include <stdint.h>
 #include <limits.h>
+#if defined(c_plusplus)
+#include <cctype>
+#endif
 
 typedef  int8_t              INT8;
 typedef uint8_t             UINT8;
@@ -46,6 +49,14 @@ typedef  int32_t             INT32;
 typedef uint32_t            UINT32;
 typedef  int64_t             INT64;
 typedef uint64_t            UINT64;
+
+#if __WORDSIZE >= 64
+#define INT128_AVAIL
+// Uses SSE.  Limited support in 32 bit mode.
+typedef int __attribute__((__mode__(__TI__)))          INT128;
+typedef unsigned int __attribute__((__mode__(__TI__))) UINT128;
+#endif
+
 typedef  intptr_t  PTR_SIZED_INT;
 typedef uintptr_t PTR_SIZED_UINT;
 
@@ -130,6 +141,14 @@ typedef int32_t             INT32;
 typedef u_int32_t           UINT32;
 typedef int64_t             INT64;
 typedef u_int64_t           UINT64;
+
+#if __WORDSIZE >= 64
+#define UINT128_AVAIL
+// Uses SSE.  Limited support in 32 bit mode.
+typedef int __attribute__((__mode__(__TI__)))          INT128;
+typedef unsigned int __attribute__((__mode__(__TI__))) UINT128;
+#endif
+
 typedef INT32               PTR_SIZED_INT;
 typedef UINT32              PTR_SIZED_UINT;
 // generic

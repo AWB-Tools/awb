@@ -867,3 +867,76 @@ Directory etc
 
 
 Added ofdm project.
+
+----------
+spartha1    Date: Fri Mar 30 15:36:59 EDT 2007  CSN: CSN-asimcore-45
+                  Fri Mar 30 19:36:59 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ trace.h                   Locally Modified           44 
+ smp.h                     Locally Modified           44 
+ pool_allocated_object.h   Locally Modified           44 
+ clockserver.h             Locally Modified           44 
+ atomic.h                  Locally Modified           44 
+ rate_matcher.h            Locally Modified           44 
+ mm.h                      Locally Modified           44 
+ dynamic_array.h           Locally Modified           44 
+ message_handler_log.h     Locally Modified           44 
+ port.h                    Locally Modified           44 
+ mmptr.h                   Locally Modified           44 
+ clockable.h               Locally Modified           44 
+ threaded_log.h            Locally Modified           44 
+ trace_legacy.h            Locally Modified           44 
+ syntax.h                  Locally Modified           44 
+
+Directory lib/libasim/src
+ smp.cpp                   Locally Modified           44 
+ atomic.cpp                Locally Modified           44 
+ clockserver.cpp           Locally Modified           44 
+
+Directory modules/model/test_model/test_board
+ test_board.cpp            Locally Modified           44 
+
+Directory modules/system
+ multi_chip_common_system.h Locally Modified           44 
+ single_chip_clockserver_system.h Locally Modified           44 
+ multi_chip_common_system.awb Locally Modified           44 
+ single_chip_common_system.cpp Locally Modified           44 
+ single_chip_clockserver_system.awb Locally Modified           44 
+ single_chip_common_system.h Locally Modified           44 
+ single_chip_common_system.awb Locally Modified           44 
+
+Directory modules/system/ape_system
+ ape.cpp                   Locally Modified           44 
+ ape.h                     Locally Modified           44 
+ ape.awb                   Locally Modified           44 
+
+Directory modules/system/system_minimal
+ system_mini.cpp           Locally Modified           44 
+ system_mini.h             Locally Modified           44 
+ system_mini.awb           Locally Modified           44 
+
+Directory modules/system
+ multi_chip_common_system.cpp Locally Modified           44 
+ single_chip_clockserver_system.cpp Locally Modified           44 
+
+Updating with simcore changes (rev. 2249 and 2250)
+
+Restructure SMP thread model to support global management of threads within
+the simulator. Major changes include:
+
+- Number of threads is no longer an argument to make. It is a property of
+the model, stored in parameters in the system module.
+- SMP class now has a number of static methods for managing threads.
+The system calls the SMP initialization method.
+- Cleaned up the threading interface to the clock server. Threads are no
+named as objects instead of integers.
+- The clock server calls SMP to start threads. All thread global IDs are
+assigned by the SMP class.
+- Updated atomic for better performance on 64 bit machines.
+- Added compare and exchange functions to atomic.h
+
+Note: no parallel models tested yet. This is all infrastructure change.
+
+Only include cctype on C++ compilations.

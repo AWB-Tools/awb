@@ -71,7 +71,6 @@ ASIM_COMMON_SYSTEM_CLASS::ASIM_COMMON_SYSTEM_CLASS(
     clock -> SetRandomClockingSeed(RANDOM_CLOCKING_SEED);
     clock -> SetDumpProfile(DUMP_CLOCKING_PROFILE);
     clock -> SetThreadedClocking(THREADED_CLOCKING == 1);
-    clock -> SetMaxPthreads(NUM_PTHREADS - 1 /* Master thread */);
 
     // Initialize single instance of thermal model
     myThermalModel = THERMAL_MODEL_CLASS::Instance();
@@ -108,7 +107,7 @@ ASIM_COMMON_SYSTEM_CLASS::InitModule()
     clock->InitClockServer();
 
     // Set the reference clock domain (-rd option)
-    clock->setReferenceClockDomain(referenceDomain);    
+    clock->SetReferenceClockDomain(referenceDomain);    
     
     return true;
 }
@@ -393,6 +392,8 @@ SYS_Init(
             return(false);
         }
     }
+
+    ASIM_SMP_CLASS::Init(MAX_PTHREADS, LIMIT_PTHREADS);
 
     common_system = new ASIM_COMMON_SYSTEM_CLASS("COMMON_SYSTEM",
                                                  reference_domain,

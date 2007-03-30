@@ -25,12 +25,12 @@
 #include "asim/atomic.h"
 #include <iostream>
 
-std::ostream & operator<< (std::ostream & os, ATOMIC_CLASS a){
-    os << ATOMIC32_TYPE( a );
+std::ostream & operator<< (std::ostream & os, ATOMIC32_CLASS a){
+    os << a.val;
     return os;
 }
 
 std::ostream & operator<< (std::ostream & os, ATOMIC64_CLASS a){
-    os << ATOMIC64_TYPE( a );
+    os << __read_val((_Atomic64 *)(&(a.val)));
     return os;
 }

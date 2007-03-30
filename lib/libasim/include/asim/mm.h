@@ -33,6 +33,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <pthread.h>
 
 // ASIM core
 #include "asim/syntax.h"
@@ -50,7 +51,7 @@ typedef UINT64 MM_UID_TYPE;
 /*
 Original mmptr code would break when running in multiple threads [1]: it's too
 easy to assign one object to n different threads and not track it appropriately.
-To fix this, we can split shared structures into NUM_PTHREADS pools and use an
+To fix this, we can split shared structures into MAX_PTHREADS pools and use an
 ATOMIC_CLASS reference count. This causes each thread to be allocated objects from
 distinct pools (thus no locking is required).
 
@@ -67,10 +68,9 @@ comments in LastRefDropped()
 the simulator, NOT software contexts.
 */
 
-#if NUM_PTHREADS > 1
+#if MAX_PTHREADS > 1
 
-  #include <pthread.h>
-  #define POOL get_asim_thread_id()
+  #define POOL (ASIM_SMP_CLASS::GetRunningThreadNumber())
   #define lockFreeList(p)   pthread_mutex_lock(p);
   #define unlockFreeList(p) pthread_mutex_unlock(p);
 
@@ -213,18 +213,18 @@ class ASIM_MM_CLASS
 #endif
 
         UINT32 mmMaxObjs;       ///< Maximum number of objects
-        UINT32 mmTotalObjs[NUM_PTHREADS];     ///< Number of Objects
+        UINT32 mmTotalObjs[MAX_PTHREADS];     ///< Number of Objects
         /// List of free MM_TYPE objects; its used as a stack, but we also
         /// need to have an iterator, so <stack> does not work;
-        ObjectVector mmFreeList[NUM_PTHREADS];
+        ObjectVector mmFreeList[MAX_PTHREADS];
 
-#if NUM_PTHREADS > 1
-        pthread_mutex_t mmFreeListLock[NUM_PTHREADS];
+#if MAX_PTHREADS > 1
+        pthread_mutex_t mmFreeListLock[MAX_PTHREADS];
 #endif
 
 #ifdef MM_OBJ_DUMP
         /// List of all objects (only in extended debug mode MM_OBJ_DUMP)
-        ObjectVector mmObjList[NUM_PTHREADS];
+        ObjectVector mmObjList[MAX_PTHREADS];
 #endif // MM_OBJ_DUMP
 
         bool destructed;        ///< has destructor for this already run
@@ -259,12 +259,7 @@ class ASIM_MM_CLASS
     /// the free list, so we can detect illegal operations on the
     /// object during this time;
 
-#if NUM_PTHREADS > 1
-    ATOMIC_CLASS mmCnt;  //ATOMIC_CLASS to support references across multiple threads.
-#else
-    INT32 mmCnt;
-#endif
-
+    ATOMIC_INT32 mmCnt;  //ATOMIC_CLASS to support references across multiple threads.
     int mmOwnerThread;   //note which thread 1st grabbed this object.  It will be returned to the same freelist
 
   private:
@@ -350,11 +345,11 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::DATA (
     mmMaxObjs(max),
     destructed(false)
 {
-    for(int i=0; i<NUM_PTHREADS; i++)
+    for(int i=0; i<MAX_PTHREADS; i++)
     {
         mmTotalObjs[i]=0;
 
-#if NUM_PTHREADS > 1
+#if MAX_PTHREADS > 1
         pthread_mutex_init(&mmFreeListLock[i], NULL);
 #endif
 
@@ -390,7 +385,7 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::~DATA()
                  << endl;
         }
     }
-    for(int i=0; i<NUM_PTHREADS; i++)
+    for(int i=0; i<MAX_PTHREADS; i++)
     {
         // free all objects that are on the free list
         while ( ! mmFreeList[i].empty())
@@ -404,8 +399,8 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::~DATA()
 
     destructed = true;
 
-#if NUM_PTHREADS > 1
-    for(int i=0; i<NUM_PTHREADS; i++)
+#if MAX_PTHREADS > 1
+    for(int i=0; i<MAX_PTHREADS; i++)
     {
         pthread_mutex_destroy(&mmFreeListLock[i]);
     }
@@ -499,7 +494,7 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::IncrRef (void)
 //         }
 //     }
 
-    mmCnt++;
+    mmCnt += 1;
 }
 
 
@@ -521,7 +516,7 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DecrRef (void)
     // mmCnt is atomically decremented, but its value may
     // be changed by another thread concurrently. We must make a copy
     // to compare it with 1. Do not compare the mmCnt itself!!
-    INT32 mmCntCopy = mmCnt --;
+    INT32 mmCntCopy = mmCnt--;
 
 
 //    if( data.className == "MICRO_INST_CLASS" )

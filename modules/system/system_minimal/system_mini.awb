@@ -35,3 +35,6 @@
 #
 # %AWB_END
 # */
+
+%export MAX_PTHREADS                  1 "Maximum number of simulator threads"
+%export %dynamic LIMIT_PTHREADS       0 "Dynamic maximum simulator threads (0 == use MAX_PTHREADS)"

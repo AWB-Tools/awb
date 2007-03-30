@@ -39,6 +39,10 @@ Awb module specification
 %export NUM_HWCS_PER_CPU       16 "Number of hardware contexts per CPU"
 %export MAX_TOTAL_NUM_CPUS       1 "Max Number of CPUS"
 %export MAX_TOTAL_NUM_HWCS       1 "Max Number of hardware contexts"
+
+%export MAX_PTHREADS                  1 "Maximum number of simulator threads"
+%export %dynamic LIMIT_PTHREADS       0 "Dynamic maximum simulator threads (0 == use MAX_PTHREADS)"
+
 %param %dynamic SIMULATED_REGION_WEIGHT 10000 "The weight of the benchmark section from 1-10000"
 %param %dynamic SIMULATED_REGION_INSTRS_REPRESENTED 0 "Total instructions per CPU in benchmark represented by this region"
 %AWB_END

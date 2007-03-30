@@ -37,9 +37,9 @@ using namespace std;
 /**
  * Interface that must implement all the classes that wants to be clocked
  **/
-typedef class asim_clockable_class ASIM_CLOCKABLE_CLASS, *ASIM_CLOCKABLE;
+typedef class ASIM_CLOCKABLE_CLASS *ASIM_CLOCKABLE;
 
-class asim_clockable_class : public TRACEABLE_CLASS
+class ASIM_CLOCKABLE_CLASS : public TRACEABLE_CLASS
 {
     
   private:
@@ -77,7 +77,7 @@ class asim_clockable_class : public TRACEABLE_CLASS
 
   public:
 
-    asim_clockable_class(asim_clockable_class* p) :
+    ASIM_CLOCKABLE_CLASS(ASIM_CLOCKABLE_CLASS* p) :
         registered(false),
         registeredDral(false),
         thread(NULL),
@@ -90,7 +90,7 @@ class asim_clockable_class : public TRACEABLE_CLASS
         nWrapAround(0)
     { }
 
-    virtual ~asim_clockable_class()
+    virtual ~ASIM_CLOCKABLE_CLASS()
     {
         for(list<CLOCK_CALLBACK_INTERFACE>::iterator it = cbL.begin(); it != cbL.end(); it++)
         {
@@ -148,20 +148,26 @@ class asim_clockable_class : public TRACEABLE_CLASS
      *
      * @param name  Unique name of the clock domain.
      * @param freq/freqs  Working frequencies in GHz
-     * @param threadId  Id of the thread that will be used by default for clocking
-     *                  the modules registed to the created domain. A negative value
+     * @param tHandle   Handle of the thread that will be used by default for clocking
+     *                  the modules registed to the created domain. A NULL value
      *                  means the default thread.
      **/
-    void newClockDomain(string name, float freq, INT32 threadId = -1)
+    void NewClockDomain(
+        string name,
+        float freq,
+        ASIM_SMP_THREAD_HANDLE tHandle = NULL)
     {
         ASSERTX(freq > (float)0);
         
         list<float> tmp_list;
         tmp_list.push_back(freq);
-        clockServer.newClockDomain(name, tmp_list, threadId);
+        clockServer.NewClockDomain(name, tmp_list, tHandle);
     }
     
-    void newClockDomain(string name, list<float> freqs, INT32 threadId = -1)
+    void NewClockDomain(
+        string name,
+        list<float> freqs,
+        ASIM_SMP_THREAD_HANDLE tHandle = NULL)
     {
         list<float>::iterator it = freqs.begin();
         while(it != freqs.end())
@@ -170,7 +176,7 @@ class asim_clockable_class : public TRACEABLE_CLASS
             ++it;
         }
         
-        clockServer.newClockDomain(name, freqs, threadId);
+        clockServer.NewClockDomain(name, freqs, tHandle);
     }
     
     /** 
@@ -179,18 +185,22 @@ class asim_clockable_class : public TRACEABLE_CLASS
      * @param name Name of the clock domain.
      * @param freq New working frequency.
      **/
-    void setDomainFrequency(string name, float freq){ clockServer.setDomainFrequency(name, freq); }
+    void SetDomainFrequency(string name, float freq){ clockServer.SetDomainFrequency(name, freq); }
              
     /**
      * Adds a new model to be clocked in the given domain.
      *
      * @param domainName Name of the domain to which the clockable module belongs to.
      * @param skew Clocking skew within this domain.
-     * @param threadId Idenfifier of the thread that will clock the module
-     *                (a negative value means the default domain's thread)
+     * @param tHandle Handle of the thread that will clock the module
+     *                (a NULL value means the default domain's thread)
      * @param referenceDomain Set as reference clock domain for this module.
      **/
-    void RegisterClock(string domainName, UINT32 skew = 0, INT32 threadId = -1, bool referenceDomain = false)
+    void RegisterClock(
+        string domainName,
+        UINT32 skew = 0,
+        ASIM_SMP_THREAD_HANDLE tHandle = NULL,
+        bool referenceDomain = false)
     {        
         // The following assertion has been removed to allow a module to get registered to be clocked
         // at different domains/skews        
@@ -200,7 +210,7 @@ class asim_clockable_class : public TRACEABLE_CLASS
         
         if(registered) registered = !referenceDomain;
         
-        CLOCK_DOMAIN _domain = clockServer.RegisterClock(this, domainName, skew, threadId);
+        CLOCK_DOMAIN _domain = clockServer.RegisterClock(this, domainName, skew, tHandle);
         if(!registered)
         {
             domain = _domain;
@@ -214,12 +224,16 @@ class asim_clockable_class : public TRACEABLE_CLASS
      * @param domainName Name of the domain to which the clockable module belongs to.
      * @param cb Callback to the method that will be called.
      * @param skew Clocking skew within this domain.
-     * @param threadId Idenfifier of the thread that will clock the module
-     *                (a negative value means the default domain's thread)
+     * @param tHandle Handle of the thread that will clock the module
+     *                (a NULL value means the default domain's thread)
      * @param referenceDomain Set as reference clock domain for this module.
      **/
-    void RegisterClock(string domainName, CLOCK_CALLBACK_INTERFACE cb, UINT32 skew = 0,
-                       INT32 threadId = -1, bool referenceDomain = false)
+    void RegisterClock(
+        string domainName,
+        CLOCK_CALLBACK_INTERFACE cb,
+        UINT32 skew = 0,
+        ASIM_SMP_THREAD_HANDLE tHandle = NULL,
+        bool referenceDomain = false)
     {
         // The following assertion has been removed to allow a module to get registered to be clocked
         // at different domains/skews        
@@ -230,7 +244,7 @@ class asim_clockable_class : public TRACEABLE_CLASS
         if(registered) registered = !referenceDomain;
 
         // The current skew is scaled to support phases 
-        CLOCK_DOMAIN _domain = clockServer.RegisterClock(this, domainName, cb , skew + clkEdges2skew[cb->getClkEdge()], threadId);
+        CLOCK_DOMAIN _domain = clockServer.RegisterClock(this, domainName, cb , skew + clkEdges2skew[cb->getClkEdge()], tHandle);
         if(!registered)
         {
             domain = _domain;
@@ -245,15 +259,20 @@ class asim_clockable_class : public TRACEABLE_CLASS
      * @param cb Callback to the method that will be called, it must be a phased callback.
      * @param ed Clock edge when the module will be clocked.
      * @param skew Clocking skew within this domain.
-     * @param threadId Idenfifier of the thread that will clock the module
-     *                (a negative value means the default domain's thread)
+     * @param tHandle Handle of the thread that will clock the module
+     *                (a NULL value means the default domain's thread)
      * @param referenceDomain Set as reference clock domain for this module.
      **/
-    void RegisterClock(string domainName, CLOCK_CALLBACK_INTERFACE cb, CLK_EDGE ed,
-                       UINT32 skew = 0, INT32 threadId = -1, bool referenceDomain = false)
+    void RegisterClock(
+        string domainName,
+        CLOCK_CALLBACK_INTERFACE cb,
+        CLK_EDGE ed,
+        UINT32 skew = 0,
+        ASIM_SMP_THREAD_HANDLE tHandle = NULL,
+        bool referenceDomain = false)
     {
         cb->setClkEdge(ed);
-        RegisterClock(domainName, cb, skew, threadId, referenceDomain);
+        RegisterClock(domainName, cb, skew, tHandle, referenceDomain);
     }
     
     /**
