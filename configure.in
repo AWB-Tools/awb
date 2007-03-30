@@ -67,16 +67,19 @@ AC_DEFUN([FIND_MOC],[
 
     for dir in $1
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
-	do
-          if test -f $try/moc
-          then
-              QTMOCDIR=$try
-              AC_MSG_RESULT("found in $QTMOCDIR")
-              break 2
-	  fi
-	done
-	
+        if test -f $dir/moc
+        then
+            QTMOCDIR=$dir
+            AC_MSG_RESULT("found in $QTMOCDIR")
+            break
+        else
+            if test -f $dir/bin/moc
+            then
+                QTMOCDIR=$dir/bin
+                AC_MSG_RESULT("found in $QTMOCDIR")
+                break
+            fi
+        fi
     done
 ])
 
@@ -85,46 +88,48 @@ AC_DEFUN([FIND_UIC],[
 
     for dir in $1
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
-	do
-          if test -f $try/uic
-          then
-              QTUICDIR=$try
-              AC_MSG_RESULT("found in $QTUICDIR")
-              break 2
-	  fi
-	done
-	
+        if test -f $dir/uic
+        then
+            QTUICDIR=$dir
+            AC_MSG_RESULT("found in $QTUICDIR")
+            break
+        else
+            if test -f $dir/bin/uic
+            then
+                QTUICDIR=$dir/bin
+                AC_MSG_RESULT("found in $QTUICDIR")
+                break
+            fi
+        fi
     done
-
 ])
 
 AC_DEFUN([FIND_QT_LIBS],[
     AC_MSG_CHECKING("for Qt 3.x.x libraries")
 
-    QTLIBS="qt-mt qt"
+    QTLIBS="qt"
 
     for dir in $1
     do
-        for try in $dir/qt3/lib $dir/qt/lib $dir/lib/qt3 $dir/lib/qt $dir/lib $dir/qt3 $dir/qt $dir
-	do
-
-          for i in $QTLIBS
-          do
-	  
-              if test -f $try/lib$i.a -o -f $try/lib$i.so
-              then
-                  QTLIBDIR=$try
-                  QT=$i
-                  AC_MSG_RESULT("found lib$i in $QTLIBDIR")
-                  break 3
-              fi
-	      
-	  done
-	done
-	
+        for i in $QTLIBS
+        do
+            if test -f $dir/lib$i.a -o -f $dir/lib$i.so
+            then
+                QTLIBDIR=$dir
+                AC_MSG_RESULT("found in $QTLIBDIR")
+                QT=$i
+                break 2
+            else
+                if test -f $dir/lib/lib$i.a -o -f $dir/lib/lib$i.so
+                then
+                    QTLIBDIR=$dir/lib
+                    AC_MSG_RESULT("found in $QTLIBDIR")
+                    QT=$i
+                    break 2
+                fi
+            fi
+        done
     done
-    
 ])
 
 AC_DEFUN([FIND_QT_INCLUDES],[
@@ -132,18 +137,20 @@ AC_DEFUN([FIND_QT_INCLUDES],[
 
     for dir in $1
     do
-        for try in $dir/qt3/include $dir/qt/include $dir/include/qt3 $dir/include/qt $dir/include $dir/qt3 $dir/qt $dir
-	do
-          if test -f $try/qwidget.h
-          then
-              QTINCDIR=$try
-              AC_MSG_RESULT("found in $QTINCDIR")
-              break 2
-	  fi
-	done
-	
+        if test -f $dir/qwidget.h
+        then
+            QTINCDIR=$dir
+            AC_MSG_RESULT("found in $QTINCDIR")
+            break
+        else
+            if test -f $dir/include/qwidget.h
+            then
+                QTINCDIR=$dir/include
+                AC_MSG_RESULT("found in $QTINCDIR")
+                break
+            fi
+        fi
     done
-    
 ])
 
 AC_DEFUN([FIND_QT], [
@@ -151,7 +158,7 @@ AC_DEFUN([FIND_QT], [
 
     AC_SUBST(QT)
 
-    FIND_MOC($with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    FIND_MOC($with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/bin /bin /usr/local /usr/X11R6)
     if test "X$QTMOCDIR" = "X"; then
         echo ""
         echo "Qt's moc not found! If you have installed Qt in an"
@@ -171,7 +178,7 @@ AC_DEFUN([FIND_QT], [
     dnl find uic
     dnl
 
-    FIND_UIC($with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    FIND_UIC($with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/bin /bin /usr/local /usr/X11R6)
     if test "X$QTUICDIR" = "X"; then
         echo ""
         echo "Qt's uic not found! If you have installed Qt in an"
@@ -191,7 +198,7 @@ AC_DEFUN([FIND_QT], [
     dnl find qt libraries
     dnl
 
-    FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64)
+    FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/lib /usr/local/lib /usr/X11R6/lib /usr/lib/qt3/lib64)
     if test "X$QTLIBDIR" = "X"
     then
         echo ""
@@ -207,7 +214,7 @@ AC_DEFUN([FIND_QT], [
         echo ""
         qt_available=0;
     else
-        QTLIBOBJ="-l$QT"
+        QTLIBOBJ="-lqt"
         QTLIBDIR="-L$QTLIBDIR"
     fi
 
@@ -215,7 +222,7 @@ AC_DEFUN([FIND_QT], [
     dnl find qt headers
     dnl
 
-    FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib ${prefix} /usr/local/lib /usr/local /usr/lib /usr /usr/X11R6/lib /usr/X11R6)
+    FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/local/include /usr/X11R6/include/qt3)
     if test "X$QTINCDIR" = "X"
     then
         echo ""
@@ -282,35 +289,38 @@ AC_DEFUN([FIND_PERLGUI], [
     AC_PATH_XTRA
     AC_MSG_CHECKING(for PerlQt)
 
-    perlprefixes="$prefix /usr"
-    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
-    perlarch="/ i386-linux-thread-multi i686-linux"
+    case $HOSTOS in
+      Linux) ;;
+      *)     AC_MSG_ERROR(This OS version $HOSTOS is not supported)
+             exit ;;
+    esac
 
-    for p in $perlprefixes
-    do
-        for d in $perllibs
-        do
-            for a in $perlarch
-            do
-                if test -f $p/$d/$a/Qt.pm
-                then
-                    AC_MSG_RESULT(found in $p/$d)
-                    perlqt_search_path=$p/$d
-                    break 2
-                fi
-            done
-        done
-    done
+    case $HOSTOSRELEASE in
+      2.4*)
+	case $PERLVERSION in
+	  5.6*)  perlqt_search_suff=/lib/perl5/site_perl/$PERLVERSION ;;
+	  5.8*)  perlqt_search_suff=/lib/site_perl ;;
+	esac ;;
+      2.6*)
+	case $PERLVERSION in
+	  5.6*)  perlqt_search_suff=/lib/site_perl/$PERLVERSION ;;
+	  5.8*)
+            case $HOSTMACHINE in
+              x86_64*) perlqt_search_suff=/lib64/site_perl ;;
+              *)       perlqt_search_suff=/lib32/site_perl ;;
+            esac ;;
+	esac ;;
+      *)
+        AC_MSG_ERROR(This OS version $HOSTOSRELEASE is not supported)
+    esac
 
-    if test "X$perlqt_search_path" = "X"
+    if test -d $prefix$perlqt_search_suff
     then
-        echo ""
-        echo "****************************************************************"
-        echo "PerlQt not found!"
-        echo "****************************************************************"
-        echo ""
-    fi    
-
+        perlqt_search_path='${prefix}'$perlqt_search_suff ;
+        AC_MSG_RESULT(found in $perlqt_search_path)
+    else
+        AC_MSG_ERROR(PerlQt not found)
+    fi
 
     AC_SUBST(perlqt_search_path)
 
@@ -514,7 +524,7 @@ AC_SUBST(AM_LDFLAGS)
 
 # This is the asim package name
 AC_SUBST(package)
-package=asimcore
+package=simcore
 
 # This is the release tag out of the package file.
 # The tag is assumed to be in a line that looks like: Tag=<tagname>

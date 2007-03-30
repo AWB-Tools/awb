@@ -966,3 +966,24 @@ Updating with simcore changes (rev. 2257)
 
 - supported linking of directories with persist qualifier.
 - persist option to model configure is functional now.
+
+----------
+spartha1    Date: Fri Mar 30 16:28:51 EDT 2007  CSN: CSN-asimcore-48
+                  Fri Mar 30 20:28:51 UTC 2007
+
+
+Directory .
+ configure                 Locally Modified           47 
+ Makefile.in               Locally Modified           47 
+ configure.in              Locally Modified           47 
+ Makefile.am               Locally Modified           47 
+
+Updating with simcore changes (rev. 2258 and 2259)
+
+- Fixed the perl Qt search path to look under .../lib64/... on SUSE64 with perl 5.8.7
+instead of lib32, since that version of perl seems to be a true 64-bit binary.
+- Added a make target "install-src-public" that does the same as "install-sc" but also
+makes the installed source tree world-readable.
+
+- look for PerlQt in either .../lib32/... or .../lib64/... depending
+on whether you are on x86_64 or not, on SUSE.

@@ -2412,7 +2412,7 @@ AM_LDFLAGS='$(ARCHFLAGS) $(ASIMCORELIBS)'
 
 # This is the asim package name
 
-package=asimcore
+package=simcore
 
 # This is the release tag out of the package file.
 # The tag is assumed to be in a line that looks like: Tag=<tagname>
@@ -21183,19 +21183,23 @@ fi
     echo "$as_me:$LINENO: checking \"for Qt moc\"" >&5
 echo $ECHO_N "checking \"for Qt moc\"... $ECHO_C" >&6
 
-    for dir in $with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6
+    for dir in $with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/bin /bin /usr/local /usr/X11R6
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
-	do
-          if test -f $try/moc
-          then
-              QTMOCDIR=$try
-              echo "$as_me:$LINENO: result: \"found in $QTMOCDIR\"" >&5
+        if test -f $dir/moc
+        then
+            QTMOCDIR=$dir
+            echo "$as_me:$LINENO: result: \"found in $QTMOCDIR\"" >&5
 echo "${ECHO_T}\"found in $QTMOCDIR\"" >&6
-              break 2
-	  fi
-	done
-
+            break
+        else
+            if test -f $dir/bin/moc
+            then
+                QTMOCDIR=$dir/bin
+                echo "$as_me:$LINENO: result: \"found in $QTMOCDIR\"" >&5
+echo "${ECHO_T}\"found in $QTMOCDIR\"" >&6
+                break
+            fi
+        fi
     done
 
     if test "X$QTMOCDIR" = "X"; then
@@ -21218,21 +21222,24 @@ echo "${ECHO_T}\"found in $QTMOCDIR\"" >&6
     echo "$as_me:$LINENO: checking \"for Qt uic\"" >&5
 echo $ECHO_N "checking \"for Qt uic\"... $ECHO_C" >&6
 
-    for dir in $with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6
+    for dir in $with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/bin /bin /usr/local /usr/X11R6
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
-	do
-          if test -f $try/uic
-          then
-              QTUICDIR=$try
-              echo "$as_me:$LINENO: result: \"found in $QTUICDIR\"" >&5
+        if test -f $dir/uic
+        then
+            QTUICDIR=$dir
+            echo "$as_me:$LINENO: result: \"found in $QTUICDIR\"" >&5
 echo "${ECHO_T}\"found in $QTUICDIR\"" >&6
-              break 2
-	  fi
-	done
-
+            break
+        else
+            if test -f $dir/bin/uic
+            then
+                QTUICDIR=$dir/bin
+                echo "$as_me:$LINENO: result: \"found in $QTUICDIR\"" >&5
+echo "${ECHO_T}\"found in $QTUICDIR\"" >&6
+                break
+            fi
+        fi
     done
-
 
     if test "X$QTUICDIR" = "X"; then
         echo ""
@@ -21254,30 +21261,31 @@ echo "${ECHO_T}\"found in $QTUICDIR\"" >&6
     echo "$as_me:$LINENO: checking \"for Qt 3.x.x libraries\"" >&5
 echo $ECHO_N "checking \"for Qt 3.x.x libraries\"... $ECHO_C" >&6
 
-    QTLIBS="qt-mt qt"
+    QTLIBS="qt"
 
-    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64
+    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/lib /usr/local/lib /usr/X11R6/lib /usr/lib/qt3/lib64
     do
-        for try in $dir/qt3/lib $dir/qt/lib $dir/lib/qt3 $dir/lib/qt $dir/lib $dir/qt3 $dir/qt $dir
-	do
-
-          for i in $QTLIBS
-          do
-
-              if test -f $try/lib$i.a -o -f $try/lib$i.so
-              then
-                  QTLIBDIR=$try
-                  QT=$i
-                  echo "$as_me:$LINENO: result: \"found lib$i in $QTLIBDIR\"" >&5
-echo "${ECHO_T}\"found lib$i in $QTLIBDIR\"" >&6
-                  break 3
-              fi
-
-	  done
-	done
-
+        for i in $QTLIBS
+        do
+            if test -f $dir/lib$i.a -o -f $dir/lib$i.so
+            then
+                QTLIBDIR=$dir
+                echo "$as_me:$LINENO: result: \"found in $QTLIBDIR\"" >&5
+echo "${ECHO_T}\"found in $QTLIBDIR\"" >&6
+                QT=$i
+                break 2
+            else
+                if test -f $dir/lib/lib$i.a -o -f $dir/lib/lib$i.so
+                then
+                    QTLIBDIR=$dir/lib
+                    echo "$as_me:$LINENO: result: \"found in $QTLIBDIR\"" >&5
+echo "${ECHO_T}\"found in $QTLIBDIR\"" >&6
+                    QT=$i
+                    break 2
+                fi
+            fi
+        done
     done
-
 
     if test "X$QTLIBDIR" = "X"
     then
@@ -21294,7 +21302,7 @@ echo "${ECHO_T}\"found lib$i in $QTLIBDIR\"" >&6
         echo ""
         qt_available=0;
     else
-        QTLIBOBJ="-l$QT"
+        QTLIBOBJ="-lqt"
         QTLIBDIR="-L$QTLIBDIR"
     fi
 
@@ -21303,21 +21311,24 @@ echo "${ECHO_T}\"found lib$i in $QTLIBDIR\"" >&6
     echo "$as_me:$LINENO: checking \"for Qt 3.x.x include files\"" >&5
 echo $ECHO_N "checking \"for Qt 3.x.x include files\"... $ECHO_C" >&6
 
-    for dir in $with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib ${prefix} /usr/local/lib /usr/local /usr/lib /usr /usr/X11R6/lib /usr/X11R6
+    for dir in $with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/local/include /usr/X11R6/include/qt3
     do
-        for try in $dir/qt3/include $dir/qt/include $dir/include/qt3 $dir/include/qt $dir/include $dir/qt3 $dir/qt $dir
-	do
-          if test -f $try/qwidget.h
-          then
-              QTINCDIR=$try
-              echo "$as_me:$LINENO: result: \"found in $QTINCDIR\"" >&5
+        if test -f $dir/qwidget.h
+        then
+            QTINCDIR=$dir
+            echo "$as_me:$LINENO: result: \"found in $QTINCDIR\"" >&5
 echo "${ECHO_T}\"found in $QTINCDIR\"" >&6
-              break 2
-	  fi
-	done
-
+            break
+        else
+            if test -f $dir/include/qwidget.h
+            then
+                QTINCDIR=$dir/include
+                echo "$as_me:$LINENO: result: \"found in $QTINCDIR\"" >&5
+echo "${ECHO_T}\"found in $QTINCDIR\"" >&6
+                break
+            fi
+        fi
     done
-
 
     if test "X$QTINCDIR" = "X"
     then
@@ -22549,36 +22560,45 @@ fi
     echo "$as_me:$LINENO: checking for PerlQt" >&5
 echo $ECHO_N "checking for PerlQt... $ECHO_C" >&6
 
-    perlprefixes="$prefix /usr"
-    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
-    perlarch="/ i386-linux-thread-multi i686-linux"
+    case $HOSTOS in
+      Linux) ;;
+      *)     { { echo "$as_me:$LINENO: error: This OS version $HOSTOS is not supported" >&5
+echo "$as_me: error: This OS version $HOSTOS is not supported" >&2;}
+   { (exit 1); exit 1; }; }
+             exit ;;
+    esac
 
-    for p in $perlprefixes
-    do
-        for d in $perllibs
-        do
-            for a in $perlarch
-            do
-                if test -f $p/$d/$a/Qt.pm
-                then
-                    echo "$as_me:$LINENO: result: found in $p/$d" >&5
-echo "${ECHO_T}found in $p/$d" >&6
-                    perlqt_search_path=$p/$d
-                    break 2
-                fi
-            done
-        done
-    done
+    case $HOSTOSRELEASE in
+      2.4*)
+	case $PERLVERSION in
+	  5.6*)  perlqt_search_suff=/lib/perl5/site_perl/$PERLVERSION ;;
+	  5.8*)  perlqt_search_suff=/lib/site_perl ;;
+	esac ;;
+      2.6*)
+	case $PERLVERSION in
+	  5.6*)  perlqt_search_suff=/lib/site_perl/$PERLVERSION ;;
+	  5.8*)
+            case $HOSTMACHINE in
+              x86_64*) perlqt_search_suff=/lib64/site_perl ;;
+              *)       perlqt_search_suff=/lib32/site_perl ;;
+            esac ;;
+	esac ;;
+      *)
+        { { echo "$as_me:$LINENO: error: This OS version $HOSTOSRELEASE is not supported" >&5
+echo "$as_me: error: This OS version $HOSTOSRELEASE is not supported" >&2;}
+   { (exit 1); exit 1; }; }
+    esac
 
-    if test "X$perlqt_search_path" = "X"
+    if test -d $prefix$perlqt_search_suff
     then
-        echo ""
-        echo "****************************************************************"
-        echo "PerlQt not found!"
-        echo "****************************************************************"
-        echo ""
+        perlqt_search_path='${prefix}'$perlqt_search_suff ;
+        echo "$as_me:$LINENO: result: found in $perlqt_search_path" >&5
+echo "${ECHO_T}found in $perlqt_search_path" >&6
+    else
+        { { echo "$as_me:$LINENO: error: PerlQt not found" >&5
+echo "$as_me: error: PerlQt not found" >&2;}
+   { (exit 1); exit 1; }; }
     fi
-
 
 
 

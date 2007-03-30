@@ -60,26 +60,33 @@ install-etc:
 
 #
 # This horrible sequence copies the source to $(codedir) and
-# tries to make the ownershop and permissions reasonable
-#
-# To allow multiple users of the same group install the source
-# with same group and group write permission as $(datadir)
+# tries to make the ownership and permissions reasonable
+# It also removes the .svn subdirectories in the installed tree.
 #
 install-src:
 	$(mkinstalldirs)  $(DESTDIR)$(codedir)
-	rm -rf $(DESTDIR)$(codedir)/*
+	rm -rf  $(DESTDIR)$(codedir)/*
 	cp -r . $(DESTDIR)$(codedir)
 	chgrp --recursive --reference $(datadir) $(DESTDIR)$(codedir)
 	if [ `ls -ld $(datadir) | cut -b 6` = w ]; then chmod -R g+w $(DESTDIR)$(codedir); fi
 	make -C $(DESTDIR)$(codedir) clean
+	find    $(DESTDIR)$(codedir) -name .svn -depth -exec rm -rf {} \;
+
+#
+# Install the source tree, and make it world-readable
+#
+install-src-public: install-src
+	chmod -R o+r $(DESTDIR)$(codedir)
+	find         $(DESTDIR)$(codedir) -type d -exec chmod o+x {} \;
 
 
 #
 # we also need to fix up the distribution to contain the whole source tree
-# minus the CVS directories
+# minus the .svn directories
 #
 EXTRA_DIST = admin config etc include lib libperl tools base pm feeders util Makefile changes $(INSTALL_RC)
 
 dist-hook:
 	make -C $(distdir) distclean
-	find $(distdir) -name CVS -depth -exec rm -rf {} \;
+	find $(distdir) -name .svn -depth -exec rm -rf {} \;
+
