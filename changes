@@ -1271,3 +1271,16 @@ package directory does not begin asim-
 modules are put in directory named modules/
 
 Joel
+
+----------
+spartha1    Date: Fri Mar 30 17:52:06 EDT 2007  CSN: CSN-asimcore-65
+                  Fri Mar 30 21:52:06 UTC 2007
+
+
+Directory lib/libawb
+ workspace.cpp             Locally Modified           64 
+
+Updating with simcore changes (rev. 2279)
+
+- updated another variable holding stale default build path.
+

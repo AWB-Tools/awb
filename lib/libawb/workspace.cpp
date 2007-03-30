@@ -38,7 +38,7 @@
 
 // gcc 3.2.2 complains about these lines inside the class def.
 static const char* const DefaultBenchmarkDir   = "/proj/asim/benchmarks";
-static const char* const DefaultBuildDir       = "build";
+static const char* const DefaultBuildDir       = "build/default";
 static const char* const DefaultSourceTreePath = "asim";
 static const char* const DefaultCompiler       = "GCC";
 static const char* const DefaultParallel       = "FALSE";
