@@ -1340,3 +1340,21 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2285)
 
 Minor fix to the new package command.
+
+----------
+spartha1    Date: Fri Mar 30 18:25:03 EDT 2007  CSN: CSN-asimcore-70
+                  Fri Mar 30 22:25:03 UTC 2007
+
+
+Directory tools/scripts
+ rsync.pl                  Locally Added               0 
+
+Directory lib/libasim/include/asim
+ freelist.h                Locally Modified           69 
+ mod_numbers_dyn.h         Locally Added               0 
+
+Missed a file in rev. 68.
+
+Updating with simcore changes (rev. 2286)
+
+- basic rsync script; for private use currently.
