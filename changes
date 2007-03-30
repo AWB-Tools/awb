@@ -1284,3 +1284,15 @@ Updating with simcore changes (rev. 2279)
 
 - updated another variable holding stale default build path.
 
+
+----------
+spartha1    Date: Fri Mar 30 17:54:26 EDT 2007  CSN: CSN-asimcore-66
+                  Fri Mar 30 21:54:26 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified           65 
+
+Updating with simcore changes (rev. 2280)
+
+Checking in Jeffrey Wilder's modification to asim-run

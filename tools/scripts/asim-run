@@ -385,44 +385,6 @@ $batch_scr = realpath(dirname($batch_scr)) . "/$filename";
 ( -f $batch_scr ) || die "Batch script $batch_scr does not exist.\n";
 
 
-###########################################################
-# Get the path of the Netbatch pre-exec script to test machine viability,
-# but don't bother if we're not submitting as batch jobs,
-# or if our version of netbatch is not high enough.
-##########################################################
-if ( $runbatch && $ENABLE_NETBATCH_PRE ) {
-  $nbqver = `$BATCH_SUBMIT_COMMAND -v`;
-  if ($NETBATCH_PRE_USE_SMARTCLASS == 0) {
-      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 ) ) {
-	  print "WARNING: $BATCH_SUBMIT_COMMAND version does not support pre-exec check, jobs might be lost.\n";
-      } else {
-	  $netbatch_pre_scr = `$AWB_RESOLVER $NETBATCH_PRE_NM`;
-	  if ($? != 0) {
-	      print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
-	  } else {
-	      # Generate a real path for pre-exec script (no links)
-	      chomp ($netbatch_pre_scr);
-	      $filename = basename($netbatch_pre_scr);
-	      $netbatch_pre_scr = realpath(dirname($netbatch_pre_scr)) . "/$filename";
-	      if ( ! ( -f $netbatch_pre_scr )) {
-		  print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
-	      } else {
-		  # found pre-exec script file ok?  Then add a pre-exec option to netbatch args.
-		  # for now, we'll just hardwire the minimum space requirement to 10 MB:
-		  $batch_flags = $batch_flags . "--pre-exec \"$netbatch_pre_scr -tempdir $TMP_DIR $MIN_TMP_SPACE_MB\" ";
-	      }
-	  }
-      }
-  }
-  else {
-      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 && $2 >= 3) ) {
-	  print "WARNING: $BATCH_SUBMIT_COMMAND version does not support smart class check, jobs might be lost.\n";
-      }
-      else {
-	  $batch_flags = $batch_flags . "-C \"fDS\(\'$TMP_DIR\'\)\>$MIN_TMP_SPACE_MB\" ";
-      }
-  }
-}
 ##########################################################
 # Add auto-requeue to netbatch if specified.
 ##########################################################
@@ -553,6 +515,45 @@ if ($buildbatch) {
 	    $batch_flags_build = $batch_flags_build . "-C $class ";
 	}
     }
+}
+
+###########################################################
+# Get the path of the Netbatch pre-exec script to test machine viability,
+# but don't bother if we're not submitting as batch jobs,
+# or if our version of netbatch is not high enough.
+##########################################################
+if ( $runbatch && $ENABLE_NETBATCH_PRE ) {
+  $nbqver = `$BATCH_SUBMIT_COMMAND -v`;
+  if ($NETBATCH_PRE_USE_SMARTCLASS == 0) {
+      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 ) ) {
+      print "WARNING: $BATCH_SUBMIT_COMMAND version does not support pre-exec check, jobs might be lost.\n";
+      } else {
+      $netbatch_pre_scr = `$AWB_RESOLVER $NETBATCH_PRE_NM`;
+      if ($? != 0) {
+          print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
+      } else {
+          # Generate a real path for pre-exec script (no links)
+          chomp ($netbatch_pre_scr);
+          $filename = basename($netbatch_pre_scr);
+          $netbatch_pre_scr = realpath(dirname($netbatch_pre_scr)) . "/$filename";
+          if ( ! ( -f $netbatch_pre_scr )) {
+          print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
+          } else {
+          # found pre-exec script file ok?  Then add a pre-exec option to netbatch args.
+          # for now, we'll just hardwire the minimum space requirement to 10 MB:
+          $batch_flags = $batch_flags . "--pre-exec \"$netbatch_pre_scr -tempdir $TMP_DIR $MIN_TMP_SPACE_MB\" ";
+          }
+      }
+      }
+  }
+  else {
+      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 && $2 >= 3) ) {
+      print "WARNING: $BATCH_SUBMIT_COMMAND version does not support smart class check, jobs might be lost.\n";
+      }
+      else {
+      $batch_flags = $batch_flags . "-C \"fDS\(\'$TMP_DIR\'\)\>$MIN_TMP_SPACE_MB\" ";
+      }
+  }
 }
 
 ##########################################################
@@ -1611,8 +1612,8 @@ sub SubmitJob {
   ScheduleJob();
 
   if (defined $modelSubmit && $modelSubmit) {
-#      print "BUILD -- command is $BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags_build $command"; 
-      if ( RunCommand ("$BATCH_SUBMIT_COMMAND -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $batch_flags_build $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
+#      print "BUILD -- command is $BATCH_SUBMIT_COMMAND $batch_flags_build -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $command"; 
+      if ( RunCommand ("$BATCH_SUBMIT_COMMAND $batch_flags_build -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
 	  # There was an error in the submission.      
 	  PrintError("Unable to finish command; $command\n",
 		     "Netbatch returned error.\n",
@@ -1621,8 +1622,8 @@ sub SubmitJob {
       }
   }
   else {
-#      print "RUN -- command is $BATCH_SUBMIT_COMMAND -J $resdir/$name/ADMIN/$bm_name.asimlog $batch_flags $command";
-      if (RunCommand("$BATCH_SUBMIT_COMMAND -J $resdir/$name/ADMIN/$bm_name.asimlog $batch_flags $command > $resdir/$name/$bm_name.SUBMITTED")) {
+#      print "RUN -- command is $BATCH_SUBMIT_COMMAND $batch_flags -J $resdir/$name/ADMIN/$bm_name.asimlog $command";
+      if (RunCommand("$BATCH_SUBMIT_COMMAND $batch_flags -J $resdir/$name/ADMIN/$bm_name.asimlog $command > $resdir/$name/$bm_name.SUBMITTED")) {
 	  # There was an error in the submission.
 	  PrintError("Unable to submit command; $command\n",
 		     "Netbatch returned error.\n");
