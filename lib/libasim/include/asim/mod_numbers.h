@@ -127,7 +127,6 @@ ModNumber<MAXIMUM, MINIMUM>::Get()
     return MAP_TO_EXTERNAL(offset);
 }
 
-
 template<int MAXIMUM, int MINIMUM>
 ModNumber<MAXIMUM, MINIMUM>
 ModNumber<MAXIMUM, MINIMUM>::Next()

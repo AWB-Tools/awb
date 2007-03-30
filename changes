@@ -1315,3 +1315,16 @@ lists using cmpxchg to manage the head.
 - Use free lists in mm.h to replace the mutex around new/delete.
 - Clean up cmpxchg macros and work around some compiler bugs.
 - Fix inconsistent naming of INT128_AVAIL in syntax.h
+
+----------
+spartha1    Date: Fri Mar 30 18:16:18 EDT 2007  CSN: CSN-asimcore-68
+                  Fri Mar 30 22:16:18 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ mod_numbers.h             Locally Modified           67 
+
+Updating with simcore changes (rev. 2284)
+
+added ModNumberDyn as a non-templated version of ModNumber. This can be used
+without knowing the constraints at compile time.
