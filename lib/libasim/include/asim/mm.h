@@ -284,9 +284,9 @@ class ASIM_MM_CLASS
 
     // methods
     /// Increment reference count for this object
-    inline void IncrRef (void);
+    inline INT32 IncrRef (void);
     /// Decrement reference count for this object
-    inline void DecrRef (void);
+    inline INT32 DecrRef (void);
 
     // accessors / modifiers
     /// Get reference count
@@ -487,7 +487,7 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::ObjDump(void)
  * is trying to illegaly revive it - flag this error.
  */
 template <class MM_TYPE>
-inline void
+inline INT32
 ASIM_MM_CLASS<MM_TYPE>::IncrRef (void)
 {
     MMCHK;
@@ -504,7 +504,7 @@ ASIM_MM_CLASS<MM_TYPE>::IncrRef (void)
 //         }
 //     }
 
-    mmCnt += 1;
+    return mmCnt++;
 }
 
 
@@ -517,7 +517,7 @@ ASIM_MM_CLASS<MM_TYPE>::IncrRef (void)
  * does not call LastRefDropped() at all.
  */
 template <class MM_TYPE>
-inline void
+inline INT32
 ASIM_MM_CLASS<MM_TYPE>::DecrRef (void)
 {
     MMCHK;
@@ -527,17 +527,9 @@ ASIM_MM_CLASS<MM_TYPE>::DecrRef (void)
     // be changed by another thread concurrently. We must make a copy
     // to compare it with 1. Do not compare the mmCnt itself!!
     INT32 mmCntCopy = mmCnt--;
+    return mmCntCopy - 1;
 
-
-//    if( data.className == "MICRO_INST_CLASS" )
-//    {
-//        if(mmCntCopy < 3)
-//        {
-//            cout <<" Decrementing Ref for MICRO type mmuid: "<<mmUid;
-//            cout << "  Count = " << mmCntCopy << endl;
-//        }
-//    }
-
+#if 0
     // mmCntCopy is the value before being decremented, so we have to
     // compare it with 1 instead of 0!
     if (mmCntCopy <= 1)
@@ -545,6 +537,7 @@ ASIM_MM_CLASS<MM_TYPE>::DecrRef (void)
         // continue the work there ...
         LastRefDropped();
     }
+#endif
 }
 
 /**

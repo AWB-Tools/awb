@@ -1131,3 +1131,22 @@ added support for distcc in asim-run. added support for ccache and distcc in
 awb. Makefile.config should also support CCACHE and DISTCC variables for this
 the model to build with distcc/ccache. asim-run will use --builddistcc
 command line option or key off of asimrc variable BUILD_DISTCC.
+
+----------
+spartha1    Date: Fri Mar 30 17:00:02 EDT 2007  CSN: CSN-asimcore-57
+                  Fri Mar 30 21:00:02 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ mm.h                      Locally Modified           56 
+ mmptr.h                   Locally Modified           56 
+
+Updating with simcore changes (rev. 2268)
+
+Fix a problem that lead to recursive clearing of the same reference.
+When the ref count reached 0 for a pointer being cleared the destructor
+was being called before the pointer was cleared. This can lead to
+recursive attempts to clear the pointer if the destructor checks the
+pointer and tries to clear it. (E.g. Removing an object from a list.)
+Changed the code to decrement the ref count, clear the pointer and then
+call the destructor if the ref count is 0.

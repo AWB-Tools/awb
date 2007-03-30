@@ -44,35 +44,44 @@ class mmptr
   private:
     Type *ptr;
     void copy(Type *p);
-    void del();
+    bool del();
 
   public:
     mmptr() { ptr = NULL; }
     mmptr(Type *p) { copy(p); }
     mmptr(const mmptr &mmp) { copy(mmp.ptr); }
-    ~mmptr() { del(); ptr = NULL; }
+    ~mmptr()
+    {
+        bool killObj = del();
+        Type *oldPtr = ptr;
 
-  Type * ptr_value();
+        ptr = NULL;
+
+        if (killObj)
+        {
+            ((ASIM_MM_CLASS<Type>*)oldPtr)->LastRefDropped();
+        }
+    }
+
+    Type * ptr_value();
 
     Type *operator->() const { return ptr; }
     Type &operator*() const { return *ptr; }
     operator Type *() const { return ptr; }
      
-#if 0
-    mmptr &operator=(void *p) {
-        ASSERTX(p == NULL);
-        del();
-        ptr = (Type *) p;
-        return *this;
-    }
-#endif
-
     Type *operator=(const mmptr &mmp) const { return ptr; }
 
     mmptr &operator=(Type *p) {
         if (p != ptr) {
-            del();
+            bool killObj = del();
+            Type *oldPtr = ptr;
+
             copy(p);
+
+            if (killObj)
+            {
+                ((ASIM_MM_CLASS<Type>*)oldPtr)->LastRefDropped();
+            }
         }
 
         return *this;
@@ -98,45 +107,30 @@ mmptr<Type>::copy(Type *p)
     ptr = p;
     if(ptr) 
     {
-        // when uncommenting this, you need to make DATA a public
-        // member of mm in mm.h
-	
-        /*
-        if (Type::data.ClassName == "CPU_INST_CLASS")
-        {
-            if (ptr->mmUid == 25005)
-            {
-                cout << "mid = " << uid << "\tcopy: " << fmt_p(ptr)
-                     << " mmUid = " << ptr->mmUid << endl;
-            }
-        }
-        */
-
         ((ASIM_MM_CLASS<Type>*)ptr)->IncrRef();
-
     }
 }
  
 template <class Type>
-inline void 
+inline bool
 mmptr<Type>::del() 
 {
+    bool killObj = false;
 
     if(ptr) 
     {
-        /*
-        if (Type::data.ClassName == "CPU_INST_CLASS")
+        //
+        // DecrRef returns the reference count following the decrement.  If
+        // it reaches 0 return true so the caller knows to kill the object
+        // after clearing any pointers to it.
+        //
+        if (((ASIM_MM_CLASS<Type>*)ptr)->DecrRef() <= 0)
         {
-            if (ptr->mmUid == 25005)
-            {
-                cout << "mid = " << uid << "\tdel: " << fmt_p(ptr)
-                     << " mmUid = " << ptr->mmUid << endl;
-            }
+            killObj = true;
         }
-        */
-
-        ((ASIM_MM_CLASS<Type>*)ptr)->DecrRef(); 
     }
+
+    return killObj;
 }
 
 #endif //_MMPTR_
