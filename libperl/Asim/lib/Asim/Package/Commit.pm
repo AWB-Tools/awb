@@ -112,6 +112,8 @@ sub commit {
   my $self = shift;
   my $only_self = shift || 0;
 
+  my $stop_commit = 0;
+
   my @all;
   print "Commit: Starting a commit of package: " . $self->name() . "\n";
 
@@ -146,9 +148,17 @@ sub commit {
     $p->banner();
 
     if (! $p->check_stage()) {
-      unlockall(@all);
-      return ();
+      $stop_commit = 1;
+      #unlockall(@all);
+      #return ();
     }
+  }
+
+  ## Instead of exiting when the first package is not up-to-date,
+  ## check the status of all packages and then exit.
+  if ($stop_commit == 1) {
+    unlockall(@all);
+    return ();
   }
 
 #########      ###########      ###########      ###########      ###########

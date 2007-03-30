@@ -987,3 +987,15 @@ makes the installed source tree world-readable.
 
 - look for PerlQt in either .../lib32/... or .../lib64/... depending
 on whether you are on x86_64 or not, on SUSE.
+
+----------
+spartha1    Date: Fri Mar 30 16:33:05 EDT 2007  CSN: CSN-asimcore-49
+                  Fri Mar 30 20:33:05 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified           48 
+
+Updating with simcore changes (rev. 2260)
+
+The commit process now halts after listing all packages that need to updated.
