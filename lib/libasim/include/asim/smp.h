@@ -35,6 +35,16 @@
 
 
 //
+// Is thread local storage available?  For now, just assume yes for 64 bit
+// bit environments and no otherwise.  For x86 this works, but is conservative.
+// Newer 32 bit x86 environments do support TLS.
+//
+#if __WORDSIZE >= 64
+#define TLS_AVAILABLE
+#endif
+
+
+//
 // SMP_THREAD_HANDLE_CLASS --
 //   This class holds thread-local storage.
 //
@@ -50,10 +60,7 @@ class ASIM_SMP_THREAD_HANDLE_CLASS
     // assigned until a thread is finally created for a handle.  Use this
     // value if you want dense IDs of running threads.
     // 
-    INT32 GetRunningThreadNumber() const
-    {
-        return (ThreadIsRunning() ? threadNumber : -1);
-    };
+    INT32 GetRunningThreadNumber() const { return threadNumber; };
 
     //
     // Thread ID is assigned when a thread handle is constructed.  If no
@@ -63,18 +70,17 @@ class ASIM_SMP_THREAD_HANDLE_CLASS
     //
     UINT32 GetThreadId() const { return threadId; };
 
-    bool ThreadIsRunning() const { return threadLive; };
+    bool ThreadIsRunning() const { return threadNumber != -1; };
 
     friend class ASIM_SMP_CLASS;
 
   private:
     // Only allow ASIM_SMP_CLASS to claim that a thread is running
-    void NoteThreadStart();
+    void NoteThreadActive(INT32 tNum);
 
     typedef void* voidp;
     volatile voidp threadCreateArg;
     volatile UINT32 threadId;
-    ATOMIC_INT32 threadLive;
     volatile INT32 threadNumber;
 
     // This helps ThreadEntry find the right entry function for the thread
@@ -86,6 +92,14 @@ class ASIM_SMP_THREAD_HANDLE_CLASS
 typedef ASIM_SMP_THREAD_HANDLE_CLASS *ASIM_SMP_THREAD_HANDLE;
 
 
+#ifdef TLS_AVAILABLE
+//
+// ASIM_SMP_RunningThreadNumber ought to be a static inside ASIM_SMP_CLASS.
+// Unfortunately, g++ as of 3.4.3 mishandles thread local values for member
+// statics when the optimizer is on.
+//
+extern __thread INT32 ASIM_SMP_RunningThreadNumber;
+#endif
 
 class ASIM_SMP_CLASS
 {
@@ -122,8 +136,11 @@ class ASIM_SMP_CLASS
         return ASIM_SMP_THREAD_HANDLE_CLASS::threadUidGen;
     };
 
-    static UINT32 GetRunningThreadNumber(void)
+    static INT32 GetRunningThreadNumber(void)
     {
+#ifdef TLS_AVAILABLE
+        return ASIM_SMP_RunningThreadNumber;
+#else
         if (GetTotalRunningThreads() <= 1)
         {
             return 0;
@@ -132,6 +149,7 @@ class ASIM_SMP_CLASS
         {
             return GetThreadHandle()->GetRunningThreadNumber();
         }
+#endif
     };
 
     static UINT32 GetMaxThreads(void) { return maxThreads; };
@@ -150,4 +168,3 @@ class ASIM_SMP_CLASS
 };
 
 #endif
-

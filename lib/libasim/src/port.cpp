@@ -163,8 +163,9 @@ BasePort::ConnectPorts(int rdPort, int port, int index,
             // with different latencies on each end or it is a monocast port
             // with different latencies defined on each side.
             // Let's assert that we are not on the second case.
-            VERIFY((index !=0), "Port with different latencies defined on write"
-                    " and read end. \n");
+            VERIFY((index !=0),
+                   "Port with different latencies defined on write and read end (" <<
+                   i[port]->GetName() << ")");
             // We are in from of a multicast multilatency port.
             // Mark-it on the write side.
             i[port]->Latency = -2;

@@ -73,13 +73,13 @@ CONTROLLER_CLASS::CONTROLLER_CLASS() {
 
 CONTROLLER_CLASS::~CONTROLLER_CLASS() {
     if (awbArgv) {
-        delete [] awbArgv;
+        free(awbArgv);
     }
     if (sysArgv) {
-        delete [] sysArgv;
+        free(sysArgv);
     }
     if (fdArgv) {
-        delete [] fdArgv;
+        free(fdArgv);
     }
     if (StatsFileName) {
 	delete StatsFileName;

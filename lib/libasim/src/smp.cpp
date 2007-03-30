@@ -35,6 +35,10 @@ pthread_key_t ASIM_SMP_CLASS::threadLocalKey;
 UINT32 ASIM_SMP_CLASS::maxThreads = 0;
 ATOMIC32_CLASS ASIM_SMP_CLASS::activeThreads = 0;
 
+#ifdef TLS_AVAILABLE
+__thread INT32 ASIM_SMP_RunningThreadNumber = 0;
+#endif
+
 
 ASIM_SMP_THREAD_HANDLE_CLASS::ASIM_SMP_THREAD_HANDLE_CLASS()
     : threadCreateArg(NULL),
@@ -45,9 +49,10 @@ ASIM_SMP_THREAD_HANDLE_CLASS::ASIM_SMP_THREAD_HANDLE_CLASS()
 
 
 void
-ASIM_SMP_THREAD_HANDLE_CLASS::NoteThreadStart()
+ASIM_SMP_THREAD_HANDLE_CLASS::NoteThreadActive(INT32 tNum)
 {
-    VERIFYX(! threadLive++);
+    VERIFYX(threadNumber == -1);
+    threadNumber = tNum;
 };
 
 
@@ -72,7 +77,17 @@ ASIM_SMP_CLASS::Init(
     }
 
     mainThread = new ASIM_SMP_THREAD_HANDLE_CLASS();
+    mainThread->NoteThreadActive(activeThreads++);
+#ifdef TLS_AVAILABLE
+    ASIM_SMP_RunningThreadNumber = mainThread->threadNumber;
+#endif
+
     VERIFY(mainThread->GetThreadId() == 0, "ASIM_SMP_CLASS::Init() called more than once");
+
+    VERIFYX(0 == pthread_key_create(&threadLocalKey, NULL));
+    VERIFYX(0 == pthread_setspecific(threadLocalKey, mainThread));
+
+    VERIFYX(GetRunningThreadNumber() == 0);
 }
 
 
@@ -103,11 +118,15 @@ ASIM_SMP_CLASS::ThreadEntry(void *arg)
     //
 
     ASIM_SMP_THREAD_HANDLE threadHandle = ASIM_SMP_THREAD_HANDLE(arg);
-    threadHandle->NoteThreadStart();
 
-    VERIFYX(0 == pthread_key_create(&threadLocalKey, NULL));
+#ifdef TLS_AVAILABLE
+    ASIM_SMP_RunningThreadNumber = threadHandle->threadNumber;
+#endif
+
     VERIFYX(0 == pthread_setspecific(threadLocalKey, threadHandle));
 
+    cout << "Thread " << GetRunningThreadNumber() << " created." << endl;
+    
     // Call the real entry function
     return (*(threadHandle->start_routine))(threadHandle->threadCreateArg);
 }
@@ -119,10 +138,6 @@ ASIM_SMP_CLASS::GetThreadHandle(void)
     ASIM_SMP_THREAD_HANDLE threadHandle =
         (ASIM_SMP_THREAD_HANDLE) pthread_getspecific(threadLocalKey);
 
-    if (threadHandle == NULL)
-    {
-        threadHandle = mainThread;
-    }
-
+    VERIFYX(threadHandle != NULL);
     return threadHandle;
 }

@@ -35,7 +35,8 @@ using namespace std;
  * If events are not enabled, then no event method invocations will
  * be compiled into the model.
  */
-#ifdef ASIM_ENABLE_EVENTS
+// *** Doesn't work with multi-threaded models ***
+#if defined(ASIM_ENABLE_EVENTS) && (MAX_PTHREADS <= 1)
 #define DRALEVENT(E)          ASIM_DRAL_EVENT_CLASS::event->E
 #define DRALEVENT_GUARDED(E)  if (ASIM_DRAL_EVENT_CLASS::event) {ASIM_DRAL_EVENT_CLASS::event->E;}
 #define EVENT(E)        E

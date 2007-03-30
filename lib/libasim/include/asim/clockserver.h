@@ -650,7 +650,6 @@ class ASIM_CLOCK_SERVER_CLASS : public TRACEABLE_CLASS
         
     /** Threaded clocking? */
     bool threaded;
-    UINT32 max_pthreads;
         
     /** Clock registry of the reference clock domain */
     CLOCK_REGISTRY referenceClockRegitry;

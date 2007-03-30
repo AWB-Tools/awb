@@ -30,6 +30,7 @@
 // ASIM core
 #include "asim/syntax.h"
 #include "asim/mesg.h"
+#include "asim/smp.h"
 
 using namespace std;
 
@@ -137,8 +138,18 @@ ASIM_MESG_CLASS::Finish(void)
     if (terminate)
     {
         out << endl << flush;
-//        abort();
-        exit(1);
+        if (ASIM_SMP_CLASS::GetRunningThreadNumber() > 0)
+        {
+            // Thread attempting to exit is a child thread.  exit() may
+            // not work cleanly -- just give up.  We could do better by
+            // passing a message to the main thread to force an exit.
+            _exit(1);
+        }
+        else
+        {
+            // Cleaner exit from the main thread.
+            exit(1);
+        }
     }
 }
 
@@ -171,7 +182,7 @@ ASIM_MESG_CLASS::FilenameToOstream (
             // we can't use ASIM's error message handling here, since
             // we are right in the middle of setting it up!
             cerr << "Unable to open message file " << file << endl;
-            exit(1);
+            Finish();
         }
 
         return *ofs;

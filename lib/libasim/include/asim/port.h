@@ -1421,28 +1421,23 @@ template <class T>
 inline bool
 ReadPort<T>::ReadRemote(T& data, UINT64 cycle)
 { 
-  UINT64 okayToRead = (cycle <= 2*(UINT32)GetLatency()) ? (UINT32)GetLatency() : (cycle - (UINT32)GetLatency() - 1);
-  int timeout=10000000;
-  UINT64 la;
-  
-  while(1){
-    //loop!  wait on cond var, instead.
-    la = GetLastAccessed();
-
-    if(Buffer.IsActive() && (la <= okayToRead)){// && (Buffer.GetLastWritten() > la)){           
-      //let time advance in the other processor
-        T1("Not ready at cycle" << cycle << ".  " <<  la << "<" << okayToRead);
-      continue;
-      //ASSERT(timeout--, "My writer is active but does not
-      //appear to be writing!");
+    // Wait for producer to store something.  This will block if nothing ever
+    // becomes available.
+    bool firstPass = true;
+    while(!Buffer.SomethingToRead(cycle))
+    {
+        if (firstPass)
+        {
+            T1("Not ready at cycle " << cycle);
+            firstPass = false;
+        }
+        //
+        // We need some exponential backoff here...
+        //
     }
-    else{
-      break;
-    }
-  }
-  T1("ready at cycle" << cycle << ".  Last CPU0 tick was at " << la << ">=" << okayToRead);
-  return Buffer.Read(data, cycle, GetName()); 
 
+    T1("Ready at cycle " << cycle);
+    return Buffer.Read(data, cycle, GetName()); 
 }
 
 ////////////////////////////

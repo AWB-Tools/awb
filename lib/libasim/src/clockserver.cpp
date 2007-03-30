@@ -104,8 +104,6 @@ void * ASIM_CLOCKSERVER_THREAD_CLASS::ThreadWork(void* param)
     ASIM_CLOCKSERVER_THREAD parent = (ASIM_CLOCKSERVER_THREAD)param;
     VERIFYX(parent != NULL);
 
-    cout << "Pthread " << parent->GetThreadId() << " created." << endl;
-    
     parent->threadActive = true;
     
     // Before enter the loop lock the task_list_mutex to avoid any race condition
@@ -115,7 +113,7 @@ void * ASIM_CLOCKSERVER_THREAD_CLASS::ThreadWork(void* param)
     {      
         // IMPORTANT!! We don't need to get/release the lock in this loop
         // since pthread_cond_wait does it for us.
-        
+
         // Wait until we get some work to perform
         while(parent->tasks_completed)
         {
@@ -188,7 +186,6 @@ ASIM_CLOCK_SERVER_CLASS::ASIM_CLOCK_SERVER_CLASS()
       uniqueClockDomain(false),
       uniqueDomainOptimization(true),
       threaded(false),
-      max_pthreads(0),
       referenceClockRegitry(NULL),
       firstClockRegitry(NULL),
       firstClockRegitrySet(false),
@@ -917,7 +914,7 @@ void ASIM_CLOCK_SERVER_CLASS::InitClockServer(void)
 
     if(threaded)
     {
-        
+        UINT32 max_pthreads = ASIM_SMP_CLASS::GetMaxThreads();
         VERIFY(lThreads.size() <= max_pthreads, "Max pthreads set to "
                 << max_pthreads << " and the model is trying to create "
                 << lThreads.size() << " pthreads");

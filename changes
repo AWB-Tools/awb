@@ -1067,3 +1067,37 @@ Updating with simcore changes (rev. 2264)
 - missed out changes in an earlier commit. added a new qualifier to
 asim-run named 'persist'. If specified, creates hard links during
 the model configure step.
+
+----------
+spartha1    Date: Fri Mar 30 16:52:15 EDT 2007  CSN: CSN-asimcore-54
+                  Fri Mar 30 20:52:15 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ smp.h                     Locally Modified           53 
+ clockserver.h             Locally Modified           53 
+ event.h                   Locally Modified           53 
+ mm.h                      Locally Modified           53 
+ port.h                    Locally Modified           53 
+ mmptr.h                   Locally Modified           53 
+
+Directory lib/libasim/src
+ smp.cpp                   Locally Modified           53 
+ event.cpp                 Locally Modified           53 
+ clockserver.cpp           Locally Modified           53 
+ port.cpp                  Locally Modified           53 
+ mesg.cpp                  Locally Modified           53 
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified           53 
+
+Updating with simcore changes (rev. 2265)
+
+- Fix the code in SMP so it actually works.
+- Remove LAZY_DEST template option from ASIM_MM_CLASS. It was never used
+and will get in the way of optimizing the class for multithreading.
+- Update the cross-process port methods. For now they use spin locks.
+We'll need to add exponential backoff.
+- Disable events for multithreaded models. Obviously this will have to
+be fixed.
+- Fix mismatched malloc/free in args.

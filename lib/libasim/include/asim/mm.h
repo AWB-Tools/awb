@@ -181,7 +181,7 @@ extern bool debugOn;
  *   For performance reasons, many of the debugging features are not
  *   compiled in for non-debug compilation.
  */
-template <class MM_TYPE, bool LAZY_DEST = false>
+template <class MM_TYPE>
 class ASIM_MM_CLASS
 {
   private:
@@ -333,8 +333,8 @@ class ASIM_MM_CLASS
 /**
  * Create a new 'factory' object of this object type
  */
-template <class MM_TYPE, bool LAZY_DEST>
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::DATA (
+template <class MM_TYPE>
+ASIM_MM_CLASS<MM_TYPE>::DATA::DATA (
     UINT32 max,   ///< max number of objects of this type
     string name,  ///< name of this MM object type
     UINT32 magic) ///< magic key for this MM object type (only in debug mode)
@@ -345,22 +345,32 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::DATA (
     mmMaxObjs(max),
     destructed(false)
 {
+#if MAX_PTHREADS > 1
+    pthread_mutexattr_t mAttr;
+    pthread_mutexattr_init(&mAttr);
+    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE_NP);
+#endif
+
     for(int i=0; i<MAX_PTHREADS; i++)
     {
         mmTotalObjs[i]=0;
 
 #if MAX_PTHREADS > 1
-        pthread_mutex_init(&mmFreeListLock[i], NULL);
+        pthread_mutex_init(&mmFreeListLock[i], &mAttr);
 #endif
 
     }
+
+#if MAX_PTHREADS > 1
+    pthread_mutexattr_destroy(&mAttr);
+#endif
 }
 
 /**
  * Delete this object type
  */
-template <class MM_TYPE, bool LAZY_DEST>
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::~DATA()
+template <class MM_TYPE>
+ASIM_MM_CLASS<MM_TYPE>::DATA::~DATA()
 {
     if (debugOn)
     {
@@ -412,9 +422,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::~DATA()
  * When the life of this MM class comes to an end, make sure we dispose
  * properly of all objects that are under our supervison.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::FinalObjectCleanup(MM_TYPE * obj)
+ASIM_MM_CLASS<MM_TYPE>::DATA::FinalObjectCleanup(MM_TYPE * obj)
 { 
     if (obj->mmCnt == MMCNT_ON_FREELIST_NOT_DELETED)
     {
@@ -438,9 +448,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::FinalObjectCleanup(MM_TYPE * obj)
 /**
  * Dump all objects of this MM type.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::ObjDump(void)
+ASIM_MM_CLASS<MM_TYPE>::DATA::ObjDump(void)
 {
 #ifdef MM_OBJ_DUMP
     cout << "Object Dump:" << endl;
@@ -476,9 +486,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::ObjDump(void)
  * been put back on the free list (by a previous DecrRef(), this call
  * is trying to illegaly revive it - flag this error.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 inline void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::IncrRef (void)
+ASIM_MM_CLASS<MM_TYPE>::IncrRef (void)
 {
     MMCHK;
 
@@ -506,9 +516,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::IncrRef (void)
  * small enough to be inlinable, and the most frequent path through it
  * does not call LastRefDropped() at all.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 inline void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DecrRef (void)
+ASIM_MM_CLASS<MM_TYPE>::DecrRef (void)
 {
     MMCHK;
 
@@ -554,9 +564,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DecrRef (void)
  * have been shown to run us out of stack space and thus crash the
  * application. @see also @ref lazy_delete "Lazy Delete".
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::LastRefDropped (void)
+ASIM_MM_CLASS<MM_TYPE>::LastRefDropped (void)
 {
     ASSERT (mmCnt == 0, "MM Object type " << data.className
         << " ref count decremented while on free list.");
@@ -577,7 +587,7 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::LastRefDropped (void)
 
         data.mmFreeList[mmOwnerThread].push_back(obj);
 
-        if(!LAZY_DEST)
+//        if(!LAZY_DEST)
         {
             obj->mmCnt = MMCNT_ON_FREELIST_AND_DELETED;
             delete obj;
@@ -613,9 +623,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::LastRefDropped (void)
  * Pre-requisite: The mmFreeListLock[POOL] must be caught when calling this method
  *
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::PreAllocateMemory (void)
+ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
 {
 
     // it is not OK to call this while there are objects on the freelist
@@ -679,9 +689,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::PreAllocateMemory (void)
  * Prerequisite: The mmFreeListLock[POOL] must be caught before calling this method
  *
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::FreeListObjectDestructor (void)
+ASIM_MM_CLASS<MM_TYPE>::DATA::FreeListObjectDestructor (void)
 {
     MM_TYPE * obj;
     if (mmFreeList[POOL].empty())
@@ -742,8 +752,8 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::DATA::FreeListObjectDestructor (void)
  * @note The mmUid and mmMagicKey are only provided when debugging is
  * enabled.
  */
-template <class MM_TYPE, bool LAZY_DEST>
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::ASIM_MM_CLASS (
+template <class MM_TYPE>
+ASIM_MM_CLASS<MM_TYPE>::ASIM_MM_CLASS (
     MM_UID_TYPE uid,   ///< unique ID for this object
     UINT32 initCount)  ///< initial ref count for this object
     : mmCnt(initCount),
@@ -760,8 +770,8 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::ASIM_MM_CLASS (
  * derived classes to define their own destructor, which should
  * get called instead of this one.
  */
-template <class MM_TYPE, bool LAZY_DEST>
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::~ASIM_MM_CLASS ()
+template <class MM_TYPE>
+ASIM_MM_CLASS<MM_TYPE>::~ASIM_MM_CLASS ()
 {
     // nada
 }
@@ -771,9 +781,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::~ASIM_MM_CLASS ()
  * object from 'mmFreeList', or malloc a new one if 'mmFreeList' is
  * empty.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void *
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::operator new (
+ASIM_MM_CLASS<MM_TYPE>::operator new (
     size_t size)
 {
     ASSERTX(!data.destructed);
@@ -863,9 +873,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::operator new (
  * In this operator delete we merely check if the call to delete
  * happens at a legal place, ie. the current ref count has to be < 0.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::operator delete (
+ASIM_MM_CLASS<MM_TYPE>::operator delete (
     void * ptr,  ///< pointer to object memory
     size_t size) ///< size of memory to delete
 {
@@ -886,9 +896,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::operator delete (
 /**
  * Reset the maximum number of allowed objects to a new value.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::SetMaxObjs (
+ASIM_MM_CLASS<MM_TYPE>::SetMaxObjs (
     UINT32 max) ///< new max
 {
     if (debugOn)
@@ -912,9 +922,9 @@ ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::SetMaxObjs (
 /**
  * Dump internal MM data to cout
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::Dump (
+ASIM_MM_CLASS<MM_TYPE>::Dump (
     int seqNo)  ///< sequence number to print before object data
 const
 {
@@ -932,9 +942,9 @@ const
  * Check if this object is legal to access, i.e. if there are known
  * references to it. If not, an error is raised.
  */
-template <class MM_TYPE, bool LAZY_DEST>
+template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE, LAZY_DEST>::MmCheckRefCnt (
+ASIM_MM_CLASS<MM_TYPE>::MmCheckRefCnt (
     UINT32 line, ///< line number where this check is performed
     char *file)  ///< file name where this check is performed
 const

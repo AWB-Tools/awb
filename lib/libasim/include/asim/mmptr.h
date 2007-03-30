@@ -33,12 +33,12 @@ namespace iof = IoFormat;
 using namespace iof;
 using namespace std;
 
-template <class Type, bool LAZY_DEST> class ASIM_MM_CLASS;
+template <class Type> class ASIM_MM_CLASS;
 
 #ifndef _MMPTR_
 #define _MMPTR_
 
-template <class Type, bool LAZY_DEST = false>
+template <class Type>
 class mmptr
 {
   private:
@@ -83,16 +83,16 @@ class mmptr
     }
 };  
 
-template <class Type, bool LAZY_DEST>
+template <class Type>
 Type * 
-mmptr<Type, LAZY_DEST>::ptr_value() 
+mmptr<Type>::ptr_value() 
 { 
     return ptr; 
 }
 
-template <class Type, bool LAZY_DEST>
+template <class Type>
 inline void 
-mmptr<Type, LAZY_DEST>::copy(Type *p) 
+mmptr<Type>::copy(Type *p) 
 {
 
     ptr = p;
@@ -112,14 +112,14 @@ mmptr<Type, LAZY_DEST>::copy(Type *p)
         }
         */
 
-        ((ASIM_MM_CLASS<Type, LAZY_DEST>*)ptr)->IncrRef();
+        ((ASIM_MM_CLASS<Type>*)ptr)->IncrRef();
 
     }
 }
  
-template <class Type, bool LAZY_DEST>
+template <class Type>
 inline void 
-mmptr<Type, LAZY_DEST>::del() 
+mmptr<Type>::del() 
 {
 
     if(ptr) 
@@ -135,7 +135,7 @@ mmptr<Type, LAZY_DEST>::del()
         }
         */
 
-        ((ASIM_MM_CLASS<Type, LAZY_DEST>*)ptr)->DecrRef(); 
+        ((ASIM_MM_CLASS<Type>*)ptr)->DecrRef(); 
     }
 }
 
