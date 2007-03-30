@@ -1,0 +1,126 @@
+: # -*-Perl-*-
+
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+eval 'exec perl -w "$0" ${1+"$@"}'
+    if 0;
+
+use Asim;
+use Asim::GenCFG::Auto;
+use strict;
+
+##
+## Generate a generic cfg file for a single-threaded trace,
+## FIXME: 
+## FIXME:      tools/scripts/bm/tracecache/single-check-param.cfx/fetched/1234/cpu2000_78_99228p_301.apsi_0017.P6_9909.cfg
+## FIXME:                                                        ^       ^     ^                                     ^
+## FIXME:                                                        |       |     |                                     |
+## FIXME:                                                        < param>< val><--------- name of the trace --------->
+## FIXME: 
+## FIXME:      tools/scripts/bm/tracecache/single-check-param.cfx/committed/567890/p/asim/benchmarks/traces/LIT/regression/hello.cfg
+## FIXME:                                                        ^         ^      ^                                            ^
+## FIXME:                                                        |         |      |                                            |
+## FIXME:                                                        < param  >< val ><---- absolute path prefix of the trace ----->
+## 
+## Brian Slechta 01/06/2007
+## 
+
+# CONSTANTS: BE VERY CAREFUL HOW YOU PICK THESE
+my $category_delimiter = '@';
+my $space_delimiter = ':';
+
+# get the argument string, which follows the --emit arg, remove the ".cfg" suffix
+die "unknown trace path" if ( $ARGV[0] ne '--emit' );
+(my $arg_string = $ARGV[1]) =~ s/\.cfg$//;
+my @arg_list = split '/', $arg_string;
+
+# strip the directory off to get a name:
+my $trace_name = $arg_list[$#arg_list];
+$#arg_list--;
+
+# get the parameter name, value, and directory tree:
+my @trace_path = @arg_list;
+my @actual_trace_path = @arg_list;
+my @tree = @arg_list;
+
+# if the trace argument looks like a path, rather than a simple name,
+# we need to prepend a '/' which gets stripped by the caller:
+my $trace_path = $trace_name;
+if ( $#trace_path >= 0 ) { $trace_path = '/' . join( '/', @trace_path ) . '/' . $trace_path; }
+
+my ($actual_trace_name, @sim_params) = split $category_delimiter, $trace_name;
+
+@sim_params = reverse @sim_params;
+
+sub get_next_sim_param()
+{
+    my $val = pop @sim_params;
+
+    if (!defined ($val))
+    {
+        return "";
+    }
+    else 
+    {
+        $val =~ s/$space_delimiter/ /g;
+
+        return $val;
+    }
+}
+
+my $model_params  = get_next_sim_param();
+my $feeder_params = get_next_sim_param();
+my $system_params = get_next_sim_param();
+
+
+my $actual_trace_path = $actual_trace_name;
+if ( $#actual_trace_path >= 0 ) { $actual_trace_path = '/' . join( '/', @actual_trace_path ) . '/' . $actual_trace_path; }
+
+my $SetupScriptTemplate =
+"#!/bin/sh
+trace=`fetch-trace $actual_trace_path | tail -1`
+ln -sf \$trace* \$2/
+cp -f \@RUNSCRIPT@ \$2/run
+";
+
+my $RunScriptTemplate =
+"#!/bin/sh
+PATH=\$PATH:/p/asim/i386_linux24/bin
+command=\"\$model $model_params \$genFlags --feeder $feeder_params -t $actual_trace_name \$feedFlags --system $system_params \$sysFlags\"
+echo \$command
+eval \$command
+";
+
+# DEBUG PRINT
+# print "actual_trace_name=$actual_trace_name\n";
+# print "sim_params=";
+# foreach my $foo (@sim_params) { print "$foo "; }; print "\n";
+# print "actual_trace_path=$actual_trace_path\n";
+# print "SetupScriptTemplate=\n$SetupScriptTemplate\n";
+# print "RunScriptTemplate=\n$RunScriptTemplate\n";
+
+# use default setup and run scripts:
+Asim::GenCFG::Auto::Generate(setup_script=>$SetupScriptTemplate, 
+                             run_script=>$RunScriptTemplate);
+
+	
+
+exit(0);
+

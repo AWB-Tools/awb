@@ -999,3 +999,17 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2260)
 
 The commit process now halts after listing all packages that need to updated.
+
+----------
+spartha1    Date: Fri Mar 30 16:37:23 EDT 2007  CSN: CSN-asimcore-50
+                  Fri Mar 30 20:37:23 UTC 2007
+
+
+Directory tools/scripts/bm/tracecache
+ single-with-params.cfx    Locally Added               0 
+
+Updating with simcore changes (rev. 2261)
+
+new .cfx script allows benchmark-specific adjustments to simulation
+parameters. it works just like single.cfx except you can add model, feeder,
+and system flag overrides on a per benchmark basis.
