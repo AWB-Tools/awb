@@ -45,6 +45,7 @@
 #ifndef ASIM_ATOMIC_H
 #define ASIM_ATOMIC_H
 
+#include "asim/syntax.h"
 #include "asim/mesg.h"
 
 #define ll_low(x)       *(((unsigned int*)&(x))+0)
@@ -120,7 +121,7 @@ CompareAndExchangeU64(
     return didXchg;
 }
 
-#ifdef UINT128_AVAIL
+#ifdef INT128_AVAIL
 
 inline bool
 __attribute__ ((__unused__))
@@ -136,12 +137,12 @@ CompareAndExchangeU128(
     // GNU assembler doesn't know about cmpxchg16b but assembles the 8b
     // version as a cmpxchg16b when the rex64 prefix is set.  This can be
     // changed when gas is fixed.
-    __asm__ __volatile__("lock; rex64 cmpxchg8b %4\n\t"
+    __asm__ __volatile__("lock; rex64 cmpxchg8b (%4)\n\t"
                          "sete %0"
                              : "=a"(didXchg), "=d"(dummy)
                              : "b"(UINT64(newValue)),
                                "c"(UINT64(newValue >> 64)),
-                               "m"(*(UINT64*)mem),
+                               "S"(mem),
                                "0"(UINT64(oldValue)),
                                "1"(UINT64(oldValue >> 64))
                              : "memory", "cc");
@@ -151,35 +152,42 @@ CompareAndExchangeU128(
     return didXchg;
 }
 
-#endif // UINT128_AVAIL
+#endif // INT128_AVAIL
 
-static inline void *
-CompareAndExchangePTR(
-    volatile void *mem,
-    void *oldValue,
-    void *newValue)
+template <class T>
+static inline bool
+CompareAndExchange(
+    T *mem,
+    T oldValue,
+    T newValue)
 {
-    if (sizeof(mem) == 64)
+    if (sizeof(T) == 8)
     {
-        return (void *)(PTR_SIZED_UINT)
-            CompareAndExchangeU64((UINT64 *)mem,
-                                  UINT64(PTR_SIZED_UINT(oldValue)),
-                                  UINT64(PTR_SIZED_UINT(newValue)));
+        return CompareAndExchangeU64((UINT64 *)mem,
+                                     (UINT64)oldValue,
+                                     (UINT64)newValue);
+        return true;
     }
-    else if (sizeof(mem) == 32)
+    else if (sizeof(T) == 4)
     {
-        return (void *)(PTR_SIZED_UINT)
-            CompareAndExchangeU32((UINT32 *)mem,
-                                  UINT32(PTR_SIZED_UINT(oldValue)),
-                                  UINT32(PTR_SIZED_UINT(newValue)));
+        return CompareAndExchangeU32((UINT32 *)mem,
+                                     (UINT32)oldValue,
+                                     (UINT32)newValue);
     }
+#ifdef INT128_AVAIL
+    else if (sizeof(T) == 16)
+    {
+        return CompareAndExchangeU128((UINT128 *)mem,
+                                      (UINT128)oldValue,
+                                      (UINT128)newValue);
+    }
+#endif
     else
     {
-        ASIMERROR("Unexpected pointer size");
+        ASIMERROR("Unexpected size");
+        return false;
     }
 }
-
-
 
 
 

@@ -34,6 +34,7 @@
 #include <string>
 #include <vector>
 #include <pthread.h>
+#include <string.h>
 
 // ASIM core
 #include "asim/syntax.h"
@@ -42,60 +43,21 @@
 #include "asim/ioformat.h"
 #include "asim/atomic.h"
 #include "asim/smp.h"
+#include "asim/freelist.h"
 
 namespace iof = IoFormat;
 using namespace iof;
 
 typedef UINT64 MM_UID_TYPE;
 
-/*
-Original mmptr code would break when running in multiple threads [1]: it's too
-easy to assign one object to n different threads and not track it appropriately.
-To fix this, we can split shared structures into MAX_PTHREADS pools and use an
-ATOMIC_CLASS reference count. This causes each thread to be allocated objects from
-distinct pools (thus no locking is required).
-
-The freelist, however, must be locked to handle object deletion.  For recycling,
-they must be placed on the original owner's freelist, but they may be deleted by
-a different thread.  TODO: It's probably that it -will- be the owner who is the last
-reference; can we exploit this?  (if (get_asim_thread_id == obj->ownerThread) {
-no lock needed? } )
-
-Handling destruction of statics is a mess.  Write a good destructor and see
-comments in LastRefDropped()
-
-1. in this context, "threads" means -real- threads (pthreads) on the machine hosting
-the simulator, NOT software contexts.
-*/
-
-#if MAX_PTHREADS > 1
-
-  #define POOL (ASIM_SMP_CLASS::GetRunningThreadNumber())
-  #define lockFreeList(p)   pthread_mutex_lock(p);
-  #define unlockFreeList(p) pthread_mutex_unlock(p);
-
-#else
-
-  #define POOL 0
-  #define lockFreeList(p)
-  #define unlockFreeList(p)
-
-#endif
 
 
 /**
  * Macro used to define static members in ASIM_MM_CLASS.
  */
-#define ASIM_MM_DEFINE_L(M,L,MAX) \
-template<> \
-ASIM_MM_CLASS<M,L>::DATA ASIM_MM_CLASS<M,L>::data(MAX, #M);
-
 #define ASIM_MM_DEFINE(M, MAX) \
 template<> \
 ASIM_MM_CLASS<M>::DATA ASIM_MM_CLASS<M>::data(MAX, #M);
-
-// even more per-object debugging can be turned on with MM_OBJ_DUMP
-//#define MM_OBJ_DUMP
 
 // allocate all memory of the pool at once (rather than each object on demand)
 #define MM_PREALLOC_MEMORY
@@ -141,7 +103,7 @@ extern bool debugOn;
  *
  * This class provides support for reference counting, memory allocation,
  * and memory debugging. We'll call a class M that is derived from
- * ASIM_MM_CLASS<M,L> also a "MM class", and its objects are called "MM
+ * ASIM_MM_CLASS<M> also a "MM class", and its objects are called "MM
  * objects" for short.
  *
  * - Reference Counting:
@@ -182,7 +144,7 @@ extern bool debugOn;
  *   compiled in for non-debug compilation.
  */
 template <class MM_TYPE>
-class ASIM_MM_CLASS
+class ASIM_MM_CLASS : public ASIM_FREE_LIST_ELEMENT_CLASS<MM_TYPE>
 {
   private:
     // types
@@ -212,19 +174,15 @@ class ASIM_MM_CLASS
         UINT32 mmMagicKey;
 #endif
 
-        UINT32 mmMaxObjs;       ///< Maximum number of objects
-        UINT32 mmTotalObjs[MAX_PTHREADS];     ///< Number of Objects
-        /// List of free MM_TYPE objects; its used as a stack, but we also
-        /// need to have an iterator, so <stack> does not work;
-        ObjectVector mmFreeList[MAX_PTHREADS];
+        INT32 mmMaxObjs;       ///< Maximum number of objects
+        INT32 mmTotalObjs;     ///< Number of Objects
 
-#if MAX_PTHREADS > 1
-        pthread_mutex_t mmFreeListLock[MAX_PTHREADS];
-#endif
+        /// List of free MM_TYPE objects.
+        ASIM_FREE_LIST_CLASS<MM_TYPE> mmFreeList;
 
 #ifdef MM_OBJ_DUMP
         /// List of all objects (only in extended debug mode MM_OBJ_DUMP)
-        ObjectVector mmObjList[MAX_PTHREADS];
+        MM_TYPE *mmObjListHead;
 #endif // MM_OBJ_DUMP
 
         bool destructed;        ///< has destructor for this already run
@@ -235,19 +193,23 @@ class ASIM_MM_CLASS
         DATA (UINT32 max, string name, UINT32 magic = 0xf0d2b496);
         ~DATA();
 
-        /// Destructor call for undestructed objects on free list
-        void FreeListObjectDestructor(void);
         /// Dispose of objects properly at end of run
         void FinalObjectCleanup (MM_TYPE * obj);
 
         // debug
         /// Dump all objects of this MM type.
         void ObjDump(void);
+        void AddToObjDumpList(MM_TYPE *newMmObj);
     };
 
   private:
     /// To aid debugging make mmptr friend of MM
     friend class mmptr<MM_TYPE>;
+
+#ifdef MM_OBJ_DUMP
+    /// List of all objects (only in extended debug mode MM_OBJ_DUMP)
+    MM_TYPE *mmObjListNext;
+#endif // MM_OBJ_DUMP
 
   public:
     // static members
@@ -260,7 +222,6 @@ class ASIM_MM_CLASS
     /// object during this time;
 
     ATOMIC_INT32 mmCnt;  //ATOMIC_CLASS to support references across multiple threads.
-    int mmOwnerThread;   //note which thread 1st grabbed this object.  It will be returned to the same freelist
 
   private:
 
@@ -343,28 +304,12 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::DATA (
     mmMagicKey(magic),
 #endif
     mmMaxObjs(max),
+    mmTotalObjs(0),
+#ifdef MM_OBJ_DUMP
+    mmObjListHead(NULL),
+#endif
     destructed(false)
-{
-#if MAX_PTHREADS > 1
-    pthread_mutexattr_t mAttr;
-    pthread_mutexattr_init(&mAttr);
-    pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE_NP);
-#endif
-
-    for(int i=0; i<MAX_PTHREADS; i++)
-    {
-        mmTotalObjs[i]=0;
-
-#if MAX_PTHREADS > 1
-        pthread_mutex_init(&mmFreeListLock[i], &mAttr);
-#endif
-
-    }
-
-#if MAX_PTHREADS > 1
-    pthread_mutexattr_destroy(&mAttr);
-#endif
-}
+{}
 
 /**
  * Delete this object type
@@ -375,47 +320,33 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::~DATA()
     if (debugOn)
     {
         cout << className << ": Peak Number of Objects = "
-             << mmTotalObjs[POOL] << endl;
+             << mmTotalObjs << endl;
     }
 
-#ifdef MM_OBJ_DUMP
     // dump a list of all objects of this type
     ObjDump();
-#endif // MM_OBJ_DUMP
 
     // all objects of this MM type should be on the free list by the
     // time we call the destructor for this type ...
     if (debugOn)
     {
-        if (mmFreeList[POOL].size() != mmTotalObjs[POOL])
+        if (mmFreeList.Size() != mmTotalObjs)
         {
             cerr << "WARNING: ASIM_MM_CLASS<" << className << ">" << endl
-                 << "  has allocated " << mmTotalObjs[POOL] << " objects, but only "
-                 << mmFreeList[POOL].size() << " can be found at destructor time."
+                 << "  has allocated " << mmTotalObjs << " objects, but only "
+                 << mmFreeList.Size() << " can be found at destructor time."
                  << endl;
         }
     }
-    for(int i=0; i<MAX_PTHREADS; i++)
-    {
-        // free all objects that are on the free list
-        while ( ! mmFreeList[i].empty())
-        {
-            MM_TYPE * obj = mmFreeList[i].back();
-            mmFreeList[i].pop_back();
-            FinalObjectCleanup(obj);
-        }
 
+    // free all objects that are on the free list
+    while (! mmFreeList.Empty())
+    {
+        MM_TYPE * obj = mmFreeList.Pop();
+        FinalObjectCleanup(obj);
     }
 
     destructed = true;
-
-#if MAX_PTHREADS > 1
-    for(int i=0; i<MAX_PTHREADS; i++)
-    {
-        pthread_mutex_destroy(&mmFreeListLock[i]);
-    }
-#endif
-
 }
 
 /**
@@ -444,7 +375,6 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::FinalObjectCleanup(MM_TYPE * obj)
     delete [] (char*) obj;
 }
 
-#ifdef MM_OBJ_DUMP
 /**
  * Dump all objects of this MM type.
  */
@@ -455,27 +385,55 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::ObjDump(void)
 #ifdef MM_OBJ_DUMP
     cout << "Object Dump:" << endl;
 
-    if (mmObjList[POOL].empty())
+    if (mmObjListHead == NULL)
     {
         cout << "  No " << className << " objects in use." << endl;
     }
     else
     {
-        int count = 0;
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //      NOT THREAD SAFE!!!!!!
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-        for (typename ObjectVector::const_iterator it = mmObjList[POOL].begin();
-             it != mmObjList[POOL].end();
-             it++)
+        int count = 0;
+        MM_TYPE *obj = mmObjListHead;
+
+        while (obj != NULL)
         {
-            if (*it && (*it)->mmCnt > 0)
+            if (obj->mmCnt > 0)
             {
-                (*it)->Dump(count++);
+                obj->Dump(count++);
             }
+
+            obj = obj->mmObjListNext;
         }
     }
 #endif // MM_OBJ_DUMP
 }
+
+
+/**
+ * Add new MM object to list for ObjDump() debugging.
+ */
+template <class MM_TYPE>
+void
+ASIM_MM_CLASS<MM_TYPE>::DATA::AddToObjDumpList(MM_TYPE *newMmObj)
+{
+#ifdef MM_OBJ_DUMP
+    ASSERTX(newMmObj != NULL);
+
+    MM_TYPE *oldHead;
+    do
+    {
+        oldHead = mmObjListHead;
+        newMmObj->mmObjListNext = oldHead;
+    }
+    while (! CompareAndExchange((PTR_SIZED_UINT*)&mmObjListHead,
+                                (PTR_SIZED_UINT)oldHead,
+                                (PTR_SIZED_UINT)newMmObj));
 #endif // MM_OBJ_DUMP
+}
+
 
 //----------------------------------------------------------------------------
 // ASIM_MM_CLASS<>
@@ -571,22 +529,9 @@ ASIM_MM_CLASS<MM_TYPE>::LastRefDropped (void)
 
     if (!data.destructed)
     {
-        // Note: due to the undeterminate ordering of global
-        // destructors, we might execute this code for objects
-        // AFTER the static data object has already been destroyed;
-        // in that case we refrain from writing to it;
-
-        lockFreeList(&data.mmFreeListLock[mmOwnerThread]);
-
-        data.mmFreeList[mmOwnerThread].push_back(obj);
-
-//        if(!LAZY_DEST)
-        {
-            obj->mmCnt = MMCNT_ON_FREELIST_AND_DELETED;
-            delete obj;
-        }
-        
-        unlockFreeList(&data.mmFreeListLock[mmOwnerThread]);
+        obj->mmCnt = MMCNT_ON_FREELIST_AND_DELETED;
+        delete obj;
+        data.mmFreeList.Push(obj);
     }
     else
     {
@@ -613,8 +558,6 @@ ASIM_MM_CLASS<MM_TYPE>::LastRefDropped (void)
 /**
  * Pre-allocate all memory for this MM pool of objects
  *
- * Pre-requisite: The mmFreeListLock[POOL] must be caught when calling this method
- *
  */
 template <class MM_TYPE>
 void
@@ -622,23 +565,21 @@ ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
 {
 
     // it is not OK to call this while there are objects on the freelist
-    ASSERT (data.mmFreeList[POOL].empty(), "MM Object type " << data.className
+    ASSERT (data.mmFreeList.Empty(), "MM Object type " << data.className
         << " memory pre-allocation failed.");
 
     // allocate all objects that are missing
-    for ( ; data.mmTotalObjs[POOL] < data.mmMaxObjs; data.mmTotalObjs[POOL]++)
+    for ( ; data.mmTotalObjs < data.mmMaxObjs; data.mmTotalObjs++)
     {
-
         MM_TYPE * newMmObj;
         newMmObj = ((MM_TYPE *) new char[sizeof(MM_TYPE)]);
+        memset(newMmObj, 0, sizeof(MM_TYPE));
 
-#ifdef MM_OBJ_DUMP
-        data.mmObjList[POOL].push_back(newMmObj);
-#endif //MM_OBJ_DUMP
+        data.AddToObjDumpList(newMmObj);
 
         // object is on the freelist, no deletion necessary
         newMmObj->mmCnt = MMCNT_ON_FREELIST_AND_DELETED;
-        data.mmFreeList[POOL].push_back(newMmObj);
+        data.mmFreeList.Push(newMmObj);
 
 #ifdef MM_VALGRIND
         // object is on the free list and should not be accessed anymore!
@@ -652,89 +593,6 @@ ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
     }
 }
 
-
-/**
- * When we put objects onto the free list we don't call their destructor
- * to avoid cascading affects that can run us out of stack space.
- * Here is where we rectify this.
- *
- * @note @anchor lazy_delete
- * Lazy Delete - Why are objects not destructed as they are put onto the
- * free list? Assume somebody has a linked list of MM objects, and the
- * link is of MMPTR type. Assuming there are no other references to those
- * objects pending, when the head of the list is deleted and its
- * destructor called, it will destruct the associated MMPTR, which
- * decrements the refCnt of the second object on the list down to 0.
- * Now that destructor is called recursively while we are still in the
- * first destructor. The depth of this recursion is only bound by the
- * lenght of the list. With complicated webs of data structures this
- * immediate call of the destructor can easily result in aborts due to
- * stack overflows.
- * We avoid this recursion by turning it into iteration. We put the
- * objects onto the free list without deleting them yet. But the next time
- * we take something off the free list we run through it (in a loop) and
- * call the destructors of the objects that have not yet been
- * distructed.
-
- * This is only called from 'new' which handles the freelist locking.
- *
- *
- * Prerequisite: The mmFreeListLock[POOL] must be caught before calling this method
- *
- */
-template <class MM_TYPE>
-void
-ASIM_MM_CLASS<MM_TYPE>::DATA::FreeListObjectDestructor (void)
-{
-    MM_TYPE * obj;
-    if (mmFreeList[POOL].empty())
-    {
-        return;
-    }
-
-    // note: we need two loops since the inner loop can push new
-    // objects onto the free list, so the outer loop checks for that;
-    for (obj = mmFreeList[POOL].back();
-         obj->mmCnt == MMCNT_ON_FREELIST_NOT_DELETED;
-         obj = mmFreeList[POOL].back())
-    {
-        for (typename ObjectVector::reverse_iterator it =
-             mmFreeList[POOL].rbegin();
-             it != mmFreeList[POOL].rend();
-             it++)
-        {
-            obj = *(it);
-
-            // note: all not yet delted items are on the top of the
-            // stack, so we can stop as soon as we see a deleted one;
-            if (obj->mmCnt == MMCNT_ON_FREELIST_AND_DELETED)
-            {
-                break;
-            }
-
-#ifdef MM_VALGRIND
-            // make it legal to call the destructor on the object now
-            VALGRIND_DISCARD (VALGRIND_MAKE_READABLE (obj, sizeof(MM_TYPE)));
-#endif
-
-            // Note: The destructor might have the side effect of
-            // putting new objects onto this (and other) free lists;
-            obj->mmCnt = MMCNT_ON_FREELIST_AND_DELETED;
-
-            delete obj;
-
-#ifdef MM_VALGRIND
-            // restrict object access again - as it remains on the free list
-            // revoke access permission from object's memory range
-            VALGRIND_DISCARD (VALGRIND_MAKE_NOACCESS (obj, sizeof(MM_TYPE)));
-            // allow read+write on MM meta information though
-            VALGRIND_DISCARD (
-                VALGRIND_MAKE_READABLE (obj, sizeof(ASIM_MM_CLASS<MM_TYPE>)));
-#endif
-
-        }
-    }
-}
 
 /**
  * Create a new MM object of this MM type. The memory has been
@@ -781,11 +639,9 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
 {
     ASSERTX(!data.destructed);
 
-    lockFreeList(&data.mmFreeListLock[POOL]);
-
 #ifdef MM_PREALLOC_MEMORY
 
-    if (data.mmFreeList[POOL].empty())
+    if (data.mmFreeList.Empty())
     {
         // acquire memory for max # objects on first use of pool;
         // enhances memory locality of objects in the pool
@@ -795,48 +651,31 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
 #endif
 
     MM_TYPE * newMmObj;
-    if (! data.mmFreeList[POOL].empty())
+    if (! data.mmFreeList.Empty())
     {
-        newMmObj = data.mmFreeList[POOL].back();
-
-        if (newMmObj->mmCnt == MMCNT_ON_FREELIST_NOT_DELETED)
-        {
-            data.FreeListObjectDestructor();
-            // the contents of the free list might have changed, so we
-            // need to get the new top of stack (ie. back())
-            newMmObj = data.mmFreeList[POOL].back();
-        }
+        newMmObj = data.mmFreeList.Pop();
 
         ASSERT(newMmObj->mmCnt == MMCNT_ON_FREELIST_AND_DELETED,
             "MM Object type " << data.className
             << " taken from free list has not yet been destructed!");
-
-        data.mmFreeList[POOL].pop_back();
-
     }
     else
     {
-      // acquire memory for 1 object on demand
-      if (++data.mmTotalObjs[POOL] > data.mmMaxObjs)
-      {
-          cout << "MEMORY FAILURE: mmMaxObjs (" << data.mmMaxObjs << ")"
-               << " for " << data.className << " exceeded. Pool " << POOL << endl;
+        // acquire memory for 1 object on demand
+        if (++data.mmTotalObjs > data.mmMaxObjs)
+        {
+            cout << "MEMORY FAILURE: mmMaxObjs (" << data.mmMaxObjs << ")"
+                 << " for " << data.className << " exceeded." << endl;
 
-#ifdef MM_OBJ_DUMP
-          data.ObjDump();
-#endif
-          ASSERTX(false);
-      }
+            data.ObjDump();
+            ASSERTX(false);
+        }
 
-      newMmObj = ((MM_TYPE *) new char[size]);
+        newMmObj = ((MM_TYPE *) new char[size]);
+        memset(newMmObj, 0, sizeof(MM_TYPE));
 
-#ifdef MM_OBJ_DUMP
-      data.mmObjList[POOL].push_back(newMmObj);
-#endif //MM_OBJ_DUMP
-
+        data.AddToObjDumpList(newMmObj);
     }
-
-    unlockFreeList(&data.mmFreeListLock[POOL]);
 
 #ifdef MM_VALGRIND
     // make object address range writable, but containing invalid data
@@ -848,7 +687,6 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
             sizeof (ASIM_MM_CLASS<MM_TYPE>)));
 #endif
 
-    newMmObj->mmOwnerThread = POOL;  // make a note of the original pool.
     return((void *) newMmObj);
 }
 
@@ -900,11 +738,11 @@ ASIM_MM_CLASS<MM_TYPE>::SetMaxObjs (
              << "Old Value = " << data.mmMaxObjs
              << ", New Value = " << max << endl;
     }
-    if (data.mmTotalObjs[POOL] > max)
+    if (data.mmTotalObjs > max)
     {
         cerr << "ERROR: " << data.className
              << ": trying to change to max number of objects to "
-             << max << " but there are already " << data.mmTotalObjs[POOL]
+             << max << " but there are already " << data.mmTotalObjs
              << " allocated";
         ASSERTX(false);
     }

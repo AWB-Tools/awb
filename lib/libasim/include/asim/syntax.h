@@ -143,7 +143,7 @@ typedef int64_t             INT64;
 typedef u_int64_t           UINT64;
 
 #if __WORDSIZE >= 64
-#define UINT128_AVAIL
+#define INT128_AVAIL
 // Uses SSE.  Limited support in 32 bit mode.
 typedef int __attribute__((__mode__(__TI__)))          INT128;
 typedef unsigned int __attribute__((__mode__(__TI__))) UINT128;

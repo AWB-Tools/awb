@@ -1296,3 +1296,22 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2280)
 
 Checking in Jeffrey Wilder's modification to asim-run
+
+----------
+spartha1    Date: Fri Mar 30 18:13:11 EDT 2007  CSN: CSN-asimcore-67
+                  Fri Mar 30 22:13:11 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ atomic.h                  Locally Modified           66 
+ freelist.h                Locally Added               0 
+ mm.h                      Locally Modified           66 
+ syntax.h                  Locally Modified           66 
+
+Updating with simcore changes (rev. 2283)
+
+- Add freelist.h: a thread-safe but lock free implementation of free
+lists using cmpxchg to manage the head.
+- Use free lists in mm.h to replace the mutex around new/delete.
+- Clean up cmpxchg macros and work around some compiler bugs.
+- Fix inconsistent naming of INT128_AVAIL in syntax.h
