@@ -1383,3 +1383,32 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2288)
 
 - renamed rsync.pl to rsync-traces
+
+----------
+spartha1    Date: Fri Mar 30 22:15:40 EDT 2007  CSN: CSN-asimcore-73
+                  Sat Mar 31 02:15:40 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified           72 
+
+Directory libperl/Asim/lib/Asim
+ Stats/                    Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/Stats
+ ToText.pm                 Locally Added               0 
+ ToText/                   Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/Stats/ToText
+ LongNames.pm              Locally Added               0 
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified           72 
+ stat-to-text              Locally Added               0 
+
+Updating with simcore changes (rev. 2290)
+
+- Added basic XML-to-text converter for stats files.
+The perl library class can be easily extended to
+provide alternate output file formats. See asim-shell
+help code, and choose 24 or 25; and also stat-to-text --help.

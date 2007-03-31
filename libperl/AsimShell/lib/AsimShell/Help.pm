@@ -428,6 +428,8 @@ sub help_code {
                     "Asim/Regression.pm",
                     "Asim/GenCFG.pm",
                     "Asim/GenCFG/Auto.pm",
+                    "Asim/Stats/ToText.pm",
+                    "Asim/Stats/ToText/LongNames.pm",
                   );
 
     $item = Asim::choose_name("Choose perl module", @choices);

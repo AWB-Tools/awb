@@ -154,6 +154,7 @@ if (! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "regression.launcher" => "tools/scripts/regression.launcher",
   "regression.verifier" => "tools/scripts/regression.verifier",
   "regression.cleanup"  => "tools/scripts/regression.cleanup",
+  "stat-to-text"        => "tools/scripts/stat-to-text",
   "summarize-stats"     => "tools/scripts/summarize-stats",
   "sum-simpoints"       => "tools/scripts/sum-simpoints",
   "sum-unweighted"      => "tools/scripts/sum-unweighted",

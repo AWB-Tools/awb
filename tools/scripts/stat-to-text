@@ -1,0 +1,99 @@
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+#
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+=head1 NAME
+
+stat-to-text
+
+=head1 SYNOPSIS
+
+stat-to-text [options] <in_file>
+
+where [options] are zero or more of:
+
+  --long             ; print stat names in long format with prefixes
+  --out=<out_file>   ; print results to file <output_filename>
+  --help             ; this message
+
+=head1 DESCRIPTION
+
+convert an Asim XML stats file into a plain text format.
+
+=head1 OTHER OUTPUT FORMATS
+
+This is a simple driver for the Asim::Stats::ToText package
+that you can use as an example.
+Copy and modify this program if you want to create your own
+custom stat-to-text converter.  Also, copy and modify
+Asim/Stats/ToText/LongNames.pm for the output format routines.
+
+=head1 SEE ALSO
+
+See also "asim-shell help code" for the Asim::Stats::ToText and
+Asim::Stats::ToText::LongNames packages.
+
+=head1 AUTHOR
+
+Carl J. Beckmann
+
+=head1 COPYRIGHT
+
+2007 Intel Corporation All Rights Reserved.
+
+=cut
+
+use File::Basename;
+use Getopt::Long;
+use Asim::Stats::ToText;
+use Asim::Stats::ToText::LongNames;
+
+#
+# parse command line options
+#
+my $long_names = 0;
+my $out_file   = undef;
+my $help       = 0;
+$status = GetOptions( "long!" => \$long_names,
+                      "o=s"   => \$out_file,
+		      "help!" => \$help       );
+my $prog = basename($0);
+if (!$status) {
+  print STDERR "$prog: Illegal argument\n";
+  exit 0;
+}
+if ($help) {
+  system("perldoc $0");
+  exit 0;
+}
+
+#
+# main routine:
+#
+my $in_file = shift;
+my $stats_handler;
+if ( $long_names ) {
+  $stats_handler = Asim::Stats::ToText::LongNames->new( $in_file );
+} else {
+  $stats_handler = Asim::Stats::ToText->new( $in_file );
+}
+$stats_handler->transcribe( $out_file );
