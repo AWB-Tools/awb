@@ -44,6 +44,7 @@ libasim_a_SOURCES =	src/mesg.cpp \
 			src/atomic.cpp \
 			src/smp.cpp \
 			src/regexobj.cpp \
+                        src/cache_dyn.cpp \
 			src/cache_manager.cpp 
 
 # Inside ASIM we reuse AGT definitions (UINT64 and so on)

@@ -436,16 +436,25 @@ class VictimPolicy
             NumLinesPerWay = nLinesPerWay;
             NumWays = nWays;
             Policy = vPolicy;
-            LruArray = new lruInfo[NumLinesPerWay](NumWays) ;
+            LruArray = new(lruInfo*[NumLinesPerWay]);
+            for(UINT32 i=0; i<NumLinesPerWay; i++){
+                LruArray[i] = new lruInfo(NumWays);
+            }
             switch(Policy) 
             {
                 case VP_LRUReplacement:
                 case VP_RandomReplacement:
                 case VP_RandomNotMRUReplacement:
-                    LruArray = new lru_info_dynamic[NumLinesPerWay](NumWays) ;
+                    LruArray = new(lruInfo*[NumLinesPerWay]);
+                    for(UINT32 i=0; i<NumLinesPerWay; i++){
+                        LruArray[i] = new lruInfo(NumWays);
+                    }
                     break;
                 case VP_PseudoLRUReplacement:
-                    LruArray = new pseudo_lru_info_dynamic[NumLinesPerWay](NumWays);
+                    LruArray = new(lruInfo*[NumLinesPerWay]);
+                    for(UINT32 i=0; i<NumLinesPerWay; i++){
+                        LruArray[i] = new pseudo_lru_info_dynamic(NumWays);
+                    }
                     break;
                 default:
                     cerr << "ERROR: Unknown Replacement Policy"<<  endl;
@@ -466,21 +475,21 @@ class VictimPolicy
             switch(Policy) {
                 case VP_LRUReplacement:
                     ASSERTX(index<NumLinesPerWay);
-                    way = LruArray[index].getLRU();
+                    way = LruArray[index]->getLRU();
                     break;
                 case VP_PseudoLRUReplacement:
                     ASSERTX(index<NumLinesPerWay);
-                    way = LruArray[index].getPseudoLRU();
+                    way = LruArray[index]->getPseudoLRU();
                     break;
                 case VP_RandomReplacement:
                     ASSERTX(index<NumLinesPerWay);
-                    way = LruArray[index].getRandom();
+                    way = LruArray[index]->getRandom();
                     break;
                 case VP_RandomNotMRUReplacement:
                     ASSERTX(index<NumLinesPerWay);
                     ASSERTX(NumWays>1);
                     // Get the MRU
-                    mruWay = LruArray[index].getMRU();
+                    mruWay = LruArray[index]->getMRU();
                     // Get a random number between 0 and NumWays-1
                     ran = random()%(NumWays-1);
                     // Get random but not MRU
@@ -496,7 +505,7 @@ class VictimPolicy
         }
 
                     protected:
-        lruInfo *LruArray;
+        lruInfo **LruArray;
 };
 
 
@@ -517,7 +526,7 @@ class VictimPolicy
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-class dyn_cache_class:public VictimPolicy
+class dyn_cache_class : public VictimPolicy
 {
   public:
     //typedef line_state_dynamic<NumObjectsPerLine, INFO> lineState;
@@ -543,7 +552,7 @@ class dyn_cache_class:public VictimPolicy
     // Tag array holding the contents of the cache and its state.
     //
     //lineState	TagArray[NumLinesPerWay][NumWays];
-    lineState	**TagArray;
+    lineState	***TagArray;
 
     //
     // This array reduces to almost nothing if the user sets 'WithData' to
@@ -582,9 +591,9 @@ class dyn_cache_class:public VictimPolicy
             //cout << "\tTagArray[" << fmt_x(index)
             //     << "][" << fmt_x(i)
             //     << "].GetTag " << TagArray[index][i].GetTag() << endl;
-            if ( TagArray[index][i].GetTag() == tag ) 
+            if ( TagArray[index][i]->GetTag() == tag ) 
             {
-                if(TagArray[index][i].GetStatus() == S_INVALID)
+                if(TagArray[index][i]->GetStatus() == S_INVALID)
                 {
                     inv=true;
                 }
@@ -594,7 +603,7 @@ class dyn_cache_class:public VictimPolicy
                     return_way = i;
                 }
             }
-            else if ( TagArray[index][i].GetStatus() == S_WARM )
+            else if ( TagArray[index][i]->GetStatus() == S_WARM )
             {
                 warm.push_back(i);
             }
@@ -617,18 +626,18 @@ class dyn_cache_class:public VictimPolicy
                 
                 // Randomize the selected warmed way
                 UINT64 warm_way = warm[UINT64(random()) % warm.size()];            
-                ASSERTX(TagArray[index][warm_way].GetStatus() == S_WARM);                
+                ASSERTX(TagArray[index][warm_way]->GetStatus() == S_WARM);                
 
                 if ( warmFactor > rand_factor )
                 {
                     //              cout << " -- WARM!" << endl;
 
-                    TagArray[index][warm_way].SetTag(tag);
-                    TagArray[index][warm_way].SetStatus(initialWarmedState);
-                    TagArray[index][warm_way].SetOwnerId(warm_owner);
+                    TagArray[index][warm_way]->SetTag(tag);
+                    TagArray[index][warm_way]->SetStatus(initialWarmedState);
+                    TagArray[index][warm_way]->SetOwnerId(warm_owner);
                     for (UINT32 j=0; j<NumObjectsPerLine; j++)
                     {
-                        TagArray[index][warm_way].SetValidBit(j);
+                        TagArray[index][warm_way]->SetValidBit(j);
                     }
                     return warm_way;
                 }
@@ -636,8 +645,8 @@ class dyn_cache_class:public VictimPolicy
                 {
                     //              cout << " -- COLD!" << endl;
 
-                    TagArray[index][warm_way].SetTag(tag);
-                    TagArray[index][warm_way].SetStatus(S_INVALID);
+                    TagArray[index][warm_way]->SetTag(tag);
+                    TagArray[index][warm_way]->SetStatus(S_INVALID);
                     return -1;
                 }
                 
@@ -669,19 +678,23 @@ class dyn_cache_class:public VictimPolicy
 
         UINT32 KiloObjects = ( NumWays *  NumLinesPerWay * NumObjectsPerLine) / 1024;
 
-        TagArray = new(lineState*[NumLinesPerWay]);
+        //! 2D array of lineStates
+        TagArray = new(lineState**[NumLinesPerWay]);
         for ( i = 0; i < NumLinesPerWay; i++ ) 
         {
-            TagArray[i] = new lineState[NumWays](NumObjectsPerLine);
+            TagArray[i] = new(lineState*[NumWays]);
+            for(int j=0; j<NumWays; j++){ 
+                TagArray[i][j] = new lineState(NumObjectsPerLine);
+            }
         }
 
         VERIFYX(isPowerOf2(NumObjectsPerLine));
-        IndexMask = CEIL_POW2(NumLinesPerWay) - 1;
+        IndexMask = CEIL_POW2((UINT64)NumLinesPerWay) - 1;
         PosMask = NumObjectsPerLine -1;
         ClassicalIndexShift = ilog2(NumObjectsPerLine) + 3;
-        ClassicalTagMask = ~(UINT64)((CEIL_POW2(NumLinesPerWay) * NumObjectsPerLine * 8) - 1);
+        ClassicalTagMask = ~(UINT64)((CEIL_POW2((UINT64)NumLinesPerWay) * NumObjectsPerLine * 8) - 1);
         ShiftedIndexShift = ilog2(NumObjectsPerLine);
-        ShiftedTagMask = ~(UINT64)((CEIL_POW2(NumLinesPerWay) * NumObjectsPerLine) - 1);
+        ShiftedTagMask = ~(UINT64)((CEIL_POW2((UINT64)NumLinesPerWay) * NumObjectsPerLine) - 1);
 
         // Initialize the random state
         if(random_seed < 0)
@@ -698,12 +711,12 @@ class dyn_cache_class:public VictimPolicy
         {
             for (j = 0; j < NumWays; j++ ) 
             {
-                TagArray[i][j].Clear();
-                TagArray[i][j].SetWay(j);
+                TagArray[i][j]->Clear();
+                TagArray[i][j]->SetWay(j);
 
                 if (warmPercent > 0)
                 {
-                    TagArray[i][j].SetStatus(S_WARM);
+                    TagArray[i][j]->SetStatus(S_WARM);
                 }
             }
         }
@@ -735,6 +748,9 @@ class dyn_cache_class:public VictimPolicy
     {
         for (unsigned int i = 0; i < NumLinesPerWay; i++ ) 
         {
+            for(int j=0; j<NumWays; j++){
+                delete(TagArray[i][j]);
+            }
             delete(TagArray[i]);
         }
         delete(TagArray);
@@ -748,7 +764,7 @@ class dyn_cache_class:public VictimPolicy
         {
             for (UINT64 j = 0; j < NumWays; j++ )
             {            
-                TagArray[i][j].SetStatus(S_INVALID);            
+                TagArray[i][j]->SetStatus(S_INVALID);            
             }
         }    
         
@@ -764,7 +780,7 @@ class dyn_cache_class:public VictimPolicy
     // If the <idx,tag> pair can not be found in the cache, the function returns 
     // a NULL pointer.
     //
-    line_state_dynamic* GetLineState(UINT64 index, UINT64 tag, UINT32 warm_owner = UINT32(-1)) 
+    lineState* GetLineState(UINT64 index, UINT64 tag, UINT32 warm_owner = UINT32(-1)) 
     {
         INT32 way;
 
@@ -773,61 +789,61 @@ class dyn_cache_class:public VictimPolicy
         // Do an associative search on the several ways of the cache.
         way = FindWay(index,tag,warm_owner);
 
-        return ( way == -1 ) ? NULL : (&(TagArray[index][way]));
+        return ( way == -1 ) ? NULL : ((TagArray[index][way]));
     };
 
 
     //
     // Get a particular way of a particular index
     //
-    line_state_dynamic * GetWayLineState(UINT64 index, UINT32 way)
+    lineState * GetWayLineState(UINT64 index, UINT32 way)
     {
         ASSERTX(index < NumLinesPerWay);
         ASSERTX(way < NumWays);
 
-        return (&(TagArray[index][way]));
+        return ((TagArray[index][way]));
     } 
 
     //
     // Functions used to find a Victim within a given index to be replaced
     //
-    line_state_dynamic * getLRUState(UINT64 index)
+    lineState * getLRUState(UINT64 index)
     {
         UINT32 way;
         // Get the LRU way
         ASSERTX(index < NumLinesPerWay);
-        way = LruArray[index].getLRU();
+        way = LruArray[index]->getLRU();
         // Return pointer to it.
-        return &(TagArray[index][way]);
+        return (TagArray[index][way]);
     }
 
-    line_state_dynamic *getMRUState(UINT64 index)
+    lineState *getMRUState(UINT64 index)
     {
         UINT32 way;
 
         // Get the MRU way
         ASSERTX(index < NumLinesPerWay);
-        way = LruArray[index].getMRU();
+        way = LruArray[index]->getMRU();
         // Return pointer to it.
-        return &(TagArray[index][way]);
+        return (TagArray[index][way]);
     }
 
-    line_state_dynamic *GetVictimState(UINT64 index)
+    lineState *GetVictimState(UINT64 index)
     {
         UINT32 way;
 
         // Search for an invalid way that should be the first to be victimized
         for (UINT16 i = 0; i < NumWays; ++i)
         {
-            if (TagArray[index][i].GetStatus()==S_INVALID)
+            if (TagArray[index][i]->GetStatus()==S_INVALID)
             {
-                return &(TagArray[index][i]);
+                return (TagArray[index][i]);
             }
         }
         // No invalid line -> get the victim according to the selected replacement algorithm
         way = GetVictim(index);
         // Return pointer to it.
-        return &(TagArray[index][way]);
+        return (TagArray[index][way]);
     }
 
 
@@ -838,14 +854,14 @@ class dyn_cache_class:public VictimPolicy
     {
         ASSERTX(index < NumLinesPerWay);
         ASSERTX(way < NumWays);
-        LruArray[index].makeMRU(way);
+        LruArray[index]->makeMRU(way);
     }
 
     void MakeLRU(UINT64 index, UINT32 way)
     {
         ASSERTX(index < NumLinesPerWay);
         ASSERTX(way < NumWays);
-        LruArray[index].makeLRU(way);
+        LruArray[index]->makeLRU(way);
     }
 
 
@@ -971,8 +987,8 @@ class dyn_cache_class:public VictimPolicy
 
         // copy data into the cache
         for (UINT32 i = 0; i < NumObjectsPerLine; i++ ) {
-            ASSERT(TagArray[index][way].GetValidBit(i) == true,"ValidBit(i) must be true before writing data into the cache!\n");
-            TagArray[index][way].SetDirtyBit(i);
+            ASSERT(TagArray[index][way]->GetValidBit(i) == true,"ValidBit(i) must be true before writing data into the cache!\n");
+            TagArray[index][way]->SetDirtyBit(i);
             DataArray[index][way][i] = data[i];
         }
     }
@@ -992,8 +1008,8 @@ class dyn_cache_class:public VictimPolicy
         //      "You can not use SetLineData on a line that is not S_EXCLUSIVE_*\n");
 
         // copy data item into the cache
-        ASSERT(TagArray[index][way].GetValidBit(ObjectInLine) == true,"ValidBit(i) must be true before writing data into the cache!\n");
-        TagArray[index][way].SetDirtyBit(ObjectInLine);
+        ASSERT(TagArray[index][way]->GetValidBit(ObjectInLine) == true,"ValidBit(i) must be true before writing data into the cache!\n");
+        TagArray[index][way]->SetDirtyBit(ObjectInLine);
         DataArray[index][way][ObjectInLine] = data;
     } 
 
@@ -1007,47 +1023,45 @@ class dyn_cache_class:public VictimPolicy
 
         //cout << "\tDump for cache line at <" << fmt_x(index)
         //     << "x,--> way " << way << ":";
-        TagArray[index][way].Dump();
+        TagArray[index][way]->Dump();
     }
 
     void DumpLRU(UINT64 index)
     {
         ASSERTX(index < NumLinesPerWay);
         cout << "Dump for index 0x" << fmt_x(index) << " :";
-        LruArray[index].Dump();
+        LruArray[index]->Dump();
     }  
 
     void tester(void)
     {
-        LruArray[4].Dump();
+        LruArray[4]->Dump();
 
-        LruArray[4].makeMRU(5);
-        ASSERTX(LruArray[4].getLRU() == 4);
-        ASSERTX(LruArray[4].getMRU() == 5);
-        LruArray[4].Dump();
+        LruArray[4]->makeMRU(5);
+        ASSERTX(LruArray[4]->getLRU() == 4);
+        ASSERTX(LruArray[4]->getMRU() == 5);
+        LruArray[4]->Dump();
 
-        LruArray[4].makeLRU(2);
-        ASSERTX(LruArray[4].getLRU() == 2);
-        ASSERTX(LruArray[4].getMRU() == 5);
-        LruArray[4].Dump();
+        LruArray[4]->makeLRU(2);
+        ASSERTX(LruArray[4]->getLRU() == 2);
+        ASSERTX(LruArray[4]->getMRU() == 5);
+        LruArray[4]->Dump();
 
-        LruArray[4].makeLRU(5);
-        ASSERTX(LruArray[4].getLRU() == 5);
-        ASSERTX(LruArray[4].getMRU() == 0);
-        LruArray[4].Dump();
+        LruArray[4]->makeLRU(5);
+        ASSERTX(LruArray[4]->getLRU() == 5);
+        ASSERTX(LruArray[4]->getMRU() == 0);
+        LruArray[4]->Dump();
 
-        LruArray[4].makeMRU(3);
-        ASSERTX(LruArray[4].getLRU() == 5);
-        ASSERTX(LruArray[4].getMRU() == 3);
-        LruArray[4].Dump();
+        LruArray[4]->makeMRU(3);
+        ASSERTX(LruArray[4]->getLRU() == 5);
+        ASSERTX(LruArray[4]->getMRU() == 3);
+        LruArray[4]->Dump();
 
-        LruArray[4].makeMRU(2);
-        ASSERTX(LruArray[4].getLRU() == 5);
-        ASSERTX(LruArray[4].getMRU() == 2);
-        LruArray[4].Dump();
+        LruArray[4]->makeMRU(2);
+        ASSERTX(LruArray[4]->getLRU() == 5);
+        ASSERTX(LruArray[4]->getMRU() == 2);
+        LruArray[4]->Dump();
     }
 };
-
-UINT32 dyn_cache_class::DEFAULT_CACHE_RANDOM_SEED = 0;
 
 #endif // CACHE_DYN_H

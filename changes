@@ -1456,3 +1456,25 @@ Updating with simcore changes (rev. 2299)
 - Added the ability to grep on stat names, and to exclude histograms.
 The "ToText.pm" base class now allows a user-defined filter procedure
 to be installed to arbitrarily enable/disable printing of stats items.
+
+----------
+spartha1    Date: Fri Mar 30 22:44:02 EDT 2007  CSN: CSN-asimcore-77
+                  Sat Mar 31 02:44:02 UTC 2007
+
+
+Directory lib/libasim
+ Makefile.in               Locally Modified           76 
+
+Directory lib/libasim/include/asim
+ cache_dyn.h               Locally Modified           76 
+
+Directory lib/libasim/src
+ cache_dyn.cpp             Locally Added               0 
+
+Directory lib/libasim
+ Makefile.am               Locally Modified           76 
+
+Updating with simcore changes (rev. 2300)
+
+- fix to dynamic cache class provided by Alex Settle.
+libasim.a now contains a necessary instantiation of a static class member.
