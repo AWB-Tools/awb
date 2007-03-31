@@ -1542,3 +1542,18 @@ Directory .
  changes                   Locally Modified           79 
 
 Adding some files to the svn ignore option
+
+----------
+emer        Date: Sat Mar 31 10:55:47 EDT 2007  CSN: CSN-asimcore-81
+                  Sat Mar 31 14:55:47 UTC 2007
+
+
+Directory .
+ configure                 Locally Modified           80 
+ configure.in              Locally Modified           80 
+
+
+Reapplying changes from CSNs 8,10,13 for supporting builds
+on more systems. 
+
+Joel
