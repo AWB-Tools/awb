@@ -1557,3 +1557,16 @@ Reapplying changes from CSNs 8,10,13 for supporting builds
 on more systems. 
 
 Joel
+
+----------
+jsemer      Date: Sat Mar 31 17:32:20 EDT 2007  CSN: CSN-asimcore-82
+                  Sat Mar 31 21:32:20 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Benchmark.pm              Locally Modified           81 
+
+Updating with simcore changes (rev. 2303 - jsemer)
+
+Preliminary support for parsing of .cfg files in the
+Perl library.

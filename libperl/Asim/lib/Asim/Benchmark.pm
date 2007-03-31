@@ -28,9 +28,15 @@ use Asim::Base;
 
 our @ISA = qw(Asim::Base);
 
-our %a =  ( name =>                 [ "name",
+our %a =  ( filename =>             [ "filename",
+                                      "SCALAR" ],
+            name =>                 [ "name",
                                       "SCALAR" ],
             description =>          [ "description",
+                                      "SCALAR" ],
+            setup_command =>        [ "setup_command",
+                                      "SCALAR" ],
+            setup_args =>           [ "setup_args",
                                       "SCALAR" ],
       );
 
@@ -63,7 +69,7 @@ The following methods are supported:
 ################################################################
 
 
-=item $model = Asim::Benchmark::DB-E<gt>new($benchmarkDB, $name, [$variable, $value]...)
+=item $model = Asim::Benchmark::DB-E<gt>new($name, [$variable, $value]...)
 
 Create a new benchmark from $benchmarkDB with name $name and using variable substitution
 from each $variable, $value pair.
@@ -86,10 +92,9 @@ sub new {
   # Open specific benchmark if given
   #
   if (@_) {
-    my $benchmarkDB = shift;
-    my $benchmarkname = shift;
+    my $filename = shift;
 
-    $self->open($benchmarkDB, $benchmarkname) || return undef;
+    $self->open($filename) || return undef;
 
     # There must be a better way to do this...
 
@@ -133,20 +138,72 @@ of the model object with the information in the file.
 
 sub open {
   my $self = shift;
-  my $benchmarkDB = shift;
-  my $name = shift;
+  my $file = shift;
+  my $status;
 
   #
-  # Rememeber benchmarkDB and benchmark name
+  # Rememeber benchmark name
   #
-  $self->{benchmarkDB} = $benchmarkDB;
-  $self->{name} = $name;
+  $self->{filename} = $file;
+  $self->{name} = $file;
+
+
+  #
+  # Handle path with .cfx in them
+  # 
+  my $is_cfx = $file =~ m/(.*\.cfx)\/(.*)/;
+  my $cfg_base = $1;
+  my $cfx_suffix = $2;
+  my $cfx_file;
+  my $open_file;
+
+  if ($is_cfx) {
+
+    #Use the CFX to generate the CFG
+
+    my $cfx_file = Asim::resolve($cfg_base) 
+      ||  return undef;
+
+    $open_file = "$cfx_file --emit $cfx_suffix |";
+  } else {
+
+    my $cfg_file = Asim::resolve($file)
+      || return undef;
+
+    $open_file = "< $cfg_file";
+  }
+
+  #
+  # Parse cfg file (version 1)
+  #
+  my @cfg = ();
+
+  CORE::open(CFG, $open_file)
+    || return undef;
+
+  while (my $line = <CFG>) {
+    chomp($line);
+    push(@cfg, $line);
+  }
+
+  CORE::close(CFG);
+
+  #
+  # TBD: This hack should be replaced with a 
+  #      proper parsing of the config file
+  #
+  my $setup = $cfg[5];
+
+  $setup =~ m/ *([^ ]*) (.*)/;
+  my $setup_command = $1;
+  my $setup_args = $2;
+
+  $self->{setup_command} = Asim::resolve($setup_command);
+  $self->{setup_args} = $setup_args;
 
   $self->modified(0);
   return 1;
 }
-
-
 
 
 ################################################################
@@ -160,13 +217,13 @@ Return a list of accessor functions for this object
 ################################################################
 
 sub accessors {
-    return qw(name description);
+    return qw(filename name description setup_command setup_script);
 }
 
 
 ################################################################
 
-=item $model-E<gt>filename()
+=item $benchmark-E<gt>filename()
 
 Filename of source of module information
 
@@ -221,6 +278,56 @@ Always return current model "description".
 ################################################################
 
 sub description { return $_[0]->{description} }
+
+################################################################
+
+=item $benchmark-E<gt>setup_srcdir()
+
+Source directory for setup
+
+=cut
+
+################################################################
+
+sub setup_srcdir {
+  my $self = shift;
+
+  return dirname($self->setup_command());
+}
+
+
+################################################################
+
+=item $benchmark-E<gt>setup_command()
+
+Filename of setup script
+
+=cut
+
+################################################################
+
+sub setup_command {
+  my $self = shift;
+
+  return $self->{setup_command};
+}
+
+################################################################
+
+=item $benchmark-E<gt>setup_args()
+
+Arguemnts to the setup script
+
+=cut
+
+################################################################
+
+sub setup_args {
+  my $self = shift;
+
+  return $self->{setup_args};
+}
+
 
 ################################################################
 
