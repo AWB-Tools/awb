@@ -1,5 +1,5 @@
 
-----------
+-----------
 emer        Date: Mon Nov  6 16:00:22 EST 2006  CSN: CSN-asim-6
                   Mon Nov  6 21:00:22 UTC 2006
 
@@ -1532,3 +1532,13 @@ to find the name of the package the repository holds, and some bug
 fixes when a workspace contaings no packages.
 
 Joel
+
+----------
+spartha1    Date: Fri Mar 30 23:25:51 EDT 2007  CSN: CSN-asimcore-80
+                  Sat Mar 31 03:25:51 UTC 2007
+
+
+Directory .
+ changes                   Locally Modified           79 
+
+Adding some files to the svn ignore option
