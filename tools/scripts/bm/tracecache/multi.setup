@@ -38,8 +38,8 @@ if [ $# -lt 4 ]; then
 fi
 
 # the last two args are the source and dest directories
-eval srcdir=\$$(($#-1))
-eval destdir=\$$#
+eval srcdir=\$\{$(($#-1))\}
+eval destdir=\$\{$#\}
 
 # start creating the run script
 echo "Creating run script"

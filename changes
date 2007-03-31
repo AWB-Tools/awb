@@ -1427,3 +1427,15 @@ Fixed longstanding warning about an empty concatentation in asimstarter
 when no workspace is found and the default workspace needs to be used.
 
 Joel
+
+----------
+spartha1    Date: Fri Mar 30 22:35:35 EDT 2007  CSN: CSN-asimcore-75
+                  Sat Mar 31 02:35:35 UTC 2007
+
+
+Directory tools/scripts/bm/tracecache
+ multi.setup               Locally Modified           74 
+
+Updating with simcore changes (rev. 2298)
+
+- fixed a bug in multi.setup that occurs when 8 or more traces are specified.
