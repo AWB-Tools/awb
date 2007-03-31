@@ -125,7 +125,7 @@ if (! defined($ENV{AWBLOCAL}) && -e $rcfile ) {
 
 # Make sure its a real workspace
 
-if (! -e "$ENV{AWBLOCAL}/awb.config" ) {
+if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   print "\n";
   print "Warning: No valid workspace found!!!\n";
   print "         Check the value of \$AWBLOCAL and your ~/.asimrc file\n";
