@@ -278,12 +278,18 @@ sub get_repository {
     $target  = $self->_get_item($fullname, "Target")  || return undef;
     $changes = $self->_get_item($fullname, "Changes");
 
-    $repository = Asim::Repository->new(method  => $method, 
-                                        access  => $access,
-                                        module  => $module,
-                                        tag     => $cvstag,
-                                        target  => $target,
-                                        changes => $changes);
+    # Note: 
+    #   We depend on the packagename matching the package filename,
+    #   i.e., the filename in the admin/package directory, 
+    #   but we cannot check that here
+
+    $repository = Asim::Repository->new(packagename => $name,
+                                        method      => $method,
+                                        access      => $access,
+                                        module      => $module,
+                                        tag         => $cvstag,
+                                        target      => $target,
+                                        changes     => $changes);
 
   } else {
     ierror("Unknown access method $method");

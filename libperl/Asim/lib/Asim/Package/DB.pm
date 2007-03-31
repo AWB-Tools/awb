@@ -95,6 +95,14 @@ sub _initialize {
 
 Rehash the list packages in the packageDB
 
+In specific, rehash populates the following strcuctures:
+
+ $self->{packages} -
+      a reference to a list of package names
+
+ $sel->{path} -
+      a hash mapping package names to the directory containing it
+
 =cut
 
 ################################################################
@@ -103,13 +111,21 @@ sub rehash {
   my $self = shift;
   my $workspace = $self->{workspace};
 
+  my @packagedirs;
   my $admindir;
   my $path;
 
-  $self->{packages} = ();
+  print "Rehashing packages\n" if ($DEBUG);
+
+  @{$self->{packages}} = ();
   $self->{path} = {};
 
-  foreach my $p ($workspace->listdir("admin/packages")) {
+  @packagedirs = $workspace->listdir("admin/packages");
+  if (! @packagedirs) {
+    return undef;
+  }
+
+  foreach my $p (@packagedirs) {
     # . .. and version control files, .e.g., CVS, .svn, are already removed
     $p =~ /~$/ && next;
     $p =~ /^\#/ && next;

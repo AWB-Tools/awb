@@ -21,9 +21,8 @@ package Asim::UnionDir;
 use warnings;
 use strict;
 
+our $DEBUG = (($ENV{ASIM_DEBUG} || 0) >= 2) || defined($ENV{ASIM_DEBUG_UNIONDIR});
 
-
-our $DEBUG = ($ENV{ASIM_DEBUG} || 0) >= 2;
 
 use File::Basename;
 use File::Spec;
@@ -72,7 +71,7 @@ sub new {
 
   if ($_[0]) {
     $self->set_path(@_);
-  }    
+  }
 
   return $self;
 }

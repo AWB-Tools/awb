@@ -765,6 +765,24 @@ sub checkout_package {
   }
 
   #
+  # Check if package of this type already exists in searchpath
+  #
+
+  my $target_packagename = $repository->packagename();
+
+  if (! -e $targetdir && defined($default_packageDB->get_package($target_packagename))) {
+    print "A package of this name ($target_packagename) already exists in your searchpath!\n";
+    my $q = "Do you want to remove the reference to this package from the searchpath";
+
+    if (Asim::choose_yes_or_no($q, "yes", "yes")) {
+      my $workspace = $Asim::default_workspace;
+
+      $workspace->remove_path_by_packagename($target_packagename);
+      $workspace->save();
+    }
+  }
+
+  #
   # Determine user to do checkout
   #
   $default_user = $user

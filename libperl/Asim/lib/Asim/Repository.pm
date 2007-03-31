@@ -51,7 +51,8 @@ The following public methods are supported:
 
 =over 4
 
-=item $repository = Asim::Repository-E<gt>new(method => cvs, 
+=item $repository = Asim::Repository-E<gt>new(packagename => <name of package>,
+                                        method => [cvs|svn|bitkeeper],
                                         access => <accessinfo>,
                                         module => <CVSmodule>,
                                         tag => <CVStag>,
@@ -395,6 +396,25 @@ sub checkout {
   return $package_dir;
 }
 
+
+################################################################
+
+=item $packagename = $repository-E<gt>packagename()
+
+Returns the name of the package stored in this repository
+
+=cut
+
+################################################################
+
+sub packagename {
+  my $self = shift;
+  my $packagename;
+
+  $packagename = $self->{packagename} || return undef;
+
+  return $packagename;
+}
 
 ################################################################
 

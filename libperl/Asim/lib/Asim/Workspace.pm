@@ -32,7 +32,7 @@ use Asim::UnionDir;
 use Asim::Workspace::Template;
 
 
-our $DEBUG = ($ENV{ASIM_DEBUG} || 0) >= 1;
+our $DEBUG = (($ENV{ASIM_DEBUG} || 0) >= 1) || defined($ENV{ASIM_DEBUG_WORKSPACE});
 
 our @ISA = qw(Asim::Base Asim::UnionDir);
 
@@ -225,7 +225,7 @@ sub open {
   $self->{filename} = $file;
   $self->{inifile}  = $inifile;
 
-  $self->_rehash_workspace();
+  $self->_rehash_path();
 
   $self->{packageDB} = Asim::Package::DB->new($self);
 
@@ -249,10 +249,10 @@ sub rehash {
   my $self = shift;
 
   #
-  # Rehash the workspace
+  # Rehash the search path
   #
 
-  $self->_rehash_workspace()
+  $self->_rehash_path()
     || return undef;
 
   #
@@ -265,87 +265,6 @@ sub rehash {
 }
 
 
-sub _rehash_workspace {
-  my $self = shift;
-
-  my @path = split(/:/,$self->_accessor("Paths","SEARCHPATH"));
-  my @epath = ();
-
-  #
-  # Do variable substition in path
-  #
-  foreach my $i (@path) {
-    $i = $self->_substitute($i);
-    push(@epath, $i);
-  }
-
-  @path = @epath;
-  @epath = ();
-  #
-  # Do {a,b,c} expansion in path
-  #
-  my $changed = 1;
-
-  while ($changed) {
-    $changed = 0;
-    foreach my $i (@path) {
-      if ($i =~ /\{(.*)\}/) {
-	$changed = 1;
-	my @cross = split(/,/,$1);
-	foreach my $j (@cross) {
-	  my $k = $i;
-	  $k =~ s/\{.*\}/$j/;
-	  push(@epath, $k);
-	}
-      } else {
-	push(@epath, $i);
-      }
-    }
-    @path = @epath;
-    @epath =();
-  }
-
-  #
-  # Make absolute
-  #
-
-  foreach my $i (@path) {
-
-    if ( ! File::Spec->file_name_is_absolute($i)) {
-      $i = $self->rootdir() . "/$i";
-    }
-
-    if (! -d $i) {
-#     iwarn("Non-directory ($i) found in search path\n");
-      next;
-    }
-    push(@epath, $i);
-
-  }
-  @path = @epath;
-  @epath = ();
-
-  #
-  # Put path into the UnionDir
-  #
-  $self->Asim::UnionDir::set_path(@path);
-
-  return 1;
-}
-
-# Do variable substitution in an awb string
-
-sub _substitute {
-  my $self = shift;
-  my $s = shift;
-
-  while ($s =~ /\$\((\w*)\)/) {
-    my $var = $self->_accessor("Vars", $1);
-    $s =~ s/\$\(\w*\)/$var/;
-  }
-
-  return $s;
-}
 
 ################################################################
 
@@ -565,6 +484,13 @@ sub awb_package_makeflags {
 
 Return the awb search path
 
+Note we keep parallel version of the path
+   1) in the Inifile:: unexpanded
+   2) in the UnionDir:: expanded
+
+
+This method returns 2
+
 =cut
 
 ################################################################
@@ -572,28 +498,72 @@ Return the awb search path
 sub path {
   my $self = shift;
 
-  #
-  # Note we keep parallel version of the path
-  #   1) in the Inifile:: unexpanded
-  #   2) in the UnionDir:: expanded
-  #
-  # $self->_accessor_array("Paths","SEARCHPATH",":");
   return $self->Asim::UnionDir::path(@_);
 }
+
+
+################################################################
+
+=item $workspace-E<gt>unexpanded_path()
+
+Return the awb search path as seen in the awb.file
+
+Note we keep parallel version of the path
+   1) in the Inifile:: unexpanded
+   2) in the UnionDir:: expanded
+
+
+This method returns 1
+
+=cut
+
+################################################################
+
+sub unexpanded_path {
+  my $self = shift;
+
+ return $self->_accessor_array("Paths","SEARCHPATH",":");
+
+}
+
+
+################################################################
+
+=item $workspace-E<gt>set_path($packagedir [,$packagedir]...)
+
+Set the asim search path to the list of package directories
+provided. Variable substitution and cross product expansion
+are performed on each $packagedir argument provided.
+
+=cut
 
 ################################################################
 
 sub set_path {
   my $self = shift;
+  my @path = @_;
 
   #
   # Note we keep parallel version of the path
   #   1) in the Inifile:: unexpanded
   #   2) in the UnionDir:: expanded
   #
-  $self->_accessor_array_set("Paths","SEARCHPATH",":",@_);
-  return $self->Asim::UnionDir::set_path(@_);
+  $self->_rehash_path(@path)
+    || return undef;
+
+  $self->_accessor_array_set("Paths","SEARCHPATH",":",@path);
+
+  #
+  # Rehash the packageDB, too
+  #
+  $self->{packageDB}->rehash()
+    || return undef;
+
+
+  return 1;
 }
+
+
 
 ################################################################
 
@@ -608,20 +578,16 @@ Prepend $dir to the path
 sub prepend_path {
   my $self = shift;
   my $dir = shift;
-  my $rdir;
 
-  my $unexpanded_path;
-  my @expanded_path;
+  my $rdir;
+  my @unexpanded_path;
 
   $rdir = $self->_relativize_dir($dir);
 
-  $unexpanded_path = $self->{inifile}->get("Paths","SEARCHPATH");
-  $self->{inifile}->put("Paths","SEARCHPATH", "$rdir:$unexpanded_path");
+  @unexpanded_path = $self->unexpanded_path();
+  unshift(@unexpanded_path, $rdir);
 
-  @expanded_path = $self->Asim::UnionDir::path();
-  unshift(@expanded_path, $dir);
-
-  return $self->Asim::UnionDir::set_path(@expanded_path);
+  return $self->set_path(@unexpanded_path);
 }
 
 
@@ -638,20 +604,16 @@ Postpend $dir to the path
 sub postpend_path {
   my $self = shift;
   my $dir = shift;
-  my $rdir;
 
-  my $unexpanded_path;
-  my @expanded_path;
+  my $rdir;
+  my @unexpanded_path;
 
   $rdir = $self->_relativize_dir($dir);
 
-  $unexpanded_path = $self->{inifile}->get("Paths","SEARCHPATH");
-  $self->{inifile}->put("Paths","SEARCHPATH", "$unexpanded_path:$rdir");
+  @unexpanded_path = $self->unexpanded_path();
+  push(@unexpanded_path, $rdir);
 
-  @expanded_path = $self->Asim::UnionDir::path();
-  push(@expanded_path, $dir);
-
-  return $self->Asim::UnionDir::set_path(@expanded_path);
+  return $self->set_path(@unexpanded_path);
 }
 
 ################################################################
@@ -678,10 +640,229 @@ sub _relativize_dir {
   if ( $absdir =~ /$rootdir\/(.*)/ ) {
     return $1;
   }
-  
+
   return $dir;
 }
 
+
+################################################################
+
+=item $workspace-E<gt>remove_path_by_packagename($file)
+
+Remove a directory from the path corresponding to a particular
+package.
+
+=cut
+
+################################################################
+
+sub remove_path_by_packagename {
+  my $self = shift;
+  my $packagename = shift;
+
+  my $packageDB  = $self->packageDB()
+                   || return undef;
+
+  my $package    = $packageDB->get_package($packagename)
+                   || return undef;
+
+  my $packagedir = $package->location();
+
+  print "Removing package at: $packagedir\n" if ($DEBUG);
+
+  my @path = $self->path();
+  my $idx  = 0;
+
+  # Search for matching path in searchpath
+  #     Note: both @path and $packagedir are already canonicalized with 'realpath'.
+
+  for my $d (@path) {
+    print "Comparing package path to: $d\n" if ($DEBUG);
+
+    if ( $d eq $packagedir) {
+      my $rindex = @{$self->{epath2path}}[$idx];
+
+      if (! ($rindex =~ /[0-9]+/)) {
+        iwarn("Cannot remove searchpath element generated with crossproduct expansion\n");
+        return undef;
+      }
+
+      return $self->_remove_path_by_index($rindex);
+    }
+
+    $idx++;
+  }
+}
+
+
+sub _remove_path_by_index {
+  my $self = shift;
+  my $index = shift;
+
+  my @path = $self->unexpanded_path();
+
+  splice(@path, $index, 1);
+
+  return $self->set_path(@path);
+}
+
+
+################################################################
+#
+# AWB Searchpath Utility Functions
+#
+# Create a searchpath for the workspace
+#      Multiple representations of the searchpath are maintained:
+#           1) @path the path elements from the orginal text in the awb.config file
+#           2) @epath the variable substituted, cross product expanded
+#              and canonicalized version
+#
+#       @epath2path contains the index in @path for each element in @epath
+#       iff the mapping is 1:1.
+#
+################################################################
+
+sub _rehash_path {
+  my $self = shift;
+  my @path = @_;
+
+  if (! @path) {
+    @path = split(":",$self->{inifile}->get("Paths","SEARCHPATH"));
+  }
+
+  my @epath = ();
+  my @epath2path = ();
+
+  my @tpath = ();
+  my $pnum = 0;
+
+  #
+  # Do variable substition in path
+  #
+  @epath = $self->_substitute_array(@path);
+
+  #
+  # Do {a,b,c} expansion in path
+  #
+
+  $pnum = 0;
+  @tpath = ();
+
+  for my $d (@epath) {
+    my @xpath = $self->_expand_cross($d);
+
+    push(@tpath, @xpath);
+
+    # Keep a map of the index in @path that correspends to the element in @epath
+
+    if ($#xpath == 0) {
+      push(@epath2path, $pnum);
+    } else {
+      push(@epath2path, ("X") x ($#xpath + 1));
+    }
+    $pnum++;
+  }
+
+  @epath = @tpath;
+  $self->{epath2path} = \@epath2path;
+
+  #
+  # Make absolute
+  #
+
+  @tpath = ();
+
+  foreach my $i (@epath) {
+
+    if ( ! File::Spec->file_name_is_absolute($i)) {
+      $i = $self->rootdir() . "/$i";
+    }
+
+    if (! -d $i) {
+      print "Non-directory ($i) found in search path\n" if $DEBUG;
+      next;
+    }
+    push(@tpath, $i);
+
+  }
+
+  @epath = @tpath;
+
+  #
+  # Put path into the UnionDir
+  #
+  $self->Asim::UnionDir::set_path(@epath);
+
+
+  if ($DEBUG) {
+    my $i = 0;
+    while ($i <= $#epath) {
+      print "  " . $epath[$i] . " @ " . $epath2path[$i] . "\n";
+      $i++;
+    }
+  }
+
+
+  return 1;
+}
+
+
+
+# Do variable substitution in an awb string
+
+sub _substitute_array {
+  my $self = shift;
+  my @path = @_;
+  my @epath = ();
+
+  foreach my $i (@path) {
+    $i = $self->_substitute($i);
+    push(@epath, $i);
+  }
+
+  return @epath;
+}
+
+sub _substitute {
+  my $self = shift;
+  my $s = shift;
+
+  while ($s =~ /\$\((\w*)\)/) {
+    my $var = $self->_accessor("Vars", $1);
+    $s =~ s/\$\(\w*\)/$var/;
+  }
+
+  return $s;
+}
+
+# Do cross product expansion of a value
+
+sub _expand_cross {
+  my $self = shift;
+  my @path = @_;
+  my @epath = ();
+
+  my $changed = 1;
+
+  while ($changed) {
+    $changed = 0;
+    foreach my $i (@path) {
+      if ($i =~ /\{(.*)\}/) {
+	$changed = 1;
+	my @cross = split(/,/,$1);
+	foreach my $j (@cross) {
+	  my $k = $i;
+	  $k =~ s/\{.*\}/$j/;
+	  push(@epath, $k);
+	}
+      } else {
+	push(@epath, $i);
+      }
+    }
+
+    return @epath;
+  }
+}
 
 ################################################################
 
@@ -738,7 +919,7 @@ search path.
 
 ################################################################
 
-=item $workspace-E<gt>file2package($file)
+=item $workspace-E<gt>packageDB($file)
 
 Return the name of the package containing $file
 

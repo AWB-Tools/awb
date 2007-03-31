@@ -1491,3 +1491,44 @@ Updating with simcore changes (rev. 2301)
 
 - Added a generic CFX script that allows multicore Asim models
 to get the list of traces to run from a file.
+
+----------
+spartha1    Date: Fri Mar 30 22:50:07 EDT 2007  CSN: CSN-asimcore-79
+                  Sat Mar 31 02:50:07 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           78 
+
+Directory libperl/Asim/lib/Asim/Package
+ DB.pm                     Locally Modified           78 
+
+Directory libperl/Asim/lib/Asim
+ UnionDir.pm               Locally Modified           78 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified           78 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified           78 
+ Workspace.pm              Locally Modified           78 
+
+Updating with simcore changes (rev. 2302)
+
+This commit adds support for removing a reference to a
+package from the awb search path specified in the awb.config file
+(so long as the reference to the package does not result from a
+crossproduct {a,b,c} expansion in the search path). This support is
+used as part of checkout to ask a user if they want to remove
+a reference to a particular package if they are checking out
+a package with the same name. This should result in the elimination
+of the annoying message about multiple copies of a package after
+one checks out simcore and the reference to the public version was 
+left in the search path.
+
+Specific changes involved a refactoring of the workspace
+search path manipultation code, a new accessor in the repository object
+to find the name of the package the repository holds, and some bug
+fixes when a workspace contaings no packages.
+
+Joel
