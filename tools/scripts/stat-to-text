@@ -33,6 +33,8 @@ where [options] are zero or more of:
 
   --long             ; print stat names in long format with prefixes
   --out=<out_file>   ; print results to file <output_filename>
+  --grep=<regex>     ; only print stats matching <regex>
+  --no-hist          ; do not print histograms
   --help             ; this message
 
 =head1 DESCRIPTION
@@ -68,14 +70,39 @@ use Asim::Stats::ToText;
 use Asim::Stats::ToText::LongNames;
 
 #
+# filter routine to disable printing if name does not
+# match the given regular expression
+#
+$GrepString = undef;
+sub grep_filter {
+  my $self = shift;
+  if ( 0 == $self->{in_histogram} ) {
+    return ( $self->{properties}->{name} =~ m/$GrepString/ );
+  } else {
+    return ( $self->{histogram}->{name}  =~ m/$GrepString/ );
+  }
+}
+
+#
+# filter routine to disable printing histograms
+#
+sub no_hist {
+  my $self = shift;
+  return ( 0 == $self->{in_histogram} );
+}
+
+#
 # parse command line options
 #
 my $long_names = 0;
 my $out_file   = undef;
 my $help       = 0;
-$status = GetOptions( "long!" => \$long_names,
-                      "o=s"   => \$out_file,
-		      "help!" => \$help       );
+my $no_hist    = 0;
+$status = GetOptions( "long!"    => \$long_names,
+                      "o=s"      => \$out_file,
+		      "grep=s"   => \$GrepString,
+		      "no-hist!" => \$no_hist,
+		      "help!"    => \$help       );
 my $prog = basename($0);
 if (!$status) {
   print STDERR "$prog: Illegal argument\n";
@@ -91,9 +118,23 @@ if ($help) {
 #
 my $in_file = shift;
 my $stats_handler;
+
+# instantiate the right kind of parser, depending on output format
 if ( $long_names ) {
   $stats_handler = Asim::Stats::ToText::LongNames->new( $in_file );
 } else {
   $stats_handler = Asim::Stats::ToText->new( $in_file );
 }
+
+# maybe install a grep filter or a histogram filter
+if ( $GrepString ) {
+  if ( $no_hist ) {
+    die "--no-hist and --grep are not allowed at the same time\n";
+  }
+  $stats_handler->{filter_proc} = \&grep_filter;
+} elsif ( $no_hist ) {
+  $stats_handler->{filter_proc} = \&no_hist;
+}
+
+# now process the file
 $stats_handler->transcribe( $out_file );

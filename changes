@@ -1439,3 +1439,20 @@ Directory tools/scripts/bm/tracecache
 Updating with simcore changes (rev. 2298)
 
 - fixed a bug in multi.setup that occurs when 8 or more traces are specified.
+
+----------
+spartha1    Date: Fri Mar 30 22:37:45 EDT 2007  CSN: CSN-asimcore-76
+                  Sat Mar 31 02:37:45 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Stats
+ ToText.pm                 Locally Modified           75 
+
+Directory tools/scripts
+ stat-to-text              Locally Modified           75 
+
+Updating with simcore changes (rev. 2299)
+
+- Added the ability to grep on stat names, and to exclude histograms.
+The "ToText.pm" base class now allows a user-defined filter procedure
+to be installed to arbitrarily enable/disable printing of stats items.

@@ -58,6 +58,7 @@ Objects of this class have the following members:
   input_filename  => name of the XML stats input file
   output_filename => name of the text stats output file
   output_file     => file handle to the output file
+  filter_proc     => filter subroutine
 
 The following are parser state variables:
 
@@ -81,6 +82,7 @@ sub init {
   $self->{input_filename} = shift;   # remember the input file name
   $self->{output_filename}= undef;   # the output file defaults to STDOUT
   $self->{output_file}    = *STDOUT; # the output file defaults to STDOUT
+  $self->{filter_proc}    = sub {1;};# filter subroutine
 
   # parser state variables
   $self->{contents}       = '';      # current text found in between tag elements
@@ -402,6 +404,44 @@ sub indentation {
 
 =back
 
+=head1 FILTER ROUTINES
+
+The data member $this->{filter_proc} can be set to refer to a subroutine
+that is called just before each of the print_*() methods.  If the filter
+routine returns 0, the item is not printed.
+
+The filter routine is passed a reference to this parser object.
+It is typically written something like the following:
+
+    sub my_filter {
+      my $this = shift;
+      # code to return 1 if we should print this item...
+    }
+
+The following fields are typically used to determine what to print:
+
+=over 4
+
+=item $this->{properties}->{name}
+
+The name of a scalar or non-histogram item.
+
+=item $this->{histogram}->{name}
+
+The name of a histogram item.
+
+=item $this->{in_histogram}
+
+If nonzero, the item to print is the header or a portion of the data of a histogram
+
+=item $this->{name_stack}
+
+A list of enclosing module names, starting with the outermost.
+
+=back
+
+
+
 =head1 PRIVATE PARSING METHODS
 
 The following private methods are also implemented in this base class.
@@ -557,11 +597,15 @@ sub handle_header() {
         # if we just entered the histogram data section,
 	# set flag and print histogram header
 	$self->{in_histogram} = 2;
-	$self->print_histogram_header( );
+	if ( &{$self->{filter_proc}}( $self ) ) {
+	  $self->print_histogram_header( );
+	}
 
       } elsif ( $self->{in_histogram} == 0 ) {
         # but if we're not in a histogram, just print the header:
-	$self->print_header( );
+	if ( &{$self->{filter_proc}}( $self ) ) {
+	  $self->print_header( );
+	}
       }
 
       # set flag so we don't get called here again
@@ -578,7 +622,9 @@ sub handle_footer() {
     # if you're parsing a histogram, pop out of it
     $self->{in_histogram}--;
     if ( $self->{in_histogram} ) {
-      $self->print_histogram_footer( );
+      if ( &{$self->{filter_proc}}( $self ) ) {
+	$self->print_histogram_footer( );
+      }
     }
 
   } else {
@@ -603,12 +649,16 @@ sub handle_vector() {
 
     } elsif ( $self->{properties}->{type} eq 'row'          ) {
       # ...and this is a data row vector, print it:
-      $self->print_histogram_row();
+      if ( &{$self->{filter_proc}}( $self ) ) {
+	$self->print_histogram_row();
+      }
     }
   
   } else {
     # otherwise, just print the vector
-    $self->print_vector( );
+    if ( &{$self->{filter_proc}}( $self ) ) {
+      $self->print_vector( );
+    }
   }
 }
 
@@ -624,7 +674,9 @@ sub handle_scalar() {
   
   } else {
     # otherwise, just print the scalar
-    $self->print_scalar( );
+    if ( &{$self->{filter_proc}}( $self ) ) {
+      $self->print_scalar( );
+    }
   }
 }
 
@@ -655,11 +707,6 @@ sub characters {
 There are no callbacks yet for the start and end
 of the document.  These would be useful for printing
 document headers and footers in the output.
-
-I should probably also provide a filter() method
-that can be overridden by a configuration variable,
-so that you can selectively print only those stats
-you are interested in, independently of the output format.
 
 Maybe I should provide a generic configure() method
 that would be called like:
