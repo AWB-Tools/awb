@@ -1478,3 +1478,16 @@ Updating with simcore changes (rev. 2300)
 
 - fix to dynamic cache class provided by Alex Settle.
 libasim.a now contains a necessary instantiation of a static class member.
+
+----------
+spartha1    Date: Fri Mar 30 22:47:34 EDT 2007  CSN: CSN-asimcore-78
+                  Sat Mar 31 02:47:34 UTC 2007
+
+
+Directory tools/scripts/bm/tracecache
+ multi-tlist.cfx           Locally Added               0 
+
+Updating with simcore changes (rev. 2301)
+
+- Added a generic CFX script that allows multicore Asim models
+to get the list of traces to run from a file.
