@@ -1570,3 +1570,53 @@ Updating with simcore changes (rev. 2303 - jsemer)
 
 Preliminary support for parsing of .cfg files in the
 Perl library.
+
+----------
+spartha1    Date: Mon Apr  2 10:34:22 EDT 2007  CSN: CSN-asimcore-83
+                  Mon Apr  2 14:34:22 UTC 2007
+
+
+Directory .
+ Makefile.in               Locally Modified           82 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           82 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified           82 
+
+Directory tools/scripts
+ asim-shell                Locally Modified           82 
+
+Directory .
+ Makefile.am               Locally Modified           82 
+
+Directory etc
+ repositories.d/           Locally Added               0 
+
+Directory etc/repositories.d
+ README                    Locally Added               0 
+
+Updating with simcore changes (rev. 2292-2294: Joel Emer)
+
+The commit adds support for finding repository .pack files from a
+list of places rather than an single file asim.pack. This packfile
+path can contain either individual .pack files or directories, in
+which case all of the files (matching the pattern *.pack) will be
+used. 
+
+The default packfile path is 
+$HOME/.asim/repositories.d
+$HOME/.asim/asim.pack
+<install-dir>/etc/asim/repositories.d
+<install-dir>/etc/asim/asim.pack
+
+That list can be overridden in asim-shell on the command line with
+the --repositoryDB switch.
+
+A later phase of this process will involve populating the repositories.d
+directory.
+
+Joel
+
+Fixed Makefile bug.

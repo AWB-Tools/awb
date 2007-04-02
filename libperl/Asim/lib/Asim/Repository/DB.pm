@@ -32,13 +32,17 @@ use File::Find;
 our @ISA=qw(Asim::Base);
 
 our $VERSION = 1.1;
-our $Default_packfile = "/usr/local/etc/asim/asim.pack";
+
+our $DEBUG=$Asim::Repository::DEBUG;
 
 
 =head1 NAME
 
-Asim::Repository::DB - Library for manipulating a DB of ASIM CVS
-repositories, i.e., a set of repositories defined in a .pack file.
+Asim::Repository::DB - Library for manipulating a DB of ASIM
+repositories, i.e., a set of repositories defined in a set of
+.pack files.
+
+At present CVS, SVN and Bitkeeper repositories are supported.
 
 =head1 SYNOPSIS
 
@@ -58,10 +62,17 @@ The following public methods are supported:
 
 =over 4
 
-=item $repositoryDB = Asim::Repository::DB-E<gt>new([$packfile])
+=item $repositoryDB = Asim::Repository::DB-E<gt>new([$packfile]...)
 
-Create a new repository database by reading the .pack file $packfile
-Default packfile is /usr/local/share/asim/etc/asim.pack.
+Create a new repository database by reading each .pack file $packfile
+If $packfile is a directory, then read all files of the form *.pack
+in that directory.
+
+Default packfile path is: 
+        $HOME/.asim/repositories.d/
+        $HOME/.asim/asim.pack
+        <install-dir>/repositories.d/
+        <install-dir>/asim.pack
 
 =cut
 
@@ -70,14 +81,18 @@ Default packfile is /usr/local/share/asim/etc/asim.pack.
 
 sub new {
   my $this = shift;
-  my $packfile = shift || $Default_packfile;
+  my @packfile_path = @_;
 
-  if (! -e $packfile) {
-    return 0;
+  if ($#packfile_path < 0) {
+    @packfile_path = ();
+    push(@packfile_path, "$ENV{HOME}/.asim/repositories.d",
+                         "$ENV{HOME}/.asim/asim.pack",
+                         Asim::Sysconfdir() . "/repositories.d",
+                         Asim::Sysconfdir() . "/asim/asim.pack");
   }
 
   my $class = ref($this) || $this;
-  my $self = _initialize($packfile);
+  my $self = _initialize(@packfile_path);
 
   bless	$self, $class;
 
@@ -87,11 +102,11 @@ sub new {
 }
 
 sub _initialize {
-  my $packfile = shift;
+  my @packfile_path = @_;
 
   my $self = {};
 
-  $self->{filename} = $packfile;
+  $self->{packfile_path} = \@packfile_path;
 
   return $self;
 }
@@ -108,15 +123,35 @@ Rehash the repository DB.
 
 sub rehash {
   my $self = shift;
-  my $version;
-  our $VERSION;
+  my @dir;
 
-  $self->{inifile} = Asim::Inifile->new($self->{filename});
+  $self->{inifile} = Asim::Inifile->new();
 
-  $version = $self->{inifile}->get("Global","Version");
+  # Reverse order so items earlier in the list overwrite
+  # items later in the list.
 
-  if ( $version > $VERSION) {
-    ierror("Invalid packfile version - found $version - need $VERSION\n");
+  foreach my $packfile (reverse @{$self->{packfile_path}}) {
+
+    # For directories get all the *.pack files
+
+    if (-d $packfile) {
+      for my $i  (glob("$packfile/*.pack")) {
+        $self->_add_packfile($i);
+      }
+    }
+
+    # For regular files just open them
+
+    elsif (-e $packfile) {
+      $self->_add_packfile($packfile);
+    }
+  }
+
+  # Check that we have some repositories to check out from
+
+  @dir = $self->directory();
+  if ($#dir < 0) {
+    ierror("No repositories were found. No checkouts can be done\n");
     return undef;
   }
 
@@ -124,20 +159,48 @@ sub rehash {
 }
 
 
+sub _add_packfile {
+  my $self = shift;
+  my $packfile = shift;
+  my $status;
+  my $version;
+
+  our $VERSION;
+
+  print "Adding packfile: $packfile\n" if $DEBUG;
+
+  $status = $self->{inifile}->include("$packfile");
+
+  if (!defined($status)) {
+    ierror("Failed to include packfile: $packfile\n");
+    return undef;
+  }
+
+  # Latest include will overwrite Version...so we can check each file
+
+  $version = $self->{inifile}->get("Global","Version");
+
+  if ( $version > $VERSION) {
+    ierror("Invalid packfile version in $packfile - found $version - need $VERSION\n");
+    return undef;
+  }
+}
+
 ################################################################
 
-=item $module-E<gt>filename()
+=item $repositoryDB-E<gt>packfile_path()
 
-Filename of source of module information
+Array of packfiles (or packfile directories) containing repositry
+information.
 
 =cut
 
 ################################################################
 
-sub filename {
+sub packfile_path {
   my $self = shift;
 
-  return $self->{filename};
+  return @{$self->{packfile_path}};
 }
 
 
@@ -357,8 +420,8 @@ List bundles in the bundles area.
 
 sub bundle_directory {
   my $self = shift;
-  our @files;  
-  
+  our @files;
+
   sub wanted {
       push(@files, $File::Find::name) if (-f $File::Find::name);
   }
@@ -397,7 +460,7 @@ sub bundle_files {
   my $bundle = shift;
   our @files; 
   my @flist;
-  
+
   find(\&wanted, Asim::Sysconfdir() . "/asim/bundles");
 
   # also read in custom bundles in the user's area 
@@ -432,10 +495,10 @@ Get list of ids available for bundle $bundlename
 sub bundle_ids {
   my $self = shift;
   my $bundlename = shift;
- 
+
   my @flist = $self->bundle_files($bundlename);
   (@flist == 0) && return ();
-  
+
   #
   # Read bundle files and collect ids
   #
@@ -443,7 +506,7 @@ sub bundle_ids {
   foreach my $file (@flist) {
       $inifile->include($file);
   }
-  
+
   return $inifile->get_grouplist();
 }
 
@@ -522,7 +585,8 @@ sub ierror {
 
 =head1 BUGS
 
-Too numerous to list
+Bundles should also support a path of locations where
+bundles are defined.
 
 =head1 AUTHORS
 

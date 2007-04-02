@@ -294,17 +294,26 @@ sub add_path {
 ################################################################
 
 sub set_repositoryDB {
-  my $file = shift;
+  my $packfile_path_string = shift;
+  my @packfile_path;
+  my $repositoryDB;
 
-  $default_repositoryDB = undef;
-  $default_repositoryDB = get_repositoryDB($file);
+  if (defined($packfile_path_string)) {
+    @packfile_path = split(":", $packfile_path_string);
+  } else {
+    @packfile_path = ();
+  }
+
+  $repositoryDB = Asim::Repository::DB->new(@packfile_path) 
+      || shell_error("Failed to open repositoryDB files (" . join(",",@packfile_path) . "\n") && return undef;
+
+  $default_repositoryDB = $repositoryDB;
 
   return $default_repositoryDB;
 }
 
 sub rehash_repositories {
-  my $file = shift;
-  my $repositoryDB = get_repositoryDB($file) || return ();
+  my $repositoryDB = get_repositoryDB() || return undef;
 
   print "Rehashing repository database...\n";
 
@@ -317,8 +326,7 @@ sub rehash_repositories {
 
 
 sub list_repositories {
-  my $file = shift;
-  my $repositoryDB = get_repositoryDB($file) || return ();
+  my $repositoryDB = get_repositoryDB() || return undef;
 
   $repositoryDB->dump();
   return 1;
@@ -326,24 +334,11 @@ sub list_repositories {
 
 
 sub get_repositoryDB {
-  my $file = shift;
-  my $repositoryDB;
 
-  if (!defined($file) && !defined($default_repositoryDB)) {
-    $file = Asim::choose_filename("Repository .pack file")
-      || shell_error("No repository .pack file defined\n") && return ();
-  }
-
-  if (defined($file) && $file) {
-    $repositoryDB = Asim::Repository::DB->new($file) 
-      || shell_error("Failed to open repositoryDB file ($file)\n") && return ();
-  }
-
-  return $repositoryDB
-    || $default_repositoryDB
-    || shell_error("No repositoryDB or default repositoryDB defined\n") && return ();
-
+  return $default_repositoryDB
+    || shell_error("No repositoryDB or default repositoryDB defined\n") && return undef;
 }
+
 
 ################################################################
 #
@@ -2310,19 +2305,22 @@ sub status {
   my $repositoryDB_file = "";
   my $workspace_file = "";
   my $package_location = "";
+  my $packfile_path;
   my $model_file = "";
   my $moduleDB_file = "";
   my $module_file = "";
+
+  $packfile_path     = join(":\n                       ",
+                            $default_repositoryDB->packfile_path());
 
   $model_file        = $default_model->filename()       if $default_model;
   $module_file       = $default_module->filename()      if $default_module;
   $package_location  = $default_package->location()     if $default_package;
 
+  print "\n";
   print "Asim Version:          $version\n\n";
-
-  print "Current RepositoryDB:  " . $default_repositoryDB->filename() . "\n";
-  print "Current workspace:     " . Asim::rootdir() . "\n";
-  print "";
+  print "Current packfile_path: $packfile_path\n\n";
+  print "Current workspace:     " . Asim::rootdir() . "\n\n";
   print "Current package:       $package_location\n";
   print "Current model:         $model_file\n";
   print "Current module:        $module_file\n";

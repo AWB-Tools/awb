@@ -55,6 +55,10 @@ INSTALL_RC = $(top_srcdir)/scripts/install-rcfile
 
 install-etc:
 	$(INSTALL) -D -m 644 $(srcdir)/etc/asim.pack $(DESTDIR)$(sysconfdir)/asim/asim.pack
+	cd $(srcdir)/etc/repositories.d; \
+	for i in * ; do \
+	    $(INSTALL) -D -m 644 $$i $(DESTDIR)$(sysconfdir)/asim/repositories.d/$$i; \
+	done
 	export PERL5LIB=$(top_srcdir)/libperl/Asim/lib; \
 	$(INSTALL_RC) -D -m 644 $(srcdir)/etc/asimrc.template $(DESTDIR)$(sysconfdir)/asim/asimrc
 

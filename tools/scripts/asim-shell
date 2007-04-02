@@ -37,7 +37,7 @@ use AsimShell;
 #
 my $status;
 
-my $repositoryDB = "";
+my $repositoryDB = undef;
 my $moduleDB = ".";
 
 my $workspace = "$ENV{AWBLOCAL}";
@@ -57,12 +57,6 @@ my $warnings = 1;
 my $locking = 0;
 
 my $batchfile = "";
-
-if (-e "$ENV{HOME}/.asim/asim.pack") {
-  $repositoryDB = "$ENV{HOME}/.asim/asim.pack";
-} else {
-  $repositoryDB = Asim::Sysconfdir() . "/asim/asim.pack";
-}
 
 if (defined($ENV{ASIMSHELLOPT})) {
    unshift(@ARGV, split(" ", $ENV{ASIMSHELLOPT}));
@@ -124,6 +118,7 @@ AsimShell::init(mode => $runmode,
 if (! $locking) {
   Asim::Lock::disable_locks();
 }
+
 
 AsimShell::set_repositoryDB($repositoryDB)
   || warn("Failed reading in package repository database - no checkouts will be possible\n");
@@ -267,10 +262,11 @@ configuration file (.cfg). Defaults to environment variable $AWB_BENCHMARK if se
 
 Set the current module to <module>, where <module> is a model .awb file.
 
-=item --repositoryDB <repositoryDB>
+=item --repositoryDB <packfile>[:<packfile>]...
 
-Set the source for the information on available repositories to
-<repositoryDB>, which must point at a .pack file.
+Set the source for the information on available repositories to a path
+of <packfile>s, each of which must point at a .pack file or a
+directory containing .pack files.
 
 =item --batch
 

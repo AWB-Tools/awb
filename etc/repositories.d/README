@@ -16,10 +16,5 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 #
-[Global]
-Description=Asim Base Library
-CSN=CSN-asimcore-83
-Name=asimcore
-Tag=HEAD
-Lock=asim-asimcore
-Buildorder=1
+
+Repository description (*.pack) files go here.
