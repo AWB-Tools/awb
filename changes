@@ -1620,3 +1620,17 @@ directory.
 Joel
 
 Fixed Makefile bug.
+
+----------
+jsemer      Date: Wed Apr  4 15:37:33 EDT 2007  CSN: CSN-asimcore-84
+                  Wed Apr  4 19:37:33 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified           83 
+
+Updating with simcore changes (rev 2306 - jsemer)
+
+Look for repository information in <install-dir>/etc/asim/repositories.d/
+
+Joel

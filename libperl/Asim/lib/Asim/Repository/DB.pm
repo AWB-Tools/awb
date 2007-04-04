@@ -87,7 +87,7 @@ sub new {
     @packfile_path = ();
     push(@packfile_path, "$ENV{HOME}/.asim/repositories.d",
                          "$ENV{HOME}/.asim/asim.pack",
-                         Asim::Sysconfdir() . "/repositories.d",
+                         Asim::Sysconfdir() . "/asim/repositories.d",
                          Asim::Sysconfdir() . "/asim/asim.pack");
   }
 
