@@ -1634,3 +1634,20 @@ Updating with simcore changes (rev 2306 - jsemer)
 Look for repository information in <install-dir>/etc/asim/repositories.d/
 
 Joel
+
+----------
+spartha1    Date: Fri Apr 27 19:23:24 EDT 2007  CSN: CSN-asimcore-85
+                  Fri Apr 27 23:23:24 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Stats
+ ToText.pm                 Locally Modified           84 
+
+Directory tools/scripts
+ stat-to-text              Locally Modified           84 
+
+Updating with simcore changes (rev. 2304 - Carl Beckmann)
+
+- The input file argument to stat-to-text can now be omitted
+to use STDIN instead, in order to use this as a filter
+(e.g. "zcat foo.stats.gz | stat-to-text")

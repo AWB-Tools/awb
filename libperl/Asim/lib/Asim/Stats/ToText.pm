@@ -147,7 +147,11 @@ sub transcribe {
   my $parser  = XML::SAX::ParserFactory->parser( Handler => $self );
   
   # invoke the SAX parse method to parse the file and transcribe to output
-  $parser->parse_uri( $self->{input_filename} );
+  if ( $self->{input_filename} ) {
+    $parser->parse_uri( $self->{input_filename} );
+  } else {
+    $parser->parse_file( \*STDIN );
+  }
 }
 
 

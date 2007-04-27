@@ -27,15 +27,15 @@ stat-to-text
 
 =head1 SYNOPSIS
 
-stat-to-text [options] <in_file>
+stat-to-text [options] [<in_file>]
 
 where [options] are zero or more of:
 
-  --long             ; print stat names in long format with prefixes
-  --out=<out_file>   ; print results to file <output_filename>
-  --grep=<regex>     ; only print stats matching <regex>
-  --no-hist          ; do not print histograms
-  --help             ; this message
+  --long           ; print stat names in long format with prefixes
+  --o=<out_file>   ; print results to file <output_filename>
+  --grep=<regex>   ; only print stats matching <regex>
+  --no-hist        ; do not print histograms
+  --help           ; this message
 
 =head1 DESCRIPTION
 
