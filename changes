@@ -1651,3 +1651,15 @@ Updating with simcore changes (rev. 2304 - Carl Beckmann)
 - The input file argument to stat-to-text can now be omitted
 to use STDIN instead, in order to use this as a filter
 (e.g. "zcat foo.stats.gz | stat-to-text")
+
+----------
+spartha1    Date: Sat Apr 28 19:00:51 EDT 2007  CSN: CSN-asimcore-86
+                  Sat Apr 28 23:00:51 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           85 
+
+Updating with simcore changes (rev. 2307 - Sailashri Parthasarathy)
+
+Asim-shell now produces a list of packages for the update package command when the user does not specify any.

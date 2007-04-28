@@ -1283,26 +1283,32 @@ sub update_package {
   $status = GetOptions( "build!" => \$build);
   return undef if (!$status);
 
-  # remaining argument(s) is (are) package name(s)
-  while ( $name = shift @ARGV ) {
+  $name = shift @ARGV;
 
-    # handle special case of "all packages"
-    if (defined($name) && ($name eq "*" || $name eq "all")) {
+  # handle special case of "all packages"
+  if (defined($name) && ($name eq "*" || $name eq "all")) {
       return update_all_packages($build);
-    }
+  }
 
+  do {
     # normal case: update a single package
+    # or if no package name is specified, display list of packages
     my $package = get_package($name) || return undef;
+
     if (!$package->isprivate()) {
       shell_error("Cannot update a non-private package\n")  && return undef;
     }
+
     $package->update()      || return undef;
+
     if ($build) {
       # if we are also building, add the package to the list of ones to build
       push @build_list, $package;
     }
   }
-  
+  # remaining argument(s) is (are) package name(s)
+  while ( $name = shift @ARGV );
+
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.
   while ( my $package = shift @build_list ) {
