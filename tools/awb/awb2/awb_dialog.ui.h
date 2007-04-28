@@ -720,6 +720,10 @@ void awb_dialog::compilerType_clicked( int )
     extraBuildSwitches_textChanged();
 }
 
+void awb_dialog::documentation_clicked( int )
+{
+    extraBuildSwitches_textChanged();
+}
 
 void awb_dialog::buildType_clicked( int )
 {
@@ -731,6 +735,10 @@ void awb_dialog::buildType_clicked( int )
 void awb_dialog::extraBuildSwitches_textChanged( const QString & )
 {
     my $options = "";
+
+    if (documentationYes->isOn()) {
+        $options .= "dox";
+    }
 
     if (parallelNo->isOn()) {
         $options .= " PAR=0";

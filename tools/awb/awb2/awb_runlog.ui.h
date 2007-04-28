@@ -107,6 +107,12 @@ void RunLog::run()
 
     close(LOG);
 
+    if ($command =~ /dox/) {
+      Log1->insert("\n");
+      Log1->insert("Refresh the web browser to view the dox output\n");
+      Log1->insert("\n");
+    }
+
     Log1->insert("\n");
     Log1->insert("*******DONE******\n");
     Log1->insert("\n");

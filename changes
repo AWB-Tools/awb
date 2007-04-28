@@ -1663,3 +1663,18 @@ Directory libperl/AsimShell/lib/AsimShell
 Updating with simcore changes (rev. 2307 - Sailashri Parthasarathy)
 
 Asim-shell now produces a list of packages for the update package command when the user does not specify any.
+
+----------
+spartha1    Date: Sat Apr 28 19:03:45 EDT 2007  CSN: CSN-asimcore-87
+                  Sat Apr 28 23:03:45 UTC 2007
+
+
+Directory tools/awb/awb2
+ awb_runlog.ui.h           Locally Modified           86 
+ awb_util.pm               Locally Modified           86 
+ awb_dialog.ui             Locally Modified           86 
+ awb_dialog.ui.h           Locally Modified           86 
+
+Updating with simcore changes (rev. 2308 - Sailashri Parthasarathy)
+
+Doxygen documentation can now be obtained by using the documentation button in the Build window in awb.

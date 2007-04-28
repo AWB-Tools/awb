@@ -509,6 +509,71 @@
                                     </property>
                                 </widget>
                             </widget>
+                            <widget class="QButtonGroup" row="1" column="1">
+                                <property name="name">
+                                    <cstring>documentation</cstring>
+                                </property>
+                                <property name="title">
+                                    <string>Documentation</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Select whether you want documentation</string>
+                                </property>
+                                <widget class="QRadioButton">
+                                    <property name="name">
+                                        <cstring>documentationYes</cstring>
+                                    </property>
+                                    <property name="geometry">
+                                        <rect>
+                                            <x>10</x>
+                                            <y>20</y>
+                                            <width>44</width>
+                                            <height>18</height>
+                                        </rect>
+                                    </property>
+                                    <property name="text">
+                                        <string>Yes</string>
+                                    </property>
+                                </widget>
+                                <widget class="QRadioButton">
+                                    <property name="name">
+                                        <cstring>documentationDefault</cstring>
+                                    </property>
+                                    <property name="geometry">
+                                        <rect>
+                                            <x>10</x>
+                                            <y>60</y>
+                                            <width>70</width>
+                                            <height>18</height>
+                                        </rect>
+                                    </property>
+                                    <property name="text">
+                                        <string>Default</string>
+                                    </property>
+                                    <property name="checked">
+                                        <bool>true</bool>
+                                    </property>
+                                </widget>
+                                <widget class="QRadioButton">
+                                    <property name="name">
+                                        <cstring>documentationNo</cstring>
+                                    </property>
+                                    <property name="geometry">
+                                        <rect>
+                                            <x>10</x>
+                                            <y>40</y>
+                                            <width>38</width>
+                                            <height>18</height>
+                                        </rect>
+                                    </property>
+                                    <property name="text">
+                                        <string>No</string>
+                                    </property>
+                                    <property name="checked">
+                                        <bool>false</bool>
+                                    </property>
+                                </widget>
+                            </widget>
                         </grid>
                     </widget>
                     <widget class="QGroupBox">
@@ -2132,6 +2197,12 @@
         <slot>compilerType_clicked(int)</slot>
     </connection>
     <connection>
+        <sender>documentation</sender>
+        <signal>clicked(int)</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>documentation_clicked(int)</slot>
+    </connection>
+    <connection>
         <sender>traceRun</sender>
         <signal>clicked(int)</signal>
         <receiver>awb_dialog</receiver>
@@ -2336,6 +2407,7 @@
     <slot>parallelMake_clicked( int )</slot>
     <slot>compilerType_clicked( int )</slot>
     <slot>buildType_clicked( int )</slot>
+    <slot>documentation_clicked( int )</slot>
     <slot>extraBuildSwitches_textChanged( const QString &amp; )</slot>
     <slot>paramRefresh_clicked()</slot>
     <slot>paramList_selectionChanged( QListBoxItem * )</slot>

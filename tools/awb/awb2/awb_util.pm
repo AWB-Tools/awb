@@ -606,7 +606,15 @@ sub build_model()
   $w = awb_runlog(0,0,1);
   $cmd = $model->build("--getcommand" => 1,
 		       "--buildopt" => $build_switches);
-  $w->run($cmd);
+
+  if ($build_switches =~ /dox/) {
+    my $dir = $model->build_dir();
+    my $html_cmd = system ("mozilla $dir/dox/html/index.html &");
+    $w->run($cmd, $html_cmd);
+  }
+  else {
+    $w->run($cmd);
+  }
 
   return 1;
 }
