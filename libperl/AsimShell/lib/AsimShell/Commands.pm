@@ -1001,11 +1001,15 @@ sub add_dependent_packages {
 }
 
 #
-# configure, make, build, or install one or more packages,
-# returning 1 if all succeeded.
+# configure, make, build, install, or clean one or more packages,
+# returning 1 if all succeeded.  These all take as arguments a list
+# of package names, or "all" or "*" to denote all pacages in the workspace.
 #
 sub configure_package {
   while ( my $name = shift ) {
+    if ( $name eq 'all' || $name eq '*' ) {
+      return configure_package( $default_packageDB->directory() );
+    }
     my $package = get_package($name) || return undef;
     $package->configure()            || return undef;
   }
@@ -1014,6 +1018,9 @@ sub configure_package {
 
 sub make_package {
   while ( my $name = shift ) {
+    if ( $name eq 'all' || $name eq '*' ) {
+      return make_package( $default_packageDB->directory() );
+    }
     my $package = get_package($name) || return undef;
     $package->build()                || return undef;
   }
@@ -1022,6 +1029,9 @@ sub make_package {
 
 sub build_package {
   while ( my $name = shift ) {
+    if ( $name eq 'all' || $name eq '*' ) {
+      return configure_and_build_packages( $default_packageDB->directory() );
+    }
     my $package = get_package($name)       || return undef;
     configure_and_build_packages($package) || return undef;
   }
@@ -1030,8 +1040,22 @@ sub build_package {
 
 sub install_package {
   while ( my $name = shift ) {
+    if ( $name eq 'all' || $name eq '*' ) {
+      return install_package( $default_packageDB->directory() );
+    }
     my $package = get_package($name) || return undef;
     $package->install()              || return undef;
+  }
+  return 1;
+}
+
+sub clean_package {
+  while ( my $name = shift ) {
+    if ( $name eq 'all' || $name eq '*' ) {
+      return clean_package( $default_packageDB->directory() );
+    }
+    my $package = get_package($name) || return undef;
+    $package->clean()                || return undef;
   }
   return 1;
 }

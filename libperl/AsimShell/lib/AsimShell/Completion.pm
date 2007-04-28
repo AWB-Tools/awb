@@ -54,7 +54,7 @@ our $default_module;
 #
 sub is_multi_package_command {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make))$/ );
+  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
 }
 
 #
@@ -62,7 +62,7 @@ sub is_multi_package_command {
 #
 sub package_command_takes_all_arg {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(update)|(commit))$/ );
+  return ( $cmd =~ m/^((status)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
 }
 
 #

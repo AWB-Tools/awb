@@ -1694,3 +1694,24 @@ Updating with simcore changes (rev. 2309 - Michael Powell)
 Added .cfx and support scripts to run a benchmark
 and check an output stat to be within a certain 
 percentage range.
+
+----------
+spartha1    Date: Sat Apr 28 19:11:57 EDT 2007  CSN: CSN-asimcore-89
+                  Sat Apr 28 23:11:57 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Completion.pm             Locally Modified           88 
+ Commands.pm               Locally Modified           88 
+
+Directory libperl/Asim/lib/Asim
+ BuildTree.pm              Locally Modified           88 
+
+Updating with simcore changes (rev. 2310 - Carl Beckmann)
+
+- Added a "clean package" command to asim-shell. This takes one or more
+package names (or "all" or "*") as argument, and does a "make clean"
+if the package has a top-level makefile.
+
+Also updated the "build", "configure" and "make" package commands to
+take "all" or "*" as an argument.

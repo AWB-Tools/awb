@@ -157,6 +157,32 @@ sub install {
   return 1;
 }
 
+################################################################
+
+=item $build_tree-E<gt>clean()
+
+Clean up this package's build
+
+=cut
+
+################################################################
+
+sub clean {
+  my $self = shift;
+  my $location = $self->location();
+  my $command = "cd $location; make clean";
+
+  return 1 if (! -e "$location/Makefile");
+
+  print "% $command\n";
+  if (system($command)) {
+      warn("Clean failed\n");
+      return undef;
+  }
+
+  return 1;
+}
+
 =back
 
 =head1 BUGS
