@@ -1,0 +1,66 @@
+#!/bin/sh
+
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+##############################################################
+#
+# Benchmark setup for one thread, use fetch_trace to get
+# trace from the trace cache, check stat value from stats file
+# on simulator completion to be within a given tolerance range.
+#
+# Usage: setup <statname> <statvalue> <tolerance> <tracepath> <srcdir> <destdir>
+#
+# Setup benchmark to run in <destdir>.  The <tracepath> arg
+# is the absolute path where fetch_trace will get the trace from.
+# The <statname> is a stat in the stats file to check for <statvalue> to 
+# be within plus or minus the fraction <tolerance>.
+#
+# This is a generic "setup" script, used by single-check-stat-range.cfx.
+#
+# Michael D. Powell 4/11/2007
+#
+##############################################################
+
+if [ $# -ne 6 ]; then
+    echo Usage $0 " <statname> <statvalue> <tolerance> <tracepath> <srcdir> <destdir> "
+    exit 1
+fi
+
+statname=$1
+statvalue=$2
+tolerance=$3
+tracepath=$4
+srcdir=$5
+destdir=$6
+
+echo "Fetching trace from cache"
+cacheloc=`fetch-trace $tracepath | tail -1`
+
+echo "Creating links to trace files"
+/bin/ln -f -s $cacheloc* $destdir/
+
+echo "Creating run script"
+tracename=`echo $tracepath | sed -e 's/.*\///'`
+sed -e "s/@statname@/$statname/g"   \
+    -e "s/@statvalue@/$statvalue/g" \
+    -e "s/@tolerance@/$tolerance/g" \
+    -e "s/@tracename@/$tracename/g"   \
+    $srcdir/single-check-stat-range.run    \
+  > $destdir/run

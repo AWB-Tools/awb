@@ -1,0 +1,66 @@
+#!/bin/sh
+
+#
+# Copyright (C) 2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# run a model, then check its stats file
+# to make sure the given stat is within a tolerance range
+# of a given value.
+#
+# This is a template "run" script, used by single-check-stat-range.cfx.
+#
+# Michael D. Powell 4/11/2007
+#
+#
+PATH=/p/asim/i386_linux24/bin:$PATH
+TRACENAME=@tracename@
+
+# run the model, after printing the exact commands used:
+echo $model $genFlags --feeder -t $TRACENAME $feedFlags --system $sysFlags
+$model $genFlags --feeder -t $TRACENAME $feedFlags --system $sysFlags
+
+# we need the asim environment before using grab.pl:
+source /p/asim/scripts/setup/setup-asim.sh
+
+# extract the parameter from the stats file
+runvalue=`grab.pl -filename @tracename@.stats -parameters @statname@ | grep unknown_benchmark | sed -e 's/unknown_benchmark[ \t]*//' -e 's/[ \t]*$//'`
+
+## Crude hack:
+## Need a simple perl script to do floating point comparison.
+## cannot seem to use awb-resolver from here to find a script in simcore/tools/scripts, so using the run
+## script to manually create the needed perl script in the local directory.  also,
+## entire script had to be crammed on one line for some unknown reason.  repeated printfs ended up going to stdout
+## in spite of redirection
+
+printf "#!/usr/intel/bin/perl \n \$argcnt = \$#ARGV + 1; \n \$val1 = \$ARGV[0]; \$val2 = \$ARGV[1]; \$range = \$ARGV[2]; \n \$rangebottom = \$val1 * (1 - \$range); \$rangetop = \$val1 * (1 + \$range); \n if ((\$val2 >= \$rangebottom) && (\$val2 <= \$rangetop)) { print 0; } else { \n print 1; } \n " > rangecheck.pl
+
+rangescript=./rangecheck.pl
+
+#rangescript=`awb-resolver tools/scripts/rangecheck.pl`
+
+# check range
+exit_code=`/usr/intel/bin/perl $rangescript @statvalue@ $runvalue @tolerance@`
+
+if /usr/bin/test $exit_code -ne 0; then
+   printf "FAILURE: @statname@ of $runvalue more than @tolerance@ X from golden value of @statvalue@ \n"
+fi
+
+exit $exit_code;
+

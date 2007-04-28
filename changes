@@ -1678,3 +1678,19 @@ Directory tools/awb/awb2
 Updating with simcore changes (rev. 2308 - Sailashri Parthasarathy)
 
 Doxygen documentation can now be obtained by using the documentation button in the Build window in awb.
+
+----------
+spartha1    Date: Sat Apr 28 19:10:00 EDT 2007  CSN: CSN-asimcore-88
+                  Sat Apr 28 23:10:00 UTC 2007
+
+
+Directory tools/scripts/bm/tracecache
+ single-check-stat-range.run Locally Added               0 
+ single-check-stat-range.cfx Locally Added               0 
+ single-check-stat-range.setup Locally Added               0 
+
+Updating with simcore changes (rev. 2309 - Michael Powell)
+
+Added .cfx and support scripts to run a benchmark
+and check an output stat to be within a certain 
+percentage range.
