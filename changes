@@ -1730,3 +1730,18 @@ Updating with simcore changes (rev. 2312 - Carl Beckmann)
 
 - Fixed the "help" command in asim-shell to add the new "clean package"
 command, and added comments on how to add a new command to asim-shell :-)
+
+----------
+spartha1    Date: Sat Apr 28 19:44:14 EDT 2007  CSN: CSN-asimcore-91
+                  Sat Apr 28 23:44:14 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           90 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified           90 
+
+Updating with simcore changes (rev. 2313 - Carl Beckmann)
+
+- Fixed compound command completion for "clean package" command
