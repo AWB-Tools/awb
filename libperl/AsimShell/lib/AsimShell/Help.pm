@@ -17,6 +17,14 @@
 # 
 #
 
+#
+# ATTENTION MAINTAINERS!
+#
+# See the header comments in Commands.pm for how to add commands
+# to asim-shell.
+#
+
+
 package AsimShell;
 use warnings;
 use strict;
@@ -114,10 +122,11 @@ Commands:
 
   svn package [<package>] <command>      - issue svn command on a package
 
-  build package [<package>]              - configure and make package
-  configure package [<package>]          - configure package
-  make package [<package>]               - build package
-  install package [<package>]            - install package
+  build package [<package> ...]          - configure and make package(s)
+  configure package [<package> ...]      - configure package(s)
+  make package [<package> ...]           - build package(s)
+  install package [<package> ...]        - install package(s)
+  clean package [<package> ...]          - clean up object files in package(s)
 
   status package [<package> ...]         - print status of package(s) against repository
     [--verbose]                          - print status of every file

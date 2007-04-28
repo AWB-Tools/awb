@@ -17,6 +17,35 @@
 # 
 #
 
+#
+# ATTENTION MAINTAINERS!
+#
+# This perl module contains routines that implement various commands
+# in asim-shell.
+#
+# HOW TO ADD NEW COMMANDS TO ASIM-SHELL
+#
+# Let's say you want to add a new command "lubricate driveshaft" to
+# asim-shell, such that you can type "lubricate driveshart" at the asim>
+# prompt, or "asim-shell lubricate driveshaft" at the unix prompt.
+# To add this command, do the following:
+#
+# 1. Create a new subroutine in this file named "lubricate_driveshaft".
+#    Note the underscore "_" in the name.
+#
+# 2. You must also update the file Completion.pm in this directory,
+#    to deal with command-line completion.  Usually this involved developing
+#    a list of alternative module, package, or other such names, and returning
+#    something appropriate in the attempted_completion routine, usually by
+#    calling the max_common function (follow the pattern in the existing code).
+#
+#    SEE THE NOTE in Completion.pm on package commands that take multiple
+#    package names or the name "all" as arguments!!
+#
+# 3. Finally, edit the Help.pm file in this directory, to add the command
+#    to what is displayed in the "asim-shell help" command.
+#
+
 package AsimShell;
 use warnings;
 use strict;

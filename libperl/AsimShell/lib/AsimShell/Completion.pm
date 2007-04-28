@@ -17,6 +17,18 @@
 # 
 #
 
+#
+# ATTENTION MAINTAINERS!
+#
+# See the header comments in Commands.pm for how to add commands
+# to asim-shell.
+#
+# IF YOU ARE ADDING A NEW PACKAGE COMMAND that takes multiple package names
+# as argument, or that takes "all" or "*" to denote all packages,
+# make sure you update the is_multi_package_command() or
+# package_command_takes_all_arg() routines in this file accordingly!!
+#
+
 package AsimShell;
 use warnings;
 use strict;
