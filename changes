@@ -1988,3 +1988,15 @@ Updating with simcore changes (rev. 2319 - Sari Coumeri)
 no longer derived from ASIM_MODULE_CLASS. There's no need for it
 to be derived in the null model. This removes the construction of
 an asim module for the null power model macros (SLC)
+
+----------
+spartha1    Date: Sat Apr 28 22:53:57 EDT 2007  CSN: CSN-asimcore-98
+                  Sun Apr 29 02:53:57 UTC 2007
+
+
+Directory modules/dral_api
+ classic_dral_api_ptv_bk.awb Locally Modified           97 
+
+Updating with simcore changes (rev. 2322 - Brian Slechta)
+
+fixed duplicate module name.

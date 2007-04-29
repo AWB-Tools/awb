@@ -6,7 +6,7 @@
 
 %AWB_START
 
-%name Classic DRAL API with PTV support
+%name Classic DRAL API with PTV support (using coho-bk)
 %desc Classic DRAL API using PTV library in coho-bk
 
 %provides dral_api
