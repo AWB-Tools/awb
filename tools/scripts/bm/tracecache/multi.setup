@@ -54,7 +54,7 @@ command='$model $genFlags --feeder'
 # and add the trace to the -t arguments passed to the model:
 i=1
 while (( $i < $# - 1 )); do
-  eval tracepath=\$$i
+  eval tracepath=\$\{$i\}
   echo "Fetching trace $tracepath from cache and linking to it"
   cacheloc=`fetch-trace $tracepath | tail -1`
   /bin/ln -f -s $cacheloc* $destdir/
