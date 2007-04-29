@@ -1066,7 +1066,11 @@ sub make_package {
 sub build_package {
   while ( my $name = shift ) {
     if ( $name eq 'all' || $name eq '*' ) {
-      return configure_and_build_packages( $default_packageDB->directory() );
+      my @all_packages = ();
+      foreach my $pn ( $default_packageDB->directory() ) {
+        push @all_packages, get_package( $pn );
+      }
+      return configure_and_build_packages( @all_packages );
     }
     my $package = get_package($name)       || return undef;
     configure_and_build_packages($package) || return undef;

@@ -1909,3 +1909,15 @@ fix for asim bug #0000741.
 
 created new "system" modules which have support for the new "dral_api" modules
 (ie. version 2). added new "dral_api" modules.
+
+----------
+spartha1    Date: Sat Apr 28 21:09:24 EDT 2007  CSN: CSN-asimcore-93
+                  Sun Apr 29 01:09:24 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified           92 
+
+Updating with simcore changes (rev. 2315 - Carl Beckmann)
+
+- fixed "build package all" command
