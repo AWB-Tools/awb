@@ -1,0 +1,20 @@
+********************************************************************
+* Awb module specification, for Asim DRAL API
+*
+* Copyright (c) 1999-2006 Intel Corporation, all rights reserved
+********************************************************************
+
+%AWB_START
+
+%name Classic DRAL API without PTV support
+%desc Classic DRAL API using NULL PTV library in simcore
+
+%provides dral_api
+
+/* this much come before its dependencies */
+%library lib/libdral/libdral.a
+
+%library lib/libnullptlib/libnullptlib.a
+
+
+%AWB_END

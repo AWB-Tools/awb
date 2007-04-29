@@ -383,6 +383,26 @@ fi
 AC_SUBST(OPTFLAGS)
 
 #
+# --enable-ptv
+#
+AC_ARG_ENABLE([ptv],
+      AC_HELP_STRING([--enable-ptv=ARG],
+                     [ptv logs enabled? [[ARG=no|yes]] (default=no)]),
+      asim_cv_enable_ptv=$enableval,
+      asim_cv_enable_ptv=no)
+
+AC_CACHE_CHECK([if ptv should be used] ,
+      asim_cv_enable_ptv,
+      asim_cv_enable_ptv=no)
+
+if test $asim_cv_enable_ptv = yes; then
+    PTVFLAGS="-DCOMPILE_DRAL_WITH_PTV"
+else
+    PTVFLAGS=""
+fi
+AC_SUBST(PTVFLAGS)
+
+#
 # --enable-distcc
 #
 AC_ARG_ENABLE([distcc],
@@ -506,7 +526,7 @@ fi
 AC_SUBST(STLPORTINC)
 
 # pull all flags together
-AM_CXXFLAGS='$(WARNFLAGS) $(OPTFLAGS) $(ARCHFLAGS) $(ASIMCOREFLAGS) $(ASIMCOREINCS)'
+AM_CXXFLAGS='$(WARNFLAGS) $(PTVFLAGS) $(OPTFLAGS) $(ARCHFLAGS) $(ASIMCOREFLAGS) $(ASIMCOREINCS)'
 AM_LDFLAGS='$(ARCHFLAGS) $(ASIMCORELIBS)'
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)
@@ -781,6 +801,11 @@ AC_CONFIG_LINKS($libasimSrcDir/xmlout.cpp:$libasimSrcDir/$xmlout.cpp)
 AC_CONFIG_FILES(lib/libdral/Makefile lib/libdral/include/Makefile)
 AC_CONFIG_FILES(lib/libdral/pkgconfig/libdral.pc)
 AC_CONFIG_FILES(lib/libdral/pkgconfig/libdral-uninstalled.pc)
+
+# lib/libnullptlib
+AC_CONFIG_FILES(lib/libnullptlib/Makefile lib/libnullptlib/include/Makefile)
+AC_CONFIG_FILES(lib/libnullptlib/pkgconfig/libnullptlib.pc)
+AC_CONFIG_FILES(lib/libnullptlib/pkgconfig/libnullptlib-uninstalled.pc)
 
 # lib/libawb
 AC_CONFIG_FILES(lib/libawb/Makefile)

@@ -62,6 +62,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/lib/libasim/pkgconfig/libasim.pc.in \
 	$(top_srcdir)/lib/libdral/pkgconfig/libdral-uninstalled.pc.in \
 	$(top_srcdir)/lib/libdral/pkgconfig/libdral.pc.in \
+ 	$(top_srcdir)/lib/libnullptlib/pkgconfig/libnullptlib-uninstalled.pc.in \
+ 	$(top_srcdir)/lib/libnullptlib/pkgconfig/libnullptlib.pc.in \
 	$(top_srcdir)/libperl/Asim/lib/Asim.pm.in COPYING INSTALL \
 	scripts/compile scripts/config.guess scripts/config.sub \
 	scripts/depcomp scripts/install-sh scripts/ltmain.sh \
@@ -80,6 +82,8 @@ CONFIG_CLEAN_FILES = etc/awb.config.template \
 	lib/libasim/pkgconfig/libasim-uninstalled.pc \
 	lib/libdral/pkgconfig/libdral.pc \
 	lib/libdral/pkgconfig/libdral-uninstalled.pc \
+	lib/libnullptlib/pkgconfig/libnullptlib.pc \
+	lib/libnullptlib/pkgconfig/libnullptlib-uninstalled.pc \
 	libperl/Asim/lib/Asim.pm
 SOURCES =
 DIST_SOURCES =
@@ -164,6 +168,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTVFLAGS = @PTVFLAGS@
 QT = @QT@
 QTINCDIR = @QTINCDIR@
 QTLIBDIR = @QTLIBDIR@
@@ -308,6 +313,10 @@ lib/libasim/pkgconfig/libasim-uninstalled.pc: $(top_builddir)/config.status $(to
 lib/libdral/pkgconfig/libdral.pc: $(top_builddir)/config.status $(top_srcdir)/lib/libdral/pkgconfig/libdral.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 lib/libdral/pkgconfig/libdral-uninstalled.pc: $(top_builddir)/config.status $(top_srcdir)/lib/libdral/pkgconfig/libdral-uninstalled.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+lib/libnullptlib/pkgconfig/libnullptlib.pc: $(top_builddir)/config.status $(top_srcdir)/lib/libnullptlib/pkgconfig/libnullptlib.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+lib/libnullptlib/pkgconfig/libnullptlib-uninstalled.pc: $(top_builddir)/config.status $(top_srcdir)/lib/libnullptlib/pkgconfig/libnullptlib-uninstalled.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 libperl/Asim/lib/Asim.pm: $(top_builddir)/config.status $(top_srcdir)/libperl/Asim/lib/Asim.pm.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -457,7 +466,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/$(top_srcdir)/scripts $(distdir)/etc $(distdir)/include $(distdir)/lib/libasim/pkgconfig $(distdir)/lib/libdral/pkgconfig $(distdir)/libperl/Asim/lib $(distdir)/scripts $(distdir)/tools/scripts
+	$(mkdir_p) $(distdir)/$(top_srcdir)/scripts $(distdir)/etc $(distdir)/include $(distdir)/lib/libasim/pkgconfig $(distdir)/lib/libdral/pkgconfig $(distdir)/lib/libnullptlib/pkgconfig $(distdir)/libperl/Asim/lib $(distdir)/scripts $(distdir)/tools/scripts
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

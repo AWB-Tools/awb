@@ -71,7 +71,7 @@ ASIM_DRAL_EVENT_CLASS::InitEvent()
     {
         runWithEventsOn = true;
 
-        event = new DRAL_SERVER_CLASS("Events.drl.gz",1024,true);
+        event = new DRAL_SERVER_CLASS("Events",1024,true);
         //eventsOn = false;
         // Send an event creating 
         // a fake node with number 0. This is necessary because port.h will connect to node 0

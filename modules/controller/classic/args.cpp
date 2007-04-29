@@ -217,6 +217,9 @@ static char *scan_arg_value( char * &source )
 	break;
       case esc:                     *b++ = *s;   state = quote;
 	break;
+      default:
+        ; // do nothing
+        break;
     }
   }
   unsigned len = b - buf;

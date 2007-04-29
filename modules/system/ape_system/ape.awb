@@ -33,6 +33,7 @@ Awb module specification
 %param %dynamic MAX_IDLE_CYCLES 256  "maximum number of allowable idle cycles (progress assurance)"
 
 %library lib/libasim/libasim.a
+%library lib/libnullptlib/libnullptlib.a
 %library lib/libdral/libdral.a
 
 --- some code requires that to be defined ---

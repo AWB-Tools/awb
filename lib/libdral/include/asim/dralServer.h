@@ -34,11 +34,19 @@
 #include <string>
 #include <set>
 
+// for var args
+#include <stdarg.h>
+
 #include "asim/dral_syntax.h"
 #include "asim/dralServerImplementation.h"
 #include "asim/dralStorage.h"
 #include "asim/dralServerDefines.h"
 #include "asim/dralCommonDefines.h"
+
+// forward declarations
+class DRAL_ITEM_DESC_CLASS;
+class DRAL_DATA_DESC_CLASS;
+class DRAL_EVENT_DESC_CLASS;
 
 /*
  * Autocompress stuff, Federico Ardanaz @ BSSAD, November 2004.
@@ -1180,6 +1188,72 @@ class DRAL_SERVER_CLASS
     */
     UINT32 GetEdgeMaxBandwidth(UINT16 edgeId);
 
+    /**
+     * Opens up an "event" record.  This will allow the events to be logged
+     * appropriately with PTV.  We can also use this information in DRAL, but
+     * this is not particularly well thought out yet.  :)
+     * @brief Opens an event record and returns the rec_id
+     * @param rec Event record type for this record
+     * @param thread_id Thread id for this record
+     * @param parent_id Event record id for the parent of this record
+     */
+    UINT32 OpenEventRec(DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, UINT32 parent_id);
+
+    /**
+     * Closes an "event" record.  This will stop the events from being logged
+     * appropriately with PTV.  We can also use this information in DRAL, but
+     * this is not particularly well thought out yet.  :)
+     * @brief Opens an event record and returns the rec_id
+     * @param rec_id ID for this event record
+     */
+    void CloseEventRec(UINT32 rec_id);
+
+    /**
+    * Activates a DRAL "event".  This will decorate the item with the 
+    * appropriate tags.  In this case of PTV output selection, this will
+    * call the appropriate pipe_record_event() function.
+    * @brief Activates a DRAL "event"
+    * @param item_id the ID for the asim item with the event
+    * @param record_id the ID for the PTV record
+    * @param data The value of the event
+    * @param ap A var-args continuation
+    */
+    void SetItemTag(UINT32 item_id, UINT32 record_id,
+                    DRAL_DATA_DESC_CLASS *data, va_list & ap);
+
+    /**
+    * Activates a DRAL "event".  This will decorate the item with the 
+    * appropriate tags.  In this case of PTV output selection, this will
+    * call the appropriate pipe_record_event() function.
+    * @brief Activates a DRAL "event"
+    * @param item_id the ID for the asim item with the event
+    * @param record_id the ID for the PTV record
+    * @param desc Event Descriptor
+    * @param cycle When this event occured
+    * @param duration For how long this event occured
+    * @param data The value of the event
+    * @param ap A var-args continuation
+    */
+    void SetEvent(UINT32 item_id, UINT32 record_id,
+                  DRAL_EVENT_DESC_CLASS *desc, UINT64 cycle, UINT64 duration, 
+                  DRAL_DATA_DESC_CLASS *data, va_list & ap);
+
+    /**
+    * Returns the event descriptor corresponding to the event_name.  This 
+    * event descriptor is registered in the AddEventDesc function.
+    * @brief Returns the event descriptor corresponding to the event_name.
+    * @param event_name character string name for the event desciptor
+    */
+    DRAL_EVENT_DESC_CLASS *FindEventDesc(const char *event_name);
+
+    /**
+    * Adds the event descriptor to the event database.  We can use 
+    * this database to find any registered event descriptor.
+    * @brief Add event descriptor to the database
+    * @param event event descriptor that we wish to register
+    */
+    void AddEventDesc(DRAL_EVENT_DESC_CLASS *event);
+
 private:
 
     void Init(UINT16 buffer_size, bool avoid_rep, bool compression);
@@ -1191,6 +1265,13 @@ private:
     void AutoFlush(UINT64 n);
     void DumpLiveItemIds();
     void UpdateEdgeMaxBandwidth();
+
+
+    // get the size, in bytes, of the var-args list
+    static UINT32 GetDralVaListSize(DRAL_DATA_DESC_CLASS *dd, va_list ap);
+
+    // we expect the dst list to already have allocated storage
+    static void CvtApListDralToPtv(va_list & dst, DRAL_DATA_DESC_CLASS *src_dd, va_list src, UINT32 size);
 
     /*
      * Private counters. They are used when creating new items, new nodes,

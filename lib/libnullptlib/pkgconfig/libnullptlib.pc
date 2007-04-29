@@ -1,0 +1,12 @@
+prefix=/p/asim/i386_linux26
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libnullptlib
+Description: NULL PTV Library
+Version: 2.0a
+Requires:
+Conflicts:
+Libs: -L${libdir} -lnullptlib -lz
+Cflags: -I${includedir}

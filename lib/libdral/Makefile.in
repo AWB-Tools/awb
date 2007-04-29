@@ -93,7 +93,7 @@ am_libdral_a_OBJECTS = src/dralServer.$(OBJEXT) \
 	src/dralStringMapping.$(OBJEXT) \
 	src/dralListenerConverter.$(OBJEXT) src/dralWrite.$(OBJEXT) \
 	src/dralRead.$(OBJEXT) src/dralInterface.$(OBJEXT) \
-	src/dralTar.$(OBJEXT)
+	src/dralDesc.$(OBJEXT) src/dralTar.$(OBJEXT)
 libdral_a_OBJECTS = $(am_libdral_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/scripts/depcomp
@@ -180,6 +180,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTVFLAGS = @PTVFLAGS@
 QT = @QT@
 QTINCDIR = @QTINCDIR@
 QTLIBDIR = @QTLIBDIR@
@@ -257,25 +258,27 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 tooldir = @tooldir@
 lib_LIBRARIES = libdral.a
-libdral_a_SOURCES = src/dralServer.cpp \
-		src/dralServerBinary.cpp \
-		src/dralServerAscii.cpp \
-		src/dralServerImplementation.cpp \
-		src/dralStorage.cpp \
-		src/dralClientBinary_v0.cpp \
-		src/dralClientBinary_v1.cpp \
-		src/dralClientBinary_v2.cpp \
-        src/dralClientBinary_v3.cpp \
-        src/dralClientBinary_v4.cpp \
-		src/dralClientAscii_v0_1.cpp \
-    	src/dralClient.cpp \
-		src/dralClientImplementation.cpp \
-        src/dralStringMapping.cpp \
-        src/dralListenerConverter.cpp \
-		src/dralWrite.cpp \
-		src/dralRead.cpp \
-		src/dralInterface.cpp \
-		src/dralTar.cpp
+libdral_a_SOURCES = \
+	src/dralServer.cpp \
+	src/dralServerBinary.cpp \
+	src/dralServerAscii.cpp \
+	src/dralServerImplementation.cpp \
+	src/dralStorage.cpp \
+	src/dralClientBinary_v0.cpp \
+	src/dralClientBinary_v1.cpp \
+	src/dralClientBinary_v2.cpp \
+	src/dralClientBinary_v3.cpp \
+	src/dralClientBinary_v4.cpp \
+	src/dralClientAscii_v0_1.cpp \
+	src/dralClient.cpp \
+	src/dralClientImplementation.cpp \
+	src/dralStringMapping.cpp \
+	src/dralListenerConverter.cpp \
+	src/dralWrite.cpp \
+	src/dralRead.cpp \
+	src/dralInterface.cpp \
+	src/dralDesc.cpp \
+	src/dralTar.cpp
 
 # pkgconfig configuration file
 pkgconfigdir = $(libdir)/pkgconfig
@@ -392,6 +395,8 @@ src/dralRead.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/dralInterface.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/dralDesc.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/dralTar.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 libdral.a: $(libdral_a_OBJECTS) $(libdral_a_DEPENDENCIES) 
@@ -409,6 +414,7 @@ mostlyclean-compile:
 	-rm -f src/dralClientBinary_v3.$(OBJEXT)
 	-rm -f src/dralClientBinary_v4.$(OBJEXT)
 	-rm -f src/dralClientImplementation.$(OBJEXT)
+	-rm -f src/dralDesc.$(OBJEXT)
 	-rm -f src/dralInterface.$(OBJEXT)
 	-rm -f src/dralListenerConverter.$(OBJEXT)
 	-rm -f src/dralRead.$(OBJEXT)
@@ -432,6 +438,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralClientBinary_v3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralClientBinary_v4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralClientImplementation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralDesc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralInterface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralListenerConverter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dralRead.Po@am__quote@

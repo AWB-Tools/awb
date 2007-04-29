@@ -1,0 +1,35 @@
+********************************************************************
+* Awb module specification, for Asim DRAL API with PTV support
+*
+* Copyright (c) 1999-2006 Intel Corporation, all rights reserved
+********************************************************************
+
+%AWB_START
+
+%name Classic DRAL API with PTV support
+%desc Classic DRAL API using PTV library in x86libs
+
+%provides dral_api
+
+/* this much come before its dependencies */
+%library lib/libdral/libdral.a
+
+%library lib/willy/libarchlib.a
+%library lib/willy/libarisim.a
+%library lib/willy/libsupport.a
+%library lib/willy/libptlib.a
+%library lib/willy/libwmtperfchecker.a
+
+%param %dynamic pt          ""  "Pipetrace filename"
+%param %dynamic pt_dump     ""  "Pipetrace filename dump on fail"
+%param %dynamic pipetrace_dump_max     20000  "Pipetrace dump max size"
+%param %dynamic stats       ""  "PT Stats filename"
+%param %dynamic pt_ascii    0   "Output pipetrace in ascii"
+%param %dynamic nthread     4   "number of threads per core"
+%param %dynamic ncore       16  "number of cores"
+%param %dynamic nproc       1   "number of processors"
+%param %dynamic perfchecker 0   "Run perfchecker"
+%param %dynamic WILLY_STYLE_STATS 0 "Create Willy Style Stats File"
+%param %dynamic instrs_retired  0   "current number of instrs retired (hack)"
+
+%AWB_END

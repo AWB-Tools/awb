@@ -1,0 +1,30 @@
+******************************************************************
+Awb module specification
+******************************************************************
+
+
+%AWB_START
+
+%name Single Chip Clockserver System Version 2
+%desc Single Chip System using a Clockserver with DRAL API as a seperate module
+%attributes single_chip
+%provides system
+%requires dral_api packages basesystem context_scheduler isa chip warmup_manager power_model
+%public single_chip_clockserver_system.h 
+%private single_chip_clockserver_system.cpp 
+%library lib/libasim/libasim.a
+
+%export MAX_TOTAL_NUM_CPUS          128 "Maximum number of CPUS allowed"
+%export MAX_TOTAL_NUM_HWCS          128 "Maximum number of hardware contexts allowed"
+
+%export MAX_PTHREADS                  1 "Maximum number of simulator threads"
+%export %dynamic LIMIT_PTHREADS       0 "Dynamic maximum simulator threads (0 == use MAX_PTHREADS)"
+
+%export %dynamic THREADED_CLOCKING            1 "Enables the threaded clocking"
+%export %dynamic RANDOM_CLOCKING_SEED         0 "Seed to clock modules in random order (0 == Fixed order)"
+%export %dynamic DUMP_CLOCKING_PROFILE        0 "Enables the Clock routine profiling"
+
+%param %dynamic SIMULATED_REGION_WEIGHT 10000 "The weight of the benchmark section from 1-10000"
+%param %dynamic SIMULATED_REGION_INSTRS_REPRESENTED 0 "Total instructions per CPU in benchmark represented by this region"
+
+%AWB_END

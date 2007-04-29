@@ -93,6 +93,14 @@ class ModNumberDyn
 
     void SetMaxMin(int max=1, int min=0, int initial_value=0)
     {
+        // asim bug #0000741.  do not allow for max to be less than the min.  
+        // this can cause very bad things to happen (see bug report).
+        // --slechta
+        if (max < min)
+        {
+            max = min;
+        }
+
         min_value = min;
         max_value = max;
         

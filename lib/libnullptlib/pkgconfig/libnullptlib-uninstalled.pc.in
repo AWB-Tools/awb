@@ -1,0 +1,10 @@
+libdir=@abs_srcdir@/..
+includedir=@abs_srcdir@/../include
+
+Name: libnullptlib
+Description: NULL PTV Library - uninstalled
+Version: @VERSION@
+Requires:
+Conflicts:
+Libs: -L${libdir} -lnullptlib -lz
+Cflags: -I${includedir}

@@ -30,7 +30,15 @@
 #include "asim/event.h"
 #include "asim/mesg.h"
 
+// for var args
+#include <stdarg.h>
+
 using namespace std;
+
+// forward declarations
+class DRAL_DATA_DESC_CLASS;
+class DRAL_EVENT_DESC_CLASS;
+class DRAL_ITEM_DESC_CLASS;
 
 /*
  * Class ASIM_ITEM
@@ -47,6 +55,7 @@ class ASIM_ITEM_CLASS
     // ASIM_ITEM_CLASS when traveling trough ports (and then automatic events
     // would be generated).
     explicit ASIM_ITEM_CLASS(bool generateEvents = true) :
+      recId(0),
       eventsEnabled(generateEvents),
       idGenerated(false)
     {     
@@ -60,6 +69,7 @@ class ASIM_ITEM_CLASS
     // This second contructor is not the default one.
     // It does not produce a NewItemEvent.
     explicit ASIM_ITEM_CLASS(UINT32 i, bool generateEvents = true) :
+      recId(0),
       eventsEnabled(generateEvents)
     {
         itemId = i;
@@ -174,9 +184,84 @@ class ASIM_ITEM_CLASS
         }
     }
 
+    inline UINT32 GetRecId() { return recId; };
+
+
+
+    inline void
+    OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, ASIM_ITEM_CLASS *parent=NULL)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  UINT32 parent_id = parent ? parent->GetRecId() : 0;
+                  
+                  recId = DRALEVENT(OpenEventRec(rec, thread_id, parent_id));
+                  );
+        }
+    }
+
+    inline void
+    CloseEventRec ()
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  DRALEVENT(CloseEventRec(recId));
+                  );
+        }
+    }
+
+    inline void
+    SetItemTag (DRAL_DATA_DESC_CLASS *data, ...)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  va_list ap;
+                  va_start(ap, data);
+                  DRALEVENT(SetItemTag(itemId, recId, data, ap));
+                  va_end(ap);
+                  );
+        }
+    }
+
+    inline void
+    SetEvent (const char *action_name, UINT64 cycle, UINT64 duration, DRAL_DATA_DESC_CLASS *data, ...)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  DRAL_EVENT_DESC_CLASS *desc = DRALEVENT(FindEventDesc(action_name));
+                  ASSERTX(desc);
+                  
+                  va_list ap;
+                  va_start(ap, data);
+                  DRALEVENT(SetEvent(itemId, recId, desc, cycle, duration, data, ap));
+                  va_end(ap);
+                  );
+        }
+    }
+    
+    inline void
+    SetEvent (DRAL_EVENT_DESC_CLASS *desc, UINT64 cycle, UINT64 duration, DRAL_DATA_DESC_CLASS *data, ...)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  va_list ap;
+                  va_start(ap, data);
+                  DRALEVENT(SetEvent(itemId, recId, desc, cycle, duration, data, ap));
+                  va_end(ap);
+                  );
+        }
+    }
+
   protected:
 
     UINT64 itemId;
+
+    UINT32 recId;
 
   private:
 

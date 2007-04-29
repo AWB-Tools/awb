@@ -19,25 +19,27 @@
 
 lib_LIBRARIES = libdral.a
 
-libdral_a_SOURCES = src/dralServer.cpp \
-		src/dralServerBinary.cpp \
-		src/dralServerAscii.cpp \
-		src/dralServerImplementation.cpp \
-		src/dralStorage.cpp \
-		src/dralClientBinary_v0.cpp \
-		src/dralClientBinary_v1.cpp \
-		src/dralClientBinary_v2.cpp \
-        src/dralClientBinary_v3.cpp \
-        src/dralClientBinary_v4.cpp \
-		src/dralClientAscii_v0_1.cpp \
-    	src/dralClient.cpp \
-		src/dralClientImplementation.cpp \
-        src/dralStringMapping.cpp \
-        src/dralListenerConverter.cpp \
-		src/dralWrite.cpp \
-		src/dralRead.cpp \
-		src/dralInterface.cpp \
-		src/dralTar.cpp
+libdral_a_SOURCES = \
+	src/dralServer.cpp \
+	src/dralServerBinary.cpp \
+	src/dralServerAscii.cpp \
+	src/dralServerImplementation.cpp \
+	src/dralStorage.cpp \
+	src/dralClientBinary_v0.cpp \
+	src/dralClientBinary_v1.cpp \
+	src/dralClientBinary_v2.cpp \
+	src/dralClientBinary_v3.cpp \
+	src/dralClientBinary_v4.cpp \
+	src/dralClientAscii_v0_1.cpp \
+	src/dralClient.cpp \
+	src/dralClientImplementation.cpp \
+	src/dralStringMapping.cpp \
+	src/dralListenerConverter.cpp \
+	src/dralWrite.cpp \
+	src/dralRead.cpp \
+	src/dralInterface.cpp \
+	src/dralDesc.cpp \
+	src/dralTar.cpp
 
 src/dralTar.cpp : tar_files/tarFile.tar scripts/makeDralTar.pl
 	perl scripts/makeDralTar.pl tar_files/tarFile.tar > src/dralTar.cpp

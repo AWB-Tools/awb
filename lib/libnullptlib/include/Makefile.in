@@ -14,25 +14,6 @@
 
 @SET_MAKE@
 
-#
-# Copyright (C) 2003-2006 Intel Corporation
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-# 
-#
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -55,7 +36,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = lib/libdraldb/include
+subdir = lib/libnullptlib/include
 DIST_COMMON = $(nobase_include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -215,43 +196,8 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 tooldir = @tooldir@
-nobase_include_HEADERS = asim/Dict2064.h \
-			    asim/Hash6431.h \
-                            asim/StatObj.h \
-                            asim/DRALTag.h \
-                            asim/ItemTagHeap.h \
-                            asim/ItemTagDef.h \
-                            asim/draldb_syntax.h \
-                            asim/TagDescVector.h \
-                            asim/AEVector.h \
-                            asim/fvaluevector.h \
-                            asim/PrimeList.h \
-                            asim/DralDBDefinitions.h\
-                            asim/StrTable.h \
-                            asim/TrackHeap.h \
-                            asim/TrackHeapDef.h \
-                            asim/TagVec.h \
-                            asim/TrackVec.h \
-                            asim/TagIdVec.h \
-                            asim/TagVecItemIdx.h \
-                            asim/TagVecDenseItemIdx.h \
-                            asim/TagVecDenseShortItemIdx.h \
-                            asim/TagVecDictionary.h \
-                            asim/TagVecDenseDictionary.h \
-                            asim/TagVecDictionaryNF.h \
-                            asim/TagVecDenseDictionaryNF.h \
-                            asim/LogMgr.h \
-                            asim/DBConfig.h \
-                            asim/DBListener.h \
-                            asim/DBGraphEdge.h \
-                            asim/DBGraphNode.h \
-                            asim/DBGraph.h \
-                            asim/DBItoa.h \
-                            asim/ItemHandler.h \
-                            asim/DralDB.h \
-                            asim/DBListenerDef.h \
-			    asim/AMemObj.h \
-                            asim/ZipObject.h
+nobase_include_HEADERS = \
+			asim/ptlib.h
 
 all: all-am
 
@@ -265,9 +211,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  lib/libdraldb/include/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  lib/libnullptlib/include/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  lib/libdraldb/include/Makefile
+	  $(AUTOMAKE) --foreign  lib/libnullptlib/include/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

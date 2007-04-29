@@ -135,6 +135,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTVFLAGS = @PTVFLAGS@
 QT = @QT@
 QTINCDIR = @QTINCDIR@
 QTLIBDIR = @QTLIBDIR@
@@ -209,8 +210,8 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 tooldir = @tooldir@
-DIST_SUBDIRS = libasim libdral @NO_GUI@ libagt libdraldb libawb
-SUBDIRS = libasim libdral  @NO_GUI@ libagt libdraldb libawb
+DIST_SUBDIRS = libasim libdral libnullptlib @NO_GUI@ libagt libdraldb libawb
+SUBDIRS = libasim libdral libnullptlib  @NO_GUI@ libagt libdraldb libawb
 all: all-recursive
 
 .SUFFIXES:

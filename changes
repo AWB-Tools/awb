@@ -1745,3 +1745,167 @@ Directory libperl/AsimShell/lib
 Updating with simcore changes (rev. 2313 - Carl Beckmann)
 
 - Fixed compound command completion for "clean package" command
+
+----------
+spartha1    Date: Sat Apr 28 21:01:36 EDT 2007  CSN: CSN-asimcore-92
+                  Sun Apr 29 01:01:36 UTC 2007
+
+
+Directory .
+ configure                 Locally Modified           91 
+ Makefile.in               Locally Modified           91 
+ configure.in              Locally Modified           91 
+
+Directory libperl
+ Makefile.in               Locally Modified           91 
+
+Directory tools
+ Makefile.in               Locally Modified           91 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified           91 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified           91 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified           91 
+
+Directory tools/awb
+ Makefile.in               Locally Modified           91 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified           91 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified           91 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified           91 
+
+Directory tools/dreams
+ Makefile.in               Locally Modified           91 
+
+Directory tools/dreams/dbtest
+ Makefile.in               Locally Modified           91 
+
+Directory tools/dreams/dbtest/src
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libdraldb
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libdraldb/include
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libasim
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libasim/include
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libasim/include/asim
+ mod_numbers_dyn.h         Locally Modified           91 
+ item.h                    Locally Modified           91 
+
+Directory lib/libasim/src
+ event.cpp                 Locally Modified           91 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libagt
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libagt/include
+ Makefile.in               Locally Modified           91 
+
+Directory lib
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libdral
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libdral/include
+ Makefile.in               Locally Modified           91 
+
+Directory lib/libdral/include/asim
+ dralServer.h              Locally Modified           91 
+ dralDesc.h                Locally Added               0 
+
+Directory lib/libdral/src
+ dralServer.cpp            Locally Modified           91 
+ dralDesc.cpp              Locally Added               0 
+
+Directory lib/libdral
+ Makefile.am               Locally Modified           91 
+
+Directory lib
+ Makefile.am               Locally Modified           91 
+ libnullptlib/             Locally Added               0 
+
+Directory lib/libnullptlib
+ Makefile.in               Locally Added               0 
+ include/                  Locally Added               0 
+
+Directory lib/libnullptlib/include
+ Makefile.in               Locally Added               0 
+ Makefile.am               Locally Added               0 
+ asim/                     Locally Added               0 
+
+Directory lib/libnullptlib/include/asim
+ ptlib.h                   Locally Added               0 
+
+Directory lib/libnullptlib
+ pkgconfig/                Locally Added               0 
+
+Directory lib/libnullptlib/pkgconfig
+ libnullptlib.pc.in        Locally Added               0 
+ libnullptlib-uninstalled.pc.in Locally Added               0 
+ libnullptlib-uninstalled.pc Locally Added               0 
+ libnullptlib.pc           Locally Added               0 
+
+Directory lib/libnullptlib
+ src/                      Locally Added               0 
+
+Directory lib/libnullptlib/src
+ ptlib.cpp                 Locally Added               0 
+
+Directory lib/libnullptlib
+ Makefile.am               Locally Added               0 
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified           91 
+
+Directory modules/system
+ single_chip_common_system_v2.awb Locally Added               0 
+ multi_chip_common_system_v2.awb Locally Added               0 
+ single_chip_clockserver_system_v2.awb Locally Added               0 
+
+Directory modules/system/ape_system
+ ape.awb                   Locally Modified           91 
+
+Directory modules
+ dral_api/                 Locally Added               0 
+
+Directory modules/dral_api
+ classic_dral_api_nullptv.awb Locally Added               0 
+ x86_dral_api.awb          Locally Added               0 
+ classic_dral_api_ptv_bk.awb Locally Added               0 
+ classic_dral_api_ptv.awb  Locally Added               0 
+
+Updating with simcore changes (rev. 2314 - Brian Slechta)
+
+added ptv support to dral. this can be enabled with --enable-ptv=yes. this
+is off by default.
+
+wrote and debugged new dral/ptv api for ptv-style event instrumentation. you
+can now generate ptv logs using coho-bk or x86libs versions of ptlib.
+
+added libnullptlib to be linked in with a ptv-enabled libdral when you do not
+want to link in a real ptv library.
+
+fix for asim bug #0000741.
+
+created new "system" modules which have support for the new "dral_api" modules
+(ie. version 2). added new "dral_api" modules.

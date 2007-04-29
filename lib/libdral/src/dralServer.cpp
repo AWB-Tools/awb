@@ -39,11 +39,21 @@ using namespace std;
 #include "asim/dralServerImplementation.h"
 #include "asim/dralServerBinary.h"
 #include "asim/dralServerAscii.h"
+#include "asim/dralDesc.h"
 
 // hack: not all platforms define O_LARGEFILE so
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
+
+// used for va_list iteration and conversion
+// FIXME: this is not portable!!!
+typedef union VA_LIST_UNION_TYPE {
+    va_list ap;
+    void *p;
+    DRAL_DATA_DESC_CLASS **ddpp;
+    PTV_DATA_TYPE_CLASS **pdpp;
+} VA_LIST_UNION_T;
 
 /*
  * constructor with the name of the file that will be used
@@ -104,7 +114,6 @@ DRAL_SERVER_CLASS::Init(UINT16 buffer_size, bool avoid_rep, bool compression)
         nodetagAutocompress = (!strcasecmp(compress,"true"));
         cout << "autocompress set to " << nodetagAutocompress << endl;
     }
-    
 }
 
 
@@ -118,6 +127,17 @@ DRAL_SERVER_CLASS::~DRAL_SERVER_CLASS()
     if (openedWithFileName && fileOpened)
     {
         close(file_descriptor);
+
+#if COMPILE_DRAL_WITH_PTV
+        std::string ptv_file_name = file_name;
+        ptv_file_name += ".pt";
+
+	pipe_close_file(PIPE_NO_RECORD);
+        //pipe_dump_buffer(ptv_file_name.c_str(), 
+        //                 20000,
+        //                 PT_Binary);
+#endif        
+
     }
     if(com_edge_bw)
     {
@@ -136,8 +156,14 @@ DRAL_SERVER_CLASS::TurnOn()
 {
     if (openedWithFileName && !fileOpened)
     {
+        std::string dral_file_name = file_name;
+        std::string ptv_file_name = file_name;
+
+        dral_file_name += ".drl.gz";
+        ptv_file_name += ".pt";
+
         file_descriptor=open(
-            file_name.c_str(),O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE,00660);
+            dral_file_name.c_str(),O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE,00660);
         DRAL_ASSERT(
             file_descriptor!=-1,
             "Error opening the file: " << strerror(errno));
@@ -145,6 +171,22 @@ DRAL_SERVER_CLASS::TurnOn()
         fileOpened=true;
         implementation->Version(); /* Send the Dral Server version */
         dralStorage->DumpAllCommandsList();
+
+        
+
+#if COMPILE_DRAL_WITH_PTV
+        thread_initialize(60000); // deadlock detector count
+        pipe_threads_per_proc(2);
+        pipe_init(20000);
+        pipe_disable_implicit_stats();
+        pipe_enable_collection();
+        int ptid;
+        pipe_open_file(ptv_file_name.c_str(),
+                       //(pt_ascii ? PT_ASCII : PT_Binary),
+                       PT_Binary,
+                       PIPE_NO_RECORD, PIPE_PDL_MAX, &ptid);
+        DRAL_ASSERT(ptid == TRACE_FILE_DEFAULT, "unexpected ptv id");
+#endif
     }
     else
     {
@@ -1168,4 +1210,256 @@ DRAL_SERVER_CLASS::UpdateEdgeMaxBandwidth()
         ++it;
     }
     edge_bw.clear();
+}
+
+UINT32 
+DRAL_SERVER_CLASS::OpenEventRec(
+    DRAL_ITEM_DESC_CLASS *rec, 
+    UINT32 thread_id, 
+    UINT32 parent_id)
+{
+    DRAL_ASSERT(rec, "rec is NULL in OpenEventRec()");
+
+    if (!turnedOn)
+    {        
+        return 0;
+    }
+
+    UINT32 rec_id = 0;
+        
+#if COMPILE_DRAL_WITH_PTV
+        rec_id = pipe_open_record_inst(rec->GetPtvRecType(), thread_id, parent_id, 
+                                       TRACE_FILE_DEFAULT, __FILE__, __LINE__);
+#endif
+
+    return rec_id;
+}
+
+void
+DRAL_SERVER_CLASS::CloseEventRec(
+    UINT32 rec_id)
+{
+    if (rec_id == 0)
+    {
+        return;
+    }
+    
+#if COMPILE_DRAL_WITH_PTV
+    pipe_close_record_inst(rec_id, __FILE__, __LINE__);
+#endif
+
+    return;
+}
+
+
+UINT32 
+DRAL_SERVER_CLASS::GetDralVaListSize(
+    DRAL_DATA_DESC_CLASS *dd, 
+    va_list ap)
+{
+    VA_LIST_UNION_T i; i.ap = ap;
+    UINT32 va_size = 0;
+
+    while (dd)
+    {
+        // get the size of this data value + data pointer
+        const UINT32 d_size = dd->GetVaSize(ap);
+
+        // increment the pointer by value size
+        i.p = (void*)((PTR_SIZED_UINT)i.p + (PTR_SIZED_UINT)d_size);
+        
+        // the new "current" data
+        dd = (*i.ddpp);
+
+        // increment the pointer again to consume the descriptor
+        i.p = (void*)((PTR_SIZED_UINT)i.p + (PTR_SIZED_UINT)sizeof(DRAL_DATA_DESC_CLASS *));
+
+        // add cum size change
+        va_size += d_size + sizeof(DRAL_DATA_DESC_CLASS *);
+    }
+ 
+    return va_size;
+}
+
+
+void 
+DRAL_SERVER_CLASS::CvtApListDralToPtv(
+    va_list & dst, 
+    DRAL_DATA_DESC_CLASS *src_dd, 
+    va_list src, 
+    UINT32 size)
+{
+#if COMPILE_DRAL_WITH_PTV
+    // just make sure out pointer arithmetic is safe.  :)
+    DRAL_ASSERT(sizeof(UINT64) >= sizeof(void*), "unsafe pointer arithmetic");
+
+    // start by copying over the raw data.  we only need to convert the 
+    // data desciptor pointers.  the rest of the data remains unchanged.
+    memcpy(dst, src, size);
+
+    // create the iterator to go over the dst va_list
+    VA_LIST_UNION_T i; i.ap = dst;
+    
+    // iterate over the new list and convert the DRAL_DATA_DESC_CLASS
+    // pointers to Pipe_Datatype pointers.
+    DRAL_DATA_DESC_CLASS *dd = src_dd;
+    while (dd)
+    {
+        UINT32 size = dd->GetVaSize(i.ap);
+        
+        // increment the pointer by value size
+        i.p = (void*)((PTR_SIZED_UINT)i.p + (PTR_SIZED_UINT)size);
+        
+        // the new "current" data descriptor pointer
+        dd = (*i.ddpp);
+
+        // convert the data pointer
+        if (dd)
+        {
+            // real pointer, so we can continune
+            (*i.pdpp) = dd->GetPtvDataType();
+        }
+        else
+        {
+            // NULL pointer indicates end of list
+            (*i.pdpp) = PIPE_NO_DATATYPE;
+            break;
+        }
+            
+        // increment the pointer again to consume the descriptor
+        i.p = (void*)((PTR_SIZED_UINT)i.p + (PTR_SIZED_UINT)sizeof(DRAL_DATA_DESC_CLASS *));
+    }
+#endif
+    return;
+}   
+
+void 
+DRAL_SERVER_CLASS::SetItemTag(
+    UINT32 item_id, 
+    UINT32 rec_id,
+    DRAL_DATA_DESC_CLASS *data, 
+    va_list & ap)
+{
+    DRAL_DATA_DESC_CLASS *orig_data = data;;
+    va_list orig_ap = ap;
+
+
+    // TODO: add DRAL log code
+
+
+#if COMPILE_DRAL_WITH_PTV
+    // only if we opened this record can we record this event.
+    if (rec_id != 0)
+    {
+        UINT32 va_size = GetDralVaListSize(orig_data, orig_ap);
+        
+        // allocate the new va list and copy over data of the original
+        VA_LIST_UNION_T new_va; new_va.p = alloca(va_size);
+        
+        if (va_size)
+        {
+            CvtApListDralToPtv(new_va.ap, orig_data, orig_ap, va_size);
+        }
+        
+        pipe_record_data_va(rec_id, 
+                            orig_data ? orig_data->GetPtvDataType() : PIPE_NO_DATATYPE, 
+                            (va_list*)&(new_va.ap));
+        
+    }
+#endif
+    return;
+}
+
+void
+DRAL_SERVER_CLASS::SetEvent(
+    UINT32 item_id,
+    UINT32 rec_id,
+    DRAL_EVENT_DESC_CLASS *desc, 
+    UINT64 cycle, 
+    UINT64 duration, 
+    DRAL_DATA_DESC_CLASS *data, 
+    va_list & ap)
+{
+    DRAL_ASSERT(desc, "NULL descriptor in SetEvent()");
+
+    if (!turnedOn)
+    {        
+        return;
+    }
+
+    DRAL_DATA_DESC_CLASS *orig_data = data;;
+    va_list orig_ap = ap;
+
+    // the DRAL code to process this event.
+    SetItemTag(item_id, desc->GetName().c_str(), "true");
+
+    static const std::string dot_str = ".";
+
+    std::string item_base_str = desc->GetName() + dot_str;
+
+    std::string cycle_name_str = item_base_str + std::string("cycle");
+
+    char c_s[20]; 
+    sprintf(c_s, "%d", (int)cycle);
+    std::string cycle_val_str = c_s;
+    if (duration != 1)
+    {
+        char d_s[20]; 
+        sprintf(d_s, "%d", (int)duration);
+
+        cycle_val_str += "/";
+        cycle_val_str += d_s;
+    }
+
+    SetItemTag(item_id, cycle_name_str.c_str(), cycle_val_str.c_str());
+    
+    data = orig_data;
+    while (data)
+    {
+        std::string data_name_str = item_base_str + data->GetName();
+        std::string data_val_str = data->GetDralDataStr(ap, true);
+
+        SetItemTag(item_id, data_name_str.c_str(), data_val_str.c_str());
+
+        data = va_arg(ap, DRAL_DATA_DESC_CLASS *);
+    }
+ 
+
+#if COMPILE_DRAL_WITH_PTV
+    // only if we opened this record can we record this event.
+    if (rec_id != 0)
+    {
+        UINT32 va_size = GetDralVaListSize(orig_data, orig_ap);
+
+        // allocate the new va list and copy over data of the original
+        VA_LIST_UNION_T new_va; new_va.p = alloca(va_size);
+        
+        if (va_size)
+        {
+            CvtApListDralToPtv(new_va.ap, orig_data, orig_ap, va_size);
+        }
+        
+        // the PTV code to process this event.
+        pipe_record_event_time(rec_id, desc->GetPtvEventType(), 
+                               (UINT32)cycle, (UINT32)duration, 
+                               orig_data ? orig_data->GetPtvDataType() : PIPE_NO_DATATYPE, 
+                               (va_list*)&(new_va.ap));
+    }
+#endif
+
+    return;
+}
+
+DRAL_EVENT_DESC_CLASS *
+DRAL_SERVER_CLASS::FindEventDesc(const char *event_name)
+{
+    // TODO: write me!
+    return NULL;
+}
+
+void 
+DRAL_SERVER_CLASS::AddEventDesc(DRAL_EVENT_DESC_CLASS *event)
+{
+    // TODO: write me!
+    return;
 }
