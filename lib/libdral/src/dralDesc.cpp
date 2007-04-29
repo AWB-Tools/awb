@@ -23,12 +23,14 @@ using namespace std;
 
 #include "asim/dralDesc.h"
 
+#define ENABLE_VALIST_CODE COMPILE_DRAL_WITH_PTV
+
 // ----------------------------------------------------------------------------
 char *
 hack_ptv_s(
     const char * n)
 {
-    // create a new string "chars" that contains prefix appended to "n"
+    // create a new string "chars" that contains postfix appended to "n"
     static const size_t post_size = strlen(HACK_PTV_NAME_POSTFIX_STR);
     const size_t n_size = strlen(n);
     
@@ -331,9 +333,12 @@ DRAL_DATA_DESC_CLASS::GetDralDataStr(
     va_list & ap,
     bool advance_ap)
 {
+    std::string data_str("");
+
+#if ENABLE_VALIST_CODE
+
     va_list tmpap = ap;
     DRAL_BASE_DATA_VAL_T val;
-    std::string data_str("");
 
     switch (bdt)
     {
@@ -411,6 +416,8 @@ DRAL_DATA_DESC_CLASS::GetDralDataStr(
     {
         ap = tmpap;
     }
+
+#endif
 
     return data_str;
 }

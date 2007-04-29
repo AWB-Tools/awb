@@ -46,6 +46,9 @@ using namespace std;
 #define O_LARGEFILE 0
 #endif
 
+#define ENABLE_VALIST_CODE COMPILE_DRAL_WITH_PTV
+
+
 // used for va_list iteration and conversion
 // FIXME: this is not portable!!!
 typedef union VA_LIST_UNION_TYPE {
@@ -1257,8 +1260,11 @@ DRAL_SERVER_CLASS::GetDralVaListSize(
     DRAL_DATA_DESC_CLASS *dd, 
     va_list ap)
 {
-    VA_LIST_UNION_T i; i.ap = ap;
     UINT32 va_size = 0;
+
+#if ENABLE_VALIST_CODE
+
+    VA_LIST_UNION_T i; i.ap = ap;
 
     while (dd)
     {
@@ -1277,7 +1283,9 @@ DRAL_SERVER_CLASS::GetDralVaListSize(
         // add cum size change
         va_size += d_size + sizeof(DRAL_DATA_DESC_CLASS *);
     }
- 
+
+#endif 
+
     return va_size;
 }
 
@@ -1340,6 +1348,8 @@ DRAL_SERVER_CLASS::SetItemTag(
     DRAL_DATA_DESC_CLASS *data, 
     va_list & ap)
 {
+#if ENABLE_VALIST_CODE
+
     DRAL_DATA_DESC_CLASS *orig_data = data;;
     va_list orig_ap = ap;
 
@@ -1367,6 +1377,7 @@ DRAL_SERVER_CLASS::SetItemTag(
         
     }
 #endif
+#endif
     return;
 }
 
@@ -1386,6 +1397,8 @@ DRAL_SERVER_CLASS::SetEvent(
     {        
         return;
     }
+
+#if ENABLE_VALIST_CODE
 
     DRAL_DATA_DESC_CLASS *orig_data = data;;
     va_list orig_ap = ap;
@@ -1446,7 +1459,7 @@ DRAL_SERVER_CLASS::SetEvent(
                                (va_list*)&(new_va.ap));
     }
 #endif
-
+#endif
     return;
 }
 

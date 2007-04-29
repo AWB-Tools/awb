@@ -1949,3 +1949,25 @@ Updating with simcore changes (rev. 2317 - Carl Beckmann)
 
 - Fixed bug in setup script that leads to bad soft links when there are
 more than 9 benchmark traces
+
+----------
+spartha1    Date: Sat Apr 28 22:36:06 EDT 2007  CSN: CSN-asimcore-96
+                  Sun Apr 29 02:36:06 UTC 2007
+
+
+Directory lib/libdral/src
+ dralServer.cpp            Locally Modified           95 
+ dralDesc.cpp              Locally Modified           95 
+
+Updating with simcore changes (rev. 2318 - Brian Slechta)
+
+there is no ANSI compliant way to create var-args on the fly, so I created a
+non-portable way to do this. this non-portability broke the SUSE64 build for
+libdral. If you compile 32-bit binaries on 64-bit machines, this problem does
+not come up.
+
+i disabled all va_list code when --enable-ptv=no. the new dral/ptv api will
+not do anything when this flag is enabled until this issue is actually
+resolved.
+
+this commit should fix the build on SUSE64 with 64-bit builds.
