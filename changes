@@ -1971,3 +1971,20 @@ not do anything when this flag is enabled until this issue is actually
 resolved.
 
 this commit should fix the build on SUSE64 with 64-bit builds.
+
+----------
+spartha1    Date: Sat Apr 28 22:39:00 EDT 2007  CSN: CSN-asimcore-97
+                  Sun Apr 29 02:39:00 UTC 2007
+
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified           96 
+
+Updating with simcore changes (rev. 2319 - Sari Coumeri)
+
+* Update null power model with new RegisterVFClock routine (SLC).
+
+* Changed BASE_POWER_MODEL_CLASS in null power model so that it is
+no longer derived from ASIM_MODULE_CLASS. There's no need for it
+to be derived in the null model. This removes the construction of
+an asim module for the null power model macros (SLC)
