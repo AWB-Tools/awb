@@ -217,6 +217,19 @@ class ASIM_CLOCKABLE_CLASS : public TRACEABLE_CLASS
             registered = true;
         }
     }
+              
+    /**
+     * Adds a new model to be clocked in the given domain.
+     *
+     * @param domainName Name of the domain to which the clockable module belongs to.
+     * @param tHandle Handle of the thread that will clock the module.
+     **/
+    void RegisterClock(
+        string domainName,
+        ASIM_SMP_THREAD_HANDLE tHandle)
+    {
+        RegisterClock(domainName, /*skew=*/0, tHandle);
+    }
 
     /**
      * Adds a new model to be clocked in the given domain specifying the method to be called.
@@ -274,7 +287,7 @@ class ASIM_CLOCKABLE_CLASS : public TRACEABLE_CLASS
         cb->setClkEdge(ed);
         RegisterClock(domainName, cb, skew, tHandle, referenceDomain);
     }
-    
+   
     /**
      * Method to assign to the clockable element all the clocking info attached to it
      * This method is called by the clockserver and it's only available for the registered

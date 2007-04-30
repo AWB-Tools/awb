@@ -1166,6 +1166,27 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::ThreadedClock()
             deque<CLOCK_REGISTRY>::iterator it_event = lClockedEvents.begin();
             for( ; it_event != lClockedEvents.end(); ++it_event)
             {
+        
+                // Also clock all the WriterRateMatcher that must be clocked at current time.
+		// FIX?  This is done sequentially, because there is not much work to do,
+		// and because it is easier to enforce the ordering with other tasks.
+                vector< pair<ASIM_CLOCKABLE, CLOCK_CALLBACK_INTERFACE> >::iterator
+                    endRM = (*it_event)->lWriterRM.end();
+                vector< pair<ASIM_CLOCKABLE, CLOCK_CALLBACK_INTERFACE> >::iterator
+                    iter = (*it_event)->lWriterRM.begin();
+
+                if(eventsOn && iter != endRM)
+                {
+                    // Generate dral new cycle event if necessary
+                    EVENT( (*it_event)->DralNewCycle(); );   
+                }
+
+                for( ; iter != endRM; ++iter)
+                {
+                    (*iter).second->currentCycle = (*it_event)->nCycle;
+                    (*iter).second->Clock();
+                }
+        
                 (*it_event)->nCycle++;
                 
                 // WARNING! The step may have been modified at
@@ -1194,24 +1215,6 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::ThreadedClock()
         {
             (*iter).second->currentCycle = currentEvent->nCycle;
             (*iter).first->GetClockingThread()->AssignTask((*iter).second);
-        }
-
-        // We insert all the WriterRateMatcher that must be clocked at
-        // current time in the threads task list
-        vector< pair<ASIM_CLOCKABLE, CLOCK_CALLBACK_INTERFACE> >::iterator
-            endRM = currentEvent->lWriterRM.end();
-        iter = currentEvent->lWriterRM.begin();
-            
-        for( ; iter != endRM; ++iter)
-        {
-            (*iter).second->currentCycle = currentEvent->nCycle;
-            
-            // The clocking thread must be the same than the writer
-            // in order to be clocked after it. It is guaranteed just by
-            // redefining GetClockingThread in the rate matcher
-            VERIFYX(dynamic_cast<RATE_MATCHER>((*iter).first)!=NULL);
-            dynamic_cast<RATE_MATCHER>((*iter).first)->GetClockingThread()->
-                AssignTask((*iter).second);
         }
         
     }

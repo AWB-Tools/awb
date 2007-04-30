@@ -687,6 +687,32 @@ class ASIM_MODULE_CLASS : public ASIM_REGISTRY_CLASS, public ASIM_DRAL_NODE_CLAS
          * find the system call GetParentOfType<ASIM_SYSTEM>().
          */
         template <class PT> inline PT GetParentOfType(void);
+        
+
+        /*                                                                                                               
+         * GetHostThread() returns the thread handle, if any, for the module tree
+         * we are enclosed in.  This thread handle is typically passed to RegisterClock()
+         * to get clock server callbacks in a parallel thread.
+         *
+         * If this module or one of its ancestors wants to run in a separate thread,
+         * it will typically inherit from ASIM_SMP_THREAD_HANDLE_CLASS, so that the
+         * default routine here will find it and return the thread handle.
+         *
+         * But derived classes can override this function in order to allocate threads
+         * using whatever algorithm they want.  In that case, this function should simply
+         * return a handle to the thread this module should run in.
+         */
+        virtual ASIM_SMP_THREAD_HANDLE GetHostThread(void)
+        {
+            ASIM_MODULE            m;    /* a module */
+            ASIM_SMP_THREAD_HANDLE t;    /* an enclosing module that is also a thread */
+            for ( m = this; m != NULL; m = m->GetParent() )
+            {
+		t = m->GetParentOfType<ASIM_SMP_THREAD_HANDLE>();
+		if ( t != NULL ) { return t; }
+            }
+            return NULL;
+        };
 };
 
 template <class PT>

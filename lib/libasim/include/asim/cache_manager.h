@@ -41,6 +41,7 @@
 
 class CACHE_MANAGER
 {
+  protected:
     class LINE_MANAGER
     {
         struct LINE_STATE
@@ -73,23 +74,26 @@ class CACHE_MANAGER
 
     typedef LINE_MANAGER::ADDRESS ADDRESS;
 
+    CACHE_MANAGER();
+    virtual ~CACHE_MANAGER();
+
   public:
     static CACHE_MANAGER& GetInstance();
-    void Register(std::string level);
+    virtual void Register(std::string level);
 
-    LINE_STATUS GetStatus(std::string level, UINT32 index, UINT64 tag) const;
-    LINE_STATUS GetStatus(std::string level, UINT32 owner, UINT32 index, UINT64 tag) const;
+    LINE_STATUS GetStatus(std::string level, UINT32 index, UINT64 tag);
+    LINE_STATUS GetStatus(std::string level, UINT32 owner, UINT32 index, UINT64 tag);
     void SetStatus(std::string level, UINT32 owner, UINT32 index, UINT64 tag, LINE_STATUS status);
     
   private:
-    CACHE_MANAGER();
-    ~CACHE_MANAGER();
-
     std::map<std::string, LINE_MANAGER> str2manager_;
     
     bool clear_lines;
     bool activated;
   
+  protected:
+    virtual LINE_MANAGER *find_line_manager(std::string level);
+
   public:
     void setClearLines() { clear_lines = true; }
     const bool getClearLines() { return clear_lines; }

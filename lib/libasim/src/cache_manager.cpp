@@ -146,13 +146,20 @@ CACHE_MANAGER::Register(std::string level)
     str2manager_[level];
 }
 
-LINE_STATUS
-CACHE_MANAGER::GetStatus(std::string level, UINT32 index, UINT64 tag) const
+CACHE_MANAGER::LINE_MANAGER *
+CACHE_MANAGER::find_line_manager(std::string level)
 {
     map<std::string, LINE_MANAGER>::const_iterator it = str2manager_.find(level);
-    if (it != str2manager_.end())
+    return (it != str2manager_.end()) ? ((CACHE_MANAGER::LINE_MANAGER *)&it->second) : NULL;
+}
+
+LINE_STATUS
+CACHE_MANAGER::GetStatus(std::string level, UINT32 index, UINT64 tag)
+{
+    LINE_MANAGER *line_manager = find_line_manager( level );
+    if ( line_manager != NULL )
     {
-        return it->second.GetStatus(std::pair<UINT32, UINT64>(index, tag));
+        return line_manager->GetStatus(std::pair<UINT32, UINT64>(index, tag));
     }
     else
     {
@@ -162,12 +169,12 @@ CACHE_MANAGER::GetStatus(std::string level, UINT32 index, UINT64 tag) const
 
 
 LINE_STATUS
-CACHE_MANAGER::GetStatus(std::string level, UINT32 owner, UINT32 index, UINT64 tag) const
+CACHE_MANAGER::GetStatus(std::string level, UINT32 owner, UINT32 index, UINT64 tag)
 {
-    map<std::string, LINE_MANAGER>::const_iterator it = str2manager_.find(level);
-    if (it != str2manager_.end())
+    LINE_MANAGER *line_manager = find_line_manager( level );
+    if ( line_manager != NULL )
     {
-        return it->second.GetStatus(owner, std::pair<UINT32, UINT64>(index, tag));
+        return line_manager->GetStatus(owner, std::pair<UINT32, UINT64>(index, tag));
     }
     else
     {
@@ -180,10 +187,10 @@ CACHE_MANAGER::SetStatus(std::string level, UINT32 owner, UINT32 index, UINT64 t
 {
     if(!activated) return;
     
-    map<std::string, LINE_MANAGER>::iterator it = str2manager_.find(level);
-    if (it != str2manager_.end())
+    LINE_MANAGER *line_manager = find_line_manager( level );
+    if ( line_manager != NULL )
     {
-        it->second.SetStatus(owner, std::pair<UINT32, UINT64>(index,tag), status);
+        line_manager->SetStatus(owner, std::pair<UINT32, UINT64>(index,tag), status);
     }
 }
 

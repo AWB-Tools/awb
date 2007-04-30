@@ -2000,3 +2000,40 @@ Directory modules/dral_api
 Updating with simcore changes (rev. 2322 - Brian Slechta)
 
 fixed duplicate module name.
+
+----------
+spartha1    Date: Mon Apr 30 12:20:43 EDT 2007  CSN: CSN-asimcore-99
+                  Mon Apr 30 16:20:43 UTC 2007
+
+
+Directory lib/libasim
+ Makefile.in               Locally Modified           98 
+
+Directory lib/libasim/include/asim
+ module.h                  Locally Modified           98 
+ cache_manager_smp.h       Locally Added               0 
+ cache_manager.h           Locally Modified           98 
+ clockable.h               Locally Modified           98 
+
+Directory lib/libasim/src
+ cache_manager_smp.cpp     Locally Added               0 
+ clockserver.cpp           Locally Modified           98 
+ cache_manager.cpp         Locally Modified           98 
+
+Directory lib/libasim
+ Makefile.am               Locally Modified           98 
+
+Directory modules/system
+ multi_chip_common_system.awb Locally Modified           98 
+
+Updating with simcore changes (rev. 2320 & 2321 - Carl Beckmann)
+
+- Multithreaded simulation support:
+Added a routine in Clockable class to return the Asim thread a module is
+running in, to pass to the clock server.
+Fixed a bug in clock server's handling of rate matcher ports.
+Added a thread-safe version of the cache manager class.
+Added some static params to the multi-chip system controller to enable
+multithreaded simulation at various levels of granularity.
+
+- Forgot to add new files from previous commit

@@ -91,7 +91,7 @@ am_libasim_a_OBJECTS = src/mesg.$(OBJEXT) src/profile.$(OBJEXT) \
 	src/arch_register.$(OBJEXT) src/clockserver.$(OBJEXT) \
 	src/clockable.$(OBJEXT) src/atomic.$(OBJEXT) src/smp.$(OBJEXT) \
 	src/regexobj.$(OBJEXT) src/cache_dyn.$(OBJEXT) \
-	src/cache_manager.$(OBJEXT)
+	src/cache_manager.$(OBJEXT) src/cache_manager_smp.$(OBJEXT)
 libasim_a_OBJECTS = $(am_libasim_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/scripts/depcomp
@@ -286,7 +286,8 @@ libasim_a_SOURCES = src/mesg.cpp \
 			src/smp.cpp \
 			src/regexobj.cpp \
                         src/cache_dyn.cpp \
-			src/cache_manager.cpp 
+			src/cache_manager.cpp \
+			src/cache_manager_smp.cpp 
 
 
 # pkgconfig configuration file
@@ -415,6 +416,8 @@ src/cache_dyn.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/cache_manager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/cache_manager_smp.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 libasim.a: $(libasim_a_OBJECTS) $(libasim_a_DEPENDENCIES) 
 	-rm -f libasim.a
 	$(libasim_a_AR) libasim.a $(libasim_a_OBJECTS) $(libasim_a_LIBADD)
@@ -427,6 +430,7 @@ mostlyclean-compile:
 	-rm -f src/atomic.$(OBJEXT)
 	-rm -f src/cache_dyn.$(OBJEXT)
 	-rm -f src/cache_manager.$(OBJEXT)
+	-rm -f src/cache_manager_smp.$(OBJEXT)
 	-rm -f src/clockable.$(OBJEXT)
 	-rm -f src/clockserver.$(OBJEXT)
 	-rm -f src/disasm.$(OBJEXT)
@@ -458,6 +462,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/atomic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/cache_dyn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/cache_manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/cache_manager_smp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/clockable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/clockserver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/disasm.Po@am__quote@
