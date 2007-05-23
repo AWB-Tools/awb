@@ -2037,3 +2037,18 @@ Added some static params to the multi-chip system controller to enable
 multithreaded simulation at various levels of granularity.
 
 - Forgot to add new files from previous commit
+
+----------
+emer        Date: Wed May 23 14:48:54 EDT 2007  CSN: CSN-asimcore-100
+                  Wed May 23 18:48:54 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified           99 
+
+Updating with simcore changes (rev. 2350 - Joel Emer)
+
+Accept system verilog style parameters of the form that start with
+a single quote (') like 'b[0-1]*.
+
+

@@ -315,7 +315,7 @@ sub open {
 
       push(@{$self->{params}}, $param);
       next;
-    } elsif (/^.*(param|export|const)\s+(%dynamic)?\s*(\w*)\s+(\w*)\s+\"([^"]*)\"/) {
+    } elsif (/^.*(param|export|const)\s+(%dynamic)?\s*(\w*)\s+('?\w*)\s+\"([^"]*)\"/) {
       #
       # Add normal (numeric) parameter
       #
