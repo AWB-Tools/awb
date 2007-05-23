@@ -112,7 +112,7 @@ AC_DEFUN([FIND_QT_LIBS],[
           for i in $QTLIBS
           do
 	  
-              if test -f $try/lib$i.a -o -f $try/lib$i.so
+              if test -f $try/lib$i.a -o -f $try/lib$i.so -o -f $try/lib$i.so.3
               then
                   QTLIBDIR=$try
                   QT=$i

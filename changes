@@ -2052,3 +2052,16 @@ Accept system verilog style parameters of the form that start with
 a single quote (') like 'b[0-1]*.
 
 
+
+----------
+mpellaux    Date: Wed May 23 18:01:07 EDT 2007  CSN: CSN-asimcore-101
+                  Wed May 23 22:01:07 UTC 2007
+
+
+Directory .
+ configure.in              Locally Modified          100 
+
+
+Small change to the way we look for libqt.
+
+Michael P.
