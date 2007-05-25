@@ -37,6 +37,7 @@ use Asim::Regression;
 use Asim::Repository::DB;
 use Asim::Repository;
 
+use Asim::Model::DB;
 use Asim::Model;
 
 use Asim::Module::DB;

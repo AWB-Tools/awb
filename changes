@@ -2065,3 +2065,47 @@ Directory .
 Small change to the way we look for libqt.
 
 Michael P.
+
+----------
+spartha1    Date: Fri May 25 16:11:08 EDT 2007  CSN: CSN-asimcore-102
+                  Fri May 25 20:11:08 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          101 
+ Commands.pm               Locally Modified          101 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          101 
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          101 
+
+Directory libperl/Asim/lib/Asim/Model
+ DB.pm                     Locally Added               0 
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          101 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          101 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          101 
+
+Updating with simcore changes (rev. 2323 - Joel Emer)
+
+Added more uniform support for submodels. So in the base
+library there is now support for a database of submodels,
+i.e., .apm files whose root is not of asim-type "model".
+A cache of this database is kept in <AWBLOCAL>/var, like
+the module database, so a rehash of that cache is done
+with the asim-shell command "rehash models" as well as
+will a simple "rehash".
+
+And in apm-edit, the box in the lower left showing
+alternative modules lists submodels as alternatives, and
+the "refresh" button (the terminology shouldn't be
+different) will rehash the submodel cache.
+
+Joel

@@ -77,6 +77,7 @@ our $show_warnings;
 #
 our $default_repositoryDB;
 our $default_packageDB;
+our $default_modelDB;
 our $default_moduleDB;
 
 our $default_package;
@@ -1844,6 +1845,60 @@ sub choose_lock {
 
 ################################################################
 #
+# ModelDB functions
+#
+################################################################
+
+
+sub set_modelDB {
+  my $file = shift;
+
+  $default_modelDB = undef;
+  $default_modelDB = get_modelDB($file);
+
+  return $default_modelDB;
+}
+
+sub rehash_models {
+  my $file = shift;
+  my $modelDB = get_modelDB($file) || return();
+
+  print "Rehashing model database...\n";
+
+  $modelDB->rehash();
+
+  print "Done.\n";
+
+  return 1;
+}
+
+sub list_models {
+  my $file = shift;
+  my $modelDB = get_modelDB($file) || return();
+
+  $modelDB->dump();
+
+  return 1;
+}
+
+
+sub get_modelDB {
+  my $modelDB;
+
+  if (!defined($default_modelDB)) {
+    $modelDB = Asim::Model::DB->new()
+      || shell_error("No modelDB defined\n") && return ();
+  }
+
+  return $modelDB
+    || $default_modelDB
+    || shell_error("No modelDB defined\n") && return ();
+
+}
+
+
+################################################################
+#
 # Model functions
 #
 ################################################################
@@ -2362,6 +2417,7 @@ sub awb {
 
 sub rehash {
   rehash_workspace();
+  rehash_models();
   rehash_modules();
   rehash_packages();
   rehash_repositories();

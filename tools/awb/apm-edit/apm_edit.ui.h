@@ -80,8 +80,10 @@ void apm__edit::init()
 
     our $model = undef;
     our $moduleDB = undef;
+    our $modelDB = undef;
 
     $moduleDB = Asim::Module::DB->new(".");
+    $modelDB = Asim::Model::DB->new();
 
     Model->setSorting(-1,0);
 
@@ -637,6 +639,9 @@ void apm_edit::modelAutoBuild_activated()
 void apm_edit::modelRefresh_activated()
 {
     our $moduleDB;
+    our $modelDB;
+
+    # Rehash the module DB
 
     statusBar()->message("Loading moduleDB...");
     print "Loading moduleDB...";
@@ -645,6 +650,17 @@ void apm_edit::modelRefresh_activated()
     $moduleDB->rehash();
 
     statusBar()->message("Loading moduleDB...done", 5000);
+    print "...done.\n";
+
+    # Rehash the model DB
+
+    statusBar()->message("Loading modelDB...");
+    print "Loading modelDB...";
+    STDOUT->flush();
+
+    $modelDB->rehash();
+
+    statusBar()->message("Loading modelDB...done", 5000);
     print "...done.\n";
 
     #
@@ -808,6 +824,10 @@ void apm_edit::moduleInsertSubmodelAction_activated()
             "Submodel of wrong type");
         return;
     }
+
+    ###
+    ### TBD: Do not duplicate code from Alternatives_returnPressed_onSubmodel
+    ###
 
     #
     # Clear out the existing node
@@ -1053,6 +1073,7 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
 {
     our $model;
     our $moduleDB;
+    our $modelDB;
 
     my $item = shift;
 
@@ -1074,14 +1095,27 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     $module = $model->find_module_providing($provides);
     
     if (defined($module)) {
-        $module_name = $module->name();
-        $module_filename = $module->filename();
+
+        if ($module->isroot() && ($module != $model->modelroot())) {
+            # This is the root of a submodel
+
+            my $submodel = $module->owner();
+
+            $module_name = $submodel->name();
+            $module_filename = $submodel->filename();
+        } else {
+            # This is an ordinary module
+
+            $module_name = $module->name();
+            $module_filename = $module->filename();
+        }
     }
 
     #
     # Display module alternatives list
     #
     my @modules = $moduleDB->find($provides);
+    my @models = $modelDB->find($provides);
 
     Alternatives->clear();
     Info->clear();
@@ -1099,7 +1133,7 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     #
     # Display all the other modules
     #
-    foreach my $m (@modules) {
+    foreach my $m (@models, @modules) {
         my $next_root = Qt::ListViewItem(Alternatives, undef);
 
         $next_root->setText(0, trUtf8($m->name()));
@@ -1115,12 +1149,20 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
             Alternatives->ensureItemVisible($next_root);
         }
     
+        # TBD: Score for submodels
+
+        my $is_model = $m->filename() =~ /.apm$/;
         my $score = $model->is_default_module($m);
 
-        if ($score) {
-            $next_root->setPixmap(0, module_default_pix);
+        if ($is_model) {
+            $next_root->setPixmap(0, submodel_pix);
+
         } else {
-            $next_root->setPixmap(0, module_pix);
+            if ($score) {
+                $next_root->setPixmap(0, module_default_pix);
+            } else {
+                $next_root->setPixmap(0, module_pix);
+            }
         }
     
         # Select the default alternative...
@@ -1183,7 +1225,7 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     our $model;
 
     my $item = shift;
-    my $module;
+    my $module = undef;
     my $delimiter;   # Used to distinquish if part of real model
 
     #
@@ -1199,17 +1241,30 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
 
         my $module_item = Model->selectedItem();
         my $provides = $module_item->text(0);
+
         $module = $model->find_module_providing($provides);
+        if ($module->isroot() && ($module != $model->modelroot())) {
+            # This is a submodel...
+
+            $module = $module->owner();
+        }
+
         $delimiter = "=";
     } else {
-        # From .awb file
+        # From .apm/.awb file
 
         my $filename = $item->text(1);
-        $module = Asim::Module->new($filename);
+
+        if ($filename =~ /.awb/) {
+            $module = Asim::Module->new($filename);
+        } elsif ($filename =~ /.apm/) {
+            $module = Asim::Model->new($filename);
+        }
         $delimiter = "~";
     }
 
     Info->clear();
+
     if (! defined($module)) {
         Info->insertItem("Module not found - refresh probably needed!!!");
         return;
@@ -1408,7 +1463,50 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
 
 void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
 {
+    our $model;
 
+    my $alt_item = shift;
+
+    my $item;
+
+    my $model_name = $alt_item->text(0);
+    my $model_filename = $alt_item->text(1) || return;
+
+    my $submodel = Asim::Model->new($model_filename) || return;
+
+    #
+    # Get the current item, then
+    #
+    $item = Model->selectedItem() || die("No item was selected");
+
+
+    ###
+    ### TBD: Do not duplicate code from moduleInsertSubmodelAction_activated
+    ###
+
+    #
+    # Clear out the existing node
+    #
+    moduleDelete($item);
+
+    #
+    # Replace the module in the model
+    #
+    my $parent_module = $model->find_module_requiring($submodel->provides()); 
+    $model->add_submodule($parent_module, $submodel->modelroot());
+
+    #
+    # Add the submodel information in the tree
+    #
+    $item->setExpandable(0); 
+    $item->setOpen(0); 
+
+    $item->setPixmap(0, submodel_pix);
+    $item->setText(0, trUtf8($submodel->provides()));
+    $item->setText(1, trUtf8($submodel->name()));
+    $item->setText(2, trUtf8($submodel->filename()));
+
+    return;
 }
 
 

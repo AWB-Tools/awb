@@ -644,6 +644,10 @@ Always return current "default attributes".
 
 ################################################################
 
+sub attributes {
+  return $_[0]->default_attributes();
+}
+
 sub default_attributes { return $_[0]->_accessor("Model","DefaultAttributes",$_[1]) || ""; }
 
 
@@ -725,6 +729,8 @@ sub add_submodule {
     return 1;
   }
 
+  # Note: this isn't recursive since $parent is a Asim::Module
+
   $parent->add_submodule($child);
   $self->modified(1);
 
@@ -749,6 +755,78 @@ sub provides {
 
   return 1;
 }
+
+################################################################
+
+=item $model-E<gt>requires()
+
+Return the asim-type of the submoodules requires. Just here for
+compabitility with a modules, and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub requires {
+  my $self = shift;
+
+  return ();
+}
+
+
+################################################################
+
+=item $model-E<gt>public()
+
+Return the public files. Just here for compabitility with a module,
+and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub public {
+  my $self = shift;
+
+  return ();
+}
+
+
+################################################################
+
+=item $model-E<gt>private()
+
+Return the private files. Just here for compabitility with a module,
+and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub private {
+  my $self = shift;
+
+  return ();
+}
+
+
+################################################################
+
+=item $model-E<gt>parameters()
+
+Return the parameters. Just here for compabitility with a module,
+and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub parameters {
+  my $self = shift;
+
+  return ();
+}
+
 
 ################################################################
 
@@ -844,13 +922,13 @@ sub is_default_module {
   my $self = shift;
   my $module = shift;
 
-  my @model_attr = split(' ', $self->default_attributes());
-  my @module_attr = $module->attributes();
-
   my $match_count = 0;
   my $attr_number = 0;
   my $first_attr_number = 0;
   my $score;
+
+  my @model_attr = split(' ', $self->default_attributes());
+  my @module_attr = $module->attributes();
 
   foreach my $a (@model_attr) {
     $attr_number++;

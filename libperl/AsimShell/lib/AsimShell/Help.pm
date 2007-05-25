@@ -175,6 +175,9 @@ Commands:
 
   cd model [<model>]                     - cd to build directory of model
 
+  list models                            - list the models
+  rehash models                          - rehash the model list
+
   list modules                           - list the modules
   rehash modules                         - rehash the module list
 

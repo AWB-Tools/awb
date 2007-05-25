@@ -1,4 +1,5 @@
 lib/Asim/Benchmark/DB.pm
+lib/Asim/Model/DB.pm
 lib/Asim/Model/Template.pm
 lib/Asim/Module/Template.pm
 lib/Asim/Module/DB.pm
