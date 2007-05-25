@@ -2167,3 +2167,15 @@ on certain machines, the number of warning makes asim tool almost unusable.
 
 fixes to the support for remote virtual netbatch. it "seems" to be working,
 but i cannot get the test environment to work. <fingers crossed>
+
+----------
+spartha1    Date: Fri May 25 16:28:14 EDT 2007  CSN: CSN-asimcore-106
+                  Fri May 25 20:28:14 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          105 
+
+Updating with simcore changes (rev. 2327 - Brian Slechta)
+
+oops. left a debug message in there. :)

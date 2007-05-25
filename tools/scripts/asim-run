@@ -1211,7 +1211,6 @@ sub run_benchmarks
                         # retarget the symlinks, and send symlinks over 
                         # to remote
                         RunCommand("ln -s $remotesymdir/$shortfile $rundir/remote_$shortfile > /dev/null 2>&1");
-                        RunCommand("echo \"rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile\" > /nfs/an/disks/an_cfn_disk0001/perf_models/asim/bjslecht/test/ihatethis10");
                         RunCommand("       rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile > /dev/null 2>&1");
                       }
                     }
