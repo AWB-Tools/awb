@@ -2144,3 +2144,26 @@ to run in the remote area, and funally the results are then rsync'd back to the
 workspace.
 
 i will now test in AN using virtual netbatch options.
+
+----------
+spartha1    Date: Fri May 25 16:26:39 EDT 2007  CSN: CSN-asimcore-105
+                  Fri May 25 20:26:39 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ DB.pm                     Locally Modified          104 
+
+Directory libperl/Asim/lib/Asim
+ UnionDir.pm               Locally Modified          104 
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          104 
+ asim-run                  Locally Modified          104 
+
+Updating with simcore changes (rev. 2326 - Brian Slechta)
+
+fixes to eliminate uses of undefined variables in the perl modules. when run
+on certain machines, the number of warning makes asim tool almost unusable.
+
+fixes to the support for remote virtual netbatch. it "seems" to be working,
+but i cannot get the test environment to work. <fingers crossed>

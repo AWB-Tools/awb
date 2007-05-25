@@ -214,21 +214,23 @@ sub duplicates {
   my @dups = ();
 
   foreach my $s ($self->{workspace}->path()) {
-    foreach my $p (glob "$s/admin/packages/*") {
-
-      $p = basename($p);
-      $p =~ /~$/   && next;
-      $p =~ /^\#/  && next;
-      $p =~ /^CVS$/ && next;
-      $p =~ /^\.svn$/ && next;
-      $p =~ /^\.$/   && next;
-      $p =~ /^\.\.$/ && next;
-
-      if (defined($packages{$p})) {
-        push(@dups, $p)
+    if (defined $s) {
+      foreach my $p (glob "$s/admin/packages/*") {
+      
+        $p = basename($p);
+        $p =~ /~$/   && next;
+        $p =~ /^\#/  && next;
+        $p =~ /^CVS$/ && next;
+        $p =~ /^\.svn$/ && next;
+        $p =~ /^\.$/   && next;
+        $p =~ /^\.\.$/ && next;
+      
+        if (defined($packages{$p})) {
+          push(@dups, $p)
+        }
+      
+        $packages{$p} = 1;
       }
-
-      $packages{$p} = 1;
     }
   }
 

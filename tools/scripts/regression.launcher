@@ -508,7 +508,7 @@ sub run_regression {
       $cmd = $cmd . "-queue=$queue ";
     }
     if (defined $remote && $remote) {
-      $cmd = $cmd . "-remote -remoteresdir=$remoteresdir";
+      $cmd = $cmd . " -remote -remoteresdir=$remoteresdir ";
     }
     if (defined $runcmds) {
       $cmd = $cmd . "$runcmds";

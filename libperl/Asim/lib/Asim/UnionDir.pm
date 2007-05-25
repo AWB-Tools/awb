@@ -154,8 +154,10 @@ sub resolve {
   # Look in each element of path for file
   #
   foreach my $p ($self->path()) {
-    if (-e "$p/$file") {
-      return "$p/$file";
+    if (defined $p) {
+      if (-e "$p/$file") {
+        return "$p/$file";
+      }
     }
   }
 
@@ -273,20 +275,22 @@ sub listdir {
 
 
   foreach my $p ($self->path()) {
-    $curdir = "$p/$dir";
-    if (-e $curdir && opendir(DIR,$curdir)) {
-      foreach my $n (readdir(DIR)) {
-        next if ($n eq ".");
-        next if ($n eq "..");
-        next if ($n eq "CVS");
-        next if ($n eq ".svn");  
-        next if ($n eq "SCCS");
-
-	if (! defined($list{"$n"})) {
-	  $list{"$n"} = 1;
-	}
+    if (defined $p) {
+      $curdir = "$p/$dir";
+      if (-e $curdir && opendir(DIR,$curdir)) {
+        foreach my $n (readdir(DIR)) {
+          next if ($n eq ".");
+          next if ($n eq "..");
+          next if ($n eq "CVS");
+          next if ($n eq ".svn");  
+          next if ($n eq "SCCS");
+      
+          if (! defined($list{"$n"})) {
+            $list{"$n"} = 1;
+          }
+        }
+        closedir(DIR);
       }
-      closedir(DIR);
     }
   }
 

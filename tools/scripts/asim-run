@@ -1,3 +1,4 @@
+
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
@@ -154,7 +155,10 @@ my $runbatch    = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"  
 my $remote      = Asim::Util::get_asimrc_val("asim-run", "REMOTE",         "0"   );
 my $remotehost  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_HOST",    ""    );
 my $remotenbqopt= Asim::Util::get_asimrc_val("asim-run", "REMOTE_NBQOPT",  "");
+my $remoteresym = Asim::Util::get_asimrc_val("asim-run", "REMOTE_RESYM",   "");
+my $remotesymdir= Asim::Util::get_asimrc_val("asim-run", "REMOTE_SYMDIR",  $TMP_DIR);
 my $localhost   = Asim::Util::get_asimrc_val("asim-run", "LOCAL_HOST",     $actual_hostname);
+my $checklegal  = Asim::Util::get_asimrc_val("asim-run", "CHECK_LEGAL",    "1");
 
 #
 # Get the legal queue slots, if any.  If no legal queue slots are specified, then 
@@ -216,7 +220,7 @@ my $verbose = 0;
 my $help = 0;
 my $delay =0;
 my $persist = 0;
-my $remoteresdir = $TMP_DIR;
+my $remoteresdir = undef;
 #
 # Additional computed variables. 
 #
@@ -263,7 +267,10 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
                         "remotehost=s"   => \$remotehost,
                         "remoteresdir=s" => \$remoteresdir,
                         "remotenbqopt=s" => \$remotenbqopt,
+                        "remoteresym!"   => \$remoteresym,
+                        "remotesymdir=s" => \$remotesymdir,
                         "localhost=s"    => \$localhost,
+                        "checklegal!"    => \$checklegal,
                     );
 # Quiet overrides verbose...
 
@@ -356,6 +363,11 @@ if (defined $buildarea && $buildarea ne "" && $build == 1) {
 	}
     }
 }
+
+# default to same directory structure on the remote side
+if (!(defined $remoteresdir)) {
+  $remoteresdir = $resdir;
+};
 
 ###########################
 # Parse experiments
@@ -457,7 +469,7 @@ if ($buildbatch) {
 ##########################################################
 PrintVerbose("Checking netbatch queue...");
 if ($runbatch && defined $queue) {
-  if (scalar(@LEGAL_QSLOTS) > 0) {
+  if ($checklegal && scalar(@LEGAL_QSLOTS) > 0) {
     my $legal = grep /^$queue$/, @LEGAL_QSLOTS;
     if ($legal != 1) {
       # We couldn't find the qslot.  Exit
@@ -471,7 +483,7 @@ if ($runbatch && defined $queue) {
 }
 if ($buildbatch) {
     if (defined $queue_build) {
-	if (scalar(@LEGAL_QSLOTS_BUILD) > 0) {
+	if ($checklegal && scalar(@LEGAL_QSLOTS_BUILD) > 0) {
 	    my $legal = grep /^$queue_build$/, @LEGAL_QSLOTS_BUILD;
 	    if ($legal != 1) {
 		# We couldn't find the qslot.  Exit
@@ -495,7 +507,7 @@ if ($buildbatch) {
 ##########################################################
 PrintVerbose("Checking netbatch class...");
 if ($runbatch && defined $class) {
-  if (scalar(@LEGAL_CLASSES) > 0) 
+  if ($checklegal && scalar(@LEGAL_CLASSES) > 0) 
   {
     my $legal = grep /^$class$/, @LEGAL_CLASSES;
     if ($legal != 1) {
@@ -510,7 +522,7 @@ if ($runbatch && defined $class) {
 }
 if ($buildbatch) {
     if (defined $class_build) {
-	if (scalar(@LEGAL_CLASSES_BUILD) > 0) 
+	if ($checklegal && scalar(@LEGAL_CLASSES_BUILD) > 0) 
 	{
 	    my $legal = grep /^$class_build$/, @LEGAL_CLASSES_BUILD;
 	    if ($legal != 1) {
@@ -533,9 +545,11 @@ if ($buildbatch) {
 ##########################################################
 # REMOTE NETBATCH.
 ##########################################################
-if ($runbatch && defined $remotenbqopt) {
+if ($runbatch && $remote && defined $remotenbqopt) {
   $batch_flags = $batch_flags . " " . $remotenbqopt . " ";
 }
+
+
 ###########################################################
 # Get the path of the Netbatch pre-exec script to test machine viability,
 # but don't bother if we're not submitting as batch jobs,
@@ -1041,14 +1055,14 @@ sub run_benchmarks
     # make the model area in the remote side and 
     # rsync over the executable
     if ($remotehost eq "") {
-      system("mkdir -p $remoteresdir/$name/RUN/");
-      system("mkdir -p $remoteresdir/$name/BUILD/");
-      system("rsync $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/");
+      RunCommand("mkdir -p $remoteresdir/$name/RUN/ > /dev/null 2>&1");
+      RunCommand("mkdir -p $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+      RunCommand("rsync --quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
     }
     else {
-      system("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/'");
-      system("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/'");
-      system("rsync $resdir/$name/BUILD/$name $remotehost:$remoteresdir/$name/BUILD/");
+      RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
+      RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/' > /dev/null 2>&1");
+      RunCommand("rsync  --quiet $resdir/$name/BUILD/$name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
     }
 
   }
@@ -1157,20 +1171,55 @@ sub run_benchmarks
                   my $remoteresdir_regex = $remoteresdir;
                   $resdir_regex =~ s/\//\\\//g;
                   $remoteresdir_regex =~ s/\//\\\//g;
-                  system("perl -p -e \'s/$resdir_regex/$remoteresdir_regex/g\' $rundir/run > $rundir/remote_run");
-                  system("chmod +x $rundir/remote_run");
+                  RunCommand("perl -p -e \'s/$resdir_regex/$remoteresdir_regex/g\' $rundir/run > $rundir/remote_run");
+                  RunCommand("chmod +x $rundir/remote_run > /dev/null 2>&1");
 
                   # now, we can rsync over the RUN directory... let's hope the
                   # symlinks for the trace files are consistent in the two
                   # areas.  we are just going to copy over the links.
                   my $remoteruntarg;
+                  my $remoteruntarg2;
                   if ($remotehost eq "") {
-                    $remoteruntarg = "$remoteresdir/$name/RUN/";
+                    $remoteruntarg = "$remoteresdir/$name/RUN";
+                    $remoteruntarg2 = "$remoteresdir/$name/RUN";                    
                   }
                   else {
-                    $remoteruntarg = "$remotehost:$remoteresdir/$name/RUN/";
+                    $remoteruntarg = "$remotehost:$remoteresdir/$name/RUN";
+                    $remoteruntarg2 = "$remotehost\@$remoteresdir/$name/RUN";
                   }
-                  system("rsync -r --links $rundir $remoteruntarg");
+
+                  # the links in the run directory may not point to anything
+                  # meaningful on the remote machine.  this option will
+                  # re-target all the symlinks to point to the $remotesymdir.
+                  # this code was added to re-target trace_cache links and
+                  # may not work with your benchmark run area.  :(
+                  if ($remoteresym) {
+
+                    # this rsync will ignore links.  we will re-create the links.
+                    RunCommand("rsync --quiet -r $rundir $remoteruntarg > /dev/null 2>&1");
+
+                    # let's look at each file and find the symlinks
+                    foreach my $file (<$rundir/*>) {
+                      if (defined(readlink($file))) {
+
+                        # take fully qualified file name and get the
+                        # unqualified name
+                        my @file = split(/\//, $file);
+                        my $num = @file;
+                        my $shortfile = $file[$num-1];
+
+                        # retarget the symlinks, and send symlinks over 
+                        # to remote
+                        RunCommand("ln -s $remotesymdir/$shortfile $rundir/remote_$shortfile > /dev/null 2>&1");
+                        RunCommand("echo \"rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile\" > /nfs/an/disks/an_cfn_disk0001/perf_models/asim/bjslecht/test/ihatethis10");
+                        RunCommand("       rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile > /dev/null 2>&1");
+                      }
+                    }
+                  }
+                  else {
+                    # this rsync will just plain copy the links as is.
+                    RunCommand("rsync --quiet -r --links $rundir $remoteruntarg > /dev/null 2>&1");
+                  }
 
                   ## BAD my $cmd = "";
                   ## BAD $cmd .= " AWB_BENCHMARK=$ENV{AWB_BENCHMARK}";
@@ -1224,7 +1273,7 @@ sub run_benchmarks
           my $submit_cmd;
           if ($remote)
           {
-            $submit_cmd = "$batch_scr ".
+            $submit_cmd = "asim-batch ".       # FIXME:
                           "-benchmark=$bm ".
                           "-resdir=$remoteresdir/$name ".
                           "-exp=$model ".
@@ -1725,6 +1774,7 @@ sub SubmitJob {
   }
   else {
 #      print "RUN -- command is $BATCH_SUBMIT_COMMAND $batch_flags -J $resdir/$name/ADMIN/$bm_name.asimlog $command";
+
       if (RunCommand("$BATCH_SUBMIT_COMMAND $batch_flags -J $resdir/$name/ADMIN/$bm_name.asimlog $command > $resdir/$name/$bm_name.SUBMITTED")) {
 	  # There was an error in the submission.
 	  PrintError("Unable to submit command; $command\n",
