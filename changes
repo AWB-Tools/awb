@@ -2247,3 +2247,22 @@ Updating with simcore changes (rev 2334 - Carl Beckmann)
 - cleaned up multithreading support, so #ifdefs are not needed to enable it
 (feedback from code review). Also added multithreading params to the
 multi-chip controller version 2 (they are disabled by default).
+
+----------
+spartha1    Date: Fri May 25 17:16:12 EDT 2007  CSN: CSN-asimcore-111
+                  Fri May 25 21:16:12 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          110 
+
+Updating with simcore changes (rev. 2335 - Brian Slechta)
+
+fixes for asim-run bugs.
+
+asim-run does not correctly pass build options to local model build
+asim-run: rsync of binary to remote host fails if model name is
+different from experiment name
+
+also, added optional timestamps to asim-run output. use --printtimes or
+PRINT_TIMES=1 in your asimrc.

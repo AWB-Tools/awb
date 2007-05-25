@@ -165,6 +165,7 @@ my $remotehome  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_HOME",    $ENV{
 my $localhost   = Asim::Util::get_asimrc_val("asim-run", "LOCAL_HOST",     $actual_hostname);
 my $checklegal  = Asim::Util::get_asimrc_val("asim-run", "CHECK_LEGAL",    "1");
 my $debugoutfile= Asim::Util::get_asimrc_val("asim-run", "DEBUG_OUTFILE",    "");
+my $printtimes  = Asim::Util::get_asimrc_val("asim-run", "PRINT_TIMES",    0);
 
 #
 # Get the legal queue slots, if any.  If no legal queue slots are specified, then 
@@ -283,6 +284,7 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
                         "localhost=s"    => \$localhost,
                         "checklegal!"    => \$checklegal,
                         "debugoutfile=s" => \$debugoutfile,
+                        "printtimes!"    => \$printtimes,
                     );
 
 if ($debugoutfile ne "") {
@@ -321,6 +323,10 @@ my $runuser = $ENV{"USER"} ? $ENV{"USER"} : "unknown";
 chomp($runuser);
 my $asim_runlogfl = "$TMP_DIR/log\.$runuser\.$start_time\.$$";
 system ("touch $asim_runlogfl; chmod 666 $asim_runlogfl");
+
+if ($debugoutfile ne "") {
+  print DEBUGOUTFILE "asim_runlogfl:$asim_runlogfl\n";
+}
 
 # buildbatch overrides runbatch
 if (defined $buildbatch && $buildbatch) {
@@ -949,8 +955,18 @@ foreach $name (@exp_ordered) {
 	  if ($buildforced == 1) {
 	      # Build model (optimized)
 	      PrintInfo("........ Building model $model_name\n");
-              
-	      if (! ($thisModel->build("--logfile", "$asim_runlogfl", "--buildopt", $buildopt))) {
+
+              # fix for asim bug #0000766: asim-run does not correctly pass
+              # build options to local model build.
+              # strip out the ' marks              
+              my $buildopt_notick = $buildopt;
+              $buildopt_notick =~ s/'//g;
+
+              if ($debugoutfile ne "") {
+                  print DEBUGOUTFILE "buildcmd:model->build(\"--logfile\", \"$asim_runlogfl\", \"--buildopt\", $buildopt_notick)\n";
+              } 
+
+	      if (! ($thisModel->build("--logfile", "$asim_runlogfl", "--buildopt", $buildopt_notick))) {
 		  PrintError("Unable to build model $model_name\n",
 			     "Not running benchmarks on model $model_name.\n");
 		  system ("cat $asim_runlogfl");
@@ -1070,7 +1086,14 @@ sub run_benchmarks
 	
   my $name = shift;  
 
+  # Generate absolute path for the model associated with this name. 
+  my $xmodel = &FullPath($exps->{"$name"}{model});
+  my $xmodel_name = "";
+  ($xmodel_name = basename($model)) =~ s/\.[a-z][a-z]*//s;
+
   if ($remote) {
+
+    PrintInfo("........ Rsyncing executable $xmodel_name to remote host ...");
 
     # make the model area in the remote side and 
     # rsync over the executable
@@ -1084,8 +1107,12 @@ sub run_benchmarks
       RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
       RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/' > /dev/null 2>&1");
       RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/ADMIN/' > /dev/null 2>&1");
-      RunCommand("rsync  --quiet $resdir/$name/BUILD/$name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+      # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
+      # different from experiment name.
+      RunCommand("rsync  --quiet $resdir/$name/BUILD/$xmodel_name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
     }
+
+    PrintInfo("........    done.\n");
   }
 
   foreach $bm (@{$bms->{$name}}) 
@@ -1183,6 +1210,8 @@ sub run_benchmarks
 	      }
               elsif ($remote)
               {
+                  PrintInfo("........ Setting up benchmark on remote host ...");
+
                   # we need to setup the run directory on the remote host!
                   # for now, we just rsync over the run area and hope
                   # that the links are already setup correctly.  :)
@@ -1250,6 +1279,8 @@ sub run_benchmarks
                   ## BAD $cmd .= " > $asim_runlogfl 2>&1";
                   ## BAD RunCommand ("echo \"$cmd\" > $asim_runlogfl 2>&1");
                   ## BAD RunCommand ("echo \"$cmd\" > /home/bjslecht/grrr");
+
+                  PrintInfo("........    done.\n");
               }
 # This shouldn't be needed anymore. 
 
@@ -2077,11 +2108,17 @@ sub HandleBuildFailure {
 
 sub PrintInfo {
   my $line = shift;
- 
+
+  my $timestr = ""; 
+  if ($printtimes) {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    $timestr = sprintf "%02d:%02d:%02d ",$hour,$min,$sec;
+  }
+
   if (!$quiet) {
     chomp $line;
 #    RunCommand("echo \'$line\'");
-    print "$line\n";
+    print "$timestr$line\n";
   }
   
 }
