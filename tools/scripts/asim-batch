@@ -54,7 +54,8 @@ $TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
 $ASIM_LOG = Asim::Util::get_asimrc_val("asim-batch", "ASIM_LOG", undef);
 $env = Asim::Util::get_asimrc_val("asim-batch", "SAVED_ENV_VARS", "LD_LIBRARY_PATH");
 $compress = Asim::Util::get_asimrc_val("asim-batch", "COMPRESS", "gzip");
-
+$rsynchost = "";
+$rsyncresdir = "";
 
 #
 # No defaults for the following....
@@ -80,7 +81,9 @@ $status = GetOptions(   "benchmark=s"   => \$benchmark,
                         "exp=s"         => \$exp,
                         "compress=s"    => \$compress,
                         "execscript=s"  => \$execscript,
-                        "nicelevel=i"   => \$nicelevel
+                        "nicelevel=i"   => \$nicelevel,
+                        "rsynchost=s"   => \$rsynchost,
+                        "rsyncresdir=s" => \$rsyncresdir,
                     );
 
 if (! $status || ! $benchmark || ! $resdir || ! $exp) {
@@ -91,6 +94,8 @@ if (! $status || ! $benchmark || ! $resdir || ! $exp) {
   print STDERR "resdir=<full path to results directory>\n";
   print STDERR "env=<space separated list of environment variables to use from you current environment>\n";
   print STDERR "exp=<Name of experiment configuration file>\n";
+  print STDERR "rsynchost=<optional host for results to be rsyncd to>\n";
+  print STDERR "rsyncresdir=<optional dir for results to be rsyncd to>\n";
   print STDERR "compress=none|no|gzip|gz|bzip2|bz2\n";
   print STDERR "-- <list of params to model>\n";
   print STDERR "\n";
@@ -99,6 +104,34 @@ if (! $status || ! $benchmark || ! $resdir || ! $exp) {
   print STDERR "\n";
   exit;
 }
+
+if ($rsynchost eq "") {
+  if ($rsyncresdir eq "") {
+    # local run
+  }
+  else {
+    # remote run
+    $remote = 1;
+    $rsyncrestarg = $rsyncresdir;
+    $execscript="./remote_run";
+  }
+}
+else {
+  if ($rsyncresdir eq "") {
+    # remote run, but use same directory structure
+    $remote = 1;
+    $rsyncresdir = $resdir;
+    $rsyncrestarg = "$rsynchost:$rsyncresdir";
+    $execscript="./remote_run";
+  }
+  else {
+    # remote run
+    $remote = 1;
+    $rsyncrestarg = "$rsynchost:$rsyncresdir";
+    $execscript="./remote_run";
+  }
+}
+
 
 # 
 # Come up with the execution command
@@ -133,13 +166,50 @@ if ( -f "$resdir/$bm.RUNNING" ) {
   &runerror("Benchmark is already being run as indicated by $resdir/$bm.RUNNING file.\n");
 }
 
-$rundir = $resdir . "/RUN/" . $bm;
+my $res2run_postfix = "/RUN/" . $bm;
+$rundir = $resdir.$res2run_postfix;
+$rsyncruntarg = $rsyncrestarg.$res2run_postfix; 
 if ( ! -d $rundir ) {
   &runerror("Directory $rundir does not exist.\n");
 }    
 
 system ("rm $resdir/$bm.ERROR > /dev/null 2>&1");
-system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+
+if ($rsyncrestarg eq "") {
+  # nothing to rsync
+  system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+}
+else
+{
+  # make sure the SUBMITTED file is here, then move it to a RUNNING,
+  # then rsync it back to the submitter
+  my $subtimeout = 8;
+  my $done = 1;
+  do {
+    if (-e "$resdir/$bm.SUBMITTED") {
+      system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+      system ("rsync $resdir/$bm.RUNNING $rsyncrestarg/");
+      if ($rsynchost eq "") {
+        system ("rm $rsyncresdir/$bm.SUBMITTED ");
+      }
+      else {
+        system ("ssh $rsynchost rm $rsyncresdir/$bm.SUBMITTED ");
+      }
+      $done = 1;
+    }
+    elsif ($subtimeout == 0) {
+      # error!
+      print "never got $bm.SUBMITTED\n";
+    }
+    else {
+      # sleep for 3 seconds and try again
+      print "sleep... waiting for $bm.SUBMITTED\n";
+      $subtimeout--;
+      sleep (3);
+    }
+  } while (!($done));
+}
+
 $runflset = 1;
 
 if (! chdir $rundir) {
@@ -170,6 +240,17 @@ if (system ("$exec_command $params >> $runlogfl 2>&1")) {
   &print_error_info($hostname);
   close ERROR_FL;
   system ("cat $runlogfl >> $resdir/$bm.ERROR");
+  if ($remote) {
+    # rsync ERROR file
+    system ("rsync $resdir/$bm.ERROR $rsyncrestarg/");
+    if ($rsynchost eq "") {
+      system ("rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+    else {
+      system ("ssh $rsynchost rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+  }
+  
 }
 else {
   # Copy over the stats file and clean up the status of other files in directory. 
@@ -184,17 +265,20 @@ else {
   if ($compress =~ m/^(none|no)$/) {
     # nothing to be done
   } elsif ($compress =~ m/^(bzip2|bz2)$/) {
-    if (system ("bzip2 -9 $resdir/$bm.stats")) {
+    if (system ("bzip2 --force -9 $resdir/$bm.stats")) {
       &runerror("Unable to bzip2 $resdir/$bm.stats.");
     }
   } else {
     # default to gzip
-    if (system ("gzip --best $resdir/$bm.stats")) {
+    if (system ("gzip --force --best $resdir/$bm.stats")) {
       &runerror("Unable to gzip $resdir/$bm.stats.");
     }
   }
   system ("cat $runlogfl");
 }
+
+&rsync_results();
+
 my $end_time = `date +%s`;
 
 # Note the amount of time spent running program. 
@@ -217,6 +301,18 @@ sub runerror {
   # Cat any information we have from the log file. 
   #
   system ("cat $runlogfl >> $resdir/$bm.ERROR");
+
+  if ($remote) {
+    # rsync ERROR file
+    system ("rsync $resdir/$bm.ERROR $rsyncrestarg/");
+    if ($rsynchost eq "") {
+      system ("rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+    else {
+      system ("ssh $rsynchost rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+  }
+
   &Cleanup();
 }
 
@@ -224,6 +320,15 @@ sub Cleanup {
   # Unlock directory.
   if ($runflset == 1) {
     system ("rm $resdir/$bm.RUNNING > /dev/null 2>&1");
+    if (!($rsyncrestarg eq "")) {
+      if ($rsynchost eq "") {
+        system ("rm $rsyncresdir/$bm.RUNNING ");
+      }
+      else {
+        system ("ssh $rsynchost rm $rsyncresdir/$bm.RUNNING ");
+      }
+    }
+
     system ("rm $runlogfl > /dev/null 2>&1");
   }
   if ($rmrundir == 1) {
@@ -275,6 +380,10 @@ sub setup_def_env {
   print( "Nuking environment\n" );
   foreach $key (keys %ENV) {
     # Save certain environment variables
+
+
+
+
     if ( !(grep /^$key$/, @env) ) {
       delete $ENV{$key};
     }
@@ -345,5 +454,27 @@ sub print_error_info {
 }
 
 
+sub rsync_results
+{
+  if ($remote) {
+    # user specified that we rsync the results.  let's do that.
+    my $rsync_log_file = "$rundir/asim-batch-rsync.log";
+    my @rsync_cmds;
+    
+    push (@rsync_cmds, "rsync --verbose $rundir/* $rsyncruntarg/");
+    push (@rsync_cmds, "rsync --verbose $resdir/$bm.* $rsyncrestarg/");
+    push (@rsync_cmds, "rsync --verbose $rsync_log_file $rsyncruntarg/");
 
-            
+    # create an rsync log file for help in debugging rsync issues
+    system ("echo \"RSYNC LOG FILE\" > $rsync_log_file");
+ 
+    foreach my $cmd (@rsync_cmds) {
+
+      # create an rsync log file for help in debugging rsync issues
+      system ("echo \"command=$cmd\n\" >> $rsync_log_file");
+ 
+      # actually rsync directory back (will ignore symlinks, which is good)
+      system ("$cmd >> $rsync_log_file");    
+    }
+  }
+}

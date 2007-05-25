@@ -39,7 +39,6 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 #              specified.
 #
 
-
 use File::Basename;
 use Getopt::Long;
 use IO::Handle;
@@ -133,6 +132,9 @@ $JOBS_SUBMITTED_CURRENT_CYCLE = 0;
 $CURRENT_POOL = "";                  
 $CURRENT_QSLOT = "";
 
+my $actual_hostname = `hostname --long`;
+chomp $actual_hostname;
+
 ##
 ## Inputs for how to compile and run ASIM
 ##
@@ -149,6 +151,11 @@ my $replace     = Asim::Util::get_asimrc_val("asim-run", "REPLACE",        0    
 my $buildbatch  = Asim::Util::get_asimrc_val("asim-run", "BUILD_NETBATCH", "0"   );
 my $builddistcc = Asim::Util::get_asimrc_val("asim-run", "BUILD_DISTCC",   "0"   );
 my $runbatch    = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
+my $remote      = Asim::Util::get_asimrc_val("asim-run", "REMOTE",         "0"   );
+my $remotehost  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_HOST",    ""    );
+my $remotenbqopt= Asim::Util::get_asimrc_val("asim-run", "REMOTE_NBQOPT",  "");
+my $localhost   = Asim::Util::get_asimrc_val("asim-run", "LOCAL_HOST",     $actual_hostname);
+
 #
 # Get the legal queue slots, if any.  If no legal queue slots are specified, then 
 # all queue slots specified are considered legal. 
@@ -209,6 +216,7 @@ my $verbose = 0;
 my $help = 0;
 my $delay =0;
 my $persist = 0;
+my $remoteresdir = $TMP_DIR;
 #
 # Additional computed variables. 
 #
@@ -238,7 +246,7 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
                         "execscript=s"   => \$execscript,
                         "buildbatch!"    => \$buildbatch,
                         "buildopt=s"     => \$buildopt,
-                        "builddistcc!"  => \$builddistcc,
+                        "builddistcc!"   => \$builddistcc,
 			"persist!"       => \$persist,
                         "batch!"         => \$runbatch,
 			"pool=s"         => \$pool,
@@ -250,7 +258,12 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
 			"debug"          => \$debug,
                         "verbose!"       => \$verbose,
                         "help"           => \$help,
-                        "delay=i"        => \$delay
+                        "delay=i"        => \$delay,
+                        "remote!"        => \$remote,
+                        "remotehost=s"   => \$remotehost,
+                        "remoteresdir=s" => \$remoteresdir,
+                        "remotenbqopt=s" => \$remotenbqopt,
+                        "localhost=s"    => \$localhost,
                     );
 # Quiet overrides verbose...
 
@@ -517,6 +530,12 @@ if ($buildbatch) {
     }
 }
 
+##########################################################
+# REMOTE NETBATCH.
+##########################################################
+if ($runbatch && defined $remotenbqopt) {
+  $batch_flags = $batch_flags . " " . $remotenbqopt . " ";
+}
 ###########################################################
 # Get the path of the Netbatch pre-exec script to test machine viability,
 # but don't bother if we're not submitting as batch jobs,
@@ -1015,7 +1034,25 @@ sub batch_build_run
 
 sub run_benchmarks 
 {
+	
   my $name = shift;  
+
+  if ($remote) {
+    # make the model area in the remote side and 
+    # rsync over the executable
+    if ($remotehost eq "") {
+      system("mkdir -p $remoteresdir/$name/RUN/");
+      system("mkdir -p $remoteresdir/$name/BUILD/");
+      system("rsync $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/");
+    }
+    else {
+      system("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/'");
+      system("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/'");
+      system("rsync $resdir/$name/BUILD/$name $remotehost:$remoteresdir/$name/BUILD/");
+    }
+
+  }
+
   foreach $bm (@{$bms->{$name}}) 
   {
       my $bm_type;
@@ -1109,6 +1146,42 @@ sub run_benchmarks
 		  $exit_code++;
 		  next;
 	      }
+              elsif ($remote)
+              {
+                  # we need to setup the run directory on the remote host!
+                  # for now, we just rsync over the run area and hope
+                  # that the links are already setup correctly.  :)
+
+                  # do a regex replacement to create a "remote_run" file
+                  my $resdir_regex = $resdir;
+                  my $remoteresdir_regex = $remoteresdir;
+                  $resdir_regex =~ s/\//\\\//g;
+                  $remoteresdir_regex =~ s/\//\\\//g;
+                  system("perl -p -e \'s/$resdir_regex/$remoteresdir_regex/g\' $rundir/run > $rundir/remote_run");
+                  system("chmod +x $rundir/remote_run");
+
+                  # now, we can rsync over the RUN directory... let's hope the
+                  # symlinks for the trace files are consistent in the two
+                  # areas.  we are just going to copy over the links.
+                  my $remoteruntarg;
+                  if ($remotehost eq "") {
+                    $remoteruntarg = "$remoteresdir/$name/RUN/";
+                  }
+                  else {
+                    $remoteruntarg = "$remotehost:$remoteresdir/$name/RUN/";
+                  }
+                  system("rsync -r --links $rundir $remoteruntarg");
+
+                  ## BAD my $cmd = "";
+                  ## BAD $cmd .= " AWB_BENCHMARK=$ENV{AWB_BENCHMARK}";
+                  ## BAD $cmd .= " AWB_MODEL=$ENV{AWB_MODEL}";
+                  ## BAD $cmd .= " poo=asim-shell -batch setup model -- ";
+                  ## BAD $cmd .= " --builddir $remoteresdir/$name/BUILD";
+                  ## BAD $cmd .= " --rundir $rundir";
+                  ## BAD $cmd .= " > $asim_runlogfl 2>&1";
+                  ## BAD RunCommand ("echo \"$cmd\" > $asim_runlogfl 2>&1");
+                  ## BAD RunCommand ("echo \"$cmd\" > /home/bjslecht/grrr");
+              }
 # This shouldn't be needed anymore. 
 
       # HACK: We have to determine the directory where the setup occurs.
@@ -1141,10 +1214,39 @@ sub run_benchmarks
 	      $exit_code++;
 	      next;
 	  }
+          elsif ($remote)
+          {
+              RunCommand ("rsync --quiet $resdir/$name/$bm_name.SUBMITTED $remotehost:$remoteresdir/$name/");
+          }
 
 	  my $input = $exps->{"$name"}{params};
 	  
-	  if ( SubmitJob("$batch_scr -benchmark=$bm -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input") ) {
+          my $submit_cmd;
+          if ($remote)
+          {
+            $submit_cmd = "$batch_scr ".
+                          "-benchmark=$bm ".
+                          "-resdir=$remoteresdir/$name ".
+                          "-exp=$model ".
+                          "-compress=$compress $batch_scr_inputs ".
+                          "-execscript=\"$execscript\" ".
+                          "-rsynchost=\"$localhost\" ".
+                          "-rsyncresdir=\"$resdir/$name\" ".
+                          "-- $input";                
+          }
+          else
+          {
+            $submit_cmd = "$batch_scr ".
+                          "-benchmark=$bm ".
+                          "-resdir=$resdir/$name ".
+                          "-exp=$model ".
+                          "-compress=$compress $batch_scr_inputs ".
+                          "-execscript=\"$execscript\" ".
+                          "-- $input";                
+
+          }
+
+	  if ( SubmitJob($submit_cmd) ) {
 	      # There was an error in the submission.
 	      $exit_code++;
 	      next;

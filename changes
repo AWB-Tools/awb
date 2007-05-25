@@ -2124,3 +2124,23 @@ Directory lib/libdral/src
 Updating with simcore changes (rev. 2324 - Brian Slechta)
 
 made minor changes to support dral/ptv api and its usage in axp.
+
+----------
+spartha1    Date: Fri May 25 16:23:42 EDT 2007  CSN: CSN-asimcore-104
+                  Fri May 25 20:23:42 UTC 2007
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          103 
+ asim-run                  Locally Modified          103 
+ asim-batch                Locally Modified          103 
+
+Updating with simcore changes (rev. 2325 - Brian Slechta)
+
+added support for virtual netbatch. the flow has been tested in MMDC using
+regular netbatch. the benchmarks are setup in the local workspace. run areas
+and executables are rsync'd to the remote area, the runs are sent to netbach
+to run in the remote area, and funally the results are then rsync'd back to the
+workspace.
+
+i will now test in AN using virtual netbatch options.

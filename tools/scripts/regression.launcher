@@ -67,6 +67,9 @@ my $runstyle = Asim::Util::get_asimrc_val("regression.launcher", "RUNSTYLE", "li
 my $runcmds = Asim::Util::get_asimrc_val("regression.launcher", "ASIMRUN_COMMANDS", undef);
 my $compress = Asim::Util::get_asimrc_val("regression.launcher", "COMPRESS", "gzip");
 my $queue = Asim::Util::get_asimrc_val("regression.launcher", "QSLOT", undef);
+my $remote = Asim::Util::get_asimrc_val("regression.launcher", "REMOTE", 0);
+my $remoteroot = Asim::Util::get_asimrc_val("regression.launcher", "REMOTE_ROOT", "");
+my $remoteregdir = "";
 my $regdir;
 my $dryrun = 0;
 my $rerun = 0;
@@ -82,6 +85,9 @@ my $status = GetOptions("package=s"    =>  \@packages,
                         "compress=s"   =>  \$compress,
                         "queue=s"      =>  \$queue,
                         "dryrun!"      =>  \$dryrun,
+			"remote!"      =>  \$remote,
+			"remoteroot=s" =>  \$remoteroot,
+			"remoteregdir=s"=> \$remoteregdir,
 			"rerun"        =>  \$rerun
                        );
 if ( ! $status ) {
@@ -89,10 +95,14 @@ if ( ! $status ) {
   print "\t\t [--package=ipf|arana|...]\n";
   print "\t\t [--runtype=regression|nightly] \n";
   print "\t\t [--runstyle=pruned|list] \n";
-  print "\t\t [--regdir=<root directory to place regression results>]\n";
+  print "\t\t [--regdir=<directory to place regression results>]\n";
   print "\t\t [--runcmds=<asim-run commands>]\n";
   print "\t\t [--compress=none|gzip|bzip2]\n";
   print "\t\t [--queue=<netbatch queue - e.g. /fast or /slow/asim>]\n";
+  print "\t\t [--[no]remote]\n";
+  print "\t\t [--remoteroot=<remote root directory to place regression results>]\n";
+  print "\t\t [--remoteregdir=<where to run regressions on remote host>]\n";
+  print "\t\t [--remotebqopt=<nbq options for remote netbatch>]\n";
   print "\t\t [--[no]dryrun]\n";
   print "\t\t [--rerun]\n";
   print "\n";
@@ -162,6 +172,22 @@ else {
     $resdir="$AWBLOCAL/run/regtest";
 }
 
+
+if (defined $remoteregdir && $remoteregdir ne "") {
+    # Use user specified location for results directory
+
+    chomp $remoteregdir;
+
+    $remoteresdir = $remoteregdir;
+}
+else {
+    # Use default location for results directory
+
+    $remoteresdir="$remoteroot/run/regtest";
+}
+
+
+
 if ($rerun) {
     #
     #  Find last test run and use that result directory
@@ -170,6 +196,7 @@ if ($rerun) {
     my $last_dir = $rdirlist[$#rdirlist];
     chomp($last_dir);
     $resdir = $resdir . "/" . $last_dir;
+    $remoteresdir = $remoteresdir . "/" . $last_dir;
 }
 else {
     #
@@ -179,6 +206,7 @@ else {
     chomp $curdate;
 
     $resdir = $resdir . "/" . $curdate;
+    $remoteresdir = $remoteresdir . "/" . $curdate;
 }
 
 print "Result directory: $resdir\n";
@@ -478,6 +506,9 @@ sub run_regression {
     #
     if (defined $queue)  {
       $cmd = $cmd . "-queue=$queue ";
+    }
+    if (defined $remote && $remote) {
+      $cmd = $cmd . "-remote -remoteresdir=$remoteresdir";
     }
     if (defined $runcmds) {
       $cmd = $cmd . "$runcmds";
