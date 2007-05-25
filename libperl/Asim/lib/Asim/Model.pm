@@ -174,7 +174,7 @@ sub open {
     my $system = $inifile->get("Model","system");
     $self->{system} = $self->_get_module($system);
 
-  } elsif ($version == "2.0") {
+  } elsif ($version >= 2.0 && $version <= 2.1) {
     my $model =  $inifile->get("Model","model");
     $self->modelroot($self->_get_module($model));
 
@@ -361,7 +361,8 @@ sub save {
   #
   # Save [Global] section
   #
-  $new_inifile->put("Global", "Version", "2.0");
+  $new_inifile->put("Global", "Version", "2.1");
+  $new_inifile->put("Global", "Class", "Asim::Model");
   #
   $new_inifile->put("Global", "Name", $self->name());
   $new_inifile->put("Global", "Description", $self->description());

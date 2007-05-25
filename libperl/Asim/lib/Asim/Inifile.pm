@@ -59,11 +59,53 @@ File looks like:
 
 ################################################################
 
+################################################################
+# WARNING: 
+#    The charactistics (especially file parsing) of this
+#    object must stay in sync with the tcl file ini.tcl
+#
+################################################################
+
+################################################################
+
 =head1 METHODS
 
 The following public methods are supported:
 
+=cut
 =over 4
+
+################################################################
+
+=item $inifile = Asim::Inifile-E<gt>new_as_class($file)
+
+Open an inifile then determine its class and return an
+object of the appriate class
+
+=cut
+
+################################################################
+
+sub new_as_class {
+  my $this = shift;
+  my $file = shift;
+
+  # Determine class of object $file contains
+
+  my $inifile = Asim::Inifile->new($file)        || return undef;
+  my $class   = $inifile->get("Global", "Class") || return undef;
+
+  # Reopen $file as a new object of class obtained from $file.
+
+  my $object;
+
+  eval("\$object = $class->new(\$file)");
+
+  return $object;
+}
+
+
+################################################################
 
 =item $inifile = Asim::Inifile-E<gt>new($file)
 
@@ -72,14 +114,6 @@ Create a new configuration file database from $file.
 =cut
 
 ################################################################
-
-################################################################
-# WARNING: 
-#    The charactistics (especially file parsing) of this
-#    object must stay in sync with the tcl file ini.tcl
-#
-################################################################
-
 
 sub new {
   my $this = shift;

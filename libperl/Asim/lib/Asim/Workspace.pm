@@ -165,7 +165,7 @@ sub new {
 
 sub _initialize {
   my $self = { accessors => \%a,
-               version => 1.0,
+               version => 1.2,
 	       filename => "",
 	       inifile => {},
 	     };
@@ -1024,6 +1024,14 @@ sub upgrade {
     mkdir $self->rootdir() . "/run";
     $self->version("1.1");
     $self->save();
+  }
+
+  if ($self->version() == 1.1) {
+    print "Upgrading workspace from version 1.1 to 1.2\n";
+
+    $self->{inifile}->put("Global", "Class", "Asim::Workspace");
+    $self->version("1.2");
+   $self->save();
   }
 
 }

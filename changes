@@ -2208,3 +2208,21 @@ Directory tools/scripts
 Updating with simcore changes rev. 2330 (Angshu Parashar)
 
 Added path information for hasim-front-panel to asimstarter.in
+
+----------
+spartha1    Date: Fri May 25 16:49:16 EDT 2007  CSN: CSN-asimcore-109
+                  Fri May 25 20:49:16 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          108 
+ Model.pm                  Locally Modified          108 
+ Workspace.pm              Locally Modified          108 
+
+Updating with simcore changes (rev. 2332 - Joel Emer)
+
+Establishment of a systematic convention for including class information
+in .ini files. The convention is there for models and workspaces, but
+not really used for anything yet.
+
+Joel
