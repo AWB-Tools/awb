@@ -570,10 +570,17 @@ class ASIM_MODULE_CLASS : public ASIM_REGISTRY_CLASS, public ASIM_DRAL_NODE_CLAS
         UINT16		module_id;
 
     protected:
+        /*
+	 * a thread object, if this module wants to run in parallel.
+	 * This is left protected, so that derived classes can allocate
+	 * threads in non-standard ways if they choose.
+	 */
+	ASIM_SMP_THREAD_HANDLE thread;
 
     public:
         ASIM_MODULE_CLASS (ASIM_MODULE p, const char * const n,
-			   ASIM_EXCEPT e = NULL);
+			   ASIM_EXCEPT e = NULL, bool create_thread = false);
+
         virtual ~ASIM_MODULE_CLASS ();
 
         /*
@@ -695,8 +702,8 @@ class ASIM_MODULE_CLASS : public ASIM_REGISTRY_CLASS, public ASIM_DRAL_NODE_CLAS
          * to get clock server callbacks in a parallel thread.
          *
          * If this module or one of its ancestors wants to run in a separate thread,
-         * it will typically inherit from ASIM_SMP_THREAD_HANDLE_CLASS, so that the
-         * default routine here will find it and return the thread handle.
+         * it will typically pass create_thread=true to the constructor, and then
+	 * all its children will find it using GetHostThread().
          *
          * But derived classes can override this function in order to allocate threads
          * using whatever algorithm they want.  In that case, this function should simply
@@ -704,12 +711,16 @@ class ASIM_MODULE_CLASS : public ASIM_REGISTRY_CLASS, public ASIM_DRAL_NODE_CLAS
          */
         virtual ASIM_SMP_THREAD_HANDLE GetHostThread(void)
         {
-            ASIM_MODULE            m;    /* a module */
-            ASIM_SMP_THREAD_HANDLE t;    /* an enclosing module that is also a thread */
-            for ( m = this; m != NULL; m = m->GetParent() )
+            // if this module allocated a thread itself, return it:
+	    if (thread)
             {
-		t = m->GetParentOfType<ASIM_SMP_THREAD_HANDLE>();
-		if ( t != NULL ) { return t; }
+                return thread;
+            }
+	    // otherwise, get the thread from the parent, if any:
+            ASIM_MODULE p = GetParent();
+            if (p)
+            {
+                return p->GetHostThread();
             }
             return NULL;
         };

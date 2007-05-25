@@ -174,8 +174,8 @@ class ASIM_MM_CLASS : public ASIM_FREE_LIST_ELEMENT_CLASS<MM_TYPE>
         UINT32 mmMagicKey;
 #endif
 
-        INT32 mmMaxObjs;       ///< Maximum number of objects
-        INT32 mmTotalObjs;     ///< Number of Objects
+        ATOMIC_INT32 mmMaxObjs;       ///< Maximum number of objects
+        ATOMIC_INT32 mmTotalObjs;     ///< Number of Objects
 
         /// List of free MM_TYPE objects.
         ASIM_FREE_LIST_CLASS<MM_TYPE> mmFreeList;
@@ -662,7 +662,8 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
     else
     {
         // acquire memory for 1 object on demand
-        if (++data.mmTotalObjs > data.mmMaxObjs)
+        ++data.mmTotalObjs;
+	if (data.mmTotalObjs > data.mmMaxObjs)
         {
             cout << "MEMORY FAILURE: mmMaxObjs (" << data.mmMaxObjs << ")"
                  << " for " << data.className << " exceeded." << endl;

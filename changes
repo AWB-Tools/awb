@@ -2226,3 +2226,24 @@ in .ini files. The convention is there for models and workspaces, but
 not really used for anything yet.
 
 Joel
+
+----------
+spartha1    Date: Fri May 25 17:13:33 EDT 2007  CSN: CSN-asimcore-110
+                  Fri May 25 21:13:33 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ module.h                  Locally Modified          109 
+ mm.h                      Locally Modified          109 
+
+Directory lib/libasim/src
+ module.cpp                Locally Modified          109 
+
+Directory modules/system
+ multi_chip_common_system_v2.awb Locally Modified          109 
+
+Updating with simcore changes (rev 2334 - Carl Beckmann)
+
+- cleaned up multithreading support, so #ifdefs are not needed to enable it
+(feedback from code review). Also added multithreading params to the
+multi-chip controller version 2 (they are disabled by default).

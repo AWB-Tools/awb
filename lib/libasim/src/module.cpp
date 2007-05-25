@@ -43,8 +43,10 @@ ASIM_DRAL_NODE_CLASS::ASIM_DRAL_NODE_CLASS(ASIM_MODULE parent, const char* const
     }
 }
 
-ASIM_MODULE_CLASS::ASIM_MODULE_CLASS(ASIM_MODULE p, const char *const n,
-				     ASIM_EXCEPT e) :
+ASIM_MODULE_CLASS::ASIM_MODULE_CLASS(ASIM_MODULE       p,
+                                     const char *const n,
+				     ASIM_EXCEPT       e,
+				     bool              create_thread) :
     ASIM_REGISTRY_CLASS(),
     ASIM_DRAL_NODE_CLASS(p,n),
     ASIM_CLOCKABLE_CLASS((ASIM_CLOCKABLE)p),
@@ -78,6 +80,9 @@ ASIM_MODULE_CLASS::ASIM_MODULE_CLASS(ASIM_MODULE p, const char *const n,
         traceName.erase(0,1);
     }
     SetTraceableName(traceName);
+    
+    // maybe create a thread if we're running in parallel
+    thread = (create_thread) ? new ASIM_SMP_THREAD_HANDLE_CLASS : NULL;
 }
 
 ASIM_MODULE_CLASS::~ASIM_MODULE_CLASS ()
@@ -94,6 +99,9 @@ ASIM_MODULE_CLASS::~ASIM_MODULE_CLASS ()
         ASIM_MODULELINK_CLASS * tmp = contained;
         contained = contained->next;
         delete tmp;
+    }
+    if (thread) {
+        delete thread;
     }
 }
 
