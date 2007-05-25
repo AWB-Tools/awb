@@ -1251,6 +1251,8 @@ DRAL_SERVER_CLASS::CloseEventRec(
     pipe_close_record_inst(rec_id, __FILE__, __LINE__);
 #endif
 
+    rec_id = 0;
+
     return;
 }
 

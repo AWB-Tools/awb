@@ -84,18 +84,51 @@ class ASIM_ITEM_CLASS
         }
     }
 
-  private:
-    // XXX This method is privated to avoid its usage in the ASIM models code.
-    //     We made it privated becase it was causing a memory leak in the
-    //     DRAL server live items data base.
-    //     Try to inherit from ASIM_MM_CLASS and use MM pointers.
-    //     If it does not work, please contact paux.s.cabre@intel.com
-    //     and we will try to find a solution
-    ASIM_ITEM_CLASS & operator = (const ASIM_ITEM_CLASS & aic)
+    // we have some AXP structures with entries that we would like to associate
+    // dral/ptv events.  however, they currently require come copying when
+    // new entries are added.  so, rather than explicitly disallow copying of
+    // ASIM_ITEMs, i am going to do the following on a copy:
+    //   1) lvalue must delete and/or close appropriate records
+    //   2) rvalue passes on dral/ptv references to the lvalue
+    //   3) rvalue disassociates himself from ids
+    //
+    // here, we essentially pass on the dral/ptv info from one object to
+    // another, and the originating item loses its handles.
+    ASIM_ITEM_CLASS & operator = (/*const*/ ASIM_ITEM_CLASS & aic)
     {
-        ASSERTX(false);
+        if (runWithEventsOn && idGenerated)
+        {
+            // kill the current item because we are going to 
+            // inherit aic's dral/ptv id
+            DRALEVENT_GUARDED(DeleteItem(itemId));
+            EVENT(DRALEVENT(CloseEventRec(recId)));
+
+            // inherit from aic
+            itemId = aic.itemId;
+            idGenerated = aic.idGenerated;
+            recId = aic.recId;
+
+            // dissaociate aic from the id's.
+            aic.itemId = 0;
+            aic.idGenerated = false;
+            aic.recId = 0;
+        }
+	
         return *this;
     }
+
+// OLD   private:
+// OLD     // XXX This method is privated to avoid its usage in the ASIM models code.
+// OLD     //     We made it privated becase it was causing a memory leak in the
+// OLD     //     DRAL server live items data base.
+// OLD     //     Try to inherit from ASIM_MM_CLASS and use MM pointers.
+// OLD     //     If it does not work, please contact paux.s.cabre@intel.com
+// OLD     //     and we will try to find a solution
+// OLD     ASIM_ITEM_CLASS & operator = (const ASIM_ITEM_CLASS & aic)
+// OLD     {
+// OLD         ASSERTX(false);
+// OLD         return *this;
+// OLD     }
 
   public:
 
@@ -184,9 +217,8 @@ class ASIM_ITEM_CLASS
         }
     }
 
+    inline void SetRecId(UINT32 x) { recId = x; };
     inline UINT32 GetRecId() { return recId; };
-
-
 
     inline void
     OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, ASIM_ITEM_CLASS *parent=NULL)
