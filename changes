@@ -2179,3 +2179,20 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2327 - Brian Slechta)
 
 oops. left a debug message in there. :)
+----------
+spartha1    Date: Fri May 25 16:30:27 EDT 2007  CSN: CSN-asimcore-107
+                  Fri May 25 20:30:27 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Util.pm                   Locally Modified          106 
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          106 
+ asim-run                  Locally Modified          106 
+ asim-batch                Locally Modified          106 
+
+Updating with simcore changes (rev. 2329 - Brian Slechta)
+
+some fixes and additions for remote virtual netbatch. i have been sucessful
+with running regression on an_vp remote pool. :)

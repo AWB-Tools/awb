@@ -1,4 +1,4 @@
-
+:
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
@@ -157,8 +157,14 @@ my $remotehost  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_HOST",    ""   
 my $remotenbqopt= Asim::Util::get_asimrc_val("asim-run", "REMOTE_NBQOPT",  "");
 my $remoteresym = Asim::Util::get_asimrc_val("asim-run", "REMOTE_RESYM",   "");
 my $remotesymdir= Asim::Util::get_asimrc_val("asim-run", "REMOTE_SYMDIR",  $TMP_DIR);
+my $remotenbwd  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_NBWD",    $ENV{"NWBD"});
+my $remotetmpdir= Asim::Util::get_asimrc_val("asim-run", "REMOTE_TMPDIR",  "/tmp");
+my $remoteitools= Asim::Util::get_asimrc_val("asim-run", "REMOTE_ITOOLS",  $ENV{"USER_ITOOLS"});
+my $remoteawblcl= Asim::Util::get_asimrc_val("asim-run", "REMOTE_AWBLOCAL",$ENV{"AWBLOCAL"});
+my $remotehome  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_HOME",    $ENV{"HOME"});
 my $localhost   = Asim::Util::get_asimrc_val("asim-run", "LOCAL_HOST",     $actual_hostname);
 my $checklegal  = Asim::Util::get_asimrc_val("asim-run", "CHECK_LEGAL",    "1");
+my $debugoutfile= Asim::Util::get_asimrc_val("asim-run", "DEBUG_OUTFILE",    "");
 
 #
 # Get the legal queue slots, if any.  If no legal queue slots are specified, then 
@@ -269,11 +275,23 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
                         "remotenbqopt=s" => \$remotenbqopt,
                         "remoteresym!"   => \$remoteresym,
                         "remotesymdir=s" => \$remotesymdir,
+                        "remotenbwd=s"   => \$remotenbwd,
+                        "remotetmpdir=s" => \$remotetmpdir,
+                        "remoteitools=s" => \$remoteitools,
+                        "remoteawblcl=s" => \$remoteawblcl,
+                        "remotehome=s"   => \$remotehome,
                         "localhost=s"    => \$localhost,
                         "checklegal!"    => \$checklegal,
+                        "debugoutfile=s" => \$debugoutfile,
                     );
-# Quiet overrides verbose...
 
+if ($debugoutfile ne "") {
+  open (DEBUGOUTFILE, ">$debugoutfile") 
+  || die "could not open debugoutfile=$debugoutfile\n$!\n";
+}
+
+
+# Quiet overrides verbose...
 if ($quiet) {
   $verbose = 0;
 }
@@ -554,8 +572,9 @@ if ($runbatch && $remote && defined $remotenbqopt) {
 # Get the path of the Netbatch pre-exec script to test machine viability,
 # but don't bother if we're not submitting as batch jobs,
 # or if our version of netbatch is not high enough.
+# FIXME: does not currently work with remote virtual netbatch
 ##########################################################
-if ( $runbatch && $ENABLE_NETBATCH_PRE ) {
+if ( !($remote) && $runbatch && $ENABLE_NETBATCH_PRE ) {
   $nbqver = `$BATCH_SUBMIT_COMMAND -v`;
   if ($NETBATCH_PRE_USE_SMARTCLASS == 0) {
       if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 ) ) {
@@ -1052,19 +1071,21 @@ sub run_benchmarks
   my $name = shift;  
 
   if ($remote) {
+
     # make the model area in the remote side and 
     # rsync over the executable
     if ($remotehost eq "") {
       RunCommand("mkdir -p $remoteresdir/$name/RUN/ > /dev/null 2>&1");
       RunCommand("mkdir -p $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+      RunCommand("mkdir -p $remoteresdir/$name/ADMIN/ > /dev/null 2>&1");
       RunCommand("rsync --quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
     }
     else {
       RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
       RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/' > /dev/null 2>&1");
+      RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/ADMIN/' > /dev/null 2>&1");
       RunCommand("rsync  --quiet $resdir/$name/BUILD/$name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
     }
-
   }
 
   foreach $bm (@{$bms->{$name}}) 
@@ -1211,7 +1232,7 @@ sub run_benchmarks
                         # retarget the symlinks, and send symlinks over 
                         # to remote
                         RunCommand("ln -s $remotesymdir/$shortfile $rundir/remote_$shortfile > /dev/null 2>&1");
-                        RunCommand("       rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile > /dev/null 2>&1");
+                        RunCommand("rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile > /dev/null 2>&1");
                       }
                     }
                   }
@@ -1268,7 +1289,7 @@ sub run_benchmarks
           }
 
 	  my $input = $exps->{"$name"}{params};
-	  
+
           my $submit_cmd;
           if ($remote)
           {
@@ -1280,6 +1301,7 @@ sub run_benchmarks
                           "-execscript=\"$execscript\" ".
                           "-rsynchost=\"$localhost\" ".
                           "-rsyncresdir=\"$resdir/$name\" ".
+                          "-tmpdir=\"$remotetmpdir\" ".
                           "-- $input";                
           }
           else
@@ -1294,11 +1316,14 @@ sub run_benchmarks
 
           }
 
-	  if ( SubmitJob($submit_cmd) ) {
+	  my $submiterror = SubmitJob($submit_cmd);
+          
+          if ($submiterror) {
 	      # There was an error in the submission.
 	      $exit_code++;
 	      next;
 	  }
+
       }
       elsif ($bm_type eq "tlist") 
       {
@@ -1762,32 +1787,66 @@ sub SubmitJob {
   ScheduleJob();
 
   if (defined $modelSubmit && $modelSubmit) {
-#      print "BUILD -- command is $BATCH_SUBMIT_COMMAND $batch_flags_build -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $command"; 
-      if ( RunCommand ("$BATCH_SUBMIT_COMMAND $batch_flags_build -J $resdir/$name/BUILD/$model_name.SUBMITTED --block $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
-	  # There was an error in the submission.      
-	  PrintError("Unable to finish command; $command\n",
-		     "Netbatch returned error.\n",
-		     "Failed Model build.\n");
-	  return 1;
-      }
+    
+    # setup param for nbq to specify where the -J log goes.
+    my $dashj = "-J $resdir/$name/BUILD/$model_name.SUBMITTED";
+
+    # actually run the nbq command       
+    if ( RunCommand ("$BATCH_SUBMIT_COMMAND $batch_flags_build $dashj --block $command >> $resdir/$name/BUILD/batch.log 2>&1" ) ) {
+        # There was an error in the submission.      
+        PrintError("Unable to finish command; $command\n",
+      	     "Netbatch returned error.\n",
+      	     "Failed Model build.\n");
+        return 1;
+    }
   }
   else {
-#      print "RUN -- command is $BATCH_SUBMIT_COMMAND $batch_flags -J $resdir/$name/ADMIN/$bm_name.asimlog $command";
+    # save ENV variables that might be changed temporarily
+    my $temp_nwbd = $ENV{"NWBD"};
+    my $temp_itools = $ENV{"USER_ITOOLS"};
+    my $temp_home = $ENV{"HOME"};
+    my $temp_awblcl = $ENV{"AWBLOCAL"};
 
-      if (RunCommand("$BATCH_SUBMIT_COMMAND $batch_flags -J $resdir/$name/ADMIN/$bm_name.asimlog $command > $resdir/$name/$bm_name.SUBMITTED")) {
-	  # There was an error in the submission.
-	  PrintError("Unable to submit command; $command\n",
-		     "Netbatch returned error.\n");
-	  
-	  CleanupQueueProblems();
-	  return 1;
-      }
-      else {
-	  if (! $buildbatch) {
-	      system ("cat $resdir/$name/$bm_name.SUBMITTED");
-	  }
-	  PrintInfo("........ Queued up benchmark: $bm_name\n");
-      }
+    # setup params for nbq.  the job inherits the current env so we may have
+    # to change some env variables and retore them after submission.
+    my $dashj;
+    if ($remote) {
+      PutEnv("NBWD", $remotenbwd);
+      PutEnv("USER_ITOOLS", $remoteitools);
+      PutEnv("HOME", $remotehome);
+      PutEnv("AWBLOCAL", $remoteawblcl);
+
+      DumpEnvToDebugOutfile();
+
+      $dashj = "-J $remoteresdir/$name/ADMIN/$bm_name.asimlog";
+    }
+    else {
+      $dashj = "-J $resdir/$name/ADMIN/$bm_name.asimlog";
+    }
+
+    # submit run job to netbatch
+    my $runerror = RunCommand("$BATCH_SUBMIT_COMMAND $batch_flags $dashj $command > $resdir/$name/$bm_name.SUBMITTED");
+
+    # restore ENV variables after submission
+    PutEnv("NBWD", $temp_nwbd);
+    PutEnv("USER_ITOOLS", $temp_itools);
+    PutEnv("HOME", $temp_home);
+    PutEnv("AWBLOCAL", $temp_awblcl);
+
+    if ($runerror) {
+        # There was an error in the submission.
+        PrintError("Unable to submit command; $command\n",
+      	     "Netbatch returned error.\n");
+        
+        CleanupQueueProblems();
+        return 1;
+    }
+    else {
+        if (! $buildbatch) {
+            system ("cat $resdir/$name/$bm_name.SUBMITTED");
+        }
+        PrintInfo("........ Queued up benchmark: $bm_name\n");
+    }
   }
   return 0;
 }
@@ -2095,13 +2154,26 @@ sub TimedQuestion {
 ##
 sub RunCommand {
   my $command = shift;
-  
+
+  if ($debugoutfile ne "") {
+    print DEBUGOUTFILE "command:$command\n";
+  }
+
   if ($dryrun) {
     print "$command\n";
     return 0;
   }
   
   return system($command);
+}
+
+
+sub DumpEnvToDebugOutfile {
+  if ($debugoutfile ne "") {
+    foreach my $var (keys %ENV) {
+      print DEBUGOUTFILE "env:$var=$ENV{$var}\n";
+    }
+  }
 }
 
 __END__

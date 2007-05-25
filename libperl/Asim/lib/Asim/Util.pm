@@ -248,6 +248,11 @@ sub get_asimrc_val
   my $def = shift;
   my $val;
 
+  if (!(defined($Asim::rcfile)))
+  {
+      return $def;
+  }
+
   $val = $Asim::rcfile->get($group, $item);
   
   # Is this value really defined, or are we just getting some white spaces....

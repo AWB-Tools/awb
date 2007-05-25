@@ -50,7 +50,7 @@ use Asim::Util;
 $execscript="./run";
 
 # Some global information
-$TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
+$tmpdir = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
 $ASIM_LOG = Asim::Util::get_asimrc_val("asim-batch", "ASIM_LOG", undef);
 $env = Asim::Util::get_asimrc_val("asim-batch", "SAVED_ENV_VARS", "LD_LIBRARY_PATH");
 $compress = Asim::Util::get_asimrc_val("asim-batch", "COMPRESS", "gzip");
@@ -84,12 +84,14 @@ $status = GetOptions(   "benchmark=s"   => \$benchmark,
                         "nicelevel=i"   => \$nicelevel,
                         "rsynchost=s"   => \$rsynchost,
                         "rsyncresdir=s" => \$rsyncresdir,
+                        "tmpdir=s"      => \$tmpdir,
                     );
 
 if (! $status || ! $benchmark || ! $resdir || ! $exp) {
   my $prog = basename($0);
   print STDERR "\n";
   print STDERR "$prog: Inputs are \n";
+  print STDERR "tmpdir=<for temporary asim-batch outputs>\n";
   print STDERR "benchmark=<name of benchmark, e.g., gzip_00>\n";
   print STDERR "resdir=<full path to results directory>\n";
   print STDERR "env=<space separated list of environment variables to use from you current environment>\n";
@@ -222,7 +224,7 @@ my $timeval = $start_time;
 chomp($timeval);
 my $runuser = $ENV{"USER"} ? $ENV{"USER"} : "asim1";
 chomp($runuser);
-my $runlogfl = "$TMP_DIR/log\.$runuser\.$timeval\.$$";
+my $runlogfl = "$tmpdir/log\.$runuser\.$timeval\.$$";
 system ("touch $runlogfl; chmod 777 $runlogfl");
 
 # Determine list of environment variables to use, and clear out the

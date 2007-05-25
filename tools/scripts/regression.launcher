@@ -102,7 +102,6 @@ if ( ! $status ) {
   print "\t\t [--[no]remote]\n";
   print "\t\t [--remoteroot=<remote root directory to place regression results>]\n";
   print "\t\t [--remoteregdir=<where to run regressions on remote host>]\n";
-  print "\t\t [--remotebqopt=<nbq options for remote netbatch>]\n";
   print "\t\t [--[no]dryrun]\n";
   print "\t\t [--rerun]\n";
   print "\n";
