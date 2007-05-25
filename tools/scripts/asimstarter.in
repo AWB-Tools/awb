@@ -165,6 +165,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "install-rcfile"      => "scripts/install-rcfile",
   "fetch-trace"         => "tools/scripts/fetch-trace",
   "create-benchmark-file" => "tools/scripts/create-benchmark-file",
+  "hasim-front-panel"   => "tools/hasim/hasim-front-panel/hasim-front-panel",
 #
 # Obsoleted tools - 
 #

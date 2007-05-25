@@ -2196,3 +2196,15 @@ Updating with simcore changes (rev. 2329 - Brian Slechta)
 
 some fixes and additions for remote virtual netbatch. i have been sucessful
 with running regression on an_vp remote pool. :)
+
+----------
+spartha1    Date: Fri May 25 16:32:04 EDT 2007  CSN: CSN-asimcore-108
+                  Fri May 25 20:32:04 UTC 2007
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          107 
+
+Updating with simcore changes rev. 2330 (Angshu Parashar)
+
+Added path information for hasim-front-panel to asimstarter.in
