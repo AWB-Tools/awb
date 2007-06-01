@@ -17,4 +17,4 @@
 # 
 #
 
-SUBDIRS=amc awb-resolver @NO_GUI@ @NO_PERLGUI@ awb2 apm-edit awb-wizard
+SUBDIRS=amc awb-resolver @NO_GUI@ @NO_PERLGUI@ awb2 apm-edit apm-find-replace awb-wizard

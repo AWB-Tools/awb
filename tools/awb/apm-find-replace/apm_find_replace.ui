@@ -1,0 +1,630 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>apmFindReplace</class>
+<widget class="QMainWindow">
+    <property name="name">
+        <cstring>apmFindReplace</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>594</width>
+            <height>647</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>apmFindReplace</string>
+    </property>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>Replace</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>30</x>
+                <y>290</y>
+                <width>541</width>
+                <height>161</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Replace</string>
+        </property>
+        <widget class="QComboBox">
+            <property name="name">
+                <cstring>replaceModuleComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>410</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Select a remplacement module</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>replacePushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>440</x>
+                    <y>20</y>
+                    <width>70</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Replace</string>
+            </property>
+            <property name="accel">
+                <string>Alt+R</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Substitute replacement module in each selected model</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>savePushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>440</x>
+                    <y>70</y>
+                    <width>70</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Save</string>
+            </property>
+            <property name="accel">
+                <string>Alt+S</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Save modifed models</string>
+            </property>
+        </widget>
+        <widget class="QListBox">
+            <item>
+                <property name="text">
+                    <string>New Item</string>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>moduleListBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>410</width>
+                    <height>100</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Informatoin about the replacement module</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>Find</cstring>
+        </property>
+        <property name="enabled">
+            <bool>true</bool>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>31</x>
+                <y>9</y>
+                <width>540</width>
+                <height>280</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Find</string>
+        </property>
+        <spacer>
+            <property name="name">
+                <cstring>spacer1</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+            <property name="sizeType">
+                <enum>Expanding</enum>
+            </property>
+            <property name="sizeHint">
+                <size>
+                    <width>70</width>
+                    <height>20</height>
+                </size>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>444</x>
+                    <y>83</y>
+                    <width>70</width>
+                    <height>20</height>
+                </rect>
+            </property>
+        </spacer>
+        <spacer>
+            <property name="name">
+                <cstring>spacer1_2</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+            <property name="sizeType">
+                <enum>Expanding</enum>
+            </property>
+            <property name="sizeHint">
+                <size>
+                    <width>70</width>
+                    <height>20</height>
+                </size>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>443</x>
+                    <y>154</y>
+                    <width>70</width>
+                    <height>20</height>
+                </rect>
+            </property>
+        </spacer>
+        <widget class="QComboBox">
+            <property name="name">
+                <cstring>findModuleComboBox</cstring>
+            </property>
+            <property name="enabled">
+                <bool>false</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>79</y>
+                    <width>410</width>
+                    <height>23</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Restrict serach to just model containing this module</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>filterLineEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>245</y>
+                    <width>410</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Enter a regex to filter model selection</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>filterPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>440</x>
+                    <y>245</y>
+                    <width>70</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Fil&amp;ter</string>
+            </property>
+            <property name="accel">
+                <string>Alt+T</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Filter selection to just models that match this regex</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>findPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>440</x>
+                    <y>50</y>
+                    <width>70</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Find</string>
+            </property>
+            <property name="accel">
+                <string>Alt+F</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Find models matching search criteria</string>
+            </property>
+        </widget>
+        <widget class="QComboBox">
+            <property name="name">
+                <cstring>findModuleTypeComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>410</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Select a module type to search modles for</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>newPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>440</x>
+                    <y>20</y>
+                    <width>70</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;New</string>
+            </property>
+            <property name="accel">
+                <string>Alt+N</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Start a new search</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>rootdirLineEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>410</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Enter directory to start search from</string>
+            </property>
+        </widget>
+        <widget class="QListBox">
+            <item>
+                <property name="text">
+                    <string>New Item</string>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>modelsListBox</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>108</y>
+                    <width>410</width>
+                    <height>131</height>
+                </rect>
+            </property>
+            <property name="selectionMode">
+                <enum>Extended</enum>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Select models in this list to have a module replaced</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>Log</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>30</x>
+                <y>457</y>
+                <width>540</width>
+                <height>141</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Log</string>
+        </property>
+        <widget class="QListBox">
+            <item>
+                <property name="text">
+                    <string>New Item</string>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>logListBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>410</width>
+                    <height>100</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Processing log </string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>clearPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>440</x>
+                    <y>20</y>
+                    <width>70</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Clear</string>
+            </property>
+            <property name="accel">
+                <string>Alt+C</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Clear log</string>
+            </property>
+        </widget>
+    </widget>
+</widget>
+<menubar>
+    <property name="name">
+        <cstring>MenuBar</cstring>
+    </property>
+    <item text="&amp;File" name="fileMenu">
+        <action name="fileNewAction"/>
+        <separator/>
+        <separator/>
+        <action name="fileExitAction"/>
+    </item>
+    <item text="&amp;Edit" name="editMenu">
+        <separator/>
+        <separator/>
+        <action name="editFindAction"/>
+    </item>
+    <item text="&amp;Help" name="helpMenu">
+        <separator/>
+        <action name="helpAboutAction"/>
+    </item>
+    <separator/>
+</menubar>
+<toolbars>
+</toolbars>
+<actions>
+    <action>
+        <property name="name">
+            <cstring>fileNewAction</cstring>
+        </property>
+        <property name="text">
+            <string>New</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;New</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+N</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileExitAction</cstring>
+        </property>
+        <property name="text">
+            <string>Exit</string>
+        </property>
+        <property name="menuText">
+            <string>E&amp;xit</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editFindAction</cstring>
+        </property>
+        <property name="text">
+            <string>Find</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Find...</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+F</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpAboutAction</cstring>
+        </property>
+        <property name="text">
+            <string>About</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;About</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+</actions>
+<connections>
+    <connection>
+        <sender>fileNewAction</sender>
+        <signal>activated()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>fileNew()</slot>
+    </connection>
+    <connection>
+        <sender>fileExitAction</sender>
+        <signal>activated()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>fileExit()</slot>
+    </connection>
+    <connection>
+        <sender>editFindAction</sender>
+        <signal>activated()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>editFind()</slot>
+    </connection>
+    <connection>
+        <sender>helpAboutAction</sender>
+        <signal>activated()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>helpAbout()</slot>
+    </connection>
+    <connection>
+        <sender>findPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>findPushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>replacePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>replacePushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>findModuleTypeComboBox</sender>
+        <signal>activated(const QString&amp;)</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>findModuleTypeComboBox_activated(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>replaceModuleComboBox</sender>
+        <signal>activated(const QString&amp;)</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>ModulesComboBox_activated(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>filterPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>filterPushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>newPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>newPushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>modelsListBox</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>modelsListBox_doubleClicked(QListBoxItem*)</slot>
+    </connection>
+    <connection>
+        <sender>logListBox</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>logListBox_doubleClicked(QListBoxItem*)</slot>
+    </connection>
+    <connection>
+        <sender>filterLineEdit</sender>
+        <signal>returnPressed()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>filterLineEdit_returnPressed()</slot>
+    </connection>
+    <connection>
+        <sender>savePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>savePushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>clearPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>clearPushButton_clicked()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>newPushButton</tabstop>
+    <tabstop>rootdirLineEdit</tabstop>
+    <tabstop>findModuleTypeComboBox</tabstop>
+    <tabstop>findModuleComboBox</tabstop>
+    <tabstop>findPushButton</tabstop>
+    <tabstop>modelsListBox</tabstop>
+    <tabstop>filterLineEdit</tabstop>
+    <tabstop>filterPushButton</tabstop>
+    <tabstop>replaceModuleComboBox</tabstop>
+    <tabstop>replacePushButton</tabstop>
+    <tabstop>savePushButton</tabstop>
+    <tabstop>logListBox</tabstop>
+    <tabstop>clearPushButton</tabstop>
+    <tabstop>moduleListBox</tabstop>
+</tabstops>
+<includes>
+    <include location="local" impldecl="in implementation">apm_find_replace.ui.h</include>
+</includes>
+<variables>
+    <variable access="public">searchModuleType;</variable>
+    <variable access="public">searchModuleMap;</variable>
+    <variable access="public">searchModelMap;</variable>
+    <variable access="public">replacementModule;</variable>
+</variables>
+<slots>
+    <slot>fileNew()</slot>
+    <slot>fileExit()</slot>
+    <slot>editFind()</slot>
+    <slot>helpAbout()</slot>
+    <slot>newPushButton_clicked()</slot>
+    <slot>findModuleTypeComboBox_activated( const QString &amp; )</slot>
+    <slot>findPushButton_clicked()</slot>
+    <slot>modelsListBox_doubleClicked( QListBoxItem * )</slot>
+    <slot>filterLineEdit_returnPressed()</slot>
+    <slot>filterPushButton_clicked()</slot>
+    <slot>ModulesComboBox_activated( const QString &amp; )</slot>
+    <slot>replacePushButton_clicked()</slot>
+    <slot>savePushButton_clicked()</slot>
+    <slot>clearPushButton_clicked()</slot>
+    <slot>logListBox_doubleClicked( QListBoxItem * )</slot>
+</slots>
+<functions>
+    <function access="private">findModels()</function>
+    <function access="private">replaceModule()</function>
+</functions>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

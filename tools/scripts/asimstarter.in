@@ -142,6 +142,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "awb2"                => "tools/awb/awb2/awb2",
   "amc"                 => "tools/awb/amc/amc",
   "apm-edit"            => "tools/awb/apm-edit/apm-edit",
+  "apm-find-replace"    => "tools/awb/apm-find-replace/apm-find-replace",
   "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
   "asim-shell"          => "tools/scripts/asim-shell",
   "asim-benchmark"      => "tools/scripts/asim-benchmark",

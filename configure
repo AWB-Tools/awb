@@ -21293,7 +21293,7 @@ echo $ECHO_N "checking \"for Qt 3.x.x libraries\"... $ECHO_C" >&6
           for i in $QTLIBS
           do
 
-              if test -f $try/lib$i.a -o -f $try/lib$i.so
+              if test -f $try/lib$i.a -o -f $try/lib$i.so -o -f $try/lib$i.so.3
               then
                   QTLIBDIR=$try
                   QT=$i
@@ -23769,6 +23769,8 @@ fi
 
           ac_config_files="$ac_config_files tools/awb/apm-edit/Makefile"
 
+          ac_config_files="$ac_config_files tools/awb/apm-find-replace/Makefile"
+
           ac_config_files="$ac_config_files tools/awb/awb-wizard/Makefile"
 
 
@@ -24384,6 +24386,7 @@ do
   "tools/awb/awb-resolver/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/awb/awb-resolver/Makefile" ;;
   "tools/awb/awb2/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/awb/awb2/Makefile" ;;
   "tools/awb/apm-edit/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/awb/apm-edit/Makefile" ;;
+  "tools/awb/apm-find-replace/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/awb/apm-find-replace/Makefile" ;;
   "tools/awb/awb-wizard/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/awb/awb-wizard/Makefile" ;;
   "$libasimIncDir/xmlout.h" ) CONFIG_LINKS="$CONFIG_LINKS $libasimIncDir/xmlout.h:$libasimIncDir/$xmlout.h" ;;
   "$libasimSrcDir/xmlout.cpp" ) CONFIG_LINKS="$CONFIG_LINKS $libasimSrcDir/xmlout.cpp:$libasimSrcDir/$xmlout.cpp" ;;

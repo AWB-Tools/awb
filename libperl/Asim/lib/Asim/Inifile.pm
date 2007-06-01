@@ -21,7 +21,9 @@
 package Asim::Inifile;
 use warnings;
 use strict;
+
 use Fcntl ':flock';
+use File::Copy;
 
 my $debug = 0;
 
@@ -472,6 +474,41 @@ NEWFILE:
   $self->{filename} = $file;
   $self->modified(0);
   return 1
+}
+
+################################################################
+
+=item $inifile-E<gt>backup()[$file])
+
+Save the inifile (or optionally the specificed $file) into a
+new file with a suffix of the form .~<version>~.
+
+Note: backups are 0 extended up to 3 digits for nice lexical
+sorts. If one has more than 999 backups, then probably nice
+lexical sorts aren't going to make things more comprehensible.
+
+=cut
+
+################################################################
+
+
+sub backup {
+  my $self = shift;
+  my $filename = shift | $self->filename();
+
+  if (! -e $filename) {
+    return undef;
+  }
+
+  my $v = "001";
+
+  while (-e "$filename.~$v~") {
+    $v = sprintf("%03d", $v+1);
+  }
+
+  copy($filename, "$filename.~$v~") || return undef;
+
+  return 1;
 }
 
 

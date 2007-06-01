@@ -451,6 +451,25 @@ sub _put_module {
 
 ################################################################
 
+=item $model-E<gt>backup($file)
+
+Backup the file.
+
+=cut
+
+################################################################
+
+
+sub backup {
+  my $self = shift;
+  my $file = shift || $self->filename() || return undef;
+
+  return $self->{inifile}->backup($file);
+}
+
+
+################################################################
+
 =item $model-E<gt>accessors()
 
 Return a list of accessor functions for this object
@@ -704,6 +723,82 @@ sub modelroot  {
   }
 
   return ($self->{system});
+}
+
+################################################################
+
+=item $model-E<gt>smart_add_submodule($parent_module $child_module)
+
+Add the $child_module as a submodule of the parent module.
+If parent is undefined we make child the modelroot.
+
+This function will work if the $child_module is a submodel.
+
+IF the $child_module is replacing an existing mooule then an 
+attempt will be made to add the old grand-children into the
+new child.
+
+=cut
+
+################################################################
+
+sub smart_add_submodule {
+  my $self = shift;
+  my $new_child_module = shift;
+
+  my $parent_module;
+  my $old_child_module;
+
+  my $provides = $new_child_module->provides();
+
+  if ($provides eq $self->provides()) {
+    #
+    # This is the root --- handle specially
+    #
+    $parent_module = undef;
+    $old_child_module = $self->modelroot();
+
+  } else {
+    #
+    # This is an internal node...
+    #
+
+    #
+    # Find the parent module by looking for the module that
+    # requires a module of the chosen type.... 
+    #
+    #    Note: implicit dependence on single provides
+    #
+    $parent_module = $self->find_module_requiring($provides);
+    $old_child_module = $parent_module->find_module_providing($provides);
+  }
+
+
+  #
+  # Check if we're adding a submodel
+  #
+  if (ref($new_child_module) eq "Asim::Model") {
+    return $self->add_submodule($parent_module, $new_child_module->modelroot());
+  }
+
+  #
+  # Preserve any sub-submodules that were of the same type 
+  # as in the submodule being replaced, as long as we are 
+  # not the root of a submodel.
+  #
+  if (defined($old_child_module)
+      && !($old_child_module->isroot() && defined($parent_module))) {
+    foreach my $s ($old_child_module->submodules()) {
+      if (defined($s)) {
+        $self->add_submodule($new_child_module, $s);
+      }
+    }
+  }
+
+  #
+  # Add the new child module into the tree
+  #
+  return $self->add_submodule($parent_module, $new_child_module);
 }
 
 ################################################################

@@ -2266,3 +2266,49 @@ different from experiment name
 
 also, added optional timestamps to asim-run output. use --printtimes or
 PRINT_TIMES=1 in your asimrc.
+
+----------
+spartha1    Date: Fri Jun  1 16:00:11 EDT 2007  CSN: CSN-asimcore-112
+                  Fri Jun  1 20:00:11 UTC 2007
+
+
+Directory .
+ configure                 Locally Modified          111 
+ configure.in              Locally Modified          111 
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          111 
+ Model.pm                  Locally Modified          111 
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          111 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          111 
+ apm-find-replace/         Locally Added               0 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Added               0 
+ apm_find_replace_head.pl  Locally Added               0 
+ apm_find_replace.ui       Locally Added               0 
+ apm_find_replace_main.pl  Locally Added               0 
+ Makefile.am               Locally Added               0 
+ apm_find_replace.ui.h     Locally Added               0 
+
+Directory tools/awb
+ Makefile.am               Locally Modified          111 
+
+Updating with simcore changes rev. 2336 (Joel Emer)
+
+Added apm-find-replace a graphical program that can be
+used to do bulk replacements of a module across a set of
+models.Invoke as: apm-find-replace or apm-find-replace --help
+for some documentation.
+
+Changes in Model.pm to add a method to intelligently add
+a module to a model.
+
+Changes in Inifile.pm to add a method to back up a file.
+Backups are in the GNU emacs style of .~<version>~.
+
+Joel
