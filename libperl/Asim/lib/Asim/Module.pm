@@ -1040,6 +1040,9 @@ Return the owning model of this module. If $value
 is provided designate it as the owner of this module.
 specified.
 
+Note: By convention only the root module of a model or
+submodel will have an owner defined.
+
 =cut
 
 ################################################################
@@ -1065,6 +1068,8 @@ that provides $provides
 
 Maybe this should return the list of modules that provide $provides.
 
+Note: this method does not recurse into submodels
+
 =cut
 
 ################################################################
@@ -1072,15 +1077,47 @@ Maybe this should return the list of modules that provide $provides.
 sub find_module_providing {
   my $self = shift;
   my $modtype = shift;
+  my $recurse = shift || undef;
+
   my $found;
 
   return $self if ($self->provides() eq $modtype);
 
+  # Do not look at child of a submouule root;
+  return undef if  $recurse && $self->isroot();
+
   foreach my $submodule ($self->submodules()) {
     next unless defined($submodule);
 
-    $found = $submodule->find_module_providing($modtype);
+    $found = $submodule->find_module_providing($modtype, 1);
     return $found if ($found);
+  }
+
+  return undef;
+}
+
+################################################################
+
+=item $module-E<gt>embed_submodel($provides)
+
+Turns any embedded submodels into direct components of the
+module tree.
+
+=cut
+
+################################################################
+
+sub embed_submodels {
+  my $self = shift;
+
+  foreach my $submodule ($self->submodules()) {
+    next unless defined($submodule);
+
+    if ($submodule->isroot()) {
+      $submodule->isroot(0);
+    }
+
+    $submodule->embed_submodels();
   }
 
   return undef;
@@ -1092,6 +1129,8 @@ sub find_module_providing {
 
 Recursively search the module list looking for the first module
 that requires $requires
+
+Note: this method does not recurse into submodels
 
 =cut
 
@@ -1108,6 +1147,7 @@ sub find_module_requiring {
 
   foreach my $submodule ($self->submodules()) {
     next unless defined($submodule);
+    next if $submodule->isroot();
 
     $found = $submodule->find_module_requiring($modtype);
     return $found if ($found);

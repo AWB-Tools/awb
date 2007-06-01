@@ -2410,3 +2410,31 @@ Updating with simcore changes (rev. 2341 - Brian Slechta)
 
 added basic acessors to the gen_cache_class. made very minor changes to
 asim-run.
+
+----------
+spartha1    Date: Fri Jun  1 16:47:20 EDT 2007  CSN: CSN-asimcore-118
+                  Fri Jun  1 20:47:20 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          117 
+ Model.pm                  Locally Modified          117 
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.ui       Locally Modified          117 
+ apm_find_replace_main.pl  Locally Modified          117 
+ apm_find_replace.ui.h     Locally Modified          117 
+
+Updating with simcore changes (rev. 2342 - Joel Emer)
+
+apm-find-relace was updated with enhanced filtering capabilities
+and the ability to rename models.
+
+The semantics of find_module_{providing,requiring}() in Asim::Model
+and Asim::Module have changed to not include searching of the
+modules in a submodel. To get the previous behavior one much first
+invoke emded_submodles on the model. The only script that actually
+relied on the old semantics was hasim-connect, and it has been
+updated.
+
+Joel

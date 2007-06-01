@@ -14,8 +14,10 @@ use Asim;
 my $status;
 
 my $help = 0;
+my $list = undef;
 
-$status = GetOptions( "help"           => \$help
+$status = GetOptions( "list"           => \$list,
+                      "help"           => \$help
                     );
 
 if (!$status) {
@@ -34,11 +36,26 @@ if ($help) {
 
 Asim::init();
 
-my $a = Qt::Application(\@ARGV);
-my $w = apmFindReplace;
+my $a;
+my $w;
+
+$a = Qt::Application(\@ARGV);
+$w = apmFindReplace;
 $a->setMainWidget($w);
 $w->show;
-exit $a->exec;
+$status = $a->exec();
+
+if ($status) {
+  exit $status;
+}
+
+if ($list) {
+  my $modelhash = $w->models(1);
+
+  foreach my $i (sort keys %{$modelhash}) {
+    print $modelhash->{$i}->filename() . "\n";
+  }
+}
 
 
 __END__
@@ -61,6 +78,11 @@ of a module with another module (or submodel) in a set of models.
 The following command line switches are currently supported:
 
 =over 4
+
+=item --list
+
+At exit, print the filenames for each of the selected models. This
+allows this program to be used as a sort of model selection dialog.
 
 =item --help
 

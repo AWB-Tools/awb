@@ -174,7 +174,11 @@ sub open {
     my $system = $inifile->get("Model","system");
     $self->{system} = $self->_get_module($system);
 
-  } elsif ($version >= 2.0 && $version <= 2.1) {
+  } elsif ($version >= 2.0 && $version < 3.0) {
+    #
+    # Althought we are actually version 2.1, we
+    # should be able to read versions up to 3.0
+    #
     my $model =  $inifile->get("Model","model");
     $self->modelroot($self->_get_module($model));
 
@@ -239,7 +243,14 @@ sub _get_module {
   my $submod;
 
   foreach my $r (@requires) {
-      $submodname = $inifile->get("$modname/Requires", $r) || next;
+      $submodname = $inifile->get("$modname/Requires", $r);
+
+      if (! defined($submodname)) {
+        _process_warning("Model missing [$modname/Reguires]  in .apm file\n");
+        $self->{missing}++;
+        next;
+      }
+
       $submod = $self->_get_module($submodname) || next;
       $module->add_submodule($submod);
   }
@@ -755,6 +766,11 @@ sub smart_add_submodule {
     #
     # This is the root --- handle specially
     #
+    if (ref($new_child_module) eq "Asim::Model") {
+      _process_warning("Illegal attempt to insert submodel as root of model/n");
+      return undef;
+    }
+
     $parent_module = undef;
     $old_child_module = $self->modelroot();
 
@@ -770,6 +786,11 @@ sub smart_add_submodule {
     #    Note: implicit dependence on single provides
     #
     $parent_module = $self->find_module_requiring($provides);
+    if (! defined($parent_module)) {
+      # Module type not used in this model
+      return undef;
+    }
+
     $old_child_module = $parent_module->find_module_providing($provides);
   }
 
@@ -956,12 +977,37 @@ sub remove_submodule {
 
 ################################################################
 
+=item $model-E<gt>contains_module_providing($provides)
+
+Recursively search the module list looking a stop in the
+model that needs a module of type $provides
+
+Note: this method does not recurse into submodels
+
+=cut
+
+################################################################
+
+sub contains_module_providing {
+  my $self = shift;
+  my $provides = shift;
+
+  # TBD: This is a pretty naive implementation...
+
+  return defined($self->find_module_providing($provides)) ||
+         defined($self->find_module_requiring($provides));
+}
+
+################################################################
+
 =item $model-E<gt>find_module_providing($provides)
 
 Recursively search the module list looking for the first module
 that provides $provides
 
 Maybe this should return the list of modules that provide $provides.
+
+Note: this method does not recurse into submodels
 
 =cut
 
@@ -983,6 +1029,8 @@ Recursively search the module list looking for the first module
 that requires $requires.
 
 Maybe this should return the list of modules that requires $requires.
+
+Note: this method does not recurse into submodels
 
 =cut
 
@@ -1059,6 +1107,27 @@ sub missing_module_count {
   my $self = shift;
 
   return $self->{missing};
+}
+
+################################################################
+
+=item $model-E<gt>embed_submodels()
+
+Turns any embedded submodels into direct components of the model
+
+=cut
+
+################################################################
+
+sub embed_submodels {
+  my $self = shift;
+  my $root = $self->modelroot();
+
+  if (! defined($root)) {
+    return undef;
+  }
+
+  return $root->embed_submodels();
 }
 
 ################################################################
@@ -1370,7 +1439,7 @@ sub run {
   my $status;
 
   if (! $self->issetup()) {
-      return _process_error("Model does not appear to be configured", %args);
+      return _process_error("Model does not appear to be configured\n", %args);
   }
 
   # determine correct command (Asim v. Hasim)
@@ -1488,10 +1557,10 @@ sub _process_warning {
 
   my $warning = "Asim::Model:: Warning: - $message";
   if (defined($getcommand)) {
-      return "echo \"$warning\"";
+      return "echo -n \"$warning\"";
   }
 
-  print "$warning\n";
+  print "$warning";
   return 1;
 }
 
@@ -1502,10 +1571,10 @@ sub _process_error {
 
   my $error = "Asim::Model:: Error: - $message";
   if (defined($getcommand)) {
-      return "echo \"$error\"";
+      return "echo -n \"$error\"";
   }
 
-  print "$error\n";
+  print "$error";
   return 1;
 }
 
