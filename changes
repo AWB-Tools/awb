@@ -2357,3 +2357,18 @@ Updating with simcore changes (rev. 2338 - Brian Slechta)
 
 added missing PTHREAD_* variables to various systems. copied them from
 multichip_common_system.awb
+
+----------
+spartha1    Date: Fri Jun  1 16:41:50 EDT 2007  CSN: CSN-asimcore-115
+                  Fri Jun  1 20:41:50 UTC 2007
+
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.ui       Locally Modified          114 
+ apm_find_replace.ui.h     Locally Modified          114 
+
+Updating with simcore changes (rev. 2339 - Joel Emer)
+
+Changed layout and added more filtering options.
+
+Joel

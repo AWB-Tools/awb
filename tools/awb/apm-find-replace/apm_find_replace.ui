@@ -8,402 +8,648 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>594</width>
-            <height>647</height>
+            <width>597</width>
+            <height>667</height>
         </rect>
     </property>
     <property name="caption">
         <string>apmFindReplace</string>
     </property>
-    <widget class="QGroupBox">
+    <widget class="QFrame">
         <property name="name">
-            <cstring>Replace</cstring>
+            <cstring>frame3</cstring>
         </property>
         <property name="geometry">
             <rect>
-                <x>30</x>
-                <y>290</y>
-                <width>541</width>
-                <height>161</height>
+                <x>10</x>
+                <y>280</y>
+                <width>570</width>
+                <height>180</height>
             </rect>
         </property>
-        <property name="title">
-            <string>Replace</string>
+        <property name="frameShape">
+            <enum>StyledPanel</enum>
         </property>
-        <widget class="QComboBox">
+        <property name="frameShadow">
+            <enum>Raised</enum>
+        </property>
+        <widget class="QGroupBox">
             <property name="name">
-                <cstring>replaceModuleComboBox</cstring>
+                <cstring>groupBox5</cstring>
             </property>
             <property name="geometry">
                 <rect>
                     <x>10</x>
-                    <y>20</y>
-                    <width>410</width>
-                    <height>24</height>
+                    <y>10</y>
+                    <width>540</width>
+                    <height>150</height>
                 </rect>
             </property>
-            <property name="toolTip" stdset="0">
-                <string>Select a remplacement module</string>
+            <property name="title">
+                <string>Models</string>
             </property>
-        </widget>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>replacePushButton</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>440</x>
-                    <y>20</y>
-                    <width>70</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>&amp;Replace</string>
-            </property>
-            <property name="accel">
-                <string>Alt+R</string>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Substitute replacement module in each selected model</string>
-            </property>
-        </widget>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>savePushButton</cstring>
-            </property>
-            <property name="enabled">
-                <bool>true</bool>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>440</x>
-                    <y>70</y>
-                    <width>70</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>&amp;Save</string>
-            </property>
-            <property name="accel">
-                <string>Alt+S</string>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Save modifed models</string>
-            </property>
-        </widget>
-        <widget class="QListBox">
-            <item>
-                <property name="text">
-                    <string>New Item</string>
+            <widget class="QListBox">
+                <property name="name">
+                    <cstring>modelsListBox</cstring>
                 </property>
-            </item>
-            <property name="name">
-                <cstring>moduleListBox</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>50</y>
-                    <width>410</width>
-                    <height>100</height>
-                </rect>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Informatoin about the replacement module</string>
-            </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>23</y>
+                        <width>410</width>
+                        <height>110</height>
+                    </rect>
+                </property>
+                <property name="selectionMode">
+                    <enum>Extended</enum>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Select models in this list to have a module replaced</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>invertPushButton</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>443</x>
+                        <y>29</y>
+                        <width>70</width>
+                        <height>24</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Invert</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Filter selection to just models that match this regex</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>purgePushButton</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>443</x>
+                        <y>66</y>
+                        <width>70</width>
+                        <height>24</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Purge</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Filter selection to just models that match this regex</string>
+                </property>
+            </widget>
         </widget>
     </widget>
-    <widget class="QGroupBox">
+    <widget class="QFrame">
         <property name="name">
-            <cstring>Find</cstring>
-        </property>
-        <property name="enabled">
-            <bool>true</bool>
+            <cstring>frame4</cstring>
         </property>
         <property name="geometry">
             <rect>
-                <x>31</x>
-                <y>9</y>
-                <width>540</width>
-                <height>280</height>
+                <x>10</x>
+                <y>470</y>
+                <width>571</width>
+                <height>150</height>
             </rect>
         </property>
-        <property name="title">
-            <string>Find</string>
+        <property name="frameShape">
+            <enum>StyledPanel</enum>
         </property>
-        <spacer>
+        <property name="frameShadow">
+            <enum>Raised</enum>
+        </property>
+        <widget class="QGroupBox">
             <property name="name">
-                <cstring>spacer1</cstring>
-            </property>
-            <property name="orientation">
-                <enum>Horizontal</enum>
-            </property>
-            <property name="sizeType">
-                <enum>Expanding</enum>
-            </property>
-            <property name="sizeHint">
-                <size>
-                    <width>70</width>
-                    <height>20</height>
-                </size>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>444</x>
-                    <y>83</y>
-                    <width>70</width>
-                    <height>20</height>
-                </rect>
-            </property>
-        </spacer>
-        <spacer>
-            <property name="name">
-                <cstring>spacer1_2</cstring>
-            </property>
-            <property name="orientation">
-                <enum>Horizontal</enum>
-            </property>
-            <property name="sizeType">
-                <enum>Expanding</enum>
-            </property>
-            <property name="sizeHint">
-                <size>
-                    <width>70</width>
-                    <height>20</height>
-                </size>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>443</x>
-                    <y>154</y>
-                    <width>70</width>
-                    <height>20</height>
-                </rect>
-            </property>
-        </spacer>
-        <widget class="QComboBox">
-            <property name="name">
-                <cstring>findModuleComboBox</cstring>
-            </property>
-            <property name="enabled">
-                <bool>false</bool>
+                <cstring>Log</cstring>
             </property>
             <property name="geometry">
                 <rect>
                     <x>10</x>
-                    <y>79</y>
-                    <width>410</width>
-                    <height>23</height>
+                    <y>10</y>
+                    <width>540</width>
+                    <height>120</height>
                 </rect>
             </property>
-            <property name="toolTip" stdset="0">
-                <string>Restrict serach to just model containing this module</string>
+            <property name="title">
+                <string>Log</string>
             </property>
-        </widget>
-        <widget class="QLineEdit">
-            <property name="name">
-                <cstring>filterLineEdit</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>245</y>
-                    <width>410</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Enter a regex to filter model selection</string>
-            </property>
-        </widget>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>filterPushButton</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>440</x>
-                    <y>245</y>
-                    <width>70</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Fil&amp;ter</string>
-            </property>
-            <property name="accel">
-                <string>Alt+T</string>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Filter selection to just models that match this regex</string>
-            </property>
-        </widget>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>findPushButton</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>440</x>
-                    <y>50</y>
-                    <width>70</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>&amp;Find</string>
-            </property>
-            <property name="accel">
-                <string>Alt+F</string>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Find models matching search criteria</string>
-            </property>
-        </widget>
-        <widget class="QComboBox">
-            <property name="name">
-                <cstring>findModuleTypeComboBox</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>50</y>
-                    <width>410</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Select a module type to search modles for</string>
-            </property>
-        </widget>
-        <widget class="QPushButton">
-            <property name="name">
-                <cstring>newPushButton</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>440</x>
-                    <y>20</y>
-                    <width>70</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>&amp;New</string>
-            </property>
-            <property name="accel">
-                <string>Alt+N</string>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Start a new search</string>
-            </property>
-        </widget>
-        <widget class="QLineEdit">
-            <property name="name">
-                <cstring>rootdirLineEdit</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>20</y>
-                    <width>410</width>
-                    <height>24</height>
-                </rect>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Enter directory to start search from</string>
-            </property>
-        </widget>
-        <widget class="QListBox">
-            <item>
-                <property name="text">
-                    <string>New Item</string>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>clearPushButton</cstring>
                 </property>
-            </item>
-            <property name="name">
-                <cstring>modelsListBox</cstring>
-            </property>
-            <property name="enabled">
-                <bool>true</bool>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>108</y>
-                    <width>410</width>
-                    <height>131</height>
-                </rect>
-            </property>
-            <property name="selectionMode">
-                <enum>Extended</enum>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Select models in this list to have a module replaced</string>
-            </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>440</x>
+                        <y>20</y>
+                        <width>70</width>
+                        <height>24</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>&amp;Clear</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+C</string>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Clear log</string>
+                </property>
+            </widget>
+            <widget class="QListBox">
+                <property name="name">
+                    <cstring>logListBox</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>20</y>
+                        <width>410</width>
+                        <height>80</height>
+                    </rect>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Processing log </string>
+                </property>
+            </widget>
         </widget>
     </widget>
-    <widget class="QGroupBox">
+    <widget class="QTabWidget">
         <property name="name">
-            <cstring>Log</cstring>
+            <cstring>tabWidget2</cstring>
         </property>
         <property name="geometry">
             <rect>
-                <x>30</x>
-                <y>457</y>
-                <width>540</width>
-                <height>141</height>
+                <x>9</x>
+                <y>10</y>
+                <width>570</width>
+                <height>260</height>
             </rect>
         </property>
-        <property name="title">
-            <string>Log</string>
-        </property>
-        <widget class="QListBox">
-            <item>
-                <property name="text">
-                    <string>New Item</string>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tab</cstring>
+            </property>
+            <attribute name="title">
+                <string>Find</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>Find</cstring>
                 </property>
-            </item>
-            <property name="name">
-                <cstring>logListBox</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>20</y>
-                    <width>410</width>
-                    <height>100</height>
-                </rect>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Processing log </string>
-            </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>17</x>
+                        <y>7</y>
+                        <width>540</width>
+                        <height>210</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Find</string>
+                </property>
+                <spacer>
+                    <property name="name">
+                        <cstring>spacer1</cstring>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                        <enum>Expanding</enum>
+                    </property>
+                    <property name="sizeHint">
+                        <size>
+                            <width>70</width>
+                            <height>20</height>
+                        </size>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>444</x>
+                            <y>83</y>
+                            <width>70</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                </spacer>
+                <widget class="QComboBox">
+                    <property name="name">
+                        <cstring>findModuleComboBox</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>79</y>
+                            <width>410</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Restrict serach to just model containing this module</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>findPushButton</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>440</x>
+                            <y>50</y>
+                            <width>70</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Find</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+F</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Find models matching search criteria</string>
+                    </property>
+                </widget>
+                <widget class="QComboBox">
+                    <property name="name">
+                        <cstring>findModuleTypeComboBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>50</y>
+                            <width>410</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Select a module type to search modles for</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>newPushButton</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>440</x>
+                            <y>20</y>
+                            <width>70</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;New</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+N</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Start a new search</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>rootdirLineEdit</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>410</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enter directory to start search from</string>
+                    </property>
+                </widget>
+            </widget>
         </widget>
-        <widget class="QPushButton">
+        <widget class="QWidget">
             <property name="name">
-                <cstring>clearPushButton</cstring>
+                <cstring>TabPage</cstring>
             </property>
-            <property name="enabled">
-                <bool>true</bool>
+            <attribute name="title">
+                <string>Filter</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>groupBox4</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>0</y>
+                        <width>530</width>
+                        <height>211</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Filter</string>
+                </property>
+                <widget class="QButtonGroup">
+                    <property name="name">
+                        <cstring>ActionButtonGroup</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>101</x>
+                            <y>14</y>
+                            <width>270</width>
+                            <height>50</height>
+                        </rect>
+                    </property>
+                    <property name="title">
+                        <string>Action</string>
+                    </property>
+                    <widget class="QRadioButton">
+                        <property name="name">
+                            <cstring>selectRadioButton</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>35</x>
+                                <y>23</y>
+                                <width>59</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Select</string>
+                        </property>
+                        <property name="checked">
+                            <bool>true</bool>
+                        </property>
+                    </widget>
+                    <widget class="QRadioButton">
+                        <property name="name">
+                            <cstring>removeRadioButton</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>167</x>
+                                <y>23</y>
+                                <width>71</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Remove</string>
+                        </property>
+                    </widget>
+                    <widget class="QRadioButton">
+                        <property name="name">
+                            <cstring>addRadioButton</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>100</x>
+                                <y>24</y>
+                                <width>60</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Add</string>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>filterLineEdit</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>76</y>
+                            <width>410</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enter a regex to filter model selection</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>attrLineEdit</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>11</x>
+                            <y>110</y>
+                            <width>410</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enter a regex to filter model selection</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>attrPushButton</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>439</x>
+                            <y>111</y>
+                            <width>70</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Attribute</string>
+                    </property>
+                    <property name="accel">
+                        <string></string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Filter selection to just models that match this regex</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>filterPushButton</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>440</x>
+                            <y>76</y>
+                            <width>70</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Name</string>
+                    </property>
+                    <property name="accel">
+                        <string></string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Filter selection to just models that match this regex</string>
+                    </property>
+                </widget>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tab</cstring>
             </property>
-            <property name="geometry">
-                <rect>
-                    <x>440</x>
-                    <y>20</y>
-                    <width>70</width>
-                    <height>24</height>
-                </rect>
+            <attribute name="title">
+                <string>Replace</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>Replace</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>9</x>
+                        <y>15</y>
+                        <width>541</width>
+                        <height>170</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Replace</string>
+                </property>
+                <widget class="QComboBox">
+                    <property name="name">
+                        <cstring>replaceModuleComboBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>410</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Select a remplacement module</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>replacePushButton</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>440</x>
+                            <y>20</y>
+                            <width>70</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Replace</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+R</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Substitute replacement module in each selected model</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>savePushButton</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>440</x>
+                            <y>70</y>
+                            <width>70</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>&amp;Save</string>
+                    </property>
+                    <property name="accel">
+                        <string>Alt+S</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Save modifed models</string>
+                    </property>
+                </widget>
+                <widget class="QListBox">
+                    <item>
+                        <property name="text">
+                            <string>Module Description</string>
+                        </property>
+                    </item>
+                    <property name="name">
+                        <cstring>moduleListBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>50</y>
+                            <width>410</width>
+                            <height>100</height>
+                        </rect>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Informatoin about the replacement module</string>
+                    </property>
+                </widget>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>TabPage</cstring>
             </property>
-            <property name="text">
-                <string>&amp;Clear</string>
-            </property>
-            <property name="accel">
-                <string>Alt+C</string>
-            </property>
-            <property name="toolTip" stdset="0">
-                <string>Clear log</string>
-            </property>
+            <attribute name="title">
+                <string>Rename</string>
+            </attribute>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel1</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>99</x>
+                        <y>31</y>
+                        <width>381</width>
+                        <height>81</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Rename models
+	Unimplemented</string>
+                </property>
+            </widget>
         </widget>
     </widget>
 </widget>
@@ -538,12 +784,6 @@
         <slot>ModulesComboBox_activated(const QString&amp;)</slot>
     </connection>
     <connection>
-        <sender>filterPushButton</sender>
-        <signal>clicked()</signal>
-        <receiver>apmFindReplace</receiver>
-        <slot>filterPushButton_clicked()</slot>
-    </connection>
-    <connection>
         <sender>newPushButton</sender>
         <signal>clicked()</signal>
         <receiver>apmFindReplace</receiver>
@@ -562,12 +802,6 @@
         <slot>logListBox_doubleClicked(QListBoxItem*)</slot>
     </connection>
     <connection>
-        <sender>filterLineEdit</sender>
-        <signal>returnPressed()</signal>
-        <receiver>apmFindReplace</receiver>
-        <slot>filterLineEdit_returnPressed()</slot>
-    </connection>
-    <connection>
         <sender>savePushButton</sender>
         <signal>clicked()</signal>
         <receiver>apmFindReplace</receiver>
@@ -579,6 +813,42 @@
         <receiver>apmFindReplace</receiver>
         <slot>clearPushButton_clicked()</slot>
     </connection>
+    <connection>
+        <sender>filterPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>filterPushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>filterLineEdit</sender>
+        <signal>returnPressed()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>filterLineEdit_returnPressed()</slot>
+    </connection>
+    <connection>
+        <sender>attrPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>attrPushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>attrLineEdit</sender>
+        <signal>returnPressed()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>attrLineEdit_returnPressed()</slot>
+    </connection>
+    <connection>
+        <sender>invertPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>invertPushButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>purgePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>purgePushButton_clicked()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>newPushButton</tabstop>
@@ -587,8 +857,6 @@
     <tabstop>findModuleComboBox</tabstop>
     <tabstop>findPushButton</tabstop>
     <tabstop>modelsListBox</tabstop>
-    <tabstop>filterLineEdit</tabstop>
-    <tabstop>filterPushButton</tabstop>
     <tabstop>replaceModuleComboBox</tabstop>
     <tabstop>replacePushButton</tabstop>
     <tabstop>savePushButton</tabstop>
@@ -616,11 +884,15 @@
     <slot>modelsListBox_doubleClicked( QListBoxItem * )</slot>
     <slot>filterLineEdit_returnPressed()</slot>
     <slot>filterPushButton_clicked()</slot>
+    <slot>attrLineEdit_returnPressed()</slot>
+    <slot>attrPushButton_clicked()</slot>
     <slot>ModulesComboBox_activated( const QString &amp; )</slot>
     <slot>replacePushButton_clicked()</slot>
     <slot>savePushButton_clicked()</slot>
     <slot>clearPushButton_clicked()</slot>
     <slot>logListBox_doubleClicked( QListBoxItem * )</slot>
+    <slot>invertPushButton_clicked()</slot>
+    <slot>purgePushButton_clicked()</slot>
 </slots>
 <functions>
     <function access="private">findModels()</function>

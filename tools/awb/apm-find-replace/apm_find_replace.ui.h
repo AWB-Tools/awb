@@ -283,6 +283,54 @@ void apmFindReplace::findModels()
 }
 
 
+void apmFindReplace::invertPushButton_clicked()
+{
+  #
+  # Invert selection on each item
+  #
+
+  my $max = modelsListBox->count();
+
+  for (my $i=0; $i < $max; $i++) {
+    my $item;
+    
+    $item = modelsListBox->item($i);
+    next if (! defined($item));
+
+    my $selected = modelsListBox->isSelected($i);
+
+    modelsListBox->setSelected($i,! $selected);
+  }
+}
+
+
+void apmFindReplace::purgePushButton_clicked()
+{
+  #
+  # Invert selection on each item
+  #
+
+  my $max = 
+
+  my $i = 0;
+
+  while ($i < modelsListBox->count()) {
+    my $item;
+    
+    $item = modelsListBox->item($i);
+    next if (! defined($item));
+
+    my $selected = modelsListBox->isSelected($i);
+
+    if (! $selected) {
+        modelsListBox->removeItem($i);
+        $i = 0;
+    } else {
+        $i++;
+    }
+  }
+}
+
 void apmFindReplace::modelsListBox_doubleClicked( QListBoxItem * )
 {
     my $item = shift;
@@ -312,6 +360,13 @@ void apmFindReplace::filterPushButton_clicked()
   my $filter = filterLineEdit->text();
 
   #
+  # Get action
+  #
+  my $select = selectRadioButton->isChecked();
+  my $add    = addRadioButton->isChecked();
+  my $remove = removeRadioButton->isChecked();
+
+  #
   # Check (and select) model names that match regex
   #
 
@@ -319,17 +374,85 @@ void apmFindReplace::filterPushButton_clicked()
 
   for (my $i=0; $i < $max; $i++) {
     my $item;
-    my $select;
+    my $match;
     
     $item = modelsListBox->item($i);
     next if (! defined($item));
 
-    $select = $item->text() =~ /$filter/;      
+    $match = $item->text() =~ /$filter/;      
 
-    modelsListBox->setSelected($i,$select);
+    if ($match) {
+      if ($select || $add) {
+        modelsListBox->setSelected($i,1);
+      }
+      if ($remove) {
+        modelsListBox->setSelected($i,0);
+      }
+    } else {
+      if ($select) {
+        modelsListBox->setSelected($i,0);
+      }
+    }
   }
 }
 
+
+
+
+void apmFindReplace::attrLineEdit_returnPressed()
+{
+  attrPushButton_clicked();
+}
+
+
+void apmFindReplace::attrPushButton_clicked()
+{
+  my $filter = attrLineEdit->text();
+
+  #
+  # Get action
+  #
+  my $select = selectRadioButton->isChecked();
+  my $add    = addRadioButton->isChecked();
+  my $remove = removeRadioButton->isChecked();
+
+  #
+  # Check (and select) model names that match regex
+  #
+
+  my $max = modelsListBox->count();
+
+  for (my $i=0; $i < $max; $i++) {
+    my $item;
+    my $model;
+    my $match;
+    
+    $item = modelsListBox->item($i);
+    next if (! defined($item));
+
+    $model = searchModelMap->{$item->text()};
+    next if (! defined($model));
+
+    my @attributes = $model->attributes();
+
+    $match = grep(/$filter/, @attributes);
+
+    # print "$filter - $match - " . join(",", @attributes);
+
+    if ($match) {
+      if ($select || $add) {
+        modelsListBox->setSelected($i,1);
+      }
+      if ($remove) {
+        modelsListBox->setSelected($i,0);
+      }
+    } else {
+      if ($select) {
+        modelsListBox->setSelected($i,0);
+      }
+    }
+  }
+}
 
 #
 #  Replace Group Box
@@ -535,5 +658,6 @@ void apmFindReplace::logListBox_doubleClicked( QListBoxItem * )
 
     system("apm-edit " . $model->filename() . " &");
 }
+
 
 
