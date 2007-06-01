@@ -1136,7 +1136,7 @@ sub batch_build_run
 	    PrintInfo(".... Submitting model build\n");
 	    
 	    # Build model (optimized)	    
-	    if (SubmitJob("asim-shell --batch build model -- --builddir $model_buildarea --options=$buildopt", "1")) {
+	    if (SubmitJob("asim-shell --batch build model -- --builddir $model_buildarea --options=$buildopt", $bm_name, "1")) {
 		HandleBuildFailure();
 		close LOGFILE;
 		wait_and_exit(1);
@@ -1466,7 +1466,8 @@ sub run_one_benchmark
 
         }
 
-        my $submiterror = SubmitJob($submit_cmd);
+        PrintInfo("bm name is currently $bm_name");
+        my $submiterror = SubmitJob($submit_cmd, $bm_name);
         
         if ($submiterror) {
             # There was an error in the submission.
@@ -1548,7 +1549,7 @@ sub run_one_benchmark
                     return;
                 }
 
-                if ( SubmitJob("$batch_scr -benchmark=$trace_name -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input") ) {
+                if ( SubmitJob("$batch_scr -benchmark=$trace_name -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input"), $bm_name ) {
                     # There was an error in the submission.
                     $exit_code++;
                     return;
@@ -1934,7 +1935,9 @@ sub FullPath {
 ##
 sub SubmitJob {
   my $command = shift;
+  my $bm_name = shift;
   my $modelSubmit = shift;
+  PrintInfo("start of submit job: bm_name is $bm_name");
 
   if (! $runbatch) {
     # Run command directly...
@@ -2013,7 +2016,7 @@ sub SubmitJob {
     }
   }
   return 0;
-}
+} # end SubmitJob
 
 # -----------------------------------------------------------------------------
 ##

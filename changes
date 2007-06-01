@@ -2450,3 +2450,20 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2343 - Sailashri Parthasarathy)
 
 Minor fix to asim-batch
+
+----------
+spartha1    Date: Fri Jun  1 16:50:46 EDT 2007  CSN: CSN-asimcore-120
+                  Fri Jun  1 20:50:46 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          119 
+
+Updating with simcore changes (rev. 2344 - Michael Powell)
+
+Bugfix to asim-run suggested by adhilton. $bm_name had been converted
+to local variable and was being used uninitialized in various places. Fixed
+that.
+
+Note: this fix is barely tested and I'm still getting lots of errors from
+regression.launcher, but I think this is a better state than it was in.
