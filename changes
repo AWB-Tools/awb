@@ -2438,3 +2438,15 @@ relied on the old semantics was hasim-connect, and it has been
 updated.
 
 Joel
+
+----------
+spartha1    Date: Fri Jun  1 16:48:49 EDT 2007  CSN: CSN-asimcore-119
+                  Fri Jun  1 20:48:49 UTC 2007
+
+
+Directory tools/scripts
+ asim-batch                Locally Modified          118 
+
+Updating with simcore changes (rev. 2343 - Sailashri Parthasarathy)
+
+Minor fix to asim-batch

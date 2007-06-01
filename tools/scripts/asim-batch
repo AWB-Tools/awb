@@ -110,6 +110,7 @@ if (! $status || ! $benchmark || ! $resdir || ! $exp) {
 if ($rsynchost eq "") {
   if ($rsyncresdir eq "") {
     # local run
+    $rsyncrestarg = "";
   }
   else {
     # remote run
