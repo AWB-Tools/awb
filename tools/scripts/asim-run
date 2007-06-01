@@ -980,17 +980,7 @@ sub wait_and_exit
 {
     wait_for_children();
 
-    if ($parentpid == getpid())
-    {
-        #$child_count_lock->remove;
-    }
-
-    if (defined @_) {
-        exit @_;
-    }
-    else {
-        exit;
-    }
+    exit @_;
 }
 
 # -----------------------------------------------------------------------------

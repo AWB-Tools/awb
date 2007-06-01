@@ -2394,3 +2394,19 @@ NOTE: forklocal is still beta. use caution. :)
 
 NOTE: try with lower settings of forklocal and if your machine is ok, you can
 increase it. you can easily swamp your machine if you set this too high.
+
+----------
+spartha1    Date: Fri Jun  1 16:45:34 EDT 2007  CSN: CSN-asimcore-117
+                  Fri Jun  1 20:45:34 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          116 
+
+Directory lib/libasim/include/asim
+ cache.h                   Locally Modified          116 
+
+Updating with simcore changes (rev. 2341 - Brian Slechta)
+
+added basic acessors to the gen_cache_class. made very minor changes to
+asim-run.

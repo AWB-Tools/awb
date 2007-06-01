@@ -792,12 +792,23 @@ class EV7_scheme_replacement
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
-         class T = UINT64, bool WithData = false, template <UINT8,UINT32> class VictimPolicy = LRUReplacement, class INFO = UINT32> class gen_cache_class:public VictimPolicy<NumWays,NumLinesPerWay>
+template<UINT8 NumWays, 
+         UINT32 NumLinesPerWay, 
+         UINT32 NumObjectsPerLine,
+         class T = UINT64, 
+         bool WithData = false, 
+         template <UINT8,UINT32> class VictimPolicy = LRUReplacement, 
+         class INFO = UINT32> 
+class gen_cache_class : public VictimPolicy<NumWays,NumLinesPerWay>
 {
   public:
     typedef line_state<NumObjectsPerLine, INFO> lineState;
 
+    // accessors to query the template parameters
+    UINT32 GetNumWays () { return NumWays; }
+    UINT32 GetNumLinesPerWay () { return NumLinesPerWay; }
+    UINT32 GetNumObjectsPerLine () { return NumObjectsPerLine; }
+    
   private:
 
   // WARNING! Each cache instance has its own random state to guarantee
