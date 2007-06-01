@@ -52,6 +52,18 @@ Asim::init();
 use Asim::Util;
 use Asim::Workspace;
 
+use POSIX ":sys_wait_h";
+
+# # for forking control.  shared data variable and associated lock.
+# use IPC::Shareable;
+# $child_count_lock = tie $child_count, 'IPC::Shareable', { create => 1,
+#                                                           key => 'data', 
+#                                                           destroy => 0,
+#                                                       };
+# $child_count = 1;
+
+#$SIG{INT} = sub { die "$$ dying\n" };
+
 #
 # Hard coded global values.  These are not controlled by the asimrc file. 
 #
@@ -68,12 +80,15 @@ $BM_ENTRY = ".. ";
 $EXP_ENTRY = ":::";
 $BAD_BM_ENTRY = "<UNKNOWN>";
 
+@children = ();
+$maxchildren_per_model = 10;
+
 # Some global information
 $TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
 if (!-e $TMP_DIR) {
   # we can't find $TMP_DIR
   PrintError("TMP_DIR $TMP_DIR doesn't exist\n");
-  exit 1;
+  wait_and_exit(1);
 }
 
 #
@@ -243,7 +258,6 @@ my $bms = {};
 my @build_models = ();
 my $thisModel;
 my @summaryArgv = @ARGV;
-my @childpids = ();
 my $parentpid = getpid();
 
 if (defined($ENV{ASIMRUNOPT})) {
@@ -290,7 +304,7 @@ $status = GetOptions(   "experiments=s"  => \$experiments,
                         "checklegal!"    => \$checklegal,
                         "debugoutfile=s" => \$debugoutfile,
                         "printtimes!"    => \$printtimes,
-                        "forklocal!"     => \$forklocal,
+                        "forklocal=s"    => \$forklocal,
                         "distccjlevel=s" => \$distccjlevel,
                     );
 
@@ -307,7 +321,7 @@ if ($quiet) {
 
 if ($help) {
   system "perldoc $0";
-  exit 0;
+  wait_and_exit(0);
 }
 
 
@@ -320,7 +334,7 @@ if (! $status ||
   print STDERR "$prog: Insufficent switches specified.\n";
   print STDERR "$prog: All of --experiments and --benchmarks switches are required.\n";
   print STDERR "$prog: Try \"$prog --help\" for more information.\n";
-  exit 1;
+  wait_and_exit(1);
 }
 
 # create a logfile and make it removable by anyone
@@ -388,7 +402,7 @@ if (defined $buildarea && $buildarea ne "" && $build == 1) {
 	if (! mkdir "$buildarea") {
 	    # Unable to mkdir.
 	    PrintError("Unable to create directory $buildarea.\n");
-	    exit 1;
+	    wait_and_exit(1);
 	}
     }
 }
@@ -398,7 +412,7 @@ if (!(defined $remoteresdir)) {
   $remoteresdir = $resdir;
 };
 
-PrintInfo("ASIM-RUN Parent PID = ".getpid()."\n");
+PrintInfo("Parent PID = ".getpid()."\n");
 
 ###########################
 # Parse experiments
@@ -467,7 +481,7 @@ if ( $runbatch && $pool ne "" ) {
 
     system ("cat $asim_runlogfl");
     system ("rm -f $asim_runlogfl");
-    exit 1;
+    wait_and_exit(1);
   }
   else {
     $batch_flags = $batch_flags . "-P$pool ";
@@ -482,7 +496,7 @@ if ($buildbatch) {
 
 	    system ("cat $asim_runlogfl");
 	    system ("rm -f $asim_runlogfl");
-	    exit 1;
+	    wait_and_exit(1);
 	}
 	else {
 	    $batch_flags_build = $batch_flags_build . "-P$pool_build ";
@@ -507,7 +521,7 @@ if ($runbatch && defined $queue) {
       my $legal_queues=join(", ", @LEGAL_QSLOTS);
       PrintError("Unknown queue slot $queue: Acceptable queue slots are $legal_queues.\n");
       system ("rm -f $asim_runlogfl");
-      exit 1;
+      wait_and_exit(1);
     }
   }
   $batch_flags = $batch_flags . "-Q $queue ";
@@ -521,7 +535,7 @@ if ($buildbatch) {
 		my $legal_queues=join(", ", @LEGAL_QSLOTS_BUILD);
 		PrintError("Unknown build queue slot $queue: Acceptable queue slots are $legal_queues.\n");
 		system ("rm -f $asim_runlogfl");
-		exit 1;
+		wait_and_exit(1);
 	    }
 	}
 	$batch_flags_build = $batch_flags_build . "-Q $queue_build ";
@@ -546,7 +560,7 @@ if ($runbatch && defined $class) {
       my $legal_classes=join(", ", @LEGAL_CLASSES);
       PrintError("Unknown class $class: Acceptable queues are $legal_classes.\n");
       system ("rm -f $asim_runlogfl");
-      exit 1;
+      wait_and_exit(1);
     }
   }
   $batch_flags = $batch_flags . "-C $class ";
@@ -561,7 +575,7 @@ if ($buildbatch) {
 		my $legal_classes=join(", ", @LEGAL_CLASSES_BUILD);
 		PrintError("Unknown build class $class_build: Acceptable queues are $legal_classes.\n");
 		system ("rm -f $asim_runlogfl");
-		exit 1;
+		wait_and_exit(1);
 	    }
 	}
 	$batch_flags_build = $batch_flags_build . "-C $class_build ";
@@ -631,7 +645,7 @@ if (defined $nicelevel) {
     # Illegal value for nice 
     PrintError("Unknown nice level: $nicelevel: Legal values are integer values between $NICEMIN and $NICEMAX.\n");
     system ("rm -f $asim_runlogfl");
-    exit 1;
+    wait_and_exit(1);
   }
   $batch_scr_inputs = $batch_scr_inputs . "-nicelevel=\"$nicelevel\" ";
 }
@@ -713,6 +727,9 @@ sub generate_run_summary
 # Walk through each model and try to build it using asim-shell
 ##########################################################
 my $exit_code = generate_run_summary();
+
+$maxchildren_per_model = $forklocal / @exp_ordered + 1;
+dprint("setting maxchildren_per_model =  $forklocal / @exp_ordered + 1 ==> $maxchildren_per_model\n");
 
 foreach $name (@exp_ordered) {
   
@@ -934,72 +951,60 @@ foreach $name (@exp_ordered) {
 # Cleanup
 RunCommand ("rm -f $asim_runlogfl > /dev/null 2>&1");
 
-wait_for_children();
-
-exit $exit_code;
+wait_and_exit($exit_code);
        
 #############################################################################
 #SUBROUTINES
 #############################################################################
 
+# -----------------------------------------------------------------------------
 sub getpid
 {
     return $$;
 }
 
+# -----------------------------------------------------------------------------
 sub wait_for_children
 {
     my $pid = getpid();
+    
+    for (my $child = wait(); $child != -1; $child = wait()) {
+        PrintInfo("Done Waiting For Child PID = $child\n");
+    }
 
-    if ($pid == $parentpid) {
-        PrintInfo("Waiting For Children on PID = $pid\n");
-        
-        for (my $child = wait(); $child != -1; $child = wait()) {
-            PrintInfo("Done Waiting For Child PID = $child\n");
-        }
-        
-        PrintInfo("Exiting PID = $pid\n");
+    return;
+}
+
+# -----------------------------------------------------------------------------
+sub wait_and_exit
+{
+    wait_for_children();
+
+    if ($parentpid == getpid())
+    {
+        #$child_count_lock->remove;
+    }
+
+    if (defined @_) {
+        exit @_;
     }
     else {
-        my $child = wait();
-
-        if ($child != -1) {
-            PrintInfo("Did Not Expect PID = $pid To Have A Child PID = $child\n");
-        }
+        exit;
     }
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## similiar to batch_build_run() except the model build will take place
 ## locally instead.
 ##
 ## first, build the model.  second, run all the benchmarks.
 ##
-
 sub local_build_run
 {
      my ($name, $build, $model_name) = @_;
 
-     my $pid = 0;
-     if ($forklocal) {
-         $pid = fork();
-
-         if ($pid == 0) {
-             PrintInfo("ASIM-RUN Starting Fork At PID = ".getpid()."\n");
-             dprint("fork:$name pid=".getpid()."\n");
-             
-             # my $runlogfile = "$resdir/$name/ADMIN/local_build_run.log";
-             # dprint("fork:$name runlog=$runlogfile\n");
-             # open(LOGFILE, "> $runlogfile") || die ("Unable to open $runlogfile\n");
-             # *STDOUT = *LOGFILE;
-             # *STDERR = *LOGFILE;
-         }
-         else {
-             # add to list of child pids
-             push @childpids, $pid;
-         }
-     }
-     if ($pid == 0) {
+     unless (controlled_fork()) {
          
          my $build_log = "$resdir/$name/BUILD/local_build.log";
 
@@ -1013,11 +1018,14 @@ sub local_build_run
              PrintInfo("........ Submitting benchmarks for $name\n");
              run_benchmarks($name, $build, $model_name);
          }
+
+         controlled_exit();
      }
 
      return;
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## build the model locally
 ##
@@ -1036,7 +1044,7 @@ sub local_build
         PrintError("It looks like I've built the same model twice.\n",
                    "ACK!! BUG!! Get Bobbie to fix this @#$!#\n");
         $exit_code++;
-        exit $exit_code;
+        wait_and_exit($exit_code);
     }
 
     if (scalar(@built) == 1) {
@@ -1111,11 +1119,11 @@ sub local_build
     return;
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## Submits a model build to netbatch and blocks.  If the build completed 
 ## successfully, submits the benchmarks.
 ##
-
 sub batch_build_run
 {
     my $name = shift;
@@ -1125,7 +1133,7 @@ sub batch_build_run
     
     if ($pid == 0) 
     {
-        PrintInfo("Starting Fork At PID = ".getpid()."\n");
+        PrintInfo("Starting Fork From PID = ".getppid()."\n");
 
 	open(LOGFILE, "> $resdir/$name/BUILD/batch.log") || die ("Unable to open $resdir/$name/BUILD/batch.log\n");
 	*STDOUT = *LOGFILE;
@@ -1141,7 +1149,7 @@ sub batch_build_run
 	    if (SubmitJob("asim-shell --batch build model -- --builddir $model_buildarea --options=$buildopt", "1")) {
 		HandleBuildFailure();
 		close LOGFILE;
-		exit 1;
+		wait_and_exit(1);
 	    }
 	    
 	    PrintInfo(".... Completed model build\n");	    
@@ -1162,223 +1170,252 @@ sub batch_build_run
 	    PrintInfo(".... Model \'$resdir/name/BUILD/$model_name\' does not exist and no build specified.  Runs will not be scheduled on this model.\n");
 	}
 	close LOGFILE;
-	exit $exit_code;
-    }
-    else {
-        # add to list of child pids
-        push @childpids, $pid;
+	wait_and_exit($exit_code);
     }
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## Run the benchamarks for the experiment (taken as an argument).
 ##
-
 sub run_benchmarks 
 {
-  my ($name, $build, $model_name) = @_;
+    my ($name, $build, $model_name) = @_;
 
-  # Generate absolute path for the model associated with this name. 
-  my $xmodel = &FullPath($exps->{"$name"}{model});
-  my $xmodel_name = "";
-  ($xmodel_name = basename($model)) =~ s/\.[a-z][a-z]*//s;
+    rsync_model($name, $build, $model_name);
 
-  if ($remote) {
-
-    PrintInfo("........ Rsyncing executable $xmodel_name to remote host ...");
-
-    # make the model area in the remote side and 
-    # rsync over the executable
-    if ($remotehost eq "") {
-      RunCommand("mkdir -p $remoteresdir/$name/RUN/ > /dev/null 2>&1");
-      RunCommand("mkdir -p $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
-      RunCommand("mkdir -p $remoteresdir/$name/ADMIN/ > /dev/null 2>&1");
-      RunCommand("rsync --quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+    foreach $bm (@{$bms->{$name}}) 
+    {
+        unless (controlled_fork()) {
+            
+            run_one_benchmark($name, $build, $model_name, $bm);
+            
+            controlled_exit();
+        }
     }
-    else {
-      RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
-      RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/' > /dev/null 2>&1");
-      RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/ADMIN/' > /dev/null 2>&1");
-      # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
-      # different from experiment name.
-      RunCommand("rsync  --quiet $resdir/$name/BUILD/$xmodel_name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+    wait_for_children();
+
+    return;
+}
+
+# -----------------------------------------------------------------------------
+sub rsync_model
+{
+    my ($name, $build, $model_name) = @_;
+
+    if ($remote) {
+
+        PrintInfo("........ Rsyncing executable $model_name to remote host ...");
+
+        # make the model area in the remote side and 
+        # rsync over the executable
+        if ($remotehost eq "") {
+            RunCommand("mkdir -p $remoteresdir/$name/RUN/ > /dev/null 2>&1");
+            RunCommand("mkdir -p $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+            RunCommand("mkdir -p $remoteresdir/$name/ADMIN/ > /dev/null 2>&1");
+            RunCommand("rsync --quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+        }
+        else {
+            RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
+            RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/' > /dev/null 2>&1");
+            RunCommand("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/ADMIN/' > /dev/null 2>&1");
+            # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
+            # different from experiment name.
+            RunCommand("rsync  --quiet $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+        }
     }
 
-    PrintInfo("........    done.\n");
-  }
+    return;
+}
 
-  foreach $bm (@{$bms->{$name}}) 
-  {
-      my $bm_type;
-      if    ( $bm =~ m/\.tlist\s*$/ ) { $bm_type = 'tlist'; }
-      elsif ( $bm =~ m/\.cfx\//     ) { $bm_type = 'cfx';   }
-      else                            { $bm_type = 'cfg';   }
-      
-      ($bm_name = basename($bm)) =~ s/\.[a-z][a-z]*\s*$//s;
+# -----------------------------------------------------------------------------
+sub run_one_benchmark
+{
+    my ($name, $build, $model_name, $bm) = @_;
 
-      if ( $bm_type eq 'cfg' || $bm_type eq 'cfx' ) 
-      {
-
-	  PutEnv("AWB_BENCHMARK", "$bm");
-	  
-          #    $bm = &FullPath($bm);
-	  
-	  # Determine if benchmark configuration file exists.
-	  # if this benchmark is a region of a benchmark then look for the config file
-	  # that is used for all the regions
-	  $tmp =$bm;
-	  $tmp =~ s/.cfg_r[0-9]+/.cfg/;
-	  my $full_bm = &FullPath($bm);
-	  my $full_bm_without_region = &FullPath($tmp);
-
-          # with the new CFX file/script that sets up benchmarks, the CFG file is a virtual file and 
-          # doesn't really exist, so we cannot fail when we don't find it.  We'll emit a warning until
-          # someone fixes permanently.
-	  if ((! -f $full_bm) && (! -f $full_bm_without_region) && ($bm_type eq 'cfg')) {
-	      PrintInfo("Unable to find benchmark configuration file $full_bm\n");
-	      $bm_name=~ s/.cfg//;
-	      $exit_code++;
-	      next;
-	  }
-	  
-	  #if this is a benchmark that uses regions in the config file then change the bmname to reflect the region
-	  if ((($bm_type eq 'cfx') && ($bm =~ m/.cfg_r[0-9]+/)) || ((! -f $full_bm) && ( -f $full_bm_without_region))){
-	      PrintWarning("This appears to be region of the benchmark  $full_bm_without_region.\n",
-			   "Altering the bm_name to reflect the region number.\n");
-	      $bm_name=~ s/.cfg//;
-	  }
-	  PrintInfo("........ " . ($runbatch?"Submitting":"Running") . " benchmark $bm_name for experiment $name\n");
-
-	  # Setup flag indicating that the benchmark has been submitted. 
-	  if ( -f "$resdir/$name/$bm_name.SUBMITTED" ) {
-	      PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
-			   "File $resdir/$name/$bm_name.SUBMITTED already exists.\n");
-	      
-	      next;
-	  }
-
-	  if ( -f "$resdir/$name/$bm_name.RUNNING" ) {
-	      PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
-			   "File $resdir/$name/$bm_name.RUNNING already exists.\n");
-	      
-	      next;
-	  }
-	  
-	  if (( -f "$resdir/$name/$bm_name.stats" ) ||
-	      ( -f "$resdir/$name/$bm_name.stats.gz") ||
-	      ( -f "$resdir/$name/$bm_name.stats.bz2")) {
-	      if ( $replace == 0 ) {
-		  PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
-			       "File $resdir/$name/$bm_name.stats(.gz|.bz2)? already exists.\n");
-		  
-		  next;
-	      }
-	      else {
-		  if ((system ( "rm -f $resdir/$name/$bm_name.stats"))    ||
-		      (system ( "rm -f $resdir/$name/$bm_name.stats.gz")) ||
-		      (system ( "rm -f $resdir/$name/$bm_name.stats.bz2")) ) {
-		      PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
-				   "Cannot remove file $resdir/$name/$bm_name.stats(.gz|.bz2)? .\n");
-		      
-		      next;
-		  }
-	      }
-	  }
+    my $bm_type;
+    if    ( $bm =~ m/\.tlist\s*$/ ) { $bm_type = 'tlist'; }
+    elsif ( $bm =~ m/\.cfx\//     ) { $bm_type = 'cfx';   }
+    else                            { $bm_type = 'cfg';   }
     
-	  # Create benchmark run directory in $resdir/$name/RUN/$bm_name.
-	  my $rundir = $resdir . "/" . "$name" . "/RUN/" . $bm_name;
-	  if ( ! -d "$rundir" ) {
-	      # Setup benchmark. 
-	      PrintInfo("........ Setting up benchmark: $bm_name for experiment $name\n");
-	      print "asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir" if ($debug);
-	      if ( RunCommand ("asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir > $asim_runlogfl 2>&1") ) {
-		  # We have an error in the setup.
-		  PrintError("Unable to setup benchmark $bm_name\n",
-			     "Not running benchmark $bm_name for experiment $name.\n");
-		  
-		  system ("cat $asim_runlogfl");
-		  $exit_code++;
-		  next;
-	      }
-              elsif ($remote)
-              {
-                  PrintInfo("........ Setting up benchmark on remote host ...");
+    (my $bm_name = basename($bm)) =~ s/\.[a-z][a-z]*\s*$//s;
 
-                  # we need to setup the run directory on the remote host!
-                  # for now, we just rsync over the run area and hope
-                  # that the links are already setup correctly.  :)
+    if ( $bm_type eq 'cfg' || $bm_type eq 'cfx' ) 
+    {
 
-                  # do a regex replacement to create a "remote_run" file
-                  my $resdir_regex = $resdir;
-                  my $remoteresdir_regex = $remoteresdir;
-                  $resdir_regex =~ s/\//\\\//g;
-                  $remoteresdir_regex =~ s/\//\\\//g;
-                  RunCommand("perl -p -e \'s/$resdir_regex/$remoteresdir_regex/g\' $rundir/run > $rundir/remote_run");
-                  RunCommand("chmod +x $rundir/remote_run > /dev/null 2>&1");
+        PutEnv("AWB_BENCHMARK", "$bm");
+        
+        #    $bm = &FullPath($bm);
+        
+        # Determine if benchmark configuration file exists.
+        # if this benchmark is a region of a benchmark then look for the config file
+        # that is used for all the regions
+        $tmp =$bm;
+        $tmp =~ s/.cfg_r[0-9]+/.cfg/;
+        my $full_bm = &FullPath($bm);
+        my $full_bm_without_region = &FullPath($tmp);
 
-                  # now, we can rsync over the RUN directory... let's hope the
-                  # symlinks for the trace files are consistent in the two
-                  # areas.  we are just going to copy over the links.
-                  my $remoteruntarg;
-                  my $remoteruntarg2;
-                  if ($remotehost eq "") {
+        # with the new CFX file/script that sets up benchmarks, the CFG file is a virtual file and 
+        # doesn't really exist, so we cannot fail when we don't find it.  We'll emit a warning until
+        # someone fixes permanently.
+        if ((! -f $full_bm) && (! -f $full_bm_without_region) && ($bm_type eq 'cfg')) {
+            PrintInfo("Unable to find benchmark configuration file $full_bm\n");
+            $bm_name=~ s/.cfg//;
+            $exit_code++;
+            return;
+        }
+        
+        #if this is a benchmark that uses regions in the config file then change the bmname to reflect the region
+        if ((($bm_type eq 'cfx') && ($bm =~ m/.cfg_r[0-9]+/)) || ((! -f $full_bm) && ( -f $full_bm_without_region))){
+            PrintWarning("This appears to be region of the benchmark  $full_bm_without_region.\n",
+                         "Altering the bm_name to reflect the region number.\n");
+            $bm_name=~ s/.cfg//;
+        }
+        PrintInfo("........ " . ($runbatch?"Submitting":"Running") . " benchmark $bm_name for experiment $name\n");
+
+        # Setup flag indicating that the benchmark has been submitted. 
+        if ( -f "$resdir/$name/$bm_name.SUBMITTED" ) {
+            PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+                         "File $resdir/$name/$bm_name.SUBMITTED already exists.\n");
+            
+            return;
+        }
+
+        if ( -f "$resdir/$name/$bm_name.RUNNING" ) {
+            PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+                         "File $resdir/$name/$bm_name.RUNNING already exists.\n");
+            
+            return;
+        }
+        
+        if (( -f "$resdir/$name/$bm_name.stats" ) ||
+            ( -f "$resdir/$name/$bm_name.stats.gz") ||
+            ( -f "$resdir/$name/$bm_name.stats.bz2")) {
+            if ( $replace == 0 ) {
+                PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+                             "File $resdir/$name/$bm_name.stats(.gz|.bz2)? already exists.\n");
+                
+                return;
+            }
+            else {
+                if ((system ( "rm -f $resdir/$name/$bm_name.stats"))    ||
+                    (system ( "rm -f $resdir/$name/$bm_name.stats.gz")) ||
+                    (system ( "rm -f $resdir/$name/$bm_name.stats.bz2")) ) {
+                    PrintWarning("Unable to submit benchmark $bm_name for experiment $name.\n",
+                                 "Cannot remove file $resdir/$name/$bm_name.stats(.gz|.bz2)? .\n");
+                    
+                    return;
+                }
+            }
+        }
+        
+        # Create benchmark run directory in $resdir/$name/RUN/$bm_name.
+        my $rundir = $resdir . "/" . "$name" . "/RUN/" . $bm_name;
+        if ( ! -d "$rundir" ) {
+            # Setup benchmark. 
+            PrintInfo("........ Setting up benchmark: $bm_name for experiment $name\n");
+            print "asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir" if ($debug);
+            if ( RunCommand ("asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir > $asim_runlogfl 2>&1") ) {
+                # We have an error in the setup.
+                PrintError("Unable to setup benchmark $bm_name\n",
+                           "Not running benchmark $bm_name for experiment $name.\n");
+                
+                system ("cat $asim_runlogfl");
+                $exit_code++;
+                return;
+            }
+            elsif ($remote)
+            {
+                PrintInfo("........ Setting up benchmark on remote host ...");
+
+                # we need to setup the run directory on the remote host!
+                # for now, we just rsync over the run area and hope
+                # that the links are already setup correctly.  :)
+
+                # do a regex replacement to create a "remote_run" file
+                my $resdir_regex = $resdir;
+                my $remoteresdir_regex = $remoteresdir;
+                $resdir_regex =~ s/\//\\\//g;
+                $remoteresdir_regex =~ s/\//\\\//g;
+                RunCommand("perl -p -e \'s/$resdir_regex/$remoteresdir_regex/g\' $rundir/run > $rundir/remote_run");
+                RunCommand("chmod +x $rundir/remote_run > /dev/null 2>&1");
+
+                # now, we can rsync over the RUN directory... let's hope the
+                # symlinks for the trace files are consistent in the two
+                # areas.  we are just going to copy over the links.
+                my $remoteruntarg;
+                my $remoteruntarg2;
+                if ($remotehost eq "") {
                     $remoteruntarg = "$remoteresdir/$name/RUN";
                     $remoteruntarg2 = "$remoteresdir/$name/RUN";                    
-                  }
-                  else {
+                }
+                else {
                     $remoteruntarg = "$remotehost:$remoteresdir/$name/RUN";
                     $remoteruntarg2 = "$remotehost\@$remoteresdir/$name/RUN";
-                  }
+                }
 
-                  # the links in the run directory may not point to anything
-                  # meaningful on the remote machine.  this option will
-                  # re-target all the symlinks to point to the $remotesymdir.
-                  # this code was added to re-target trace_cache links and
-                  # may not work with your benchmark run area.  :(
-                  if ($remoteresym) {
+                # the links in the run directory may not point to anything
+                # meaningful on the remote machine.  this option will
+                # re-target all the symlinks to point to the $remotesymdir.
+                # this code was added to re-target trace_cache links and
+                # may not work with your benchmark run area.  :(
+                if ($remoteresym) {
+                    
+                    # THIS SEQUENCE IS TOO SLOW... TRYING SOMETHING NEW
+                    # WE WANT TO MINIMIZE THE NUMBER OF RSYNC CALLS
+                    #
+                    # # this rsync will ignore links.  we will re-create the links.
+                    # RunCommand("rsync --quiet -r $rundir $remoteruntarg > /dev/null 2>&1");
+                    # 
+                    # # let's look at each file and find the symlinks
+                    # foreach my $file (<$rundir/*>) {
+                    #   if (defined(readlink($file))) {
+                    # 
+                    #     # take fully qualified file name and get the
+                    #     # unqualified name
+                    #     my @file = split(/\//, $file);
+                    #     my $num = @file;
+                    #     my $shortfile = $file[$num-1];
+                    # 
+                    #     # retarget the symlinks, and send symlinks over 
+                    #     # to remote
+                    #     RunCommand("ln -s $remotesymdir/$shortfile $rundir/remote_$shortfile > /dev/null 2>&1");
+                    #     RunCommand("rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile > /dev/null 2>&1");
+                    #   }
+                    # }
 
-                    # this rsync will ignore links.  we will re-create the links.
-                    RunCommand("rsync --quiet -r $rundir $remoteruntarg > /dev/null 2>&1");
-
+                    # FASTER SEQUENCE WITH ONLY ONE RSYNC HERE
+                    #
                     # let's look at each file and find the symlinks
                     foreach my $file (<$rundir/*>) {
-                      if (defined(readlink($file))) {
-
-                        # take fully qualified file name and get the
-                        # unqualified name
-                        my @file = split(/\//, $file);
-                        my $num = @file;
-                        my $shortfile = $file[$num-1];
-
-                        # retarget the symlinks, and send symlinks over 
-                        # to remote
-                        RunCommand("ln -s $remotesymdir/$shortfile $rundir/remote_$shortfile > /dev/null 2>&1");
-                        RunCommand("rsync --quiet --links $rundir/remote_$shortfile $remoteruntarg/$bm_name/$shortfile > /dev/null 2>&1");
-                      }
+                        if (defined(readlink($file))) {
+                            
+                            # take fully qualified file name and get the
+                            # unqualified name
+                            my @file = split(/\//, $file);
+                            my $num = @file;
+                            my $shortfile = $file[$num-1];
+                            
+                            # retarget the symlinks, and send symlinks over 
+                            # to remote
+                            RunCommand("mv $file $rundir/orig_$shortfile > /dev/null 2>&1");
+                            RunCommand("ln -s $remotesymdir/$shortfile $file > /dev/null 2>&1");
+                        }
                     }
-                  }
-                  else {
+
+                    # rsync whole run area and links as links
+                    RunCommand("rsync --links --quiet -r $rundir $remoteruntarg > /dev/null 2>&1");                    
+                }
+                else {
                     # this rsync will just plain copy the links as is.
                     RunCommand("rsync --quiet -r --links $rundir $remoteruntarg > /dev/null 2>&1");
-                  }
-
-                  ## BAD my $cmd = "";
-                  ## BAD $cmd .= " AWB_BENCHMARK=$ENV{AWB_BENCHMARK}";
-                  ## BAD $cmd .= " AWB_MODEL=$ENV{AWB_MODEL}";
-                  ## BAD $cmd .= " poo=asim-shell -batch setup model -- ";
-                  ## BAD $cmd .= " --builddir $remoteresdir/$name/BUILD";
-                  ## BAD $cmd .= " --rundir $rundir";
-                  ## BAD $cmd .= " > $asim_runlogfl 2>&1";
-                  ## BAD RunCommand ("echo \"$cmd\" > $asim_runlogfl 2>&1");
-                  ## BAD RunCommand ("echo \"$cmd\" > /home/bjslecht/grrr");
-
-                  PrintInfo("........    done.\n");
-              }
+                }
+            }
 # This shouldn't be needed anymore. 
 
-      # HACK: We have to determine the directory where the setup occurs.
-      # This is currently hard coded, but this code should change when AWB 
-      # is more flexible. 
+            # HACK: We have to determine the directory where the setup occurs.
+            # This is currently hard coded, but this code should change when AWB 
+            # is more flexible. 
 #      $setupdir = "$awblocal" . "/build/$model_name/bm/$bm_name";
 
 #      if (RunCommand ("cp -r $setupdir $resdir/$name/RUN")) {
@@ -1387,153 +1424,154 @@ sub run_benchmarks
 #                   "Unable to copy run directory for $bm_name\n");
 #        
 #        $exit_code++;
-#        next;
+#        return;
 #      }
-          if($delay)
-          {
-             RunCommand("sleep ${delay}");
-          }
-	  }
-	  else {
-	      PrintWarning("Run directory $rundir already exists. It won't be overwritten.\n");
-	      RunCommand ("rm -f $rundir/*.stats* > /dev/null 2>&1");
-	  }
-	  
-	  if ( RunCommand ("touch $resdir/$name/$bm_name.SUBMITTED") ) {
-	      PrintError("Unable to submit $bm_name for experiment $name\n",
-			 "Unable to create file $resdir/$name/$bm_name.SUBMITTED.\n");
-	      
-	      $exit_code++;
-	      next;
-	  }
-          elsif ($remote)
-          {
-              RunCommand ("rsync --quiet $resdir/$name/$bm_name.SUBMITTED $remotehost:$remoteresdir/$name/");
-          }
+            if($delay)
+            {
+                RunCommand("sleep ${delay}");
+            }
+        }
+        else {
+            PrintWarning("Run directory $rundir already exists. It won't be overwritten.\n");
+            RunCommand ("rm -f $rundir/*.stats* > /dev/null 2>&1");
+        }
+        
+        if ( RunCommand ("touch $resdir/$name/$bm_name.SUBMITTED") ) {
+            PrintError("Unable to submit $bm_name for experiment $name\n",
+                       "Unable to create file $resdir/$name/$bm_name.SUBMITTED.\n");
+            
+            $exit_code++;
+            return;
+        }
+        elsif ($remote)
+        {
+            RunCommand ("rsync --quiet $resdir/$name/$bm_name.SUBMITTED $remotehost:$remoteresdir/$name/");
+        }
 
-	  my $input = $exps->{"$name"}{params};
+        my $input = $exps->{"$name"}{params};
 
-          my $submit_cmd;
-          if ($remote)
-          {
+        my $submit_cmd;
+        if ($remote)
+        {
             $submit_cmd = "asim-batch ".       # FIXME:
-                          "-benchmark=$bm ".
-                          "-resdir=$remoteresdir/$name ".
-                          "-exp=$model ".
-                          "-compress=$compress $batch_scr_inputs ".
-                          "-execscript=\"$execscript\" ".
-                          "-rsynchost=\"$localhost\" ".
-                          "-rsyncresdir=\"$resdir/$name\" ".
-                          "-tmpdir=\"$remotetmpdir\" ".
-                          "-- $input";                
-          }
-          else
-          {
+                "-benchmark=$bm ".
+                "-resdir=$remoteresdir/$name ".
+                "-exp=$model ".
+                "-compress=$compress $batch_scr_inputs ".
+                "-execscript=\"$execscript\" ".
+                "-rsynchost=\"$localhost\" ".
+                "-rsyncresdir=\"$resdir/$name\" ".
+                "-tmpdir=\"$remotetmpdir\" ".
+                "-- $input";                
+        }
+        else
+        {
             $submit_cmd = "$batch_scr ".
-                          "-benchmark=$bm ".
-                          "-resdir=$resdir/$name ".
-                          "-exp=$model ".
-                          "-compress=$compress $batch_scr_inputs ".
-                          "-execscript=\"$execscript\" ".
-                          "-- $input";                
+                "-benchmark=$bm ".
+                "-resdir=$resdir/$name ".
+                "-exp=$model ".
+                "-compress=$compress $batch_scr_inputs ".
+                "-execscript=\"$execscript\" ".
+                "-- $input";                
 
-          }
+        }
 
-	  my $submiterror = SubmitJob($submit_cmd);
-          
-          if ($submiterror) {
-	      # There was an error in the submission.
-	      $exit_code++;
-	      next;
-	  }
+        my $submiterror = SubmitJob($submit_cmd);
+        
+        if ($submiterror) {
+            # There was an error in the submission.
+            $exit_code++;
+            return;
+        }
 
-      }
-      elsif ($bm_type eq "tlist") 
-      {
-	  my $full_bm = &FullPath($bm);
-	  if (! -f $full_bm) {
-	      PrintError("Unable to find benchmark tlist file $full_bm.\n");
-	      $exit_code++;
-	      next;
-	  }
-	  PrintInfo("........ " . "Begin tracelist file: $full_bm for experiment $name\n");
-	  my @traces = parse_tlist_file($full_bm);
-	  foreach my $trace (@traces) 
-	  {
-	      chomp($trace);  
-	      if (!($trace =~ /\#.*/))
-	      {
-		  $trace =~ s/\s*$//;
-		  my $trace_name = basename($trace);
-		  PrintInfo("........ " . ($runbatch ? "Submitting" : "Running") . " trace $trace_name for experiment $name\n");
-		  if (-f "$resdir/$name/$trace_name.SUBMITTED") {
-		      PrintWarning("Unable to submit trace $trace_name for experiment $name.\n",
-				   "File $resdir/$name/$trace_name.SUBMITTED already exists.\n");
-		      next;
-		  }
-		  if ( -f "$resdir/$name/$trace_name.RUNNING" ) {
-		      PrintWarning("Unable to submit benchmark $trace_name for experiment $name.\n",
-				   "File $resdir/$name/$trace_name.RUNNING already exists.\n");
-		      next;
-		  }
-		  if (( -f "$resdir/$name/$trace_name.stats" ) ||
-		      ( -f "$resdir/$name/$trace_name.stats.gz") ||
-		      ( -f "$resdir/$name/$trace_name.stats.bz2")) {
-		      if ( $replace == 0 ) {
-			  PrintWarning("Unable to submit trace $trace_name for experiment $name.\n",
-				       "File $resdir/$name/$trace_name.stats(.gz|.bz2)? already exists.\n");
-			  next;
-		      }
-		      else {
-			  if ((system ( "rm -f $resdir/$name/$trace_name.stats"))    ||
-			      (system ( "rm -f $resdir/$name/$trace_name.stats.gz")) ||
-			      (system ( "rm -f $resdir/$name/$trace_name.stats.bz2")) ) {
-			      PrintWarning("Unable to submit benchmark $trace_name for experiment $name.\n",
-					   "Cannot remove file $resdir/$name/$trace_name.stats(.gz|.bz2)? .\n");
-			      next;
-			  }
-		      }
-		  }
-		  # Create benchmark run directory in $resdir/$name/RUN/$trace_name.
-		  my $rundir = $resdir . "/" . "$name" . "/RUN/" . $trace_name;
-		  my $input = $exps->{"$name"}{params};
-		  if (! -d "$rundir") {
-		      # Setup trace run.
-		      PrintInfo("........ Setting up trace: $trace_name for experiment $name\n");
-                      my $builddir = "$resdir/$name/BUILD";
-		      if (setup_tlist_run($builddir, $model_name, $trace, $rundir, \$input)) {
-			  # We have an error in the setup.
-			  PrintError("Unable to setup trace $trace_name\n",
-				     "Not running trace $trace_name for experiment $name.\n");
-			  $exit_code++;
-			  next;
-		      }
-		  }
-		  else {
-		      PrintWarning("Run directory $rundir already exists. It won't be overwritten.\n");
-		      RunCommand ("rm -f $rundir/*.stats* > /dev/null 2>&1");
-		  }
-		  
-		  if ( RunCommand ("touch $resdir/$name/$trace_name.SUBMITTED") ) {
-		      PrintError("Unable to submit $trace_name for experiment $name\n",
-				 "Unable to create file $resdir/$name/$trace_name.SUBMITTED.\n");
-		      $exit_code++;
-		      next;
-		  }
+    }
+    elsif ($bm_type eq "tlist") 
+    {
+        my $full_bm = &FullPath($bm);
+        if (! -f $full_bm) {
+            PrintError("Unable to find benchmark tlist file $full_bm.\n");
+            $exit_code++;
+            return;
+        }
+        PrintInfo("........ " . "Begin tracelist file: $full_bm for experiment $name\n");
+        my @traces = parse_tlist_file($full_bm);
+        foreach my $trace (@traces) 
+        {
+            chomp($trace);  
+            if (!($trace =~ /\#.*/))
+            {
+                $trace =~ s/\s*$//;
+                my $trace_name = basename($trace);
+                PrintInfo("........ " . ($runbatch ? "Submitting" : "Running") . " trace $trace_name for experiment $name\n");
+                if (-f "$resdir/$name/$trace_name.SUBMITTED") {
+                    PrintWarning("Unable to submit trace $trace_name for experiment $name.\n",
+                                 "File $resdir/$name/$trace_name.SUBMITTED already exists.\n");
+                    return;
+                }
+                if ( -f "$resdir/$name/$trace_name.RUNNING" ) {
+                    PrintWarning("Unable to submit benchmark $trace_name for experiment $name.\n",
+                                 "File $resdir/$name/$trace_name.RUNNING already exists.\n");
+                    return;
+                }
+                if (( -f "$resdir/$name/$trace_name.stats" ) ||
+                    ( -f "$resdir/$name/$trace_name.stats.gz") ||
+                    ( -f "$resdir/$name/$trace_name.stats.bz2")) {
+                    if ( $replace == 0 ) {
+                        PrintWarning("Unable to submit trace $trace_name for experiment $name.\n",
+                                     "File $resdir/$name/$trace_name.stats(.gz|.bz2)? already exists.\n");
+                        return;
+                    }
+                    else {
+                        if ((system ( "rm -f $resdir/$name/$trace_name.stats"))    ||
+                            (system ( "rm -f $resdir/$name/$trace_name.stats.gz")) ||
+                            (system ( "rm -f $resdir/$name/$trace_name.stats.bz2")) ) {
+                            PrintWarning("Unable to submit benchmark $trace_name for experiment $name.\n",
+                                         "Cannot remove file $resdir/$name/$trace_name.stats(.gz|.bz2)? .\n");
+                            return;
+                        }
+                    }
+                }
+                # Create benchmark run directory in $resdir/$name/RUN/$trace_name.
+                my $rundir = $resdir . "/" . "$name" . "/RUN/" . $trace_name;
+                my $input = $exps->{"$name"}{params};
+                if (! -d "$rundir") {
+                    # Setup trace run.
+                    PrintInfo("........ Setting up trace: $trace_name for experiment $name\n");
+                    my $builddir = "$resdir/$name/BUILD";
+                    if (setup_tlist_run($builddir, $model_name, $trace, $rundir, \$input)) {
+                        # We have an error in the setup.
+                        PrintError("Unable to setup trace $trace_name\n",
+                                   "Not running trace $trace_name for experiment $name.\n");
+                        $exit_code++;
+                        return;
+                    }
+                }
+                else {
+                    PrintWarning("Run directory $rundir already exists. It won't be overwritten.\n");
+                    RunCommand ("rm -f $rundir/*.stats* > /dev/null 2>&1");
+                }
+                
+                if ( RunCommand ("touch $resdir/$name/$trace_name.SUBMITTED") ) {
+                    PrintError("Unable to submit $trace_name for experiment $name\n",
+                               "Unable to create file $resdir/$name/$trace_name.SUBMITTED.\n");
+                    $exit_code++;
+                    return;
+                }
 
-		  if ( SubmitJob("$batch_scr -benchmark=$trace_name -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input") ) {
-		      # There was an error in the submission.
-		      $exit_code++;
-		      next;
-		  }
-	      }
-	  }
-      }
-  }
+                if ( SubmitJob("$batch_scr -benchmark=$trace_name -resdir=$resdir/$name -exp=$model -compress=$compress $batch_scr_inputs -execscript=\"$execscript\" -- $input") ) {
+                    # There was an error in the submission.
+                    $exit_code++;
+                    return;
+                }
+            }
+        }
+    }
+
+    return;
 }
 
 
-
+# -----------------------------------------------------------------------------
 ##
 ## Name: parse_exp_file
 ##
@@ -1558,14 +1596,14 @@ sub parse_exp_file {
   if ($#explist > 260) {
     if ($limit && $#explist > 2050) {
       PrintError("Too many experiments ($#explist) were requested\n");
-      exit 1;
+      wait_and_exit(1);
     }
 
     my $ans = TimedQuestion("Are you SURE you want to run $#explist experiments?",
                              "Yes", 30);
 
     if (! ($ans =~ /^[Yy]/)) {
-      exit 1;
+      wait_and_exit(1);
     }
   }
   
@@ -1582,7 +1620,7 @@ sub parse_exp_file {
                  "Not enough entries in the following line:\n",
                  "$expline\n");
       
-      exit 1;
+      wait_and_exit(1);
     }
 
     $name = shift(@exp);
@@ -1590,7 +1628,7 @@ sub parse_exp_file {
       PrintError("Duplicate experiment name in experiments file $file.\n",
                  "$expline\n");
       
-      exit 1;
+      wait_and_exit(1);
     }
 
     PrintVerbose("$name\n");
@@ -1603,6 +1641,7 @@ sub parse_exp_file {
   return $exps;
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## Name: read_exps
 ##
@@ -1612,7 +1651,6 @@ sub parse_exp_file {
 ##
 ## Read in list of experiments... 
 ##
-
 sub read_exps {
  my $in = shift;
 
@@ -1651,6 +1689,8 @@ sub read_exps {
  return @explist;
 }
 
+
+# -----------------------------------------------------------------------------
 ##
 ## Name: exps
 ##
@@ -1662,7 +1702,6 @@ sub read_exps {
 ##
 ## Do crossproduct expansion of experiments
 ##
-
 sub exps {
   my $name = shift;
   my $line = shift;
@@ -1782,6 +1821,7 @@ sub parse_bm_file {
   close BMFL;
 }
 
+# -----------------------------------------------------------------------------
 sub setup_tlist_run {
     my ($builddir, $model_name, $trace, $rundir, $input) = @_;
     my $trace_name = basename($trace);
@@ -1835,6 +1875,7 @@ sub setup_tlist_run {
     return 0;
 }
 
+# -----------------------------------------------------------------------------
 sub parse_tlist_file {
     my ($file) = shift;
     my @traces;
@@ -1852,11 +1893,12 @@ sub parse_tlist_file {
 }
 
 
+# -----------------------------------------------------------------------------
 ##
 ## Sets an environment variable. 
 ##
 sub PutEnv {
-  local($name, $value) = @_;
+  local ($name, $value) = @_;
 
   if (defined($value))
   {
@@ -1868,6 +1910,7 @@ sub PutEnv {
 #  print( "$name = $ENV{"$name"} \n" );
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## Changes relative paths to absolute paths. 
 ## Returns null file name if it can't figure out the path. 
@@ -1895,6 +1938,7 @@ sub FullPath {
 }
 
 
+# -----------------------------------------------------------------------------
 ##
 ## Submit a batch job
 ##
@@ -1981,6 +2025,7 @@ sub SubmitJob {
   return 0;
 }
 
+# -----------------------------------------------------------------------------
 ##
 ## Scheduler that makes sure user doesn't take over batch queues
 ##
@@ -2288,6 +2333,7 @@ sub TimedQuestion {
 }
 
 
+# -----------------------------------------------------------------------------
 ##
 ## Run a command or just print out what would be run
 ##
@@ -2304,7 +2350,7 @@ sub RunCommand {
   return system($command);
 }
 
-
+# -----------------------------------------------------------------------------
 sub DumpEnvToDebugOutfile 
 {
     foreach my $var (keys %ENV) {
@@ -2312,6 +2358,7 @@ sub DumpEnvToDebugOutfile
     }
 }
 
+# -----------------------------------------------------------------------------
 sub dprint
 {
   my @printargs = @_;
@@ -2331,6 +2378,148 @@ sub dprint
 
     print DEBUGOUTFILE @printargs;
   }
+}
+
+
+# -----------------------------------------------------------------------------
+# searches through the list of children and counts the number of active 
+# children in the list.  will reap the completed children from the list if that
+# param is passed as true.
+sub count_children {
+    my ($reap) = @_;
+
+    my $num = 0;
+
+    my @alive = ();
+
+    foreach $child (@children) {
+        my $p = waitpid($child, WNOHANG);
+
+        if ($p < 0) {
+            # no such child
+        }
+        elsif ($p == 0) {
+            # still running
+            $num++;
+            push @alive, $child;
+        }
+        else {
+            # child is diseased
+        }
+    }
+
+    if (defined $reap && $reap) {
+        my $num_alive = @alive;
+        dprint("reaping dead children from list.  new child list size is $num_alive\n");
+        @children = @alive;
+    }
+
+    return $num;
+}
+
+# -----------------------------------------------------------------------------
+# fork with some throttling.  any process started with this needs to exit with
+# controlled_exit().  increment the reference count.
+sub controlled_fork() {
+
+    if ($forklocal) {
+        
+        # we are in forking mode, so fork! 
+        my $done = 0;
+
+        # let's throttle a bit if specified
+        if ($delay > 0 ) { sleep($delay); };
+
+        # loop while checking the maxchildren.  dont exceed the max.
+        while (1) {
+            # $child_count_lock->shlock();
+            # if ($child_count < $forklocal) {
+            #     $done = 1;
+            #     $child_count = $child_count + 1;
+            # }
+            # $child_count_lock->shunlock();
+
+            my $num_children = count_children(1);
+
+            dprint("trying to fork with num_children=$num_children and maxchildren_per_model=$maxchildren_per_model\n");
+
+            if ($num_children < $maxchildren_per_model) {
+                $done = 1;
+            }
+
+            if ($done) {
+                # we are allowed to breed a new child.
+                my $pid = fork();
+
+                if ($pid == 0) {
+                    # this is the child
+                    PrintInfo("Starting Fork From PID = ".getppid()."\n");
+                    dprint("fork:$name ppid=".getppid()."\n");
+
+                    @children = ();
+                }
+                else {
+                    push @children, $pid;
+                    dprint("adding $pid to list of children (".@children.")\n");
+                }
+                
+                # $child_count_lock = tie $child_count, 'IPC::Shareable', undef, { destroy => 0 };
+                
+                return $pid;
+            }
+            else {
+                # no more children allowed now.  let's wait and try again.
+                dprint("too many children right now, sleeping for a bit...\n");
+                if ($forklocal > 50) {
+                    sleep(60);
+                }
+                elsif ($forklocal > 30) {
+                    sleep(30);
+                }
+                elsif ($forklocal > 20) {
+                    sleep(10);
+                }
+                elsif ($forklocal > 5) {
+                    sleep(2);
+                }
+                else {
+                    sleep(1);
+                }
+            }   
+        }
+    }
+    else {
+        # we are not in forking mode
+        return 0;
+    }
+}
+
+# -----------------------------------------------------------------------------
+# exit a thread that was started with controlled_fork().  decrement the
+# reference count.
+sub controlled_exit() {
+
+    # BE CAREFUL WITH PRINTING MESSAGES HERE
+    # THIS MIGHT BE CALLED VERY EARLY
+
+    if ($forklocal) {
+        # we are in forking mode, so deal with ref count and exit
+        
+        # decrement the reference count
+        # $child_count_lock->shlock();
+        # $child_count = $child_count - 1;;
+        # $child_count_lock->shunlock();
+        
+        PrintInfo("Exiting Fork From PID = ".getppid()."\n");
+        dprint("dead:$name ppid=".getppid()."\n");
+
+        # exit with the specified args
+        wait_and_exit $_;
+    }
+    else {
+        # we are not in forking mode, so dont exit
+        return;
+    }
 }
 
 __END__
@@ -2706,6 +2895,7 @@ kept in sync!
 =head1 AUTHORS
 
 Srilatha Manne and Joel Emer
+Enhanced by Brian Slechta
 
 =head1 COPYRIGHT
 

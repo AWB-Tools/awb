@@ -2372,3 +2372,25 @@ Updating with simcore changes (rev. 2339 - Joel Emer)
 Changed layout and added more filtering options.
 
 Joel
+
+----------
+spartha1    Date: Fri Jun  1 16:43:29 EDT 2007  CSN: CSN-asimcore-116
+                  Fri Jun  1 20:43:29 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          115 
+
+Updating with simcore changes (rev. 2340 - Brian Slechta)
+
+fixes for parallel asim-run (ie. forklocal).
+
+the value of forklocal is the *max* number of child forks that can exist (plus
+or minus a few). for example, if you set FORK_LOCAL=25 in your asimrc,
+asim-run will allow up to 25 simultaneous benchmark setups at once. this will
+speed up submissions to netbatch and especially virtual netbatch.
+
+NOTE: forklocal is still beta. use caution. :)
+
+NOTE: try with lower settings of forklocal and if your machine is ok, you can
+increase it. you can easily swamp your machine if you set this too high.
