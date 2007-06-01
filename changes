@@ -2312,3 +2312,32 @@ Changes in Inifile.pm to add a method to back up a file.
 Backups are in the GNU emacs style of .~<version>~.
 
 Joel
+
+----------
+spartha1    Date: Fri Jun  1 16:38:24 EDT 2007  CSN: CSN-asimcore-113
+                  Fri Jun  1 20:38:24 UTC 2007
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          112 
+ regression.verifier       Locally Modified          112 
+ asim-run                  Locally Modified          112 
+
+Updating with simcore changes rev. 2337 (Brian Slechta)
+
+made changes to asim-run to support a faster local build. namely, i added the
+ability to fork each build/setup to its own process to achieve greater
+parallelism. make sure you can handle that many builds at once (eg. use
+distcc). second, added timestamps and pids to output and logs. third, added
+ability to control the distcc "-j" level. this is most useful when you are
+parallelizing many builds.
+
+WARNING: this forking is still relatively experimental
+
+new options are (params and asimr variables):
+
+--printtimes!, PRINT_TIMES, defaults to 1
+--forklocal!, FORK_LOCAL, defaults to 0
+--distccjlevel, DISTCC_JLEVEL, defaults to ""
+
+added header to all three scripts for perl syntax highlighting in emacs.

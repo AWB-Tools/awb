@@ -1,4 +1,4 @@
-:
+: # -*- perl -*-
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
@@ -32,6 +32,7 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 #  asim-run with some appropriate parameters. See asim-run
 #  for more details about what's going on.
 #
+
 ###############################################################
 
 use Getopt::Long;
@@ -443,7 +444,7 @@ sub check_regression {
           # We've found a regression command. 
           if ( $state == 3 || $state == 1 ) {
             $found = 1;
-            print "$_\n";
+            #print "$_\n";
             if ( ! grep /^$user$/, @users ) {
               push (@users, $user);
             }
