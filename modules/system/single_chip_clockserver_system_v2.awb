@@ -20,6 +20,12 @@ Awb module specification
 %export MAX_PTHREADS                  1 "Maximum number of simulator threads"
 %export %dynamic LIMIT_PTHREADS       0 "Dynamic maximum simulator threads (0 == use MAX_PTHREADS)"
 
+%export PTHREAD_PER_BOARD             0 "Are board models run in parallel?"
+%export PTHREAD_PER_SOCKET            0 "Are socket models run in parallel?"
+%export PTHREAD_PER_CORE              0 "Are core models run in parallel?"
+%export PTHREAD_PER_UNIT              0 "Are unit models run in parallel?"
+%export PTHREAD_PER_MODULE            0 "Are all modules run in parallel?"
+
 %export %dynamic THREADED_CLOCKING            1 "Enables the threaded clocking"
 %export %dynamic RANDOM_CLOCKING_SEED         0 "Seed to clock modules in random order (0 == Fixed order)"
 %export %dynamic DUMP_CLOCKING_PROFILE        0 "Enables the Clock routine profiling"

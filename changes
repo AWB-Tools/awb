@@ -2341,3 +2341,19 @@ new options are (params and asimr variables):
 --distccjlevel, DISTCC_JLEVEL, defaults to ""
 
 added header to all three scripts for perl syntax highlighting in emacs.
+
+----------
+spartha1    Date: Fri Jun  1 16:40:10 EDT 2007  CSN: CSN-asimcore-114
+                  Fri Jun  1 20:40:10 UTC 2007
+
+
+Directory modules/system
+ single_chip_common_system_v2.awb Locally Modified          113 
+ single_chip_clockserver_system.awb Locally Modified          113 
+ single_chip_common_system.awb Locally Modified          113 
+ single_chip_clockserver_system_v2.awb Locally Modified          113 
+
+Updating with simcore changes (rev. 2338 - Brian Slechta)
+
+added missing PTHREAD_* variables to various systems. copied them from
+multichip_common_system.awb
