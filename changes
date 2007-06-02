@@ -2700,3 +2700,16 @@ Updating with simcore changes (rev. 2359 - Joel Emer)
 
 Added controls to awb to separate the name of the repositories from
 the versions (branches) of the repositories.
+
+----------
+spartha1    Date: Sat Jun  2 09:21:38 EDT 2007  CSN: CSN-asimcore-135
+                  Sat Jun  2 13:21:38 UTC 2007
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          134 
+
+Updating with simcore changes (rev. 2360 - Joel Emer)
+
+Tool menu item 'Find/Replace' that launches apm-find-replace
+in the background.

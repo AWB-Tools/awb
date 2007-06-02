@@ -693,7 +693,7 @@ void awb_dialog::Button_run_clicked()
 
 void awb_dialog::FindReplace_activated()
 {
-    system("apm-find-replace");
+    system("apm-find-replace &");
 }
 
 
