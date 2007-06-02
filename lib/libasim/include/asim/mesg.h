@@ -118,6 +118,19 @@ extern pthread_mutex_t asim_mesg_mutex;
  * VERIFY is always checked.
  */
 #ifdef ASIM_ENABLE_ASSERTIONS
+
+#define WARNX(condition) \
+    if (! (condition)) { \
+        asim_warn.Prepare(__FILE__,__LINE__); \
+        asim_warn.Finish(); \
+    }
+
+#define WARN(condition,mesg) \
+    if (! (condition)) { \
+        asim_warn.Prepare(__FILE__,__LINE__) << mesg << endl; \
+        asim_warn.Finish(); \
+    }
+
 #define ASSERTX(condition) \
     if (! (condition)) { \
         asim_assert.Prepare(__FILE__,__LINE__); \

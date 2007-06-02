@@ -2467,3 +2467,29 @@ that.
 
 Note: this fix is barely tested and I'm still getting lots of errors from
 regression.launcher, but I think this is a better state than it was in.
+
+----------
+spartha1    Date: Sat Jun  2 08:44:49 EDT 2007  CSN: CSN-asimcore-121
+                  Sat Jun  2 12:44:49 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          120 
+
+Directory lib/libasim/include/asim
+ mesg.h                    Locally Modified          120 
+
+Directory base
+ param.cpp                 Locally Modified          120 
+
+Updating with simcore changes (rev. 2345 - Brian Slechta)
+
+did a *lot* of cleanup in asim-run. the major changes include the explicit
+passing of variables to functions so that we can avoid all the problems of
+using the global variables. this seems to fix all of the remaining problems
+that i am aware of. both local build and batch build modes seem to work great
+now. <fingers_crossed> also, i fixed the "use of unitialized variables" in
+PutEnv. the rest of the changes are just cleanup.
+
+added WARN and WARNX to mesg.h. these macros are like ASSERT but they do not
+kill the program.
