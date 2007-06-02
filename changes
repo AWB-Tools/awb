@@ -2673,3 +2673,16 @@ Updating with simcore changes (rev. 2357)
 Added Asim::Edit::{Interactive,Noninteractive}.pm to MANIFEST and
 fixed order of initialization of AsimShell::term wrt setting
 interaction mode.
+
+----------
+spartha1    Date: Sat Jun  2 09:18:36 EDT 2007  CSN: CSN-asimcore-133
+                  Sat Jun  2 13:18:36 UTC 2007
+
+
+Directory etc
+ awb.config.template.in    Locally Modified          132 
+
+Updating with simcore changes (rev. 2358 - Joel Emer)
+
+Updated workspace version of awb.config for shared workspace to avoid
+upgrade warnings.
