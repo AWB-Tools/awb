@@ -200,6 +200,24 @@ class ASIM_MM_CLASS : public ASIM_FREE_LIST_ELEMENT_CLASS<MM_TYPE>
         /// Dump all objects of this MM type.
         void ObjDump(void);
         void AddToObjDumpList(MM_TYPE *newMmObj);
+	
+	// Create a lock for the freelist in Multi-threaded mode
+        #if MAX_PTHREADS > 1 
+ 	pthread_mutex_t freelist_mutex; 
+
+ 	inline void freelist_enter () { 
+ 	  pthread_mutex_lock (& freelist_mutex); 
+ 	  return; 
+ 	} 
+
+ 	inline void freelist_leave () { 
+ 	  pthread_mutex_unlock (& freelist_mutex); 
+ 	  return; 
+ 	} 
+ 	#else 
+ 	inline void freelist_enter () {} 
+ 	inline void freelist_leave () {} 
+ 	#endif 
     };
 
   private:
@@ -309,7 +327,12 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::DATA (
     mmObjListHead(NULL),
 #endif
     destructed(false)
-{}
+{
+   // Initialize lock if Multi-threaded mode
+   #if MAX_PTHREADS > 1  
+   pthread_mutex_t freelist_mutex = PTHREAD_MUTEX_INITIALIZER; 
+   #endif 
+}
 
 /**
  * Delete this object type
@@ -339,12 +362,18 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::~DATA()
         }
     }
 
+    // Lock freelist before modifying it (only in MT mode)
+    data.freelist_enter(); 
+
     // free all objects that are on the free list
     while (! mmFreeList.Empty())
     {
         MM_TYPE * obj = mmFreeList.Pop();
         FinalObjectCleanup(obj);
     }
+
+    // Unlock freelist after modifying it (only in MT mode)
+    data.freelist_leave(); 
 
     destructed = true;
 }
@@ -641,6 +670,9 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
 
 #ifdef MM_PREALLOC_MEMORY
 
+    // Lock the freelist before modifying it (only in MT mode)
+    data.freelist_enter(); 
+
     if (data.mmFreeList.Empty())
     {
         // acquire memory for max # objects on first use of pool;
@@ -648,7 +680,13 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
         PreAllocateMemory();
     }
 
+    // Unlock the freelist before modifying it (only in MT mode)
+    data.freelist_leave(); 
+
 #endif
+
+    // Lock the freelist before modifying it (only in MT mode)
+    data.freelist_enter(); 
 
     MM_TYPE * newMmObj;
     if (! data.mmFreeList.Empty())
@@ -677,6 +715,9 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
 
         data.AddToObjDumpList(newMmObj);
     }
+
+    // Unlock the freelist before modifying it (only in MT mode)
+    data.freelist_leave(); 
 
 #ifdef MM_VALGRIND
     // make object address range writable, but containing invalid data

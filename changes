@@ -2601,3 +2601,16 @@ Partial fix for awb sometimes not exiting completely and
 the 'Kill' button not seeming to function in the run log.
 Problems still arise when the subprocess does not respond
 to a SIGPIPE.
+
+----------
+spartha1    Date: Sat Jun  2 09:10:03 EDT 2007  CSN: CSN-asimcore-129
+                  Sat Jun  2 13:10:03 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ mm.h                      Locally Modified          128 
+
+Updating with simcore changes (rev. 2354 - Sailashri Parthasarathy)
+
+-Multithreaded simulation support
+Added locks around the freelist operations
