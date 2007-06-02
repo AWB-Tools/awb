@@ -2577,3 +2577,27 @@ i have done a lot of re-factoring and code cleanup. i fixed some issues
 around the exit codes and the handling of certain error conditions. i unified
 the forking mechanism with batch and local builds. i added better debug
 information to the debug_outfile. other miscellaneous changes.
+
+----------
+spartha1    Date: Sat Jun  2 09:06:33 EDT 2007  CSN: CSN-asimcore-128
+                  Sat Jun  2 13:06:33 UTC 2007
+
+
+Directory tools/awb/awb2
+ awb_runlog.ui.h           Locally Modified          127 
+ awb_dialog.ui             Locally Modified          127 
+ awb_dialog.ui.h           Locally Modified          127 
+ awb_runlog.ui             Locally Modified          127 
+
+Updating with simcore changes (rev. 2353 - Joel Emer)
+
+Added an 'Admin' tab to awb. This tab allows one to create
+and switch workspaces, checkout and update packages. Some
+additional functionaly is disabled pending more support
+for interactive responses in a graphical environment in
+asim-shell.
+
+Partial fix for awb sometimes not exiting completely and
+the 'Kill' button not seeming to function in the run log.
+Problems still arise when the subprocess does not respond
+to a SIGPIPE.

@@ -35,8 +35,9 @@ void awb_dialog::init()
     use Asim;
 
     use awb_about;
+    use awb_runlog;
 
-    my $private_root;
+
     my $public_root;
     my $workspace;
     my $root;
@@ -59,42 +60,32 @@ void awb_dialog::init()
     
 #    Steps->setText($steps[0]);
 
-    # Build private model tree (this should get deprecated)
+    # Clear model info
 
-    $private_root = Qt::ListViewItem(model_tree, undef);
-    $private_root->setExpandable(1); 
-    $private_root->setText(0, trUtf8("Private"));
+    model_tree->clear();
+    model_list->clear();
 
-    $root = "$workspace/config/pm";
-    print "awb_dialog::init - Private root=$root\n" if $::debug;
-    $private_root->setText(1, trUtf8($root));
-
-    # Build public model tree
+    # Build model tree
 
     $public_root = Qt::ListViewItem(model_tree, undef);
     $public_root->setExpandable(1); 
-    $public_root->setText(0, trUtf8("Public"));
+    $public_root->setText(0, trUtf8("Models"));
 
     $root = "config/pm";
-    print "awb_dialog::init - Public root=$root\n" if $::debug;
+    print "awb_dialog::init - Model root=$root\n" if $::debug;
     $public_root->setText(1, trUtf8($root));
 
 
-    # Build private benchmark tree
+    # Clear benchmark info
 
-    $private_root = Qt::ListViewItem(benchmark_tree, undef);
-    $private_root->setExpandable(1); 
-    $private_root->setText(0, trUtf8("Private"));
+    benchmark_tree->clear();
+    benchmark_list->clear();
 
-    $root = "$workspace/config/bm";
-    $private_root->setText(1, trUtf8($root));
-
-
-    # Build public benchmark tree
+    # Build benchmark tree
 
     $public_root = Qt::ListViewItem(benchmark_tree, undef);
     $public_root->setExpandable(1); 
-    $public_root->setText(0, trUtf8("Public"));
+    $public_root->setText(0, trUtf8("Benchmarks"));
 
     $root = "config/bm";
     $public_root->setText(1, trUtf8($root));
@@ -123,8 +114,24 @@ void awb_dialog::init()
 
     extraBuildSwitches_textChanged();
     extraRunSwitches_textChanged();
+
+
+    # Set up the setup tab
+
+    setupInit();
+
 }
 
+
+#
+# Exit program
+#
+
+void awb_dialog::Exit_activated()
+{
+    close();
+    Qt::Application::exit();
+}
 
 #
 # Expansion/collapse of model explorer tree
@@ -687,8 +694,6 @@ void awb_dialog::Button_run_clicked()
 
 void awb_dialog::Manual_activated()
 {
-    use awb_runlog;
-
     my $w = awb_runlog(0,0,1);
 
     return $w->run("awb2 --help");
@@ -968,6 +973,304 @@ void awb_dialog::browseAdfPath_clicked()
 
 
 #
+# Setup tab
+#
+
+
+void awb_dialog::setupInit()
+{
+    #
+    # Set up the workspace group
+    #
+    my $workspacedir = Asim::rootdir();
+    my $workspacebase = dirname($workspacedir);
+
+    if (! -w $workspacebase) {
+        $workspacebase = $ENV{HOME};
+    }
+
+    workspaceDirLineEdit->setText($workspacebase);
+
+    #
+    # Set up repository list
+    #
+    my $packageDB = Asim::Package::DB->new();
+    my @packages = $packageDB->directory();
+
+    updatePackagesListBox->clear();
+
+    foreach my $p (@packages) {
+        updatePackagesListBox->insertItem($p);
+    }
+
+    #
+    # Set up repository list
+    #
+    my $repoDB = Asim::Repository::DB->new();
+    my @repodirs = $repoDB->directory();
+
+    checkoutListBox->clear();
+
+    foreach my $p (@repodirs) {
+        if (1) {
+            checkoutListBox->insertItem($p);
+        }
+    }
+
+
+}
+
+
+#
+# Workspace group
+#
+
+void awb_dialog::workspaceDirLineEdit_textChanged( const QString & )
+{
+    my $dir = shift;
+
+    if ( -d $dir) {
+        my $workspacename = basename($Asim::default_workspace->rootdir());
+
+        workspaceComboBox->clear();
+
+        for my $i (glob("$dir/*/awb.config")) {
+            my $n = basename(dirname($i));
+
+            workspaceComboBox->insertItem($n);
+            if ($n eq $workspacename) {
+                workspaceComboBox->setCurrentItem(workspaceComboBox->count()-1);
+            }
+        }
+    }
+
+}
+
+void awb_dialog::workspaceBrowsePushButton_clicked()
+{
+    my $dir = Qt::FileDialog::getExistingDirectory(
+                    workspaceDirLineEdit->text(),
+                    this,
+                    "get existing directory",
+                    "Get directory to hold workspace");
+
+    workspaceDirLineEdit->setText($dir);
+
+    return;
+}
+
+
+void awb_dialog::workspaceCreatePushButton_clicked()
+{
+    my $dir = workspaceDirLineEdit->text();
+    if (! -d $dir) {
+        Qt::MessageBox::information(
+            this, 
+            "awb", 
+            "Root directory for workspace must exist\n");
+        return;
+    }
+
+    my $workspace = "$dir/" . workspaceNameLineEdit->text();
+
+    # TBD: Check that we are not in an existing workspace
+
+    if ( -e $workspace) {
+        Qt::MessageBox::information(
+            this, 
+            "awb", 
+            "Workspace directory must not already exist\n");
+        return;
+    }
+
+
+    my $command = "asim-shell --batch -- new workspace $workspace";
+
+    my $w = awb_runlog(0,0,1);
+    my $status = $w->run($command);
+
+    if ( ! $status) {
+        if (Asim::open($workspace)) {
+            init();
+        }
+    }
+    return;
+}
+
+void awb_dialog::workspaceSwitchPushButton_clicked()
+{
+
+    my $dir = workspaceDirLineEdit->text();
+    my $workspace = "$dir/" . workspaceComboBox->currentText();
+
+    if (Asim::open($workspace)) {
+        init();
+    }
+}
+
+
+
+#
+# Repository Group
+#
+
+void awb_dialog::checkoutPushButton_clicked()
+{
+    my $command = "asim-shell --batch -- checkout package";
+
+    my $w = awb_runlog(0,0,1);
+
+    #
+    # Get name of package to check out
+    #
+    my $i = checkoutListBox->currentItem();
+    my $item = checkoutListBox->item($i);
+    return if (! defined($item));
+    my $package = $item->text();
+
+    $command .= " $package";
+
+    #
+    # Optionally add uesrname
+    #
+    my $username = usernameLineEdit->text();
+    print "$username\n";
+    if ($username ne "") {
+        $command .= " --user=$username";
+    }
+
+    #
+    # TBD: Do something with password
+    #
+    my $password = passwordLineEdit->text();
+
+
+    #
+    # Respect build checkbox
+    #
+
+    if (! checkoutBuildCheckBox->isChecked() ) {
+        $command .= " --nobuild ";
+    }
+
+    my $status = $w->run($command);
+
+    #
+    # Update package list after checkout
+    #   TBD: Maybe we should just refresh the entire box
+    #
+
+    if ( ! $status) {
+        $package =~ s/\/.*//;
+        updatePackagesListBox->insertItem($package);
+    }
+        
+}
+
+
+#
+# Packages Group
+#
+
+void awb_dialog::updatePackagesListBox_selectionChanged()
+{
+    updateAllCheckBox->setChecked(0);
+}
+
+void awb_dialog::updatePackagesListBox_selected( QListBoxItem * )
+{
+    updateAllCheckBox->setChecked(0);
+}
+
+
+void awb_dialog::updateAllCheckBox_toggled( bool )
+{
+    my $checked = shift;
+
+    if ($checked) {
+        my $max = updatePackagesListBox->count();
+
+        for (my $i=0; $i < $max; $i++) {
+            updatePackagesListBox->setSelected($i,0);
+        }
+    }
+    
+    #
+    # Restore checkbox state
+    #
+    updateAllCheckBox->setChecked($checked);
+
+}
+
+void awb_dialog::updatePushButton_clicked()
+{
+    my $command = "asim-shell --batch -- ";
+    my $update = 0;
+
+    if (packageUpdateRadioButton->isChecked()) {
+        $update = 1;
+        $command .= "update package";
+    }
+
+    if (packageCommitRadioButton->isChecked()) {
+        $command .= "commit package";
+    }
+
+    if (packageDeleteRadioButton->isChecked()) {
+        my $status = Qt::MessageBox::warning ( 
+            this, 
+            "awb", 
+            "Are you sure you want to delete the selected packages?",
+            "&Yes",
+            "&No",
+            "Cancel",
+            0,
+            2);
+
+        return  if ($status == 1);
+        return  if ($status == 2);
+
+        $command .= "deletexxx package";
+    }
+
+    my $w = awb_runlog(0,0,1);
+
+    if (updateAllCheckBox->isChecked()) {
+        if (! $update) {
+           Qt::MessageBox::information(
+             this, 
+             "awb", 
+            "Only update can be performed on all packages\n");
+           return;
+        }
+
+        $command .= " all";
+    } else {
+        my $max = updatePackagesListBox->count();
+        my $count = 0;
+
+        for (my $i=0; $i < $max; $i++) {
+            if (updatePackagesListBox->isSelected($i)) {
+                my $item = updatePackagesListBox->item($i);
+                my $name = $item->text();
+
+                $command .= " $name";
+            }
+        }
+    }
+
+    if ($update && ! updateBuildCheckBox->isChecked()) {
+        $command .= " --nobuild ";
+    }
+
+    #
+    # TBD: Package list needs to be updated on delete
+    #
+
+    return $w->run($command);
+}
+
+#
 # Todo:
 #
 #      Refresh on regain focus
@@ -987,8 +1290,6 @@ void awb_dialog::browseAdfPath_clicked()
 #      Provide step-by-step instructions...
 #      More intelligent menu/button enable/disable
 #
-#      Support for private config area
-#
 #      Refine splitter sizes/layout
 #      Leave manual page at top of window rather than bottom
 #
@@ -1002,7 +1303,5 @@ void awb_dialog::browseAdfPath_clicked()
 #      Sometimes {model,bencmark}_tree_expanded not called!
 #
 #           
-
-
 
 

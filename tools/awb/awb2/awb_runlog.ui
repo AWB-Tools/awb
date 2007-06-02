@@ -100,7 +100,7 @@
         <sender>Ok</sender>
         <signal>clicked()</signal>
         <receiver>awb_runlog</receiver>
-        <slot>close()</slot>
+        <slot>Ok_clicked()</slot>
     </connection>
 </connections>
 <includes>
@@ -109,6 +109,7 @@
 <slots>
     <slot>init()</slot>
     <slot>run()</slot>
+    <slot>Ok_clicked()</slot>
     <slot>Kill_clicked()</slot>
 </slots>
 <pixmapinproject/>
