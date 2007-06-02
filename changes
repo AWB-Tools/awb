@@ -2505,3 +2505,18 @@ Directory lib/libawb
 Updating with simcore changes (rev. 2346 - Sailashri Parthasarathy)
 
 Fixed the "Unimplemented configuration version" error that occured when a .apm file was modified using apm-edit. Since the version number was changed from 2.0 to 2.1, the check for version number was modified to allow any version 2.*.
+
+----------
+spartha1    Date: Sat Jun  2 08:48:13 EDT 2007  CSN: CSN-asimcore-123
+                  Sat Jun  2 12:48:13 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          122 
+ Model.pm                  Locally Modified          122 
+
+Updating with simcore changes (rev. 2347 - Joel Emer)
+
+Added a utility method to check if a file has been modified
+since it was opened. To be useful, this method needs to
+be used when the file is locked.

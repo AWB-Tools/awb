@@ -1498,6 +1498,27 @@ sub issetup {
 
 ################################################################
 
+=item $object-E<gt>file_modified()
+
+Return a boolean indicating whether the file has been modified.
+
+Note: this method is only meaningful if used under some file lock.
+
+=cut
+
+################################################################
+
+
+sub file_modified {
+  my $self = shift;
+
+  return $self->{inifile}->file_modified();
+}
+
+
+
+################################################################
+
 =item $model-E<gt>dump()
 
 Dump the model in ASCII to STDOUT

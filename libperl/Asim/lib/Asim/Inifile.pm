@@ -24,6 +24,7 @@ use strict;
 
 use Fcntl ':flock';
 use File::Copy;
+use File::stat;
 
 my $debug = 0;
 
@@ -158,6 +159,9 @@ sub open {
   print "Asim::Inifile - Opening inifile = $file\n" if $debug;
 
   CORE::open(M, "< $file") || return undef;
+
+  my $stat = stat($file);
+  $self->{mtime} = $stat->mtime();
 
   while (<M>) {
     chomp;
@@ -472,6 +476,10 @@ NEWFILE:
   }
 
   $self->{filename} = $file;
+
+  my $stat = stat($file);
+  $self->{mtime} = $stat->mtime();
+
   $self->modified(0);
   return 1
 }
@@ -722,6 +730,30 @@ sub modified {
   }
 
   return $self->{"modified"};
+}
+
+
+################################################################
+
+=item $object-E<gt>file_modified()
+
+Return a boolean indicating whether the file backing the inifile
+has been modified
+
+Note: this method is only meaningful if used under some file lock.
+
+=cut
+
+################################################################
+
+
+sub file_modified {
+  my $self = shift;
+
+  my $stat = stat($self->filename()) || return undef;
+  my $mtime = $stat->mtime();
+
+  return $mtime != $self->{mtime};
 }
 
 
