@@ -2493,3 +2493,15 @@ PutEnv. the rest of the changes are just cleanup.
 
 added WARN and WARNX to mesg.h. these macros are like ASSERT but they do not
 kill the program.
+
+----------
+spartha1    Date: Sat Jun  2 08:46:29 EDT 2007  CSN: CSN-asimcore-122
+                  Sat Jun  2 12:46:29 UTC 2007
+
+
+Directory lib/libawb
+ model.cpp                 Locally Modified          121 
+
+Updating with simcore changes (rev. 2346 - Sailashri Parthasarathy)
+
+Fixed the "Unimplemented configuration version" error that occured when a .apm file was modified using apm-edit. Since the version number was changed from 2.0 to 2.1, the check for version number was modified to allow any version 2.*.

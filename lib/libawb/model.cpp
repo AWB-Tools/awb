@@ -96,7 +96,7 @@ Model::Parse (
 	cerr << "Outdated version of model config file " << modelFileName
              << endl << "Run update utility 'cvs-config-to-apm'" << endl;
         return false;
-    } else if (version != "2.0") {
+    } else if (version[0] != '2') {
         cerr << "Unimplemented configuration version " << version << endl
              << "for model config file " << modelFileName << endl;
         return false;
