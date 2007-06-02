@@ -2614,3 +2614,23 @@ Updating with simcore changes (rev. 2354 - Sailashri Parthasarathy)
 
 -Multithreaded simulation support
 Added locks around the freelist operations
+
+----------
+spartha1    Date: Sat Jun  2 09:14:00 EDT 2007  CSN: CSN-asimcore-130
+                  Sat Jun  2 13:14:00 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Edit/                     Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/Edit
+ Noninteractive.pm         Locally Added               0 
+ Interactive.pm            Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Edit.pm                   Locally Modified          129 
+
+Updating with simcore changes (rev. 2355 - Joel Emer)
+
+Minor reorganization of interactive dialog module in
+preparation for adding a graphical version of the dialogs.
