@@ -691,6 +691,11 @@ void awb_dialog::Button_run_clicked()
 }
 
 
+void awb_dialog::FindReplace_activated()
+{
+    system("apm-find-replace");
+}
+
 
 void awb_dialog::Manual_activated()
 {
@@ -1011,7 +1016,9 @@ void awb_dialog::workspaceBrowsePushButton_clicked()
                     "get existing directory",
                     "Get directory to hold workspace");
 
-    workspaceDirLineEdit->setText($dir);
+    if ($dir) {
+        workspaceDirLineEdit->setText($dir);
+    }
 
     return;
 }
@@ -1076,6 +1083,8 @@ void awb_dialog::workspaceCreatePushButton_clicked()
             init();
         }
     }
+
+    workspaceNameLineEdit->clear();
     return;
 }
 
@@ -1104,6 +1113,21 @@ void awb_dialog::workspaceSwitchPushButton_clicked()
 # Repository Group
 #
 
+
+
+void awb_dialog::checkoutListBox_highlighted( const QString & )
+{
+    my $repo = shift;
+
+    repoVersionComboBox->clear();
+    repoVersionComboBox->insertItem("<Optionally select alternate version>");
+
+    for my $v (sort keys  %{this->{repos}->{$repo}}) {
+        repoVersionComboBox->insertItem($v);
+    }
+}
+
+
 void awb_dialog::checkoutPushButton_clicked()
 {
     my $command = "asim-shell --batch -- checkout package";
@@ -1117,6 +1141,12 @@ void awb_dialog::checkoutPushButton_clicked()
     my $item = checkoutListBox->item($i);
     return if (! defined($item));
     my $package = $item->text();
+
+    my $version = repoVersionComboBox->currentText();
+
+    if (! $version =~ /<.*>/) {
+        $package .= "/$version";
+    }
 
     $command .= " $package";
 
@@ -1204,6 +1234,12 @@ void awb_dialog::updateAllCheckBox_toggled( bool )
 
 void awb_dialog::refreshPushButton_clicked()
 {
+    # Reopen the workspace and refresh the package list
+    #    TBD: Maybe this should be a method in Asim:: & Asim::Workspace
+
+    my $workspace = Asim::rootdir();
+    Asim::open($workspace);
+
     packagesInit();
 }
 
@@ -1320,6 +1356,17 @@ void awb_dialog::setupInit()
     workspaceDirLineEdit->setText("");
     workspaceDirLineEdit->setText($workspacebase);
 
+    reposInit();
+
+    packagesInit();
+}
+
+
+
+
+void awb_dialog::reposInit()
+{
+
     #
     # Set up repository list
     #
@@ -1327,17 +1374,25 @@ void awb_dialog::setupInit()
     my @repodirs = $repoDB->directory();
 
     checkoutListBox->clear();
+    repoVersionComboBox->clear();
 
+    this->{repsos} = {};
+
+    #
+    # Keep a hash of repos each of which is s hash of versions
+    #
     foreach my $p (@repodirs) {
-        if (1) {
+
+        if ($p =~ /^[^\/]*$/) {
+            this->{repos}->{$p} = {};
             checkoutListBox->insertItem($p);
         }
+
+        if ($p =~ /^(.*)\/(.*)/) {
+            this->{repos}->{$1}->{$2} = 1;
+        }
     }
-
-    packagesInit();
 }
-
-
 
 
 void awb_dialog::packagesInit()
@@ -1391,4 +1446,5 @@ void awb_dialog::packagesInit()
 #      Sometimes {model,bencmark}_tree_expanded not called!
 #
 #           
+
 

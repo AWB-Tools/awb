@@ -2686,3 +2686,17 @@ Updating with simcore changes (rev. 2358 - Joel Emer)
 
 Updated workspace version of awb.config for shared workspace to avoid
 upgrade warnings.
+
+----------
+spartha1    Date: Sat Jun  2 09:20:19 EDT 2007  CSN: CSN-asimcore-134
+                  Sat Jun  2 13:20:19 UTC 2007
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          133 
+ awb_dialog.ui.h           Locally Modified          133 
+
+Updating with simcore changes (rev. 2359 - Joel Emer)
+
+Added controls to awb to separate the name of the repositories from
+the versions (branches) of the repositories.
