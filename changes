@@ -2557,3 +2557,23 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2351 - Sailashri Parthasarathy)
 
 Minor re-arrangement in the code.
+
+----------
+spartha1    Date: Sat Jun  2 08:59:41 EDT 2007  CSN: CSN-asimcore-127
+                  Sat Jun  2 12:59:41 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          126 
+
+Updating with simcore changes (rev. 2352 - Brian Slechta)
+
+fixes for the following asim bugs have already been checked in.
+
+asim-run does not correctly pass build options to local model build
+asim-run: rsync of binary to remote host fails if model name is different from experiment name
+
+i have done a lot of re-factoring and code cleanup. i fixed some issues
+around the exit codes and the handling of certain error conditions. i unified
+the forking mechanism with batch and local builds. i added better debug
+information to the debug_outfile. other miscellaneous changes.
