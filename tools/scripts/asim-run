@@ -997,9 +997,7 @@ sub wait_and_exit
         $ecode = 0;
     }
 
-    my $children_ecode = wait_for_children();
-
-    $ecode += $children_ecode;
+    $ecode += wait_for_children();
 
     exit $ecode;
 }
@@ -1174,7 +1172,7 @@ sub batch_build_run
 	}
 	if (($build == 1) || (-x "$resdir/$name/BUILD/$model_name")) {	
 	    PrintInfo(".... Running benchmarks for experiment $name\n");
-	    run_benchmarks($name, $build, $model_name);
+	    run_benchmarks($model, $name, $build, $model_name);
 	    PrintInfo(".... Finished benchmarks for experiment $name\n");
 	}
 	else {
@@ -1205,8 +1203,7 @@ sub run_benchmarks
         }
     }
     
-    my $children_ecode = wait_for_children();
-    $exit_code += $children_ecode;
+    $exit_code += wait_for_children();
 
     return;
 }

@@ -2520,3 +2520,15 @@ Updating with simcore changes (rev. 2347 - Joel Emer)
 Added a utility method to check if a file has been modified
 since it was opened. To be useful, this method needs to
 be used when the file is locked.
+
+----------
+spartha1    Date: Sat Jun  2 08:49:27 EDT 2007  CSN: CSN-asimcore-124
+                  Sat Jun  2 12:49:27 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          123 
+
+Updating with simcore changes (rev. 2348 - Brian Slechta)
+
+small but very important typo fix. :(
