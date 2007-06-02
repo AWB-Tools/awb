@@ -19,6 +19,8 @@ lib/Asim/Package/Svn.pm
 lib/Asim/BuildTree.pm
 lib/Asim/Package/Cvs.pm
 lib/Asim/Edit.pm
+lib/Asim/Edit/Interactive.pm
+lib/Asim/Edit/Noninteractive.pm
 lib/Asim/GenCFG.pm
 lib/Asim/Inifile.pm
 lib/Asim/Lock.pm

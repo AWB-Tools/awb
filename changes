@@ -2656,3 +2656,20 @@ QT's QProcess class. Implemenation is more straightforward
 and both the 'Kill' and 'Okay' buttons are responsive. Only
 persistent bug is that kill doesn't kill the entire process
 tree only the parent.
+
+----------
+spartha1    Date: Sat Jun  2 09:17:13 EDT 2007  CSN: CSN-asimcore-132
+                  Sat Jun  2 13:17:13 UTC 2007
+
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          131 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          131 
+
+Updating with simcore changes (rev. 2357)
+
+Added Asim::Edit::{Interactive,Noninteractive}.pm to MANIFEST and
+fixed order of initialization of AsimShell::term wrt setting
+interaction mode.

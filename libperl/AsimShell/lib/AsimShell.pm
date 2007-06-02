@@ -357,13 +357,13 @@ sub mode_batch {
 
 sub mode_interactive {
 
-  Asim::mode("Interactive");
-
   if (!defined($term) ) {
     $term = Term::ReadLine->new('AsimShell');;
     ##FIXME 11/12/03 Mark Charney:  disabled, was not ssh2/ssh-agent2 friendly
     ## check_ssh_agent();
   }
+
+  Asim::mode("Interactive");
 
   return 1;
 }
