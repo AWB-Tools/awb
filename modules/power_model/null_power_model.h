@@ -54,6 +54,7 @@ class BASE_POWER_MACRO_CLASS
   // Constructor
   BASE_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			 const char * const name,
+			 const char * const tname,
 			 bool enable) {};
   
   // Destructor
@@ -69,8 +70,9 @@ class BASE_MEM_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
   // Constructor
   BASE_MEM_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			     const char * const name,
+			     const char * const tname,
 			     bool enable) :
-    BASE_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
   // Destructor
   ~BASE_MEM_POWER_MACRO_CLASS(){};
@@ -84,8 +86,9 @@ class BASE_CTRL_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
   // Constructor
   BASE_CTRL_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			      const char * const name,
+			      const char * const tname,
 			      bool enable) :
-    BASE_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~BASE_CTRL_POWER_MACRO_CLASS(){};
@@ -104,8 +107,9 @@ class REG_FILE_POWER_MACRO_CLASS : public BASE_MEM_POWER_MACRO_CLASS
   // Constructor
   REG_FILE_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			     const char * const name,
+			     const char * const tname="",
 			     bool enable = true) :
-    BASE_MEM_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_MEM_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~REG_FILE_POWER_MACRO_CLASS(){};
@@ -123,8 +127,9 @@ class ROM_POWER_MACRO_CLASS : public BASE_MEM_POWER_MACRO_CLASS
   // Constructor
   ROM_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			const char * const name,
+			const char * const tname="",
 			bool enable = true) :
-    BASE_MEM_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_MEM_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~ROM_POWER_MACRO_CLASS(){};
@@ -156,8 +161,9 @@ class CACHE_POWER_MACRO_CLASS : public BASE_MEM_POWER_MACRO_CLASS
   // Constructor
   CACHE_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			  const char * const name,
+			  const char * const tname="",
 			  bool enable = true) :
-    BASE_MEM_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_MEM_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
   // Destructor
   ~CACHE_POWER_MACRO_CLASS(){};
@@ -181,8 +187,9 @@ class MUX_POWER_MACRO_CLASS : public BASE_CTRL_POWER_MACRO_CLASS
   // Constructor
   MUX_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			const char * const name,
+			const char * const tname="",
 			bool enable = true) :
-    BASE_CTRL_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_CTRL_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~MUX_POWER_MACRO_CLASS(){};
@@ -200,8 +207,9 @@ class GENERAL_POWER_MACRO_CLASS : public BASE_CTRL_POWER_MACRO_CLASS
   // Constructor
   GENERAL_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			    const char * const name,
+			    const char * const tname="",
 			    bool enable = true) :
-    BASE_CTRL_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_CTRL_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
   // Destructor
   ~GENERAL_POWER_MACRO_CLASS(){};
@@ -228,8 +236,9 @@ class DECODER_POWER_MACRO_CLASS : public BASE_CTRL_POWER_MACRO_CLASS
   // Constructor
   DECODER_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			    const char * const name,
+			    const char * const tname="",
 			    bool enable = true) :
-    BASE_CTRL_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_CTRL_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~DECODER_POWER_MACRO_CLASS(){};
@@ -246,8 +255,9 @@ class BASE_EXE_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
   // Constructor
   BASE_EXE_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			     const char * const name,
+			     const char * const tname="",
 			     bool enable = true) :
-    BASE_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_POWER_MACRO_CLASS(parent, name, tname, enable) {};
  
   // Destructor
   virtual ~BASE_EXE_POWER_MACRO_CLASS(){};
@@ -286,8 +296,9 @@ class CAM_POWER_MACRO_CLASS : public BASE_MEM_POWER_MACRO_CLASS
   // Constructor
   CAM_POWER_MACRO_CLASS(ASIM_MODULE parent,
 			const char * const name,
+			const char * const tname="",
 			bool enable = true) :
-    BASE_MEM_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_MEM_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~CAM_POWER_MACRO_CLASS(){};
@@ -305,8 +316,9 @@ class EXE_POWER_MACRO_CLASS : public BASE_EXE_POWER_MACRO_CLASS
  // Constructor
  EXE_POWER_MACRO_CLASS(ASIM_MODULE parent,
                        const char * const name,
+		       const char * const tname="",
 		       bool enable = true) :
-   BASE_EXE_POWER_MACRO_CLASS(parent, name, enable) {};
+   BASE_EXE_POWER_MACRO_CLASS(parent, name, tname, enable) {};
   
  // Desstructor
  ~EXE_POWER_MACRO_CLASS() {};
@@ -321,8 +333,9 @@ class NO_ACTIVITY_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
   // Constructor
   NO_ACTIVITY_POWER_MACRO_CLASS(ASIM_MODULE parent,
 				const char * const name,
+				const char * const tname="",
 				bool enable = true) :
-    BASE_POWER_MACRO_CLASS(parent, name, enable) {};
+    BASE_POWER_MACRO_CLASS(parent, name, tname, enable) {};
 
     // Destructor
   ~NO_ACTIVITY_POWER_MACRO_CLASS(){};

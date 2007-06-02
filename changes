@@ -2532,3 +2532,16 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2348 - Brian Slechta)
 
 small but very important typo fix. :(
+
+----------
+spartha1    Date: Sat Jun  2 08:51:12 EDT 2007  CSN: CSN-asimcore-125
+                  Sat Jun  2 12:51:12 UTC 2007
+
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified          124 
+
+Updating with simcore changes (rev. 2349 - Sari Coumeri)
+
+* Updated null_power_model.h constructors for new template name member
+added to power macro classes. (SLC)
