@@ -109,8 +109,12 @@
 <slots>
     <slot>init()</slot>
     <slot>run()</slot>
-    <slot>Ok_clicked()</slot>
+    <slot>receivedLineStdout()</slot>
+    <slot>receivedLineStderr()</slot>
+    <slot>receivedProcessExited()</slot>
     <slot>Kill_clicked()</slot>
+    <slot>Ok_clicked()</slot>
+    <slot>wait()</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

@@ -2634,3 +2634,25 @@ Updating with simcore changes (rev. 2355 - Joel Emer)
 
 Minor reorganization of interactive dialog module in
 preparation for adding a graphical version of the dialogs.
+
+----------
+spartha1    Date: Sat Jun  2 09:15:41 EDT 2007  CSN: CSN-asimcore-131
+                  Sat Jun  2 13:15:41 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          130 
+
+Directory tools/awb/awb2
+ awb_runlog.ui.h           Locally Modified          130 
+ awb_dialog.ui             Locally Modified          130 
+ awb_dialog.ui.h           Locally Modified          130 
+ awb_runlog.ui             Locally Modified          130 
+
+Updating with simcore changes (rev. 2356 - Joel Emer)
+
+Major rework of runlog dialog. The runlog is now based on
+QT's QProcess class. Implemenation is more straightforward
+and both the 'Kill' and 'Okay' buttons are responsive. Only
+persistent bug is that kill doesn't kill the entire process
+tree only the parent.

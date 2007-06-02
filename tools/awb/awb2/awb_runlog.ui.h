@@ -24,11 +24,6 @@
 ** a constructor, and a destroy() slot in place of a destructor.
 *****************************************************************************/
 
-#
-# TBD: 
-#      Add a save option...
-#
-
 void RunLog::init()
 {
     our $debug = 0;
@@ -39,153 +34,227 @@ void RunLog::init()
 void RunLog::run()
 {
     my $command = shift;
+    my $callback_function = shift;
+    my $callback_arg = shift;
 
+    our $debug;
+
+    chomp($command);
+    this->{command} = $command;
+    this->{callback_function} = $callback_function;
+    this->{callback_arg} = $callback_arg;
+
+    this->{logprocess} = undef;
+    this->{runstatus} = 1;
+    this->{killed} = 0;
+
+    print "Runit <$command>\n" if $debug;
+
+    if (! defined($command) || ! $command) {
+        return 1;
+    }
+
+    Log1->append("$command\n");
+
+    Ok->setEnabled(0);
+    Kill->setEnabled(1);
+
+    # Create a QProcess to run the command
+
+    this->{logprocess} = Qt::Process(this);
+
+    # Parse the command line for QProcess
+    #   TBD: Need to parse lines with newline (\n) in them
+
+    my @args = ("/bin/sh", "-c", $command);
+
+    if ($debug) {
+        print "----\n";
+        print "Final Command = <$command>\n";
+        print join("\n", @args);
+        print "\n----\n\n";
+    }
+
+
+    this->{logprocess}->setArguments(\@args);
+
+    #
+    # Set working directory
+    #
+    my $dir = Qt::Dir();
+
+    this->{logprocess}->setWorkingDirectory($dir);
+    
+    #
+    # Connect up signals and slots
+    #
+
+    Qt::Object::connect(this->{logprocess}, SIGNAL 'readyReadStdout()',
+                        this,        SLOT   'receivedLineStdout()');
+
+    Qt::Object::connect(this->{logprocess}, SIGNAL 'readyReadStderr()',
+                        this,        SLOT   'receivedLineStderr()');
+
+    Qt::Object::connect(this->{logprocess}, SIGNAL 'processExited()',
+                        this,        SLOT   'receivedProcessExited()');
+
+
+    #
+    # Start up command
+
+    my $status = this->{logprocess}->start();
+
+    if (! $status) {
+        print STDERR "Process start failed!\n";
+        return 1;
+    }
+
+    print "Process started\n" if $debug;
+
+
+    # Force an extra reference count for our modal dialog (hack)
+
+    our $runcount;
+    our %runlist;
+
+    if (! defined($runcount)) {
+        $runcount = 0;
+    }
+
+    this->{runcount}= $runcount++;
+    $runlist{this->{runcount}} = this;
+
+    # Display the dialog and return
+
+    show();
+    return 0;
+}
+
+void awb_runlog::wait()
+{
     our $debug;
 
     my $a = $main::app;
 
-    my $rin;
-    my $win;
-    my $ein;
-    my $rout;
-    my $timeout = 0.01;
-    my $count = 0;
+    print "Wait starting\n" if $debug;
 
-    my $running = 0;
-    my $nfound;
-    my $timeleft;
-    my $s; 
-    my $x;
-    my $runstatus = 1;
-
-    this->{killed} = 0;
-    this->{waiting} = 0;
-
-    print "Runit\n" if $debug;
-
-    Log1->insert("$command\n");
-
-    show();
-    $a->processEvents();
-
-    open(LOG, '-|', '(' .  $command . ' 2>&1; echo Exit status=$?)') || die("Open failed");
-    print "Open: OK\n" if $debug;
-
-    $running = 1;
-    Kill->setEnabled(1);
-
-    $rin = $win = $ein = '';
-    vec($rin,fileno(*LOG),1) = 1;
-#   vec($win,fileno(STDOUT),1) = 1;
-    $ein = $rin | $win;
-
-    while ($running && ! this->{killed}) {
-
-        ($nfound,$timeleft) = select($rout=$rin, undef, undef, $timeout);
-        if (! defined($nfound)) {
-            print "Select failed\n" if $debug;
-            $running = 0;
-            last;
-        }
-
-        print $count++ . ": Nfound = $nfound, Timeleft = $timeleft\n" if $debug;
-        if ($nfound) {
-            my $first = 1;
-            if  ($first || $s) {
-                $s = sysread(*LOG, $x="", 1024);
-                if (!defined($s) || ($first && ! $s)) {
-                    print "End of file\n" if $debug;
-                    $running = 0;
-                    last;
-                }
-                $first = 0;
-                print "$x\n" if $debug;
-                Log1->insert($x);
-                if ($x =~ /Exit status=(.*)/) {
-                    $runstatus = $1;
-                }
-                $a->processEvents();  
-            }
-        } else {
-            print "Nothing to read\n" if $debug;
-            $a->processEvents();  
-        }
+    while (this->{logprocess}->isRunning()) {
+        $a->processEvents();
+        sleep 0.1;
     }
 
-    #
-    # Close the LOG pipe
-    #    TBD: Figure out how to kill the process first, so we don't have to wait for it to finish
-    #
+    print "Wait finished\n" if $debug;
 
-    print "Closing log\n" if $debug;
+    return this->{logprocess}->exitStatus();
+}
 
-    close(LOG);
+void RunLog::receivedLineStdout()
+{
+    our $debug;
 
-    #
-    # TBD: This should be handled with a callback not with
-    #      an command specific sequence in the generic code
-    #
+    while (this->{logprocess}->canReadLineStdout()) {
+        my $line = this->{logprocess}->readLineStdout();
 
-    if ($command =~ /dox/) {
-      Log1->insert("\n");
-      Log1->insert("Refresh the web browser to view the dox output\n");
-      Log1->insert("\n");
+        Log1->append("$line\n");
     }
+}
 
-    Log1->insert("\n");
+void RunLog::receivedLineStderr()
+{
+    our $debug;
+
+    while (this->{logprocess}->canReadLineStderr()) {
+        my $line = this->{logprocess}->readLineStderr();
+
+        Log1->append("$line\n");
+    }
+}
+
+void RunLog::receivedProcessExited()
+{
+    our $debug;
+
+    this->{runstatus} = this->{logprocess}->exitStatus();
+
     if (! this->{killed}) {
-        Log1->insert("*******DONE******\n");
-    } else {
-        Log1->insert("*******ABORTED******\n");
-    }
-    Log1->insert("\n");
+        #
+        # TBD: This should be handled with a callback or postprint argument
+        #      not with a command specific sequence in the generic code
+        #
 
-    this->{waiting} = 1;
+        if (this->{command} =~ /dox/) {
+            Log1->append("\n");
+            Log1->append("Refresh the web browser to view the dox output\n");
+            Log1->append("\n");
+        }
+
+        Log1->append("\n");
+        Log1->append("*******DONE******\n");
+        Log1->append("\n");
+    }
 
     Ok->setEnabled(1);
     Kill->setEnabled(0);
 
-    #
-    # Hacky loop to keep dialog open until "OK" is clicked
-    #     $a->exec() wasn't right...
-    #
-
-    while (this->{waiting}) {
-        $a->processEvents();
-         sleep $timeout;
-    }
-
-    print "Returning with exit status $runstatus\n" if $debug;
-
-    return $runstatus;
 }
 
-
-void RunLog::Ok_clicked()
-{
-    our $debug;
-
-    print "Ok!\n" if $debug;
-
-    Ok->setEnabled(0);
-    this->{waiting} = 0;
-    this->close();
-}
 
 
 
 void RunLog::Kill_clicked()
 {
+    my $process = this->{logprocess};
+    my $pid     = $process->processIdentifier();
     our $debug;
+
+    return if this->{killed};
 
     print "Kill!\n" if $debug;
 
-    Kill->setEnabled(0);
     this->{killed} = 1;
 
-    Log1->insert("\n");
-    Log1->insert("Killing process - this may take a while if it ignores SIGPIPE\n");
-    Log1->insert("\n");
+#    $process->kill();
+
+    system("kill $pid");
+
+    Ok->setEnabled(1);
+    Kill->setEnabled(0);
+
+    Log1->append("\n");
+    Log1->append("*******ABORTED******\n");
+    Log1->append("\n");
+
 }
+
+
+void RunLog::Ok_clicked()
+{
+    our %runlist;
+    our $debug;
+
+    print "Ok!\n" if $debug;
+
+    Ok->setEnabled(0);
+    this->close();
+
+    # Clear out our extra reference out (hack)
+
+    $runlist{this->{runcount}} = undef;
+
+}
+
+
+
+#
+# TBD:
+#
+#      Implemented a callback mechanism so that the invoker can
+#      find out about the completion of the process instead of waiting...
+#
+#      Add a save option...
+#
+#      Make sure that kill is always killing the process
+#           If not, use $process->processIdentifier with a raw kill -9
+#
 
 

@@ -1396,8 +1396,7 @@ sub setup {
   my $status;
 
   if (! $self->isconfigured()) {
-      _process_error("Model does not appear to be configured\n");
-      return 0;
+      return _process_error("Model does not appear to be configured\n", %args);
   }
 
   # determine correct command (Asim v. Hasim)
@@ -1578,7 +1577,8 @@ sub _process_warning {
 
   my $warning = "Asim::Model:: Warning: - $message";
   if (defined($getcommand)) {
-      return "echo -n \"$warning\"";
+      chomp $warning;
+      return "echo \"$warning\"";
   }
 
   print "$warning";
@@ -1592,7 +1592,8 @@ sub _process_error {
 
   my $error = "Asim::Model:: Error: - $message";
   if (defined($getcommand)) {
-      return "echo -n \"$error\"";
+    chomp $error;
+    return "echo \"$error\"";
   }
 
   print "$error";

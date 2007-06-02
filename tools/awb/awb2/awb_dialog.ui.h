@@ -49,6 +49,7 @@ void awb_dialog::init()
     print "awb_dialog::init - We are in init\n" if $::debug;
 
     $workspace = $Asim::default_workspace->rootdir();
+    chdir $workspace;
 
     setCaption(basename($workspace) . " - awb");
 
@@ -129,7 +130,6 @@ void awb_dialog::init()
 
 void awb_dialog::Exit_activated()
 {
-    close();
     Qt::Application::exit();
 }
 
@@ -977,49 +977,6 @@ void awb_dialog::browseAdfPath_clicked()
 #
 
 
-void awb_dialog::setupInit()
-{
-    #
-    # Set up the workspace group
-    #
-    my $workspacedir = Asim::rootdir();
-    my $workspacebase = dirname($workspacedir);
-
-    if (! -w $workspacebase) {
-        $workspacebase = $ENV{HOME};
-    }
-
-    workspaceDirLineEdit->setText($workspacebase);
-
-    #
-    # Set up repository list
-    #
-    my $packageDB = Asim::Package::DB->new();
-    my @packages = $packageDB->directory();
-
-    updatePackagesListBox->clear();
-
-    foreach my $p (@packages) {
-        updatePackagesListBox->insertItem($p);
-    }
-
-    #
-    # Set up repository list
-    #
-    my $repoDB = Asim::Repository::DB->new();
-    my @repodirs = $repoDB->directory();
-
-    checkoutListBox->clear();
-
-    foreach my $p (@repodirs) {
-        if (1) {
-            checkoutListBox->insertItem($p);
-        }
-    }
-
-
-}
-
 
 #
 # Workspace group
@@ -1060,6 +1017,12 @@ void awb_dialog::workspaceBrowsePushButton_clicked()
 }
 
 
+
+void awb_dialog::workspaceNameLineEdit_returnPressed()
+{
+    workspaceCreatePushButton_clicked();
+}
+
 void awb_dialog::workspaceCreatePushButton_clicked()
 {
     my $dir = workspaceDirLineEdit->text();
@@ -1071,7 +1034,8 @@ void awb_dialog::workspaceCreatePushButton_clicked()
         return;
     }
 
-    my $workspace = "$dir/" . workspaceNameLineEdit->text();
+    my $workspacename = workspaceNameLineEdit->text();
+    my $workspace = "$dir/$workspacename";
 
     # TBD: Check that we are not in an existing workspace
 
@@ -1087,7 +1051,25 @@ void awb_dialog::workspaceCreatePushButton_clicked()
     my $command = "asim-shell --batch -- new workspace $workspace";
 
     my $w = awb_runlog(0,0,1);
-    my $status = $w->run($command);
+
+    #
+    # Debugging hack...
+    #
+    if ($workspacename =~ /^% (.*)/) {
+        $command = $1;
+        print $w->run($command);
+        workspaceNameLineEdit->setText("% ");
+        return;
+    }
+
+
+    $w->run($command);
+
+    #
+    # TBD: This needs to wait for the command to complete
+    #
+
+    my $status = $w->wait();
 
     if ( ! $status) {
         if (Asim::open($workspace)) {
@@ -1095,6 +1077,14 @@ void awb_dialog::workspaceCreatePushButton_clicked()
         }
     }
     return;
+}
+
+
+void awb_dialog::workspaceComboBox_activated( const QString & )
+{
+#    This behavior seemed annoying
+#
+#    workspaceSwitchPushButton_clicked();
 }
 
 void awb_dialog::workspaceSwitchPushButton_clicked()
@@ -1153,18 +1143,28 @@ void awb_dialog::checkoutPushButton_clicked()
         $command .= " --nobuild ";
     }
 
-    my $status = $w->run($command);
+    $w->run($command);
 
     #
     # Update package list after checkout
+    #   TBD: This should wait for the command to finish
     #   TBD: Maybe we should just refresh the entire box
     #
 
-    if ( ! $status) {
-        $package =~ s/\/.*//;
-        updatePackagesListBox->insertItem($package);
+    my $status = $w->wait();
+
+    if ( $status) {
+        Qt::MessageBox::information(
+             this, 
+             "awb", 
+            "Checkout failed!\n");
     }
-        
+
+    #
+    # TBD: This is causing crashes...
+    #
+#    setupInit();
+
 }
 
 
@@ -1202,21 +1202,30 @@ void awb_dialog::updateAllCheckBox_toggled( bool )
 
 }
 
+void awb_dialog::refreshPushButton_clicked()
+{
+    packagesInit();
+}
+
 void awb_dialog::updatePushButton_clicked()
 {
     my $command = "asim-shell --batch -- ";
-    my $update = 0;
 
-    if (packageUpdateRadioButton->isChecked()) {
-        $update = 1;
+    my $update = packageUpdateRadioButton->isChecked();
+    my $commit = packageCommitRadioButton->isChecked();
+    my $delete = packageDeleteRadioButton->isChecked();
+    my $build  = packageBuildRadioButton->isChecked();
+    my $clean  = packageCleanRadioButton->isChecked();
+
+    if ($update) {
         $command .= "update package";
     }
 
-    if (packageCommitRadioButton->isChecked()) {
+    if ($commit) {
         $command .= "commit package";
     }
 
-    if (packageDeleteRadioButton->isChecked()) {
+    if ($delete) {
         my $status = Qt::MessageBox::warning ( 
             this, 
             "awb", 
@@ -1230,10 +1239,16 @@ void awb_dialog::updatePushButton_clicked()
         return  if ($status == 1);
         return  if ($status == 2);
 
-        $command .= "deletexxx package";
+        $command .= "delete package";
     }
 
-    my $w = awb_runlog(0,0,1);
+    if ($build) {
+        $command .= "build package";
+    }
+
+    if ($clean) {
+        $command .= "clean package";
+    }
 
     if (updateAllCheckBox->isChecked()) {
         if (! $update) {
@@ -1263,12 +1278,85 @@ void awb_dialog::updatePushButton_clicked()
         $command .= " --nobuild ";
     }
 
+    my $w = awb_runlog(0,0,1);
+
+    $w->run($command);
+
     #
-    # TBD: Package list needs to be updated on delete
+    # Package list needs to be updated on delete
     #
 
-    return $w->run($command);
+    if ($delete) {
+        my $status = $w->wait();
+
+        if ( $status) {
+            Qt::MessageBox::information(
+                            this, 
+                            "awb", 
+                            "Delete failed!\n");
+        }
+
+
+        # Clean up package list - this does more than that, but computes are chaap...
+
+       packagesInit();
+    }
 }
+
+
+
+void awb_dialog::setupInit()
+{
+    #
+    # Set up the workspace group
+    #
+    my $workspacedir = Asim::rootdir();
+    my $workspacebase = dirname($workspacedir);
+
+    if (! -w $workspacebase) {
+        $workspacebase = $ENV{HOME};
+    }
+
+    workspaceDirLineEdit->setText("");
+    workspaceDirLineEdit->setText($workspacebase);
+
+    #
+    # Set up repository list
+    #
+    my $repoDB = Asim::Repository::DB->new();
+    my @repodirs = $repoDB->directory();
+
+    checkoutListBox->clear();
+
+    foreach my $p (@repodirs) {
+        if (1) {
+            checkoutListBox->insertItem($p);
+        }
+    }
+
+    packagesInit();
+}
+
+
+
+
+void awb_dialog::packagesInit()
+{
+    #
+    # Set up packages list
+    #
+    my $packageDB = Asim::Package::DB->new();
+    my @packages = $packageDB->directory();
+
+    updatePackagesListBox->clear();
+
+    foreach my $p (@packages) {
+        updatePackagesListBox->insertItem($p);
+    }
+
+
+}
+
 
 #
 # Todo:
@@ -1303,5 +1391,4 @@ void awb_dialog::updatePushButton_clicked()
 #      Sometimes {model,bencmark}_tree_expanded not called!
 #
 #           
-
 
