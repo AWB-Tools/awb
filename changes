@@ -2545,3 +2545,15 @@ Updating with simcore changes (rev. 2349 - Sari Coumeri)
 
 * Updated null_power_model.h constructors for new template name member
 added to power macro classes. (SLC)
+
+----------
+spartha1    Date: Sat Jun  2 08:57:59 EDT 2007  CSN: CSN-asimcore-126
+                  Sat Jun  2 12:57:59 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          125 
+
+Updating with simcore changes (rev. 2351 - Sailashri Parthasarathy)
+
+Minor re-arrangement in the code.

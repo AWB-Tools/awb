@@ -203,16 +203,16 @@ sub _get_module {
 
   my $awbfile = $inifile->get($modname, "File");
 
-  if ($awbfile =~ /\.apm$/) {
-    # It is a sub-model!!!
-    return $self->_get_submodel($awbfile);
-  }
-
   if (! defined($awbfile)) {
     _process_warning("Module ($modname) has no file in .apm file\n");
 
     $self->{missing}++;
     return undef;
+  }
+
+  if ($awbfile =~ /\.apm$/) {
+    # It is a sub-model!!!
+    return $self->_get_submodel($awbfile);
   }
 
   my $module = Asim::Module->new($awbfile);
