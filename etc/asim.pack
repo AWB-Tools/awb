@@ -38,6 +38,7 @@ Module=undefined
 Tag=HEAD
 Target=asimcore
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=ASIMCORE
 
 [asimcore/HEAD]
 Description=Asim Core
@@ -47,6 +48,7 @@ Module=undefined
 Tag=HEAD
 Target=asimcore
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=ASIMCORE
 
 ###### Hasim trunk
 
@@ -58,6 +60,7 @@ Module=undefined
 Tag=HEAD
 Target=hasim
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM
 
 [hasim/HEAD]
 Description=Hardware Asim Model
@@ -67,6 +70,7 @@ Module=undefined
 Tag=HEAD
 Target=hasim
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM
 
 ###### Hasim-mips trunk
 
@@ -78,6 +82,7 @@ Module=hasim-mips
 Tag=HEAD
 Target=asim-hasim-mips
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-MIPS
 
 [hasim-mips/HEAD]
 Description=Hardware Asim Model for MIPS
@@ -87,6 +92,7 @@ Module=undefined
 Tag=HEAD
 Target=hasim-mips
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-MIPS
 
 ###### OFDM trunk
 
@@ -98,6 +104,7 @@ Module=undefined
 Tag=HEAD
 Target=odfm
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OFDM
 
 [ofdm/HEAD]
 Description=OFDM design
@@ -107,6 +114,7 @@ Module=undefined
 Tag=HEAD
 Target=odfm
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OFDM
 
 ###### Feeder
 

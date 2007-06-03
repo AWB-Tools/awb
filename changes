@@ -2739,3 +2739,13 @@ Updating with simcore changes (rev. 2361 - Joel Emer)
 Added ability to open grapical browsers for packages and 
 repositories. They can be accessed through the 'Admin'
 tab of awb.
+
+----------
+jsemer      Date: Sun Jun  3 18:59:28 EDT 2007  CSN: CSN-asimcore-137
+                  Sun Jun  3 22:59:28 UTC 2007
+
+
+Directory etc
+ asim.pack                 Locally Modified          135 
+
+Added BrowseURLs to repositories.
