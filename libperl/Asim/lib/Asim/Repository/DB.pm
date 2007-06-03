@@ -318,6 +318,7 @@ sub get_repository {
   my $access;
   my $module;
   my $target;
+  my $browseURL;
   my $changes;
 
   my $repository;
@@ -336,10 +337,11 @@ sub get_repository {
   # Following will eventually be conditional on "Method";
 
   if (($method eq "cvs") || ($method eq "pserver") || ($method eq "bitkeeper") || ($method eq "svn")) {
-    $access  = $self->_get_item($fullname, "Access")  || return undef;
-    $module  = $self->_get_item($fullname, "Module")  || return undef;
-    $target  = $self->_get_item($fullname, "Target")  || return undef;
-    $changes = $self->_get_item($fullname, "Changes");
+    $access    = $self->_get_item($fullname, "Access")    || return undef;
+    $module    = $self->_get_item($fullname, "Module")    || return undef;
+    $target    = $self->_get_item($fullname, "Target")    || return undef;
+    $browseURL = $self->_get_item($fullname, "BrowseURL");
+    $changes   = $self->_get_item($fullname, "Changes");
 
     # Note: 
     #   We depend on the packagename matching the package filename,
@@ -351,6 +353,7 @@ sub get_repository {
                                         access      => $access,
                                         module      => $module,
                                         tag         => $cvstag,
+                                        browseURL   => $browseURL,
                                         target      => $target,
                                         changes     => $changes);
 

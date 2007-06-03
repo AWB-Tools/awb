@@ -424,6 +424,20 @@ sub save {
 
 ################################################################
 
+=item $workspace-E<gt>browse()
+
+Open a grapichal browser on the package
+
+
+=cut
+
+################################################################
+
+# Implemented in Base.pm
+
+
+################################################################
+
 =item $package-E<gt>accessors()
 
 Return a list of accessor functions for this object

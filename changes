@@ -2713,3 +2713,29 @@ Updating with simcore changes (rev. 2360 - Joel Emer)
 
 Tool menu item 'Find/Replace' that launches apm-find-replace
 in the background.
+
+----------
+jsemer      Date: Sun Jun  3 18:31:59 EDT 2007  CSN: CSN-asimcore-136
+                  Sun Jun  3 22:31:59 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Base.pm                   Locally Modified          135 
+ Package.pm                Locally Modified          135 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          135 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          135 
+ Workspace.pm              Locally Modified          135 
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          135 
+ awb_dialog.ui.h           Locally Modified          135 
+
+Updating with simcore changes (rev. 2361 - Joel Emer)
+
+Added ability to open grapical browsers for packages and 
+repositories. They can be accessed through the 'Admin'
+tab of awb.

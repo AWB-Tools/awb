@@ -118,6 +118,51 @@ sub description {
 
 ################################################################
 
+=item $workspace-E<gt>browse()
+
+Open a grapichal browser on the package
+
+=cut
+
+################################################################
+
+sub browse {
+  my $self = shift;
+  my $location = $self->location();
+
+  my $program;
+  my $command;
+  my $fullprogram;
+  my $status;
+
+  #
+  # TBD: Get browser programs from configuration options
+  # 
+
+  if (-e "$location/.svn") {
+    $program = "kdesvn";
+    $command = "$program $location &";
+  } else {
+    $program = "nautilus";
+    $command = "$program --do-desktop $location &";
+  }
+
+
+  #
+  # TBD: Program check for existence of program
+  #
+  if (0) {
+    iwarn("Program $program not found\n");
+    return undef;
+    }
+
+  $status = system ($command);
+  return $status?undef:1;
+
+}
+
+################################################################
+
 =item $object-E<gt>location([$value])
 
 Optionally update location of object to $value.

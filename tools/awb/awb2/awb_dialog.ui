@@ -1837,22 +1837,6 @@
                             <string>Enter a directory containing workspaces</string>
                         </property>
                     </widget>
-                    <widget class="QLineEdit">
-                        <property name="name">
-                            <cstring>workspaceNameLineEdit</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>172</x>
-                                <y>61</y>
-                                <width>230</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="toolTip" stdset="0">
-                            <string>Enter a name for the new workspace</string>
-                        </property>
-                    </widget>
                     <widget class="QPushButton">
                         <property name="name">
                             <cstring>workspaceSwitchPushButton</cstring>
@@ -1926,6 +1910,22 @@
                             <string>Select a workspace do switch to</string>
                         </property>
                     </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>workspaceNameLineEdit</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>172</x>
+                                <y>61</y>
+                                <width>230</width>
+                                <height>22</height>
+                            </rect>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Enter a name for the new workspace</string>
+                        </property>
+                    </widget>
                 </widget>
                 <widget class="QGroupBox">
                     <property name="name">
@@ -1993,28 +1993,6 @@
                             <string>Enter a username for the checkout</string>
                         </property>
                     </widget>
-                    <widget class="QCheckBox">
-                        <property name="name">
-                            <cstring>checkoutBuildCheckBox</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>290</x>
-                                <y>100</y>
-                                <width>91</width>
-                                <height>21</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Build</string>
-                        </property>
-                        <property name="checked">
-                            <bool>true</bool>
-                        </property>
-                        <property name="toolTip" stdset="0">
-                            <string>Check to build package after checkout</string>
-                        </property>
-                    </widget>
                     <widget class="QLineEdit">
                         <property name="name">
                             <cstring>passwordLineEdit</cstring>
@@ -2037,6 +2015,44 @@
                             <string>Enter a password for the checkout</string>
                         </property>
                     </widget>
+                    <widget class="QComboBox">
+                        <property name="name">
+                            <cstring>repoVersionComboBox</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>21</x>
+                                <y>107</y>
+                                <width>250</width>
+                                <height>22</height>
+                            </rect>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Select alternate version, if desired</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>checkoutBuildCheckBox</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>290</x>
+                                <y>105</y>
+                                <width>91</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Build</string>
+                        </property>
+                        <property name="checked">
+                            <bool>true</bool>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Check to build package after checkout</string>
+                        </property>
+                    </widget>
                     <widget class="QPushButton">
                         <property name="name">
                             <cstring>checkoutPushButton</cstring>
@@ -2044,7 +2060,7 @@
                         <property name="geometry">
                             <rect>
                                 <x>430</x>
-                                <y>100</y>
+                                <y>106</y>
                                 <width>90</width>
                                 <height>20</height>
                             </rect>
@@ -2075,22 +2091,6 @@
                             <string>Select a package to check out</string>
                         </property>
                     </widget>
-                    <widget class="QComboBox">
-                        <property name="name">
-                            <cstring>repoVersionComboBox</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>21</x>
-                                <y>107</y>
-                                <width>250</width>
-                                <height>22</height>
-                            </rect>
-                        </property>
-                        <property name="toolTip" stdset="0">
-                            <string>Select alternate version, if desired</string>
-                        </property>
-                    </widget>
                 </widget>
                 <widget class="QGroupBox">
                     <property name="name">
@@ -2110,44 +2110,6 @@
                     <property name="whatsThis" stdset="0">
                         <string>This group of controls allows one to update, commit or delete one or more packages in your workspace. Select one or more packages in the listbox (or check the 'all' checkbox). Select the desired action and click the button. The 'build' checkbox controls whether the package is built after an update. </string>
                     </property>
-                    <widget class="QPushButton">
-                        <property name="name">
-                            <cstring>updatePushButton</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>425</x>
-                                <y>128</y>
-                                <width>91</width>
-                                <height>21</height>
-                            </rect>
-                        </property>
-                        <property name="text">
-                            <string>Execute</string>
-                        </property>
-                        <property name="toolTip" stdset="0">
-                            <string>Performan the selected action on the selected packages</string>
-                        </property>
-                    </widget>
-                    <widget class="QListBox">
-                        <property name="name">
-                            <cstring>updatePackagesListBox</cstring>
-                        </property>
-                        <property name="geometry">
-                            <rect>
-                                <x>20</x>
-                                <y>20</y>
-                                <width>250</width>
-                                <height>100</height>
-                            </rect>
-                        </property>
-                        <property name="selectionMode">
-                            <enum>Extended</enum>
-                        </property>
-                        <property name="toolTip" stdset="0">
-                            <string>Select package(s)  to operate on</string>
-                        </property>
-                    </widget>
                     <widget class="QCheckBox">
                         <property name="name">
                             <cstring>updateAllCheckBox</cstring>
@@ -2231,43 +2193,59 @@
                         </property>
                         <widget class="QRadioButton">
                             <property name="name">
-                                <cstring>packageBuildRadioButton</cstring>
+                                <cstring>packageCommitRadioButton</cstring>
+                            </property>
+                            <property name="enabled">
+                                <bool>false</bool>
+                            </property>
+                            <property name="geometry">
+                                <rect>
+                                    <x>84</x>
+                                    <y>38</y>
+                                    <width>70</width>
+                                    <height>21</height>
+                                </rect>
+                            </property>
+                            <property name="text">
+                                <string>Commit</string>
+                            </property>
+                        </widget>
+                        <widget class="QRadioButton">
+                            <property name="name">
+                                <cstring>packageDeleteRadioButton</cstring>
                             </property>
                             <property name="enabled">
                                 <bool>true</bool>
                             </property>
                             <property name="geometry">
                                 <rect>
-                                    <x>93</x>
+                                    <x>83</x>
+                                    <y>58</y>
+                                    <width>60</width>
+                                    <height>21</height>
+                                </rect>
+                            </property>
+                            <property name="text">
+                                <string>Delete</string>
+                            </property>
+                        </widget>
+                        <widget class="QRadioButton">
+                            <property name="name">
+                                <cstring>packageStatusRadioButton</cstring>
+                            </property>
+                            <property name="enabled">
+                                <bool>true</bool>
+                            </property>
+                            <property name="geometry">
+                                <rect>
+                                    <x>84</x>
                                     <y>17</y>
                                     <width>60</width>
                                     <height>21</height>
                                 </rect>
                             </property>
                             <property name="text">
-                                <string>Build</string>
-                            </property>
-                            <property name="checked">
-                                <bool>false</bool>
-                            </property>
-                        </widget>
-                        <widget class="QRadioButton">
-                            <property name="name">
-                                <cstring>packageCleanRadioButton</cstring>
-                            </property>
-                            <property name="enabled">
-                                <bool>true</bool>
-                            </property>
-                            <property name="geometry">
-                                <rect>
-                                    <x>93</x>
-                                    <y>38</y>
-                                    <width>60</width>
-                                    <height>21</height>
-                                </rect>
-                            </property>
-                            <property name="text">
-                                <string>Clean</string>
+                                <string>Status</string>
                             </property>
                             <property name="checked">
                                 <bool>false</bool>
@@ -2294,26 +2272,29 @@
                         </widget>
                         <widget class="QRadioButton">
                             <property name="name">
-                                <cstring>packageCommitRadioButton</cstring>
+                                <cstring>packageBuildRadioButton</cstring>
                             </property>
                             <property name="enabled">
-                                <bool>false</bool>
+                                <bool>true</bool>
                             </property>
                             <property name="geometry">
                                 <rect>
                                     <x>13</x>
-                                    <y>38</y>
-                                    <width>70</width>
+                                    <y>37</y>
+                                    <width>60</width>
                                     <height>21</height>
                                 </rect>
                             </property>
                             <property name="text">
-                                <string>Commit</string>
+                                <string>Build</string>
+                            </property>
+                            <property name="checked">
+                                <bool>false</bool>
                             </property>
                         </widget>
                         <widget class="QRadioButton">
                             <property name="name">
-                                <cstring>packageDeleteRadioButton</cstring>
+                                <cstring>packageCleanRadioButton</cstring>
                             </property>
                             <property name="enabled">
                                 <bool>true</bool>
@@ -2322,14 +2303,55 @@
                                 <rect>
                                     <x>13</x>
                                     <y>59</y>
-                                    <width>70</width>
+                                    <width>60</width>
                                     <height>21</height>
                                 </rect>
                             </property>
                             <property name="text">
-                                <string>Delete</string>
+                                <string>Clean</string>
+                            </property>
+                            <property name="checked">
+                                <bool>false</bool>
                             </property>
                         </widget>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>updatePushButton</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>426</x>
+                                <y>128</y>
+                                <width>91</width>
+                                <height>21</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Execute</string>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Performan the selected action on the selected packages</string>
+                        </property>
+                    </widget>
+                    <widget class="QListBox">
+                        <property name="name">
+                            <cstring>updatePackagesListBox</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>20</x>
+                                <y>20</y>
+                                <width>250</width>
+                                <height>100</height>
+                            </rect>
+                        </property>
+                        <property name="selectionMode">
+                            <enum>Extended</enum>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Select package(s)  to operate on</string>
+                        </property>
                     </widget>
                 </widget>
             </widget>
@@ -3118,6 +3140,18 @@
         <receiver>awb_dialog</receiver>
         <slot>FindReplace_activated()</slot>
     </connection>
+    <connection>
+        <sender>updatePackagesListBox</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>updatePackagesListBox_doubleClicked(QListBoxItem*)</slot>
+    </connection>
+    <connection>
+        <sender>checkoutListBox</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>checkoutListBox_doubleClicked(QListBoxItem*)</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Tabs_main</tabstop>
@@ -3210,6 +3244,8 @@
     <slot>updateAllCheckBox_toggled( bool )</slot>
     <slot>refreshPushButton_clicked()</slot>
     <slot>updatePushButton_clicked()</slot>
+    <slot>updatePackagesListBox_doubleClicked( QListBoxItem * )</slot>
+    <slot>checkoutListBox_doubleClicked( QListBoxItem * )</slot>
 </slots>
 <functions>
     <function access="private">setupInit()</function>

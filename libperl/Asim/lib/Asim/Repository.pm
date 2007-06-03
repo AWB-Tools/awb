@@ -56,6 +56,7 @@ The following public methods are supported:
                                         access => <accessinfo>,
                                         module => <CVSmodule>,
                                         tag => <CVStag>,
+                                        browseURL => <browseURL>,
 
                                         target => <targetdirectory>,
                                         changes=> <changesfilename>);
@@ -394,6 +395,31 @@ sub checkout {
   # see if it is in the path...since we do not add it.
   #
   return $package_dir;
+}
+
+
+
+################################################################
+
+=item $workspace-E<gt>browse()
+
+Open a grapichal browser on the repository
+
+=cut
+
+################################################################
+
+sub browse {
+  my $self = shift;
+  my $location = $self->{browseURL} || return undef;
+
+  #
+  # TBD: Get repository browser from configuration option
+  #
+
+  my $status = system ("firefox $location &");
+  return $status?undef:1;
+
 }
 
 

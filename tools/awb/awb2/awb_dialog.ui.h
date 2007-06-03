@@ -1128,6 +1128,19 @@ void awb_dialog::checkoutListBox_highlighted( const QString & )
 }
 
 
+
+void awb_dialog::checkoutListBox_doubleClicked( QListBoxItem * )
+{
+    my $item = shift;
+    my $reponame = $item->text();
+
+    my $repoDB = Asim::Repository::DB->new();
+    my $repo = $repoDB->get_repository($reponame);
+
+    $repo->browse();
+}
+
+
 void awb_dialog::checkoutPushButton_clicked()
 {
     my $command = "asim-shell --batch -- checkout package";
@@ -1213,6 +1226,18 @@ void awb_dialog::updatePackagesListBox_selected( QListBoxItem * )
 }
 
 
+
+void awb_dialog::updatePackagesListBox_doubleClicked( QListBoxItem * )
+{
+    my $item   = shift;
+    my $packagename = $item->text();
+    my $packageDB = Asim::Package::DB->new();
+    my $package = $packageDB->get_package($packagename);
+
+    $package->browse();
+}
+
+
 void awb_dialog::updateAllCheckBox_toggled( bool )
 {
     my $checked = shift;
@@ -1250,6 +1275,7 @@ void awb_dialog::updatePushButton_clicked()
     my $update = packageUpdateRadioButton->isChecked();
     my $commit = packageCommitRadioButton->isChecked();
     my $delete = packageDeleteRadioButton->isChecked();
+    my $status = packageStatusRadioButton->isChecked();
     my $build  = packageBuildRadioButton->isChecked();
     my $clean  = packageCleanRadioButton->isChecked();
 
@@ -1276,6 +1302,10 @@ void awb_dialog::updatePushButton_clicked()
         return  if ($status == 2);
 
         $command .= "delete package";
+    }
+
+    if ($status) {
+        $command .= "status package";
     }
 
     if ($build) {
