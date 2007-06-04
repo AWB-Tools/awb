@@ -1135,7 +1135,7 @@ void awb_dialog::checkoutListBox_doubleClicked( QListBoxItem * )
     my $reponame = $item->text();
 
     my $repoDB = Asim::Repository::DB->new();
-    my $repo = $repoDB->get_repository($reponame);
+    my $repo = $repoDB->get_repository($reponame) || return undef;
 
     $repo->browse();
 }
@@ -1232,7 +1232,7 @@ void awb_dialog::updatePackagesListBox_doubleClicked( QListBoxItem * )
     my $item   = shift;
     my $packagename = $item->text();
     my $packageDB = Asim::Package::DB->new();
-    my $package = $packageDB->get_package($packagename);
+    my $package = $packageDB->get_package($packagename) || return undef;
 
     $package->browse();
 }

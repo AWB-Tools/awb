@@ -128,7 +128,7 @@ Open a grapichal browser on the package
 
 sub browse {
   my $self = shift;
-  my $location = $self->location();
+  my $location = $self->location() || return undef;
 
   my $program;
   my $command;
@@ -144,7 +144,7 @@ sub browse {
     $command = "$program $location &";
   } else {
     $program = "nautilus";
-    $command = "$program --do-desktop $location &";
+    $command = "$program --no-desktop $location &";
   }
 
 

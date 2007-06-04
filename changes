@@ -2749,3 +2749,18 @@ Directory etc
  asim.pack                 Locally Modified          135 
 
 Added BrowseURLs to repositories.
+
+----------
+jsemer      Date: Sun Jun  3 20:53:42 EDT 2007  CSN: CSN-asimcore-138
+                  Mon Jun  4 00:53:42 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Base.pm                   Locally Modified          136 
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          136 
+
+Updating with simcore changes (rev. 2361 - Joel Emer)
+
+Improved error checking for browsing.
