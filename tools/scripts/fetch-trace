@@ -184,10 +184,12 @@ if ( ! $is_trace_arg_absolute ) {
   #
   # first look for the trace in the DPG trace list
   #
-  if ( ! $trace_path ) {
-    if ($DPG_MASTER_TLIST ) {
+  if( ! $DPG_FETCH_TRACE ) {
+    print "# Skipping check for DPG traces because disabled.\n" if ($verbose);
+  } else {
+    if ( $DPG_MASTER_TLIST ) {
       print "# looking up trace in DPG trace list\n" if ( $verbose );
-      $trace_path = find_trace_in_tlist($trace_name, $DPG_MASTER_TLIST);  
+      $trace_path = find_trace_in_tlist($trace_name, $DPG_MASTER_TLIST);
     } else {
       print "# there is no DPG trace list file to look up the trace\n" if ( $verbose );
     }
@@ -280,7 +282,7 @@ if ( $files_exist ) {
       "# copying files ${trace_path}* from remote server ${ASIM_TRACE_SERVER} to local cache $ASIM_TRACE_CACHE/\n"
       if ( $verbose );
     speed_debug("rsyncing starting ...");
-    system("rsync ${ASIM_TRACE_SERVER}:${trace_path}\\* $ASIM_TRACE_CACHE/");
+    system("rsync --progress ${ASIM_TRACE_SERVER}:${trace_path}\\* $ASIM_TRACE_CACHE/");
     speed_debug("rsyncing done ...");
   }
   print "$ASIM_TRACE_CACHE/${trace_name}\n";
