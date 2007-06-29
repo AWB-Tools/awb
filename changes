@@ -2961,3 +2961,15 @@ Updating with simcore changes (rev. 2376 - Krishna Rangan)
 
 - revised UINT128 declaration that causes gcc 3.4.3 compiler
 to hang on 64 bit machines.
+
+----------
+spartha1    Date: Fri Jun 29 16:39:54 EDT 2007  CSN: CSN-asimcore-150
+                  Fri Jun 29 20:39:54 UTC 2007
+
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified          149 
+
+Updating with simcore changes (rev. 2377 - Sari Coumeri)
+
+* Added empty bus power macro calls to null_power_model (SLC)

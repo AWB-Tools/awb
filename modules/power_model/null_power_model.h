@@ -244,6 +244,27 @@ class DECODER_POWER_MACRO_CLASS : public BASE_CTRL_POWER_MACRO_CLASS
   ~DECODER_POWER_MACRO_CLASS(){};
 };
 
+class BUS_POWER_MACRO_CLASS : public BASE_CTRL_POWER_MACRO_CLASS
+{
+ public:
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw) {};
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname,
+		       UINT32 bw) {};
+
+  // Constructor
+  BUS_POWER_MACRO_CLASS(ASIM_MODULE parent,
+			const char * const name,
+			const char * const tname="",
+			bool enable = true) :
+    BASE_CTRL_POWER_MACRO_CLASS(parent, name, tname, enable) {};
+
+    // Destructor
+  ~BUS_POWER_MACRO_CLASS(){};
+};
+
 
 class BASE_EXE_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
 {
