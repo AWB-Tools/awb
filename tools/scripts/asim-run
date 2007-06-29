@@ -110,7 +110,7 @@ my $MAX_RUNNING_JOBS    = Asim::Util::get_asimrc_val("asim-run", "MAX_RUNNING_JO
 # How many jobs can one user have in queue before the
 # number of jobs she injects at any time is limited. 
 my $EXTRA_NBQ_FLAGS   = Asim::Util::get_asimrc_val("asim-run", "EXTRA_NBQ_FLAGS",     undef);          
-                                  
+
 # When we exceed the MAX_RUNNING_JOBS limit, how many jobs can be injected per cycle? 
 my $MAX_JOBS_PER_PERIOD = Asim::Util::get_asimrc_val("asim-run", "MAX_JOBS_PER_PERIOD",   10);
 
@@ -146,6 +146,9 @@ my $ENABLE_NETBATCH_PRE = Asim::Util::get_asimrc_val("asim-run", "ENABLE_NETBATC
 
 # Should we do a smart class based pre-execution check or a script based pre-execution check?
 my $NETBATCH_PRE_USE_SMARTCLASS = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_PRE_USE_SMARTCLASS", 0);
+
+# Arguments to launch threaded jobs
+$NETBATCH_MT_SLOTS_PER_CORE   = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_MT_SLOTS_PER_CORE", 2);
 
 ## Global variables used for scheduling. 
 
@@ -648,10 +651,10 @@ if ( !($remote) && $runbatch && $ENABLE_NETBATCH_PRE ) {
   }
   else {
       if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 && $2 >= 3) ) {
-      print "WARNING: $BATCH_SUBMIT_COMMAND version does not support smart class check, jobs might be lost.\n";
+	  print "WARNING: $BATCH_SUBMIT_COMMAND version does not support smart class check, jobs might be lost.\n";
       }
       else {
-      $batch_flags = $batch_flags . "-C \"fDS\(\'$TMP_DIR\'\)\>$MIN_TMP_SPACE_MB\" ";
+	  $batch_flags = $batch_flags . "-C \"fDS\(\'$TMP_DIR\'\)\>$MIN_TMP_SPACE_MB\" ";
       }
   }
 }
@@ -1247,7 +1250,7 @@ sub batch_build_run
 
             my $submit_cmd = "asim-shell --batch build model -- --builddir $model_buildarea --options=$buildopt";
 
-            my $submiterror = submit_job($name, $model_name, "not_used", $submit_cmd, 1);
+            my $submiterror = submit_job($name, $model_name, "not_used", $submit_cmd, 1, 0);
 
             $build_success = !$submiterror;
 
@@ -1523,6 +1526,31 @@ sub run_one_benchmark
         }
 
         my $input = $exps->{"$name"}{params};
+	my $apmfile = &FullPath($exps->{"$name"}{model});
+	my $checkApm = 1;
+	my $nthreads = 0;
+	
+	# Check for threaded run of the model. The variable nthreads holds
+	# the number of threads this model launches.  At present this
+	# information is not used to pick the multi-core machine in
+	# netbatch.
+	# TODO: the runtime LIMIT_PTHREADS argument is checked, but the decl
+	# in awb file has to be checked as well.
+	if (${$input} =~ /\s*(LIMIT_PTHREADS)\s*=\s*(\d+)\s*/) {
+	    $nthreads = $2;
+	    $checkApm = 0 unless ($nthreads == 0);
+	}
+	if ($checkApm == 1) {
+	    open(APMFILE, "<$apmfile");
+	    while (<APMFILE>) {
+		chomp;
+		if (/\s*(MAX_PTHREADS)\s*=\s*(\d+)\s*/) {
+		    $nthreads = $2;
+		    last;
+		}
+	    }
+	    close(APMFILE);
+	}
 
         my $submit_cmd;
         if ($remote)
@@ -1550,7 +1578,7 @@ sub run_one_benchmark
 
         }
 
-        my $submiterror = submit_job($name, $model_name, $bm_name, $submit_cmd, 0);
+        my $submiterror = submit_job($name, $model_name, $bm_name, $submit_cmd, 0, $nthreads);
 
         if ($submiterror) {
             # There was an error in the submission.
@@ -1636,7 +1664,7 @@ sub run_one_benchmark
                     "-exp=$model -compress=$compress $batch_scr_inputs ".
                     "-execscript=\"$execscript\" -- $input"; 
 
-                my $submiterror = submit_job($name, $model_name, $bm_name, $submit_cmd, 0);
+                my $submiterror = submit_job($name, $model_name, $bm_name, $submit_cmd, 0, 0);
 
                 if ($submiterror) {
                     # There was an error in the submission.
@@ -2032,8 +2060,7 @@ sub full_path
 #
 sub submit_job 
 {
-
-    my ($name, $model_name, $bm_name, $submit_cmd, $model_submit) = @_;
+    my ($name, $model_name, $bm_name, $submit_cmd, $model_submit, $mt_run) = @_;
   
     if (! $runbatch) {
         # Run submit_cmd directly...
@@ -2044,7 +2071,6 @@ sub submit_job
         }
         return 0;
     }
-    
     # Do batch submission after making sure we can schedule job.  Whenever the 
     # routine returns, we can schedule a job. 
     schedule_job();
@@ -2088,9 +2114,14 @@ sub submit_job
         else {
             $dashj = "-J $resdir/$name/ADMIN/$bm_name.asimlog";
         }
-        
+
+	# threaded model runs have to be scheduled on multi-cores.
+	my $batch_mt_args = "";
+        if (defined $mt_run && $mt_run > 0) {
+	    $batch_mt_args = " -C \"CPUCount>=$NETBATCH_MT_SLOTS_PER_CORE\" ";
+	}
         # submit run job to netbatch
-        my $runerror = run_command("$BATCH_SUBMIT_COMMAND $batch_flags $dashj $submit_cmd > $resdir/$name/$bm_name.SUBMITTED");
+        my $runerror = run_command("$BATCH_SUBMIT_COMMAND $batch_flags $batch_mt_args $dashj $submit_cmd > $resdir/$name/$bm_name.SUBMITTED");
         
         # restore ENV variables after submission
         if ($remote) {
@@ -2117,6 +2148,7 @@ sub submit_job
     }
     return 0;
 }
+
 
 # -----------------------------------------------------------------------------
 #

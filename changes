@@ -2839,3 +2839,18 @@ always do this. I always miss some little mundane detail. :(
 
 Anyway, this should fix amc benchmark setup issues. They should now properly
 find the model executable in the "run" files.
+
+----------
+spartha1    Date: Fri Jun 29 15:28:31 EDT 2007  CSN: CSN-asimcore-142
+                  Fri Jun 29 19:28:31 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          141 
+
+Directory etc
+ asimrc.template           Locally Modified          141 
+
+Updating with simcore changes (rev. 2366 - Krishna Rangan)
+
+- support to run MT apps on multi-core systems.

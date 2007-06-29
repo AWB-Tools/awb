@@ -447,6 +447,14 @@ NETBATCH_PRE_USE_SMARTCLASS=
 # NETBATCH_AUTO_REQUEUE=0
 NETBATCH_AUTO_REQUEUE=
 
+#
+# Purpose: Specify the required slots per host for multi-threaded 
+# netbatch runs.
+#
+# Type:    Integer
+# Default: 2
+# NETBATCH_MT_SLOTS_PER_CORE=2
+NETBATCH_MT_SLOTS_PER_CORE=4
 
 #***********************************************************************#
 # asim-batch is invoked by asim-run to submit one asim job, i.e., run
