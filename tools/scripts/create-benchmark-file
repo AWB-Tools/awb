@@ -11,9 +11,11 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 chomp (my $path = `pwd`);
 
 # global constants
+my $limitmulti = 99999; # absurdly large
+my $nosingle = 0;
 my $logfile = "/dev/null";
 my $script_name = "create-benchmark-file";
-my @params = ( "tag", "tlist", "flist", "outfile", "logfile", "debug");
+my @params = ( "tag", "tlist", "flist", "outfile", "logfile", "debug", "limitmulti", "nosingle");
 
 # global variables
 my %got_param;
@@ -172,6 +174,23 @@ sub check_parameters
     {
         my $logfile = ">/dev/null";
         open (LOGFILE, $logfile) || die "could not open $logfile for writing: $!";
+    }
+
+    if ($got_param{"limitmulti"})
+    {
+        $limitmulti = $param_val{"limitmulti"};
+    }
+
+    if ($got_param{"nosingle"})
+    {
+        if (defined $param_val{"nosingle"})
+        {
+            $nosingle = $param_val{"nosingle"};
+        }
+        else
+        {
+            $nosingle = 1;
+        }
     }
 }
 
@@ -338,7 +357,10 @@ sub process_flist # (@flist)
                 {
                     dprint "ERROR: twolit_begin with a single trace\n";
                 }
-                oprint "tools/scripts/bm/tracecache/single.cfx/$singletrace.cfg\n";
+                if (!($nosingle))
+                {
+                    oprint "tools/scripts/bm/tracecache/single.cfx/$singletrace.cfg\n";
+                }
             }
         }
         elsif ($line eq "")
@@ -375,27 +397,30 @@ sub process_flist # (@flist)
                 # we likely just got the name of a twolit trace and can now 
                 # match it up with exiting twolit traces
                 my $name = $twolit_name;
-                my $combined = "tools/scripts/bm/tracecache/multi.cfx";
-                for (my $i = 0; $i < $twolit_num; $i++)
+                if ($limitmulti >= $twolit_num)
                 {
-                    my $n = $twolits{"$i"};
-                    if ($n =~ /.*\/(.*)/) 
+                    my $combined = "tools/scripts/bm/tracecache/multi.cfx";
+                    for (my $i = 0; $i < $twolit_num; $i++)
                     {
-                        $n = $1;
+                        my $n = $twolits{"$i"};
+                        if ($n =~ /.*\/(.*)/) 
+                        {
+                            $n = $1;
+                        }
+                        $combined .= "/";
+                        $combined .= $n;
                     }
                     $combined .= "/";
-                    $combined .= $n;
+                    $combined .= $name;
+                    $combined .= ".cfg\n";
+                    oprint $combined;
                 }
-                $combined .= "/";
-                $combined .= $name;
-                $combined .= ".cfg\n";
-                oprint $combined;                
                 $twolit_begin = 0;
                 $twolit_name = "";
                 $twolit_num = 0;
             }
         }
-        else
+        elsif (!($line =~ /^\s*\#/))
         {
             # this must be a twolit trace name
             dprint "name->$line\n";
@@ -419,28 +444,33 @@ sub process_flist # (@flist)
                 
                 # we can match this up with the pending twolit names
                 my $name = $line;
-                my $combined = "tools/scripts/bm/tracecache/multi.cfx";
-                for (my $i = 0; $i < $twolit_num; $i++)
+                if ($limitmulti >= $twolit_num)
                 {
-                    my $n = $twolits{"$i"};
-                    if ($n =~ /.*\/(.*)/) 
+                    my $combined = "tools/scripts/bm/tracecache/multi.cfx";
+                    for (my $i = 0; $i < $twolit_num; $i++)
                     {
-                        $n = $1;
+                        my $n = $twolits{"$i"};
+                        if ($n =~ /.*\/(.*)/) 
+                        {
+                            $n = $1;
+                        }
+                        $combined .= "/";
+                        $combined .= $n;
                     }
                     $combined .= "/";
-                    $combined .= $n;
+                    $combined .= $name;
+                    $combined .= ".cfg\n";
+                    oprint $combined;
                 }
-                $combined .= "/";
-                $combined .= $name;
-                $combined .= ".cfg\n";
-                oprint $combined;                
                 $twolit_begin = 0;
                 $twolit_name = "";
                 $twolit_num = 0;
             }
-
-            # we can match this up with the next set of twolit traces
-            $twolit_name = $line;
+            else
+            {
+                # we can match this up with the next set of twolit traces
+                $twolit_name = $line;
+            }
         }
 
         # OLD if ($line =~ /^ptag:/)

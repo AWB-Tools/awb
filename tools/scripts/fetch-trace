@@ -1,3 +1,4 @@
+: # -*- Perl -*-
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
@@ -22,6 +23,26 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 #
 ##################################################################################
 
+# ==== SPEED DEBUG ====
+use Time::HiRes qw(gettimeofday);;
+my $slechta_debug = 0;
+my $script_name = "fetch-trace";
+my $speed_num = 0;
+sub speed_debug
+{
+    if (!$slechta_debug) { return; };
+    my ($addl) = @_;
+    if (!defined $addl) { $addl = ""; };
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    my ($seconds, $microseconds) = gettimeofday;
+    my $timestr = sprintf "%02d:%02d:%02d.%02d",$hour,$min,$sec,$microseconds/10000;
+    print STDERR "$timestr fetch-trace $speed_num: $addl\n";
+    $speed_num++;
+}
+# =====================
+
+speed_debug();
+
 # Author: Carl Beckmann
 # Date: July, 2006
 # Purpose:
@@ -39,6 +60,12 @@ use Cwd 'realpath';
 use Asim;
 Asim::init();
 use Asim::Util;
+
+# function prototypes
+sub find_trace_in_tcache($$);
+sub find_trace_in_tlist($$);
+
+speed_debug();
 
 #
 # Hard coded global values.  These are not controlled by the asimrc file. 
@@ -66,6 +93,9 @@ my $ASIM_TRACE_CACHE   = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_TRACE_C
 # the server to rsync Asim traces from
 my $ASIM_TRACE_SERVER  = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_TRACE_SERVER');
 
+# option to force rsync even if trace already exists
+my $forcersync         = Asim::Util::get_asimrc_val('fetch-trace', 'FORCE_RSYNC', 0);
+
 #
 # get command line options
 #
@@ -76,6 +106,7 @@ $status = GetOptions(   "fetch!"         => \$fetch,
 			"debug"          => \$debug,
                         "verbose!"       => \$verbose,
                         "help"           => \$help,
+                        "forcersync!"    => \$forcersync,
                     );
 
 if ($help) {
@@ -112,70 +143,54 @@ if (! $status      ||
 
 ############### real work starts here ###############
 
-#
-# subroutine to search a Tlist file for a trace with the given name.
-# First arg is the name of the trace to find,
-# second arg is the Tlist file.
-#
-# FIX FIX this should be part of a reusable perl module
-# that deatls with Tlist files !!!
-#
-sub find_trace_in_tlist($$) {
-  my $trace_name = shift;
-  my $tlist_file = shift;
-  printf("# find_trace_in_tlist(%s,%s)\n", $trace_name, $tlist_file) if ( $debug );
-
-  return undef if ( ! -e $tlist_file );
-
-  my $trace_path = undef;
-  open TLISTSCAN, "grep $trace_name $tlist_file |"
-    || die "# cannot open Tlist file $tlist_file";
-  while ( <TLISTSCAN> ) {
-    chomp;
-    s/^\s*//;
-    s/\s*$//;
-    # skip comments and blank lines
-    next if ( m/^\s*(#.*)$/ );
-    # skip .tag: and .ptag: lines
-    next if ( m/^\s*[a-z]+\s*:/ );
-    # skip PARAMETER=valuelust lines
-    next if ( m/^\s*[a-zA-Z0-9_]+\s*=/ );
-    # otherwise it should be of the form directory/filename
-    if ( m/^\s*(.*)\/(.*)$/ ) {
-      print "# found possible match:\n#\t$_\n" if ( $debug );
-      if ( $2 eq $trace_name ) {
-        $trace_path = $_;
-      }
-    }
-  }
-  close TLISTSCAN;
-  return $trace_path;
-}
+speed_debug();
 
 ##
 ## if we were given just a name, first look up the name in various
 ## Tlist files to find an absolute path to it.
 ## Print the path and exit if we are not fetching the files.
 ##
+my $is_trace_arg_absolute = 1;
 my $trace_name = undef;
 my $trace_path = undef;
 if ( $trace_arg =~ m/\// ) {
+  speed_debug("trace is an absolute path");
   print "# trace is an absolute path\n" if ( $debug );
   $trace_path = $trace_arg;
   ($trace_name = $trace_arg) =~ s/.*\///;
-
+  $is_trace_arg_absolute = 1;  
 } else {
+  speed_debug("trace is just a name");
   print "# trace is just a name\n" if ( $debug );
   $trace_name = $trace_arg;
-  
+  $trace_path = undef;
+  $is_trace_arg_absolute = 0;
+}
+
+#
+# before we even check the relevant trace lists, let's check the cache and
+# see if the benchmark already exists.
+#
+if ( ! $trace_path ) {
+  unless ( $forcersync ) {
+    print "# looking up trace in trace cache\n" if ( $verbose );
+    $trace_path = find_trace_in_tcache($trace_name, $ASIM_TRACE_CACHE);
+  } else {
+    print "# forcing rsync so not looking in trace cache\n" if ( $verbose );
+  }
+}
+
+if ( ! $is_trace_arg_absolute ) {
   #
   # first look for the trace in the DPG trace list
   #
-  if ( $DPG_MASTER_TLIST ) {
-    print "# looking up trace in DPG trace list\n" if ( $verbose );
-    $trace_path = find_trace_in_tlist($trace_name, $DPG_MASTER_TLIST);
-  } else {
-    print "# there is no DPG trace list file to look up the trace\n" if ( $verbose );
+  if ( ! $trace_path ) {
+    if ($DPG_MASTER_TLIST ) {
+      print "# looking up trace in DPG trace list\n" if ( $verbose );
+      $trace_path = find_trace_in_tlist($trace_name, $DPG_MASTER_TLIST);  
+    } else {
+      print "# there is no DPG trace list file to look up the trace\n" if ( $verbose );
+    }
   }
 
   #
@@ -193,6 +208,8 @@ if ( $trace_arg =~ m/\// ) {
 
 die "# trace $trace_name not fond" if ( ! $trace_path );
 
+speed_debug("trace_name found");
+
 # if we are not actually fetching the trace, print the path and exit
 if ( ! $fetch ) {
   print "$trace_path\n";
@@ -206,8 +223,22 @@ if ( !$DPG_TRACE_PATTERN || !$DPG_FETCH_TRACE ) {
   print "# skipping DPG fetch_trace because disabled\n" if ( $verbose );
 } elsif ( $trace_path =~ m/$DPG_TRACE_PATTERN/ ) {
   print "# invoking DPG fetch_trace:\n# $DPG_FETCH_TRACE $trace_path\n" if ( $verbose );
-  exec("$DPG_FETCH_TRACE $trace_path");
+  speed_debug("$DPG_FETCH_TRACE $trace_path");
+  
+  # SPEED NOTE: this command is a source of slowness in benchmark setup.  this
+  # calls "fetch-trace /path/to/tracename".  this took 2.5 seconds even when the
+  # trace already existed.  example:
+  #
+  # fetch-trace /fs29/wmt.arch.traces.13/traces/productivity/\
+  #    winzip_-_8-0_win2k_-_katmai333-66/\
+  #    tomcat_winzip_-_8-0_win2k_-_katmai333-66_-_0107_002.P6_0108
+  #
+  my $ec = system("$DPG_FETCH_TRACE $trace_path");
+  speed_debug("done $DPG_FETCH_TRACE $trace_path");
+  exit ($ec);
 }
+
+
 
 ##
 ## if it's an Asim trace, see if the file at the absolute path exists here.
@@ -233,6 +264,7 @@ if ( $files_exist ) {
   #
   print "# files ${trace_path}* are available locally at sever path\n" if ( $debug );
   print "$trace_path\n";
+  speed_debug("files_exist ... exiting");
   exit 0;
 
 } else {
@@ -247,10 +279,82 @@ if ( $files_exist ) {
     print
       "# copying files ${trace_path}* from remote server ${ASIM_TRACE_SERVER} to local cache $ASIM_TRACE_CACHE/\n"
       if ( $verbose );
+    speed_debug("rsyncing starting ...");
     system("rsync ${ASIM_TRACE_SERVER}:${trace_path}\\* $ASIM_TRACE_CACHE/");
+    speed_debug("rsyncing done ...");
   }
   print "$ASIM_TRACE_CACHE/${trace_name}\n";
 
+}
+
+sub find_trace_in_tcache($$) {
+  my $trace_name = shift;
+  my $tcache = shift;
+  speed_debug("find_trace_in_tcache() begin");
+  printf("# find_trace_in_tcache(%s,%s)\n", $trace_name, $tcache) if ( $debug );
+
+  my $trace_path = undef;
+
+  # remove any trailing slash
+  if ($tcache =~ /(.*)\/$/) {
+    $tcache = $1;
+  }
+
+  my $ami_file = $tcache."/".$trace_name.".ami.gz";
+  speed_debug("find_trace_in_tcache()->ami_file=$ami_file");
+  if (-e $ami_file) {
+    speed_debug("find_trace_in_tcache()-> found ami_file!");
+    print "# found ami match in tcache:\n#\t$ami_file\n" if ( $debug );  
+    $trace_path = $tcache."/".$trace_name;
+  }
+
+  speed_debug("find_trace_in_tcache() end");
+  return $trace_path;
+}
+
+#
+# subroutine to search a Tlist file for a trace with the given name.
+# First arg is the name of the trace to find,
+# second arg is the Tlist file.
+#
+# FIX FIX this should be part of a reusable perl module
+# that deatls with Tlist files !!!
+#
+sub find_trace_in_tlist($$) {
+  my $trace_name = shift;
+  my $tlist_file = shift;
+  speed_debug("find_trace_in_tlist() begin");
+  printf("# find_trace_in_tlist(%s,%s)\n", $trace_name, $tlist_file) if ( $debug );
+
+  return undef if ( ! -e $tlist_file );
+
+
+  my $trace_path = undef;
+  open TLISTSCAN, "grep $trace_name $tlist_file |"
+    || die "# cannot open Tlist file $tlist_file";
+  while ( <TLISTSCAN> ) {
+    chomp;
+    s/^\s*//;
+    s/\s*$//;
+    # skip comments and blank lines
+    next if ( m/^\s*(#.*)$/ );
+    # skip .tag: and .ptag: lines
+    next if ( m/^\s*[a-z]+\s*:/ );
+    # skip PARAMETER=valuelust lines
+    next if ( m/^\s*[a-zA-Z0-9_]+\s*=/ );
+    # otherwise it should be of the form directory/filename
+    if ( m/^\s*(.*)\/(.*)$/ ) {
+      print "# found possible match:\n#\t$_\n" if ( $debug );
+      if ( $2 eq $trace_name ) {
+        $trace_path = $_;
+      }
+    }
+  }
+  close TLISTSCAN;
+
+  speed_debug("find_trace_in_tlist() end");
+
+  return $trace_path;
 }
 
 __END__

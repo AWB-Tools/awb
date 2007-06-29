@@ -64,6 +64,11 @@ class AMC {
     void SetupBenchmark (const poptContext & optContext);
     void SetupBenchmarkRunner (const poptContext & optContext);
     void PrintHelp (const poptContext & optContext);
+
+    std::string TranslateBuildDir()
+        { return FileJoin ( FileJoin (workspace->GetDirectory(Workspace::BuildDir),
+                                      model->TranslateFileName(modelFileName)),
+                            "pm"); };
 };
 
 #endif // _AMC_

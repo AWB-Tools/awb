@@ -33,6 +33,7 @@
 #include "amc.h"
 #include "libawb/util.h"
 
+
 /**
  * Create a new asim command line tool.
  */
@@ -87,6 +88,7 @@ AMC::ProcessCommandLine (
     int argc,
     char ** argv)
 {
+    SPEED_DEBUGN(1, "AMC::ProcessCommandLine() starting");
     poptContext optContext;   // context for parsing command-line options
     char c;
     char * c_modelFileName = NULL;
@@ -263,8 +265,12 @@ AMC::ProcessCommandLine (
             }
         } else if (command == "setup") {
             cout << "Setting up benchmark" << endl;
+            SPEED_DEBUGN(1, "AMC::ProcessCommandLine()->SetupBenchmarkRunner()");
             SetupBenchmarkRunner(optContext);
+            SPEED_DEBUGN(-1, "AMC::ProcessCommandLine()->SetupBenchmarkRunner() done");
+            SPEED_DEBUGN(1, "AMC::ProcessCommandLine()->runner->SetupBenchmarkDir() about to begin");
             bool success = runner->SetupBenchmarkDir();
+            SPEED_DEBUGN(-1, "AMC::ProcessCommandLine()->runner->SetupBenchmarkDir() done");
             if ( ! success) {
                 cerr << "Error setting up benchmark " << benchmarkFileName
                      << endl;
@@ -286,6 +292,8 @@ AMC::ProcessCommandLine (
     }
 
     poptFreeContext(optContext);
+
+    SPEED_DEBUGN(-1, "AMC::ProcessCommandLine() ending");
 }
 
 /**
@@ -318,18 +326,18 @@ AMC::SetupModel (
     if ( ! model) {
         if ( ! modelFileName.empty()) {
             model = new Model (*workspace);
+            SPEED_DEBUGN(1, "AMC::SetupModel()->Parse() about to begin");
             if ( ! model->Parse (modelFileName)) {
                 cerr << "Error: could not parse model " << modelFileName
                      << endl;
                 exit (1);
             }
+            SPEED_DEBUGN(-1, "AMC::SetupModel()->Parse() done");
+
 
             if (buildDir.empty()) {
                 // synthesize a backward compatible buildDir
-                buildDir = FileJoin ( FileJoin (
-                    workspace->GetDirectory(Workspace::BuildDir),
-                    model->GetFileName()),
-                    "pm");
+                buildDir = TranslateBuildDir();
             }
 
             if (modelExecutable.empty()) {
@@ -372,22 +380,27 @@ void
 AMC::SetupBenchmark (
     const poptContext & optContext) ///< command-line parsing context
 {
+    SPEED_DEBUGN(1, "AMC::SetupBenchmark() begin");
     // setup the benchmark if we have not already done so
     if ( ! benchmark) {
         if ( ! benchmarkFileName.empty()) {
             benchmark = new Benchmark (*workspace);
+            SPEED_DEBUGN(1, "AMC::SetupBenchmark()->benchmark->Parse() about to begin");
             if ( ! benchmark->Parse (benchmarkFileName)) {
                 cerr << "Error: could not parse benchmark " << benchmarkFileName
                      << endl;
                 exit (1);
             }
+            SPEED_DEBUGN(-1, "AMC::SetupBenchmark()->benchmark->Parse() done");
         } else {
             cerr << "Error: missing benchmark" << endl;
             poptPrintUsage(optContext, stderr, 0);
             exit (1);
         }
     }
+    SPEED_DEBUGN(-1, "AMC::SetupBenchmark() done");
 }
+
 
 /**
  * Set up any objects required for the benchmark runner
@@ -396,28 +409,29 @@ void
 AMC::SetupBenchmarkRunner (
     const poptContext & optContext) ///< command-line parsing context
 {
+    SPEED_DEBUGN(1, "AMC::SetupBenchmarkRunner() about to begin");
     SetupBenchmark (optContext);
 
     // setup the benchmark runner, if we have not already done so
     if ( ! runner) {
         if (runDir.empty()) {
-            // synthesize a backward compatible runDir
-            SetupModel (optContext);
 
+            // synthesize a backward compatible runDir
             runDir = FileJoin ( FileJoin ( FileJoin (
                 workspace->GetDirectory(Workspace::BuildDir),
-                model->GetFileName()),
+                model->TranslateFileName(modelFileName)),
                 "bm"),
                 benchmark->GetFileName());
         }
         if (modelExecutable.empty()) {
-            // synthesize a backward compatible modelExecutable
-            SetupModel (optContext);
 
-            modelExecutable = FileJoin (buildDir, model->GetFileName());
+            // synthesize a backward compatible modelExecutable
+            modelExecutable = FileJoin (TranslateBuildDir(), model->TranslateFileName(modelFileName));
         }
+        SPEED_DEBUGN(1, "AMC::SetupBenchmarkRunner()->newBenchmarkRunner() about to begin");
         runner = new BenchmarkRunner (*workspace, *benchmark, runDir,
-            modelExecutable);
+                                      modelExecutable);
+        SPEED_DEBUGN(-1, "AMC::SetupBenchmarkRunner()->newBenchmarkRunner() done");
         if ( ! runner) {
             cerr << "Error: could not create benchmark runner for "
                  << benchmarkFileName << endl
@@ -425,6 +439,7 @@ AMC::SetupBenchmarkRunner (
             exit (1);
         }
     }
+    SPEED_DEBUGN(-1, "AMC::SetupBenchmarkRunner() end");
 }
 
 //----------------------------------------------------------------------------

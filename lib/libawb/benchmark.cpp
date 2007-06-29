@@ -67,6 +67,8 @@ bool
 Benchmark::Parse (
     const string & benchmarkFileName)  ///< path to benchmark file to parse
 {
+    SPEED_DEBUG("Benchmark::Parse() {0}");
+
     // do some error checking first
     if (benchmarkFileName.empty()) {
         cerr << "Benchmark::Parse: Empty benchmark file name" << endl;
@@ -99,6 +101,8 @@ Benchmark::Parse (
         SetRegionNumber(regionNum);
     }
 
+    SPEED_DEBUG("Benchmark::Parse() {1}");
+
     //
     // Is there a script in the middle of the path that generates the CFG
     // file?  Look for a "directory" with a .cfx suffix.  Yes, this is a hack,
@@ -117,6 +121,8 @@ Benchmark::Parse (
         realBenchmarkFileName.resize(cfxPos + 4);
     }
 
+    SPEED_DEBUG("Benchmark::Parse() {2}");
+
     UnionDir & sourceTree = workspace.GetSourceTree();
     if (sourceTree.IsDirectory (realBenchmarkFileName)) {
         cerr << "Benchmark::Parse: benchmark points to directory "
@@ -127,6 +133,8 @@ Benchmark::Parse (
     string dirName = FileDirName (realBenchmarkFileName);
     string fullName = sourceTree.FullName (realBenchmarkFileName);
     SetConfigFile (fullName);
+
+    SPEED_DEBUG("Benchmark::Parse() {3}");
 
     if ( ! sourceTree.IsFile (realBenchmarkFileName)) {
         // if we can't find the config file, figure out what is the first
@@ -162,6 +170,8 @@ Benchmark::Parse (
     FILE *benchmarkFile;
     bool isPipe = false;
 
+    SPEED_DEBUG("Benchmark::Parse() {4}");
+
     if (GetConfigArgs().empty()) {
         // Config file is just a normal file.
         benchmarkFile = fopen(fullName.c_str(), "r");
@@ -178,10 +188,13 @@ Benchmark::Parse (
         return false;
     }
  
+    SPEED_DEBUG("Benchmark::Parse() {5}");
+
     // parse benchmark file
     int itemNumber = 0;
     // parse all but
     while ((itemNumber < 8) && fgets(cfgBuf, sizeof(cfgBuf), benchmarkFile)) {
+        SPEED_DEBUG("Benchmark::Parse() {5.5}");
         line = StringRemoveCRLF(cfgBuf);
         
         // substutite region number
@@ -248,6 +261,9 @@ Benchmark::Parse (
         }
         itemNumber++;
     }
+
+    SPEED_DEBUG("Benchmark::Parse() {6}");
+
     // parse commands section
     string::size_type cmdsIndent = 0;
     string::size_type indent = 0;
@@ -322,12 +338,16 @@ Benchmark::Parse (
         return false;
     }
 
+    SPEED_DEBUG("Benchmark::Parse() {7}");
+
     if (isPipe) {
         pclose(benchmarkFile);
     }
     else {
         fclose(benchmarkFile);
     }
+
+    SPEED_DEBUG("Benchmark::Parse() {8}");
 
     return true;
 }

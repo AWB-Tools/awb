@@ -36,6 +36,46 @@
 
 using namespace std;
 
+// -----------------------------------------------------------------------------
+// -------------------------- DEBUGGING FOR SPEED ------------------------------
+// -----------------------------------------------------------------------------
+#define SLECHTA_DEBUG 0
+#if SLECHTA_DEBUG
+#include <sys/time.h>
+#include <time.h> 
+extern int _indent;
+#define SPEED_DEBUG(X)                                                        \
+{                                                                             \
+    time_t t = time(NULL);                                                    \
+    struct tm _tm = *localtime(&t);                                           \
+    struct timeval _tim;                                                      \
+    gettimeofday(&_tim, NULL);                                                \
+    fprintf(stderr, "%02d:%02d:%02d.%02d  ", _tm.tm_hour, _tm.tm_min, _tm.tm_sec, _tim.tv_usec/10000); \
+    fflush(stderr);                                                           \
+    for (int _i = 0; _i < _indent; ++_i) {                                    \
+        cerr << "  ";                                                         \
+    }                                                                         \
+    cerr << X << endl;                                                        \
+} 
+#define SPEED_DEBUGN(N,X)                                                     \
+if ((N) > 0)                                                                  \
+{                                                                             \
+    SPEED_DEBUG(X);                                                           \
+    _indent += (N);                                                           \
+}                                                                             \
+else                                                                          \
+{                                                                             \
+    _indent += (N);                                                           \
+    SPEED_DEBUG(X);                                                           \
+}
+#else
+#define SPEED_DEBUG(X)
+#define SPEED_DEBUGN(N,X)
+#endif
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+
 //----------------------------------------------------------------------------
 // Iterator Macros
 //----------------------------------------------------------------------------

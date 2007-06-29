@@ -2785,3 +2785,40 @@ errors. it still does not rety anything, but the framework is there.
 
 added rsync error checking and rety to asim-batch. if rsync has a non-zero
 exit code, it will retry a bunch of times.
+
+----------
+spartha1    Date: Fri Jun 29 15:24:41 EDT 2007  CSN: CSN-asimcore-140
+                  Fri Jun 29 19:24:41 UTC 2007
+
+
+Directory tools/scripts
+ fetch-trace               Locally Modified          139 
+
+Directory tools/scripts/bm/tracecache
+ multi.cfx                 Locally Modified          139 
+ multi.setup               Locally Modified          139 
+
+Directory tools/scripts
+ create-benchmark-file     Locally Modified          139 
+ asim-run                  Locally Modified          139 
+
+Directory tools/awb/amc
+ amc.cpp                   Locally Modified          139 
+ amc.h                     Locally Modified          139 
+
+Directory lib/libawb
+ model.cpp                 Locally Modified          139 
+ model.h                   Locally Modified          139 
+ util.cpp                  Locally Modified          139 
+ util.h                    Locally Modified          139 
+ benchmark_runner.cpp      Locally Modified          139 
+ benchmark.cpp             Locally Modified          139 
+
+Updating with simcore changes (rev. 2364 - Brian Slechta)
+
+fixes for the following asim bugs:
+
+tools: create-benchmark-file does not support NLIT traces
+tools: amc benchmark setup takes 7.5 seconds with multi.cfx and single.cfx
+tools: multi.cfx only works with N=2 traces
+asim-run: --buildarea option is a bit brain dead

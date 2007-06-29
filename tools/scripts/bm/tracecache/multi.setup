@@ -32,7 +32,7 @@
 #
 ##############################################################
 
-if [ $# -lt 4 ]; then
+if [ $# -lt 3 ]; then
     echo Usage $0 " <trace1> <trace2> ... <traceN> <srcdir> <destdir> "
     exit 1
 fi

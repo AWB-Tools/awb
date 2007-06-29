@@ -68,6 +68,8 @@ BenchmarkRunner::~BenchmarkRunner()
 bool
 BenchmarkRunner::SetupBenchmarkDir (void)
 {
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {0}")
+
     const char * const awbcmds = "awbcmds"; // awbcmds file
     const char * const run     = "run";     // run script (file)
     bool success = true;
@@ -78,6 +80,8 @@ BenchmarkRunner::SetupBenchmarkDir (void)
     if ( ! FileExists (benchmarkDir)) {
         MakeDir (benchmarkDir);
     }
+
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {1}")
 
     //
     // create awbcmds file from info in benchmark
@@ -92,6 +96,8 @@ BenchmarkRunner::SetupBenchmarkDir (void)
     copy (awbcommands.begin(), awbcommands.end(),
           ostream_iterator<string>(awbcmdsFile, "\n"));
     awbcmdsFile.close();
+
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {2}")
 
     //
     // run the benchmark's setup script
@@ -108,6 +114,8 @@ BenchmarkRunner::SetupBenchmarkDir (void)
              << setupDir << endl;
         return false;
     }
+
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {3}")
 
     //
     // Set some environment variables for use in all scripts.  One could argue
@@ -129,13 +137,21 @@ BenchmarkRunner::SetupBenchmarkDir (void)
                  + " " + benchmark.GetSetupArgs()
                  + " " + setupDir
                  + " " + benchmarkDir;
+    
+    // DEBUG cerr << "CMD=" << cmd << endl;
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {4}: CMD=" << cmd)
+    
     if (system (cmd.c_str()) != 0) {
         cerr << "Error: Setting up benchmark " << benchmark.GetName() << endl;
         success = false;
     }
 
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {5}")
+
     unsetenv("AWB_BENCHMARKS_ROOT");
     unsetenv("ASIM_CONFIG_MODEL");
+
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {6}")
 
     if (chdir (cwd.c_str()) && success) {
         cerr << "Error: Can't cd back to previous working directory "
@@ -156,6 +172,8 @@ BenchmarkRunner::SetupBenchmarkDir (void)
     string feederFlags = benchmark.SubstituteVariables (
         benchmark.GetFeederFlags());
 
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {7}")
+
     // read in original run file
     string runFileName = FileJoin (benchmarkDir, run);
     ifstream runFileIn(runFileName.c_str());
@@ -173,6 +191,8 @@ BenchmarkRunner::SetupBenchmarkDir (void)
         runFileLines.push_back (line);
     }
     runFileIn.close();
+
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {8}")
 
     // replace all $genFlags with ${1+"$@"}
     const string searchStr =  "$genFlags";
@@ -199,6 +219,8 @@ BenchmarkRunner::SetupBenchmarkDir (void)
         return false;
     }
 
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {9}")
+
     StringList::iterator runFileIt = runFileLines.begin();
 
     // first line of run script is copied through directly (shell invocation)
@@ -214,7 +236,11 @@ BenchmarkRunner::SetupBenchmarkDir (void)
           ostream_iterator<string>(runFileOut, "\n"));
     runFileOut.close();
 
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {10}")
+
     FileChmod (runFileName, 0755);
+
+    SPEED_DEBUG("BenchmarkRunner::SetupBenchmarkDir() {11}")
 
     return true;
 }

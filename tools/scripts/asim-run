@@ -404,6 +404,11 @@ if (defined $class_build) {
     }
 }
 
+# delete trailing "/" if it exists
+if (defined $buildarea && ($buildarea =~ /(.*)\/$/)) {
+    $buildarea = $1;
+}
+
 # create space for model builds if specified
 if (defined $buildarea && $buildarea ne "" && $build == 1) {
     $buildarea = realpath($buildarea);
@@ -866,12 +871,32 @@ sub do_experiment
             # elsewhere, look there.
             if (defined $buildarea && $buildarea ne "") {
                 my $model_alternate_path = undef;
-                if (-x "$buildarea/$name/pm/$model_name") {
-                    $model_alternate_path = $buildarea . "/$name/pm/";
+
+                my @alternate_checks = (
+                    ".",
+                    "$name",
+                    "default/$name",
+                    "pm",
+                    "$name/pm",
+                    "default/$name/pm",
+                    "BUILD",
+                    "$name/BUILD",
+                    "default/$name/BUILD");
+
+                foreach my $check (@alternate_checks) {
+
+                    # full filename to check for
+                    my $fullcheck = "$buildarea/$check/$model_name";
+                    print_debug("checking $fullcheck\n");
+
+                    if (-f $fullcheck) {                        
+                        $model_alternate_path = "$buildarea/$check";
+                        print_debug("found $fullcheck\n");
+                        print_debug("model_alternate_path=$model_alternate_path\n");
+                        last;
+                    }
                 }
-                elsif (-x "$buildarea/$name/$model_name") {
-                    $model_alternate_path = $buildarea . "/$name/";
-                }
+
                 if (defined $model_alternate_path) {
                     if (!(-d "$resdir/$name/BUILD")) {
                         if (!(mkdir "$resdir/$name/BUILD")) {
@@ -1298,7 +1323,7 @@ sub rsync_model
             run_command("mkdir -p $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
             run_command("mkdir -p $remoteresdir/$name/ADMIN/ > /dev/null 2>&1");
 
-            run_command_rsync("--quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/");
+            run_command_rsync("--quiet --copy-links $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/");
         }
         else {
             run_command("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
@@ -2618,13 +2643,13 @@ sub controlled_fork
                 # no more children allowed now.  let's wait and try again.
                 print_debug("too many children right now, sleeping for a bit...\n");
                 if ($dofork > 50) {
-                    sleep(20);
-                }
-                elsif ($dofork > 30) {
                     sleep(10);
                 }
-                elsif ($dofork > 20) {
+                elsif ($dofork > 30) {
                     sleep(5);
+                }
+                elsif ($dofork > 20) {
+                    sleep(3);
                 }
                 elsif ($dofork > 5) {
                     sleep(2);

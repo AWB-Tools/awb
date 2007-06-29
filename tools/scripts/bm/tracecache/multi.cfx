@@ -25,6 +25,25 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 use Asim;
 use strict;
 
+
+# ==== SPEED DEBUG ====
+use Time::HiRes qw(gettimeofday);;
+my $slechta_debug = 0;
+my $script_name = "multi.cfx";
+my $speed_num = 0;
+sub speed_debug
+{
+    if (!$slechta_debug) { return; };
+    my ($addl) = @_;
+    if (!defined $addl) { $addl = ""; };
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+    my ($seconds, $microseconds) = gettimeofday;
+    my $timestr = sprintf "%02d:%02d:%02d.%02d",$hour,$min,$sec,$microseconds/10000;
+    print STDERR "$timestr $script_name $speed_num: $addl\n";
+    $speed_num++;
+}
+# =====================
+
 ##
 ## Generate a generic cfg file for a multi-threaded trace.
 ## Whatever follows the --emit argument is of the form:
@@ -34,6 +53,9 @@ use strict;
 ##
 ## Carl Beckmann	7/20/2006
 ##
+
+speed_debug("begin");
+
 my        $RESOLVER = 'awb-resolver';
 chomp( my $SETUP    = `$RESOLVER tools/scripts/bm/tracecache/multi.setup` );
 my        $GET_PATH = 'fetch-trace --nofetch';
@@ -46,20 +68,36 @@ my @trace_names = split '/', $ARGV[1];
 (my $name = $trace_names[$#trace_names]) =~ s/\.cfg$//;
 $#trace_names--;
 
+
 # get the locations of the traces to cache them from
 my @trace_paths = ();
 foreach my $trace_name ( @trace_names ) {
-  chomp ( my $trace_path = `$GET_PATH $trace_name | tail -1` );
-  $trace_path =~ s/^\s*//;
-  $trace_path =~ s/\s*$//;
-  die "unknown trace location" if ( $trace_path eq '' );
-  push @trace_paths, $trace_path;
+    #
+    # SPEED NOTE: this command is a source of slowness in benchmark setup.  this
+    # calls "fetch-trace --nofetch" and takes about half a second.  significant, 
+    # but not all that substantial unless aggregated over many benchmarks.
+    #
+    # NOTE: THIS IS NOT NECESSARY SO COMMENTING OUT
+    #
+    # speed_debug("calling fetch-trace");
+    # chomp ( my $trace_path = `$GET_PATH $trace_name | tail -1` );
+    # speed_debug("done calling fetch-trace");
+    # $trace_path =~ s/^\s*//;
+    # $trace_path =~ s/\s*$//;
+    #
+    # INSTEAD, JUST DO:
+    chomp (my $trace_path = $trace_name);
+
+    die "unknown trace location" if ( $trace_path eq '' );
+    push @trace_paths, $trace_path;
 }
 
 $gcfg->add(name   => $name,
-           tree   => [ "$trace_names[0]", "$trace_names[1]" ],
+           tree   => \@trace_names,
            feeder => 'archlib',
            setup  => "$SETUP @trace_paths",
            );
 
 $gcfg->action(@ARGV);
+
+speed_debug("end");

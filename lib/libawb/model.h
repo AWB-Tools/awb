@@ -105,6 +105,9 @@ class Model {
     ModuleInstance * ParseModuleInstance (const IniFile & modelIni,
         const string & moduleName);
 
+    static string TranslateFileName(const string & modelFileName)
+        { return FileRoot (FileTail (modelFileName)); }
+
     // debug
     /// Dump state of internal data structures
     ostream & Dump (ostream & out, const string & prefix = "") const;

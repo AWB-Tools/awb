@@ -70,7 +70,6 @@ Model::Parse (
              << "  I can only parse .apm files" << endl;
         return false;
     }
-
     // invariant: correct file type; ready to parse now
 
     UnionDir & sourceTree = workspace.GetSourceTree();
@@ -81,7 +80,7 @@ Model::Parse (
     }
 
     string fullName = sourceTree.FullName (modelFileName);
-    SetFileName (FileRoot (FileTail (modelFileName)));
+    SetFileName (TranslateFileName (modelFileName));
     SetConfigFile (fullName);
 
     // .apm files have Ini file structure;
