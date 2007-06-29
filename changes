@@ -2822,3 +2822,20 @@ tools: create-benchmark-file does not support NLIT traces
 tools: amc benchmark setup takes 7.5 seconds with multi.cfx and single.cfx
 tools: multi.cfx only works with N=2 traces
 asim-run: --buildarea option is a bit brain dead
+
+----------
+spartha1    Date: Fri Jun 29 15:26:37 EDT 2007  CSN: CSN-asimcore-141
+                  Fri Jun 29 19:26:37 UTC 2007
+
+
+Directory tools/awb/amc
+ amc.cpp                   Locally Modified          140 
+ amc.h                     Locally Modified          140 
+
+Updating with simcore changes (rev. 2365 - Brian Slechta)
+
+I broke the nightlies with my last commit!!! This should fix the problem. I
+always do this. I always miss some little mundane detail. :(
+
+Anyway, this should fix amc benchmark setup issues. They should now properly
+find the model executable in the "run" files.

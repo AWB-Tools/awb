@@ -334,11 +334,8 @@ AMC::SetupModel (
             }
             SPEED_DEBUGN(-1, "AMC::SetupModel()->Parse() done");
 
-
-            if (buildDir.empty()) {
-                // synthesize a backward compatible buildDir
-                buildDir = TranslateBuildDir();
-            }
+            // synthesize a backward compatible buildDir
+            buildDir = TranslateBuildDir();
 
             if (modelExecutable.empty()) {
                 // synthesize a backward compatible modelExecutable
