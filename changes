@@ -2883,3 +2883,15 @@ hierarchical).
 
 As a BKM for creating branches, I would like to suggest using all upper case,
 with a short descriptive title and a date.
+
+----------
+spartha1    Date: Fri Jun 29 15:35:41 EDT 2007  CSN: CSN-asimcore-144
+                  Fri Jun 29 19:35:41 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          143 
+
+Updating with simcore changes (rev. 2368 - Krishna Rangan)
+
+- corrected the stale reference to FullPath routine.

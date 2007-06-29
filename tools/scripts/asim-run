@@ -1526,7 +1526,7 @@ sub run_one_benchmark
         }
 
         my $input = $exps->{"$name"}{params};
-	my $apmfile = &FullPath($exps->{"$name"}{model});
+	my $apmfile = &full_path($exps->{"$name"}{model});
 	my $checkApm = 1;
 	my $nthreads = 0;
 	
