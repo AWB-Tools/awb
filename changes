@@ -3000,3 +3000,16 @@ Updating with simcore changes (rev. 2379 - Carl Beckmann)
 
 - removed unnecessary freelist locks, and added a debug option to poison
 smart pointer memory after deleting it.
+
+----------
+spartha1    Date: Fri Jun 29 16:44:35 EDT 2007  CSN: CSN-asimcore-153
+                  Fri Jun 29 20:44:35 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ mm.h                      Locally Modified          152 
+
+Updating with simcore changes (rev. 2380 - Carl Beckmann)
+
+- Fixed a race condition between pre-allocate and operator new in MM pointers,
+that showed up in the multithreaded runs.

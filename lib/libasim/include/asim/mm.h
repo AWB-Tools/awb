@@ -201,6 +201,18 @@ class ASIM_MM_CLASS : public ASIM_FREE_LIST_ELEMENT_CLASS<MM_TYPE>
         /// Dump all objects of this MM type.
         void ObjDump(void);
         void AddToObjDumpList(MM_TYPE *newMmObj);
+	
+#ifdef MM_PREALLOC_MEMORY
+	// has preallocation happened?  In multithreaded mode, this
+	// needs to be volatile since it synchronizes between threads
+        #if MAX_PTHREADS > 1 
+ 	volatile
+ 	#endif
+	bool prealloc_done;
+
+        /// Pre-allocate memory for the whole pool of objects
+        void PreAllocateMemory (void);
+#endif
     };
 
   private:
@@ -279,9 +291,6 @@ class ASIM_MM_CLASS : public ASIM_FREE_LIST_ELEMENT_CLASS<MM_TYPE>
 
     /// Put object back on free list if last reference is dropped
     void LastRefDropped (void);
-
-    /// Pre-allocate memory for the whole pool of objects
-    static void PreAllocateMemory (void);
 };
 
 //----------------------------------------------------------------------------
@@ -310,7 +319,12 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::DATA (
     mmObjListHead(NULL),
 #endif
     destructed(false)
-{}
+{
+#ifdef MM_PREALLOC_MEMORY
+   // clear "preallocation done" flag initially
+   prealloc_done = 0;
+#endif
+}
 
 /**
  * Delete this object type
@@ -556,31 +570,33 @@ ASIM_MM_CLASS<MM_TYPE>::LastRefDropped (void)
 
 }
 
+#ifdef MM_PREALLOC_MEMORY
 /**
  * Pre-allocate all memory for this MM pool of objects
  *
  */
 template <class MM_TYPE>
 void
-ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
+ASIM_MM_CLASS<MM_TYPE>::DATA::PreAllocateMemory (void)
 {
+    // only do this once
+    if ( prealloc_done ) return;
 
-    // it is not OK to call this while there are objects on the freelist
-    if ( ! data.mmFreeList.Empty() ) return;
+    // note: multiple threads could get here at the same time
 
     // allocate all objects that are missing, in a thread-safe way
     int totalobj;  // thread local copy of mmTotalObjs
-    while ( ( totalobj = data.mmTotalObjs++ ) < data.mmMaxObjs )
+    while ( ( totalobj = mmTotalObjs++ ) < mmMaxObjs )
     {
         MM_TYPE * newMmObj;
         newMmObj = ((MM_TYPE *) new char[sizeof(MM_TYPE)]);
         memset(newMmObj, 0, sizeof(MM_TYPE));
 
-        data.AddToObjDumpList(newMmObj);
+        AddToObjDumpList(newMmObj);
 
         // object is on the freelist, no deletion necessary
         newMmObj->mmCnt = MMCNT_ON_FREELIST_AND_DELETED;
-        data.mmFreeList.Push(newMmObj);
+        mmFreeList.Push(newMmObj);
 
 #ifdef MM_VALGRIND
         // object is on the free list and should not be accessed anymore!
@@ -595,8 +611,12 @@ ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
     // mmTotalObjs may transiently exceed mmMaxObjs if multiple threads enter
     // the while loop above, but any threads that attempt to allocate more
     // after mmMaxObj has been reached, will fix up the count here.
-    if ( totalobj >= data.mmMaxObjs ) { data.mmTotalObjs--; }
+    if ( totalobj >= mmMaxObjs ) { mmTotalObjs--; }
+
+   // we are now done preallocating
+   prealloc_done = 1;
 }
+#endif
 
 
 /**
@@ -645,16 +665,9 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
     ASSERTX(!data.destructed);
 
 #ifdef MM_PREALLOC_MEMORY
-
-    // FIX FIX FIX: possible race condition here
-    // between testing the freelist and preallocating...
-    if (data.mmFreeList.Empty())
-    {
-        // acquire memory for max # objects on first use of pool;
-        // enhances memory locality of objects in the pool
-        PreAllocateMemory();
-    }
-
+    // acquire memory for max # objects on first use of pool;
+    // enhances memory locality of objects in the pool
+    data.PreAllocateMemory();
 #endif
 
     MM_TYPE * newMmObj;
