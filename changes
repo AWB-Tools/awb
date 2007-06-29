@@ -2910,3 +2910,16 @@ Updating with simcore changes (rev. 2369 - Carl Beckmann)
 disabled if DPG_FETCH_TRACE set to the empty string or 0 in the asimrc file.
 This is useful if fetch_trace is not available at your site.
 Rsync also prints progress as it fetches from the MMDC trace disks.
+
+----------
+spartha1    Date: Fri Jun 29 15:39:38 EDT 2007  CSN: CSN-asimcore-146
+                  Fri Jun 29 19:39:38 UTC 2007
+
+
+Directory modules/controller/classic
+ control_x86.cpp           Locally Modified          145 
+ main_x86.cpp              Locally Modified          145 
+
+Updating with simcore changes (rev. 2370 - Chris Weaver)
+
+compile fixes

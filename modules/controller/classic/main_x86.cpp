@@ -109,7 +109,7 @@ CONTROLLER_X86_CLASS::main (INT32 argc, char *argv[], char *envp[])
         }
 
         if (dump_stats) {
-            stat_generic_dump_name_and_description(cout);
+            stat_generic_dump_name(cout);
         }
     	exit(EXIT_SUCCESS);
     }

@@ -663,7 +663,8 @@ void
 CMD_PERFPLOT_CLASS::CmdAction (void)
 {
     ASIM_XMSG("CMD_PERFPLOT_CLASS::CmdAction -> fire_perfplot_rules");
-    fire_perfplot_rules();
+//    fire_perfplot_rules();
+    perf_fire_perfplot();
 }
 
 
