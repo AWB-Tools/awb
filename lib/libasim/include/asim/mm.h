@@ -28,6 +28,7 @@
 // Enable These To Debug MM_OBJ bugs
 //#define ASIM_ENABLE_MM_DEBUG 1
 //#define MM_OBJ_DUMP 1
+//#define MM_DEBUG_POISON_DELETED 1
 
 // generic
 #include <iostream>
@@ -200,24 +201,6 @@ class ASIM_MM_CLASS : public ASIM_FREE_LIST_ELEMENT_CLASS<MM_TYPE>
         /// Dump all objects of this MM type.
         void ObjDump(void);
         void AddToObjDumpList(MM_TYPE *newMmObj);
-	
-	// Create a lock for the freelist in Multi-threaded mode
-        #if MAX_PTHREADS > 1 
- 	pthread_mutex_t freelist_mutex; 
-
- 	inline void freelist_enter () { 
- 	  pthread_mutex_lock (& freelist_mutex); 
- 	  return; 
- 	} 
-
- 	inline void freelist_leave () { 
- 	  pthread_mutex_unlock (& freelist_mutex); 
- 	  return; 
- 	} 
- 	#else 
- 	inline void freelist_enter () {} 
- 	inline void freelist_leave () {} 
- 	#endif 
     };
 
   private:
@@ -327,12 +310,7 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::DATA (
     mmObjListHead(NULL),
 #endif
     destructed(false)
-{
-   // Initialize lock if Multi-threaded mode
-   #if MAX_PTHREADS > 1  
-   pthread_mutex_t freelist_mutex = PTHREAD_MUTEX_INITIALIZER; 
-   #endif 
-}
+{}
 
 /**
  * Delete this object type
@@ -362,18 +340,12 @@ ASIM_MM_CLASS<MM_TYPE>::DATA::~DATA()
         }
     }
 
-    // Lock freelist before modifying it (only in MT mode)
-    data.freelist_enter(); 
-
     // free all objects that are on the free list
-    while (! mmFreeList.Empty())
+    MM_TYPE * obj;
+    while ( obj = mmFreeList.Pop() )
     {
-        MM_TYPE * obj = mmFreeList.Pop();
         FinalObjectCleanup(obj);
     }
-
-    // Unlock freelist after modifying it (only in MT mode)
-    data.freelist_leave(); 
 
     destructed = true;
 }
@@ -594,11 +566,11 @@ ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
 {
 
     // it is not OK to call this while there are objects on the freelist
-    ASSERT (data.mmFreeList.Empty(), "MM Object type " << data.className
-        << " memory pre-allocation failed.");
+    if ( ! data.mmFreeList.Empty() ) return;
 
-    // allocate all objects that are missing
-    for ( ; data.mmTotalObjs < data.mmMaxObjs; data.mmTotalObjs++)
+    // allocate all objects that are missing, in a thread-safe way
+    int totalobj;  // thread local copy of mmTotalObjs
+    while ( ( totalobj = data.mmTotalObjs++ ) < data.mmMaxObjs )
     {
         MM_TYPE * newMmObj;
         newMmObj = ((MM_TYPE *) new char[sizeof(MM_TYPE)]);
@@ -618,8 +590,12 @@ ASIM_MM_CLASS<MM_TYPE>::PreAllocateMemory (void)
         VALGRIND_DISCARD (
             VALGRIND_MAKE_READABLE (newMmObj, sizeof(ASIM_MM_CLASS<MM_TYPE>)));
 #endif
-
     }
+    // fixup in case two or more threads preallocated, and overshot by a bit.
+    // mmTotalObjs may transiently exceed mmMaxObjs if multiple threads enter
+    // the while loop above, but any threads that attempt to allocate more
+    // after mmMaxObj has been reached, will fix up the count here.
+    if ( totalobj >= data.mmMaxObjs ) { data.mmTotalObjs--; }
 }
 
 
@@ -670,9 +646,8 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
 
 #ifdef MM_PREALLOC_MEMORY
 
-    // Lock the freelist before modifying it (only in MT mode)
-    data.freelist_enter(); 
-
+    // FIX FIX FIX: possible race condition here
+    // between testing the freelist and preallocating...
     if (data.mmFreeList.Empty())
     {
         // acquire memory for max # objects on first use of pool;
@@ -680,19 +655,11 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
         PreAllocateMemory();
     }
 
-    // Unlock the freelist before modifying it (only in MT mode)
-    data.freelist_leave(); 
-
 #endif
 
-    // Lock the freelist before modifying it (only in MT mode)
-    data.freelist_enter(); 
-
     MM_TYPE * newMmObj;
-    if (! data.mmFreeList.Empty())
+    if ( newMmObj = data.mmFreeList.Pop() )
     {
-        newMmObj = data.mmFreeList.Pop();
-
         ASSERT(newMmObj->mmCnt == MMCNT_ON_FREELIST_AND_DELETED,
             "MM Object type " << data.className
             << " taken from free list has not yet been destructed!");
@@ -715,9 +682,6 @@ ASIM_MM_CLASS<MM_TYPE>::operator new (
 
         data.AddToObjDumpList(newMmObj);
     }
-
-    // Unlock the freelist before modifying it (only in MT mode)
-    data.freelist_leave(); 
 
 #ifdef MM_VALGRIND
     // make object address range writable, but containing invalid data
@@ -764,6 +728,19 @@ ASIM_MM_CLASS<MM_TYPE>::operator delete (
         abort();
     }
     ASSERTX(obj->mmCnt < 0);
+    
+#ifdef MM_DEBUG_POISON_DELETED
+    // Poison the memory, so we detect any memory usage problems sooner.
+    // We will preserve the mmCnt, mmUid, and freelist next fields,
+    // and set everything else to 0xFF's
+    ASIM_MM_CLASS<MM_TYPE> *mm = (ASIM_MM_CLASS<MM_TYPE> *)ptr;
+    ATOMIC_INT32 my_mmCnt         = mm->mmCnt;
+    MM_UID_TYPE  my_mmUid         = mm->mmUid;
+    memset(ptr, 0xFF, sizeof(MM_TYPE));
+    mm->mmCnt = my_mmCnt;
+    mm->mmUid = my_mmUid;
+    mm->SetFreeListNext(NULL);
+#endif // MM_DEBUG_POISON_DELETED
 }
 
 /**

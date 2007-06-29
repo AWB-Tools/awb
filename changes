@@ -2987,3 +2987,16 @@ Updating with simcore changes (rev. 2378 - Krishna Rangan)
 - check for a failure file prior to a check for submitted failure; this
 would fix an apparent failure in the regressions, that was missed by verifier.
 
+
+----------
+spartha1    Date: Fri Jun 29 16:43:07 EDT 2007  CSN: CSN-asimcore-152
+                  Fri Jun 29 20:43:07 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ mm.h                      Locally Modified          151 
+
+Updating with simcore changes (rev. 2379 - Carl Beckmann)
+
+- removed unnecessary freelist locks, and added a debug option to poison
+smart pointer memory after deleting it.
