@@ -257,6 +257,10 @@ public:
   bool Read(T& data, UINT64 cycle, const char* portName, bool relaxAsserts = false);
 
   bool Write(const T& data, UINT64 cycle, const char* portName);
+    
+  bool Look(T& data, UINT64 cycle, const char* portName, bool relaxAsserts);
+
+  void Delay(INT64 delay, const char* portName, bool relaxAsserts);
 
   bool IsStalled() const;
   void SetStalled(bool s);
@@ -491,8 +495,15 @@ private:
 public:
   bool Read(T& data, UINT64 cycle);
 
+  // like read, but no side effects or pops
+  bool Look(T& data, UINT64 cycle);
+
   virtual const PortType GetType() const;
 
+  // this sets the stall and delays the port contents by one cycle
+  void Stall(bool s);
+
+  // just manipulate the stall variable
   void SetStalled(bool s);
   bool IsStalled();
 
@@ -1120,6 +1131,64 @@ BufferStorage<T,S>::Read(T& data, UINT64 cycle, const char* portName, bool relax
 }
 
 template<class T, int S>
+inline void
+BufferStorage<T,S>::Delay(INT64 delay, const char* portName, bool relaxAsserts)
+{
+    for (int i = 0; i < BufferSize; ++i)
+    {
+        Store[i].CycleWritten += delay;
+    }
+
+    return;
+}
+
+template<class T, int S>
+inline bool
+BufferStorage<T,S>::Look(T& data, UINT64 cycle, const char* portName, bool relaxAsserts)
+{
+    // if no data, return false.  I don't think this first condidtion
+    // should ever be true since we're always advancing readindex at t
+    // the end when all items are read out.  Maybe upon startup, but
+    // maybe 2nd condition can take care of that.
+    if (IsEmpty(ReadIndex) || (CycleRowRead == (INT64) cycle && Store[ReadIndex].Start == 0)) 
+    {
+        return false;
+    }
+    
+    CycleEntry &entry = Store[ReadIndex];
+    UINT64 ReadCycle = entry.CycleWritten + Latency;
+    
+    // if next thing to read isn't ready to be read, return false
+    if (ReadCycle > cycle)
+    {
+        return false;
+    }
+
+    // do we want to add another branch condition here?  This code is
+    // executed so often it may hurt performance.  Eric
+    if (!relaxAsserts)
+    {
+        ASSERT(ReadCycle == cycle,
+               "Reading data from port " << portName <<
+	       " in the wrong cycle!  (got " << cycle << 
+	       " instead of required: " << ReadCycle << ")");
+    }
+    else {
+	if (SequentialWrites == UINT32(Latency) + 1) {
+	    // if there have been too many writes w/out a read, then the port
+	    // is being mis-used --> Only makes sense for a stall port
+	    ASSERT(LastWritten == cycle, "Write to " << portName << 
+		   " (cycle " << LastWritten << "): illegal use of port");
+	}
+    }
+
+    // read Data
+    data = entry.Data[entry.Start];
+
+    return true;
+}
+
+template<class T, int S>
 inline bool
 BufferStorage<T,S>::Write(const T& data, UINT64 cycle, const char* portName)
 {
@@ -1397,6 +1466,30 @@ ReadStallPort<T>::Read(T& data, UINT64 cycle)
     //  we need to relax the asserts here since this port
     //  does not need to be read every cycle
     return Buffer.Read(data, cycle, GetName(), true); 
+}
+
+template <class T>
+inline bool
+ReadStallPort<T>::Look(T& data, UINT64 cycle)
+{
+    //  we need to relax the asserts here since this port
+    //  does not need to be read every cycle
+    return Buffer.Look(data, cycle, GetName(), true); 
+}
+
+template <class T>
+inline void
+ReadStallPort<T>::Stall(bool s)
+{
+    if (s)
+    {
+        Buffer.SetStalled(true);
+        Buffer.Delay(1, GetName(), true); 
+    }
+    else
+    {
+        Buffer.SetStalled(false);
+    }
 }
 
 template <class T>
