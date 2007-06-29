@@ -2854,3 +2854,32 @@ Directory etc
 Updating with simcore changes (rev. 2366 - Krishna Rangan)
 
 - support to run MT apps on multi-core systems.
+
+----------
+spartha1    Date: Fri Jun 29 15:33:04 EDT 2007  CSN: CSN-asimcore-143
+                  Fri Jun 29 19:33:04 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          142 
+ Branch.pm                 Locally Modified          142 
+
+Updating with simcore changes (rev. 2367 - Carl Beckmann)
+
+- Fixed the "branch package" command for SVN packages in asim-shell.
+The semantics are a little different than the old CVS version of this command.
+You used to have to commit all your changes before creating a branch,
+and now you can create a branch even if you have uncommitted changes in
+your working copy. Your working copy will be switched over to the new
+branch, and your uncommitted changes will still be there.
+
+Also, you can now create a branch from another branch.
+
+Unlike the old CVS version, your admin/packages file will *not* be
+renamed to the new branch name, nor will you get a new CSN series starting
+at 1. This is because CSN numbers track the SVN revision numbers, which are
+global across the trunk and all branches (unlike CVS where they were
+hierarchical).
+
+As a BKM for creating branches, I would like to suggest using all upper case,
+with a short descriptive title and a date.

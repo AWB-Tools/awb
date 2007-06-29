@@ -47,8 +47,18 @@ our $PM;
 
 # Branch wide variables
 
+our $HOSTNAME;
+our $DATE;
+our $DATE_UTC;
+
 our $EDITOR;
 our $EDITOR_OPTIONS;
+
+our $TMPDIR;
+our $HOST;
+our $USER;
+
+our $PROBLEM;
 
 
 # Documentation of the public functions is in Package.pm
@@ -68,6 +78,11 @@ sub release {
   my $newcsn;
 
   my @files;
+  
+  if ( $self->type() ne 'cvs' ) {
+    ierror("Release not implemented for packages of type " . $self->type() . "\n");
+    return 0;
+  }
 
   if ($version =~ m/^(\d+)\.(\d+)$/) {
     $version_major = $1;
@@ -117,7 +132,7 @@ sub release {
   }
 
   # Check that there doesn't already exist a branch with this name.
-  my @branchtags = $self->cvs_find_branchtags($MYTAGS);
+  my @branchtags = $self->find_branchtags($MYTAGS);
   my $tag;
   foreach $tag (@branchtags) {
     if ($tag eq $branchname) {
@@ -390,6 +405,10 @@ sub edit_changes_for_release {
 }
 
 
+#
+# branch a package from the HEAD development trunk,
+# or from wherever you checked out your working copy.
+#
 sub branch {
   my $self = shift;
   my $branchname = shift ||
@@ -403,24 +422,30 @@ sub branch {
 
   my @files;
 
-  print "Make a branch to the main trunk\n";
+  print "Make a branch to the repository\n";
 
   #########      ###########      ###########      ###########      ###########
 
   $self->step("Sanity checks", 0);
 
-  if (-e "$location/$MYMERGEPOINTS") {
-    ierror("Branch: Cannot branch a branch\n");
-    return 0;
+  $self->sanity_stage();
+
+  # in the old CVS way of doing things, branching from a branch was not allowed.
+  # In SVN we don't have this restriction.
+  if ( $self->type() ne 'svn' ) {
+    if (-e "$location/$MYMERGEPOINTS") {
+      ierror("Branch: Cannot branch a branch\n");
+      return 0;
+    }
   }
 
   # Check that there doesn't already exist a branch with this name.
-  my @branchtags = $self->cvs_find_branchtags($MYTAGS);
+  my @branchtags = $self->find_branchtags($MYTAGS);
   my $tag;
   foreach $tag (@branchtags) {
     if ($tag eq $branchname) {
       ierror("Branch: Cannot create branch $branchname.\n".
-             "         CVS branch named $branchname already exists.\n");
+             "         A branch named $branchname already exists.\n");
       return 0;
     }
   }
@@ -436,15 +461,22 @@ sub branch {
   #########      ###########      ###########      ###########      ###########
 
   $self->step("Check that no updates needed in this package");
-  
+
+  # in the old CVS way of doing things, we had to commit all changes before
+  # creating a branch.  With SVN we don't have this restriction,
+  # but we'll still issue a warning:  
   if (! $self->up_to_date() ) {
-    ierror("Branch: Package not up to date - try a commit first\n");
-    $self->release_lock();
-    return 0;
+    if ( $self->type() eq 'svn' ) {
+      iwarn("Branch: Package not up to date - consider commiting changes first\n");
+    } else {
+      ierror("Branch: Package not up to date - try a commit first\n");
+      $self->release_lock();
+      return 0;
+    }
   }
 
   print "\n";
-  print "Branch: This checked out package tree is about converted into a branch\n";
+  print "Branch: This checked out package tree is about to be converted into a branch\n";
   print "\n";
   
   if (! Asim::choose_yes_or_no("Are you sure you want to proceed", "no", "yes")) {
@@ -454,21 +486,78 @@ sub branch {
     
   #########      ###########      ###########      ###########      ###########
 
-  $self->step("Cvs branch repository and convert current package into new repository");
+  $self->step("Branch repository and convert current package into new repository");
+  
+  Asim::Xaction::start();
 
+  # hack alert!
+  # Remove this IF statement by crating type-specific methods in Cvs.pm, Svn.pm, etc.
+  if ( $self->type() eq 'cvs' ) {
+  
+    ##########     CVS    ##########
+  
+    $self->cvs_command("tag -b $branchname")
+      || ierror("Branch tagging failed - repository may be corrupted\n")
+         && Asim::Xaction::abort()
+	 && return 0;
 
-  $self->cvs_command("tag -b $branchname")
-    || ierror("Branch tagging failed - repository may be corrupted\n") && return 0;
+    $self->cvs_command("update -P -r $branchname")
+      || ierror("Checkout of branch failed - this package is trash --- delete it\n")
+         && Asim::Xaction::abort()
+	 && return 0;
 
-  $self->cvs_command("update -P -r $branchname")
-    || ierror("Checkout of branch failed - this package is trash --- delete it\n") && return 0;
+  } elsif ( $self->type() eq 'svn' ) {
+   
+    ##########     SVN    ##########
+  
+    my $cur_url    = $self->get_working_url();
+    my $branch_url = $self->get_repository_url() . '/branches/' . $branchname;
 
+    # create a comment file header, nicely formatted so it gets past SVN pre-commit hook:
+    $self->{commentfile} = "$TMPDIR/asimbranch_comment.$$.txt";
+    open COMMENT, '>'.$self->{commentfile};
+    my $csn = $self->csn();
+    chomp(my $date     = `$DATE`);
+    chomp(my $date_utc = `$DATE_UTC`);
+    printf COMMENT "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n",
+      $USER, $date, $csn, "", $date_utc;
+    print  COMMENT "        Branch from revision: $csn\n";
+    print  COMMENT "        From URL:             $cur_url\n";
+    print  COMMENT "        To URL:               $branch_url\n";
+    printf COMMENT "\nDO NOT DELETE THIS LINE! ADD COMMENTS BELOW:\n";
+    close  COMMENT;
+    system "$EDITOR " . $self->{commentfile};
+    
+    # create the branch in the repository, using the supplied branch name:
+    $self->svn("copy $cur_url $branch_url --file " . $self->{commentfile});
+    $self->svn("switch $branch_url");
+ 
+  } else {
+
+    ierror("Branch not implemented for packages of type " . $self->type() . "\n");
+  }
 
   #########      ###########      ###########      ###########      ###########
 
   $self->step("Unlock repository");
+  
+  Asim::Xaction::commit();
 
   $self->release_lock();
+
+  #
+  # Now create a new admin/packages/<packagename> file for the branch,
+  # where <packagename> is the new branch name.  And we also create a new lock
+  # just for this branch, and a new set of CSN's starting at 1.
+  #
+  # But for SVN we will skip this step, and just share the package name,
+  # lock, and CSNs with the trunk.  Note that since the CSNs are synced to
+  # the SVN version numbers we don't have a choice about that...
+  #
+  if ( $self->type() eq 'svn' ) {
+    return 1;
+  }
+
 
   # We don't lock the new repository because noone should know about it yet...
 
@@ -587,6 +676,11 @@ sub merge {
 
   my $oldmergecsn;
   my $newmergecsn;
+  
+  if ( $self->type() ne 'cvs' ) {
+    ierror("Merge not implemented for packages of type " . $self->type() . "\n");
+    return 0;
+  }
 
   print "Merge changes in the main trunk into a branch\n";
 

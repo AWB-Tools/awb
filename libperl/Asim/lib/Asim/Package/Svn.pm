@@ -63,18 +63,12 @@ The following methods are supported:
 
 =over 4
 
-=cut
-
-################################################################
-
 =item $cvs = Asim::Package::Svn::set_type( $package )
 
 If $package is an SVN repository, set the object's subclass to Asim::Package::Svn and return 1.
 Otherwise return 0.
 
 =cut
-
-################################################################
 
 sub set_type {
   my $self = shift;
@@ -87,21 +81,15 @@ sub set_type {
   return 0;
 }
 
-################################################################
-
 =item $package-E<gt>type()
 
 Return type of package - "svn" in this case.
 
 =cut
 
-################################################################
-
 sub type {
   return 'svn';
 }
-
-################################################################
 
 =item $svn = Asim::Package::Svn:init()
 
@@ -109,23 +97,16 @@ Global init of Svn module.
 
 =cut
 
-################################################################
-
-
 sub init {
   # Deal with any SVN environment variables
   1;
 }
-
-################################################################
 
 =item $svn-E<gt>update()
 
 Update this package from the repository
 
 =cut
-
-################################################################
 
 sub update {
   my $self = shift;
@@ -142,20 +123,18 @@ sub update {
   return 1;
 }
 
-################################################################
-#
-# Function: status
-#
-# Check on the SVN status of each file in the current package
-#
-# Return a array with one element for each file returned 
-# by 'svn status' addin state:
-#
-# Each array element contains:
-#
-#  ($directory, $filename, $status, $reprev, $date)
-#
-################################################################
+=item $svn-E<gt>status()
+
+Check on the SVN status of each file in the current package
+
+Return a array with one element for each file returned 
+by 'svn status' addin state:
+
+Each array element contains:
+
+ ($directory, $filename, $status, $reprev, $date)
+
+=cut
 
 sub status {
   my $self = shift;
@@ -330,14 +309,14 @@ sub status {
   return (@files);
 }
 
-################################################################
-#
-# Persistent CVS command
-#
-#   Remote cvs has the habit of giving up (timeout) sometimes;
-#   We keep retrying a number of times before we give up too
-#
-################################################################
+=item $svn->svn_command( <command> )
+
+Issue an SVN command robustly.
+
+Remote cvs had the habit of giving up (timeout) sometimes;
+This implementation keeps retrying a number of times before we give up too.
+
+=cut
 
 sub svn_command {
   my $self = shift;
@@ -375,12 +354,11 @@ sub svn_command {
   return 1;
 }
 
-################################################################
-#
-# SVN command
-#
-################################################################
+=item $svn->svn( <command> )
 
+Issue an SVN command directly.  Don't retry if it fails.
+
+=cut
 
 sub svn {
   my $self = shift;
@@ -404,7 +382,65 @@ sub svn {
   return $ret;
 }
 
-################################################################
+=item $svn->get_working_url()
+
+Return the URL that the working copy was checked out with.
+This will usually look like: http://some/path/trunk
+or maybe http://some/path/branches/<branch_name>.
+
+=cut
+
+sub get_working_url
+{
+  my $self = shift;
+  my $location = $self->location();
+  my $url = `cd $location; svn info | grep URL`;
+  chomp $url;
+  $url =~ s/^URL:\s*//;
+  $url;
+}
+
+=item $svn->get_repository_url()
+
+Return the URL of the top level of the repository,
+which is just the working URL, with the "/trunk"
+or "/branches/<branch_name>" removed.
+
+=cut
+
+sub get_repository_url
+{
+  my $self = shift;
+  my $url = $self->get_working_url();
+  $url =~ s/\/trunk$//;
+  $url =~ s/\/branches\/.*$//;
+  $url;
+}
+
+=item $svn->find_branchtags( [<filename>] )
+
+Search a repository file for all branch tags.
+
+The optional filename argument is ignored
+(for backward compatibility with the old CVS version).
+
+=cut
+
+sub find_branchtags
+{
+  my $self = shift;
+  my $filename = shift || '';  # optional argument -- ignored
+  my @branches = ();
+  my $url = $self->get_repository_url() . '/branches';
+  foreach my $branch ( `svn list $url` ) {
+    if ( $branch =~ m/non-existent/ ) { last; }
+    chomp $branch;
+    $branch =~ s/\/\s*$//;
+    push @branches, $branch;
+  }
+
+  return @branches;
+}
 
 =item $svn-E<gt>commit_check()
 
@@ -412,8 +448,6 @@ A set of checks to make sure that we have a
 reasonable chance of succeeding at a commit
 
 =cut
-
-################################################################
 
 sub commit_check {
   my $self = shift;
@@ -527,8 +561,6 @@ sub commit_check {
   return 1;
 }
 
-################################################################
-
 =item $package-E<gt>increment_csn()
 
 Increment serial number CSN of package.
@@ -539,8 +571,6 @@ because we have some special-case code to keep the CSN numbers
 in sync with the SVN revision numbers.
 
 =cut
-
-################################################################
 
 sub increment_csn {
   my $self = shift;
@@ -588,7 +618,7 @@ sub increment_csn {
 
 =head1 AUTHORS
 
-Sailashri Parthasarathy based on Bitkeeper.pm by
+Sailashri Parthasarathy, Carl Beckmann based on Bitkeeper.pm by
   Oscar Rosell based on Cvs.pm by
     Joel Emer, Roger Espasa, Artur Klauser and  Pritpal Ahuja
 
@@ -600,7 +630,5 @@ All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.
 
 =cut
-
-###########################################################################
 
 1;
