@@ -2764,3 +2764,24 @@ Directory tools/awb/awb2
 Updating with simcore changes (rev. 2361 - Joel Emer)
 
 Improved error checking for browsing.
+
+----------
+spartha1    Date: Fri Jun 29 15:21:31 EDT 2007  CSN: CSN-asimcore-139
+                  Fri Jun 29 19:21:31 UTC 2007
+
+
+Directory tools/scripts
+ create-benchmark-file     Locally Modified          138 
+ asim-run                  Locally Modified          138 
+ asim-batch                Locally Modified          138 
+
+Updating with simcore changes (rev. 2363 - Brian Slechta)
+
+fixed create-benchmark-file to work with NLIT traces using multi.cfx. this
+script should now work properly with all traces currently in the Master.tlist.
+
+created a special rsync function in asim-run that can be modified to try on
+errors. it still does not rety anything, but the framework is there.
+
+added rsync error checking and rety to asim-batch. if rsync has a non-zero
+exit code, it will retry a bunch of times.

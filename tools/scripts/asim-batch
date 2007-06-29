@@ -1,4 +1,4 @@
-:
+: # -*- perl -*-
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
@@ -459,25 +459,41 @@ sub print_error_info {
 
 sub rsync_results
 {
-  if ($remote) {
-    # user specified that we rsync the results.  let's do that.
-    my $rsync_log_file = "$rundir/asim-batch-rsync.log";
-    my @rsync_cmds;
-    
-    push (@rsync_cmds, "rsync --verbose $rundir/* $rsyncruntarg/");
-    push (@rsync_cmds, "rsync --verbose $resdir/$bm.* $rsyncrestarg/");
-    push (@rsync_cmds, "rsync --verbose $rsync_log_file $rsyncruntarg/");
+    if ($remote) {
 
-    # create an rsync log file for help in debugging rsync issues
-    system ("echo \"RSYNC LOG FILE\" > $rsync_log_file");
- 
-    foreach my $cmd (@rsync_cmds) {
+        # user specified that we rsync the results.  let's do that.
+        my $rsync_log_file = "$rundir/asim-batch-rsync.log";
+        my @rsync_cmds;
+        
+        push (@rsync_cmds, "rsync --verbose $rundir/* $rsyncruntarg/");
+        push (@rsync_cmds, "rsync --verbose $resdir/$bm.* $rsyncrestarg/");
+        push (@rsync_cmds, "rsync --verbose $rsync_log_file $rsyncruntarg/");
 
-      # create an rsync log file for help in debugging rsync issues
-      system ("echo \"command=$cmd\n\" >> $rsync_log_file");
- 
-      # actually rsync directory back (will ignore symlinks, which is good)
-      system ("$cmd >> $rsync_log_file");    
+        # create an rsync log file for help in debugging rsync issues
+        system ("echo \"RSYNC LOG FILE\" > $rsync_log_file");
+        
+        foreach my $cmd (@rsync_cmds) {
+
+            my $exit_code = 1;
+
+            for (my $try_cnt = 0; (($exit_code != 0) && ($try_cnt < 10)); $try_cnt++) {
+                
+                # create an rsync log file for help in debugging rsync issues
+                system ("echo \"command=$cmd\n\" >> $rsync_log_file");      
+                
+                # actually rsync directory back (will ignore symlinks, which is good)
+                $exit_code = system ("$cmd >> $rsync_log_file");    
+                
+                print ("exit_code=$exit_code\n");
+
+                # create an rsync log file for help in debugging rsync issues
+                system ("echo \"exit_code=$exit_code\n\" >> $rsync_log_file");
+
+                # sleep before retrying
+                if ($exit_code != 0) {
+                    sleep(10);
+                }
+            }
+        }
     }
-  }
 }

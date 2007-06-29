@@ -1297,15 +1297,17 @@ sub rsync_model
             run_command("mkdir -p $remoteresdir/$name/RUN/ > /dev/null 2>&1");
             run_command("mkdir -p $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
             run_command("mkdir -p $remoteresdir/$name/ADMIN/ > /dev/null 2>&1");
-            run_command("rsync --quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+
+            run_command_rsync("--quiet $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/");
         }
         else {
             run_command("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
             run_command("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/BUILD/' > /dev/null 2>&1");
             run_command("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/ADMIN/' > /dev/null 2>&1");
+
             # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
             # different from experiment name.
-            run_command("rsync  --quiet $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/ > /dev/null 2>&1");
+            run_command_rsync("--quiet $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/");
         }
     }
 
@@ -1465,11 +1467,11 @@ sub run_one_benchmark
                     }
 
                     # rsync whole run area and links as links
-                    run_command("rsync --links --quiet -r $rundir $remoteruntarg > /dev/null 2>&1");                    
+                    run_command_rsync("--links --quiet -r $rundir $remoteruntarg");
                 }
                 else {
                     # this rsync will just plain copy the links as is.
-                    run_command("rsync --quiet -r --links $rundir $remoteruntarg > /dev/null 2>&1");
+                    run_command_rsync("--quiet -r --links $rundir $remoteruntarg");
                 }
             }
 
@@ -1492,7 +1494,7 @@ sub run_one_benchmark
         }
         elsif ($remote)
         {
-            run_command ("rsync --quiet $resdir/$name/$bm_name.SUBMITTED $remotehost:$remoteresdir/$name/");
+            run_command_rsync("--quiet $resdir/$name/$bm_name.SUBMITTED $remotehost:$remoteresdir/$name/");
         }
 
         my $input = $exps->{"$name"}{params};
@@ -2463,17 +2465,29 @@ sub timed_question {
 #
 # Run a command or just print out what would be run
 #
-sub run_command {
-  my $command = shift;
-  
-  print_debug("command:$command\n");
+sub run_command 
+{
+    my $command = shift;
+    
+    print_debug("command:$command\n");
 
-  if ($dryrun) {
-    print "$command\n";
-    return 0;
-  }
-  
-  return system($command);
+    if ($dryrun) {
+        print "$command\n";
+        return 0;
+    }
+    
+    return system($command);
+}
+
+# -----------------------------------------------------------------------------
+#
+# Run a command or just print out what would be run
+#
+sub run_command_rsync
+{
+    my ($rsync_args) = @_;
+
+    return run_command("rsync $rsync_args > /dev/null 2>&1");
 }
 
 # -----------------------------------------------------------------------------

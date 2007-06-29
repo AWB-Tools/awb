@@ -1,4 +1,4 @@
-:
+: # -*- perl -*-
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
@@ -13,7 +13,7 @@ chomp (my $path = `pwd`);
 # global constants
 my $logfile = "/dev/null";
 my $script_name = "create-benchmark-file";
-my @params = ( "tag", "tlist", "flist", "outfile", "logfile");
+my @params = ( "tag", "tlist", "flist", "outfile", "logfile", "debug");
 
 # global variables
 my %got_param;
@@ -34,6 +34,7 @@ exit 0;
 sub print_usage;
 sub parse_parameters;
 sub check_parameters;
+sub dprint;
 sub oprint;
 sub convert;
 sub convert_tlist;
@@ -188,6 +189,15 @@ sub oprint
     }
 }
 
+# print the output
+sub dprint
+{
+    if ($got_param{"debug"})
+    {
+        oprint @_;
+    }
+}
+
 sub convert
 {
     if ($got_param{"tlist"})
@@ -245,29 +255,221 @@ sub process_flist # (@flist)
 {
     my @flist = @_;
 
-    my $last_was_ptag = 0;
+    push @flist, "";
+
+    # OLD my $last_was_ptag = 0;
+
+    my $twolit_begin = 0;
+    my $twolit_num = 0;
+    my $twolit_name = "";
+    my $twolits = {};
+    my $attrs = {};
+    my $ptag = "";
+    my $ctag = "";
+    my $tag = "";
+    my $print_twolit = 0;
+
     foreach my $line (@flist)
     {
-        if ($line =~ /^ptag:/)
+        chomp $line;
+
+        if ($line =~ /^ptag:(.*)/)
         {
-            $last_was_ptag = 1;
+            dprint "ptag->$line\n";
+
+            $ptag = $1;
         }
-        else 
+        elsif ($line =~ /^tag:(.*)/)
         {
-            if ($last_was_ptag)
+            dprint "tag->$line\n";
+
+            $tag = $1;
+        }
+        elsif ($line =~ /^ctag:(.*)/)
+        {
+            dprint "ctag->$line\n";
+
+            $ctag = $1;
+        }
+        elsif ($line =~ /^(.*)=(.*)/)
+        {
+            my ($key, $val) = ($1, $2);
+
+            $attrs{$key} = $val;
+            
+            dprint "attr->$key==$attrs{$key}\n";
+
+            if ($key =~ /TWOLIT_TRACE(\d+)$/) 
             {
-                # this line should be a file path
-                if ($line =~ /\s*\/(.*)/)
+                my ($num) = ($1);
+
+                $twolits{$num} = $val;
+
+                if ($num eq "0")
                 {
-                    oprint "tools/scripts/bm/tracecache/single.cfx/$1.cfg\n";
+                    dprint "twolit_begin\n";
+                    if ($twolit_begin) 
+                    {
+                        dprint "ERROR: twolit_begin without end\n";
+                    }
+                    $twolit_begin = 1;
+                    $twolit_num = 1;
                 }
                 else
                 {
-                    # not a file path!  ignore
+                    $twolit_num++;
                 }
             }
-
-            $last_was_ptag = 0;
         }
+        elsif ($line =~ /.*\/(.*)/)
+        {
+            dprint "single->$line\n";
+
+            # found a single lit
+            my ($singletrace) = ($1);
+
+            if ($singletrace =~ /\.tlist/)
+            {
+                # not trace
+            }
+            else
+            {
+                if ($twolit_begin) 
+                {
+                    dprint "ERROR: twolit_begin with a single trace\n";
+                }
+                oprint "tools/scripts/bm/tracecache/single.cfx/$singletrace.cfg\n";
+            }
+        }
+        elsif ($line eq "")
+        {
+            dprint "blank->$line\n";
+
+            dprint "foo->$twolit_begin:$twolit_name\n";
+
+            if (($twolit_begin) && ($twolit_name ne ""))
+            {
+                # CASE: single twolit trace by itself and after TWOLIT_TRACEn 
+                # attributes from previous section.
+                # <
+                # tag: AllTraces AllTraces_complete FOURLIT FOURLIT_complete ...
+                # SIMLEN_complete=0;0;30990293
+                # SIMLEN_complete_skip=0;500000;30990293
+                # SIMLEN_long=0;0;15000000
+                # SIMLEN_long_skip=0;500000;15000000
+                # SIMLEN_tiny=0;0;5000000
+                # SIMLEN_tiny_skip=0;500000;5000000
+                # SIMLEN_variable=0;0;5000000
+                # SIMLEN_variable_skip=0;500000;5000000
+                # TRACETYPES=LCAT,TWOLIT
+                # TWOLIT_TRACE0=/fs61/nhm.arch.traces.25/traces/server/google_v1-t2...
+                # TWOLIT_TRACE1=/fs38/nhm.arch.traces.21/traces/server/specweb99ssl...
+                # TWOLIT_TRACE2=/fs38/nhm.arch.traces.21/traces/internet/ntttcpr_25...
+                # TWOLIT_TRACE3=/fs37/psc.arch.traces.17/traces/server/tpc-c/tpcc_-...
+                # 
+                # ptag: Unassigned_-_-_Unassigned_-
+                # google_v1-t2-s6-large-queries_icc9-0_016^specweb99ssl_007^ntttcpr_256_002^tpcc_071
+                #
+                # >
+
+                # we likely just got the name of a twolit trace and can now 
+                # match it up with exiting twolit traces
+                my $name = $twolit_name;
+                my $combined = "tools/scripts/bm/tracecache/multi.cfx";
+                for (my $i = 0; $i < $twolit_num; $i++)
+                {
+                    my $n = $twolits{"$i"};
+                    if ($n =~ /.*\/(.*)/) 
+                    {
+                        $n = $1;
+                    }
+                    $combined .= "/";
+                    $combined .= $n;
+                }
+                $combined .= "/";
+                $combined .= $name;
+                $combined .= ".cfg\n";
+                oprint $combined;                
+                $twolit_begin = 0;
+                $twolit_name = "";
+                $twolit_num = 0;
+            }
+        }
+        else
+        {
+            # this must be a twolit trace name
+            dprint "name->$line\n";
+
+            if ($twolit_begin) 
+            {
+                # CASE: tracename followed by TWOLIT_TRACEn attributes, often 
+                # multiple trace names with each ptag.
+                # <
+                # 
+                # ptag: Unassigned_-_-_Unassigned_-
+                # google_008^4t
+                # SIMLEN_complete=1000000;0;26009782
+                # SIMLEN_complete_skip=1000000;500000;26009782
+                # TWOLIT_TRACE0=/fs38/nhm.arch.traces.23/traces/server/google_...
+                # TWOLIT_TRACE1=/fs38/nhm.arch.traces.23/traces/server/google_...
+                # TWOLIT_TRACE2=/fs38/nhm.arch.traces.23/traces/server/google_...
+                # TWOLIT_TRACE3=/fs38/nhm.arch.traces.23/traces/server/google_...
+                # sas_011^4t
+                # >
+                
+                # we can match this up with the pending twolit names
+                my $name = $line;
+                my $combined = "tools/scripts/bm/tracecache/multi.cfx";
+                for (my $i = 0; $i < $twolit_num; $i++)
+                {
+                    my $n = $twolits{"$i"};
+                    if ($n =~ /.*\/(.*)/) 
+                    {
+                        $n = $1;
+                    }
+                    $combined .= "/";
+                    $combined .= $n;
+                }
+                $combined .= "/";
+                $combined .= $name;
+                $combined .= ".cfg\n";
+                oprint $combined;                
+                $twolit_begin = 0;
+                $twolit_name = "";
+                $twolit_num = 0;
+            }
+
+            # we can match this up with the next set of twolit traces
+            $twolit_name = $line;
+        }
+
+        # OLD if ($line =~ /^ptag:/)
+        # OLD {
+        # OLD     $last_was_ptag = 1;
+        # OLD }
+        # OLD else 
+        # OLD {
+        # OLD     if ($last_was_ptag)
+        # OLD     {
+        # OLD         # this line should be a file path
+        # OLD         if ($line =~ /\s*\/(.*)/)
+        # OLD         {
+        # OLD             oprint "tools/scripts/bm/tracecache/single.cfx/$1.cfg\n";
+        # OLD         }
+        # OLD         else
+        # OLD         {
+        # OLD             # not a file path!  ignore
+        # OLD         }
+        # OLD     }
+        # OLD 
+        # OLD     $last_was_ptag = 0;
+        # OLD }
     }
+
+    if (($twolit_begin) || ($twolit_name ne ""))
+    {
+        dprint "ERROR: end of file: twolit_begin=$twolit_begin, twolit_name=$twolit_name\n";
+    }
+
+    return;
 }
