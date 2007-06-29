@@ -3013,3 +3013,15 @@ Updating with simcore changes (rev. 2380 - Carl Beckmann)
 
 - Fixed a race condition between pre-allocate and operator new in MM pointers,
 that showed up in the multithreaded runs.
+
+----------
+spartha1    Date: Fri Jun 29 16:45:57 EDT 2007  CSN: CSN-asimcore-154
+                  Fri Jun 29 20:45:57 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ cache.h                   Locally Modified          153 
+
+Updating with simcore changes (rev. 2381 - Carl Beckmann)
+
+- fix for LRU update (provided by Drew Hilton)

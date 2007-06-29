@@ -623,7 +623,8 @@ class ev7_replacement_info : public lru_info<NumWays>
         mask = mask | (0x1 << way);
 
         // If all the bits are set, clear them 
-        if((mask & allSetMask) == allSetMask) mask = 0x0;
+	// EXCEPT for the newly MRU'ed way
+        if((mask & allSetMask) == allSetMask) mask = (0x1 << way);
         
     }
     
