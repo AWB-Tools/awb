@@ -1536,7 +1536,7 @@ sub run_one_benchmark
 	# netbatch.
 	# TODO: the runtime LIMIT_PTHREADS argument is checked, but the decl
 	# in awb file has to be checked as well.
-	if (${$input} =~ /\s*(LIMIT_PTHREADS)\s*=\s*(\d+)\s*/) {
+	if ((defined ${$input}) && ${$input} =~ /\s*(LIMIT_PTHREADS)\s*=\s*(\d+)\s*/) {
 	    $nthreads = $2;
 	    $checkApm = 0 unless ($nthreads == 0);
 	}
@@ -1969,7 +1969,7 @@ sub setup_tlist_run
     # write the run file
     my $runtimepath = Asim::Bindir();
     my $feederArgs = "-t $trace ";
-    if (${$input} =~ (s/\s*(nthreads)\s*=\s*(\d+)\s*/ /)) {
+    if ((defined ${$input}) && ${$input} =~ (s/\s*(nthreads)\s*=\s*(\d+)\s*/ /)) {
 	my $nthreads = $2;
 	while ($nthreads > 1) {
 	    $feederArgs .= " -t $trace ";

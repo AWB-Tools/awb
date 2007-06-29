@@ -2923,3 +2923,15 @@ Directory modules/controller/classic
 Updating with simcore changes (rev. 2370 - Chris Weaver)
 
 compile fixes
+
+----------
+spartha1    Date: Fri Jun 29 15:43:37 EDT 2007  CSN: CSN-asimcore-147
+                  Fri Jun 29 19:43:37 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          145 
+
+Updating with simcore changes (rev. 2372 - Krishna Rangan)
+
+- fix for attempting to read nthreds when no argument to experiment is available.
