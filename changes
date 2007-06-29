@@ -2948,3 +2948,16 @@ Updating with simcore changes (rev. 2375 - Brian Slechta)
 
 added Look() and Delay() functions to BufferStorage and StallPort. these were
 added to facillitate the stalling of longer latency ports.
+
+----------
+spartha1    Date: Fri Jun 29 16:36:48 EDT 2007  CSN: CSN-asimcore-149
+                  Fri Jun 29 20:36:48 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ syntax.h                  Locally Modified          148 
+
+Updating with simcore changes (rev. 2376 - Krishna Rangan)
+
+- revised UINT128 declaration that causes gcc 3.4.3 compiler
+to hang on 64 bit machines.
