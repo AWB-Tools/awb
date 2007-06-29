@@ -204,6 +204,15 @@ for (my $iexp = 0; $iexp < @summary; $iexp++)
 			print "\t\t$bm.stats -- OK.\n";
 		    }
 		}
+		elsif ( -f "$fbm.ERROR" )
+		{
+		    print "\t\t$bm.ERROR -- run failed!\n";
+		    if ($errorlog)
+		    {
+			show_errorlog("$fbm.ERROR");
+		    }
+		    $expfail++;
+		}
 		elsif ( -f "$fbm.SUBMITTED" )
 		{
 		    print "\t\t$bm.SUBMITTED -- run not finished yet!\n";
@@ -213,15 +222,6 @@ for (my $iexp = 0; $iexp < @summary; $iexp++)
 		{
 		    print "\t\t$bm.RUNNING -- run not finished yet!\n";
 		    $exprunning++;
-		}
-		elsif ( -f "$fbm.ERROR" )
-		{
-		    print "\t\t$bm.ERROR -- run failed!\n";
-		    if ($errorlog)
-		    {
-			show_errorlog("$fbm.ERROR");
-		    }
-		    $expfail++;
 		}
 		else
 		{

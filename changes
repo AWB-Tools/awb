@@ -2973,3 +2973,17 @@ Directory modules/power_model
 Updating with simcore changes (rev. 2377 - Sari Coumeri)
 
 * Added empty bus power macro calls to null_power_model (SLC)
+
+----------
+spartha1    Date: Fri Jun 29 16:41:17 EDT 2007  CSN: CSN-asimcore-151
+                  Fri Jun 29 20:41:17 UTC 2007
+
+
+Directory tools/scripts
+ regression.verifier       Locally Modified          150 
+
+Updating with simcore changes (rev. 2378 - Krishna Rangan)
+
+- check for a failure file prior to a check for submitted failure; this
+would fix an apparent failure in the regressions, that was missed by verifier.
+
