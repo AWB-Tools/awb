@@ -3025,3 +3025,15 @@ Directory lib/libasim/include/asim
 Updating with simcore changes (rev. 2381 - Carl Beckmann)
 
 - fix for LRU update (provided by Drew Hilton)
+
+----------
+jsemer      Date: Thu Jul 26 14:26:38 EDT 2007  CSN: CSN-asimcore-155
+                  Thu Jul 26 18:26:38 UTC 2007
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          154 
+
+Updating with simcore changes (rev. 2404 - Michael Adler)
+
+Add hasim-bsc-mkdepend.

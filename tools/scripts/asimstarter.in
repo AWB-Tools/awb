@@ -2,24 +2,26 @@
 eval 'exec perl -w "$0" ${1+"$@"}'
        if 0;
 
-#
-# Copyright (C) 2002-2006 Intel Corporation
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-# 
-#
+# *****************************************************************
+# *                                                               *
+# *   Copyright (c) Compaq Computer Corporation, 2001             *
+# *                                                               *
+# *   All Rights Reserved.  Unpublished rights  reserved  under   *
+# *   the copyright laws of the United States.                    *
+# *                                                               *
+# *   The software contained on this media  is  proprietary  to   *
+# *   and  embodies  the  confidential  technology  of  Digital   *
+# *   Equipment Corporation.  Possession, use,  duplication  or   *
+# *   dissemination of the software and media is authorized only  *
+# *   pursuant to a valid written license from Digital Equipment  *
+# *   Corporation.                                                *
+# *                                                               *
+# *   RESTRICTED RIGHTS LEGEND   Use, duplication, or disclosure  *
+# *   by the U.S. Government is subject to restrictions  as  set  *
+# *   forth in Subparagraph (c)(1)(ii)  of  DFARS  252.227-7013,  *
+# *   or  in  FAR 52.227-19, as applicable.                       *
+# *                                                               *
+# *****************************************************************
 
 #
 # Author:  Artur Klauser
@@ -149,6 +151,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "plot-shell"          => "tools/scripts/plot-shell",
   "asim-run"            => "tools/scripts/asim-run",
   "asim-batch"          => "tools/scripts/asim-batch",
+  "hasim-bsc-mkdepend"  => "tools/scripts/hasim-bsc-mkdepend",
   "hasim-configure"     => "tools/scripts/hasim-configure",
   "hasim-connect"       => "tools/scripts/hasim-connect",
   "model-coverage"      => "tools/scripts/model-coverage",
