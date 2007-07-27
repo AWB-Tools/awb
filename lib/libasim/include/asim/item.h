@@ -220,7 +220,7 @@ class ASIM_ITEM_CLASS
     inline void SetRecId(UINT32 x) { recId = x; };
     inline UINT32 GetRecId() { return recId; };
 
-    inline void
+    inline UINT32
     OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, ASIM_ITEM_CLASS *parent=NULL)
     {
         if (runWithEventsOn && eventsEnabled)
@@ -231,6 +231,35 @@ class ASIM_ITEM_CLASS
                   recId = DRALEVENT(OpenEventRec(rec, thread_id, parent_id));
                   );
         }
+
+        return recId;
+    }
+
+    inline UINT32
+    RefEventRec (ASIM_ITEM_CLASS *item)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  UINT32 rec_id = item ? item->GetRecId() : 0; 
+                  recId = DRALEVENT(RefEventRec(rec_id));
+                  );
+        }
+
+        return recId;
+    }
+
+    inline UINT32
+    RefEventRec (UINT32 rec_id)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  recId = DRALEVENT(RefEventRec(rec_id));
+                  );
+        }
+
+        return recId;
     }
 
     inline void

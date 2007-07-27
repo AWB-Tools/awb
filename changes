@@ -3050,3 +3050,63 @@ Updating with simcore changes (rev. 2387 - Brian Slechta)
 
 added some debug features to fetch-trace. should not change baseline
 functionality.
+
+----------
+spartha1    Date: Fri Jul 27 17:09:36 EDT 2007  CSN: CSN-asimcore-157
+                  Fri Jul 27 21:09:36 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ item.h                    Locally Modified          156 
+
+Directory lib/libdral/include/asim
+ dralServer.h              Locally Modified          156 
+
+Directory lib/libdral/src
+ dralServer.cpp            Locally Modified          156 
+
+Updating with simcore changes (rev. 2388 - Brian Slechta)
+
+augmented the DRAL/PTV API to support reference counting on event records.
+this uses the existing ptlib reference counting feature. you can use
+reference counting to allow multiple objects share the same PTV record. for
+example, a cbox message can share the parent idi message's ptv record. here
+is an example using the ASIM_ITEM_CLASS API in item.h.
+
+IDI_MSG_CLASS::IDI_MSG_CLASS(...)
+{
+EVENT(OpenEventRec());
+}
+
+IDI_MSG_CLASS::~IDI_MSG_CLASS()
+{
+EVENT(CloseEventRec());
+}
+
+CBOX_MSG_CLASS::CBOX_MSG_CLASS(IDI_MSG_CLASS *idi_msg, ...)
+{
+// this is the prefered method of inheriting ptv events.
+EVENT(RefEventRec(idi_msg));
+
+// *** OR ***
+
+// this is another way to slice it, though not preferred.
+// users should not play with ids from the api.
+UINT32 did = idi_msg->GetRecId();
+EVENT(RefEventRec(did));
+
+// *** OR ***
+
+// alternatively, this is the hackish way of doing it
+// this is not good. and you should not close the record
+// in the destructor. this can cause lots of issues
+// if the idi_msg dies before the cbox_msg
+EVENT(SetRecId(idi_msg->GetRecId()));
+}
+
+CBOX_MSG_CLASS::CBOX_MSG_CLASS(IDI_MSG_CLASS *idi_msg, ...)
+{
+// must close when using RecEventRec(). do *not* use this
+// if you just manually set the id via SetRecId().
+EVENT(CloseEventRec());
+}

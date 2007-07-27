@@ -1256,6 +1256,28 @@ DRAL_SERVER_CLASS::CloseEventRec(
     return;
 }
 
+UINT32 
+DRAL_SERVER_CLASS::RefEventRec(
+    UINT32 rec_id)
+{
+    if (!turnedOn)
+    {        
+        return 0;
+    }
+    
+    else if (rec_id == 0)
+    {
+        return 0;
+    }
+
+    UINT32 id = 0;
+
+#if COMPILE_DRAL_WITH_PTV
+    id = pipe_reference_record_inst(rec_id, __FILE__, __LINE__);
+#endif
+    
+    return id;
+}
 
 UINT32 
 DRAL_SERVER_CLASS::GetDralVaListSize(
