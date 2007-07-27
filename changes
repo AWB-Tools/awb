@@ -3110,3 +3110,15 @@ CBOX_MSG_CLASS::CBOX_MSG_CLASS(IDI_MSG_CLASS *idi_msg, ...)
 // if you just manually set the id via SetRecId().
 EVENT(CloseEventRec());
 }
+
+----------
+spartha1    Date: Fri Jul 27 17:46:09 EDT 2007  CSN: CSN-asimcore-158
+                  Fri Jul 27 21:46:09 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ item.h                    Locally Modified          157 
+
+Updating with simcore changes (rev. 2389 - Brian Slechta)
+
+cleaned up item.h with some comments for the DRAL/PTV functions.

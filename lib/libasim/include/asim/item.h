@@ -217,9 +217,17 @@ class ASIM_ITEM_CLASS
         }
     }
 
+    // accessors for the event record id.  it is not terribly wise to play with
+    // these, but they are nevertheless provided for portability and power users.
+    // dont use these unless you know what you are doing.  there are likely 
+    // better ways to do what you are trying to do.  this is the analog for 
+    // the ptlib id called Pipe_RecId
     inline void SetRecId(UINT32 x) { recId = x; };
     inline UINT32 GetRecId() { return recId; };
 
+    // open the event record based on the item descriptor, the thread id, and 
+    // the optional parent item from which this item was derived.  this is the 
+    // analog for the ptlib function pipe_open_record_inst().
     inline UINT32
     OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, ASIM_ITEM_CLASS *parent=NULL)
     {
@@ -235,6 +243,11 @@ class ASIM_ITEM_CLASS
         return recId;
     }
 
+    // reference an existing event record from another item.  this is used to
+    // inherit (or share) event records among different simulation objects.
+    // this is the preferred method for sharing when compared to the next
+    // method which passes the record id directly.  this is the analog for 
+    // the ptlib function pipe_reference_record_inst().    
     inline UINT32
     RefEventRec (ASIM_ITEM_CLASS *item)
     {
@@ -249,6 +262,10 @@ class ASIM_ITEM_CLASS
         return recId;
     }
 
+    // reference an existing event record from another rec id.  this is used to
+    // inherit (or share) event records among different simulation objects.  the
+    // rec_id must be a valid record id from another open event record.  this is 
+    // the analog for the ptlib function pipe_reference_record_inst().
     inline UINT32
     RefEventRec (UINT32 rec_id)
     {
@@ -262,6 +279,12 @@ class ASIM_ITEM_CLASS
         return recId;
     }
 
+    // closes an open event record.  if the recId is zero, then nothing happens.
+    // also, the closure of the event record depends on the absense of all 
+    // references to this record.  for example, if we open an event record and
+    // create two references via RefEventRec(), then we need to CloseEventRec()
+    // on all three items.  this is the analog for the ptlib function 
+    // pipe_close_record_inst().
     inline void
     CloseEventRec ()
     {
@@ -273,6 +296,19 @@ class ASIM_ITEM_CLASS
         }
     }
 
+    // decorate the event record with the PTV-style syntax.  The var args are as
+    // follows:
+    //
+    //  SetItemTag(desc0, value0, 
+    //             ..., 
+    //             descN, valueN, 
+    //             NULL);
+    //
+    // degenerate case is:
+    //
+    //  SetItemTag(NULL);
+    //     
+    // this is the analog for the ptlib function pipe_record_data_va().
     inline void
     SetItemTag (DRAL_DATA_DESC_CLASS *data, ...)
     {
@@ -287,6 +323,36 @@ class ASIM_ITEM_CLASS
         }
     }
 
+    // trigger an event with PTV-style syntax.  The var args are as follows:
+    //
+    //  SetEvent(desc, cycle, dur, desc0, value0, 
+    //           ..., 
+    //           descN, valueN, 
+    //           NULL);
+    //
+    // degenerate case with no associated data is is:
+    //
+    //  SetEvent(desc, cycle, duration, NULL);
+    //
+    // this is the analog for the ptlib function pipe_record_event_time().
+    inline void
+    SetEvent (DRAL_EVENT_DESC_CLASS *desc, UINT64 cycle, UINT64 duration, DRAL_DATA_DESC_CLASS *data, ...)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  va_list ap;
+                  va_start(ap, data);
+                  DRALEVENT(SetEvent(itemId, recId, desc, cycle, duration, data, ap));
+                  va_end(ap);
+                  );
+        }
+    }
+
+    // trigger an event with PTV-style syntax.  same as above except the 
+    // descriptor is found in the descriptor database which is hashed by
+    // the action name.  this is the analog for the ptlib function 
+    // pipe_record_event_time().
     inline void
     SetEvent (const char *action_name, UINT64 cycle, UINT64 duration, DRAL_DATA_DESC_CLASS *data, ...)
     {
@@ -304,20 +370,6 @@ class ASIM_ITEM_CLASS
         }
     }
     
-    inline void
-    SetEvent (DRAL_EVENT_DESC_CLASS *desc, UINT64 cycle, UINT64 duration, DRAL_DATA_DESC_CLASS *data, ...)
-    {
-        if (runWithEventsOn && eventsEnabled)
-        {
-            EVENT(
-                  va_list ap;
-                  va_start(ap, data);
-                  DRALEVENT(SetEvent(itemId, recId, desc, cycle, duration, data, ap));
-                  va_end(ap);
-                  );
-        }
-    }
-
   protected:
 
     UINT64 itemId;
