@@ -25,7 +25,7 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 
 # ==== SPEED DEBUG ====
 use Time::HiRes qw(gettimeofday);;
-my $slechta_debug = 0;
+my $slechta_debug = 1;
 my $script_name = "fetch-trace";
 my $speed_num = 0;
 sub speed_debug
@@ -96,6 +96,9 @@ my $ASIM_TRACE_SERVER  = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_TRACE_S
 # option to force rsync even if trace already exists
 my $forcersync         = Asim::Util::get_asimrc_val('fetch-trace', 'FORCE_RSYNC', 0);
 
+# debug option to manually rsync DPG trace rather than use fetch_trace script
+my $slechtafetch       = Asim::Util::get_asimrc_val('fetch-trace', 'SLECHTA_FETCH', 0);
+
 #
 # get command line options
 #
@@ -107,6 +110,7 @@ $status = GetOptions(   "fetch!"         => \$fetch,
                         "verbose!"       => \$verbose,
                         "help"           => \$help,
                         "forcersync!"    => \$forcersync,
+                        "slechtafetch!"  => \$slechtafetch,
                     );
 
 if ($help) {
@@ -222,25 +226,51 @@ if ( ! $fetch ) {
 ## if it's a DPG trace, just invoke DPG fetch_trace and exit
 ##
 if ( !$DPG_TRACE_PATTERN || !$DPG_FETCH_TRACE ) {
-  print "# skipping DPG fetch_trace because disabled\n" if ( $verbose );
-} elsif ( $trace_path =~ m/$DPG_TRACE_PATTERN/ ) {
-  print "# invoking DPG fetch_trace:\n# $DPG_FETCH_TRACE $trace_path\n" if ( $verbose );
-  speed_debug("$DPG_FETCH_TRACE $trace_path");
-  
-  # SPEED NOTE: this command is a source of slowness in benchmark setup.  this
-  # calls "fetch-trace /path/to/tracename".  this took 2.5 seconds even when the
-  # trace already existed.  example:
-  #
-  # fetch-trace /fs29/wmt.arch.traces.13/traces/productivity/\
-  #    winzip_-_8-0_win2k_-_katmai333-66/\
-  #    tomcat_winzip_-_8-0_win2k_-_katmai333-66_-_0107_002.P6_0108
-  #
-  my $ec = system("$DPG_FETCH_TRACE $trace_path");
-  speed_debug("done $DPG_FETCH_TRACE $trace_path");
-  exit ($ec);
+    print "# skipping DPG fetch_trace because disabled\n" if ( $verbose );
+} 
+elsif ( $trace_path =~ m/$DPG_TRACE_PATTERN/ ) {
+
+    if ($slechtafetch) {  
+        my $must_fetch = 1;
+
+        if (!$forcersync) {
+            my $path = find_trace_in_tcache($trace_name, $ASIM_TRACE_CACHE);
+            if (defined $path) {
+                $must_fetch = 0;
+            }
+        }
+
+        if ($must_fetch) {
+            speed_debug("rsyncing starting ...");
+            
+            #my $rsync_cmd = "rsync --progress  plxc2897.pdx.intel.com:${trace_path}*  $ASIM_TRACE_CACHE/";
+            my $rsync_cmd = "rsync --progress  plxc2897.pdx.intel.com:${trace_path}* --exclude=\"*_done\" --exclude=\"*_nbqlog\" $ASIM_TRACE_CACHE/";
+            
+            speed_debug("$rsync_cmd");
+            system($rsync_cmd);
+            speed_debug("rsyncing done ...");
+        }
+    }
+
+    else {
+        my $ft_cmd = "$DPG_FETCH_TRACE $trace_path";
+
+        print "# invoking DPG fetch_trace:\n# $ft_cmd\n" if ( $verbose );
+        speed_debug($ft_cmd);
+        
+        # SPEED NOTE: this command is a source of slowness in benchmark setup.  this
+        # calls "fetch-trace /path/to/tracename".  this took 2.5 seconds even when the
+        # trace already existed.  example:
+        #
+        # fetch-trace /fs29/wmt.arch.traces.13/traces/productivity/\
+        #    winzip_-_8-0_win2k_-_katmai333-66/\
+        #    tomcat_winzip_-_8-0_win2k_-_katmai333-66_-_0107_002.P6_0108
+        #
+        my $ec = system($ft_cmd);
+        speed_debug("done ($ft_cmd");
+        exit ($ec);
+    }
 }
-
-
 
 ##
 ## if it's an Asim trace, see if the file at the absolute path exists here.
@@ -282,7 +312,11 @@ if ( $files_exist ) {
       "# copying files ${trace_path}* from remote server ${ASIM_TRACE_SERVER} to local cache $ASIM_TRACE_CACHE/\n"
       if ( $verbose );
     speed_debug("rsyncing starting ...");
-    system("rsync --progress ${ASIM_TRACE_SERVER}:${trace_path}\\* $ASIM_TRACE_CACHE/");
+
+    my $rsync_cmd = "rsync --progress ${ASIM_TRACE_SERVER}:${trace_path}\\* $ASIM_TRACE_CACHE/";
+
+    speed_debug("$rsync_cmd");
+    system($rsync_cmd);
     speed_debug("rsyncing done ...");
   }
   print "$ASIM_TRACE_CACHE/${trace_name}\n";
@@ -303,10 +337,16 @@ sub find_trace_in_tcache($$) {
   }
 
   my $ami_file = $tcache."/".$trace_name.".ami.gz";
+  my $lit_file = $tcache."/".$trace_name.".lit.gz";
   speed_debug("find_trace_in_tcache()->ami_file=$ami_file");
   if (-e $ami_file) {
     speed_debug("find_trace_in_tcache()-> found ami_file!");
     print "# found ami match in tcache:\n#\t$ami_file\n" if ( $debug );  
+    $trace_path = $tcache."/".$trace_name;
+  }
+  elsif (-e $lit_file) {
+    speed_debug("find_trace_in_tcache()-> found lit_file!");
+    print "# found ami match in tcache:\n#\t$lit_file\n" if ( $debug );  
     $trace_path = $tcache."/".$trace_name;
   }
 

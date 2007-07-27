@@ -3037,3 +3037,16 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2404 - Michael Adler)
 
 Add hasim-bsc-mkdepend.
+
+----------
+spartha1    Date: Fri Jul 27 17:07:53 EDT 2007  CSN: CSN-asimcore-156
+                  Fri Jul 27 21:07:53 UTC 2007
+
+
+Directory tools/scripts
+ fetch-trace               Locally Modified          155 
+
+Updating with simcore changes (rev. 2387 - Brian Slechta)
+
+added some debug features to fetch-trace. should not change baseline
+functionality.
