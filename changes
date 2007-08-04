@@ -3122,3 +3122,13 @@ Directory lib/libasim/include/asim
 Updating with simcore changes (rev. 2389 - Brian Slechta)
 
 cleaned up item.h with some comments for the DRAL/PTV functions.
+
+----------
+emer        Date: Sat Aug  4 12:52:03 EDT 2007  CSN: CSN-asimcore-159
+                  Sat Aug  4 16:52:03 UTC 2007
+
+
+Directory etc/repositories.d
+ fast.pack                 Locally Added               0 
+
+Added fast repository.
