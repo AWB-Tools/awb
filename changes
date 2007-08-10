@@ -3209,3 +3209,16 @@ Directory modules/controller/classic
 Updating with simcore changes (rev. 2397 - Carl Beckmann)
 
 - Bug fix: no error message on bad -cfg file.
+
+----------
+spartha1    Date: Fri Aug 10 14:47:53 EDT 2007  CSN: CSN-asimcore-164
+                  Fri Aug 10 18:47:53 UTC 2007
+
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified          163 
+
+Updating with simcore changes (rev. 2398 - Carl Beckmann)
+
+- Bug fix: -cfg file cannot deal with trailing white space.
+

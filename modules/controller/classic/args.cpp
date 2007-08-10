@@ -257,6 +257,7 @@ CONTROLLER_CLASS::ParseConfigFile( char *cfg_file_name )
 	cfg_file.getline( nextline, MAXLINE );
 	for ( p = nextline; *p; ) {	        // parse each word on a line:
 	    while ( *p && isspace( *p ) ) p++;    // skip leading white space
+            if ( *p == '\0') break;               // skip trailing white space
 	    if ( *p == '#' ) break;               // if it's a comment, ignore rest of line
 	    argv[argc++] = scan_arg_value( p );   // copy the next word from the input line
 	    ASSERTX( argc < MAXARGS );
