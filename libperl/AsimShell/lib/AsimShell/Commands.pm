@@ -1102,7 +1102,9 @@ sub clean_package {
       return clean_package( $default_packageDB->directory() );
     }
     my $package = get_package($name) || return undef;
-    $package->clean()                || return undef;
+    if ( $package->isprivate() ) {
+      $package->clean()              || return undef;
+    }
   }
   return 1;
 }
