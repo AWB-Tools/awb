@@ -3197,3 +3197,15 @@ Updating with simcore changes (rev. 2396 - Carl Beckmann)
 
 - fixed a bug in "asim-shell clean package" that was causing it to spew
 forever when the workspace uses public packages.
+
+----------
+spartha1    Date: Fri Aug 10 14:45:57 EDT 2007  CSN: CSN-asimcore-163
+                  Fri Aug 10 18:45:57 UTC 2007
+
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified          162 
+
+Updating with simcore changes (rev. 2397 - Carl Beckmann)
+
+- Bug fix: no error message on bad -cfg file.

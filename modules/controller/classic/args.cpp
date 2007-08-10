@@ -250,6 +250,7 @@ CONTROLLER_CLASS::ParseConfigFile( char *cfg_file_name )
     // parse the input file and build and argv list
     //
     ifstream cfg_file( cfg_file_name );       // open the input file
+    ASSERT( !cfg_file.fail(), "Error opening configuration file " << cfg_file_name );
     while ( cfg_file.good() ) {               // do for each line in the file:
         const INT32 MAXLINE = 256;
         char  *p, nextline[MAXLINE];
