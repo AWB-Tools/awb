@@ -3258,3 +3258,16 @@ so the numbers keep incrementing, and the branch is simply distinguished
 by <branchname>.
 
 
+
+----------
+spartha1    Date: Fri Aug 10 14:52:19 EDT 2007  CSN: CSN-asimcore-166
+                  Fri Aug 10 18:52:19 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          165 
+
+Updating with simcore changes (rev. 2403 - Carl Beckmann)
+
+- Fixed "checkout package" command to recognize branch and version syntax
+for tags in the SVN case.
