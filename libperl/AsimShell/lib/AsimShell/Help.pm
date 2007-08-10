@@ -213,7 +213,7 @@ Commands:
   where,
     <workspace> is a directory containing an asim workspace
     <repository> is a repository name from a .pack file
-    <tag> is a CVS version or branch tag
+    <tag> is a version or branch tag
     <package> is the name of a package (run 'list packages' for choices)
     <model> is a model .apm filename
     <module> is a module .awb filename
@@ -221,6 +221,16 @@ Commands:
   Note command completion and editing exists at the command prompt 
   and for most of the user input prompts. You may need to install
   the perl module Term::Readline::GNU for this to work...
+  
+  The <tag> argument for package commands has the following syntax and
+  semantics:
+  
+    HEAD                       - the latest revision on the main trunk
+    <branchname>               - the latest revision on the named branch
+    CSN-<package>-<number>     - a specific revision on the main trunk
+    CSN-<branchname>-<number>  - a specific revision on a branch
+    <number>                   - a specific revision on the main trunk (SVN only)
+    <branchname>:<number>      - a specific revision on a branch (SVN only)
 
 
 Environment:

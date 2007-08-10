@@ -147,7 +147,6 @@ The package configuration file contains the following:
   Version=1.0
   Regtest=0  
 
-
 =head2 CSNs
 
 Each version of a package has a CSN of the form
@@ -159,9 +158,44 @@ in the admin/mytags file.
 
 A package may be branched and later merged with the main trunk of the
 repository with the branch and merge operations. A branch always
-exists in its own private CSN space. Merges are manged using the file
+exists in its own private CSN space. Merges are managed using the file
 admin/mymergepoints which holds a history of the CSNs of the main
 trunk against which the branch was merged.
+
+=head2 Tag Syntax
+
+When checking out or updating packages in a workspace, specific versions
+or branches of the package may be checked out by specifyng an optional tag.
+If the tag is "HEAD" or is omitted, the latest version of the trunk
+is checked out.  To check out a specific version of the main trunk,
+the syntax for the tag is:
+
+  CSN-<packagename>-<number>
+
+where <number> is a "commit serial number" or a global revision number.
+For revision control system such as SVN that support a global revision number
+for the entire repository, a bare revision number is also recognized:
+
+  <number>
+
+To check out the latest version on a branch, the tag is simply the
+branch name:
+
+  <branchname>
+
+To check out a specific version on a branch, the syntax is:
+
+  CSN-<branchname>-<number>
+
+For revision control system that support a global revision number,
+the following equivalent tag syntax also is recognized:
+
+  <branchname>:<number>
+  
+By convention, branch names are ALL UPPER CASE, with underscores, and
+optional dates in YYYYMMDD format, e.g.:
+
+  FEATURE_XYZ_BRANCH_20070723
 
 =cut
 
@@ -654,6 +688,11 @@ sub get_regress_dependent_packages {
 
 Optionally update serial number CSN of package to $value.
 Return the current (updated) serial number (CSN)  of package.
+
+Note that for packages that use the revision control system SVN,
+which supports atomic commits with a single revision number for the
+entire package, asim-shell keeps the CSN number equal to the SVN
+revision number, by construction.
 
 =cut
 

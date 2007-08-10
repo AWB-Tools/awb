@@ -452,10 +452,18 @@ sub get_repository_url
   $url;
 }
 
-=item $svn-E<gt>get_version_url(version)
+=item $svn-E<gt>get_version_url(<version>)
 
 Return the SVN URL for the given version, i.e. the URL
 used to check out the given branch, tag, or trunk.
+The <version> argument is any accepted version tag syntax, e.g.:
+
+    HEAD
+    <branchname>
+    CSN-<packagename>-<number>
+    CSN-<branchname>-<number>
+    <number>
+    <branchname>:<number>
 
 =cut
 
@@ -465,6 +473,10 @@ sub get_version_url {
   
   # get the top-level URL of the repository
   my $repo_url = $self->get_repository_url();
+  
+  # extract branch name if any
+  if    ( $version =~ m/^CSN-([a-z_0-9]+)-[0-9]+$/i ) { $version = $1; }
+  elsif ( $version =~     m/^([A-Z_0-9]+):[0-9]+$/i ) { $version = $1; }
   
   # if it looks like a tag or a branch, search for it:
   if ( $version && $version ne 'HEAD' ) {
@@ -483,7 +495,7 @@ sub get_version_url {
   return "$repo_url/trunk";
 }
 
-=item $svn-E<gt>is_fixed_version(version)
+=item $svn-E<gt>is_fixed_version(<version>)
 
 Does the given version string specify a fixed version,
 such as a "CSN" label or an SVN revision number?
@@ -495,11 +507,12 @@ sub is_fixed_version {
   my $version = shift;
   
   if ( $version =~ m/^CSN-.*-[0-9]+$/ ) { return 1; }
-  if ( $version =~ m/^[0-9]+$/        ) { return 1; }
+  if ( $version =~     m/^.*:[0-9]+$/ ) { return 1; }
+  if ( $version =~        m/^[0-9]+$/ ) { return 1; }
   return 0;
 }
 
-=item $svn-E<gt>get_revision_number(version)
+=item $svn-E<gt>get_revision_number(<version>)
 
 Return the SVN revision number associated with the given version.
 
@@ -515,7 +528,8 @@ sub get_revision_number {
   my $version = shift;
   
   if ( $version =~ m/^CSN-.*-([0-9]+)$/ ) { return $1; }
-  if ( $version =~ m/^([0-9]+)$/        ) { return $1; }
+  if ( $version =~     m/^.*:([0-9]+)$/ ) { return $1; }
+  if ( $version =~        m/^([0-9]+)$/ ) { return $1; }
   return undef;
 }
 

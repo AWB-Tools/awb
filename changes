@@ -3222,3 +3222,39 @@ Updating with simcore changes (rev. 2398 - Carl Beckmann)
 
 - Bug fix: -cfg file cannot deal with trailing white space.
 
+
+----------
+spartha1    Date: Fri Aug 10 14:51:01 EDT 2007  CSN: CSN-asimcore-165
+                  Fri Aug 10 18:51:01 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          164 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          164 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          164 
+
+Updating with simcore changes (rev. 2402 - Carl Beckmann)
+
+- Added the ability in SVN packages and bundles to check out or update to
+a specific version along a branch. This capability evidently already
+existed for CVS packages, and the SVN implementation is compatible with it,
+at least in spirit. The following syntax is now supported for tags in
+asim-shell package commands, and in bundle specifications:
+
+HEAD - the latest revision on the main trunk
+<branchname> - the latest revision on the named branch
+CSN-<package>-<number> - a specific revision on the main trunk
+CSN-<branchname>-<number> - a specific revision on a branch
+<number> - a specific revision on the main trunk
+<branchname>:<number> - a specific revision on a branch
+
+Note that unlike in CVS where CSN numbers started at 1 again with each branch,
+in SVN the branch shares the same revision number space with the main trunk,
+so the numbers keep incrementing, and the branch is simply distinguished
+by <branchname>.
+
+
