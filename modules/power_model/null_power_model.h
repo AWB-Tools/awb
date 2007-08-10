@@ -22,6 +22,10 @@
 #ifndef _NULL_POWER_MODEL_
 #define _NULL_POWER_MODEL_
 
+// added for power ports
+#include "asim/port.h"
+
+
 #define POWER_MODEL_ENABLED 0
 #define THERMAL_MODEL_ENABLED 0
 #define DUMMY_THERMAL_MODEL_ENABLED 0
@@ -403,4 +407,503 @@ class THERMAL_MODEL_CLASS
   static THERMAL_MODEL_CLASS * Instance() {return new THERMAL_MODEL_CLASS();};
   void UpdateTemperature(UINT64 system_clock) {};
 };
+
+// Power Write port inherited from Write Port in port.h
+// The only real difference is the fact that there is pointer to the
+// appropriate power macro class
+// Note that the power macro class is assumed to be derived from the
+// BASE_CTRL_POWER_MACRO_CLASS so the only method is Access()
+// Note also that the Write function had to be virtualized in the WritePort
+// class in port.h. The array Buffer is also changed to protected
+
+template<class T, class POWER_MACRO_CLASS, int F = 1>
+  class PowerWritePort : public WritePort <T, F>
+{
+  private:
+  /* pointer to power macro class */
+  POWER_MACRO_CLASS *powerMacro;
+
+  public:
+
+  /* default constructor -- calls default constructor from write port as well*/
+  PowerWritePort(){}
+
+  /* constructor -- calls default constructor from write port as well */
+  PowerWritePort(const char * const name, const char * const tname = "") { }
+
+  /* Make the power macro point to a specific object of type POWER_MACRO_CLASS */
+  void AssignMacro(POWER_MACRO_CLASS *objectPointer){ }
+
+  /* Initialize power macro calls for GENERAL_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain){ }
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname){} //used to name activity something other than "Access"
+ 
+
+  /* Initialize power macro calls for MUX_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+  /* Initialize power macro calls for DECODER_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  /* Initialize power macro calls for BUS_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw){ }
+
+  /* Write method is the same as in port.h */
+  bool Write(T data, UINT64 cycle);
+
+  /* Desctrutor */
+  ~PowerWritePort(){
+    delete powerMacro;
+  }
+};
+
+// Power Write Skid port inherited from WriteSkidPort in port.h
+// Same concept as above. Write function is virtualized in port.h
+// and Buffer is changed to protected from private
+
+
+template<class T, class POWER_MACRO_CLASS, int S = 0>
+  class PowerWriteSkidPort : public WriteSkidPort <T, S>
+{
+  private:
+  /* power macro */
+  POWER_MACRO_CLASS *powerMacro;
+
+  public:
+
+  /* default constructor -- calls default constructor from writeskid port as well*/
+  PowerWriteSkidPort(){}
+
+  /* constructor -- calls default constructor of WriteSkidPort*/
+  PowerWriteSkidPort(const char * const name, const char * const tname = ""){ }
+
+  /* Make the power macro point to a specific object of type POWER_MACRO_CLASS */
+  void AssignMacro(POWER_MACRO_CLASS *objectPointer){ }
+
+  /* Initialize power macro calls for GENERAL_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname){ }//used to name activity something other than "Access"
+
+  /* Initialize power macro calls for MUX_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+  /* Initialize power macro calls for DECODER_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  /* Initialize power macro calls for BUS_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw){ }
+
+  ~PowerWriteSkidPort(){
+    delete powerMacro;
+  }
+  
+  /* Write method is the same as port.h */
+  bool Write(T data, UINT64 cycle);
+};
+
+// Power Write Stall port inherited from PowerWriteStallPort in port.h
+// Buffer is again changed to protected from private and Write is virtualized
+template<class T, class POWER_MACRO_CLASS>
+class PowerWriteStallPort : public WriteStallPort <T>
+{
+
+ private:
+  /* power macro */
+  POWER_MACRO_CLASS *powerMacro;
+
+ public:
+
+  /* default constructor -- calls default powerwritestall port*/
+  PowerWriteStallPort(){}
+
+  /* constructor -- calls default constructor from WriteStallPort */
+  PowerWriteStallPort(const char * const name, const char * const tname = ""){ }
+
+  /* Make the power macro point to a specific object of type POWER_MACRO_CLASS */
+  void AssignMacro(POWER_MACRO_CLASS *objectPointer){ }
+
+  /* Initialize power macro calls for GENERAL_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname){ }//used to name activity something other than "Access"
+
+  /* Initialize power macro calls for MUX_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+  /* Initialize power macro calls for DECODER_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  /* Initialize power macro calls for BUS_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw){}
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw){}
+
+  /* destructor */
+  ~PowerWriteStallPort(){
+    delete powerMacro;
+  }
+
+  /* Write method is the same as port.h */
+  bool Write(T data, UINT64 cycle);
+};
+
+
+// Power Read port inherited from Read Port in port.h
+// The only real difference is the fact that there is pointer to the
+// appropriate power macro class
+// Note that the power macro class is assumed to be derived from the
+// BASE_CTRL_POWER_MACRO_CLASS so the only method is Access()
+template<class T, class POWER_MACRO_CLASS>
+  class PowerReadPort : public ReadPort <T>
+{
+ private:
+  /* pointer to the power macro class */
+  POWER_MACRO_CLASS *powerMacro;
+
+ public:
+
+  /* default constructor */
+  PowerReadPort(){}
+
+  /* constructor */
+  PowerReadPort(const char * const name, const char * const tname = "") {  }
+
+ /* Make the power macro point to a specific object of type POWER_MACRO_CLASS */
+  void AssignMacro(POWER_MACRO_CLASS *objectPointer){  }
+
+  /* Initialize power macro calls for GENERAL_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname){ } //used to name activity something other than "Access"
+   
+
+  /* Initialize power macro calls for MUX_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+ /* Initialize power macro calls for DECODER_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){  }
+
+  /* Initialize power macro calls for BUS_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw){  }
+
+  /* Read method which is the same as in port.h */
+  bool Read(T& data, UINT64 cycle);
+ /* destructor */
+  ~PowerReadPort(){
+    delete powerMacro;
+  }
+};
+
+// PowerReadSkidPort is inherited from ReadSkiPort in port.h
+// Buffer is changed to protected and Read() is virtualized in port.h
+template<class T, class POWER_MACRO_CLASS, int S = 0>
+  class PowerReadSkidPort : public ReadSkidPort <T, S>
+{
+  private:
+ /* power macro */
+ POWER_MACRO_CLASS *powerMacro;
+
+  public:
+
+ /* default constructor */
+ PowerReadSkidPort(){}
+
+ /* constructor */
+ PowerReadSkidPort(const char * const name, const char * const tname = ""){ }
+
+  /* Make the power macro point to a specific object of type POWER_MACRO_CLASS */
+  void AssignMacro(POWER_MACRO_CLASS *objectPointer){  }
+
+  /* Initialize power macro calls for GENERAL_POWER_MACRO_CLASS */
+ void InitializeMacro(VF_DOMAIN_CLASS *domain){ }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname){ }//used to name activity something other than "Access"
+   
+  
+
+  /* Initialize power macro calls for MUX_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){ }
+
+  /* Initialize power macro calls for DECODER_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){  }
+
+  /* Initialize power macro calls for BUS_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw){  }
+
+ /* destructor */
+ ~PowerReadSkidPort(){
+   delete powerMacro;
+ }
+
+  /* Read method which is the same as in port.h */
+  bool Read(T& data, UINT64 cycle);
+};
+// PowerReadStallPort is inherited from ReadStallPort in port.h
+template<class T, class POWER_MACRO_CLASS>
+class PowerReadStallPort : public ReadStallPort <T>
+{
+
+ private:
+  /* power macro */
+  POWER_MACRO_CLASS *powerMacro;
+
+ public:
+
+  /* default constructor */
+  PowerReadStallPort(){}
+
+  /* constructor */
+  PowerReadStallPort(const char * const name, const char * const tname = ""){  }
+
+  /* Make the power macro point to a specific object of type POWER_MACRO_CLASS */
+  void AssignMacro(POWER_MACRO_CLASS *objectPointer){  }
+
+  /* Initialize power macro calls for GENERAL_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname){ }//used to name activity something other than "Access"
+
+ /* Initialize power macro calls for MUX_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs = 1){  }
+
+  /* Initialize power macro calls for DECODER_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 num_inputs,
+		       UINT32 num_outputs,
+		       UINT32 input_bw,
+		       UINT32 output_bw = 0){  }
+
+  /* Initialize power macro calls for BUS_POWER_MACRO_CLASS */
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       UINT32 bw){  }
+
+  void InitializeMacro(VF_DOMAIN_CLASS *domain,
+		       const char * const aname, //used to name activity something other than "Access"
+		       UINT32 bw){  }
+
+  /* destructor */
+  ~PowerReadStallPort(){
+    delete powerMacro;
+  }
+
+  /* Read function from port.h */
+  bool Read(T& data, UINT64 cycle);
+};
+
+// Write method for PowerWritePort
+// Assumes power macro class is derived from ctrl base class
+
+template <class T, class POWER_MACRO_CLASS, int F>
+inline bool
+PowerWritePort<T,POWER_MACRO_CLASS,F>::Write(T data, UINT64 cycle)
+{ 
+  VERIFYX(this->IsConnected()); 
+  for (int f = 0; f < this->Fanout; f++) {
+    this->Buffer[f]->Write(data, cycle, this->GetName()); 
+  }  
+
+  // assertions above and in Write method will never allow them to
+  // return false, so...return true, or else make this a void function
+  return true;
+}
+
+// PowerReadPort Read method which is based on the virtual Read method 
+// in port.h
+
+template <class T, class POWER_MACRO_CLASS>
+inline bool
+PowerReadPort<T, POWER_MACRO_CLASS>::Read(T& data, UINT64 cycle)
+{ 
+  return (this->Buffer.Read(data, cycle, this->GetName())); 
+}
+
+
+// PowerReadSkidPort Read method which is based on the virtual Read method 
+// in port.h
+
+template <class T, class POWER_MACRO_CLASS, int S>
+inline bool
+PowerReadSkidPort<T,POWER_MACRO_CLASS, S>::Read(T& data, UINT64 cycle)
+{ 
+  return (this->Buffer.Read(data, cycle, this->GetName(), true)); 
+}
+
+// PowerReadStallPort Read method which is based on the virtual Read method
+// in port.h
+
+template <class T, class POWER_MACRO_CLASS>
+inline bool
+PowerReadStallPort<T, POWER_MACRO_CLASS>::Read(T& data, UINT64 cycle)
+{
+     //  we need to relax the asserts here since this port
+    //  does not need to be read every cycle
+  return (this->Buffer.Read(data, cycle, this->GetName(), true)); 
+}
+
+
+// PowerWriteSkidPort Write method which is based on the virtual Write method
+// in port.h
+
+template <class T, class POWER_MACRO_CLASS, int S>
+inline bool
+PowerWriteSkidPort<T,POWER_MACRO_CLASS, S>::Write(T data, UINT64 cycle)
+{
+  return (this->IsConnected()) && (this->Buffer->Write(data, cycle, this->GetName())); 
+}
+
+// PowerWriteStallPort Write method which is based on the virtual Write method
+// in port.h
+
+template <class T, class POWER_MACRO_CLASS>
+inline bool
+PowerWriteStallPort<T, POWER_MACRO_CLASS>::Write(T data, UINT64 cycle)
+{
+  return ((this->IsConnected()) && (this->Buffer->Write(data, cycle, this->GetName()))); }
+
 #endif

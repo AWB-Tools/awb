@@ -3288,3 +3288,26 @@ Updating with simcore changes (rev. 2406 - Krishna Rangan)
 compilation. This implementation is specific; a generic
 method to feed in special compiler flags and options with
 or without file args would be useful.
+
+----------
+spartha1    Date: Fri Aug 10 15:14:06 EDT 2007  CSN: CSN-asimcore-168
+                  Fri Aug 10 19:14:06 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ port.h                    Locally Modified          167 
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified          167 
+
+Updating with simcore changes (rev. 2407 - Abhishek Bhattacharjee)
+
+Changes made to accomodate integrated power macro calls in ports for
+models using the power infrastructure. In port.h, the access type of
+the private members in ReadPort, WritePort, ReadSkidPort,
+WriteSkidPort etc. are changed to protected. This is so that the
+PowerReadPort, PowerWritePort etc. classes in the asim-power package
+derived from the classes in port.h have access to those members as
+well.
+null_power_model.h has been modified to include the null model for the
+power ports.

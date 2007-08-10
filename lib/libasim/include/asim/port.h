@@ -298,7 +298,9 @@ class WriteRemotePort : protected WritePort
 template<class T, int F = 1>
 class WritePort : public BasePort
 {
-private:
+  // Buffer is protected for access from derived PowerWritePort class
+  //private:
+  protected:
   Storage<T> *Buffer[F];
 
   // This is WAY dangerous if not done properly.  C programmers feel
@@ -340,7 +342,9 @@ protected:
 template<class T, int S = 0>
 class WriteSkidPort : public BasePort
 {
-private:
+  // Buffer is protected for access from PowerWriteSkidPort class
+  //private:
+  protected:
 // The sizing of Skid ports currently does not work!  The value of S is not
 // used! Eric
   Storage<T,S> *Buffer;
@@ -371,7 +375,9 @@ protected:
 template<class T>
 class WriteStallPort : public BasePort
 {
-private:
+  // Buffer is protected for access from PowerWriteStallPort class
+  //private:
+ protected:
   Storage<T> *Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
@@ -405,7 +411,9 @@ protected:
 template<class T>
 class ReadPort : public BasePort
 {
-private:
+  // Buffer is protected for access from PowerReadPort class
+  //private:
+ protected:
   Storage<T> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
@@ -444,7 +452,9 @@ protected:
 template<class T, int S = 0>
 class ReadSkidPort : public BasePort
 {
-private:
+  // Buffer is protected for access from PowerReadSkidPort
+  //private:
+  protected:
   Storage<T,S> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
@@ -480,7 +490,9 @@ protected:
 template<class T>
 class ReadStallPort : public BasePort
 {
-private:
+  // Buffer is protected for access from PowerReadStallPort
+  //private:
+ protected:
   Storage<T> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
@@ -550,7 +562,9 @@ protected:
 template<class T, int F = 1>
 class WritePhasePort : public BasePort
 {
-private:
+  // Buffer is protected for access from PowerWritePhasePort
+  //private:
+  protected:
   Storage<T> *Buffer[F];
 
   // This is WAY dangerous if not done properly.  C programmers feel
@@ -595,9 +609,10 @@ protected:
 template<class T>
 class ReadPhasePort : public BasePort
 {
+  // Buffer is protected for access from PowerReadPhasePort
 
-private:
-
+  //private:
+ protected:
   Storage<T> Buffer;
 
   // This is WAY dangerous if not done properly.  C programmers feel
