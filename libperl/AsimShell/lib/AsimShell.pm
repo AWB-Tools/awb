@@ -115,7 +115,7 @@ our %COMPOUNDCOMMANDS =
     run       => [ qw(model) ],
     unlock    => [ qw(package lock) ],
     unset     => [ qw(package lock model module) ],
-    update    => [ qw(package) ],
+    update    => [ qw(bundle package) ],
     use       => [ qw(bundle package) ],
     svn       => [ qw(package) ],
   );

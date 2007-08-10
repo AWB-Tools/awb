@@ -407,20 +407,53 @@ sub list_bundles {
   return 1;
 }
 
+#
+# return the list of packages in a bundle.
+# Common suborutine used  by many commands below,
+# NOT an asim-shell command!!
+# FIX FIX ?!? create a new perl class for dealing with bundles??
+#
+sub bundle_packages_ {
+  my $bundlename = shift;
+  my $bundleid;
+
+  chomp($bundlename);
+  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
+  $bundleid = "default" unless defined $bundleid;  
+
+  my @flist = $default_repositoryDB->bundle_files($bundlename);
+  (@flist == 0) && shell_error("No bundle file found for `$bundlename`!\n") && return ();
+  
+  my $inifile = Asim::Inifile->new();
+  foreach my $file (@flist) {
+      $inifile->include($file) || ($show_warnings && print("Cannot read file `$file` to collect bundle list!\n"));
+  }
+  
+  my $items = $inifile->get($bundleid);
+  if (!defined $items) {
+      shell_error("Bundle id `$bundleid` not found!\n") && return ();
+  }
+  elsif ((defined $items->{Status}) && ($items->{Status} eq "Failure")) {
+      if (!Asim::choose_yes_or_no("This bundle has failure status.  Do you want to get it", "no", "no")) {
+	  return 0;
+      }
+  }
+  my @packages = split(" ", $items->{Packages});
+  (@packages == 0) && shell_error("Bundle id `$bundleid` did not result in any package!\n") && return ();
+
+  return @packages;
+}
+
 sub checkout_bundle {
-  my $interactive = 1;
   my $user;
   my $addpath = 1;
   my $build = 1;
   my $golden;
   my $status;
   my $bundlename;
-  my $bundleid;
   local @ARGV = @_;
-  my @bundles;
+  my @packages;
   my $runstatus;
-  my $inifile;
-  my $bundledir = Asim::Sysconfdir() . "/asim/bundles";
 
   # Parse options
 
@@ -437,34 +470,12 @@ sub checkout_bundle {
       $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
   }
   
-  chomp($bundlename);
-  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
-  $bundleid = "default" unless defined $bundleid;  
-  
   #
   # Determine the list of packages to check out from the bundle file
-  #	      
-  my @flist = $default_repositoryDB->bundle_files($bundlename);
-  (@flist == 0) && shell_error("No bundle file found for `$bundlename`!\n") && return ();
+  #
+  @packages = bundle_packages_( $bundlename );
   
-  $inifile = Asim::Inifile->new();
-  foreach my $file (@flist) {
-      $inifile->include($file) || ($show_warnings && print("Cannot read file `$file` to collect bundle list!\n"));
-  }
-  
-  my $items = $inifile->get($bundleid);
-  if (!defined $items) {
-      shell_error("Bundle id `$bundleid` not found!\n") && return ();
-  }
-  elsif ((defined $items->{Status}) && ($items->{Status} eq "Failure")) {
-      if (!Asim::choose_yes_or_no("This bundle has failure status.  Do you want to get it", "no", "no")) {
-	  return 0;
-      }
-  }
-  @bundles = split(" ", $items->{Packages});
-  (@bundles == 0) && shell_error("Bundle id `$bundleid` did not result in any package!\n") && return ();
-  
-  print "Checking out: " . join(" ", @bundles) . "\n";
+  print "Checking out: " . join(" ", @packages) . "\n";
 
   #
   # Regenerate the arguments for checkout_package
@@ -489,7 +500,7 @@ sub checkout_bundle {
   my $pkg;
   my @plist;
 
-  foreach my $b (@bundles) {
+  foreach my $b (@packages) {
     print "--- checkout package $b " . join(" ",@args) . "\n";
     $pkg = checkout_package($b, @args) || return undef;
     push(@plist, $pkg);
@@ -505,17 +516,13 @@ sub checkout_bundle {
 # Hugely redundant with checkout_bundle
 
 sub use_bundle {
-  my $interactive = 1;
   my $addpath = 1;
   my $build = 1;
   my $status;
   my $bundlename;
-  my $bundleid;
   local @ARGV = @_;
-  my @bundles;
+  my @packages;
   my $runstatus;
-  my $inifile;
-  my $bundledir = Asim::Sysconfdir() . "/asim/bundles";
 
   # Parse options
 
@@ -530,34 +537,12 @@ sub use_bundle {
       $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
   }
   
-  chomp($bundlename);
-  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
-  $bundleid = "default" unless defined $bundleid;  
-  
   #
   # Determine the list of packages to check out from the bundle file
   #	
-  my @flist = $default_repositoryDB->bundle_files($bundlename);
-  (@flist == 0) && shell_error("No bundle file found for `$bundlename`!\n") && return ();
+  @packages = bundle_packages_( $bundlename );
   
-  $inifile = Asim::Inifile->new();
-  foreach my $file (@flist) {
-      $inifile->include($file) || ($show_warnings && print("Cannot read file `$file` to collect bundle list!\n"));
-  }
-  
-  my $items = $inifile->get($bundleid);
-  if (!defined $items) {
-      shell_error("Bundle id `$bundleid` not found!\n") && return ();
-  }
-  elsif ((defined $items->{Status}) && ($items->{Status} eq "Failure")) {
-      if (!Asim::choose_yes_or_no("This bundle has failure status.  Do you want to get it", "no", "no")) {
-	  return 0;
-      }
-  }
-  @bundles = split(" ", $items->{Packages});
-  (@bundles == 0) && shell_error("Bundle id `$bundleid` did not result in any package!\n") && return ();
-  
-  print "Copying out: " . join(" ", @bundles) . "\n";
+  print "Copying out: " . join(" ", @packages) . "\n";
 
   #
   # Regenerate the arguments for checkout_package
@@ -576,7 +561,7 @@ sub use_bundle {
   my $pkg;
   my @plist;
 
-  foreach my $b (@bundles) {
+  foreach my $b (@packages) {
     print "--- use package $b " . join(" ",@args) . "\n";
     $pkg = use_package($b, @args) || return undef;
     push(@plist, $pkg);
@@ -589,41 +574,64 @@ sub use_bundle {
   return 1;
 }
 
-sub show_bundle {
-  my $bundlename = shift;
-  my @bundles;
-  my $bundleid;
-  my $runstatus;
-  my $inifile;
-  my $bundledir = Asim::Sysconfdir() . "/asim/bundles";
+#
+# update a bundle, being careful to update to the exact version specified in the bundle.
+# On a branch or on the trunk, update to the latest version, but if a package is
+# specified in the bundle with a certain CSN version number, keep exactly that version
+# checked out (this is like CVS "sticky tags")
+#
+sub update_bundle {
 
+  # Parse options
+  my $build = 1;
+  local @ARGV = @_;
+  my $status = GetOptions( "build!" => \$build );
+  return 0 if (!$status);
+
+  # Bundle name is remaining argument
+  my $bundlename = shift;
   if (!defined $bundlename) {
       $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
   }
   
-  chomp($bundlename);
-  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
-  $bundleid = "default" unless defined $bundleid;
+  # Determine the list of packages to check out from the bundle file
+  my @packages = bundle_packages_( $bundlename );
+  print "Updating: " . join(" ", @packages) . "\n";
+
+  # Regenerate the arguments for update_package
+  # Do not build since we do all the builds later...
+  my @args = ("--nobuild");
+  my @plist = ();
+  foreach my $b (@packages) {
+    print "--- update package $b " . join(" ",@args) . "\n";
+    update_package($b, @args) || return undef;
+    (my $pkgname, my $pkgvers) = split('/',$b);
+    push(@plist, get_package($pkgname));
+  }
+
+  if ($build) {
+    configure_and_build_packages(@plist);
+  }
+
+  return 1;
+}
+
+
+sub show_bundle {
+  my $bundlename = shift;
+  my @packages;
+  my $runstatus;
+
+  if (!defined $bundlename) {
+      $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
+  }
 
   #
   # Determine the list of packages to check out from the bundle file
   #	      
-  my @flist = $default_repositoryDB->bundle_files($bundlename);
-  (@flist == 0) && shell_error("No bundle file found for `$bundlename`!\n") && return ();
+  @packages = bundle_packages_( $bundlename );
 
-  $inifile = Asim::Inifile->new();
-  foreach my $file (@flist) {
-      $inifile->include($file) || ($show_warnings && print("Cannot read file `$file` to collect bundle list!\n"));
-  }
-
-  my $items = $inifile->get($bundleid);
-  if (!defined $items) {
-      shell_error("Bundle id `$bundleid` not found!\n") && return ();
-  }
-  @bundles = split(" ", $items->{Packages});
-  (@bundles == 0) && shell_error("Bundle id `$bundleid` did not result in any package!\n") && return ();	      
-
-  print join("\n", @bundles) . "\n";
+  print join("\n", @packages) . "\n";
 
   return 1;
 }
@@ -751,7 +759,6 @@ sub new_package {
 
 #######################################################
 sub checkout_package {
-  my $interactive = 1;
   my $user = undef;
   my $build = 1;
   my $addpath = 1;
@@ -865,7 +872,6 @@ sub checkout_package {
 #   Code is too redunant with checkout_package...
 #
 sub use_package {
-  my $interactive = 1;
   my $build = 1;
   my $addpath = 1;
   my $status;
@@ -1337,34 +1343,42 @@ sub edit_package {
 # update one or more packages, returning 1 if all succeeded.
 #
 sub update_package {
-  my $name;
   my $build = 1;
-  my $status;
   my @build_list = ();
   local @ARGV = @_;
 
   # Parse options
 
-  $status = GetOptions( "build!" => \$build);
+  my $status = GetOptions( "build!" => \$build);
   return undef if (!$status);
 
-  $name = shift @ARGV;
+  my $pkgspec = shift @ARGV;
 
   # handle special case of "all packages"
-  if (defined($name) && ($name eq "*" || $name eq "all")) {
+  if (defined($pkgspec) && ($pkgspec eq '*' || $pkgspec eq 'all')) {
       return update_all_packages($build);
   }
 
+  # normal case of updating one or more packages
   do {
-    # normal case: update a single package
-    # or if no package name is specified, display list of packages
-    my $package = get_package($name) || return undef;
+    # each package in the list could be a simple name,
+    # or a name and version or branch identifier, like this:
+    #   <pkgname>
+    #   <pkgname>/HEAD
+    #   <pkgname>/CSN-<pkgname>-<number>
+    #   <pkgname>/<branchname>
+    my $pkgname;
+    my $version;
+    ($pkgname,$version) = split('/',$pkgspec);
+
+    my $package = get_package($pkgname) || return undef;
 
     if (!$package->isprivate()) {
       shell_error("Cannot update a non-private package\n")  && return undef;
     }
 
-    $package->update()      || return undef;
+    # update the package to the specified version
+    $package->update($version) || return undef;
 
     if ($build) {
       # if we are also building, add the package to the list of ones to build
@@ -1372,7 +1386,7 @@ sub update_package {
     }
   }
   # remaining argument(s) is (are) package name(s)
-  while ( $name = shift @ARGV );
+  while ( $pkgspec = shift @ARGV );
 
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.

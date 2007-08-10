@@ -113,8 +113,9 @@ sub attempted_completion {
     return (max_common($text, @list), @list);
 
   } elsif ($prefix =~ /checkout bundle\s$/ ||
-           $prefix =~ /use bundle\s$/ ||
-           $prefix =~ /show bundle\s$/) {
+           $prefix =~ /use bundle\s$/      ||
+           $prefix =~ /show bundle\s$/     ||
+           $prefix =~ /update bundle\s$/   ){
     #
     # Handle bundles that can be checked out
     #

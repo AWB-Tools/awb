@@ -102,18 +102,52 @@ sub init {
   1;
 }
 
-=item $svn-E<gt>update()
+=item $svn-E<gt>update([version])
 
-Update this package from the repository
+Update this package from the repository.
+
+If an optional version string is specified,
+update the package to that version.
+The version specifier can be 'HEAD', the name of a branch,
+a CSN label 'CSN-pgname-number' or the name of a tag.
 
 =cut
 
 sub update {
   my $self = shift;
+  my $version = shift;
 
   my $location = $self->location();
   print "Updating package from SVN repository \n";
-  eval {print `(cd $location; svn update)`};
+  
+  if ( $version ) {
+    # a version to update to was explicitly specified.
+    
+    # if the version is a fixed version, i.e. a CSN number,
+    # then get the SVN revision number this corresponds to.
+    my $args = '';
+    if ( $self->is_fixed_version( $version ) ) {
+      $args .= '-r ' . $self->get_revision_number( $version );
+    }
+    
+    # get the URL of the specified version, and use SVN "switch"
+    # command if it differs from the currently checked out URL.
+    # NOTE! that we do not simply compare the version against 'HEAD' here,
+    # because we might be on a branch and we want to update to 'HEAD',
+    # which means we want to do an 'svn switch' to get back to the trunk.
+    my $command = 'update';
+    my $url = $self->get_version_url( $version );
+    if ( $url ne $self->get_working_url() ) {
+      $command = 'switch ' . $url;
+    }
+    
+    # do the update
+    eval {print `(cd $location; svn $command $args)`};
+  
+  } else {
+    # default case: no version specified.  Just do an "update"
+    eval {print `(cd $location; svn update)`};
+  }
 
   if ($@) {
       warn $@;
@@ -414,7 +448,75 @@ sub get_repository_url
   my $url = $self->get_working_url();
   $url =~ s/\/trunk$//;
   $url =~ s/\/branches\/.*$//;
+  $url =~ s/\/tags\/.*$//;
   $url;
+}
+
+=item $svn-E<gt>get_version_url(version)
+
+Return the SVN URL for the given version, i.e. the URL
+used to check out the given branch, tag, or trunk.
+
+=cut
+
+sub get_version_url {
+  my $self    = shift;
+  my $version = shift;
+  
+  # get the top-level URL of the repository
+  my $repo_url = $self->get_repository_url();
+  
+  # if it looks like a tag or a branch, search for it:
+  if ( $version && $version ne 'HEAD' ) {
+    foreach my $subdir ( 'tags', 'branches' ) {
+      open LIST, "svn list $repo_url/$subdir |";
+      while ( <LIST> ) {
+        if ( m/^$version\// ) {
+          return "$repo_url/$subdir/$version";
+        }
+      }
+      close LIST;
+    }
+  }
+  
+  # if all else fails, just return the HEAD URL
+  return "$repo_url/trunk";
+}
+
+=item $svn-E<gt>is_fixed_version(version)
+
+Does the given version string specify a fixed version,
+such as a "CSN" label or an SVN revision number?
+
+=cut
+
+sub is_fixed_version {
+  my $self    = shift;
+  my $version = shift;
+  
+  if ( $version =~ m/^CSN-.*-[0-9]+$/ ) { return 1; }
+  if ( $version =~ m/^[0-9]+$/        ) { return 1; }
+  return 0;
+}
+
+=item $svn-E<gt>get_revision_number(version)
+
+Return the SVN revision number associated with the given version.
+
+This returns an integer that you can use as a "-r" argument
+to various svn commands.
+
+If is_fixed_version would have returned 0, the result is undefined.
+
+=cut
+
+sub get_revision_number {
+  my $self    = shift;
+  my $version = shift;
+  
+  if ( $version =~ m/^CSN-.*-([0-9]+)$/ ) { return $1; }
+  if ( $version =~ m/^([0-9]+)$/        ) { return $1; }
+  return undef;
 }
 
 =item $svn->find_branchtags( [<filename>] )

@@ -3147,3 +3147,40 @@ Added PROJECT_NAME parameter to null_power_model.awb for use
 in selectively enabling power macros. Set default value to "nhm."
 
 --mdpowel1
+
+----------
+spartha1    Date: Fri Aug 10 14:43:02 EDT 2007  CSN: CSN-asimcore-161
+                  Fri Aug 10 18:43:02 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          160 
+ Completion.pm             Locally Modified          160 
+ Commands.pm               Locally Modified          160 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          160 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          160 
+
+Updating with simcore changes (rev. 2395 - Carl Beckmann)
+
+- Implemented a "update bundle" command in asim-shell, that honors
+version tags containing either CSN numbers or SVN branch or tag
+specifiers, to give you functionality akin to CVS "sticky tags".
+For example, if you define a bundle that uses specific stable versions
+of certain packages, you can "update bundle <bundle>/<tag>" and always
+get exactly those versions (it will not clobber them with the latest
+version). this is useful if you want to define a bundle where one or
+two packages are at HEAD and will get updated, and the others are at
+specific versions and will stay stable.
+
+You can also use "update bundle" to switch to a branch (i.e. a bundle
+containing one or more packages on a branch), or to switch from the branch
+back to the trunk. "Update bundle" is smart enough to use the "svn switch"
+command instead of "svn update" when changing between branches/tags or
+the trunk of repository.
+
+Also cleaned up a few minor code and documentation issues in the
+perl modules.

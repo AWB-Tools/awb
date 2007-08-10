@@ -55,7 +55,7 @@ Commands:
 
   list bundles                           - list all bundles
 
-  checkout bundle <bundle>               - CVS checkout a bundle of packages
+  checkout bundle <bundle>[/<tag>]       - checkout a bundle of packages from their repositories
     [--user=<user>]                      - do checkout as <user>
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
@@ -65,6 +65,9 @@ Commands:
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
     [--golden]                           - check out the recent golden version
+
+  update bundle <bundle>[/<tag>]         - update a bundle of packages in a workspace
+    [--nobuild]                          - do not rebuild updated packages
 
   show bundle <bundle>                   - show the packages in a bundle
   
@@ -421,10 +424,14 @@ sub help_code {
                     "Asim/Shell.pm",
                     "Asim/Workspace.pm",
                     "Asim/Repository/DB.pm",
-                    "Asim/Package/DB.pm",
                     "Asim/Package.pm",
+                    "Asim/Package/BitKeeper.pm",
+                    "Asim/Package/Copy.pm",
+                    "Asim/Package/Cvs.pm",
+                    "Asim/Package/DB.pm",
+                    "Asim/Package/Svn.pm",
+                    "Asim/Package/Template.pm",
                     "Asim/Lock.pm",
-                    "Asim/Cvs.pm",
                     "Asim/Model.pm",
                     "Asim/Module/DB.pm",
                     "Asim/Module.pm",
