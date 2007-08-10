@@ -3132,3 +3132,18 @@ Directory etc/repositories.d
  fast.pack                 Locally Added               0 
 
 Added fast repository.
+
+----------
+spartha1    Date: Fri Aug 10 14:39:35 EDT 2007  CSN: CSN-asimcore-160
+                  Fri Aug 10 18:39:35 UTC 2007
+
+
+Directory modules/power_model
+ null_power_model.awb      Locally Modified          159 
+
+Updating with simcore changes (rev. 2393 - Michael Powell)
+
+Added PROJECT_NAME parameter to null_power_model.awb for use
+in selectively enabling power macros. Set default value to "nhm."
+
+--mdpowel1

@@ -28,5 +28,6 @@ Awb module specification
 %attributes power
 %public null_power_model.h
 
+%export %param   PROJECT_NAME "nhm" "Project name for power macro enable"
 
 %AWB_END
