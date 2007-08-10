@@ -66,6 +66,7 @@ class Module {
     StringList privateFileList;   ///< list of module's private files
     StringList libraryFileList;   ///< list of module's library files
     StringList includeFileList;   ///< list of module's include directories
+    StringList includeOptionsList; ///< list of module's include directories
     StringList sysIncludeFileList; ///< list of module's system include directories
     StringList sysLibraryFileList; ///< list of module's system libraries
     ModParamList paramList;       ///< list of module's parameters
@@ -117,6 +118,10 @@ class Module {
     const StringList & GetInclude (void) const { return includeFileList; }
     void AddInclude (const string & theInclude)
         { includeFileList.push_back (theInclude); }
+
+    const StringList & GetIncludeOptions (void) const { return includeOptionsList; }
+    void AddIncludeOption (const string & theIncludeOption)
+        { includeOptionsList.push_back (theIncludeOption); }
     //
     const StringList & GetSysInclude (void) const { return sysIncludeFileList; }
     void AddSysInclude (const string & theSysInclude)

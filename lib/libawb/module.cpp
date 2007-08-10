@@ -272,6 +272,15 @@ Module::Parse (
                     AddInclude (*it);
                 }
             }
+        // %ifile_opt -- support options with file arguments. This
+	// implementation is specific - a generic method to feed in special
+	// compiler flags and options with or without file args would be
+	// useful.
+        } else if ( ! matchLine.Match (
+              "%ifile_opt[[:space:]]+([^[:space:]].+[^[:space:]])",
+              matchArray).empty())
+        {
+	    AddIncludeOption (matchArray[1]);
         // %syslibrary
         } else if ( ! matchLine.Match (
               "%syslibrary[[:space:]]+([^[:space:]].+[^[:space:]])",

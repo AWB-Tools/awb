@@ -1104,6 +1104,19 @@ ModelBuilder::CreateBuildTreeForModule (
         string incFileName = *it;
         AppendUnique (makefile.localIncs, "-I" + incFileName);
     }
+    
+    // add include options
+    StringList incOptions = module.GetIncludeOptions();
+    FOREACH_CONST (StringList, it, incOptions) 
+    {
+	SplitString split(*it, " \t");
+	SplitString::iterator sit = split.begin(); 
+	
+	string thisOption(*sit); sit++;
+	string fullName = sourceTree.FullName(*sit);
+	thisOption += " " + fullName;
+	AppendUnique (makefile.localIncs, thisOption);
+    }
 
     // system library  files
     StringList sysLibFiles = module.GetSysLibrary();

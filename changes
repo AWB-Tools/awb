@@ -3271,3 +3271,20 @@ Updating with simcore changes (rev. 2403 - Carl Beckmann)
 
 - Fixed "checkout package" command to recognize branch and version syntax
 for tags in the SVN case.
+
+----------
+spartha1    Date: Fri Aug 10 15:12:46 EDT 2007  CSN: CSN-asimcore-167
+                  Fri Aug 10 19:12:46 UTC 2007
+
+
+Directory lib/libawb
+ model_builder.cpp         Locally Modified          166 
+ module.cpp                Locally Modified          166 
+ module.h                  Locally Modified          166 
+
+Updating with simcore changes (rev. 2406 - Krishna Rangan)
+
+- added a tag to supply special include arguments used in
+compilation. This implementation is specific; a generic
+method to feed in special compiler flags and options with
+or without file args would be useful.
