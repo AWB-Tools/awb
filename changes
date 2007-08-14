@@ -3311,3 +3311,13 @@ derived from the classes in port.h have access to those members as
 well.
 null_power_model.h has been modified to include the null model for the
 power ports.
+
+----------
+emer        Date: Tue Aug 14 17:35:11 EDT 2007  CSN: CSN-asimcore-169
+                  Tue Aug 14 21:35:11 UTC 2007
+
+
+Directory etc
+ asim.pack                 Locally Modified          168 
+
+Added package for FPGA platforms.
