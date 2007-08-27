@@ -3321,3 +3321,39 @@ Directory etc
  asim.pack                 Locally Modified          168 
 
 Added package for FPGA platforms.
+
+----------
+jsemer      Date: Mon Aug 27 13:20:36 EDT 2007  CSN: CSN-asimcore-170
+                  Mon Aug 27 17:20:36 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Module
+ SourceList.pm             Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          169 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          169 
+
+Updating with simcore changes (rev. 2422 - Angshuman Parashar)
+
+Added support for a new AWB directive %sources, which is
+used to specify list(s) of source files for a module. The
+directive takes two switches: '-t' specifies the type of
+source file (e.g., CPP, VERILOG, VHDL, BSV, etc.), and
+'-v' specifies the visibility of the list of files (PUBLIC
+or PRIVATE).
+
+Example usage:
+    %sources -t CPP -v PRIVATE foo.cpp bar.cpp baz.cpp
+    %sources -t CPP -v PUBLIC  foo.h bar.h
+
+The directives %private and %public are now deprecated.
+However, for backward compatibility with existing .awb
+files and with tools such as apm-edit, these directives,
+as well as the Module.pm interfaces public() and private()
+continue to work, although they are inefficient since they
+are implemented as wrappers around the %sources framework.
+Module writers and tool writers are encouraged to use the
+new directive/interfaces.

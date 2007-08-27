@@ -4,6 +4,7 @@ lib/Asim/Model/Template.pm
 lib/Asim/Module/Template.pm
 lib/Asim/Module/DB.pm
 lib/Asim/Module/Param.pm
+lib/Asim/Module/SourceList.pm
 lib/Asim/Package/Branch.pm
 lib/Asim/Package/Commit.pm
 lib/Asim/Package/DB.pm

@@ -22,10 +22,12 @@ use warnings;
 use strict;
 
 use File::Basename;
+use Getopt::Long;
 
 use Asim::Base;
 use Asim::Module::Param;
 use Asim::Util;
+use Asim::Module::SourceList;
 
 our @ISA = qw(Asim::Base);
 
@@ -45,6 +47,9 @@ our %a =  ( name =>                 [ "name",
                                       "ARRAY" ],
             private =>              [ "private",
                                       "ARRAY" ],
+            sourcematrix =>         [ "sourcematrix",
+                                      "ARRAY",
+                                      "Asim::Module::SourceList" ],
             makefile =>             [ "makefile",
                                       "ARRAY" ],
             parameters =>           [ "parameters",
@@ -134,6 +139,7 @@ sub _initialize {
 		 submodules => [],
 		 public => [],
 		 private => [],
+         sourcematrix => [],
 		 makefile => [],
 		 attributes => [],
 		 default_attributes => [],
@@ -269,24 +275,46 @@ sub open {
       next;
     }
 
-    # %public FILENAME...
+    my $sourcetypes = "CPP|BDPI_C|BSV|VERILOG|VHDL|RRR|UNSPECIFIED";
+    my $vistypes = "PRIVATE|PUBLIC";
+
+    # %public FILENAME... backward compatibility
 
     if (/^.*%public$spaces($words)/) {
-      #
-      # Add files to list of public files
-      #
-      push(@{$self->{public}}, split(' ', $1));
-      next;
+        #
+        # Add files to list of public files
+        #
+        my @files = split(' ', $1);
+        $self->public(@files);
+        next;
     }
 
     # %private FILENAME...
 
     if (/^.*%private$spaces($words)/) {
-      #
-      # Add files to list of private files
-      #
-      push(@{$self->{private}}, split(' ', $1));
-      next;
+        #
+        # Add files to list of private files
+        #
+        my @files = split(' ', $1);
+        $self->private(@files);
+        next;
+    }
+
+    # %sources -t TYPE -v PRIVATE/PUBLIC FILENAME...
+
+    if (/^.*%sources\s+($words)/)
+    {
+        my $type = "";
+        my $vis = "";
+
+        # parse switches
+        @ARGV = split(' ', $1);
+        GetOptions("type=s" => \$type,
+                   "visibility=s" => \$vis);
+
+        # insert into source matrix
+        $self->addsources($type, $vis, @ARGV);
+        next;
     }
 
     # %makefile FILENAME...
@@ -415,12 +443,21 @@ sub save {
     print M " * %requires $i\n";
   }
 
-  foreach my $i ($self->public()) {
-    print M " * %public $i\n";
-  }
+  # foreach my $i ($self->public()) {
+  #   print M " * %public $i\n";
+  # }
 
-  foreach my $i ($self->private()) {
-    print M " * %private $i\n";
+  # foreach my $i ($self->private()) {
+  #   print M " * %private $i\n";
+  # }
+
+  my @smat = @{$self->{sourcematrix}};
+  foreach my $slist (@smat)
+  {
+      my $type  = $slist->type();
+      my $vis   = $slist->visibility();
+      my @flist = $slist->files();
+      print M " * %sources -t $type -v $vis @flist\n";
   }
 
   foreach my $i ($self->makefile()) {
@@ -512,6 +549,8 @@ sub accessors {
 	    requires
 	    public
 	    private
+        sources
+        addsources
 	    makefile
 	    parameters
 	    default_attributes
@@ -711,6 +750,50 @@ sub remove_submodule {
 
 
 ################################################################
+#
+# Decipher the source "type" of a file from its extension
+# e.g., "foo.cpp" => CPP
+#       "bar.v"   => VERILOG
+#
+################################################################
+
+sub _decipher_type_from_extension
+{
+    # capture params
+    my $filename = shift;
+
+    # since this is only for backwards-compatibility, we only
+    # need to consider a few types. amc will only be requesting
+    # file lists via public() and private() calls, so we don't
+    # really care which type the file gets classified as.
+    # hasim-configure requires us to distinguish between BSV,
+    # BDPI_C, CPP and VERILOG files.
+    if ($filename =~ /.bsv$/)
+    {
+        return "BSV";
+    }
+    elsif ($filename =~ /.\.v$/)
+    {
+        return "VERILOG";
+    }
+    elsif ($filename =~ /.\.c$/)
+    {
+        return "BDPI_C";
+    }
+    elsif ($filename =~ /.cpp$/)
+    {
+        return "CPP";
+    }
+    else
+    {
+        # hasim-configure doesn't care any more,
+        # so neither do we.
+        return "UNSPECIFIED";
+    }
+}
+
+
+################################################################
 
 =item $module-E<gt>public([$list])
 
@@ -727,17 +810,33 @@ the awbfile...
 
 ################################################################
 
+sub public
+{
+    # capture params
+    my $self = shift;
+    my @infiles = @_;
 
+    # do we have input files to update?
+    if (@infiles)
+    {
+        foreach my $f (@infiles)
+        {
+            # figure out type of file
+            my $type = _decipher_type_from_extension($f);
 
-sub public {
-  my $self = shift;
-  my @value = (@_);
+            # update source matrix
+            #
+            # NOTE: slight backwards-incompatibility: the original
+            # %public directive would *replace* the existing public
+            # file list with the new list. We will instead *add*
+            # this file to the list of existing files of this type.
+            $self->addsources($type, "PUBLIC", ($f));
+        }
+    }
 
-  if (@value) {
-    @{$self->{"public"}} = (@value);
-  }
-
-  return @{$self->{"public"}};
+    # get (possibly updated) list of PUBLIC files of all types
+    my @outfiles = $self->sources("*", "PUBLIC");
+    return @outfiles;
 }
 
 ################################################################
@@ -757,17 +856,130 @@ the awbfile...
 
 ################################################################
 
+sub private
+{
+    # capture params
+    my $self = shift;
+    my @infiles = @_;
 
-sub private {
-  my $self = shift;
-  my @value = (@_);
+    # do we have input files to update?
+    if (@infiles)
+    {
+        foreach my $f (@infiles)
+        {
+            # figure out type of file
+            my $type = _decipher_type_from_extension($f);
 
-  if (@value) {
-    @{$self->{"private"}} = (@value);
-  }
+            # update source matrix
+            #
+            # NOTE: slight backwards-incompatibility: the original
+            # %public directive would *replace* the existing public
+            # file list with the new list. We will instead *add*
+            # this file to the list of existing files of this type.
+            $self->addsources($type, "PRIVATE", ($f));
+        }
+    }
 
-  return @{$self->{"private"}};
+    # get (possibly updated) list of PRIVATE files of all types
+    my @outfiles = $self->sources("*", "PRIVATE");
 }
+
+
+################################################################
+
+=item $module-E<gt>sources($t, $v, [$list])
+
+Return the current list of source files of specified
+type and visibility. A wildcard "*" can be used for both type
+and visibility parameters.
+
+Note: All source filenames are relative to the directory
+containing the awbfile...
+
+=cut
+
+################################################################
+
+sub sources
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+    my $vis  = shift;
+
+    # list of files I'll send out
+    my @outfiles = ();
+
+    # scan through source matrix
+    my @smat = @{$self->{sourcematrix}};
+    foreach my $slist (@smat)
+    {
+        # check for type and visibility match
+        if ((($type eq "*") || ($slist->type() eq $type)) &&
+            (($vis  eq "*") || ($slist->visibility() eq $vis)))
+        {
+            my @l = $slist->files();
+            push(@outfiles, $slist->files());
+        }
+    }
+
+    # return
+    return @outfiles;
+}
+
+################################################################
+
+=item $module-E<gt>addsources($t, $v, [$list])
+
+Update the list of source files of specified type and visibility
+with $list. If the type/visibility combination is not found in
+the source matrix, then create a new row for this combination.
+Wildcards are not allowed; type and visibility have to be
+explicit.
+
+Note: All source filenames are relative to the directory
+containing the awbfile...
+
+=cut
+
+################################################################
+
+sub addsources
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+    my $vis  = shift;
+    my @infiles = (@_);
+
+    # scan through source matrix
+    my @smat = @{$self->{sourcematrix}};
+    my $found = 0;
+    foreach my $slist (@smat)
+    {
+        # check for type and visibility match
+        if (($slist->type() eq $type) &&
+            ($slist->visibility() eq $vis))
+        {
+            $slist->addfiles(@infiles);
+            $found = 1;
+            last;
+        }
+    }
+
+    # if we we haven't found a type/visibility match
+    # in our matrix, then create a new matrix entry for
+    # this file list
+    if ($found == 0)
+    {
+        my $sourcelist = Asim::Module::SourceList->new(type => "$type",
+                                                       visibility => "$vis",
+                                                       files => []);
+        $sourcelist->addfiles(@infiles);
+        push(@{$self->{sourcematrix}}, $sourcelist);
+    }
+}
+
 
 ################################################################
 
