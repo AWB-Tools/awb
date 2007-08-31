@@ -3357,3 +3357,16 @@ continue to work, although they are inefficient since they
 are implemented as wrappers around the %sources framework.
 Module writers and tool writers are encouraged to use the
 new directive/interfaces.
+
+----------
+aparasha    Date: Fri Aug 31 17:08:12 EDT 2007  CSN: CSN-asimcore-171
+                  Fri Aug 31 21:08:12 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          170 
+
+
+Updating with simcore changes (rev. 2427 - Angshuman Parashar)
+
+- fixed a bug related to the %sources directive.

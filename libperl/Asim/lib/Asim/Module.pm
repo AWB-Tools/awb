@@ -308,7 +308,7 @@ sub open {
         my $vis = "";
 
         # parse switches
-        @ARGV = split(' ', $1);
+        local @ARGV = split(' ', $1);
         GetOptions("type=s" => \$type,
                    "visibility=s" => \$vis);
 
@@ -873,7 +873,7 @@ sub private
             # update source matrix
             #
             # NOTE: slight backwards-incompatibility: the original
-            # %public directive would *replace* the existing public
+            # %private directive would *replace* the existing private
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
             $self->addsources($type, "PRIVATE", ($f));
@@ -882,6 +882,7 @@ sub private
 
     # get (possibly updated) list of PRIVATE files of all types
     my @outfiles = $self->sources("*", "PRIVATE");
+    return @outfiles;
 }
 
 
