@@ -3455,3 +3455,16 @@ Updating with simcore changes (rev. 2425 - Sari Coumeri)
 
 * Moved when power postprocessing is called to be whenever stats are
 dumped (SLC)
+
+----------
+spartha1    Date: Tue Sep  4 17:05:06 EDT 2007  CSN: CSN-asimcore-178
+                  Tue Sep  4 21:05:06 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          177 
+
+Updating with simcore changes (rev. 2428 - Krishna Rangan)
+
+- revised method to calculate pending users job and total asim jobs in
+netbtch.

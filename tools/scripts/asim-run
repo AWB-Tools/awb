@@ -2271,17 +2271,20 @@ sub schedule_job
         #
         my $num_user_running = 0;
         my $num_total_running = 0;
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -r -j > $TMP_DIR/run.$$");
+        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -r -j -f > $TMP_DIR/run.$$");
         open (RUN_JOBS, "<$TMP_DIR/run.$$");
         while (<RUN_JOBS>) {
-            chomp;
-            if ( /[\S]+.asimlog/ ) {
-                $num_total_running++;
-                if ( /$user[\s\S]+.asimlog/ ) {
-                    #        print "ASIM JOB: $_\n";
-                    $num_user_running++;
-                }
-            }
+	    chomp;
+	    if (/^User: $user(.*)/) {
+		my $jobname = <RUN_JOBS>;
+		if ($jobname =~ /^Job Name:(.*)\.asimlog(.*)/) {
+		    $num_total_running++;
+		    $num_user_running++;
+		}
+	    }
+	    elsif (/^Job Name:(.*)\.asimlog(.*)/) {
+		$num_total_running++;
+	    }
         }
         close (RUN_JOBS);
         run_command ("rm $TMP_DIR/run.$$");
