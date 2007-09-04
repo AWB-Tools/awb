@@ -3370,3 +3370,17 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2427 - Angshuman Parashar)
 
 - fixed a bug related to the %sources directive.
+----------
+spartha1    Date: Tue Sep  4 16:55:09 EDT 2007  CSN: CSN-asimcore-172
+                  Tue Sep  4 20:55:09 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ PlotStats.pm              Locally Modified          171 
+ Stats.pm                  Locally Modified          171 
+
+Updating with simcore changes (rev. 2418 - Alex Settle)
+
+Fixed plot-shell so it no longer produces error messages like
+the one below ...
+Using a hash as a reference is deprecated at /nfs/sc/proj/epdarch/perf34/amsettle/asim/src/asim-simcore/libperl/Asim/lib/Asim/Stats.pm line 694.

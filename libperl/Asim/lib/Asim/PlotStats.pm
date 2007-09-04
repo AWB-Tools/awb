@@ -170,15 +170,15 @@ sub _initialize {
 
   # Resolve path names for all ploticus scripts. 
   $self->{scripts} = \%pl_scripts;
-  %pl_scripts->{box} = Asim::Util::resolve(%pl_scripts->{box});
-  %pl_scripts->{bar} = Asim::Util::resolve(%pl_scripts->{bar});
-  %pl_scripts->{line} = Asim::Util::resolve(%pl_scripts->{line});
+  $pl_scripts{box} = Asim::Util::resolve($pl_scripts{box});
+  $pl_scripts{bar} = Asim::Util::resolve($pl_scripts{bar});
+  $pl_scripts{line} = Asim::Util::resolve($pl_scripts{line});
 
   # Determine the base directory for ploticus scripts. We need to set
   # the shell environment PLOTICUS_PREFABS to the base directory so
   # that the ploticus scripts can find some include files that they
   # need.
-  $ENV{PLOTICUS_PREFABS} = dirname(%pl_scripts->{box});
+  $ENV{PLOTICUS_PREFABS} = dirname($pl_scripts{box});
 
   # Make sure ploticus exists and is usable 
   if (system ("which $ploticus > /dev/null 2>&1")) {

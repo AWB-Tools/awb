@@ -686,7 +686,7 @@ sub _extract_data {
             $pinfo->{$path}{ncols} = 1;
             @{$pinfo->{$path}{rlabels}} = ("0");
             @{$pinfo->{$path}{clabels}} = ("0");
-            push (@{%ppaths->{$name}}, $path);
+            push (@{$ppaths{$name}}, $path);
             push @{$dimensions->{params}}, $path;
           }
         }
@@ -706,7 +706,7 @@ sub _extract_data {
             $pinfo->{$path}{ncols} = scalar(@{$clabels});
             @{$pinfo->{$path}{rlabels}} = ("0");
             @{$pinfo->{$path}{clabels}} = @{$clabels};
-            push (@{%ppaths->{$name}}, $path);
+            push (@{$ppaths{$name}}, $path);
             push @{$dimensions->{params}}, $path;
           }
           else {
@@ -738,7 +738,7 @@ sub _extract_data {
           }
           else {
             if (! defined $pinfo->{$path}) {
-              push (@{%ppaths->{$name}}, $path);
+              push (@{$ppaths{$name}}, $path);
               $pinfo->{$path}{'type'} = "histogram";
               push @{$dimensions->{params}}, $path;
             }
