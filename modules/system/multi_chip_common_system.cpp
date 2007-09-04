@@ -126,6 +126,9 @@ SYS_Usage(FILE *file)
 void
 ASIM_MULTI_CHIP_SYSTEM_CLASS::DumpStats(STATE_OUT state_out)
 {
+    // Force computation of power whenever stats are dumped
+    myPowerModel.PowerPostProcessing();
+
     ostringstream os;
     
     // get time string and remove trailing '\n'
@@ -330,7 +333,6 @@ ASIM_MULTI_CHIP_SYSTEM_CLASS::SYS_Execute(
         
     }
 
-    myPowerModel.PowerPostProcessing(); // compute power at end of interval
     
     T1(SYS_Cycle() << ": SYS_Execute hit marker " << 
        commitWatchMarker << " " << SYS_CommittedMarkers() - start_marker << " times");

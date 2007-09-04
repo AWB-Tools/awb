@@ -3440,3 +3440,18 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2423 - Sailashri Parthasarathy)
 
 Continuation of bug fix to force entry of yes or no on a commit (rev. 2420). Removing references to commit in the sub-routine.
+
+----------
+spartha1    Date: Tue Sep  4 17:03:20 EDT 2007  CSN: CSN-asimcore-177
+                  Tue Sep  4 21:03:20 UTC 2007
+
+
+Directory modules/system
+ single_chip_common_system.cpp Locally Modified          176 
+ multi_chip_common_system.cpp Locally Modified          176 
+ single_chip_clockserver_system.cpp Locally Modified          176 
+
+Updating with simcore changes (rev. 2425 - Sari Coumeri)
+
+* Moved when power postprocessing is called to be whenever stats are
+dumped (SLC)

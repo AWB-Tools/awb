@@ -127,6 +127,9 @@ SYS_Usage(FILE *file)
 void
 ASIM_COMMON_SYSTEM_CLASS::DumpStats(STATE_OUT state_out)
 {
+    // Force computation of power whenever stats are dumped
+    myPowerModel.PowerPostProcessing();
+
     ostringstream os;
     
     // get time string and remove trailing '\n'
@@ -326,7 +329,6 @@ ASIM_COMMON_SYSTEM_CLASS::SYS_Execute(
         
     }
 
-    myPowerModel.PowerPostProcessing(); // compute power at end of interval
 
     TRACE(Trace_Sys, printf(FMT64U": SYS_Execute hit marker "FMT32D
                             " "FMT64D" times\n", SYS_Cycle(),
