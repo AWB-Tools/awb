@@ -181,7 +181,7 @@ sub commit {
 
   print "Commit: I am about to commit your changes. This is your last chance...\n\n";
 
-  if (! Asim::choose_yes_or_no("Do you really want to proceed and commit","no","yes","no")) {
+  if (! Asim::choose_yes_or_no("Do you really want to proceed and commit","response_required","yes")) {
     $self->{status} = "";
     unlockall(@all);
     Asim::Xaction::abort();

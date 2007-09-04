@@ -121,6 +121,10 @@ sub choose {
 
 =item $editcontrol-E<gt>choose_yes_or_no($question, $default, $forced_default)
 
+# This subroutine can take in any of the following three options 
+# as defaults - yes, no and response_required. If response_required
+# is the default, the user is forced to type in a response and the 
+# question is repeated until the user does so.
 
 =cut
 
@@ -132,7 +136,6 @@ sub choose_yes_or_no {
   my $question = shift;
   my $default = shift || "no";
   my $forced_default = shift || $default;
-  my $commit_default = shift;
 
   my $prompt;
   my $input;
@@ -146,12 +149,7 @@ sub choose_yes_or_no {
     @OPTIONS = ("yes", "no");
     $term->Attribs->{attempted_completion_function} = \&list_completion;
 
-    if (!defined($commit_default)) {
-      $input = $term->readline($prompt) || $default;
-    }
-    else {
-      $input = $term->readline($prompt);
-    }
+    $input = $term->readline($prompt) || $default;
 
     chomp $input;
 
@@ -160,15 +158,13 @@ sub choose_yes_or_no {
     }
 
     if ($input eq "") {
-
-      # While performing commits, dont default to no
-      # Force an answer of yes or no by repeating the question
-      if (!defined($commit_default)) {
 	$input = $default;
-      }
     }
 
-    if ($input =~ /[nN][oO]?/) {
+    # Force an answer of yes or no by repeating the question
+    if ($input =~ /response_required/) {
+      print "Please answer yes or no\n";
+    } elsif ($input =~ /[nN][oO]?/) {
       return 0;
     } elsif ($input =~ /[Yy](es)?/) {
       return 1;

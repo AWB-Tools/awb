@@ -3425,3 +3425,18 @@ Updating with simcore changes (rev. 2421 - Brian Slechta)
 added GPROF to the list of options in AWB. we can now build a GPROF model
 assuming the Makefile.config will recognize that variable and do the right
 thing.
+
+----------
+spartha1    Date: Tue Sep  4 17:02:02 EDT 2007  CSN: CSN-asimcore-176
+                  Tue Sep  4 21:02:02 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Edit
+ Interactive.pm            Locally Modified          175 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          175 
+
+Updating with simcore changes (rev. 2423 - Sailashri Parthasarathy)
+
+Continuation of bug fix to force entry of yes or no on a commit (rev. 2420). Removing references to commit in the sub-routine.
