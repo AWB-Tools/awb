@@ -228,7 +228,7 @@ sub status {
     # ^   ^   ^                        ^
     # |   |   |                        |
 
-    if ( /^(.?)\s+(\*?)\s*(\d+)\s+(\d+)\s+(\S+)\s+(\S+)$/ ) {
+    if ( /^\s?(.?)\s+(\*?)\s*(\d+)\s+(\d+)\s+(\S+)\s+(\S+)$/ ) {
 
       # Convert status into CVS status equivalent
       if (($1 eq 'M') and !($2)) {

@@ -3384,3 +3384,15 @@ Updating with simcore changes (rev. 2418 - Alex Settle)
 Fixed plot-shell so it no longer produces error messages like
 the one below ...
 Using a hash as a reference is deprecated at /nfs/sc/proj/epdarch/perf34/amsettle/asim/src/asim-simcore/libperl/Asim/lib/Asim/Stats.pm line 694.
+
+----------
+spartha1    Date: Tue Sep  4 16:56:31 EDT 2007  CSN: CSN-asimcore-173
+                  Tue Sep  4 20:56:31 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          172 
+
+Updating with simcore changes (rev. 2419 - Sailashri Parthasarathy)
+
+Bug fix - Asim-shell now recognizes svn propset changes
