@@ -3396,3 +3396,18 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2419 - Sailashri Parthasarathy)
 
 Bug fix - Asim-shell now recognizes svn propset changes
+
+----------
+spartha1    Date: Tue Sep  4 16:58:55 EDT 2007  CSN: CSN-asimcore-174
+                  Tue Sep  4 20:58:55 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Edit
+ Interactive.pm            Locally Modified          173 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          173 
+
+Updating with simcore changes (rev. 2420 - Sailashri Parthasarathy)
+
+Bug fix - Asim-shell now forces an entry of yes or no on a commit, instead of defaulting to no.

@@ -132,6 +132,7 @@ sub choose_yes_or_no {
   my $question = shift;
   my $default = shift || "no";
   my $forced_default = shift || $default;
+  my $commit_default = shift;
 
   my $prompt;
   my $input;
@@ -144,7 +145,14 @@ sub choose_yes_or_no {
   while (1) {
     @OPTIONS = ("yes", "no");
     $term->Attribs->{attempted_completion_function} = \&list_completion;
-    $input = $term->readline($prompt) || $default;
+
+    if (!defined($commit_default)) {
+      $input = $term->readline($prompt) || $default;
+    }
+    else {
+      $input = $term->readline($prompt);
+    }
+
     chomp $input;
 
     if (!defined($input)) {
@@ -152,7 +160,12 @@ sub choose_yes_or_no {
     }
 
     if ($input eq "") {
-      $input = $default;
+
+      # While performing commits, dont default to no
+      # Force an answer of yes or no by repeating the question
+      if (!defined($commit_default)) {
+	$input = $default;
+      }
     }
 
     if ($input =~ /[nN][oO]?/) {
