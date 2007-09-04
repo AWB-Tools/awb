@@ -1356,6 +1356,7 @@ sub build_options {
     $options{"PROFILE"} = "Instruction Profiling Code";
     $options{"DISTCC"} = "Use distcc with gcc";
     $options{"CCACHE"} = "Use ccache with gcc";
+    $options{"GPROF"} = "add -pg option for gprof";
   }
 
 

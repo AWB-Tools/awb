@@ -3411,3 +3411,17 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2420 - Sailashri Parthasarathy)
 
 Bug fix - Asim-shell now forces an entry of yes or no on a commit, instead of defaulting to no.
+
+----------
+spartha1    Date: Tue Sep  4 17:00:27 EDT 2007  CSN: CSN-asimcore-175
+                  Tue Sep  4 21:00:27 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          174 
+
+Updating with simcore changes (rev. 2421 - Brian Slechta)
+
+added GPROF to the list of options in AWB. we can now build a GPROF model
+assuming the Makefile.config will recognize that variable and do the right
+thing.
