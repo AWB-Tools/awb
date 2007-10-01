@@ -46,7 +46,8 @@ libasim_a_SOURCES =	src/mesg.cpp \
 			src/regexobj.cpp \
                         src/cache_dyn.cpp \
 			src/cache_manager.cpp \
-			src/cache_manager_smp.cpp 
+			src/cache_manager_smp.cpp \
+			src/plru_masks.cpp 
 
 # Inside ASIM we reuse AGT definitions (UINT64 and so on)
 WARNFLAGS = -Wall -W -Wpointer-arith -Wredundant-decls -Wcast-align \

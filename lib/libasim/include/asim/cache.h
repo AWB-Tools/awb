@@ -489,6 +489,14 @@ template<UINT8 NumWays> class lru_info
     // Get The MRU and LRU ways
     UINT8	getMRU() { return mru; };
     UINT8	getLRU() { return lru; };
+    UINT8       getLRU(UINT64 reserved_mask) {
+      UINT8 way = lru;
+      while (((1<<way) & reserved_mask) != 0) {
+	way = linklist[way].prev;
+	ASSERT(way < NumWays, "No free ways?");
+      }
+      return way;
+    }
     UINT8   getRandom(){ return random()%NumWays; };
     
     // Debugging
@@ -623,8 +631,9 @@ class ev7_replacement_info : public lru_info<NumWays>
         mask = mask | (0x1 << way);
 
         // If all the bits are set, clear them 
-	// EXCEPT for the newly MRU'ed way
-        if((mask & allSetMask) == allSetMask) mask = (0x1 << way);
+        if((mask & allSetMask) == allSetMask) {
+	  mask =  (0x1 << way);
+	}
         
     }
     
@@ -654,20 +663,37 @@ class LRUReplacement
   // As its name indicates, contains all the LRU data structures for each set in the cache
   //
   typedef lru_info<NumWays>		lruInfo;
-
   UINT32 GetVictim(UINT64 index, UINT64 reserved_mask = 0)
   {
-    ASSERT(reserved_mask == 0, "LRUReplacement doesn't support reserved status.");
+    /*ASSERT(reserved_mask == 0, "LRUReplacement doesn't support reserved status.");*/
       
     UINT32 way;
     ASSERTX(index<NumLinesPerWay);
     // Get the LRU way
-    way = LruArray[index].getLRU();
+    way = LruArray[index].getLRU(reserved_mask);
+
+    ASSERT(way < NumWays && (reserved_mask & (1<<way)) == 0, "Ooops, LRU picked a bogus way");
 
     return way;
   }
 
-  protected:
+protected:
+  UINT32 getLRU(int index) {
+    return LruArray[index].getLRU();
+  }
+  UINT32 getMRU(int index) {
+    return LruArray[index].getMRU();
+  }
+  void makeMRU(int index, int way) {
+    return LruArray[index].makeMRU(way);
+  }
+  void makeLRU(int index, int way) {
+    return LruArray[index].makeLRU(way);
+  }
+  void Dump(UINT64 index) {
+    LruArray[index].Dump();
+  }
+private:
   lruInfo LruArray[NumLinesPerWay];
 };
 
@@ -693,10 +719,184 @@ class PseudoLRUReplacement
   }
 
   protected:
+  UINT32 getLRU(int index) {
+    return LruArray[index].getLRU();
+  }
+  UINT32 getMRU(int index) {
+    return LruArray[index].getMRU();
+  }
+  void makeMRU(int index, int way) {
+    return LruArray[index].makeMRU(way);
+  }
+  void makeLRU(int index, int way) {
+    return LruArray[index].makeLRU(way);
+  }
+  void Dump(UINT64 index) {
+    LruArray[index].Dump();
+  }
+private:
+
   lruInfo LruArray[NumLinesPerWay];
 };
 
 
+/* This is a generalized PLRU that supports random at the top
+ * and/or random at the bottom variants.  
+ *
+ *
+ */
+#include "plru_masks.h"
+template<UINT8 NumWays, UINT32 rand_at_bottom> 
+class PLRUTree {
+private:
+  UINT64 state;
+  int mruWay;
+  const static int NumLeafs = NumWays / rand_at_bottom;
+  
+public:
+  PLRUTree(): state(0), mruWay(NumWays-1) {}
+    UINT32 getPLRUWay(UINT64 reserved_mask) {
+      /* we need to AND together the bits of the reserved mask
+	 for all the ways that are grouped together
+      */
+      UINT64 orig_r_mask = reserved_mask;
+      UINT64 temp_mask = (UINT64) (-1);
+      for (int i = 0 ; i < rand_at_bottom; i++) {
+	temp_mask = reserved_mask & temp_mask;
+	reserved_mask  >> NumLeafs;
+      }
+      reserved_mask = temp_mask;
+      int temp;
+      int currentWay = PLRU_Mask<NumLeafs>::getLRUWayWithReservations(state,reserved_mask);
+      if (rand_at_bottom!=1) {
+	temp = random() % rand_at_bottom;
+	int first_temp = temp;
+	
+	while ( ((1<< (currentWay + (temp * NumLeafs))) & orig_r_mask) != 0) {
+	  temp ++;
+	  temp = temp % rand_at_bottom;
+	
+	  ASSERT(temp != first_temp, " No free ways at bottom?");
+	}
+      }
+      else {
+	temp = 0;
+      }
+
+      return currentWay + (temp * NumLeafs);
+    }
+    UINT32 getMRUWay() {
+      /* I dont think this actually gets used, but since
+	 its here we'll make it behave reasonably sanely*/
+      return mruWay;
+    }
+    void setMRU(UINT32 way) {
+      mruWay = way;
+      way = way % NumLeafs;
+      state = PLRU_Mask<NumLeafs>::makeMRU(way,state);
+    }
+    void setLRU(UINT32 way) {
+      way = way & NumLeafs;
+      state = PLRU_Mask<NumLeafs>::makeLRU(way,state);
+    }
+
+  void Dump() {
+    cout << state;
+  }
+};
+
+template <int rand_at_top,
+	  int rand_at_bottom>
+class GeneralizedPseudoLRUReplacement {
+public:
+
+  template <UINT8 NumWays, 
+	    UINT32 NumLinesPerWay>
+  class T	  
+  {
+    const int treeSize;
+     UINT64 masks[rand_at_top];
+  public:
+  T(): treeSize(NumWays/rand_at_top){
+      int i;
+      UINT64 mask= -1;
+      mask = mask >> (64-treeSize);
+      for (i = 0; i < rand_at_top; i++) {
+	masks[i] = mask;
+	mask = mask << treeSize;
+      }
+    }
+    UINT32 GetVictim(UINT64 index, UINT64 reserved_mask = 0)
+    {
+      /*ASSERT(reserved_mask == 0, "PseudoLRUReplacement doesn't support reserved status.");*/
+   
+      ASSERTX(index<NumLinesPerWay);
+      
+      UINT32 way;
+      int treeNum = 0; 
+      int firstNum; 
+      UINT64 tempMask;
+
+      if (rand_at_top > 1) {
+	treeNum = random() % rand_at_top;
+      }
+      firstNum = treeNum;
+      while ((masks[treeNum] & reserved_mask) == masks[treeNum]) {
+	/* everything in that tree is reserved */
+	treeNum++;
+	treeNum = treeNum % rand_at_top;
+	ASSERT(treeNum != firstNum, "All ways are reserved!");
+      }
+      /* get the part of the reserved bits which corresponds to this tree*/
+      tempMask = (reserved_mask & masks[treeNum])   >> (treeSize * treeNum);
+
+      way = trees[index][treeNum].getPLRUWay(tempMask);
+     
+      way = way +(treeSize * treeNum);
+
+      ASSERT((reserved_mask & (1<<way)) == 0, "Ooops, PLRU picked a reserved way!");
+
+      return way;
+    }
+  protected:
+    UINT32 getLRU(UINT64 index) 
+    {    
+      int treeNum = 0 ;
+      if (rand_at_top > 1) {
+       random() % rand_at_top;
+      }
+      return trees[index][treeNum].getPLRUWay(0) + (treeNum * treeSize) ;
+    }
+    UINT32 getMRU(UINT64 index) {
+      int treeNum = 0 ;
+      if (rand_at_top > 1) {
+       random() % rand_at_top;
+      }
+      return trees[index][treeNum].getMRUWay() + (treeNum *treeSize);
+    }
+    void makeMRU(UINT64 index, UINT32 wayNum) {
+      int treeNum = wayNum / treeSize;
+      wayNum = wayNum % treeSize;
+      trees[index][treeNum].setMRU(wayNum);
+    }
+    void makeLRU(UINT64 index, UINT32 wayNum) {
+      int treeNum = wayNum / treeSize;
+      wayNum = wayNum % treeSize;
+      trees[index][treeNum].setLRU(wayNum);
+    }
+    void Dump(UINT64 index) {
+      int i;
+      for (i = 0 ; i < rand_at_top; i++) {
+	cout << "Tree " << i ;
+	trees[index][i].Dump();
+	cout << endl;
+      }
+    }
+  private:
+    PLRUTree<NumWays /rand_at_top, rand_at_bottom> trees[NumLinesPerWay][rand_at_top];
+  };
+
+};
 
 template <UINT8 NumWays, UINT32 NumLinesPerWay>
 class RandomReplacement
@@ -720,6 +920,22 @@ class RandomReplacement
   }
 
   protected:
+  UINT32 getLRU(int index) {
+    return LruArray[index].getLRU();
+  }
+  UINT32 getMRU(int index) {
+    return LruArray[index].getMRU();
+  }
+  void makeMRU(int index, int way) {
+    return LruArray[index].makeMRU(way);
+  }
+  void makeLRU(int index, int way) {
+    return LruArray[index].makeLRU(way);
+  }
+  void Dump(UINT64 index) {
+    LruArray[index].Dump();
+  }
+private:
   lruInfo LruArray[NumLinesPerWay];
 };
 
@@ -732,7 +948,7 @@ class RandomNotMRUReplacement
   //
   typedef lru_info<NumWays>		lruInfo;
 
-  UINT32 GetVictim(UINT64 index, UINT64 reserved_mask = 0)
+  UINT32 GetVictim(UINT64 index, UINT64 reserved_mask = 0) 
   {
     ASSERT(reserved_mask == 0, "RandomNotMRUReplacement doesn't support reserved status.");
       
@@ -749,18 +965,34 @@ class RandomNotMRUReplacement
   }
 
   protected:
+  UINT32 getLRU(int index) {
+    return LruArray[index].getLRU();
+  }
+  UINT32 getMRU(int index) {
+    return LruArray[index].getMRU();
+  }
+  void makeMRU(int index, int way) {
+    return LruArray[index].makeMRU(way);
+  }
+  void makeLRU(int index, int way) {
+    return LruArray[index].makeLRU(way);
+  }
+  void Dump(UINT64 index) {
+    LruArray[index].Dump();
+  }
+private:
+
   lruInfo LruArray[NumLinesPerWay];
 };
 
 template <UINT8 NumWays, UINT32 NumLinesPerWay>
 class EV7_scheme_replacement
 {
-
   public:
   
   typedef ev7_replacement_info<NumWays>		ev7Info;
 
-  UINT32 GetVictim(UINT64 index, UINT64 reserved_mask = 0)
+  UINT32 GetVictim(UINT64 index, UINT64 reserved_mask = 0) 
   {
     
     ASSERTX(index < NumLinesPerWay);
@@ -774,9 +1006,30 @@ class EV7_scheme_replacement
   }
 
   protected:  
+  UINT32 getLRU(int index) {
+    return LruArray[index].getLRU();
+  }
+  UINT32 getMRU(int index) {
+    return LruArray[index].getMRU();
+  }
+  void makeMRU(int index, int way) {
+    return LruArray[index].makeMRU(way);
+  }
+  void makeLRU(int index, int way) {
+    return LruArray[index].makeLRU(way);
+  }
+  void Dump(UINT64 index) {
+    LruArray[index].Dump();
+  }
+private:
+
   ev7Info LruArray[NumLinesPerWay];
-  
 };
+
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -803,6 +1056,7 @@ template<UINT8 NumWays,
 class gen_cache_class : public VictimPolicy<NumWays,NumLinesPerWay>
 {
   public:
+  using VictimPolicy<NumWays,NumLinesPerWay>::Dump;
     typedef line_state<NumObjectsPerLine, INFO> lineState;
 
     // accessors to query the template parameters
@@ -905,7 +1159,7 @@ class gen_cache_class : public VictimPolicy<NumWays,NumLinesPerWay>
   lineState	*GetLRUState(UINT64 index);
   lineState	*GetMRUState(UINT64 index);
   lineState *GetVictimState(UINT64 index, bool invalidFirst=true);
-  
+  UINT32 GetVictimWayNum(UINT64 index, UINT64 reserved_mask, bool invalidFirst) ;
   //
   // Functions to update the LRU information according to your favorite scheme. 
   //
@@ -966,14 +1220,14 @@ class gen_cache_class : public VictimPolicy<NumWays,NumLinesPerWay>
 
 template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
          class T, bool WithData, template<UINT8,UINT32> class VictimPolicy, class INFO>
-    UINT32 gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::DEFAULT_CACHE_RANDOM_SEED = 0;
+UINT32 gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::DEFAULT_CACHE_RANDOM_SEED = 0;
 
 ////////////////////////////////////////////////////
 //
 // Constructor
 //
 ////////////////////////////////////////////////////
-template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
+template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine, 
          class T, bool WithData, template<UINT8,UINT32> class VictimPolicy, class INFO>
 gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::gen_cache_class(const UINT32 warm_percent,
                                                                                       const LINE_STATUS initial_warmed_state,
@@ -1271,15 +1525,20 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
 // Get a specific way of a specific cache index 
 //
 ///////////////////////////////////////////////////////////////////
+
 template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
          class T, bool WithData, template <UINT8,UINT32> class VictimPolicy, class INFO>
 line_state<NumObjectsPerLine,INFO> *
 gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::GetWayLineState(UINT64 index, UINT32 way)
 {
-    ASSERTX(index < NumLinesPerWay);
-    ASSERTX(way < NumWays);
+
+  ASSERTX(index < NumLinesPerWay);
+  if(way >= NumWays) {
+    printf("Way: %d, NumWays: %d\n", way, NumWays);
+  }
+  ASSERTX(way < NumWays);
     
-    return (&(TagArray[index][way]));
+  return (&(TagArray[index][way]));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -1295,7 +1554,7 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
     UINT32 way;
     // Get the LRU way
     ASSERTX(index < NumLinesPerWay);
-    way = this->LruArray[index].getLRU();
+    way = this->getLRU(index);
     // Return pointer to it.
     return &(TagArray[index][way]);
 }
@@ -1314,7 +1573,7 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
     
     // Get the MRU way
     ASSERTX(index < NumLinesPerWay);
-    way = this->LruArray[index].getMRU();
+    way = this->getMRU(index);
     // Return pointer to it.
     return &(TagArray[index][way]);
 }
@@ -1327,7 +1586,7 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
 template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
          class T, bool WithData, template <UINT8,UINT32> class VictimPolicy, class INFO>
 line_state<NumObjectsPerLine,INFO> *
-gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::GetVictimState(UINT64 index, bool invalidFirst)
+  gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::GetVictimState(UINT64 index, bool invalidFirst)
 {
     UINT32 way;
     UINT64 reserved_mask = 0;
@@ -1352,9 +1611,29 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
     // No invalid line -> get the victim according to the selected replacement algorithm
 
     way = this->GetVictim(index, reserved_mask);
-
+    
     // Return pointer to it.
     return &(TagArray[index][way]);
+}
+
+template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
+         class T, bool WithData, template <UINT8,UINT32> class VictimPolicy, class INFO>
+UINT32
+  gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::GetVictimWayNum(UINT64 index, UINT64 reserved_mask, bool invalidFirst) 
+{
+    // Search for an invalid way that should be the first to be
+    // victimized (only if invalidFirst is set!)
+    if(invalidFirst) {
+      for (UINT16 i = 0; i < NumWays; ++i) {
+	if (TagArray[index][i].GetStatus()==S_INVALID) {
+	  return i;
+	}
+      }
+    }
+    // No invalid line -> get the victim according to the selected replacement algorithm
+
+    return this->GetVictim(index, reserved_mask);
+
 }
 
 
@@ -1370,7 +1649,8 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
 {
     ASSERTX(index < NumLinesPerWay);
     ASSERTX(way < NumWays);
-    this->LruArray[index].makeMRU(way);
+    /*cout << Level << " is making " << way << " mru in " << index << endl;*/
+    this->makeMRU(index,way);
 }
 
 template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
@@ -1380,7 +1660,7 @@ gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy
 {
     ASSERTX(index < NumLinesPerWay);
     ASSERTX(way < NumWays);
-    this->LruArray[index].makeLRU(way);
+    this->makeLRU(index,way);
 }
 
 
@@ -1612,9 +1892,10 @@ template<UINT8 NumWays, UINT32 NumLinesPerWay, UINT32 NumObjectsPerLine,
 void
 gen_cache_class<NumWays,NumLinesPerWay,NumObjectsPerLine,T,WithData,VictimPolicy,INFO>::DumpLRU(UINT64 index)
 {
+    
     ASSERTX(index < NumLinesPerWay);
     cout << "Dump for index 0x" << fmt_x(index) << " :";
-    this->LruArray[index].Dump();
+    Dump(index);
 }
 //////////////////////////////////////////////////////////////////////////
 //
@@ -1678,15 +1959,16 @@ lru_info<NumWays>::lru_info()
     // We set a doubly linked list of all elements in the chain array
     //
     for (i = 0; i < NumWays; i++ ) {
-        linklist[i].prev = (i == 0)            ? 0xff : (i-1);
-        linklist[i].next = (i == (NumWays -1)) ? 0xff : (i+1);
+        linklist[i].next = (i == 0)            ? 0xff : (i-1);
+        linklist[i].prev = (i == (NumWays -1)) ? 0xff : (i+1);
     }
     
     // Now, by pure convention, we declare the MRU set, the one in position 0
     // and we declare the LRU set the one in position NumWays -1.
-    //
-    mru = 0;
-    lru = NumWays - 1;
+    // ** Actually, we'll do it the other way around- 0 = LRU,
+    // ** NumWays -1 is MRU to match Tracs 
+    lru = 0;
+    mru = NumWays - 1;
 }
 
 template<UINT8 NumWays>

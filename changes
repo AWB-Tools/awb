@@ -3577,3 +3577,23 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2436 - Krishna Rangan)
 
 - a simple fix to handle packageexps list args correctly.
+
+----------
+spartha1    Date: Mon Oct  1 17:14:39 EDT 2007  CSN: CSN-asimcore-185
+                  Mon Oct  1 21:14:39 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ plru_masks.h              Locally Added               0 
+ cache.h                   Locally Modified          184 
+
+Directory lib/libasim/src
+ plru_masks.cpp            Locally Added               0 
+
+Directory lib/libasim
+ Makefile.am               Locally Modified          184 
+
+Updating with simcore changes (rev. 2437 - Carl Beckmann)
+
+- Support for different cache replacement algorithms, and bug fixes,
+provided by Drew Hilton
