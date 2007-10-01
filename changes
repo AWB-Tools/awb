@@ -3539,3 +3539,16 @@ Updating with simcore changes (rev. 2432 - Krishna Rangan)
 - support to allow package experiment directory name to be different from
 the package name; this implementation is incomplete but working for list
 style regressions.
+
+----------
+spartha1    Date: Mon Oct  1 17:07:28 EDT 2007  CSN: CSN-asimcore-182
+                  Mon Oct  1 21:07:28 UTC 2007
+
+
+Directory tools/scripts
+ fetch-trace               Locally Modified          181 
+
+Updating with simcore changes (rev. 2433 - Carl Beckmann)
+
+- disabled debug messages, and fixed logic so that traces found in the cache
+are really not fetched.
