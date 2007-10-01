@@ -3597,3 +3597,15 @@ Updating with simcore changes (rev. 2437 - Carl Beckmann)
 
 - Support for different cache replacement algorithms, and bug fixes,
 provided by Drew Hilton
+
+----------
+spartha1    Date: Mon Oct  1 17:17:45 EDT 2007  CSN: CSN-asimcore-186
+                  Mon Oct  1 21:17:45 UTC 2007
+
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified          185 
+
+Updating with simcore changes (rev. 2440 - Carl Beckmann)
+
+- Bug fix for parameter config file handling

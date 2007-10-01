@@ -204,6 +204,7 @@ static char *scan_arg_value( char * &source )
   char buf[MAXWORD], *s, *b;
   enum {normal, quote, esc, done} state;
   for ( s = source, b = buf, state = normal; *s && state != done; s++ ) {
+    ASSERTX( ( b - buf ) < MAXWORD );
     switch ( state ) {
       case normal:
         if      ( isspace( *s ) ) { *b++ = '\0'; state = done;   }
@@ -226,6 +227,7 @@ static char *scan_arg_value( char * &source )
   char *dest = (char *)malloc( len+1 );   // allocate storage for the string
   ASSERTX( dest );
   strncpy( dest, buf, len );              // copy the string including any opening and closing quotes
+  dest[ len ] ='\0';                      // make sure to null-terminate the string
   source = s;                             // advance the source string pointer
   return dest;
 }
