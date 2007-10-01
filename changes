@@ -3525,3 +3525,17 @@ various package administration operations.
 
 Util and Package::Cvs chnages are to move cvs version check to
 a more reasonable place.
+
+----------
+spartha1    Date: Mon Oct  1 17:05:59 EDT 2007  CSN: CSN-asimcore-181
+                  Mon Oct  1 21:05:59 UTC 2007
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          180 
+
+Updating with simcore changes (rev. 2432 - Krishna Rangan)
+
+- support to allow package experiment directory name to be different from
+the package name; this implementation is incomplete but working for list
+style regressions.

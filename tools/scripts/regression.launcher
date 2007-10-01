@@ -58,11 +58,13 @@ $MODEL_COVERAGE = "model-coverage";
 # Global information
 #$TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
 
-# 
+#
 # Default variables for all options. 
 # 
 my @packages = ();
+my @package_exps = ();
 my @default_packages = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGES", "network ipf"));
+my @default_package_exps = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGEEXPS", "network ipf"));
 my $runtype = Asim::Util::get_asimrc_val("regression.launcher", "RUNTYPE", "regression");
 my $runstyle = Asim::Util::get_asimrc_val("regression.launcher", "RUNSTYLE", "list");
 my $runcmds = Asim::Util::get_asimrc_val("regression.launcher", "ASIMRUN_COMMANDS", undef);
@@ -78,18 +80,19 @@ my $package_db;
 my $package_limit_warn = 0;
 my $shared_package_area = Asim::Datadir();
 
-my $status = GetOptions("package=s"    =>  \@packages,
-                        "runtype=s"    =>  \$runtype,
+my $status = GetOptions("package=s"     =>  \@packages,
+			"packageexps=s" =>  \@package_exps,
+                        "runtype=s"     =>  \$runtype,
 			"runstyle=s"    =>  \$runstyle,
-			"regdir=s"     =>  \$regdir,
-                        "runcmds=s"    =>  \$runcmds,
-                        "compress=s"   =>  \$compress,
-                        "queue=s"      =>  \$queue,
-                        "dryrun!"      =>  \$dryrun,
-			"remote!"      =>  \$remote,
-			"remoteroot=s" =>  \$remoteroot,
-			"remoteregdir=s"=> \$remoteregdir,
-			"rerun"        =>  \$rerun
+			"regdir=s"      =>  \$regdir,
+                        "runcmds=s"     =>  \$runcmds,
+                        "compress=s"    =>  \$compress,
+                        "queue=s"       =>  \$queue,
+                        "dryrun!"       =>  \$dryrun,
+			"remote!"       =>  \$remote,
+			"remoteroot=s"  =>  \$remoteroot,
+			"remoteregdir=s"=>  \$remoteregdir,
+			"rerun"         =>  \$rerun
                        );
 if ( ! $status ) {
   print "Usage: regression.launcher\n";
@@ -120,10 +123,16 @@ if ( ! $status ) {
 if (defined $runstyle && $runstyle eq "pruned") {
     $package_db = Asim::Package::DB->new() || die ("Cannot find any packages in workspace!\n");    
     if ( $#packages >= 0 ) { $package_limit_warn = 1;  }
-    else { @packages = $package_db->directory();  }
+    else { 
+	@packages = $package_db->directory();  
+	die("Cannot be used in combination with default packages.\n") if defined (scalar(@package_exps));
+    }
 } elsif ( $#packages < 0 ) {
     @packages = @default_packages;
+    @package_exps = @default_package_exps;
 }
+
+@package_exps = @packages if (! scalar(@package_exps));
 
 my $asimrun_path = `$RESOLVER tools/scripts/$ASIM_RUN`;
 chomp $asimrun_path;
@@ -371,21 +380,23 @@ if (defined $runstyle && $runstyle eq "pruned") {
     }
 } 
 else {	# not a pruned regression run
-    foreach $package (@packages) {
+    for (my $index = 0; $index < scalar(@packages); $index++) {
+	$package = $packages[$index];	
+	$package_exp = $package_exps[$index];
 	
-	$exp_fl->{$package} = `$RESOLVER experiments/$package/$runtype/$runtype.models`;
+	$exp_fl->{$package} = `$RESOLVER experiments/$package_exp/$runtype/$runtype.models`;
 	chomp $exp_fl->{$package};
 	
 	if ( $? ne 0 ) {
-	    print "ERROR: Unable to resolve file experiments/$package/$runtype/$runtype.models.\n";
+	    print "ERROR: Unable to resolve file experiments/$package_exp/$runtype/$runtype.models.\n";
 	    exit 1;
 	}
 	
-	$bm_fl->{$package} = `$RESOLVER experiments/$package/$runtype/$runtype.benchmarks`;
+	$bm_fl->{$package} = `$RESOLVER experiments/$package_exp/$runtype/$runtype.benchmarks`;
 	chomp $bm_fl->{$package};
 	
 	if ( $? ne 0 ) {
-	    print "ERROR: Unable to resolve file experiments/$package/$runtype/$runtype.benchmarks.\n";
+	    print "ERROR: Unable to resolve file experiments/$package_exp/$runtype/$runtype.benchmarks.\n";
 	    exit 1;
 	}
     }
