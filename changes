@@ -3552,3 +3552,16 @@ Updating with simcore changes (rev. 2433 - Carl Beckmann)
 
 - disabled debug messages, and fixed logic so that traces found in the cache
 are really not fetched.
+
+----------
+spartha1    Date: Mon Oct  1 17:08:49 EDT 2007  CSN: CSN-asimcore-183
+                  Mon Oct  1 21:08:49 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          182 
+ Model.pm                  Locally Modified          182 
+
+Updating with simcore changes (rev. 2434 - Michael Adler)
+
+Clean up some apm-edit error messages.

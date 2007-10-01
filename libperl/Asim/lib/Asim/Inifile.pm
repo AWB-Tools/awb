@@ -774,7 +774,10 @@ sub dump {
   my $data = $self->{data};
 
   foreach my $i (sort keys %$data) {
-	print "$i = $data->{$i}\n";
+    print "$i = $data->{$i}\n";
+    foreach my $j (sort keys %{$data->{$i}}) {
+      print "  $j = $data->{$i}{$j}\n";
+    }
   }
 }
 

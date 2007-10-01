@@ -246,7 +246,7 @@ sub _get_module {
       $submodname = $inifile->get("$modname/Requires", $r);
 
       if (! defined($submodname)) {
-        _process_warning("Model missing [$modname/Reguires]  in .apm file\n");
+        _process_warning("Model missing \"$r\" in [$modname/Requires] in .apm file\n");
         $self->{missing}++;
         next;
       }
