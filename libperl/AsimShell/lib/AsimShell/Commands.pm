@@ -30,10 +30,17 @@
 # prompt, or "asim-shell lubricate driveshaft" at the unix prompt.
 # To add this command, do the following:
 #
-# 1. Create a new subroutine in this file named "lubricate_driveshaft".
-#    Note the underscore "_" in the name.
+# 1. Update the array %COMPOUNDCOMMANDS in the file AsimShell.pm
+#    in the directory above this one, if the new command is a compound command.
+#    For examp,e if "lubricate driveshaft" and "lubricate hingemounts" were
+#    both legal commands, you would add the following entry to this array:
 #
-# 2. You must also update the file Completion.pm in this directory,
+#        lubricate => [ qw(driveshaft hingemounts) ],
+#
+# 2. If appropriate, add the command switches to the array %OPTIONS in the
+#    file AsimShell.pm in the directory above this one. 
+#
+# 3. You should also update the file Completion.pm in this directory,
 #    to deal with command-line completion.  Usually this involved developing
 #    a list of alternative module, package, or other such names, and returning
 #    something appropriate in the attempted_completion routine, usually by
@@ -42,14 +49,12 @@
 #    SEE THE NOTE in Completion.pm on package commands that take multiple
 #    package names or the name "all" as arguments!!
 #
-# 3. Also update the array %COMPOUNDCOMMANDS in the file AsimShell.pm
-#    in the directory above this one, if the new command is a compound command.
-#    For examp,e if "lubricate driveshaft" and "lubricate hingemounts" were
-#    both legal commands, you would add the following entry to this array:
+# 4. Create a new subroutine in this file named "lubricate_driveshaft".
+#    Note the underscore "_" in the name. The individual 'words' of the 
+#    command will be passed in as the arguments of the function, i.e., as
+#    @_. You can use GetOptions() to parse switches out of @_.
 #
-#        lubricate => [ qw(driveshaft hingemounts) ],
-#
-# 4. Finally, edit the Help.pm file in this directory, to add the command
+# 5. Finally, edit the Help.pm file in this directory, to add the command
 #    to what is displayed in the "asim-shell help" command.
 #
 
@@ -141,9 +146,9 @@ sub pwd {
 }
 
 sub ls {
-  my $dir = shift || "";
+  my @args = @_;
 
-  system "ls $dir";
+  system( "ls " . join(" ", @args));
 
   return 1;
 }

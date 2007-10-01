@@ -122,19 +122,24 @@ our %COMPOUNDCOMMANDS =
 
 
 our @COMMANDS= ( keys %COMPOUNDCOMMANDS, 
-                 qw(cd awb status help exit quit)
+                 qw(pwd ls awb help exit quit)
                );
 
 #
 # These should be of a form the GetOptions can use directly!!!
 #
 our %OPTIONS = (
-    checkout_bundle    => [ "--user=", "--user=<username>", "--build", "--nobuild", "--addpath", "--noaddpath" ],
-    checkout_package   => [ "--user=", "--user=<username>", "--build", "--nobuild", "--addpath", "--noaddpath" ],
-    use_bundle => [ "--build", "--nobuild", "--addpath", "--noaddpath" ],
-    use_package => [ "--build", "--nobuild", "--addpath", "--noaddpath" ],
+    checkout_bundle    => [ "--user=", "--user=<username>", "--build", "--nobuild", 
+                            "--addpath", "--noaddpath", "--golden" ],
+    use_bundle         => [ "--build", "--nobuild", "--addpath", "--noaddpath", "--golden" ],
+
+    checkout_package   => [ "--user=", "--user=<username>", "--build", "--nobuild", 
+                            "--addpath", "--noaddpath" ],
+    use_package        => [ "--build", "--nobuild", "--addpath", "--noaddpath" ],
     commit_package     => [ "--dependent", "--nodependent" ],
+    status_package     => [ "--verbose", "--noverbose" ],
     update_package     => [ "--build", "--nobuild" ],
+
     clean_model        => [ "--builddir" ],
     nuke_model         => [ "--builddir" ],
     ncfg_model         => [ "--builddir" ],

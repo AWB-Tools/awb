@@ -3609,3 +3609,35 @@ Directory modules/controller/classic
 Updating with simcore changes (rev. 2440 - Carl Beckmann)
 
 - Bug fix for parameter config file handling
+
+----------
+spartha1    Date: Mon Oct  1 17:18:51 EDT 2007  CSN: CSN-asimcore-187
+                  Mon Oct  1 21:18:51 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Completion.pm             Locally Modified          186 
+ Commands.pm               Locally Modified          186 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          186 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          186 
+
+Updating with simcore changes (rev. 2442 - Joel Emer)
+
+Bug fix for Perl warning message on asim-shell command line completion.
+Resolves mantis bug.
+
+Bug fix for asim-shell command line completion of switches.
+Resolves mantis bug.
+
+Allow multiple whitespace characters between words of asim-shell
+commands.
+
+Updated command name completion for some asim-shell command names
+and switches.
+
+Bug fix for Perl warning message when bundles/ directory does
+not exist.

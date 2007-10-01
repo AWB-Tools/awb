@@ -61,23 +61,6 @@ our $default_benchmark;
 our $default_module;
 
 #
-# return 1 if the given command is a package
-# command that takes multiple packages as arguments
-#
-sub is_multi_package_command {
-  my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
-}
-
-#
-# return 1 if the package command takes "all" as an argument
-#
-sub package_command_takes_all_arg {
-  my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
-}
-
-#
 # Utility function to help parsing
 #
 sub attempted_completion {
@@ -99,23 +82,34 @@ sub attempted_completion {
     @list = grep /^$text/, @COMMANDS;
     return (max_common($text, @list), @list);
 
+  } elsif ($text =~ /--[^=]*$/) {
+    #
+    # Handle command switches (needs to be early)
+    #
+    my $command = build_command($prefix);
+    @list = grep /^$text/, @{$OPTIONS{$command}};
+
+    return (max_common($text, @list), @list);
+
   } elsif ( $prefix =~ /^(\w+)\s*$/) {
 
     #
     # Handle second symbol of command (if first is a legal keyword)
     #
-    if (defined($COMPOUNDCOMMANDS{$1})) {
-      my @subcommands = @{$COMPOUNDCOMMANDS{$1}};
-      @list = grep /^$text/, @subcommands;
-    } else {
-      @list = ();
+
+    if ( ! defined($COMPOUNDCOMMANDS{$1})) {
+      # Not a comound command - default to filename completion
+      return ();
     }
+
+    my @subcommands = @{$COMPOUNDCOMMANDS{$1}};
+    @list = grep /^$text/, @subcommands;
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /checkout bundle\s$/ ||
-           $prefix =~ /use bundle\s$/      ||
-           $prefix =~ /show bundle\s$/     ||
-           $prefix =~ /update bundle\s$/   ){
+  } elsif ($prefix =~ /checkout\s+bundle\s+$/ ||
+           $prefix =~ /use\s+bundle\s+$/      ||
+           $prefix =~ /show\s+bundle\s+$/     ||
+           $prefix =~ /update\s+bundle\s+$/   ){
     #
     # Handle bundles that can be checked out
     #
@@ -144,8 +138,8 @@ sub attempted_completion {
       
       return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /checkout package\s$/ ||
-           $prefix =~ /use package\s$/      ) {
+  } elsif ($prefix =~ /checkout\s+package\s+$/ ||
+           $prefix =~ /use\s+package\s+$/      ) {
     #
     # Handle packages that can be checked out
     #
@@ -170,7 +164,7 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /add public_package\s$/) {
+  } elsif ($prefix =~ /add\s+public_package\s+$/) {
     #
     # Handle packages that can be checked out
     #
@@ -179,34 +173,39 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /^\s*(\w+)\s+package(\s+\w+)*\s$/ && is_multi_package_command( $1 ) ) {
+  } elsif ($prefix =~ /^\s*(\w+)\s+package(\s+[a-zA-Z]\w+)*\s+$/ && is_multi_package_command( $1 ) ) {
     #
     # Handle commands that take one or more package names as arguments
     #
     my @packages = $default_packageDB->directory();
+
     # "all" is only valid as first argument
-    if ($prefix =~ /^\s*(\w+)\s+package\s$/ && package_command_takes_all_arg( $1 ) ) {
+    if ($prefix =~ /^\s*(\w+)\s+package\s+$/ && package_command_takes_all_arg( $1 ) ) {
       push(@packages, "all");
     }
+
     @list = grep /^$text/, @packages;
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /package\s$/) {
+  } elsif ($prefix =~ /package\s+$/) {
     #
     # Handle commands that take a single package name
     #
     my @packages = $default_packageDB->directory();
-    if ($prefix =~ /update package/ || /commit package/) {
+
+    # optionally add "all" 
+    if ($prefix =~ /^\s*(\w+)\s+package\s+$/ && package_command_takes_all_arg( $1 ) ) {
       push(@packages, "all");
     }
+
     @list = grep /^$text/, @packages;
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /model\s$/  ||
-           $prefix =~ /benchmark\s$/ ||
-           $prefix =~ /module\s$/ ) {
+  } elsif ($prefix =~ /model\s+$/  ||
+           $prefix =~ /benchmark\s+$/ ||
+           $prefix =~ /module\s+$/ ) {
     #
     # Handle Asim search path filename completion
     #
@@ -223,7 +222,7 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /lock\s$/) {
+  } elsif ($prefix =~ /lock\s+$/) {
     #
     # Handle lock names
     #
@@ -238,15 +237,6 @@ sub attempted_completion {
     #
     return $term->completion_matches($text,
                                      $term->Attribs->{'username_completion_function'});
-
-  } elsif ($text =~ /--[^=]*$/) {
-    #
-    # Handle command switches
-    #
-    my $command = build_command($prefix);
-    @list = grep /^$text/, @{$OPTIONS{$command}};
-
-    return (max_common($text, @list), @list);
 
   } elsif (0) {
     #
@@ -280,6 +270,24 @@ sub build_command {
   }
 
   return $command;
+}
+
+
+#
+# return 1 if the given command is a package
+# command that takes multiple packages as arguments
+#
+sub is_multi_package_command {
+  my $cmd = shift;
+  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
+}
+
+#
+# return 1 if the package command takes "all" as an argument
+#
+sub package_command_takes_all_arg {
+  my $cmd = shift;
+  return ( $cmd =~ m/^((status)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
 }
 
 

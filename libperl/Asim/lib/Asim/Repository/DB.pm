@@ -430,7 +430,11 @@ sub bundle_directory {
       push(@files, $File::Find::name) if (-f $File::Find::name);
   }
 
-  find(\&wanted, Asim::Sysconfdir() . "/asim/bundles");
+  # read in bundles from the system bundle directory
+  my $systembundles = Asim::Sysconfdir() . "/asim/bundles";
+  if (-d $systembundles) {
+    find(\&wanted,$systembundles);
+  }
 
   # also read in custom bundles in the user's area 
   my $userbundles = Asim::Util::expand_tilda("~/.asim/bundles");
