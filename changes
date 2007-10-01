@@ -3641,3 +3641,20 @@ and switches.
 
 Bug fix for Perl warning message when bundles/ directory does
 not exist.
+
+----------
+spartha1    Date: Mon Oct  1 17:20:19 EDT 2007  CSN: CSN-asimcore-188
+                  Mon Oct  1 21:20:19 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          187 
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.ui       Locally Modified          187 
+ apm_find_replace.ui.h     Locally Modified          187 
+
+Updating with simcore changes (rev. 2444 - Joel Emer)
+
+Added feature to apm-find-replace to allow bulk changes to
+model parameters.

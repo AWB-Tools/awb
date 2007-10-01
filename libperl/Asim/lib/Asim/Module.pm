@@ -1143,6 +1143,34 @@ sub setparameter {
 
 ################################################################
 
+=item $module-E<gt>getparameter($name)
+
+Get parameter of this module with name $name.
+Returns undef if there is no such parameter.
+
+=cut
+
+################################################################
+
+
+sub getparameter {
+  my $self = shift;
+  my $pname = shift;
+
+  my @params = $self->parameters();
+  foreach my $p (@params) {
+      if ($p->name() eq $pname) {
+	  return $p;
+      }
+  }
+
+  return undef;
+}
+
+
+
+################################################################
+
 =item $module-E<gt>attributes([$list])
 
 Optionally update the list of attributes exhibited by this

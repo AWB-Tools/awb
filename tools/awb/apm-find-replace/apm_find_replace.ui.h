@@ -143,6 +143,30 @@ void apmFindReplace::newPushButton_clicked()
   outPatternLineEdit->setText("");
 
   #
+  # Clear widgets in parameter tab
+  #
+  replaceParamModuleMap = {};
+
+
+  replaceParamModuleTypeComboBox->clear();
+  replaceParamModuleTypeComboBox->insertItem("<Select a module type>");
+  for my $i (sort(@awbtypes)) {
+    replaceParamModuleTypeComboBox->insertItem($i);
+  }
+
+
+  replaceParamModuleComboBox->clear();
+  replaceParamComboBox->clear();
+
+  my $module2 = undef;
+  replaceParamModule = $module2;
+
+  my $param = undef;
+  replaceParam = $param;
+
+  replaceParamListBox->clear();
+
+  #
   # Clear widgets in log groupbox
   #
 
@@ -346,7 +370,7 @@ void apmFindReplace::filterPushButton_clicked()
   my $modelhash = models();
   my $count = 0;
 
-  foreach my $i (sort keys %{$modelhash}) {
+  foreach my $i (reverse sort keys %{$modelhash}) {
     my $model = $modelhash->{$i};
 
     my $match;
@@ -381,7 +405,7 @@ void apmFindReplace::attrPushButton_clicked()
   my $modelhash = models();
   my $count = 0;
 
-  foreach my $i (sort keys %{$modelhash}) {
+  foreach my $i (reverse sort keys %{$modelhash}) {
     my $model = $modelhash->{$i};
 
     my @attributes = $model->attributes();
@@ -464,7 +488,7 @@ void apmFindReplace::typePushButton_clicked()
   my $modelhash = models();
   my $count = 0;
 
-  foreach my $i (sort keys %{$modelhash}) {
+  foreach my $i (reverse sort keys %{$modelhash}) {
     my $model = $modelhash->{$i};
 
     my $match;
@@ -508,7 +532,7 @@ void apmFindReplace::modulePushButton_clicked()
   my $modelhash = models();
   my $count = 0;
 
-  foreach my $i (sort keys %{$modelhash}) {
+  foreach my $i (reverse sort keys %{$modelhash}) {
     my $model = $modelhash->{$i};
 
     my $match1;
@@ -547,7 +571,7 @@ void apmFindReplace::brokenPushButton_clicked()
   my $modelhash = models();
   my $count = 0;
 
-  foreach my $i (sort keys %{$modelhash}) {
+  foreach my $i (reverse sort keys %{$modelhash}) {
     my $model = $modelhash->{$i};
     my $match;
     
@@ -594,6 +618,8 @@ void apmFindReplace::updateModelSelection()
     if ($match) {
       if ($select || $add) {
         modelsListBox->setSelected($i,1);
+        modelsListBox->setCurrentItem($i);
+	modelsListBox->ensureCurrentVisible();
       }
 
       if ($remove) {
@@ -939,6 +965,294 @@ void apmFindReplace::save2PushButton_clicked()
     savePushButton_clicked();
 }
 
+
+#
+# Parameter Tab
+#
+
+void apmFindReplace::replaceParamModuleTypeComboBox_activated( const QString & )
+{
+  my $awbtype = shift;
+
+  #
+  # Fill module combobox with appropriate modules
+  #
+
+  replaceParamModuleMap = {};
+
+  #
+  # Insert models (submodels don't have parameters - yet)
+  #
+
+  #my $modelDB = Asim::Model::DB->new();
+  #my @models = $modelDB->find($awbtype);
+
+  #for my $i (sort @models) {
+  #  replaceParamModuleMap->{$i->name(). " (submodel)"} = $i;
+  #}
+
+  #
+  # Insert modules
+  #  
+
+  my $moduleDB = Asim::Module::DB->new();
+  my @modules = $moduleDB->find($awbtype);
+
+  for my $i (sort @modules) {
+    replaceParamModuleMap->{$i->name()} = $i;
+  }
+
+  #
+  # Fill combobox with appropriate modules
+  #
+
+  replaceParamModuleComboBox->clear();
+  replaceParamModuleComboBox->insertItem("<Pick a module to update>");
+
+  my $hash2 = replaceParamModuleMap;
+
+  for my $i (sort(keys(%{$hash2}))) {
+      replaceParamModuleComboBox->insertItem($i);
+  }
+
+  #
+  # Clear the parameters combobox and listbox
+  # 
+
+  replaceParamComboBox->clear();
+  replaceParamListBox->clear();
+
+  #
+  # Initialize patterns
+  #
+
+  replaceParamInPatternLineEdit->setText(".*");
+  replaceParamOutPatternLineEdit->setText("");
+
+}
+
+
+void apmFindReplace::replaceParamModuleComboBox_activated( const QString & )
+{
+  my $modulename = shift;
+
+  #
+  # Clear out widgets
+  #
+
+  replaceParamComboBox->clear();
+
+  #
+  # Check that something was selected
+  #
+
+  if ($modulename =~ /^<.*>$/) {
+    $modulename = undef;
+    replaceParamModule = $modulename;
+    return;
+  }
+
+  #
+  # List parameters
+  #
+
+  my $module = replaceParamModuleMap->{$modulename};
+
+  replaceParamModule = $module;
+
+  #
+  # Generate list of parameters
+  #
+
+  my @parameters = $module->parameters();
+
+  replaceParamMap = {};
+
+  for my $i (sort @parameters) {
+    replaceParamMap->{$i->name()} = $i;
+  }
+
+  #
+  # Fill combobox with appropriate parameters
+  #
+
+  replaceParamComboBox->clear();
+  replaceParamComboBox->insertItem("<Pick a parameter to update>");
+
+  my $hash2 = replaceParamMap;
+
+  for my $i (sort(keys(%{$hash2}))) {
+      replaceParamComboBox->insertItem($i);
+  }
+
+  #
+  # Clear out description box
+  #
+
+  replaceParamListBox->clear();
+
+}
+
+
+void apmFindReplace::replaceParamComboBox_activated( const QString & )
+{
+  my $paramname = shift;
+
+  #
+  # Clear out widgets
+  #
+
+  replaceParamListBox->clear();
+
+  #
+  # Check that something was selected
+  #
+
+  if ($paramname =~ /^<.*>$/) {
+    $paramname = undef;
+    replaceParam = $paramname;
+    return;
+  }
+
+  #
+  # Desscribe parameter
+  #
+
+  my $param = replaceParamMap->{$paramname};
+
+  replaceParam = $param;
+
+  replaceParamListBox->insertItem("Name:        " . $param->name());
+  replaceParamListBox->insertItem("Description: " . $param->description());
+
+}
+
+
+void apmFindReplace::replaceParamReplacePushButton_clicked()
+{
+  my $module = replaceParamModule;
+  my $param  = replaceParam;
+
+  my $inpattern  = replaceParamInPatternLineEdit->text();
+  my $outpattern = replaceParamOutPatternLineEdit->text();
+
+  #
+  # Clear out the log
+  #
+
+  logListBox->clear();
+  statusTextBox->setText("");
+
+  if (! defined($module)) {
+    logListBox->insertItem("Error: a module must be selected");
+    return;
+  }
+  
+  if (! defined($param)) {
+    logListBox->insertItem("Error: a parameter to update must be selected");
+    return;
+  }
+  
+  #
+  # Do the replacement for each selected model
+  #
+
+  my $max = modelsListBox->count();
+  my $status;
+  my $count = 0;
+  my $error = 1;
+  my $selected = 0;
+
+  for (my $i=0; $i < $max; $i++) {
+    if (modelsListBox->isSelected($i)) {
+      my $item = modelsListBox->item($i);
+      my $name = $item->text();
+  
+      $status = replaceParameter($name, $module, $param, $inpattern, $outpattern);
+      $count++ if $status;
+
+      $error &= $status;
+
+      $selected++;
+    }
+  }
+
+  #
+  # Report what happened
+  #
+
+  if ($selected == 0) {
+    logListBox->insertItem("Error: it appears no models were selected");
+    return;
+  }
+
+  statusTextBox->setText("$count replacements made");
+
+  if (!$error) {
+    logListBox->insertItem("Error: some replacmements failed");
+  }
+
+}
+
+
+void apmFindReplace::replaceParamSavePushButton_clicked()
+{
+  savePushButton_clicked();
+}
+
+
+void apmFindReplace::replaceParameter()
+{
+  my $name = shift;
+  my $module = shift;
+  my $parameter = shift;
+
+  my $inpattern = shift;
+  my $outpattern = shift;
+
+  my $status;
+
+  #
+  # TBD: Create a new instance of the model
+  #
+
+  my $model = searchModelMap->{$name};
+
+  #
+  # Find the module and check that it is right instance
+  #
+
+  my $update_module = $model->find_module_providing($module->provides());
+   
+  #
+  # Get the parameter to update...
+  #
+
+  my $update_parameter = $update_module->getparameter($parameter->name());
+
+  #
+  # Update the parameter to update...
+  #
+
+  my $update_value = $update_parameter->value();
+
+  $status= ($update_value =~ s/$inpattern/$outpattern/);
+
+  if ($status) {
+    $update_parameter->value($update_value);
+  }
+
+  #
+  # Record that we did the replacement
+  #
+
+  my $log = ($status?"Processed: ":"Replacement failure: ") . $name;
+
+  logListBox->insertItem($log);
+  searchModelMap->{$log} = $model;
+
+  return $status;
+}
 
 #
 # Model List Box
