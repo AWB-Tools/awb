@@ -64,7 +64,6 @@ $MODEL_COVERAGE = "model-coverage";
 my @packages = ();
 my @package_exps = ();
 my @default_packages = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGES", "network ipf"));
-my @default_package_exps = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGEEXPS", "network ipf"));
 my $runtype = Asim::Util::get_asimrc_val("regression.launcher", "RUNTYPE", "regression");
 my $runstyle = Asim::Util::get_asimrc_val("regression.launcher", "RUNSTYLE", "list");
 my $runcmds = Asim::Util::get_asimrc_val("regression.launcher", "ASIMRUN_COMMANDS", undef);
@@ -122,17 +121,14 @@ if ( ! $status ) {
 @packages = split(/\s*[ ,]\s*/,join(',',@packages));
 if (defined $runstyle && $runstyle eq "pruned") {
     $package_db = Asim::Package::DB->new() || die ("Cannot find any packages in workspace!\n");    
+    die("Packageexps qualifier cannot be used in combination with default packages.\n") if defined (scalar(@package_exps));
     if ( $#packages >= 0 ) { $package_limit_warn = 1;  }
     else { 
 	@packages = $package_db->directory();  
-	die("Cannot be used in combination with default packages.\n") if defined (scalar(@package_exps));
     }
 } elsif ( $#packages < 0 ) {
     @packages = @default_packages;
-    @package_exps = @default_package_exps;
 }
-
-@package_exps = @packages if (! scalar(@package_exps));
 
 my $asimrun_path = `$RESOLVER tools/scripts/$ASIM_RUN`;
 chomp $asimrun_path;
@@ -380,10 +376,17 @@ if (defined $runstyle && $runstyle eq "pruned") {
     }
 } 
 else {	# not a pruned regression run
+    if (!scalar(@package_exps)) {
+	@package_exps = @packages;
+    }
+    else {
+	@package_exps = split(/\s*[ ,]\s*/,join(',',@package_exps));
+	die("Number of arguments for package and packageexps must match.\n") if (scalar(@package_exps) != scalar(@packages));
+    }
     for (my $index = 0; $index < scalar(@packages); $index++) {
 	$package = $packages[$index];	
 	$package_exp = $package_exps[$index];
-	
+
 	$exp_fl->{$package} = `$RESOLVER experiments/$package_exp/$runtype/$runtype.models`;
 	chomp $exp_fl->{$package};
 	

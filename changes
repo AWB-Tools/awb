@@ -3565,3 +3565,15 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2434 - Michael Adler)
 
 Clean up some apm-edit error messages.
+
+----------
+spartha1    Date: Mon Oct  1 17:10:44 EDT 2007  CSN: CSN-asimcore-184
+                  Mon Oct  1 21:10:44 UTC 2007
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          183 
+
+Updating with simcore changes (rev. 2436 - Krishna Rangan)
+
+- a simple fix to handle packageexps list args correctly.
