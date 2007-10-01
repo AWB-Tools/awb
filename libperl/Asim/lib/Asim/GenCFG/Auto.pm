@@ -19,6 +19,8 @@ use strict;
 use Asim;
 use Asim::GenCFG;
 use File::Temp qw/ tempfile tempdir /;
+use File::Basename;
+use File::Spec;
 
 
 our $DEBUG = ($ENV{ASIM_DEBUG} || 0) >= 2;
@@ -122,6 +124,7 @@ our $SUBST_RUNSCRIPT = 'run';
 our $SetupScriptTemplate;
 our $RunScriptTemplate;
 our @VirtualPath;
+our @Directory = ();
 
 BEGIN {
   Asim::init();
@@ -133,19 +136,25 @@ BEGIN {
   ## where "name" is "benchmark" and "path" is "/path/to/this/benchmark"
   ##
 
-  # get absolute path of the trace, which follows the --emit arg:
-  ($SUBST_PATH = $ARGV[1]) =~ s/\.cfg$//;
+  if ( $ARGV[1] ) {
+    # get absolute path of the trace, which follows the --emit arg:
+    ($SUBST_PATH = $ARGV[1]) =~ s/\.cfg$//;
 
-  # strip the directory off to get a name:
-  ($SUBST_NAME = $SUBST_PATH) =~ s/^.*\///;
+    # strip the directory off to get a name:
+    ($SUBST_NAME = $SUBST_PATH) =~ s/^.*\///;
 
-  # get the directory tree as an array:
-  @VirtualPath = split '/', $SUBST_PATH;
-  $#VirtualPath--;
+    # get the directory tree as an array:
+    @VirtualPath = split '/', $SUBST_PATH;
+    $#VirtualPath--;
+  }
 }
 
 sub Generate {
-  die "unknown trace path" if ( $ARGV[0] ne '--emit' );
+  if ( $ARGV[0] ne '--emit' ) {
+    # handle AWB browsing commands
+    GenDirectory();
+    return;
+  }
 
   # if the trace argument looks like a path, rather than a simple name,
   # we need to prepend a '/' which gets stripped by the caller:
@@ -349,6 +358,44 @@ sub ChopName {
   my $regex = shift;
   $SUBST_NAME =~ s/($regex)//;
   return $1;
+}
+
+################################################################
+
+=head2 The Directory(list) command
+
+The Directory() command is used to specify a directory of possible benchmark configurations
+that the calling script can generate.  This allows .cfx scripts to be used with AWB,
+which uses --dir and --list commands to create a GUI display of the virtual directory
+provided by a .cfx script.
+
+The argument to Directory() is simply a list of benchmark configs that this script generates,
+which may be a simple list of names, or a list of directory-structured names with "/" as
+the directory separator.
+
+=cut
+
+sub Directory {
+  @Directory = @_;
+}
+
+# generate and emit browsing information required by AWB
+sub GenDirectory {
+  my $gcfg = Asim::GenCFG->new();
+  foreach my $full ( @Directory ) {
+    my $name = basename( $full );
+    my $dir  = dirname ( $full );
+    my @tree = File::Spec->splitdir( $dir );
+    if ( $dir eq '.' ) { @tree = (); }
+    $gcfg->add(
+      name   => $name,
+      tree   => \@tree,
+      info   => "benchmark configuration $full",
+      feeder => 'archlib',
+      setup  => 'bogus setup script to be filled in later'
+    );
+  }
+  $gcfg->action(@ARGV);
 }
 
 ################################################################

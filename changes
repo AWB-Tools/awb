@@ -3468,3 +3468,29 @@ Updating with simcore changes (rev. 2428 - Krishna Rangan)
 
 - revised method to calculate pending users job and total asim jobs in
 netbtch.
+
+----------
+spartha1    Date: Mon Oct  1 17:00:23 EDT 2007  CSN: CSN-asimcore-179
+                  Mon Oct  1 21:00:23 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/GenCFG
+ Auto.pm                   Locally Modified          178 
+
+Directory tools/scripts/bm/tracecache
+ multi-tlist.cfx           Locally Modified          178 
+
+Updating with simcore changes (rev. 2429 - Carl Beckmann)
+
+- Support for AWB-friendly generic .cfx files.
+Now you can create generic .cfx scripts that get their benchmark name
+from what follows .cfx in the directory path, but there is now an additional
+Directory() command in GenCFG::Auto that generic .cfx scripts can use to
+display a directory of benchmarks that gets displayed in AWB.
+(Got this partially from the MT branch, with some additional changes).
+
+Modified the multi-tlist.cfx script so it can be used with AWB. If you make
+a copy of (or soft link to) multi-tlist.cfx, then in AWB it will find any
+.tlist files in the directory hierarchy below it, and it will set up a
+multicore benchmark run to run all the listed traces in parallel on the model.
+It works with pure-Asim style multicore models.

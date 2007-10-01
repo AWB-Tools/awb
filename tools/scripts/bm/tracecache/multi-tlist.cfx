@@ -23,40 +23,107 @@
 # Generic benchmark configuration script
 # for multi-trace benchmarks, where the list of
 # traces to use comes from a file.
-# Used in a .benchmarks file as follows:
+#
+# USED IN A .BENCHMARKS FILE AS FOLLOWS:
 #   /path/to/this/script.cfx/path/to/trace/list/file.cfg
 #
+# When invoked with --emit (e.g. when browsing for benchmarks
+# in AWB), this script will look for all files named *.tlist
+# in the directory tree where this script resides.
+#
+# USED IN A MODEL SOURCE TREE AS FOLLOWS:
+#
+# Simply create a soft link to this script in the benchmark
+# configuration source tree under
+#
+#   <workspace>/src/asim-<pkgname>/config/bm/<...etc...>
+#
+# and when you browse to it in AWB, you will be able to see
+# any .tlist files below it in the tree, and be able to configure
+# a multithreaded benchmark run using the traces in those tlist files.
+#
+use File::Basename;
+use File::Spec;
+use Asim::GenCFG;
 use Asim::GenCFG::Auto;
 
 # basic tools we need
 my $RESOLVER = 'awb-resolver';
 my $GET_PATH = 'fetch-trace --nofetch';
 
-# get the path to the generic multi-trace setup script in this diretory:
-chomp( my $setup = `$RESOLVER tools/scripts/bm/tracecache/multi.setup` );
+# location where this .cfx script resides
+my $location = File::Spec->rel2abs( dirname( $0 ) );
 
-# get the argument that follows "--emit", e.g. "path/to/trace/list/file.cfg"
-(my $trace_list_arg = $ARGV[1]) =~ s/\.cfg$//;
-chomp(my $trace_list_file = `$RESOLVER $trace_list_arg` );
-if ( ! -e $trace_list_file ) { die "cannot open $trace_list_arg\n"; }
-open TRACE_LIST, $trace_list_file || die $!;
+if ( $ARGV[0] ne '--emit' ) {
+  ##
+  ## GENERATE A LIST OF CFG FILES FOR AWB BROWSING
+  ##
+  my $gcfg = Asim::GenCFG->new();
+  
+  # get the directory where this script resides,
+  # and find all .tlist files below it:
+  open TLISTFILES, "find $location -name \'*.tlist\' |";
+  while ( <TLISTFILES> ) {
+    chomp;
+#    # the displayed paths are relative to the workspace union dir,
+#    # i.e. with the "src/<packagedir>/" taken out:
+#    my $full = File::Spec->abs2rel( $_, $ENV{AWBLOCAL} );
+#    $full =~ s/^src\/[^\/]+\///;
+    # the displayed paths are relative to the location of this script:
+    my $full = File::Spec->abs2rel( $_, $location );
+    my $name = basename( $full );
+    my $dir  = dirname ( $full );
+    my @tree = File::Spec->splitdir( $dir );
+    if ( $dir eq '.' ) { @tree = (); }
+    $gcfg->add(
+      name   => $name,
+      tree   => \@tree,
+      info   => "multithreaded workload with trace names from file $full",
+      feeder => 'archlib',
+      setup  => 'bogus setup script to be filled in later'
+    );
+  }
+  $gcfg->action(@ARGV);
+  exit(0);
 
-# read the trace list file one line at a time,
-# discarding empty lines and lines that begin with "#",
-# and build up the setup script arguments:
-while ( <TRACE_LIST> ) {
-  chomp;
-  s/^\s*//;
-  s/\#.*$//;
-  if ( m/^$/ ) { next; }
-  # look up the location in the master trace list files:
-  chomp ( my $trace_path = `$GET_PATH $_ | tail -1` );
-  $trace_path =~ s/^\s*//;
-  $trace_path =~ s/\s*$//;
-  die "unknown trace location" if ( $trace_path eq '' );
-  # add to the list of setup arguments:
-  $setup .= " $trace_path";
+} else {
+  ##
+  ## EMIT A SINGLE .cfg FILE.
+  ## This section copied verbatiom from multi-tlist.cfx
+  ## in simcore/tools/scripts/bm/tracecache
+  ##
+
+  # get the path to the generic multi-trace setup script in this diretory:
+  chomp( my $setup = `$RESOLVER tools/scripts/bm/tracecache/multi.setup` );
+
+  # get the argument that follows "--emit", e.g. "path/to/trace/list/file.cfg".
+  # First see if the file exists in a path relative to the location of this script,
+  # and if that fails, look for it in a union dir location in the workspace:
+  (my $trace_list_arg = $ARGV[1]) =~ s/\.cfg$//;
+  my        $trace_list_file = File::Spec->catfile( $location, $trace_list_arg );
+  if ( ! -e $trace_list_file ) {
+    chomp(  $trace_list_file = `$RESOLVER $trace_list_arg` );
+  }
+  if ( ! -e $trace_list_file ) { die "cannot open $trace_list_arg\n"; }
+  open TRACE_LIST, $trace_list_file || die $!;
+
+  # read the trace list file one line at a time,
+  # discarding empty lines and lines that begin with "#",
+  # and build up the setup script arguments:
+  while ( <TRACE_LIST> ) {
+    chomp;
+    s/^\s*//;
+    s/\#.*$//;
+    if ( m/^$/ ) { next; }
+    # look up the location in the master trace list files:
+    chomp ( my $trace_path = `$GET_PATH $_ | tail -1` );
+    $trace_path =~ s/^\s*//;
+    $trace_path =~ s/\s*$//;
+    die "unknown trace location" if ( $trace_path eq '' );
+    # add to the list of setup arguments:
+    $setup .= " $trace_path";
+  }
+
+  # now generate the benchmark CFG file:
+  Asim::GenCFG::Auto::Generate( setup => $setup );
 }
-
-# now generate the benchmark CFG file:
-Asim::GenCFG::Auto::Generate( setup => $setup );
