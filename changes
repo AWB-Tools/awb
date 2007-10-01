@@ -3494,3 +3494,34 @@ a copy of (or soft link to) multi-tlist.cfx, then in AWB it will find any
 .tlist files in the directory hierarchy below it, and it will set up a
 multicore benchmark run to run all the listed traces in parallel on the model.
 It works with pure-Asim style multicore models.
+
+----------
+spartha1    Date: Mon Oct  1 17:03:30 EDT 2007  CSN: CSN-asimcore-180
+                  Mon Oct  1 21:03:30 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Package
+ DB.pm                     Locally Modified          179 
+ Copy.pm                   Locally Modified          179 
+ Cvs.pm                    Locally Modified          179 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          179 
+
+Directory libperl/Asim/lib/Asim
+ Util.pm                   Locally Modified          179 
+ Repository.pm             Locally Modified          179 
+
+Updating with simcore changes (rev. 2430 - Joel Emer)
+
+Various fixes for properly supporting bitkeeper respositories.
+
+Changes in Package::Copy, Repository::* are for proper elimination of
+repository administration files, e.g., CVS/, .svn/ and SCCS/, during
+operations on package copies generated with 'use package'.
+
+Package::DB changes are to skip over SCCS/ directories during
+various package administration operations.
+
+Util and Package::Cvs chnages are to move cvs version check to
+a more reasonable place.

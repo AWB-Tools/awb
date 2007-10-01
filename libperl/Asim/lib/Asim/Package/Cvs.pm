@@ -126,6 +126,17 @@ sub init {
   if (! defined($ENV{CVS_RSH})) {
     Asim::Package::iwarn("Environment variable CVS_RSH not set - this is probably a problem\n");
   }
+
+  #
+  # Check CVS version
+  #
+  my @cvsv = grep(/\(CVS\)\s+\d+\.\d+/, (`cvs -v`));
+  $cvsv[0] =~ /(\d+\.\d+)/;
+  if ($1 < 1.1) {
+    Asim::Package::iwarn("Possible incompatible CVS version looking for >=1.1, found ($1)\n");
+  }
+
+
 }
 
 ################################################################

@@ -145,8 +145,12 @@ sub update {
     return undef;
   }
 
+  # Rsync the copy of the package
+  #   Remember to exclude all repository administration files (CVS/, .svn/, SCCS/)
+  #   This must match the operation in Asim::Repsitory:checkout() for "copy" type checkouts
+
   print "Updating a COPY package\n";
-  my $status  = system("rsync -av --exclude CVS --delete $source $destination");
+  my $status  = system("rsync -av --exclude=CVS/ --exclude=.svn/ --exclude=SCCS/ --delete $source $destination");
   $status    |= system("echo $source >$destination/COPY");
 
   if ($status) {

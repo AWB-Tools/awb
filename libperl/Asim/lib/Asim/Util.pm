@@ -317,15 +317,6 @@ sub issane {
     die "Can't find $RESOLVER or $RESOLVER failed - check your PATH environemt variable\n$msg\n";
   }
 
-  #
-  # Check CVS version
-  #
-  my @cvsv = grep(/\(CVS\)\s+\d+\.\d+/, (`cvs -v`));
-  $cvsv[0] =~ /(\d+\.\d+)/;
-  if ($1 < 1.1) {
-    die "Possible incompatible CVS version looking for >=1.1, found ($1)\n";
-  }
-
 }
 
 issane();

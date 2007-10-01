@@ -191,10 +191,10 @@ sub checkout {
 
   my $method = $archive->{method};
 
-  my $access = $archive->{access} || return 0;
-  my $tag    = $archive->{tag}    || return 0;
-  my $module = $archive->{module} || return 0;
-  my $target = $archive->{target} || return 0;
+  my $access = $archive->{access} || return undef;
+  my $tag    = $archive->{tag}    || return undef;
+  my $module = $archive->{module} || return undef;
+  my $target = $archive->{target} || return undef;
 
   my $targetdir = $self->_checkoutbasedir();
   my $package_dir = $self->checkoutdir();
@@ -205,8 +205,14 @@ sub checkout {
   # and if it is writable
 
   if (! -d "$targetdir" || ! -w "$targetdir") {
-    print "Error: Malformed workspace. \n";
-    print "Check if src directory is present and if it is writable.\n";
+    ierror("Malformed workspace - check if src directory is present and if it is writable.\n");
+    return undef;
+  }
+
+  # Make sure we have a packagename
+
+  if (! defined($self->packagename())) {
+    ierror("No packagename for this package.\n");
     return undef;
   }
 
@@ -274,7 +280,7 @@ sub checkout {
         }
       }
       ierror("Cvs checkout failed\n");
-      return 0;
+      return undef;
     }
 
   } elsif ( $method eq "pserver" ) {
@@ -299,7 +305,7 @@ sub checkout {
         }
       }
       ierror("Cvs checkout failed\n");
-      return 0;
+      return undef;
     }
 
   } elsif ( $method eq "copy" ) {
@@ -309,12 +315,21 @@ sub checkout {
     # Force / at end of access
     $access =~ s-([^/])$-$1/-;
 
-    $status =  system("rsync -av --exclude=CVS $access $package_dir");
+    if ( ! -d $access) {
+      ierror("No public package to copy available at $access\n");
+      return undef;
+    }
+
+    # Copy the package
+    #   Remember to exclude all repository administration files (CVS/, .svn/, SCCS/)
+    #   This must match the method Asim::Package::Copy::update()
+
+    $status =  system("rsync -av --exclude=CVS/ --exclude=.svn/ --exclude=SCCS/ $access $package_dir");
     $status |= system("echo $access >$package_dir/COPY");
 
     if ($status) {
       ierror("Package rsync failed\n");
-      return 0;
+      return undef;
     }
 
   } elsif ( $method eq "bitkeeper" ) {

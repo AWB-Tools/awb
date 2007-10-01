@@ -222,6 +222,7 @@ sub duplicates {
         $p =~ /^\#/  && next;
         $p =~ /^CVS$/ && next;
         $p =~ /^\.svn$/ && next;
+        $p =~ /^SCCS$/ && next;
         $p =~ /^\.$/   && next;
         $p =~ /^\.\.$/ && next;
       
@@ -285,6 +286,7 @@ sub get_package_by_dirname {
     $b =~ /^\#/  && next;
     $b =~ /^CVS$/  && next;
     $b =~ /^\.svn$/  && next;
+    $b =~ /^SCCS$/  && next;
     $b =~ /^\.$/   && next;
     $b =~ /^\.\.$/ && next;
 

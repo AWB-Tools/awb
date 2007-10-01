@@ -401,12 +401,13 @@ sub get_public_repository {
   $access = Asim::Packagedir() . "/" . $name . "/" . $tag;
   $desc   = "Unknown";
 
-  $repository = Asim::Repository->new(method  => "copy",
-                                      access  => $access,
-                                      module  => "asim-$name",
-                                      tag     => $tag,
-                                      target  => "asim-$name",
-                                      changes => "changes");
+  $repository = Asim::Repository->new(packagename => $name,
+                                      method      => "copy",
+                                      access      => $access,
+                                      module      => "asim-$name",
+                                      tag         => $tag,
+                                      target      => "asim-$name",
+                                      changes     => "changes");
 
   return $repository;
 }
