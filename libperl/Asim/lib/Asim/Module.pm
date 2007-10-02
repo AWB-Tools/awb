@@ -331,27 +331,36 @@ sub open {
     # %export [%dynamic] NAME DEFAULT "DESCRIPTION"
     # %const [%dynamic] NAME DEFAULT "DESCRIPTION"
 
-    if (/^.*(param|export|const)\s+(%dynamic)?\s*(\w*)\s+(\"[^"]*\")\s+\"([^"]*)\"/) {
+    my $p_cmd      = '%param|%export|%const';
+    my $p_switches = '(%dynamic\s+|--dynamic\s+)?(%global\s+|--global\s+)?';
+    my $p_name     = '\w+';
+    my $p_string   = '\"[^"]*\"';
+    my $p_default  = '\'?\w+';
+    my $p_desc     = '[^"]+';
+
+    if (/^.*(${p_cmd})\s+${p_switches}\s*(${p_name})\s+(${p_string})\s+\"(${p_desc})\"/) {
       #
       # Add string parameter
       #
       my $param = Asim::Module::Param->new( type => $1,
                                             dynamic => ((defined $2) ? 1 : 0),
-                                            name => $3,
-                                            default => "$4",
-                                            description => "$5");
+                                            global => ((defined $3) ? 1 : 0),
+                                            name => $4,
+                                            default => "$5",
+                                            description => "$6");
 
       push(@{$self->{params}}, $param);
       next;
-    } elsif (/^.*(param|export|const)\s+(%dynamic)?\s*(\w*)\s+('?\w*)\s+\"([^"]*)\"/) {
+    } elsif (/^.*(${p_cmd})\s+${p_switches}\s*(${p_name})\s+(${p_default})\s+\"(${p_desc})\"/) {
       #
       # Add normal (numeric) parameter
       #
       my $param = Asim::Module::Param->new( type => $1,
                                             dynamic => ((defined $2) ? 1 : 0),
-                                            name => $3,
-                                            default => "$4",
-                                            description => "$5");
+                                            global => ((defined $3) ? 1 : 0),
+                                            name => $4,
+                                            default => "$5",
+                                            description => "$6");
 
       push(@{$self->{params}}, $param);
       next;
@@ -549,8 +558,6 @@ sub accessors {
 	    requires
 	    public
 	    private
-        sources
-        addsources
 	    makefile
 	    parameters
 	    default_attributes
@@ -1130,6 +1137,7 @@ sub setparameter {
   my $pvalue = shift;
 
   my @params = $self->parameters();
+
   foreach my $p (@params) {
       if ($p->name() eq $pname) {
 	  $p->value($pvalue);
@@ -1167,6 +1175,44 @@ sub getparameter {
   return undef;
 }
 
+
+
+################################################################
+
+=item $module-E<gt>find_global_parameters();
+
+Recursively search the module list looking for all the
+global parameters.
+
+Note: This method picks up the 'global' parameters from a
+      submodel but does not recurse into them.
+
+=cut
+
+################################################################
+
+sub find_global_parameters {
+  my $self = shift;
+  my $recurse = shift || 0;
+
+  my @result = ();
+
+  foreach my $p ($self->parameters()) {
+    if ($p->global()) {
+      push(@result, $p);
+    }
+  }
+
+  return if ($recurse && $self->isroot());
+
+  foreach my $submodule ($self->submodules) {
+    next unless defined($submodule);
+
+    push(@result, $submodule->find_global_parameters(1));
+  }
+
+  return (@result);
+}
 
 
 ################################################################
@@ -1397,6 +1443,8 @@ sub find_module_requiring {
   return undef;
 }
 
+
+
 ################################################################
 
 =item $module-E<gt>issame($module2)
@@ -1548,6 +1596,41 @@ sub dump {
 
   return;
 }
+
+
+################################################################
+
+=item @outlist = Asim::Module::module_grep(&match, $module [,@inlist])
+
+The non-method call will search through all the modules starting
+at $module and select the modules that satify the match criteria
+of the expression &match.
+
+Diabled due to Perl problem - 'called too early to check prototype'
+
+=cut
+
+################################################################
+
+
+#sub module_grep (&$) {
+#  my $match = shift;
+#  my $module = shift;
+#  my @result = ();
+#
+#  if (&$match($module)) {
+#    push(@result, $module);
+#  }
+#
+#  foreach my $submodule ($module->submodules()) {
+#    next unless defined($submodule);
+#    next if $submodule->isroot();
+#
+#    push(@result, module_grep($match, $submodule));
+#  }
+#
+#  return @result;
+#}
 
 
 ################################################################

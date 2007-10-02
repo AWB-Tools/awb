@@ -791,6 +791,8 @@ void apm_edit::moduleInsertSubmodelAction_activated()
     our $model;
     
     my $item = Model->selectedItem() || return;
+    my $child_item;
+
     my $cwd;
 
     if (defined($model) && defined($model->filename())) {
@@ -830,15 +832,20 @@ void apm_edit::moduleInsertSubmodelAction_activated()
     ###
 
     #
-    # Clear out the existing node
-    #
-    moduleDelete($item);
-
-    #
     # Replace the module in the model
     #
-    my $parent_module = $model->find_module_requiring($submodel->provides()); 
-    $model->add_submodule($parent_module, $submodel->modelroot());
+    $model->smart_add_submodule($submodel);
+
+    #
+    # Remove children of module being replaced
+    #
+
+    $child_item = $item->firstChild();
+    while( defined($child_item) ) {
+            my $next_child_item = $child_item->nextSibling();
+            $item->takeItem($child_item);
+            $child_item = $next_child_item;
+        }
 
     #
     # Add the submodel information in the tree
@@ -1363,66 +1370,23 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
 
     my $alt_item = shift;
 
-    my $item;
+    my $item = Model->selectedItem() || die("No item was selected in model");
     my $child_item;
 
     my $module_name = $alt_item->text(0);
     my $module_filename = $alt_item->text(1) || return;
 
     my $module = Asim::Module->new($module_filename) || return;
-    
-    my $parent_module;
-    my $old_module;
-
-
-    if ($module->provides() eq $model->provides()) {
-        #
-        # This is the root --- handle specially
-        #
-        $parent_module = undef;
-        $old_module = $model->modelroot();
-
-
-    } else {
-        #
-        # This is an internal node...
-        #
-        
-        #
-        # Find the parent module by looking for the module that
-        # requires a module of the chosen type.... 
-        #
-        #    Note: implicit dependence on single provides
-        #
-        $parent_module = $model->find_module_requiring($module->provides()); 
-        $old_module = $parent_module->find_module_providing($module->provides());
-    }
-
 
     #
-    # Preserve any sub-submodules that were of the same type 
-    # as in the submodule being replaced, as long as we are 
-    # not the root of a submodel.
+    # TBD: Refactor this code with submodel insertion routines
     #
-    if (defined($old_module)
-        && !($old_module->isroot() && defined($parent_module))) {
-        foreach my $s ($old_module->submodules()) {
-            if (defined($s)) {
-                $model->add_submodule($module, $s);
-            }
-        }
-    }
 
-    #
     # Add the new child module into the tree
     #
-    $model->add_submodule($parent_module, $module);
-        
-    #
-    # Get the current item, then
-    #
-    $item = Model->selectedItem() || die("No item was selected");
 
+    $model->smart_add_submodule($module);
+        
     #
     # Remove children of module being replaced
     #
@@ -1467,33 +1431,34 @@ void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
 
     my $alt_item = shift;
 
-    my $item;
+    my $item = Model->selectedItem() || die("No item was selected in model");
+    my $child_item;
 
     my $model_name = $alt_item->text(0);
     my $model_filename = $alt_item->text(1) || return;
 
     my $submodel = Asim::Model->new($model_filename) || return;
 
-    #
-    # Get the current item, then
-    #
-    $item = Model->selectedItem() || die("No item was selected");
-
-
     ###
     ### TBD: Do not duplicate code from moduleInsertSubmodelAction_activated
     ###
 
     #
-    # Clear out the existing node
-    #
-    moduleDelete($item);
-
-    #
     # Replace the module in the model
     #
-    my $parent_module = $model->find_module_requiring($submodel->provides()); 
-    $model->add_submodule($parent_module, $submodel->modelroot());
+
+    $model->smart_add_submodule($submodel);
+
+    #
+    # Remove children of module being replaced
+    #
+
+    $child_item = $item->firstChild();
+    while( defined($child_item) ) {
+            my $next_child_item = $child_item->nextSibling();
+            $item->takeItem($child_item);
+            $child_item = $next_child_item;
+        }
 
     #
     # Add the submodel information in the tree
@@ -1582,6 +1547,15 @@ void apm_edit::ParamChange_clicked()
     my $module_item = Model->selectedItem();
     my $provides = $module_item->text(0);
     my $module = $model->find_module_providing($provides);
+
+    #
+    # Check if module is really the root of a submodel.
+    # In that case, we want to change the submodels's 'global' parameter,
+    # which is in the model that is the owner() of the module.
+    #
+    if ($module->isroot() && ($module != $model->modelroot())) {
+      $module = $module->owner();
+    }
 
     $module->setparameter($name, $value);
     $model->modified(1);

@@ -122,6 +122,8 @@ sub _initialize {
   $self->{build_dir} = undef;
   $self->{run_dir} = undef;
 
+  $self->{params}    = [];
+
   $self->{missing} = 0;
   $self->{missing_packages} = {};
 
@@ -163,7 +165,7 @@ sub open {
   $self->{inifile} = $inifile;
 
   #
-  # Get the well known root modulesrs
+  # Get the well known root modules
   #
   my $version = $inifile->get("Global", "Version");
 
@@ -186,10 +188,18 @@ sub open {
     _process_error("Illegal model version - $version\n");
     return ();
   }
+
+  #
+  # Collect globally export parameters from modules
+  # and add them as parameters of the model itself
+  # 
+  @{$self->{params}} = $self->modelroot()->find_global_parameters();
+						  
   #
   # Get module packfile
   #
   $self->{packfile} = ($self->_get_packfile());
+
 
   $self->modified(0);
   return 1;
@@ -212,7 +222,7 @@ sub _get_module {
 
   if ($awbfile =~ /\.apm$/) {
     # It is a sub-model!!!
-    return $self->_get_submodel($awbfile);
+    return $self->_get_submodel($modname, $awbfile);
   }
 
   my $module = Asim::Module->new($awbfile);
@@ -261,7 +271,10 @@ sub _get_module {
 
 sub _get_submodel {
   my $self = shift;
+  my $modname = shift;
   my $apmfile = shift;
+
+  my $inifile = $self->{inifile};
 
   my $submodel = Asim::Model->new($apmfile);
 
@@ -270,6 +283,18 @@ sub _get_submodel {
     $self->{missing}++;
     return undef;
   }
+
+  #
+  # Override parameters (copy of code in _get_module)
+  #
+  my @overrides = $inifile->get_itemlist("$modname/Params");
+
+  foreach my $o (@overrides) {
+      my $v = $inifile->get("$modname/Params", $o);
+      $submodel->setparameter($o, $v) 
+        || _process_warning("Attempt to set undefined parameter ($o)\n");
+  }
+
 
   #
   # Collect information about missing modules and
@@ -281,8 +306,11 @@ sub _get_submodel {
     $self->{missing_packages}->{$p} = 1;
   }
 
-  # Node modelroot will be marked isroot() so one can
-  # tell that we're in a submodel.
+  #
+  # A submodel is represented simply as a module in the tree, but
+  # because it has the property isroot() and its owner() will not be
+  # the top-level model, one check check if it is a submodel.
+  #
 
   return $submodel->modelroot();
 }
@@ -418,18 +446,17 @@ sub _put_module {
 
   if ($module->isroot() && $self != $module->owner()) {
     #
-    # This is a submodel
-    # Put reference to submodel
-    #
-    $filename = $Asim::default_workspace->unresolve($module->owner()->filename());
-    $inifile->put($modname, "File", $filename);
-
-    $packagename = Asim::file2package($filename);
-    $inifile->put($modname, "Packagehint", $packagename);
-    return;
+    # This is a submodel - put reference to submodel
+    # 
+    $module = $module->owner();
+    $filename = $Asim::default_workspace->unresolve($module->filename());
+  } else {
+    $filename = $module->filename();
   }
 
-  $filename = $module->filename();
+  #
+  # Save filename and packagehint
+  #
   $inifile->put($modname, "File", $filename);
 
   $packagename = Asim::file2package($filename);
@@ -446,6 +473,7 @@ sub _put_module {
 
   #
   # Recursively put the submodules
+  #    Note: submodels will have no submodules
   #
   foreach my $s  ($module->submodules()) {
     if (!defined($s)) {
@@ -738,6 +766,24 @@ sub modelroot  {
 
 ################################################################
 
+=item $model-E<gt>submodules()
+
+Return submodules of this model, which is the null set since 
+this is a model.
+
+Only here for compatibility with Asim::Module::submodules
+
+=cut
+
+################################################################
+
+sub submodules {
+  return ();
+}
+
+
+################################################################
+
 =item $model-E<gt>smart_add_submodule($parent_module $child_module)
 
 Add the $child_module as a submodule of the parent module.
@@ -761,6 +807,8 @@ sub smart_add_submodule {
   my $old_child_module;
 
   my $provides = $new_child_module->provides();
+
+  print "Smart adding " . $new_child_module->name() . "\n" if ($debug);
 
   if ($provides eq $self->provides()) {
     #
@@ -795,12 +843,43 @@ sub smart_add_submodule {
   }
 
 
+  # Preserve values of identially named global parameters 
+  # from previous module in new module
+
+  if (defined($old_child_module)) {
+    my @parameters = ();
+
+    if ($old_child_module->isroot() && $self != $old_child_module->owner()) {
+      @parameters = $old_child_module->owner()->parameters();
+    } else {
+      @parameters = $old_child_module->parameters();
+    }
+
+    foreach my $p (@parameters) {
+      #
+      # Try to set value to previous value
+      #    - setparameter() will ignore parameter names it doesn't know
+      #    - similarly setting a parameter to its default value is okay
+      #
+      $new_child_module->setparameter($p->name(), $p->value());
+    }
+  }
+
   #
   # Check if we're adding a submodel
   #
   if (ref($new_child_module) eq "Asim::Model") {
+
+    print "Adding a new submodel\n" if ($debug);
+
+    #
+    # A submodel is represented simply as a module in the tree, but
+    # because it has the property isroot() and its owner() will not be
+    # the top-level model, one check check if it is a submodel
+    #
     return $self->add_submodule($parent_module, $new_child_module->modelroot());
   }
+
 
   #
   # Preserve any sub-submodules that were of the same type 
@@ -931,8 +1010,10 @@ sub private {
 
 =item $model-E<gt>parameters()
 
-Return the parameters. Just here for compabitility with a module,
-and so always returns an empty list.
+Return the parameters. Which are all the global parameters
+of the submodel.
+
+Exact copy of code from Asim::Module::paramters
 
 =cut
 
@@ -940,8 +1021,48 @@ and so always returns an empty list.
 
 sub parameters {
   my $self = shift;
+  my @value = (@_);
 
-  return ();
+  if (@value) {
+    @{$self->{params}} = (@value);
+  }
+
+  return @{$self->{params}};
+}
+
+
+################################################################
+
+=item $model-E<gt>setparameter($name, $value)
+
+Set parameter of this (sub)model with name $name to $value.
+Returns undef if there is no such parameter.
+
+Exact copy of code from Asim::Module::setparameter
+
+WARNING: This changes the value of the paramters in the submodel
+         so don't ever save the submodel...
+
+=cut
+
+################################################################
+
+
+sub setparameter {
+  my $self = shift;
+  my $pname = shift;
+  my $pvalue = shift;
+
+  my @params = $self->parameters();
+
+  foreach my $p (@params) {
+    if ($p->name() eq $pname) {
+      $p->value($pvalue);
+      return 1;
+    }
+  }
+
+  return undef;
 }
 
 

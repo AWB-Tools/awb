@@ -3658,3 +3658,39 @@ Updating with simcore changes (rev. 2444 - Joel Emer)
 
 Added feature to apm-find-replace to allow bulk changes to
 model parameters.
+
+----------
+spartha1    Date: Tue Oct  2 14:15:02 EDT 2007  CSN: CSN-asimcore-189
+                  Tue Oct  2 18:15:02 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim/Module
+ Param.pm                  Locally Modified          188 
+
+Directory libperl/Asim/lib/Asim
+ Base.pm                   Locally Modified          188 
+ Module.pm                 Locally Modified          188 
+ Model.pm                  Locally Modified          188 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          188 
+
+Updating with simcore changes (rev. 2446 - Joel Emer)
+
+Added (partial) support of submodel parameters.
+
+The parameters in a module within a submodel can now be specified
+as global with the --global switch on the %param directive. These
+parameters will be visible at the submodel level and thus can be
+set in the parent model that includes the submodel. Thus, in
+apm-edit a submodel will display parameters that can be updated.
+
+NOTE: this only works for HAsim models, since AMC and its C++
+libraries do not yet support this functionality.
+
+The changes in apm-edit were to use the method smart_add_module()
+in Asim::Model to add new modules into a model. This functionality
+includes the uniform reinsertion of the current child modules of a
+module that is being replaced as the children of the new module
+and the new capability to preserve the overrides on parameters in
+the old module as the same named parameters in the new module.

@@ -87,7 +87,8 @@ sub _initialize {
 		name => "",
 		description => "",
 		type => "",
-                dynamic => "",
+                dynamic => 0,
+		global => 0,
 		value => undef,
 		default => undef,
 		@_
@@ -104,6 +105,32 @@ sub _initialize {
 
   return $self;
 }
+
+################################################################
+
+=item $module-E<gt>dup()
+
+Return a copy of the object
+
+=cut
+
+################################################################
+
+sub dup {
+  my $self = shift;
+
+  my $param = Asim::Module::Param->new( type        => $self->{type},
+					dynamic     => $self->{dynamic},
+					global      => $self->{global},
+					name        => $self->{name},
+					default     => $self->{default},
+					value       => $self->{value},
+					description => $self->{description});
+
+
+  return $param;
+}
+
 
 ################################################################
 
@@ -192,6 +219,27 @@ sub dynamic {
       $self->{dynamic} = $value;
   }
   return $self->{dynamic};
+}
+
+################################################################
+
+=item $model-E<gt>global([$value])
+
+Set parameter global to $value if supplied. 
+Always return current (updated) paramter global.
+
+=cut
+
+################################################################
+
+sub global {
+  my $self = shift;
+  my $value = shift;
+
+  if (defined($value)) {
+      $self->{global} = $value;
+  }
+  return $self->{global};
 }
 
 ################################################################
@@ -289,6 +337,12 @@ Textually dump the contents of the object
 # Implemeted in Asim::Base
 
 =back
+
+=head1 NOTES
+
+Although nominally owned by an Asim::Module, parameters can also
+be owned by an Asim::Model when they are the 'global' parameters
+of a submodel.
 
 =head1 BUGS
 

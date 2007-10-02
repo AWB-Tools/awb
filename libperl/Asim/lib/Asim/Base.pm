@@ -482,6 +482,11 @@ sub _dump_field {
   my $ftype;
   my $otype;
 
+  if (! defined($self->{accessors}->{$fname})) {
+    print "Accessor method $fname not found\n";
+    return;
+  }
+
   ($field, $ftype, $otype) = (@{$self->{accessors}->{$fname}});
 
   my $indent = "  " x $level;
