@@ -82,7 +82,7 @@ CONTROLLER_CLASS::~CONTROLLER_CLASS() {
         free(fdArgv);
     }
     if (StatsFileName) {
-	delete StatsFileName;
+	delete [] StatsFileName;
     }
 }
 

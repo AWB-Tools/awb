@@ -3694,3 +3694,17 @@ includes the uniform reinsertion of the current child modules of a
 module that is being replaced as the children of the new module
 and the new capability to preserve the overrides on parameters in
 the old module as the same named parameters in the new module.
+
+----------
+spartha1    Date: Tue Oct  2 14:18:27 EDT 2007  CSN: CSN-asimcore-190
+                  Tue Oct  2 18:18:27 UTC 2007
+
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified          189 
+
+Updating with simcore changes (rev. 2447 - Pau Cabre)
+
+Fixed a valgrind error
+
+Pau
