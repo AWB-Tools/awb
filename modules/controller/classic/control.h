@@ -1100,6 +1100,11 @@ class CONTROLLER_CLASS {
     int  ParseVariables  ( char *argv[], UINT32 argc            );
     int  parseTraceCmd   ( const char *progName, const char *command, string &regex, int &level );
 
+  private:
+    deque<char *> cfg_filename_stack;
+    void ResolveConfigFile( ifstream &cfg_file, char *relative_name );
+    bool file_exists (char * filename);
+
   protected:
     // TraceFileName (in debugger mode)
     char *StatsFileName; 

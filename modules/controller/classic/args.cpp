@@ -27,6 +27,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <iostream>
+#include <strstream> 
+#include <unistd.h>
+#include <libgen.h>
+#include <alloca.h>
 
 // ASIM core
 #include "asim/syntax.h"
@@ -248,10 +252,13 @@ CONTROLLER_CLASS::ParseConfigFile( char *cfg_file_name )
     const INT32 MAXARGS = 4096;
     char *argv[MAXARGS];
     INT32 argc = 0;
+
     //
     // parse the input file and build and argv list
     //
-    ifstream cfg_file( cfg_file_name );       // open the input file
+    ifstream cfg_file;
+    ResolveConfigFile( cfg_file,cfg_file_name);
+
     ASSERT( !cfg_file.fail(), "Error opening configuration file " << cfg_file_name );
     while ( cfg_file.good() ) {               // do for each line in the file:
         const INT32 MAXLINE = 256;
@@ -265,6 +272,7 @@ CONTROLLER_CLASS::ParseConfigFile( char *cfg_file_name )
 	    ASSERTX( argc < MAXARGS );
 	}                                       // end parse each word
     }                                         // end for each line
+
     //
     // process the argv list
     //
@@ -277,7 +285,87 @@ CONTROLLER_CLASS::ParseConfigFile( char *cfg_file_name )
     for (int i = 0; i < argc; i++) {          // now process the args
         theController.PartitionOneArg( argc, argv, i );
     }
+
+    // clean up after ResolveConfigFile()
+    cfg_filename_stack.pop_front();
 }
+
+//
+// return TRUE if and only if the file exists and is readable
+//
+bool 
+CONTROLLER_CLASS::file_exists ( char *filename ) 
+{
+    ifstream fcheck;
+    fcheck.open (filename);
+    bool result = fcheck.good();
+    fcheck.close();
+    return result;
+}
+
+//
+// Resolve the relative location of, and open, a parameter config file.
+// The file name may be an absolute path name, or it may be a relative
+// path, relative either to the current working directory, or to the
+// location of the enclosing config file, if -cfg was called recursively.
+//
+// As a side effect, this pushes the name of the config file just opened
+// onto a stack, which must be popped by the caller when it is done reading
+// the config file
+//
+void
+CONTROLLER_CLASS::ResolveConfigFile( ifstream &cfg_file, char *relative_name )
+{
+    char *absolute_name = NULL;
+    if ( file_exists( relative_name ) )
+    {
+	// filename is already an absolute path
+	absolute_name = relative_name;
+    }
+    else
+    {
+	ostrstream abs1, abs2;
+
+	// relative to current working directory?
+	char   curr_dir[1024];
+	getcwd(curr_dir,1024);
+	abs1 << curr_dir << "/" << relative_name << '\0';
+        bool abs1exists = file_exists( abs1.str() );
+
+	// relative to enclosing .cfg file?
+        bool abs2exists = false;
+        if ( cfg_filename_stack.size() > 0 )
+        {
+            char *cfg_dir = (char *)alloca( 1 + strlen( cfg_filename_stack.front() ) );
+            strcpy( cfg_dir, cfg_filename_stack.front() );
+	    abs2 << dirname( cfg_dir ) << "/" << relative_name << '\0';
+            abs2exists = file_exists( abs2.str() );
+        }
+
+        if ( abs2exists )
+        {
+	    absolute_name = abs2.str();
+	    if ( abs1exists )
+            {
+	        cerr << "WARNING: config file " << relative_name << " found in two locations, "
+                     << abs1.str() << " and " << abs2.str() << " , using " << absolute_name << " !\n";
+	    }
+        }
+        else if ( abs1exists )
+        {
+	    absolute_name = abs1.str();
+	}
+        else
+        {
+	    cerr << "ERROR: no file "  << relative_name << " found!\n"; 
+	}
+    }
+
+    cfg_filename_stack.push_front( absolute_name );
+    cfg_file.open( absolute_name );
+}
+
+
 
 int
 CONTROLLER_CLASS::parseTraceCmd(const char *progName, const char *command, string &regex, int &level) 

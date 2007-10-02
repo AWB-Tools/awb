@@ -3708,3 +3708,22 @@ Updating with simcore changes (rev. 2447 - Pau Cabre)
 Fixed a valgrind error
 
 Pau
+
+----------
+spartha1    Date: Tue Oct  2 14:20:31 EDT 2007  CSN: CSN-asimcore-191
+                  Tue Oct  2 18:20:31 UTC 2007
+
+
+Directory modules/controller/classic
+ control.h                 Locally Modified          190 
+ args.cpp                  Locally Modified          190 
+
+Updating with simcore changes (rev. 2448 - Carl Beckmann)
+
+- The classic controller's "-cfg <filename>" command line option
+now accepts relative pathnames for <filename>. The path can be
+relative to either the current working directory, or in the case
+of recursive -cfg files, relative to the directory in which the
+enclosing config file resides. In the case of a conflict, a warning
+message is issued and the one relative to the enclosing config file
+is used.
