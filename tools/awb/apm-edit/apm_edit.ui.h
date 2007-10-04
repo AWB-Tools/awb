@@ -199,24 +199,37 @@ void apm_edit::fileOpen()
     Model->clear();
 
     my $root = Qt::ListViewItem(Model, undef);
-    my $module = $model->modelroot();
 
     $root->setExpandable(1); 
     $root->setOpen(1); 
-    $root->setText(0, trUtf8($module->provides()));
+    $root->setText(0, trUtf8($model->provides()));
 
-    if ($model->is_default_module($module)) {
-        $root->setPixmap(0, module_default_pix);
+    my $module = $model->modelroot();
+
+    if (! defined($module)) {
+
+        # There is no root module
+
+        $root->setPixmap(0, module_missing_pix);
+        $root->setText(1, trUtf8(""));
+        $root->setText(2, trUtf8(""));
     } else {
-        $root->setPixmap(0, module_pix);
+
+        # There IS a root module
+
+        if ($model->is_default_module($module)) {
+            $root->setPixmap(0, module_default_pix);
+        } else {
+            $root->setPixmap(0, module_pix);
+        }
+
+        $root->setText(1, trUtf8($module->name()));
+        $root->setText(2, trUtf8($module->filename()));
+
+        # Display rest of model...
+
+        buildModel($root, $model->modelroot());
     }
-
-    $root->setText(1, trUtf8($module->name()));
-    $root->setText(2, trUtf8($module->filename()));
-
-    # Display rest of model...
-
-    buildModel($root, $model->modelroot());
 
     # Display error popup if needed
 

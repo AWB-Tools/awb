@@ -192,9 +192,13 @@ sub open {
   #
   # Collect globally export parameters from modules
   # and add them as parameters of the model itself
-  # 
-  @{$self->{params}} = $self->modelroot()->find_global_parameters();
-						  
+  #
+  my $modelroot = $self->modelroot();
+
+  if (defined($modelroot)) {
+    @{$self->{params}} = $modelroot->find_global_parameters();
+  }
+
   #
   # Get module packfile
   #

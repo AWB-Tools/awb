@@ -3727,3 +3727,19 @@ of recursive -cfg files, relative to the directory in which the
 enclosing config file resides. In the case of a conflict, a warning
 message is issued and the one relative to the enclosing config file
 is used.
+
+----------
+jsemer      Date: Thu Oct  4 17:07:28 EDT 2007  CSN: CSN-asimcore-192
+                  Thu Oct  4 21:07:28 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          191 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          191 
+
+Updating with simcore changes (rev. 2449 - Joel Emer)
+
+Gracefully handle .apm files where the root module of a model
+does not exist.
