@@ -52,6 +52,8 @@ our %a =  ( name =>                 [ "name",
                                       "Asim::Module::SourceList" ],
             makefile =>             [ "makefile",
                                       "ARRAY" ],
+            scons =>                [ "scons",
+                                      "ARRAY" ],
             parameters =>           [ "parameters",
                                       "ARRAY",
                                       "Asim::Module::Param" ],
@@ -139,8 +141,9 @@ sub _initialize {
 		 submodules => [],
 		 public => [],
 		 private => [],
-         sourcematrix => [],
+		 sourcematrix => [],
 		 makefile => [],
+		 scons => {},
 		 attributes => [],
 		 default_attributes => [],
 		 mandatory_attributes => [],
@@ -327,6 +330,29 @@ sub open {
       next;
     }
 
+    # %scons FILENAME...
+
+    if (/^.*%scons\s*(%[^ \t]*)?\s+($word)/) {
+      #
+      # Add scons config file to specified category.
+      #
+      my $class = $1;
+      my $fName = $2;
+      if (! defined($class)) {
+        $class = 'top';
+      }
+      elsif ($class =~ /^%(top|hw|sw)$/) {
+        $class =~ s/^%//;
+      }
+      else {
+        ierror("Illegal category for %scons: $class\n");
+        return undef;
+      }
+
+      $self->{scons}{$class} = $fName;
+      next;
+    }
+
     # %param [%dynamic] NAME DEFAULT "DESCRIPTION"
     # %export [%dynamic] NAME DEFAULT "DESCRIPTION"
     # %const [%dynamic] NAME DEFAULT "DESCRIPTION"
@@ -473,6 +499,10 @@ sub save {
     print M " * %makefile $i\n";
   }
 
+  foreach my $k (keys %{$self->{scons}}) {
+    print M " * %scons %" . $self->{scons}{$k} . "\n";
+  }
+
   foreach my $i ($self->library()) {
     print M " * %library $i\n";
   }
@@ -559,6 +589,7 @@ sub accessors {
 	    public
 	    private
 	    makefile
+	    scons
 	    parameters
 	    default_attributes
 	    mandatory_attributes
@@ -1013,6 +1044,39 @@ sub makefile {
   }
 
   return @{$self->{"makefile"}};
+}
+
+################################################################
+
+=item $module-E<gt>scons($category, $update)
+
+Optionally update the scons file for specified category to $update
+
+Return the current (updated) scons files for this module
+
+Note: All scons names are relative to the directory containing
+the awbfile...
+
+=cut
+
+################################################################
+
+sub scons {
+  my $self = shift;
+  my $category = shift;
+  my $value = shift;
+
+  $category = 'top' if (! defined($category));
+  if (defined($value)) {
+    $self->{"scons"}{$category} = $value;
+  }
+
+  if (exists($self->{"scons"}{$category})) {
+    return $self->{"scons"}{$category};
+  }
+  else {
+    return undef;
+  }
 }
 
 ################################################################
