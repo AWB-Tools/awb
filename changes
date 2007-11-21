@@ -3899,3 +3899,16 @@ name specified in the asim-run experiments file, respectively.
 
 Also, improved the speed of checking netbatch queue status by only
 looking at the queue being submitted to.
+
+----------
+spartha1    Date: Wed Nov 21 12:20:35 EST 2007  CSN: CSN-asimcore-200
+                  Wed Nov 21 17:20:35 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          199 
+
+Updating with simcore changes (rev. 2462 - Carl Beckmann)
+
+- Additional changes to asim-run provided by Ankush.
+Use slot= instead of --queue= for more robust netbatch interface.

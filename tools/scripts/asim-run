@@ -43,7 +43,7 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 use File::Basename;
 use Getopt::Long;
 use IO::Handle;
-#use Term::ReadKey;
+use Term::ReadKey;
 use Cwd 'realpath';
 # This is necessary to read the asimrc file
 use Asim;
@@ -325,8 +325,7 @@ if ($debugoutfile ne "") {
   || die "could not open debugoutfile=$debugoutfile\n$!\n";
 }
 
-$BATCH_STATUS_COMMAND = $BATCH_STATUS_COMMAND . " --queue $queue";
-
+#$BATCH_STATUS_COMMAND = $BATCH_STATUS_COMMAND . " slot=$queue "; 
 
 # Quiet overrides verbose...
 if ($quiet) {
@@ -500,7 +499,7 @@ $batch_flags_build = $batch_flags;
 ##########################################################
 print_verbose("Checking netbatch pool....");
 if ( $runbatch && $pool ne "" ) {
-  if (system ("$BATCH_STATUS_COMMAND -P$pool > $asim_runlogfl")) {
+  if (system ("$BATCH_STATUS_COMMAND -P$pool  slot=$queue > $asim_runlogfl")) {
     # We couldn't find the pool.  Exit
     print_error("Unknown pool $pool.\n");
 
@@ -515,7 +514,7 @@ if ( $runbatch && $pool ne "" ) {
 if ($buildbatch) {
     if ($pool_build ne "" ) {
 	print_verbose("Checking netbatch build pool....");	
-	if (system ("$BATCH_STATUS_COMMAND -P$pool_build > $asim_runlogfl")) {
+	if (system ("$BATCH_STATUS_COMMAND -P$pool_build  slot=$queue> $asim_runlogfl")) {
 	    # We couldn't find the pool.  Exit
 	    print_error("Unknown build pool $pool_build.\n");
 
@@ -878,21 +877,21 @@ sub do_experiment
                 my $model_alternate_path = undef;
 
                 my @alternate_checks = (
-                    ".",
-                    "$name",
-                    "default/$name",
-                    "pm",
-                    "$name/pm",
-                    "default/$name/pm",
-                    "BUILD",
-                    "$name/BUILD",
-                    "default/$name/BUILD", # Added Brinda's mods for --nobuild below this line.
-                    "$model_name",
-                    "default/$model_name",
-                    "$model_name/pm",
-                    "default/$model_name/pm",
-                    "$model_name/BUILD",
-                    );
+                        ".",
+                        "$name",
+                        "default/$name",
+                        "pm",
+                        "$name/pm",
+                        "default/$name/pm",
+                        "BUILD",
+                        "$name/BUILD",
+                        "default/$name/BUILD",
+                        "$model_name",
+                        "default/$model_name",
+                        "$model_name/pm",
+                        "default/$model_name/pm",
+                        "$model_name/BUILD"
+                        );
 
                 foreach my $check (@alternate_checks) {
 
@@ -2194,7 +2193,7 @@ sub schedule_job
         }
         else {
             # Determine default pool using netbatch command.
-            run_command ("$BATCH_STATUS_COMMAND -w > $TMP_DIR/pool.$$");
+            run_command ("$BATCH_STATUS_COMMAND -w  slot=$queue> $TMP_DIR/pool.$$");
             open (POOL_FILE, "< $TMP_DIR/pool.$$");
             while (<POOL_FILE>) {
                 if ( /NetBatch\s*QUEUE\s*status\s*-\s*pool\s*(\S+)\s*$/ ) {
@@ -2251,7 +2250,6 @@ sub schedule_job
     #
 
     # Else, loop until we can submit another jobs 
-    
     while (1) {
         #
         # Check for waiting jobs
@@ -2262,8 +2260,8 @@ sub schedule_job
         # or the numerical slot name.  Depending on which format your asimrc file uses,
         # we need to check BOTH formats to make sure we really know how many waiting
         # jobs you have.
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -w -n > $TMP_DIR/wait.$$");
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -w >> $TMP_DIR/wait.$$");
+        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL  -w -n slot=$queue> $TMP_DIR/wait.$$");
+        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL  -w slot=$queue>> $TMP_DIR/wait.$$");
         open (WAIT_JOBS, "<$TMP_DIR/wait.$$");
         while (<WAIT_JOBS>) {
             chomp;
@@ -2280,7 +2278,7 @@ sub schedule_job
         #
         my $num_user_running = 0;
         my $num_total_running = 0;
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL -r -j -f > $TMP_DIR/run.$$");
+        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL  -r -j -f  slot=$queue> $TMP_DIR/run.$$");
         open (RUN_JOBS, "<$TMP_DIR/run.$$");
         while (<RUN_JOBS>) {
 	    chomp;
