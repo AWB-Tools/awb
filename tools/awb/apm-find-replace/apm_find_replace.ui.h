@@ -447,7 +447,6 @@ void apmFindReplace::filterModuleTypeComboBox_activated( const QString & )
 
   for my $i (sort @models) {
     filterModuleMap->{$i->name() . " (submodel)"} = $i;
-    filterModuleComboBox->insertItem($i->name() . " (submodel)");
   }
 
   #
@@ -981,15 +980,15 @@ void apmFindReplace::replaceParamModuleTypeComboBox_activated( const QString & )
   replaceParamModuleMap = {};
 
   #
-  # Insert models (submodels don't have parameters - yet)
+  # Insert models
   #
 
-  #my $modelDB = Asim::Model::DB->new();
-  #my @models = $modelDB->find($awbtype);
+  my $modelDB = Asim::Model::DB->new();
+  my @models = $modelDB->find($awbtype);
 
-  #for my $i (sort @models) {
-  #  replaceParamModuleMap->{$i->name(). " (submodel)"} = $i;
-  #}
+  for my $i (sort @models) {
+    replaceParamModuleMap->{$i->name() . " (submodel)"} = $i;
+  }
 
   #
   # Insert modules
@@ -1007,7 +1006,7 @@ void apmFindReplace::replaceParamModuleTypeComboBox_activated( const QString & )
   #
 
   replaceParamModuleComboBox->clear();
-  replaceParamModuleComboBox->insertItem("<Pick a module to update>");
+  replaceParamModuleComboBox->insertItem("<Pick a module to change parameters in>");
 
   my $hash2 = replaceParamModuleMap;
 
@@ -1223,6 +1222,13 @@ void apmFindReplace::replaceParameter()
   #
 
   my $update_module = $model->find_module_providing($module->provides());
+
+  if ($update_module->isroot() && $model != $update_module->owner()) {
+    #
+    # This is a submodel - put reference to submodel
+    # 
+    $update_module = $update_module->owner();
+  }
    
   #
   # Get the parameter to update...

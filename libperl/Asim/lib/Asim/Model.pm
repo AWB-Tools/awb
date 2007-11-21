@@ -1072,6 +1072,35 @@ sub setparameter {
 
 ################################################################
 
+=item $model-E<gt>getparameter($name)
+
+Get parameter of this module with name $name.
+Returns undef if there is no such parameter.
+
+Exact copy of code from Asim::Module::setparameter
+
+=cut
+
+################################################################
+
+
+sub getparameter {
+  my $self = shift;
+  my $pname = shift;
+
+  my @params = $self->parameters();
+  foreach my $p (@params) {
+      if ($p->name() eq $pname) {
+	  return $p;
+      }
+  }
+
+  return undef;
+}
+
+
+################################################################
+
 =item $model-E<gt>remove_submodule($parent_module $child_module)
 
 Remove the $child_module as a submodule of the parent module.

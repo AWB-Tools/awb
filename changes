@@ -3782,3 +3782,18 @@ records.
 
 added option to asim-batch to allow the run logs to be saved so that we can
 get at simulator output (like heartbeat for ipc analysis)
+
+----------
+spartha1    Date: Wed Nov 21 12:08:02 EST 2007  CSN: CSN-asimcore-195
+                  Wed Nov 21 17:08:02 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          194 
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.ui.h     Locally Modified          194 
+
+Updating with simcore changes (rev. 2455 - Joel Emer)
+
+Added support in apm-find-replace for changing submodel parameters.
