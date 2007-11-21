@@ -154,6 +154,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "hasim-bsc-mkdepend"  => "tools/scripts/hasim-bsc-mkdepend",
   "hasim-configure"     => "tools/scripts/hasim-configure",
   "hasim-connect"       => "tools/scripts/hasim-connect",
+  "hasim-rrr-stubgen"   => "tools/scripts/hasim-rrr-stubgen",
   "model-coverage"      => "tools/scripts/model-coverage",
   "regression.launcher" => "tools/scripts/regression.launcher",
   "regression.verifier" => "tools/scripts/regression.verifier",

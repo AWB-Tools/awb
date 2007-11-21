@@ -4002,3 +4002,15 @@ got inverted, and an assertion fired.
 
 
 Eric
+
+----------
+spartha1    Date: Wed Nov 21 13:42:24 EST 2007  CSN: CSN-asimcore-205
+                  Wed Nov 21 18:42:24 UTC 2007
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          204 
+
+Updating with simcore changes (rev. 2486 - Angshuman Parashar)
+
+added entry for hasim-rrr-stubgen in asimstarter.in
