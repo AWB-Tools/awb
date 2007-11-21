@@ -208,7 +208,7 @@ static char *scan_arg_value( char * &source )
   char buf[MAXWORD], *s, *b;
   enum {normal, quote, esc, done} state;
   for ( s = source, b = buf, state = normal; *s && state != done; s++ ) {
-    ASSERTX( ( b - buf ) < MAXWORD );
+    ASSERTX(((unsigned)(b - buf)) < MAXWORD);
     switch ( state ) {
       case normal:
         if      ( isspace( *s ) ) { *b++ = '\0'; state = done;   }
@@ -955,6 +955,13 @@ CONTROLLER_CLASS::ParseOneEvent (INT32 argc, char *argv[], INT32 &i)
         else if ((strcmp(argv[i], "-pi") == 0) && (argc > (i+1))) 
         {
             theController.CMD_Progress(AWBPROG_INST, "", ACTION_INST_PERIOD,
+                         atoi_general(argv[++i]));
+        }
+        // -pm <n>       indicate progress info every <n> committed macro insts.
+        //
+        else if ((strcmp(argv[i], "-pm") == 0) && (argc > (i+1))) 
+        {
+            theController.CMD_Progress(AWBPROG_MACROINST, "", ACTION_MACROINST_PERIOD,
                          atoi_general(argv[++i]));
         }
         // -pn <n>       indicate progress info every <n> nanoseconds.

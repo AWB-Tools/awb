@@ -56,6 +56,7 @@ class ASIM_ITEM_CLASS
     // would be generated).
     explicit ASIM_ITEM_CLASS(bool generateEvents = true) :
       recId(0),
+      threadId(0),
       eventsEnabled(generateEvents),
       idGenerated(false)
     {     
@@ -70,6 +71,7 @@ class ASIM_ITEM_CLASS
     // It does not produce a NewItemEvent.
     explicit ASIM_ITEM_CLASS(UINT32 i, bool generateEvents = true) :
       recId(0),
+      threadId(0),
       eventsEnabled(generateEvents)
     {
         itemId = i;
@@ -107,11 +109,13 @@ class ASIM_ITEM_CLASS
             itemId = aic.itemId;
             idGenerated = aic.idGenerated;
             recId = aic.recId;
+            threadId = aic.threadId;
 
             // dissaociate aic from the id's.
             aic.itemId = 0;
             aic.idGenerated = false;
             aic.recId = 0;
+            aic.threadId = 0;
         }
 	
         return *this;
@@ -225,18 +229,80 @@ class ASIM_ITEM_CLASS
     inline void SetRecId(UINT32 x) { recId = x; };
     inline UINT32 GetRecId() { return recId; };
 
-    // open the event record based on the item descriptor, the thread id, and 
-    // the optional parent item from which this item was derived.  this is the 
+    // accessors for the event thread id.  it is not terribly wise to play with
+    // these if you are not sure what you are doing.  email slechta if you are
+    // going to call SetThreadId() explicitly
+    inline void SetTheadId(UINT32 x) { threadId = x; };
+    inline UINT32 GetThreadId() { return threadId; };
+
+    // open the event record based on the item descriptor, and the thread id 
+    // with no parent item from which this item was derived.  this is the 
     // analog for the ptlib function pipe_open_record_inst().
+    // NOTE: why specify thread_id when parent has thread_id?
     inline UINT32
-    OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, ASIM_ITEM_CLASS *parent=NULL)
+    OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id, ASIM_ITEM_CLASS *parent)
     {
         if (runWithEventsOn && eventsEnabled)
         {
             EVENT(
-                  UINT32 parent_id = parent ? parent->GetRecId() : 0;
-                  
+                  const UINT32 parent_id = parent ? parent->GetRecId() : 0;
+
+                  threadId = thread_id;
                   recId = DRALEVENT(OpenEventRec(rec, thread_id, parent_id));
+                  );
+        }
+
+        return recId;
+    }
+
+    // open the event record based on the item descriptor, and the thread id 
+    // with no parent item from which this item was derived.  this is the 
+    // analog for the ptlib function pipe_open_record_inst().
+    inline UINT32
+    OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, UINT32 thread_id)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  threadId = thread_id;
+                  recId = DRALEVENT(OpenEventRec(rec, thread_id, 0));
+                  );
+        }
+
+        return recId;
+    }
+
+    // open the event record based on the item descriptor and a mandatory
+    // parent item from which this item was derived.  this is the 
+    // analog for the ptlib function pipe_open_record_inst().  here, the
+    // thread id is inherited from the parent item.
+    inline UINT32
+    OpenEventRec (DRAL_ITEM_DESC_CLASS *rec, ASIM_ITEM_CLASS *parent)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  const UINT32 parent_id = parent ? parent->GetRecId() : 0;
+                  const UINT32 thread_id = parent ? parent->GetThreadId() : 0;
+
+                  threadId = thread_id;
+                  recId = DRALEVENT(OpenEventRec(rec, thread_id, parent_id));
+                  );
+        }
+
+        return recId;
+    }
+
+    // open the event record based on the item descriptor, the threadId, and 
+    // the optional parent item from which this item was derived.  this is the 
+    // analog for the ptlib function pipe_open_record_inst().
+    inline UINT32
+    OpenEventRec (DRAL_ITEM_DESC_CLASS *rec)
+    {
+        if (runWithEventsOn && eventsEnabled)
+        {
+            EVENT(
+                  recId = DRALEVENT(OpenEventRec(rec, threadId, 0));
                   );
         }
 
@@ -247,14 +313,20 @@ class ASIM_ITEM_CLASS
     // inherit (or share) event records among different simulation objects.
     // this is the preferred method for sharing when compared to the next
     // method which passes the record id directly.  this is the analog for 
-    // the ptlib function pipe_reference_record_inst().    
+    // the ptlib function pipe_reference_record_inst().  will inherit thread
+    // id from parent.
     inline UINT32
     RefEventRec (ASIM_ITEM_CLASS *item)
     {
         if (runWithEventsOn && eventsEnabled)
         {
             EVENT(
-                  UINT32 rec_id = item ? item->GetRecId() : 0; 
+                  ASSERTX(item);
+
+                  const UINT32 rec_id = item->GetRecId();
+                  const UINT32 thread_id = item->GetThreadId();
+                  
+                  threadId = thread_id;                  
                   recId = DRALEVENT(RefEventRec(rec_id));
                   );
         }
@@ -266,6 +338,7 @@ class ASIM_ITEM_CLASS
     // inherit (or share) event records among different simulation objects.  the
     // rec_id must be a valid record id from another open event record.  this is 
     // the analog for the ptlib function pipe_reference_record_inst().
+    // NOTE: there are problems here because the thread id is not inherited
     inline UINT32
     RefEventRec (UINT32 rec_id)
     {
@@ -375,6 +448,8 @@ class ASIM_ITEM_CLASS
     UINT64 itemId;
 
     UINT32 recId;
+
+    UINT32 threadId;
 
   private:
 

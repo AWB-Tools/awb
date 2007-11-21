@@ -57,6 +57,8 @@ namespace eval workbench {
     #
     variable lastProgressTime
     variable lastProgressInstrs
+    variable lastProgressMacroTime
+    variable lastProgressMacroInstrs
 
     # Seed of the random number generator
     variable randomSeed
@@ -262,6 +264,10 @@ proc workbench::AwbInit { win mode cmds {cmdsData "NULL"} } {
     set lastProgressTime $startTime
     variable lastProgressInstrs
     set lastProgressInstrs 0
+    variable lastProgressMacroTime
+    set lastProgressMacroTime $startTime
+    variable lastProgressMacroInstrs
+    set lastProgressMacroInstrs 0
     
     #
     # If we have 'bmCmds', instruct the performance model to stop at the
@@ -661,6 +667,7 @@ proc workbench::BatchProgress { progs } {
         switch $progress {
             cycle -
             nanosecond -
+            macroinst -
             inst {
                 ShowProgress
             }
@@ -718,7 +725,7 @@ proc workbench::BatchProgress { progs } {
 ###################################################################
 proc workbench::ShowProgress { } {
     # Print a global summary
-    set str [format "Time: %.0f ns (%.2f ns/s), Total Instrs: %.0f (%.1f i/s)" [PmControl nanosecond] [Nps] [TotalInstrs] [Ips]]
+    set str [format "Time: %.0f ns (%.2f ns/s), Total Instrs: %.0f (%.1f i/s) MacroInstrs: %.0f (%.1f mi/s)" [PmControl nanosecond] [Nps] [TotalInstrs] [Ips] [TotalMacroInstrs] [Mips]]
     puts "$str"
 
     set ncpus [PmControl numcpus]
@@ -843,6 +850,28 @@ proc workbench::TotalInstrs { } {
 
 ###################################################################
 #
+# TotalInstrs
+#
+# Return the number of instrs committed on all CPUs
+#
+###################################################################
+proc workbench::TotalMacroInstrs { } {
+    set ninstrs 0.0
+    set ncpus [PmControl numcpus]
+    for {set i 0} {$i < $ncpus} {incr i} {
+        set is_active [PmControl active $i]
+        if {$is_active == 1} {
+            set comm [PmControl committedmacros $i]
+            set ninstrs [expr $ninstrs + $comm.0]
+        }
+    }
+    
+    return $ninstrs
+}
+
+
+###################################################################
+#
 # Ips
 #
 # Return the rate at which instructions are completed.  The rate
@@ -863,6 +892,37 @@ proc workbench::Ips { } {
     set instrs [TotalInstrs]
     set newinstrs [expr $instrs - $lastProgressInstrs]
     set lastProgressInstrs $instrs
+
+    if { $dif == 0 } {
+        return 0.0
+    } else {
+        return [expr (1000.0 * $newinstrs) / $dif.0]
+    }
+}
+
+
+###################################################################
+#
+# Mips
+#
+# Return the rate at which macro instructions are completed.  The rate
+# is since the last time Ips was called, not since the beginning
+# of the run.  This lets us get a reasonable dynamic view of
+# instrs/s and lets us factor out time spent in warm-up or loading
+# a checkpoint.
+#
+###################################################################
+proc workbench::Mips { } {
+    variable ::workbench::lastProgressMacroTime
+    variable ::workbench::lastProgressMacroInstrs
+
+    set tim [clock clicks -milliseconds]
+    set dif [expr $tim - $lastProgressMacroTime]
+    set lastProgressMacroTime $tim
+
+    set instrs [TotalMacroInstrs]
+    set newinstrs [expr $instrs - $lastProgressMacroInstrs]
+    set lastProgressMacroInstrs $instrs
 
     if { $dif == 0 } {
         return 0.0

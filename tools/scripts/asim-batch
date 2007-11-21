@@ -54,8 +54,10 @@ $tmpdir = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
 $ASIM_LOG = Asim::Util::get_asimrc_val("asim-batch", "ASIM_LOG", undef);
 $env = Asim::Util::get_asimrc_val("asim-batch", "SAVED_ENV_VARS", "LD_LIBRARY_PATH");
 $compress = Asim::Util::get_asimrc_val("asim-batch", "COMPRESS", "gzip");
+$keeprunoutput = Asim::Util::get_asimrc_val("asim-batch", "KEEP_RUN_OUTPUT", 0);
 $rsynchost = "";
 $rsyncresdir = "";
+
 
 #
 # No defaults for the following....
@@ -256,6 +258,10 @@ if (system ("$exec_command $params >> $runlogfl 2>&1")) {
   
 }
 else {
+
+  if ($keeprunoutput) {
+    system ("cp $runlogfl $rundir/$bm.out");
+  }
   # Copy over the stats file and clean up the status of other files in directory. 
 
 #  do not remove the RUN directory; the cleanup script removes it.

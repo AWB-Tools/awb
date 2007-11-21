@@ -3753,3 +3753,32 @@ Directory libperl/Asim/lib/Asim
  Module.pm                 Locally Modified          192 
 
 Manage scons configuration files.
+
+----------
+spartha1    Date: Wed Nov 21 12:06:28 EST 2007  CSN: CSN-asimcore-194
+                  Wed Nov 21 17:06:28 UTC 2007
+
+
+Directory tools/scripts
+ asim-batch                Locally Modified          193 
+
+Directory lib/libasim/include/asim
+ item.h                    Locally Modified          193 
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified          193 
+
+Directory modules/controller/workbench/simple
+ simpleWb.tcl              Locally Modified          193 
+
+Updating with simcore changes (rev. 2450 - Brian Slechta)
+
+enhanced the heartbeat to include MacroInsts in addition to Insts.
+
+add "-pm" for macro instruction heartbeat.
+
+enhanced the ASIM_ITEM with thread id support to be used with PTV event
+records.
+
+added option to asim-batch to allow the run logs to be saved so that we can
+get at simulator output (like heartbeat for ipc analysis)
