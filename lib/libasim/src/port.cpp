@@ -341,7 +341,7 @@ BasePort::ConnectAll()
                "There is no read port for write port "
                << (*i)->GetName() << endl);
         VERIFY(numReadPorts >= numWritePorts, 
-               "Number of write ports("<<numWritePorts<<") exceed number of read ports ("<<numReadPorts<<") for "
+               "Number of write ports exceed number of read ports for "
                << (*i)->GetName() << endl);
         VERIFY(numReadPhasePorts >= numWritePhasePorts, 
                "Number of write phase ports exceed number of read phase ports for "

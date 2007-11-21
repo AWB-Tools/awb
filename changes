@@ -3835,3 +3835,34 @@ Directory modules/system
 Updating with simcore changes (rev. 2458 - Gurunath Ramagiri)
 
 Moved AVF infrastructure to higher level.
+
+----------
+spartha1    Date: Wed Nov 21 12:17:24 EST 2007  CSN: CSN-asimcore-198
+                  Wed Nov 21 17:17:24 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ port.h                    Locally Modified          197 
+
+Directory lib/libasim/src
+ port.cpp                  Locally Modified          197 
+
+Directory modules/system
+ single_chip_common_system_v2.awb Locally Modified          197 
+ multi_chip_common_system.awb Locally Modified          197 
+ multi_chip_common_system_v2.awb Locally Modified          197 
+ single_chip_clockserver_system.awb Locally Modified          197 
+ single_chip_common_system.awb Locally Modified          197 
+ single_chip_clockserver_system_v2.awb Locally Modified          197 
+
+Updating with simcore changes (rev. 2459 - Brian Slechta)
+
+Ok, everything is still broken from the previous commits. We need to make
+forward progress, and it is apparent that there are still issues. I have
+reverted the following packages. The revisions now reflect the HEAD
+of their respective repositories thus backing out Guru's changes.
+
+I would suggest committing all these changes to svn branches and testing
+before committing to the mainline. You can safely use "svn merge"
+capabilities to bring everything back. If you have questions or concerns, let
+me know.
