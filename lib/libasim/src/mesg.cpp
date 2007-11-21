@@ -116,7 +116,8 @@ ASIM_MESG_CLASS::Prepare (
     out << prefix; // print prefix string
     if (printLocation && file)
     {
-        out << file << ":" << line
+        out << dec
+            << file << ":" << line
             << " Cycle:" << global_cycle
             << endl << flush;
     }

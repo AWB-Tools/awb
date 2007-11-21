@@ -4027,3 +4027,16 @@ Updating with simcore changes (rev. 2487 - Brian Slechta)
 
 made some changes to fix asim_item copying with respect to copying DRAL and
 PTV event info.
+
+----------
+spartha1    Date: Wed Nov 21 13:45:22 EST 2007  CSN: CSN-asimcore-207
+                  Wed Nov 21 18:45:22 UTC 2007
+
+
+Directory lib/libasim/src
+ mesg.cpp                  Locally Modified          206 
+
+Updating with simcore changes (rev. 2490 - Brian Slechta)
+
+changes the message printing to explicitly set "dec"imal output to avoid the
+random hex outputs that sometimes occur.
