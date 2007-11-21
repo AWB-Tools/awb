@@ -36,7 +36,8 @@ class VF_DOMAIN_CLASS;
 enum CACHE_ARRAY_TYPE {
   CACHE_DATA = 0,
   CACHE_TAG,
-  CACHE_BOTH
+  CACHE_BOTH,
+  CACHE_OTHER
 };
 
 class POWER_MODEL_CLASS
@@ -157,10 +158,10 @@ class CACHE_POWER_MACRO_CLASS : public BASE_MEM_POWER_MACRO_CLASS
 		       UINT32 tag_read_ports = 0,
 		       UINT32 tag_write_ports = 0) {};
   
-  void Snoop(UINT32 offset){};
-  void Evict(UINT32 offset){};
-  void Partial(UINT32 offset){};
-
+  void Snoop(UINT32 offset = 0){};
+  void Evict(UINT32 offset = 0){};
+  void Partial(UINT32 offset = 0){};
+  void Hit(UINT32 offset = 0){};
 
   // Constructor
   CACHE_POWER_MACRO_CLASS(ASIM_MODULE parent,

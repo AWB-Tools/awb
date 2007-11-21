@@ -3797,3 +3797,18 @@ Directory tools/awb/apm-find-replace
 Updating with simcore changes (rev. 2455 - Joel Emer)
 
 Added support in apm-find-replace for changing submodel parameters.
+
+----------
+spartha1    Date: Wed Nov 21 12:09:20 EST 2007  CSN: CSN-asimcore-196
+                  Wed Nov 21 17:09:20 UTC 2007
+
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified          195 
+ null_power_model.awb      Locally Modified          195 
+
+Updating with simcore changes (rev. 2456 - Sari Coumeri)
+
+* Updated null power model for new hit event in cache macro (SLC)
+
+* Updated null power model awb for new default uncore voltage values (SLC)

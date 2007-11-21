@@ -29,5 +29,9 @@ Awb module specification
 %public null_power_model.h
 
 %export %param   PROJECT_NAME "nhm" "Project name for power macro enable"
+%export %dynamic SYSINT_VOLTAGE 0 "Default Sysint Voltage in mVolts"
+%export %dynamic CACHE_VOLTAGE 0 "Default Cache Voltage in mVolts"
+%export %dynamic IO_VOLTAGE 0 "Default IO Voltage in mVolts"
+%export %dynamic ANALOG_VOLTAGE 0 "Default Analog Voltage in mVolts"
 
 %AWB_END
