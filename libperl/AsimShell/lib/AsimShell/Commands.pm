@@ -706,9 +706,16 @@ sub list_packages {
 }
 
 sub baseline_packages {
+
+  # Parse options
+  my $force_csn = 0;
+  local @ARGV = @_;
+  my $status = GetOptions( "csn!" => \$force_csn );
+  return 0 if (!$status);
+
   foreach my $name ( $default_packageDB->directory() ) {
     my $package = get_package($name);
-    print $name, '/', $package->baseline_tag(), ' ';
+    print $name, '/', $package->baseline_tag( $force_csn ), ' ';
   }
   print "\n";
   return 1;

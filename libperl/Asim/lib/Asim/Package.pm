@@ -784,7 +784,7 @@ sub tag { return $_[0]->_accessor("Global","Tag",$_[1]) || "HEAD"; }
 
 ################################################################
 
-=item $package-E<gt>baseline_tag()
+=item $package-E<gt>baseline_tag([<use_csn>])
 
 Return a tag (see "Tag Syntax", above) that can be used later
 to retrieve exactly the version of the package that is currently
@@ -796,12 +796,16 @@ if you are on the trunk or a branch, it does not return "HEAD" or
 the branch name, but rather the specific version number of the
 working copy.
 
-The default behavior, which works for CVS checkouts or from
+The default behavior, which works for CVS checkouts or on
 "copy" packages that are copies of HEAD, is to return the CSN,
-which has the revision number, and the branch name in it.
+which has the revision number and the branch name in it.
 Derived classes may override this, but must always return a tag
-conforming to the legal tag syntax, that can be used, for example,
-in bundle specifiers.
+conforming to the legal tag syntax.
+
+If the optional <use_csn> flag is passed in as '1', then force
+the use of CSN information from the admin/packages file, even if
+more accurate information is available by querying the revision
+control system directly.
 
 =cut
 
@@ -810,6 +814,7 @@ in bundle specifiers.
 sub baseline_tag
 {
   my $self = shift;
+  my $use_csn = shift; # ignored
   return $self->csn();
 }
 

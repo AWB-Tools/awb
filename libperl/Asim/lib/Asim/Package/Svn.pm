@@ -605,7 +605,7 @@ sub tag_name_from_url {
   return undef;
 }
 
-=item $package-E<gt>baseline_tag()
+=item $package-E<gt>baseline_tag([<use_csn>])
 
 Return a tag that can be used later
 to retrieve exactly the version of the package that is currently
@@ -617,17 +617,26 @@ Instead, we extract the branch or tag name from the working copy's URL,
 and we explicitly get the working revision number, by querying SVN
 on the working copy's top-level directory.
 
+If the optional <use_csn> flag is passed in as '1', then use the
+CSN information from the admin/packages file instead of querying
+SVN directly to get the working copy revision number.  Sometimes these
+version can get out of sync, e.g. because of checkins on other branches,
+or because people "cheat" and do not use asim-shell to commit.
+
 =cut
 
 sub baseline_tag
 {
   my $self = shift;
+  my $use_csn = shift;
   my $url  = $self->get_working_url();
   my $rev  = $self->get_working_revision();
   if      ( is_tag_url( $url ) ) {
     return tag_name_from_url( $url );
   } elsif ( is_branch_url( $url ) ) {
     return branch_name_from_url( $url ) . ':' . $rev;
+  } elsif ( $use_csn ) {
+    return $self->csn();
   } else {
     return $rev;
   }

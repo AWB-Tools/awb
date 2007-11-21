@@ -79,6 +79,8 @@ Commands:
   rehash packages                        - rehash the package list
   list packages                          - list checked out packages
   baseline packages                      - show version information of all workspace packages
+    [--csn]                              - use CSN information from admin/packages instead of
+                                           querying revision control system
 
   set package <name>                     - set default package
   unset package                          - leave default package undefined
