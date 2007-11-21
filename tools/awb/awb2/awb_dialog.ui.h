@@ -834,27 +834,40 @@ void awb_dialog::paramValue_returnPressed()
 
 void awb_dialog::paramUpdate_clicked()
 {
-    my $itemno = paramList->currentItem();
-    my $line = paramList->text($itemno);
+    my $itemno; 
+    my $line; 
+
+    #
+    # Get parameter line out of dialog box
+    #
+    $itemno = paramList->currentItem();
+    if (! ($itemno >= 0)) {
+      print "awb: No parameter selected\n";
+      return;
+    }
+
+    $line = paramList->text($itemno);
 
     #
     # Parse out information on parameter
     #    Note: implicit dependence on format of line
     #
+
     $line =~ "([^=]+) = ([^ ]+) [[](.+)[]]";
 
     my $name = $1;
     if (!defined($name)) {
-        die("Illegally formatted parameter line");
+        print "awb: Illegally formatted parameter line: $line\n";
+	return;
     }
 
     my $default = $3;
     if (!defined($default)) {
-        print("Illegally formatted parameter line");
-        $default = $2;
+        print "awb: Illegally formatted parameter line $line\n";
+        return;
     }       
 
-    my $value = paramValue->text() || $3;
+    my $value = paramValue->text() || $default;
     
     #
     # Update information on parameter

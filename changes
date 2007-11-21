@@ -3965,3 +3965,22 @@ number information. These numbers can get out of sync with one another for
 a variety of reason, including checkins on other branches, or because
 people "cheat" and commit without using asim-shell. Checkouts and bundles
 can safely use either form of output.
+
+----------
+spartha1    Date: Wed Nov 21 12:31:14 EST 2007  CSN: CSN-asimcore-203
+                  Wed Nov 21 17:31:14 UTC 2007
+
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.ui       Locally Modified          202 
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          202 
+ awb_dialog.ui.h           Locally Modified          202 
+
+Updating with simcore changes (rev. 2470 - Joel Emer)
+
+In awb, eliminated unceremonious exit on update of nonexistent
+parameters.
+
+Implemented better dialog resize for awb and pm-find-replace.
