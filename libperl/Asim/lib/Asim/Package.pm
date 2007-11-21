@@ -782,6 +782,36 @@ Return the current value of the tag
 
 sub tag { return $_[0]->_accessor("Global","Tag",$_[1]) || "HEAD"; }
 
+################################################################
+
+=item $package-E<gt>baseline_tag()
+
+Return a tag (see "Tag Syntax", above) that can be used later
+to retrieve exactly the version of the package that is currently
+checked out in the working copy (minus any uncommitted changes).
+
+It is similar in spirit to the tag() or csn() methods, except that
+it is read-only (it cannot be used to update tag or CSN data), and
+if you are on the trunk or a branch, it does not return "HEAD" or
+the branch name, but rather the specific version number of the
+working copy.
+
+The default behavior, which works for CVS checkouts or from
+"copy" packages that are copies of HEAD, is to return the CSN,
+which has the revision number, and the branch name in it.
+Derived classes may override this, but must always return a tag
+conforming to the legal tag syntax, that can be used, for example,
+in bundle specifiers.
+
+=cut
+
+################################################################
+
+sub baseline_tag
+{
+  my $self = shift;
+  return $self->csn();
+}
 
 ################################################################
 

@@ -78,6 +78,7 @@ Commands:
 
   rehash packages                        - rehash the package list
   list packages                          - list checked out packages
+  baseline packages                      - show version information of all workspace packages
 
   set package <name>                     - set default package
   unset package                          - leave default package undefined

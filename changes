@@ -3912,3 +3912,32 @@ Updating with simcore changes (rev. 2462 - Carl Beckmann)
 
 - Additional changes to asim-run provided by Ankush.
 Use slot= instead of --queue= for more robust netbatch interface.
+
+----------
+spartha1    Date: Wed Nov 21 12:27:08 EST 2007  CSN: CSN-asimcore-201
+                  Wed Nov 21 17:27:08 UTC 2007
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          200 
+ Commands.pm               Locally Modified          200 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          200 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          200 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          200 
+
+Updating with simcore changes (rev. 2468 - Carl Beckmann)
+
+- Added an asim-shell command:
+
+baseline packages
+
+that can be used to get the version information for all
+packages in the current workspace. Its output can be cut
+and pasted into bundle files to easily specify a baseline
+on a bundle.

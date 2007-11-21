@@ -656,6 +656,7 @@ sub choose_bundle {
     return choose_package(@fulllist);
 }
 
+
 ################################################################
 #
 # Package DB functions
@@ -701,6 +702,15 @@ sub list_packages {
 
   $default_packageDB->dump();
 
+  return 1;
+}
+
+sub baseline_packages {
+  foreach my $name ( $default_packageDB->directory() ) {
+    my $package = get_package($name);
+    print $name, '/', $package->baseline_tag(), ' ';
+  }
+  print "\n";
   return 1;
 }
 

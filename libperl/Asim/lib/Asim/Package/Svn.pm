@@ -533,6 +533,106 @@ sub get_revision_number {
   return undef;
 }
 
+=item $svn->get_working_revision()
+
+Return the SVN revision number that the working copy was checked out with.
+
+This returns an integer that you can use as a "-r" argument
+to various svn commands.
+
+=cut
+
+sub get_working_revision {
+  my $self = shift;
+  my $location = $self->location();
+  my $rev = `cd $location; svn info | grep Revision`;
+  chomp $rev;
+  $rev =~ s/^Revision:\s*//;
+  $rev;
+}
+
+=item Svn::is_branch_url(<URL>)
+
+This static class function return 1 if and only if
+the given repository URL is for a branch of the package.
+
+=cut
+
+sub is_branch_url {
+  my $url = shift;
+  return ( $url =~ m/\/branches\// );
+}
+
+=item Svn::is_tag_url(<URL>)
+
+This static class function return 1 if and only if
+the given repository URL is for a tagged version of the package.
+
+=cut
+
+sub is_tag_url {
+  my $url = shift;
+  return ( $url =~ m/\/tags\// );
+}
+
+=item Svn::branch_name_from_url(<URL>)
+
+This static class function extracts the branch name from the given URL.
+Returns undef if is_branch_url() would have returned 0
+
+=cut
+
+sub branch_name_from_url {
+  my $url = shift;
+  if ( $url =~ m/\/branches\/([^\/]+)/ ) {
+    return $1;
+  }
+  return undef;
+}
+
+=item Svn::tag_name_from_url(<URL>)
+
+This static class function extracts the tagged version name from the given URL.
+Returns undef if is_tag_url() would have returned 0
+
+=cut
+
+sub tag_name_from_url {
+  my $url = shift;
+  if ( $url =~ m/\/tags\/([^\/]+)/ ) {
+    return $1;
+  }
+  return undef;
+}
+
+=item $package-E<gt>baseline_tag()
+
+Return a tag that can be used later
+to retrieve exactly the version of the package that is currently
+checked out in the working copy (minus any uncommitted changes).
+
+In Asim SVN repositories (unlike in CVS) we do not maintain the branch
+name and revision numbers as part of the CSN in the admin/packages file.
+Instead, we extract the branch or tag name from the working copy's URL,
+and we explicitly get the working revision number, by querying SVN
+on the working copy's top-level directory.
+
+=cut
+
+sub baseline_tag
+{
+  my $self = shift;
+  my $url  = $self->get_working_url();
+  my $rev  = $self->get_working_revision();
+  if      ( is_tag_url( $url ) ) {
+    return tag_name_from_url( $url );
+  } elsif ( is_branch_url( $url ) ) {
+    return branch_name_from_url( $url ) . ':' . $rev;
+  } else {
+    return $rev;
+  }
+}
+
 =item $svn->find_branchtags( [<filename>] )
 
 Search a repository file for all branch tags.

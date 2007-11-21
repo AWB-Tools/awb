@@ -84,6 +84,7 @@ our $term;
 #
 our %COMPOUNDCOMMANDS = 
   ( add       => [ qw(public_package package) ],
+    baseline  => [ qw(packages) ],
     branch    => [ qw(package) ],
     build     => [ qw(model package) ],
     cd        => [ qw(model package) ],
