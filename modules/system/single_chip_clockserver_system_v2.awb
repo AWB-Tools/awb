@@ -9,7 +9,7 @@ Awb module specification
 %desc Single Chip System using a Clockserver with DRAL API as a seperate module
 %attributes single_chip
 %provides system
-%requires dral_api packages basesystem context_scheduler isa chip warmup_manager power_model
+%requires dral_api packages basesystem context_scheduler isa chip warmup_manager power_model avf_analysis
 %public single_chip_clockserver_system.h 
 %private single_chip_clockserver_system.cpp 
 %library lib/libasim/libasim.a

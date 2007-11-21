@@ -1067,6 +1067,8 @@ template<class T, int S>
 inline bool
 BufferStorage<T,S>::Read(T& data, UINT64 cycle, const char* portName, bool relaxAsserts)
 {
+
+
     // if no data, return false.  I don't think this first condidtion
     // should ever be true since we're always advancing readindex at t
     // the end when all items are read out.  Maybe upon startup, but
@@ -1090,7 +1092,9 @@ BufferStorage<T,S>::Read(T& data, UINT64 cycle, const char* portName, bool relax
     if (!relaxAsserts)
     {
         ASSERT(ReadCycle == cycle,
-               "Reading data from port " << portName <<
+		" Written Cycle : "<<entry.CycleWritten<<
+		", Latency : "<<Latency<<
+               ", Reading data from port " << portName <<
 	       " in the wrong cycle!  (got " << cycle << 
 	       " instead of required: " << ReadCycle << ")");
     }
@@ -1184,7 +1188,7 @@ BufferStorage<T,S>::Look(T& data, UINT64 cycle, const char* portName, bool relax
     if (!relaxAsserts)
     {
         ASSERT(ReadCycle == cycle,
-               "Reading data from port " << portName <<
+               " Reading data from port " << portName <<
 	       " in the wrong cycle!  (got " << cycle << 
 	       " instead of required: " << ReadCycle << ")");
     }
@@ -1207,6 +1211,9 @@ template<class T, int S>
 inline bool
 BufferStorage<T,S>::Write(const T& data, UINT64 cycle, const char* portName)
 {
+
+//    cout <<"** Write on port : "<<portName <<"on cycle: "<<cycle<<endl;
+
     if (((UINT64)Store[WriteIndex].CycleWritten) != cycle) 
     {
         // this assert isn't really THAT necessary.  I mean, time always
@@ -1614,6 +1621,7 @@ WritePhasePort<T,F>::Write(T data, UINT64 cycle)
   VERIFYX(IsConnected());
   UINT64 internal_cycle = cycle*2;
   for (int f = 0; f < Fanout; f++) {
+    cout<< "---- BufferStorage write cycle :" <<internal_cycle<<" input cycle : "<<cycle<<endl ;
     Buffer[f]->Write(data, internal_cycle, GetName()); 
   }  
   // assertions above and in Write method will never allow them to

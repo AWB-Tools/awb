@@ -3812,3 +3812,26 @@ Updating with simcore changes (rev. 2456 - Sari Coumeri)
 * Updated null power model for new hit event in cache macro (SLC)
 
 * Updated null power model awb for new default uncore voltage values (SLC)
+
+----------
+spartha1    Date: Wed Nov 21 12:14:56 EST 2007  CSN: CSN-asimcore-197
+                  Wed Nov 21 17:14:56 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ port.h                    Locally Modified          196 
+
+Directory lib/libasim/src
+ port.cpp                  Locally Modified          196 
+
+Directory modules/system
+ single_chip_common_system_v2.awb Locally Modified          196 
+ multi_chip_common_system.awb Locally Modified          196 
+ multi_chip_common_system_v2.awb Locally Modified          196 
+ single_chip_clockserver_system.awb Locally Modified          196 
+ single_chip_common_system.awb Locally Modified          196 
+ single_chip_clockserver_system_v2.awb Locally Modified          196 
+
+Updating with simcore changes (rev. 2458 - Gurunath Ramagiri)
+
+Moved AVF infrastructure to higher level.

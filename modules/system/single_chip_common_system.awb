@@ -27,7 +27,7 @@ Awb module specification
 %desc Single Chip System
 %attributes single_chip
 %provides system
-%requires packages basesystem warmup_manager context_scheduler isa chip power_model
+%requires packages basesystem warmup_manager context_scheduler isa chip power_model avf_analysis
 %public single_chip_common_system.h
 %private single_chip_common_system.cpp
 %library lib/libasim/libasim.a

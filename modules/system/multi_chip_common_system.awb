@@ -27,7 +27,7 @@ Awb module specification
 %desc Multi-Chip System
 %attributes multi
 %provides system
-%requires packages basesystem context_scheduler isa board warmup_manager power_model
+%requires packages basesystem context_scheduler isa board warmup_manager power_model avf_analysis
 %public multi_chip_common_system.h
 %private multi_chip_common_system.cpp
 %library lib/libasim/libasim.a

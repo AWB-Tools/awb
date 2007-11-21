@@ -9,7 +9,7 @@ Awb module specification
 %desc Multi-Chip System with DRAL API as a separate module
 %attributes multi
 %provides system
-%requires dral_api packages basesystem context_scheduler isa board warmup_manager power_model
+%requires dral_api packages basesystem context_scheduler isa board warmup_manager power_model avf_analysis
 %public multi_chip_common_system.h
 %private multi_chip_common_system.cpp
 %library lib/libasim/libasim.a
