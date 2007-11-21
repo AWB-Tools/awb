@@ -3866,3 +3866,36 @@ I would suggest committing all these changes to svn branches and testing
 before committing to the mainline. You can safely use "svn merge"
 capabilities to bring everything back. If you have questions or concerns, let
 me know.
+
+----------
+spartha1    Date: Wed Nov 21 12:19:34 EST 2007  CSN: CSN-asimcore-199
+                  Wed Nov 21 17:19:34 UTC 2007
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          198 
+
+Updating with simcore changes (rev. 2461 - Carl Beckmann)
+
+- Speed amd usability improvements to asim-run provided by Ankush Varma.
+Asim-run now looks in the following directories for pre-built models:
+.
+<name>
+default/<name>
+pm
+<name>/pm
+default/<name>/pm
+BUILD
+<name>/BUILD
+default/<name>/BUILD
+<model_name>
+default/<model_name>
+<model_name>/pm
+default/<model_name>/pm
+<model_name>/BUILD
+
+where <name> and <model_name> are the APM file base name, and the model
+name specified in the asim-run experiments file, respectively.
+
+Also, improved the speed of checking netbatch queue status by only
+looking at the queue being submitted to.
