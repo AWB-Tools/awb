@@ -3984,3 +3984,21 @@ In awb, eliminated unceremonious exit on update of nonexistent
 parameters.
 
 Implemented better dialog resize for awb and pm-find-replace.
+
+----------
+spartha1    Date: Wed Nov 21 13:40:30 EST 2007  CSN: CSN-asimcore-204
+                  Wed Nov 21 18:40:30 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ cache.h                   Locally Modified          203 
+
+Updating with simcore changes (rev. 2471 - Eric Borch)
+
+- fixed a bug that appeared with a 32 way cache when shifting a one
+(32 bit signed integer) over 32 positions. The sign of the result
+got inverted, and an assertion fired.
+
+
+
+Eric

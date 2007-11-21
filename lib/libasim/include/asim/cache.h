@@ -43,6 +43,8 @@ namespace iof = IoFormat;
 using namespace iof;
 using namespace std;
 
+const UINT64 shiftable_1_64bit = 1;
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////
@@ -628,11 +630,11 @@ class ev7_replacement_info : public lru_info<NumWays>
         ASSERTX(way < NumWays);
 
         // Set the corresponding bit
-        mask = mask | (0x1 << way);
+        mask = mask | (shiftable_1_64bit << way);
 
         // If all the bits are set, clear them 
         if((mask & allSetMask) == allSetMask) {
-	  mask =  (0x1 << way);
+            mask =  (shiftable_1_64bit << way);
 	}
         
     }
@@ -1605,11 +1607,11 @@ line_state<NumObjectsPerLine,INFO> *
         
 	if (TagArray[index][i].GetStatus()==S_RESERVED)
         {
-            reserved_mask = reserved_mask | (1<<i);
+            reserved_mask = reserved_mask | (shiftable_1_64bit << i);
         }
     }
+    
     // No invalid line -> get the victim according to the selected replacement algorithm
-
     way = this->GetVictim(index, reserved_mask);
     
     // Return pointer to it.
