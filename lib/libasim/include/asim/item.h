@@ -98,11 +98,15 @@ class ASIM_ITEM_CLASS
     // another, and the originating item loses its handles.
     ASIM_ITEM_CLASS & operator = (/*const*/ ASIM_ITEM_CLASS & aic)
     {
-        if (runWithEventsOn && idGenerated)
+        if (runWithEventsOn)
         {
-            // kill the current item because we are going to 
-            // inherit aic's dral/ptv id
-            DRALEVENT_GUARDED(DeleteItem(itemId));
+            if (idGenerated)
+            {
+                // kill the current item because we are going to 
+                // inherit aic's dral/ptv id
+                DRALEVENT_GUARDED(DeleteItem(itemId));
+            }
+
             EVENT(DRALEVENT(CloseEventRec(recId)));
 
             // inherit from aic
@@ -110,14 +114,21 @@ class ASIM_ITEM_CLASS
             idGenerated = aic.idGenerated;
             recId = aic.recId;
             threadId = aic.threadId;
-
+            
             // dissaociate aic from the id's.
             aic.itemId = 0;
             aic.idGenerated = false;
             aic.recId = 0;
             aic.threadId = 0;
         }
-	
+        else
+        {
+            itemId = 0;
+            idGenerated = false;
+            recId = 0;
+            threadId = 0;
+        }
+
         return *this;
     }
 

@@ -4014,3 +4014,16 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2486 - Angshuman Parashar)
 
 added entry for hasim-rrr-stubgen in asimstarter.in
+
+----------
+spartha1    Date: Wed Nov 21 13:43:26 EST 2007  CSN: CSN-asimcore-206
+                  Wed Nov 21 18:43:26 UTC 2007
+
+
+Directory lib/libasim/include/asim
+ item.h                    Locally Modified          205 
+
+Updating with simcore changes (rev. 2487 - Brian Slechta)
+
+made some changes to fix asim_item copying with respect to copying DRAL and
+PTV event info.
