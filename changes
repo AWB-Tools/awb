@@ -4040,3 +4040,13 @@ Updating with simcore changes (rev. 2490 - Brian Slechta)
 
 changes the message printing to explicitly set "dec"imal output to avoid the
 random hex outputs that sometimes occur.
+
+----------
+mcadler     Date: Mon Dec 10 14:53:00 EST 2007  CSN: CSN-asimcore-208
+                  Mon Dec 10 19:53:00 UTC 2007
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          207 
+
+Add hasim-dict.
