@@ -278,9 +278,6 @@ sub open {
       next;
     }
 
-    my $sourcetypes = "CPP|BDPI_C|BSV|VERILOG|VHDL|RRR|UNSPECIFIED";
-    my $vistypes = "PRIVATE|PUBLIC";
-
     # %public FILENAME... backward compatibility
 
     if (/^.*%public$spaces($words)/) {
@@ -341,7 +338,7 @@ sub open {
       if (! defined($class)) {
         $class = 'top';
       }
-      elsif ($class =~ /^%(top|hw|sw)$/) {
+      elsif ($class =~ /^%(dict|hw|sw|top)$/) {
         $class =~ s/^%//;
       }
       else {
@@ -786,7 +783,6 @@ sub remove_submodule {
   return @{$self->{"submodules"}};
 }
 
-
 ################################################################
 #
 # Decipher the source "type" of a file from its extension
@@ -795,38 +791,62 @@ sub remove_submodule {
 #
 ################################################################
 
-sub _decipher_type_from_extension
+sub decipher_type_from_extension
 {
     # capture params
     my $filename = shift;
 
-    # since this is only for backwards-compatibility, we only
-    # need to consider a few types. amc will only be requesting
-    # file lists via public() and private() calls, so we don't
-    # really care which type the file gets classified as.
-    # hasim-configure requires us to distinguish between BSV,
-    # BDPI_C, CPP and VERILOG files.
-    if ($filename =~ /.bsv$/)
+    if ($filename =~ /.bs[vh]$/)
     {
-        return "BSV";
-    }
-    elsif ($filename =~ /.\.v$/)
-    {
-        return "VERILOG";
+        return "BSV";           # Bluespec
     }
     elsif ($filename =~ /.\.c$/)
     {
-        return "BDPI_C";
+        return "CPP";           # C++
     }
-    elsif ($filename =~ /.cpp$/)
+    elsif ($filename =~ /.\.cpp$/)
     {
-        return "CPP";
+        return "CPP";           # C++
+    }
+    elsif ($filename =~ /.\.dic$/)
+    {
+        return "DICT";          # HAsim dictionary
+    }
+    elsif ($filename =~ /.\.[hH]$/)
+    {
+        return "CPP";           # C++
+    }
+    elsif ($filename =~ /.\.ngc$/)
+    {
+        return "NGC";           # Xilinx netlist
+    }
+    elsif ($filename =~ /.\.rrr$/)
+    {
+        return "RRR";           # HAsim request-response
+    }
+    elsif ($filename =~ /.\.ucf$/)
+    {
+        return "UCF";           # Xilinx constraint file
+    }
+    elsif ($filename =~ /.\.ut$/)
+    {
+        return "UT";            # Xilinx script
+    }
+    elsif ($filename =~ /.\.v$/)
+    {
+        return "VERILOG";       # Verilog
+    }
+    elsif ($filename =~ /.\.vhd$/)
+    {
+        return "VHD";           # VHDL
+    }
+    elsif ($filename =~ /.\.xst$/)
+    {
+        return "XST";           # Xilinx script
     }
     else
     {
-        # hasim-configure doesn't care any more,
-        # so neither do we.
-        return "UNSPECIFIED";
+        return "";
     }
 }
 
@@ -860,7 +880,7 @@ sub public
         foreach my $f (@infiles)
         {
             # figure out type of file
-            my $type = _decipher_type_from_extension($f);
+            my $type = decipher_type_from_extension($f);
 
             # update source matrix
             #
@@ -906,7 +926,7 @@ sub private
         foreach my $f (@infiles)
         {
             # figure out type of file
-            my $type = _decipher_type_from_extension($f);
+            my $type = decipher_type_from_extension($f);
 
             # update source matrix
             #
@@ -968,6 +988,39 @@ sub sources
 
 ################################################################
 
+=item $module-E<gt>source_types()
+
+Return a list of all source types defined for the module.
+
+=cut
+
+################################################################
+
+sub source_types
+{
+    # capture params
+    my $self = shift;
+
+    my %types;
+
+    # scan through source matrix
+    my @smat = @{$self->{sourcematrix}};
+    foreach my $slist (@smat)
+    {
+        $types{$slist->type()} = 1;
+    }
+
+    # Construct an array of unique types
+    my @outtypes = ();
+    foreach my $type (keys %types) {
+        push(@outtypes, $type);
+    }
+
+    return @outtypes;
+}
+
+################################################################
+
 =item $module-E<gt>addsources($t, $v, [$list])
 
 Update the list of source files of specified type and visibility
@@ -987,35 +1040,68 @@ sub addsources
 {
     # capture params
     my $self = shift;
-    my $type = shift;
+    my $specType = shift;
     my $vis  = shift;
     my @infiles = (@_);
+    my $lastSlist = undef;
 
-    # scan through source matrix
-    my @smat = @{$self->{sourcematrix}};
-    my $found = 0;
-    foreach my $slist (@smat)
+    # Validate type claims against file suffixes
+    foreach my $f (@infiles)
     {
-        # check for type and visibility match
-        if (($slist->type() eq $type) &&
-            ($slist->visibility() eq $vis))
+        my $type = decipher_type_from_extension($f);
+        if ($specType ne '')
         {
-            $slist->addfiles(@infiles);
-            $found = 1;
-            last;
+            # A type was specified by the user
+            $type = $specType if ($type eq '');
+            if (($type ne '') && ($specType ne $type)) {
+                # Type mismatch
+                if (($specType eq 'BDPI_C') && ($type eq 'CPP')) {
+                    # Accept BDPI_C override for C sources
+                    $type = $specType;
+                }
+                else {
+                    ierror("For file $f specified type ($specType) does not match implicit type ($type)");
+                }
+            }
         }
-    }
 
-    # if we we haven't found a type/visibility match
-    # in our matrix, then create a new matrix entry for
-    # this file list
-    if ($found == 0)
-    {
-        my $sourcelist = Asim::Module::SourceList->new(type => "$type",
-                                                       visibility => "$vis",
-                                                       files => []);
-        $sourcelist->addfiles(@infiles);
-        push(@{$self->{sourcematrix}}, $sourcelist);
+        if (defined($lastSlist) &&
+            ($lastSlist->type() eq $type) &&
+            ($lastSlist->visibility() eq $vis))
+        {
+            # Last file was the same type/visibility.  Use the same source list.
+            $lastSlist->addfiles(($f));
+        }
+        else {
+            # scan through source matrix
+            my @smat = @{$self->{sourcematrix}};
+            my $found = 0;
+            foreach my $slist (@smat)
+            {
+                # check for type and visibility match
+                if (($slist->type() eq $type) &&
+                    ($slist->visibility() eq $vis))
+                {
+                    $slist->addfiles(($f));
+                    $lastSlist = $slist;
+                    $found = 1;
+                    last;
+                }
+            }
+
+            # if we we haven't found a type/visibility match
+            # in our matrix, then create a new matrix entry for
+            # this file list
+            if ($found == 0)
+            {
+                my $slist = Asim::Module::SourceList->new(type => "$type",
+                                                          visibility => "$vis",
+                                                          files => []);
+                $slist->addfiles(($f));
+                push(@{$self->{sourcematrix}}, $slist);
+                $lastSlist = $slist;
+            }
+        }
     }
 }
 

@@ -4050,3 +4050,16 @@ Directory tools/scripts
  asimstarter.in            Locally Modified          207 
 
 Add hasim-dict.
+
+----------
+mcadler     Date: Wed Dec 12 18:40:06 EST 2007  CSN: CSN-asimcore-209
+                  Wed Dec 12 23:40:06 UTC 2007
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          208 
+
+- %source now gets type implicitly from file extensions.
+- Mismatch of extension and explicit type is an error.  Exceptions
+  (e.g. BDPI_C allowed for .c) are hard coded in the source.
+- Add support for HAsim dictionaries.
