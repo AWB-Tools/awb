@@ -4179,3 +4179,25 @@ Updating with simcore changes (rev. 2527 - Michael Powell)
 Added null declaration and definition for new VECTOR_POWER_MACRO_CLASS.
 
 --mdpowel1
+
+----------
+spartha1    Date: Thu Jan 24 18:11:28 EST 2008  CSN: CSN-asimcore-217
+                  Thu Jan 24 23:11:28 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          216 
+ Commands.pm               Locally Modified          216 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          216 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          216 
+
+Directory libperl/Asim/lib/Asim
+ Edit.pm                   Locally Modified          216 
+
+Updating with simcore changes (rev. 2529 - Krishna Rangan)
+
+- added support for batch commit of svn & cvs packages.

@@ -111,6 +111,7 @@ our $PROBLEM;
 sub commit {
   my $self = shift;
   my $only_self = shift || 0;
+  my $commitlog_file = shift || undef;
 
   my $stop_commit = 0;
 
@@ -168,7 +169,7 @@ sub commit {
   foreach my $p (@all) {
     $p->banner();
 
-    if (! $p->prepare_stage()) {
+    if (! $p->prepare_stage($commitlog_file)) {
       unlockall(@all);
       Asim::Xaction::abort();
       return ();
@@ -353,6 +354,7 @@ sub check_stage {
 
 sub prepare_stage {
   my $self = shift;
+  my $commitlog_file = shift;
 
   if ($self->{status} eq "No-commit-needed") {
     print "Commit: No commit needed for this package, so nothing to do here...\n";
@@ -372,7 +374,7 @@ sub prepare_stage {
   $self->update_csns()
     || commit_failure("Unable to update serial numbers") && return 0;
 
-  $self->edit_changes_for_commit()
+  $self->edit_changes_for_commit($commitlog_file)
     || commit_failure("Unable to edit changes") && return 0;
 
   $self->update_ipchist()
@@ -776,6 +778,7 @@ sub update_csns {
 
 sub edit_changes_for_commit {
   my $self = shift;
+  my $commitlog_file = shift;
 
   my $base        = $self->location();
   my $changes     = "$base/$CHANGES";
@@ -855,7 +858,7 @@ sub edit_changes_for_commit {
   }
 
   # let the user add arbitrary comments to the changes file
-  return $self->edit_changes_manual();
+  return $self->edit_changes_manual($commitlog_file);
 }
 
 
@@ -871,6 +874,7 @@ sub edit_changes_for_commit {
 
 sub edit_changes_manual {
   my $self = shift;
+  my $commitlog_file = shift;
 
   my $base        = $self->location();
   my $changes     = "$base/$CHANGES";
@@ -879,6 +883,7 @@ sub edit_changes_manual {
 ##  my $commentfile  = "/tmp/asim-shell-comment-file.$$";
   my $commentfile = $self->{commentfile};
   my $nextline;
+  my $mode = Asim::mode();
 
   # Add the comment file to the list of files to 
   # be deleted on an abort
@@ -897,9 +902,11 @@ sub edit_changes_manual {
   # Launch a window so that the user types in an explanation for his changes
   #
   print "\n\n";
-  print "Launching your favorite editor on the 'changes' file ($changes)\n";
-  print "Please type your comments at the *end* of the 'changes' file...\n\n";
-  Asim::choose("Enter <CR> to edit changes file");
+  if ($mode eq "interactive") {
+      print "Launching your favorite editor on the 'changes' file ($changes)\n";
+      print "Please type your comments at the *end* of the 'changes' file...\n\n";
+      Asim::choose("Enter <CR> to edit changes file");
+  }
 
   if ($EDITOR =~ "gvim") {   
     $EDITOR_OPTIONS = "-f +"; # go to end of file; don't fork while starting GUI
@@ -912,11 +919,12 @@ sub edit_changes_manual {
   }
 
   if (($self->type() eq "cvs") || ($self->type() eq "bitkeeper")) {
-    system("$EDITOR $EDITOR_OPTIONS $changes");
+    system("$EDITOR $EDITOR_OPTIONS $changes") if ($mode eq "interactive");
+    system("cat $commitlog_file >> $changes") if ($mode eq "batch");
   }
   elsif (($self->type() eq "svn")) {
-
-    system("$EDITOR $EDITOR_OPTIONS $reportfile");
+    system("$EDITOR $EDITOR_OPTIONS $reportfile") if ($mode eq "interactive");
+    system("cat $commitlog_file >> $reportfile") if ($mode eq "batch");
     
     CORE::open(RPT, "<$reportfile");
     CORE::open(CMT, ">$commentfile");

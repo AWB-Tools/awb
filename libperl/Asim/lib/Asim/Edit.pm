@@ -46,18 +46,16 @@ sub mode {
   my $mode = shift;
   my $oldmode;
 
-  if (! defined($mode)) {
-    die("Asim::mode:: attempt to switch to undefined editing mode\n");
-  }
-
-  print "Switching edit mode to <$mode>\n" if ($debug);
-
   if (! defined($editcontrol)) {
     $oldmode = "interactive";
   } else {
     $oldmode = $editcontrol->mode();
   }
+  
+  return $oldmode if (!defined($mode));
 
+  print "Switching edit mode to <$mode>\n" if ($debug);
+  
   if (($mode =~ /[Ii]nteractive/) || ($mode eq "1")) {
     $editcontrol = Asim::Edit::Interactive->new();
   }

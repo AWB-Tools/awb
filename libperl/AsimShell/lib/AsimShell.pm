@@ -137,7 +137,7 @@ our %OPTIONS = (
     checkout_package   => [ "--user=", "--user=<username>", "--build", "--nobuild", 
                             "--addpath", "--noaddpath" ],
     use_package        => [ "--build", "--nobuild", "--addpath", "--noaddpath" ],
-    commit_package     => [ "--dependent", "--nodependent" ],
+    commit_package     => [ "--dependent", "--nodependent", "--commitlog=<commitlog file>" ],
     status_package     => [ "--verbose", "--noverbose" ],
     update_package     => [ "--build", "--nobuild" ],
 

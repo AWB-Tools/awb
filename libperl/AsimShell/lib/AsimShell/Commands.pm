@@ -1483,21 +1483,34 @@ sub update_all_packages {
 #
 sub commit_package {
   my $deps = 1;
+  my $commitlog_file = undef;
   local @ARGV = @_;
 
   # Parse options
-  my $status = GetOptions( "dependent!" => \$deps) || return undef;
+  my $status = GetOptions( "dependent!"     => \$deps,
+			   "commitlog=s"    => \$commitlog_file,
+			 );
+  return undef if (!$status);
+
+  if ((Asim::mode() eq "batch") && (!defined $commitlog_file)) {
+      print "Batch commit requires commitlog file argument.\n";
+      return 0;
+  }
+  elsif ((Asim::mode() eq "batch") && (! -f $commitlog_file)) {
+      print "Batch commit requires a valid commitlog file.\n";
+      return 0;
+  }
 
   # Package names are remaining arguments
   while ( my $name = shift @ARGV ) {
 
     # handle special case of "all packages"
     if (defined($name) && ($name eq "*" || $name eq "all")) {
-      return commit_all_packages($deps);
+      return commit_all_packages($deps, $commitlog_file);
     }
 
     my $package = get_package($name) || return undef;
-    $package->commit(!$deps)         || return undef;
+    $package->commit(!$deps, $commitlog_file) || return undef;
   }
   
   return 1;
@@ -1508,6 +1521,7 @@ sub commit_package {
 
 sub commit_all_packages {
   my $deps = shift;
+  my $commitlog_file = shift;
   my @plist;
 
   #
@@ -1529,7 +1543,7 @@ sub commit_all_packages {
   for my $p (@plist) {
         print "Commiting package " . $p->name() . "\n\n";
 
-	$p->commit(!$deps) || return undef;
+	$p->commit(!$deps, $commitlog_file) || return undef;
 	print "\n";
   }
 

@@ -112,6 +112,7 @@ Commands:
 
   commit package [<package>]             - CVS commit a package
     [--nodependent]                      - prevent commit of dependent packages
+    [--commitlog=<commit comments file>] - Use in batch mode to supply commit comments
 
   release package [<package>] version    - create a new release of a package
   branch package [<package>] branch      - create CVS branch named "branch"

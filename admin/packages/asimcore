@@ -18,7 +18,7 @@
 #
 [Global]
 Description=Asim Base Library
-CSN=CSN-asimcore-216
+CSN=CSN-asimcore-217
 Name=asimcore
 Tag=HEAD
 Lock=asim-asimcore
