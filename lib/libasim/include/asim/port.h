@@ -81,6 +81,7 @@ private:
   // Needed to notify the connection structure via event.
   virtual void EventConnect(int bufNum, int destination);
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
+  virtual bool DeleteStorage();
 
 protected:
   // this is used to ensure the endpoints of a connected port have the same type,
@@ -237,6 +238,7 @@ public:
   bool IsFull(int i) const;
   bool IsEmpty(int i) const;
   bool CreateStorage(UINT32 latency, UINT32 bandwidth) ;
+  bool DeleteStorage() ;
 
   INT16 GetEventEdgeId() const { return myEventEdgeId; }
   void SetEventEdgeId(const UINT16 id) { myEventEdgeId = id; }
@@ -423,8 +425,11 @@ class ReadPort : public BasePort
   virtual void *GetBuffer();
   void SetBufferInfo();
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
-
+  virtual bool DeleteStorage();
+    
 public:
+  virtual ~ReadPort() { DeleteStorage(); };
+
   bool Read(T& data, UINT64 cycle);
   
   virtual const PortType GetType() const;
@@ -464,8 +469,11 @@ class ReadSkidPort : public BasePort
   virtual void *GetBuffer();
   void SetBufferInfo();
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
+  virtual bool DeleteStorage();
 
 public:
+  virtual ~ReadSkidPort() { DeleteStorage(); };
+
   bool Read(T& data, UINT64 cycle);
 
   // This is the ONLY port type that needs SomethingToRead.  It's used
@@ -502,9 +510,11 @@ class ReadStallPort : public BasePort
   virtual void *GetBuffer();
   void SetBufferInfo();
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
-
+  virtual bool DeleteStorage();
 
 public:
+  virtual ~ReadStallPort() { DeleteStorage(); };
+
   bool Read(T& data, UINT64 cycle);
 
   // like read, but no side effects or pops
@@ -542,8 +552,11 @@ private:
   virtual void *GetBuffer();
   virtual void SetBuffer(void *buf, int rdPortNum);
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
+  virtual bool DeleteStorage();
 
 public:
+  virtual ~PeekPort() { DeleteStorage(); };
+
   void PeekReset();
   bool PeekNext(T& data, UINT64 cycle);
 
@@ -623,8 +636,10 @@ class ReadPhasePort : public BasePort
   void SetBufferInfo();
 
   virtual bool CreateStorage(UINT32 latency, UINT32 bandwidth);
+  virtual bool DeleteStorage();
 
 public:
+  virtual ~ReadPhasePort() { DeleteStorage(); };
 
   bool Read(T& data, UINT64 cycle);
   bool Read(T& data, PHASE ph);
@@ -679,10 +694,7 @@ BasePort::BasePort()
 inline
 BasePort::~BasePort()
 {
-  if (Scope)
     delete [] Scope;
-  
-  if (Name)
     delete [] Name;
 }
 
@@ -767,7 +779,9 @@ BasePort::Init(const char *name, int nodeId, int instance, const char *scope)
   if (Connected)
     return false;
 
+  ASSERT(!Name, "This port has already been initialized with " << Name << ", now " << name); 
   ASSERT(name, "A name for a buffer must always be defined.");
+
   int name_len = strlen(name);
   Name = new char[name_len + 1];
   if (!Name)
@@ -817,6 +831,12 @@ BasePort::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
   ASSERT(false, "You cannot call CreateStorage on this class type (" << GetName() << ")\n");
   return false;
+}
+inline bool
+BasePort::DeleteStorage()
+{
+    //cout << "BasePort::DeleteStorage() called for " << Name << endl;
+    return false;
 }
 inline void
 BasePort::SetBuffer(void *buf, int rdPortNum)
@@ -944,16 +964,55 @@ BufferStorage<T,S>::CreateStorage(UINT32 latency, UINT32 bandwidth)
     return true;
 }
 
+
+template<class T, int S>
+inline bool
+BufferStorage<T,S>::DeleteStorage() 
+{
+    if (Store == NULL)
+    {
+        return false;
+    }
+
+    // delete all buffer entries (which are bandwidth-sized arrays)
+    for (int count = 0; count < (BufferSize); count++) 
+    {
+        delete [] Store[count].Data;
+    }
+    
+    // delete the entire buffer (which is a latency-sized array)
+    delete [] Store;
+
+    // just to be safe
+    BufferSize = 0;
+    Store = NULL;
+
+    return true;
+}
+
+
 // Public Members
 template<class T, int S>
 inline
 BufferStorage<T,S>::BufferStorage()
-  : Dummy(T()), Enabled(false), active(true), stalled(false), ReadIndex(0), WriteIndex(1), 
-    CycleRowRead(-1), PeekReadIndex(0), SequentialWrites(0)
+  : myEventEdgeId(0),
+    Store(NULL), 
+    Dummy(T()), 
+    Enabled(false), 
+    Bandwidth(0),
+    Latency(0),
+    BufferSize(0),
+    BufferMask(0),
+    active(true), 
+    stalled(false), 
+    ReadIndex(0), 
+    WriteIndex(1), 
+    CycleRowRead(-1), 
+    PeekReadIndex(0), 
+    LastAccessed(0),
+    LastWritten(0),
+    SequentialWrites(0)
 {
-
-  //initialize the entry pointer to null so that valgrind passes if we never connect this port
-  Store=NULL;  
 }
 
 template<class T, int S>
@@ -1395,13 +1454,22 @@ template <class T>
 inline void *
 ReadPort<T>::GetBuffer()
 {   
-    return reinterpret_cast<void *>(&Buffer); }
+    return reinterpret_cast<void *>(&Buffer); 
+}
 
 template <class T>
 inline bool
 ReadPort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
     return Buffer.CreateStorage(latency, bandwidth);
+}
+
+template <class T>
+inline bool
+ReadPort<T>::DeleteStorage()
+{
+    //cout << "ReadPort::DeleteStorage() called for " << Name << endl;
+    return Buffer.DeleteStorage();
 }
 
 template <class T>
@@ -1451,6 +1519,14 @@ inline bool
 ReadSkidPort<T,S>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
     return Buffer.CreateStorage(latency, bandwidth);
+}
+
+template <class T, int S>
+inline bool
+ReadSkidPort<T,S>::DeleteStorage()
+{
+    //cout << "ReadSkidPort::DeleteStorage() called for " << Name << endl;
+    return Buffer.DeleteStorage();
 }
 
 template <class T, int S>
@@ -1526,13 +1602,22 @@ template <class T>
 inline void *
 ReadStallPort<T>::GetBuffer()
 {  
-    return reinterpret_cast<void *>(&Buffer); }
-template <class T>
+    return reinterpret_cast<void *>(&Buffer); 
+}
 
+template <class T>
 inline bool
 ReadStallPort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
     return Buffer.CreateStorage(latency, bandwidth);
+}
+
+template <class T>
+inline bool
+ReadStallPort<T>::DeleteStorage()
+{
+    //cout << "ReadStallPort::DeleteStorage() called for " << Name << endl;
+    return Buffer.DeleteStorage();
 }
 
 template <class T>
@@ -1752,6 +1837,14 @@ ReadPhasePort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
     // Previously, it used DEFAULT_MAX_LATENCY * 2 to size the array, but when
     // done dynamically, this wasn't used.  What should it be?  Eric
     return Buffer.CreateStorage(latency * 2, bandwidth);
+}
+
+template <class T>
+inline bool
+ReadPhasePort<T>::DeleteStorage()
+{
+    //cout << "ReadPhasePort::DeleteStorage() called for " << Name << endl;
+    return Buffer.DeleteStorage();
 }
 
 template <class T>
@@ -2019,6 +2112,14 @@ inline bool
 PeekPort<T>::CreateStorage(UINT32 latency, UINT32 bandwidth)
 {
     return Buffer.CreateStorage(latency, bandwidth);
+}
+
+template <class T>
+inline bool
+PeekPort<T>::DeleteStorage()
+{
+    //cout << "PeekPort::DeleteStorage() called for " << Name << endl;
+    return Buffer.DeleteStorage();
 }
 
 template <class T>

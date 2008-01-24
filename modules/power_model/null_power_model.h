@@ -405,7 +405,8 @@ class THERMAL_MODEL_CLASS
   ~THERMAL_MODEL_CLASS(){};
 
  public:
-  static THERMAL_MODEL_CLASS * Instance() {return new THERMAL_MODEL_CLASS();};
+    // NOTE: if you return a "new" object here, make sure you find a way to delete it!
+  static THERMAL_MODEL_CLASS * Instance() {return NULL;};
   void UpdateTemperature(UINT64 system_clock) {};
 };
 

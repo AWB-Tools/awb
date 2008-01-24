@@ -46,6 +46,16 @@ WARMUP_MANAGER_CLASS::WARMUP_MANAGER_CLASS(
 // feeders.  Eric
 
 
+WARMUP_MANAGER_CLASS::~WARMUP_MANAGER_CLASS()
+{
+    for (WARMUP_HWC_LIST::iterator whwc = hwcs.begin();
+         whwc != hwcs.end();
+         whwc++)
+    {
+        delete (*whwc);
+    }
+}
+
 void
 WARMUP_MANAGER_CLASS::RegisterHWC(HW_CONTEXT hwc)
 {
@@ -152,6 +162,17 @@ WARMUP_MANAGER_CLASS::WARMUP_HWC_CLASS::WARMUP_HWC_CLASS(HW_CONTEXT hwc)
 };
 
 
+WARMUP_MANAGER_CLASS::WARMUP_HWC_CLASS::~WARMUP_HWC_CLASS()
+{
+    for (IFETCH_CALLBACK_LIST::iterator i = ifetchCallbacks.begin();
+         i != ifetchCallbacks.end();
+         i++)
+    {
+        delete (*i);
+    }
+
+    return;
+}
 
 // ---------------------------------------------------------------------
 // WARMUP_INFO_CLASS --

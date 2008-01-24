@@ -475,7 +475,7 @@ RESOURCE_TRACKER_CLASS::ReleaseID(UINT32 thread, UINT32 start_id, UINT32 _count)
 
 	//  Pick up the thread ID of the first ID
 	thread = alloc_map[map][start_id];
-
+        ASSERTX(thread < num_threads);
 
 	//  Can't do this, since we may deallocate something twice
 	//  Sanity checks

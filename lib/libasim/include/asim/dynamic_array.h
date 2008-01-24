@@ -60,9 +60,8 @@ class DYNAMIC_ARRAY_CLASS
 
 template <class DATA>
 inline
-DYNAMIC_ARRAY_CLASS<DATA>::DYNAMIC_ARRAY_CLASS(UINT32 elem)
+DYNAMIC_ARRAY_CLASS<DATA>::DYNAMIC_ARRAY_CLASS(UINT32 elem) : nElements(0), data(NULL)
 {
-    nElements = 0;
     if (elem)
     {
         Init(elem);

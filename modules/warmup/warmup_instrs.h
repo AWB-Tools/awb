@@ -402,7 +402,7 @@ class WARMUP_MANAGER_CLASS : public ASIM_MODULE_CLASS
 {
   public:
     WARMUP_MANAGER_CLASS(ASIM_MODULE parent, const char *name);
-    ~WARMUP_MANAGER_CLASS() {};
+    ~WARMUP_MANAGER_CLASS();
 
     // Called by a system
     void DoWarmUp(void);
@@ -494,7 +494,7 @@ class WARMUP_MANAGER_CLASS : public ASIM_MODULE_CLASS
     {
       public:
         WARMUP_HWC_CLASS(HW_CONTEXT hwc);
-        ~WARMUP_HWC_CLASS() {};
+        ~WARMUP_HWC_CLASS();
 
         HW_CONTEXT hwc;
 

@@ -143,6 +143,8 @@ BasePort::ConnectPorts(int rdPort, int port, int index,
             "Data type mismatch when connecting ports (" <<
             i[port]->GetName()                           << ")\n" );
 
+    //cout << "Connect " << i[rdPort]->GetName() << endl;
+
     if (i[rdPort]->GetBandwidth() > 0)
     {
         VERIFY(i[port]->GetBandwidth() <= 0 || 

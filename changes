@@ -4088,3 +4088,31 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2497 - Sailashri Parthasarathy)
 
 Fix for bug: The branch package no longer appends the "DO NOT DELETE" statement to the changelog.
+
+----------
+spartha1    Date: Thu Jan 24 17:50:15 EST 2008  CSN: CSN-asimcore-212
+                  Thu Jan 24 22:50:15 UTC 2008
+
+
+Directory lib/libasim/include/asim
+ resource_tracker.h        Locally Modified          211 
+ dynamic_array.h           Locally Modified          211 
+ port.h                    Locally Modified          211 
+
+Directory lib/libasim/src
+ port.cpp                  Locally Modified          211 
+
+Directory modules/warmup
+ warmup_instrs.h           Locally Modified          211 
+ warmup_instrs.cpp         Locally Modified          211 
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified          211 
+
+Updating with simcore changes (rev. 2510 - Brian Slechta)
+
+fixed some valgrind issues
+- added destructor to WARMUP_MANAGER_CLASS and WARMUP_HWC_CLASS
+- fixed numm thermal model to return NULL for Instance()
+- fixed ports to delete their BufferStorage on destruction
+- added assert to resource_tracker to catch possible memory errors
