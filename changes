@@ -4149,3 +4149,19 @@ Directory libperl/Asim/lib/Asim/Repository
 Updating with simcore changes (rev. 2514 - Carl Beckmann)
 
 - Traverse symbolic links when looking for bundle files.
+
+----------
+spartha1    Date: Thu Jan 24 18:03:44 EST 2008  CSN: CSN-asimcore-215
+                  Thu Jan 24 23:03:44 UTC 2008
+
+
+Directory tools/scripts
+ asim-batch                Locally Modified          214 
+
+Directory etc
+ asimrc.template           Locally Modified          214 
+
+Updating with simcore changes (rev. 2515 - Krishna Rangan)
+
+- added KEEP_STATS_FILE (an asim-batch option) to work around the stats file
+being deleted.

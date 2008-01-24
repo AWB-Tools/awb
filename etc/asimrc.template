@@ -512,6 +512,15 @@ COMPRESS=
 # ASIM_LOG=/home/ASIM1/BigSis.log
 ASIM_LOG=
 
+#
+# Purpose: Provides a way to maintain duplicate copies of the stats file 
+#	   in the RUN directory if the user desires
+# Type: Integer
+#
+# Default: 0
+# KEEP_STATS_FILE=1
+KEEP_STATS_FILE=
+
 #***********************************************************************#
 # fetch-trace is invoked by benchmark .cfg files or .cfx scripts used by
 # asim-run and awb when setting up benchmarks.  It fetches trace files into

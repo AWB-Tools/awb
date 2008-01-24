@@ -55,6 +55,7 @@ $ASIM_LOG = Asim::Util::get_asimrc_val("asim-batch", "ASIM_LOG", undef);
 $env = Asim::Util::get_asimrc_val("asim-batch", "SAVED_ENV_VARS", "LD_LIBRARY_PATH");
 $compress = Asim::Util::get_asimrc_val("asim-batch", "COMPRESS", "gzip");
 $keeprunoutput = Asim::Util::get_asimrc_val("asim-batch", "KEEP_RUN_OUTPUT", 0);
+$keepstatsfile = Asim::Util::get_asimrc_val("asim-batch", "KEEP_STATS_FILE", 0);
 $rsynchost = "";
 $rsyncresdir = "";
 
@@ -273,7 +274,7 @@ else {
   }
   else {
       # remove the copied over stats files
-      system ("rm $rundir/*.stats > /dev/null 2>&1");
+      system ("rm $rundir/*.stats > /dev/null 2>&1") unless ($keepstatsfile == 1);
   }
   if ($compress =~ m/^(none|no)$/) {
     # nothing to be done
