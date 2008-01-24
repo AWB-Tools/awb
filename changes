@@ -4063,3 +4063,16 @@ Directory libperl/Asim/lib/Asim
 - Mismatch of extension and explicit type is an error.  Exceptions
   (e.g. BDPI_C allowed for .c) are hard coded in the source.
 - Add support for HAsim dictionaries.
+
+----------
+spartha1    Date: Thu Jan 24 17:35:44 EST 2008  CSN: CSN-asimcore-210
+                  Thu Jan 24 22:35:44 UTC 2008
+
+
+Directory tools/scripts
+ regression.cleanup        Locally Modified          209 
+ asim-batch                Locally Modified          209 
+
+Updating with simcore changes (rev. 2493 - Krishna Rangan)
+
+- remove the copied over stats file from the run area.

@@ -271,6 +271,10 @@ else {
   if (system ("cp $rundir/*.stats $resdir/.")) {
     &runerror("Unable to copy $rundir/$bm.stats file in $resdir.");
   }
+  else {
+      # remove the copied over stats files
+      system ("rm $rundir/*.stats > /dev/null 2>&1");
+  }
   if ($compress =~ m/^(none|no)$/) {
     # nothing to be done
   } elsif ($compress =~ m/^(bzip2|bz2)$/) {
