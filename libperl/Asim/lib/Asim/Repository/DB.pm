@@ -433,13 +433,13 @@ sub bundle_directory {
   # read in bundles from the system bundle directory
   my $systembundles = Asim::Sysconfdir() . "/asim/bundles";
   if (-d $systembundles) {
-    find(\&wanted,$systembundles);
+    find({wanted => \&wanted, follow => 1}, $systembundles);
   }
 
   # also read in custom bundles in the user's area 
   my $userbundles = Asim::Util::expand_tilda("~/.asim/bundles");
   if (-d $userbundles) {
-      find(\&wanted, $userbundles);
+      find({wanted => \&wanted, follow => 1},  $userbundles);
   }
 
   my $bundlelist = {};
@@ -469,12 +469,12 @@ sub bundle_files {
   our @files; 
   my @flist;
 
-  find(\&wanted, Asim::Sysconfdir() . "/asim/bundles");
+  find({wanted => \&wanted, follow => 1},  Asim::Sysconfdir() . "/asim/bundles");
 
   # also read in custom bundles in the user's area 
   my $userbundles = Asim::Util::expand_tilda("~/.asim/bundles");
   if (-d $userbundles) {
-      find(\&wanted, $userbundles);
+      find({wanted => \&wanted, follow => 1},  $userbundles);
   }
 
   my $bundlelist = {};

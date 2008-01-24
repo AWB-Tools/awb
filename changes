@@ -4137,3 +4137,15 @@ Previously, links were not copied at all. Now they're copied as
 links.
 
 Eric
+
+----------
+spartha1    Date: Thu Jan 24 18:02:41 EST 2008  CSN: CSN-asimcore-214
+                  Thu Jan 24 23:02:41 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          213 
+
+Updating with simcore changes (rev. 2514 - Carl Beckmann)
+
+- Traverse symbolic links when looking for bundle files.
