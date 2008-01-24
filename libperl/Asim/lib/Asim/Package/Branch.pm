@@ -524,7 +524,6 @@ sub branch {
     print  COMMENT "        Branch from revision: $csn\n";
     print  COMMENT "        From URL:             $cur_url\n";
     print  COMMENT "        To URL:               $branch_url\n";
-    printf COMMENT "\nDO NOT DELETE THIS LINE! ADD COMMENTS BELOW:\n";
     close  COMMENT;
     system "$EDITOR " . $self->{commentfile};
     

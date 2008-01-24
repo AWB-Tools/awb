@@ -4076,3 +4076,15 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2493 - Krishna Rangan)
 
 - remove the copied over stats file from the run area.
+
+----------
+spartha1    Date: Thu Jan 24 17:38:05 EST 2008  CSN: CSN-asimcore-211
+                  Thu Jan 24 22:38:05 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Branch.pm                 Locally Modified          210 
+
+Updating with simcore changes (rev. 2497 - Sailashri Parthasarathy)
+
+Fix for bug: The branch package no longer appends the "DO NOT DELETE" statement to the changelog.
