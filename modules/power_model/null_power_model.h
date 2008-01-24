@@ -289,6 +289,26 @@ class BASE_EXE_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
   virtual ~BASE_EXE_POWER_MACRO_CLASS(){};
 };
 
+class BASE_VECTOR_POWER_MACRO_CLASS : public BASE_POWER_MACRO_CLASS
+{
+
+  public:
+
+  void Access(UINT64 offset, UINT32 access_class) {};
+
+  // Constructor
+  BASE_VECTOR_POWER_MACRO_CLASS(ASIM_MODULE parent,
+			     const char * const name,
+			     const char * const tname="",
+			     bool enable = true) :
+    BASE_POWER_MACRO_CLASS(parent, name, tname, enable) {};
+ 
+  // Destructor
+  virtual ~BASE_VECTOR_POWER_MACRO_CLASS(){};
+};
+
+
+
 class CAM_POWER_MACRO_CLASS : public BASE_MEM_POWER_MACRO_CLASS
 {
   friend class POWER_CALCULATOR_CLASS;
@@ -348,6 +368,26 @@ class EXE_POWER_MACRO_CLASS : public BASE_EXE_POWER_MACRO_CLASS
   
  // Desstructor
  ~EXE_POWER_MACRO_CLASS() {};
+ 
+};
+
+class VECTOR_POWER_MACRO_CLASS : public BASE_VECTOR_POWER_MACRO_CLASS
+{
+
+ public:
+   void InitializeMacro(VF_DOMAIN_CLASS *domain,
+                        string access_names[],
+                        UINT32 access_class_count) {};
+
+ // Constructor
+ VECTOR_POWER_MACRO_CLASS(ASIM_MODULE parent,
+                       const char * const name,
+		       const char * const tname="",
+		       bool enable = true) :
+   BASE_VECTOR_POWER_MACRO_CLASS(parent, name, tname, enable) {};
+  
+ // Desstructor
+ ~VECTOR_POWER_MACRO_CLASS() {};
  
 };
 

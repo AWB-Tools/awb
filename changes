@@ -4165,3 +4165,17 @@ Updating with simcore changes (rev. 2515 - Krishna Rangan)
 
 - added KEEP_STATS_FILE (an asim-batch option) to work around the stats file
 being deleted.
+
+----------
+spartha1    Date: Thu Jan 24 18:10:02 EST 2008  CSN: CSN-asimcore-216
+                  Thu Jan 24 23:10:02 UTC 2008
+
+
+Directory modules/power_model
+ null_power_model.h        Locally Modified          215 
+
+Updating with simcore changes (rev. 2527 - Michael Powell)
+
+Added null declaration and definition for new VECTOR_POWER_MACRO_CLASS.
+
+--mdpowel1
