@@ -175,6 +175,7 @@ my $build       = Asim::Util::get_asimrc_val("asim-run", "BUILD",          1    
 my $nuke        = Asim::Util::get_asimrc_val("asim-run", "NUKE",           1     );
 my $compress    = Asim::Util::get_asimrc_val("asim-run", "COMPRESS",       "gzip");
 my $replace     = Asim::Util::get_asimrc_val("asim-run", "REPLACE",        0     );
+my $buildall    = Asim::Util::get_asimrc_val("asim-run", "BUILD_ALL", "0"   );
 my $buildbatch  = Asim::Util::get_asimrc_val("asim-run", "BUILD_NETBATCH", "0"   );
 my $builddistcc = Asim::Util::get_asimrc_val("asim-run", "BUILD_DISTCC",   "0"   );
 my $runbatch    = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
@@ -285,6 +286,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "replace!"       => \$replace,
 			"compress=s"     => \$compress,
                         "execscript=s"   => \$execscript,
+                        "buildall!"       => \$buildall,
                         "buildbatch!"    => \$buildbatch,
                         "buildopt=s"     => \$buildopt,
                         "builddistcc!"   => \$builddistcc,
@@ -1152,45 +1154,48 @@ sub local_build
 
     # Determine if we've already built this model. 
     my $buildforced = 1;
-    (my $cur_model = $model) =~ s/\//:/g;
-    my @built = grep (/($cur_model)$EXP_ENTRY(.*)/, @built_models);
-    
-    if (scalar(@built) > 1) {
+
+    if ($buildall == 0) {
+      (my $cur_model = $model) =~ s/\//:/g;
+      my @built = grep (/($cur_model)$EXP_ENTRY(.*)/, @built_models);
+      
+      if (scalar(@built) > 1) {
         print_error("It looks like I've built the same model twice.\n",
-                   "ACK!! BUG!! Get Bobbie to fix this @#$!#\n");
+                    "ACK!! BUG!! Get Bobbie to fix this @#$!#\n");
         $exit_code++;
         return 0;
-    }
-
-    if (scalar(@built) == 1) {
+      }
+      
+      if (scalar(@built) == 1) {
         $built[0] =~ /($cur_model)$EXP_ENTRY(.*)/;
         my $builtexp = $2;
         print_info("........ Skipping build: Linking to prebuilt model $model_name in experiment $builtexp\n");
         if (defined $buildarea && $buildarea ne "") {
-            # model is configured in build area, just link binary.
-            if ( run_command ("ln -sf $buildarea/$builtexp/$model_name $model_buildarea/$model_name > $asim_runlogfl 2>&1") ) {  
-                print_warning("Unable to link to prebuilt model $model_name in build area in experiment $builtexp\n",
-                             "Build forced.\n");
-                $exit_code++;
-                return 0;
-            }
-            # model is not configured in $resdir, link all.
-            if (run_command ("ln -sf $resdir/$name/BUILD/../../$builtexp/BUILD/* $resdir/$name/BUILD/ > $asim_runlogfl 2>&1") ) {
-                print_warning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
-                             "Build forced.\n");
-                $exit_code++;
-                return 0;
-            }
-        }
-        elsif (run_command ("ln -sf $resdir/$name/BUILD/../../$builtexp/BUILD/$model_name $resdir/$name/BUILD/$model_name > $asim_runlogfl 2>&1") ) {
-            print_warning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
-                         "Build forced.\n");
+          # model is configured in build area, just link binary.
+          if ( run_command ("ln -sf $buildarea/$builtexp/$model_name $model_buildarea/$model_name > $asim_runlogfl 2>&1") ) {  
+            print_warning("Unable to link to prebuilt model $model_name in build area in experiment $builtexp\n",
+                          "Build forced.\n");
             $exit_code++;
             return 0;
+          }
+          # model is not configured in $resdir, link all.
+          if (run_command ("cd $resdir/$name/BUILD; ln -sf ../../$builtexp/BUILD/* $resdir/$name/BUILD/ > $asim_runlogfl 2>&1") ) {
+            print_warning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
+                          "Build forced.\n");
+            $exit_code++;
+            return 0;
+          }
+        }
+        elsif (run_command ("cd $resdir/$name/BUILD; ln -sf ../../$builtexp/BUILD/$model_name $resdir/$name/BUILD/$model_name > $asim_runlogfl 2>&1") ) {
+          print_warning("Unable to link to prebuilt model $model_name in experiment $builtexp\n",
+                        "Build forced.\n");
+          $exit_code++;
+          return 0;
         }
         else {
-            $buildforced = 0;
+          $buildforced = 0;
         }
+      }
     }
     
     if ($buildforced) {
@@ -1342,7 +1347,7 @@ sub rsync_model
 
             # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
             # different from experiment name.
-            run_command_rsync("--quiet $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/");
+            run_command_rsync("--quiet -l $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/");
         }
     }
 
@@ -2752,6 +2757,7 @@ Asim-run - Program to run a set of asim experiments
           [--nicelevel <Number between Nicemin (usually 10) & Nicemax (usually 19)>]
           [--execscript <Name of script to execute to simulate each benchmark>]
           [--[no]build]
+          [--[no]buildall]
           [--buildarea <Alternate location to build models or look for pre-built model(s)>]
           [--[no]persist]
           [--[no]replace]
@@ -2824,7 +2830,13 @@ be no reason to change the default.
 =item --[no]build
 
 Specifies whether the models are to be built or (with the [no] prefix)
-that they are already built. Default is to build all models.
+that they are already built. Default is to build.
+
+=item --[no]buildall
+
+Specifies that all models are to be built.  With the [no] prefix,
+experiments can share executables via links.  Default is --nobuildall
+to share executables.
 
 =item --buildarea <Alternate location to build models or look for pre-built model(s)>
 

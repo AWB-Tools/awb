@@ -4116,3 +4116,24 @@ fixed some valgrind issues
 - fixed numm thermal model to return NULL for Instance()
 - fixed ports to delete their BufferStorage on destruction
 - added assert to resource_tracker to catch possible memory errors
+
+----------
+spartha1    Date: Thu Jan 24 18:00:35 EST 2008  CSN: CSN-asimcore-213
+                  Thu Jan 24 23:00:35 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          212 
+
+Updating with simcore changes (rev. 2513 - Eric Borch)
+
+- changed how links get set up when running multiple experiments that
+share the same binary. Now the links are relative to the exectuable
+location, instead of full path links. This makes running on remote
+netbatch farms a bit easier.
+
+- fixed a bug when syncing binaries to remote netbatch farms.
+Previously, links were not copied at all. Now they're copied as
+links.
+
+Eric
