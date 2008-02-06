@@ -4201,3 +4201,14 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2529 - Krishna Rangan)
 
 - added support for batch commit of svn & cvs packages.
+
+----------
+mcadler     Date: Wed Feb  6 10:39:13 EST 2008  CSN: CSN-asimcore-218
+                  Wed Feb  6 15:39:13 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          217 
+
+- "dict" SCons class now named "iface"
+- C++ include files now of type "H" instead of "CPP"

@@ -174,7 +174,7 @@ Returns module.
 sub open {
   my $self = shift;
   my $file = shift
-      || ierror("No module file name specified\n") && return undef;
+      || $self->ierror("No module file name specified\n") && return undef;
 
   print "Asim::Module - opening module - $file\n" if $debug;
 
@@ -182,10 +182,10 @@ sub open {
   # Cannonicalize file name and open
   #
   my $rfile = $Asim::default_workspace->resolve($file) 
-    || ierror("Could not resolve module file ($file)\n") && return undef;
+    || $self->ierror("Could not resolve module file ($file)\n") && return undef;
 
   CORE::open(M, "< $rfile") 
-    || ierror("Could not open module file ($file)\n") && return undef;
+    || $self->ierror("Could not open module file ($file)\n") && return undef;
 
   $self->{filename} = $file;
 
@@ -313,7 +313,7 @@ sub open {
                    "visibility=s" => \$vis);
 
         # insert into source matrix
-        $self->addsources($type, $vis, @ARGV);
+        $self->addsources($type, $vis, 1, @ARGV);
         next;
     }
 
@@ -338,11 +338,11 @@ sub open {
       if (! defined($class)) {
         $class = 'top';
       }
-      elsif ($class =~ /^%(dict|hw|sw|top)$/) {
+      elsif ($class =~ /^%(iface|hw|sw|top)$/) {
         $class =~ s/^%//;
       }
       else {
-        ierror("Illegal category for %scons: $class\n");
+        $self->ierror("Illegal category for %scons: $class\n");
         return undef;
       }
 
@@ -814,11 +814,19 @@ sub decipher_type_from_extension
     }
     elsif ($filename =~ /.\.[hH]$/)
     {
-        return "CPP";           # C++
+        return "H";             # C++
     }
     elsif ($filename =~ /.\.ngc$/)
     {
         return "NGC";           # Xilinx netlist
+    }
+    elsif ($filename =~ /.\.pack$/)
+    {
+        return "PACK";          # Asim package file
+    }
+    elsif ($filename =~ /.\.prj$/)
+    {
+        return "PRJ";           # Xilinx project
     }
     elsif ($filename =~ /.\.rrr$/)
     {
@@ -888,7 +896,7 @@ sub public
             # %public directive would *replace* the existing public
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
-            $self->addsources($type, "PUBLIC", ($f));
+            $self->addsources($type, "PUBLIC", 0, ($f));
         }
     }
 
@@ -934,7 +942,7 @@ sub private
             # %private directive would *replace* the existing private
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
-            $self->addsources($type, "PRIVATE", ($f));
+            $self->addsources($type, "PRIVATE", 0, ($f));
         }
     }
 
@@ -1021,7 +1029,7 @@ sub source_types
 
 ################################################################
 
-=item $module-E<gt>addsources($t, $v, [$list])
+=item $module-E<gt>addsources($t, $v, $requireType, [$list])
 
 Update the list of source files of specified type and visibility
 with $list. If the type/visibility combination is not found in
@@ -1042,6 +1050,7 @@ sub addsources
     my $self = shift;
     my $specType = shift;
     my $vis  = shift;
+    my $requireType = shift;
     my @infiles = (@_);
     my $lastSlist = undef;
 
@@ -1055,14 +1064,25 @@ sub addsources
             $type = $specType if ($type eq '');
             if (($type ne '') && ($specType ne $type)) {
                 # Type mismatch
-                if (($specType eq 'BDPI_C') && ($type eq 'CPP')) {
-                    # Accept BDPI_C override for C sources
+                if ((($specType eq 'BDPI_C') && ($type eq 'CPP')) ||
+                    (($specType eq 'BDPI_H') && ($type eq 'H'))) {
+                    # Accept BDPI override for C sources
                     $type = $specType;
                 }
                 else {
-                    ierror("For file $f specified type ($specType) does not match implicit type ($type)");
+                    $self->ierror("For file $f specified type ($specType) does not match implicit type ($type)\n");
                 }
             }
+        }
+
+        if ($requireType && ($type eq '')) {
+            $self->ierror("Type of file $f not specified\n");
+        }
+        if ($vis eq '') {
+            $self->ierror("Visibility of file $f not specified\n");
+        }
+        elsif (($vis ne 'PUBLIC') && ($vis ne 'PRIVATE')) {
+            $self->ierror("Unrecognized visibility of file $f ($vis)\n");
         }
 
         if (defined($lastSlist) &&
@@ -1790,11 +1810,12 @@ Diabled due to Perl problem - 'called too early to check prototype'
 ################################################################
 
 sub ierror {
-  my $message = shift;
+    my $self = shift;
+    my $message = shift;
 
-  print "Asim::Module:: Error - $message";
+    print "Asim::Module ($self->{filename}) Error - $message";
 
-  return 1;
+    return 1;
 }
 
 =back
