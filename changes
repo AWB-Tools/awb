@@ -4212,3 +4212,13 @@ Directory libperl/Asim/lib/Asim
 
 - "dict" SCons class now named "iface"
 - C++ include files now of type "H" instead of "CPP"
+
+----------
+mcadler     Date: Wed Feb  6 14:53:06 EST 2008  CSN: CSN-asimcore-219
+                  Wed Feb  6 19:53:06 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          218 
+
+Generate error message when filename isn't defined.

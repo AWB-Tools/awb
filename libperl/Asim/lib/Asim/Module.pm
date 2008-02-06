@@ -1813,7 +1813,12 @@ sub ierror {
     my $self = shift;
     my $message = shift;
 
-    print "Asim::Module ($self->{filename}) Error - $message";
+    if (exists($self->{filename})) {
+        print "Asim::Module ($self->{filename}) Error - $message";
+    }
+    else {
+        print "Asim::Module Error - $message";
+    }
 
     return 1;
 }
