@@ -4222,3 +4222,13 @@ Directory libperl/Asim/lib/Asim
  Module.pm                 Locally Modified          218 
 
 Generate error message when filename isn't defined.
+
+----------
+mcadler     Date: Wed Apr  2 13:56:54 EDT 2008  CSN: CSN-asimcore-220
+                  Wed Apr  2 17:56:54 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim
+ Benchmark.pm              Locally Modified          219 
+
+Parse more fields in a benchmark configuration file.

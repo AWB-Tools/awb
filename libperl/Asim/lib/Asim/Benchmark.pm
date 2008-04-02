@@ -1,5 +1,4 @@
-#
-# Copyright (C) 2004-2006 Intel Corporation
+# Copyright (C) 2004-2008 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,8 +14,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
-#
-
 
 package Asim::Benchmark;
 use warnings;
@@ -34,9 +31,19 @@ our %a =  ( filename =>             [ "filename",
                                       "SCALAR" ],
             description =>          [ "description",
                                       "SCALAR" ],
+            feeder =>               [ "feeder",
+                                      "SCALAR" ],
+            region =>               [ "region",
+                                      "SCALAR" ],
             setup_command =>        [ "setup_command",
                                       "SCALAR" ],
             setup_args =>           [ "setup_args",
+                                      "SCALAR" ],
+            general_flags =>        [ "general_flags",
+                                      "SCALAR" ],
+            feeder_flags =>         [ "feeder_flags",
+                                      "SCALAR" ],
+            system_flags =>         [ "system_flags",
                                       "SCALAR" ],
       );
 
@@ -117,6 +124,14 @@ sub _initialize {
 
   $self->{name} = "";
   $self->{description} = "";
+  $self->{feeder} = "";
+
+  $self->{region} = undef;
+  $self->{setup_command} = "";
+  $self->{setup_args} = "";
+  $self->{general_flags} = "";
+  $self->{feeder_flags} = "";
+  $self->{system_flags} = "";
 
   $self->{vars} = {};
 
@@ -141,12 +156,19 @@ sub open {
   my $file = shift;
   my $status;
 
-  #
-  # Rememeber benchmark name
-  #
-  $self->{filename} = $file;
-  $self->{name} = $file;
+  my $orig_file = $file;
 
+  #
+  # Strip region specifier
+  #
+  $self->{region} = '';
+  my $region_tag = '';
+  my $is_region = $file =~ m/_r([0-9]+)$/;
+  if ($is_region) {
+      $self->{region} = $1;
+      $file =~ s/_r[0-9]+$//;
+      $region_tag = '_r' . $self->{region};
+  }
 
   #
   # Handle path with .cfx in them
@@ -164,7 +186,7 @@ sub open {
     my $cfx_file = Asim::resolve($cfg_base) 
       ||  return undef;
 
-    $open_file = "$cfx_file --emit $cfx_suffix |";
+    $open_file = "asimstarter -- $cfx_file --emit $cfx_suffix |";
   } else {
 
     my $cfg_file = Asim::resolve($file)
@@ -181,27 +203,70 @@ sub open {
   CORE::open(CFG, $open_file)
     || return undef;
 
-  while (my $line = <CFG>) {
+  while (($#cfg < 8) && (my $line = <CFG>)) {
     chomp($line);
-    push(@cfg, $line);
+
+    # Drop leading whitespace and TCL {} string encapsulation
+    $line =~ s/^[ \t{]*//;
+    $line =~ s/[ \t}]*$//;
+
+    # Substitute region tag
+    $line =~ s/%R/$region_tag/g;
+
+    # Keep all but the leading BmAdd { token
+    if (! ($line =~ /^BmAdd[ \t{]*$/)) {
+        push(@cfg, $line);
+    }
   }
+
+  ##
+  ## This is where we would parse TCL controller commands.
+  ##
 
   CORE::close(CFG);
 
+  if ($#cfg != 8) {
+      ierror("Error parsing benchmark file ${orig_file}\n");
+      ierror("Wrong number of items found: got $#cfg but expected 8.\n");
+      return 0;
+  }
+
+  $self->{name} = $cfg[0];
+  $self->{filename} = $cfg[1];
+  $self->{description} = $cfg[2];
+  $self->{feeder} = $cfg[3];
+
   #
-  # TBD: This hack should be replaced with a 
-  #      proper parsing of the config file
+  # Setup command and arguments comes from line 4...
   #
-  my $setup = $cfg[5];
+  my $setup = $cfg[4];
 
   $setup =~ m/ *([^ ]*) (.*)/;
   my $setup_command = $1;
   my $setup_args = $2;
+  if ($is_region) {
+      $setup_args .= " --region " . $self->{region};
+  }
 
   $self->{setup_command} = Asim::resolve($setup_command);
   $self->{setup_args} = $setup_args;
 
+  #
+  # Hack alert.  General flags can include flags to this code,
+  # e.g. the --regions tag used by awb to show individual regions.
+  # The same is true of --queryregions. 
+  # Strip them.
+  #
+  my $genfl = $cfg[5];
+  $genfl =~ s/--regions[ \t]*[0-9]*[ \t]*//g;
+  $genfl =~ s/--queryregions[ \t]*//g;
+  $self->{general_flags} = $genfl;
+
+  $self->{feeder_flags} = $cfg[6];
+  $self->{system_flags} = $cfg[7];
+
   $self->modified(0);
+
   return 1;
 }
 
@@ -217,7 +282,7 @@ Return a list of accessor functions for this object
 ################################################################
 
 sub accessors {
-    return qw(filename name description setup_command setup_script);
+    return qw(filename name description feeder region setup_command setup_args general_flags feeder_flags system_flags);
 }
 
 
@@ -240,10 +305,9 @@ sub filename {
 
 ################################################################
 
-=item $model-E<gt>version([$value])
+=item $model-E<gt>version()
 
-Set model "version" to $value if supplied. 
-Always return configuration file "version".
+Return configuration file "version".
 
 =cut
 
@@ -252,13 +316,11 @@ Always return configuration file "version".
 sub version     { return "1.0" }
 
 
-
 ################################################################
 
-=item $model-E<gt>name([$value])
+=item $model-E<gt>name()
 
-Set model "name" to $value if supplied. 
-Always return model "name".
+Return model "name".
 
 =cut
 
@@ -268,10 +330,9 @@ sub name        { return $_[0]->{name} }
 
 ################################################################
 
-=item $model-E<gt>description([$value])
+=item $model-E<gt>description()
 
-Set model "description" to $value if supplied. 
-Always return current model "description".
+Return current model "description".
 
 =cut
 
@@ -281,20 +342,27 @@ sub description { return $_[0]->{description} }
 
 ################################################################
 
-=item $benchmark-E<gt>setup_srcdir()
+=item $model-E<gt>feeder()
 
-Source directory for setup
+Return current model "feeder".
 
 =cut
 
 ################################################################
 
-sub setup_srcdir {
-  my $self = shift;
+sub feeder { return $_[0]->{feeder} }
 
-  return dirname($self->setup_command());
-}
+################################################################
 
+=item $model-E<gt>region()
+
+Return the region of the workload.
+
+=cut
+
+################################################################
+
+sub region { return $_[0]->{region} }
 
 ################################################################
 
@@ -306,11 +374,8 @@ Filename of setup script
 
 ################################################################
 
-sub setup_command {
-  my $self = shift;
+sub setup_command { return $_[0]->{setup_command} }
 
-  return $self->{setup_command};
-}
 
 ################################################################
 
@@ -322,11 +387,46 @@ Arguemnts to the setup script
 
 ################################################################
 
-sub setup_args {
-  my $self = shift;
+sub setup_args { return $_[0]->{setup_args} }
 
-  return $self->{setup_args};
-}
+
+################################################################
+
+=item $benchmark-E<gt>general_flags()
+
+General flags to in the run script
+
+=cut
+
+################################################################
+
+sub general_flags { return $_[0]->{general_flags} }
+
+
+################################################################
+
+=item $benchmark-E<gt>feeder_flags()
+
+Feeder flags to in the run script
+
+=cut
+
+################################################################
+
+sub feeder_flags { return $_[0]->{feeder_flags} }
+
+
+################################################################
+
+=item $benchmark-E<gt>system_flags()
+
+System flags to in the run script
+
+=cut
+
+################################################################
+
+sub system_flags { return $_[0]->{system_flags} }
 
 
 ################################################################
