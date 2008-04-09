@@ -145,20 +145,22 @@ BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OFDM
 [feeder]
 Description=Instruction Feeders
 Method=svn
-Access=http://asim.intel.com:81/svn/feeder
-Module=asim-feeder
+Access=https://asim.csail.mit.edu/svn/feeder
+Module=undefined
 Tag=HEAD
 Target=asim-feeder
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=FEEDER
 
 [feeder/HEAD]
 Description=ASIM Instruction Feeders Library
 Method=svn
-Access=http://asim.intel.com:81/svn/feeder
-Module=asim-feeder
+Access=https://asim.csail.mit.edu/svn/feeder
+Module=undefined
 Tag=HEAD
 Target=asim-feeder
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=FEEDER
 
 
 ######### Dreams tools
@@ -166,15 +168,17 @@ Changes=changes
 [dreams]
 Description=Dreams Visualization Tools
 Method=svn
-Access=http://asim.intel.com:81/svn/dreams
-Module=asim-dreams
-Target=asim-dreams
+Access=https://asim.csail.mit.edu/svn/dreams
+Module=undefined
+Target=dreams
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=DREAMS
 
 [dreams/HEAD]
 Description=Dreams Visualization Tools
 Method=svn
-Access=http://asim.intel.com:81/svn/dreams
-Module=asim-dreams
-Target=asim-dreams
+Access=https://asim.csail.mit.edu/svn/dreams
+Module=undefined
+Target=dreams
 Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=DREAMS

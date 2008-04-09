@@ -4232,3 +4232,13 @@ Directory libperl/Asim/lib/Asim
  Benchmark.pm              Locally Modified          219 
 
 Parse more fields in a benchmark configuration file.
+
+----------
+joel        Date: Wed Apr  9 14:42:02 EDT 2008  CSN: CSN-asimcore-221
+                  Wed Apr  9 18:42:02 UTC 2008
+
+
+Directory etc
+ asim.pack                 Locally Modified          220 
+
+Fixed some URLs.
