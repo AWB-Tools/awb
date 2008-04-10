@@ -103,7 +103,7 @@ Method=svn
 Access=https://asim.csail.mit.edu/svn/hasim-alpha
 Module=undefined
 Tag=HEAD
-Target=asim-hasim-alpha
+Target=hasim-alpha
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-ALPHA
 
@@ -125,7 +125,7 @@ Method=svn
 Access=https://asim.csail.mit.edu/svn/hasim-mips
 Module=undefined
 Tag=HEAD
-Target=asim-hasim-mips
+Target=hasim-mips
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-MIPS
 

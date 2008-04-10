@@ -4252,3 +4252,13 @@ Directory etc
  asim.pack                 Locally Modified          221 
 
 Added hasim-alpha package.
+
+----------
+emer        Date: Wed Apr  9 21:53:26 EDT 2008  CSN: CSN-asimcore-223
+                  Thu Apr 10 01:53:26 UTC 2008
+
+
+Directory etc
+ asim.pack                 Locally Modified          222 
+
+Made checkout target directories consistent.
