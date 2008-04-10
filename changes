@@ -4242,3 +4242,13 @@ Directory etc
  asim.pack                 Locally Modified          220 
 
 Fixed some URLs.
+
+----------
+emer        Date: Wed Apr  9 21:41:18 EDT 2008  CSN: CSN-asimcore-222
+                  Thu Apr 10 01:41:18 UTC 2008
+
+
+Directory etc
+ asim.pack                 Locally Modified          221 
+
+Added hasim-alpha package.

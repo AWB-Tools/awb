@@ -95,6 +95,27 @@ Target=platforms
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-PLATFORMS
 
+###### Hasim-alpha trunk
+
+[hasim-alpha]
+Description=Hardware Asim Model for ALPHA
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim-alpha
+Module=undefined
+Tag=HEAD
+Target=asim-hasim-alpha
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-ALPHA
+
+[hasim-alpha/HEAD]
+Description=Hardware Asim Model for ALPHA
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim-alpha
+Module=undefined
+Tag=HEAD
+Target=hasim-alpha
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-ALPHA
 
 ###### Hasim-mips trunk
 
@@ -102,7 +123,7 @@ BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-PLATFORMS
 Description=Hardware Asim Model for MIPS
 Method=svn
 Access=https://asim.csail.mit.edu/svn/hasim-mips
-Module=hasim-mips
+Module=undefined
 Tag=HEAD
 Target=asim-hasim-mips
 Changes=changes
