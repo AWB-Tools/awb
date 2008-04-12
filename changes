@@ -4262,3 +4262,13 @@ Directory etc
  asim.pack                 Locally Modified          222 
 
 Made checkout target directories consistent.
+
+----------
+emer        Date: Sat Apr 12 19:31:46 EDT 2008  CSN: CSN-asimcore-224
+                  Sat Apr 12 23:31:46 UTC 2008
+
+
+Directory etc
+ asim.pack                 Locally Modified          223 
+
+Added repository for m5.
