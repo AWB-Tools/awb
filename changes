@@ -4272,3 +4272,24 @@ Directory etc
  asim.pack                 Locally Modified          223 
 
 Added repository for m5.
+
+----------
+mcadler     Date: Fri Apr 25 17:56:23 EDT 2008  CSN: CSN-asimcore-225
+                  Fri Apr 25 21:56:23 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Workspace
+ Template.pm               Locally Modified          224 
+
+Directory libperl/Asim/lib/Asim
+ Workspace.pm              Locally Modified          224 
+
+Directory tools/awb/awb-resolver
+ awb-resolver.cpp          Locally Modified          224 
+
+Directory lib/libawb
+ workspace.cpp             Locally Modified          224 
+ workspace.h               Locally Modified          224 
+
+Add EVENTS to the awb.config and awb-resolver options processing to control
+building models with support for events.  Default is off.

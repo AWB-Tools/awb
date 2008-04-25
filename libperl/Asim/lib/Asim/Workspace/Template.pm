@@ -155,6 +155,8 @@ PARALLEL=1
 # DEBUG or OPTIMIZE
 BUILDTYPE=OPTIMIZE
 
+# Build models with (1) or without (0) support for events
+EVENTS=0
 EOF
 
   close(AWBCONFIG);

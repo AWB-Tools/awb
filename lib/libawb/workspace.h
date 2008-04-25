@@ -77,6 +77,9 @@ using namespace std;
  *   
  *   # Do parallel make (1) or not (0)
  *   PARALLEL=0
+ *   
+ *   # Build binary with (1) or without (0) events
+ *   EVENTS=1
  * </pre>        
  */
 
@@ -121,20 +124,11 @@ class Workspace {
         BuildEnvFlagOptimize, ///< build with optimizations turned on
         BuildEnvFlagStatic,   ///< build statically linked executable
         BuildEnvFlagWarn,     ///< build with warnings turned on
+        BuildEnvFlagEvents,   ///< build with / without events code in the binary
         LAST_BUILD_ENV_FLAG   ///< sentinel
     };
 
   private:
-    // consts
-    // default values
-    // gcc 3.2.2 complains about these lines inside the class def.
-//    static const char* const DefaultBenchmarkDir   = "/proj/asim/benchmarks";
-//    static const char* const DefaultBuildDir       = "build";
-//    static const char* const DefaultSourceTreePath = "asim";
-//    static const char* const DefaultCompiler       = "GCC";
-//    static const char* const DefaultParallel       = "FALSE";
-//    static const char* const DefaultBuildType      = "DEBUG";
-
     // members
     IniFile workspaceConfig;   ///< workspace's awb.config IniFile object
     UnionDir * sourceTree;     ///< the ASIM source tree UnionDir

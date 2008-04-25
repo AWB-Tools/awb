@@ -43,6 +43,7 @@ static const char* const DefaultSourceTreePath = "asim";
 static const char* const DefaultCompiler       = "GCC";
 static const char* const DefaultParallel       = "FALSE";
 static const char* const DefaultBuildType      = "DEBUG";
+static const char* const DefaultEvents         = "FALSE";
 static const char* const DefaultMakeFlags      = "";
 
 /**
@@ -183,6 +184,13 @@ Workspace::Workspace (
     //
     string buildType =
         workspaceConfig.Get ("Build", "BUILDTYPE", DefaultBuildType);
+
+    //
+    // EVENTS - build with or without event tracking in the binary
+    //
+    SetBuildEnvFlag (BuildEnvFlagEvents,
+        StringToBool (
+            workspaceConfig.Get ("Build", "EVENTS", DefaultEvents)));
 
     //------------------------------------------------------------------------
     // end parsing awb.config file
@@ -552,6 +560,9 @@ const
 
     out << prefix << "  BuildEnvFlag:" << endl;
     count = 0;
+    out << prefix << "    Events: "
+        << GetBuildEnvFlag (BuildEnvFlagEvents) << endl;
+    count++;
     out << prefix << "    Parallel: "
         << GetBuildEnvFlag (BuildEnvFlagParallel) << endl;
     count++;

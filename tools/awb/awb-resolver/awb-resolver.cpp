@@ -169,6 +169,10 @@ AWB_RESOLVER::ProcessCommandLine (
                   cout << workspace->GetBuildEnvFlag(
                           Workspace::BuildEnvFlagParallel)
                        << endl;
+              } else if (config == "events") {
+                  cout << workspace->GetBuildEnvFlag(
+                          Workspace::BuildEnvFlagEvents)
+                       << endl;
               } else {
                   if ( ! quiet ) {
                       cerr << "Error: -config unknown parameter "
@@ -292,7 +296,7 @@ AWB_RESOLVER::PrintHelp (
     cerr << endl;
     cerr << "parameters that can be queried with the -config command:" << endl;
     cerr << "    workspace, benchmarkdir, builddir, searchpath,"<< endl;
-    cerr << "    compiler, debug, optimize, parallel" << endl;
+    cerr << "    compiler, debug, optimize, parallel, events" << endl;
     cerr << endl;
 }
 

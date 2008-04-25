@@ -121,6 +121,8 @@ The awb.config file current contains the following:
   # DEBUG or OPTIMIZE
   BUILDTYPE=OPTIMIZE
 
+  # Build models with (1) or without (0) support for events
+  EVENTS=0
 
 
 =head1 METHODS
