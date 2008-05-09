@@ -1287,12 +1287,19 @@ BufferStorage<T,S>::Write(const T& data, UINT64 cycle, const char* portName)
                "Port " << portName << " trying to write to buffer entry "
                << WriteIndex << " that has data in it");
 
+        // Note! CycleWritten has to be set before Start and 
+        // End are initialized. Do not re-order these 
+        // statements unless you know what you are doing.
+        // This ordering is needed for the parallel runs.
+
+        Store[WriteIndex].CycleWritten = (INT64)cycle;
+        MemBarrier();
+
         // this is the first time we're writing into this row this cycle, so reset
         // the start and end to 0.
         Store[WriteIndex].Start = 0;
         Store[WriteIndex].End = 0;
         
-        Store[WriteIndex].CycleWritten = (INT64)cycle;
         LastWritten = (UINT64)cycle;
 
 	++SequentialWrites;

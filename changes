@@ -4305,3 +4305,15 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2536 - Sailashri Parthasarathy)
 
 Bug fix: Adding a command line check to check if the specified experiment and benchmark files exist.
+
+----------
+spartha1    Date: Fri May  9 16:39:29 EDT 2008  CSN: CSN-asimcore-227
+                  Fri May  9 20:39:29 UTC 2008
+
+
+Directory lib/libasim/include/asim
+ port.h                    Locally Modified          226 
+
+Updating with simcore changes (rev. 2539)
+
+Fixed a bug in the port implementation.
