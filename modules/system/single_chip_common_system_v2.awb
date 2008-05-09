@@ -22,16 +22,21 @@ Awb module specification
 %export MAX_TOTAL_NUM_CPUS          128 "Maximum number of CPUS allowed"
 %export MAX_TOTAL_NUM_HWCS          128 "Maximum number of hardware contexts allowed"
 
-%export MAX_PTHREADS                  1 "Maximum number of simulator threads"
-%export %dynamic LIMIT_PTHREADS       0 "Dynamic maximum simulator threads (0 == use MAX_PTHREADS)"
+%const MAX_PTHREADS                  1 "Maximum number of simulator threads"
+%const %dynamic LIMIT_PTHREADS       0 "Dynamic maximum simulator threads (0 == use MAX_PTHREADS)"
 
-%export PTHREAD_PER_BOARD             0 "Are board models run in parallel?"
-%export PTHREAD_PER_SOCKET            0 "Are socket models run in parallel?"
-%export PTHREAD_PER_CORE              0 "Are core models run in parallel?"
-%export PTHREAD_PER_UNIT              0 "Are unit models run in parallel?"
-%export PTHREAD_PER_MODULE            0 "Are all modules run in parallel?"
+%const PTHREAD_PER_BOARD 0 "Are board models run in parallel?"
+%const PTHREAD_PER_SOCKET 0 "Are socket models run in parallel?"
+%const PTHREAD_PER_SLICE 0 "Are core+uncore slice models run in parallel?"
+%const PTHREAD_PER_CORE 0 "Are core models run in parallel?"
+%const PTHREAD_PER_UNIT 0 "Are unit models run in parallel?"
+%const PTHREAD_PER_MODULE 0 "Are all modules run in parallel?"
+%const CORES_PER_PTHREAD 1 "How many core models are run on one pthread? (Range is 1 to max num of cores)"
 
-%param %dynamic SIMULATED_REGION_WEIGHT 10000 "The weight of the benchmark section from 1-10000"
+%const THREADED_CLOCKING 0 "Enables the threaded clocking"
+%const RANDOM_CLOCKING_SEED 0 "Seed to clock modules in random order (0 == Fixed order)"
+%const DUMP_CLOCKING_PROFILE 0 "Enables the Clock routine profiling"
+
 %param %dynamic SIMULATED_REGION_INSTRS_REPRESENTED 0 "Total instructions per CPU in benchmark represented by this region"
 
 %AWB_END

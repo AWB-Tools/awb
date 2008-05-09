@@ -4506,3 +4506,16 @@ In asim-shell:
 Added printouts around each package for a few more package commands.
 
 Added 'all' as option for 'show package' command.
+
+----------
+spartha1    Date: Fri May  9 19:36:03 EDT 2008  CSN: CSN-asimcore-236
+                  Fri May  9 23:36:03 UTC 2008
+
+
+Directory modules/system
+ single_chip_common_system_v2.awb Locally Modified          235 
+
+Updating with simcore changes (rev. 2562 - Carl Beckmann)
+
+- Added a clockserver parameter. For this non-clockserver system 
+module, made all clockserver params into %const's with inactive values.
