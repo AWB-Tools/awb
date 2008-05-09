@@ -1739,8 +1739,8 @@ sub parse_exp_file
     foreach my $expline (@explist) {
         print "Processing: $expline\n" if ($debug);
         
-        @exp = split(" ", $expline);
-
+	@exp = split(" ", $expline, 3);
+	
         if (scalar(@exp) < 2) {
             print_error("Unable to parse experiments file $file.\n",
                        "Not enough entries in the following line:\n",
@@ -1806,7 +1806,7 @@ sub read_exps
 
         print "Raw experiment: $exp\n" if $debug;
         
-        my @expv = split(/ +/, $exp);
+        my @expv = split_preserve_quotes($exp);
         my $name = shift @expv;
         my $line = shift @expv;
 
@@ -1816,6 +1816,34 @@ sub read_exps
     return @explist;
 }
 
+# -----------------------------------------------------------------------------
+#
+# Name: split_preserve_quotes
+#
+# Input: Experiment name with parameters
+#
+# Output: Experiment name with parameters split into an array, 
+#         preserving any parameter values within quotes intact
+#
+#
+sub split_preserve_quotes
+{
+    my $exp = shift;
+    my @quoted = split(/\"/, $exp);
+
+    return split(/ +/, $exp) if (scalar(@quoted) < 2);
+    
+    my @expv = ();
+    for (my $i = 0; $i < scalar(@quoted); $i++) {
+	if ($i % 2) {
+	    $expv[$#expv] .= "\\\"" . $quoted[$i] . "\\\"";
+	}
+	else {
+	    push(@expv, split(/ +/, $quoted[$i]));
+	}
+    }
+    return @expv;
+}
 
 # -----------------------------------------------------------------------------
 #

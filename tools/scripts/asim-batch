@@ -145,7 +145,7 @@ else {
 my $exec_command;
 
 if (!($nicelevel eq "")) {
-  print STDERR "using nice";
+  print STDERR "using nice\n";
   $exec_command = "nice -n $nicelevel $execscript";
 }
 else {
@@ -394,10 +394,6 @@ sub setup_def_env {
   print( "Nuking environment\n" );
   foreach $key (keys %ENV) {
     # Save certain environment variables
-
-
-
-
     if ( !(grep /^$key$/, @env) ) {
       delete $ENV{$key};
     }

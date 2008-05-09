@@ -4317,3 +4317,16 @@ Directory lib/libasim/include/asim
 Updating with simcore changes (rev. 2539)
 
 Fixed a bug in the port implementation.
+
+----------
+spartha1    Date: Fri May  9 18:46:07 EDT 2008  CSN: CSN-asimcore-228
+                  Fri May  9 22:46:07 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          227 
+ asim-batch                Locally Modified          227 
+
+Updating with simcore changes (rev. 2546 - Krishna Rangan)
+
+- fix to accept quoted parameters values.
