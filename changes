@@ -4330,3 +4330,19 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2546 - Krishna Rangan)
 
 - fix to accept quoted parameters values.
+
+----------
+spartha1    Date: Fri May  9 18:49:07 EDT 2008  CSN: CSN-asimcore-229
+                  Fri May  9 22:49:07 UTC 2008
+
+
+Directory modules/controller/classic
+ control_x86.cpp           Locally Modified          228 
+ control_x86.h             Locally Modified          228 
+
+Updating with simcore changes (rev. 2547 - Chris Weaver)
+
+add a macro for the close completely piperecord type.
+remove the use of the ptv_events macro since the quiet bool will
+give you the same speed as turning off the pipetrace events but still
+allow you to generate pipetraces.

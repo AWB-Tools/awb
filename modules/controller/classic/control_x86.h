@@ -52,45 +52,6 @@ extern Knob<char*>  perfplot_stats;
 extern Knob<char*>  perfplot_firing_stat;
 extern Knob<uint32> perfplot_start_from_end;
 
-#if PTV_EVENTS
-#define PIPE_RECORD_EVENT_TIME_MACRO4(A,B,C,D)           pipe_record_event_time(A,B,C,D)
-#define PIPE_RECORD_EVENT_TIME_MACRO5(A,B,C,D,E)         pipe_record_event_time(A,B,C,D,E)
-#define PIPE_RECORD_EVENT_TIME_MACRO6(A,B,C,D,E,F)       pipe_record_event_time(A,B,C,D,E,F)
-#define PIPE_RECORD_EVENT_TIME_MACRO7(A,B,C,D,E,F,G)     pipe_record_event_time(A,B,C,D,E,F,G)
-#define PIPE_RECORD_EVENT_TIME_MACRO8(A,B,C,D,E,F,G,H)   pipe_record_event_time(A,B,C,D,E,F,G,H)
-#define PIPE_RECORD_EVENT_TIME_MACRO9(A,B,C,D,E,F,G,H,I) pipe_record_event_time(A,B,C,D,E,F,G,H,I)
-#define PIPE_RECORD_EVENT_TIME_MACRO11(A,B,C,D,E,F,G,H,I,J,K) pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K)
-#define PIPE_RECORD_EVENT_TIME_MACRO13(A,B,C,D,E,F,G,H,I,J,K,L,M) pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M)
-#define PIPE_RECORD_EVENT_TIME_MACRO15(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O) pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O)
-
-#define PIPE_RECORD_EVENT_TIME_MACRO17(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q) pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q)
-#define PIPE_RECORD_EVENT_TIME_MACRO19(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S) \
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S)
-#define PIPE_RECORD_EVENT_TIME_MACRO21(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U)\
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U)
-
-#define PIPE_RECORD_EVENT_TIME_MACRO23(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W) \
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W)
-
-#define PIPE_RECORD_EVENT_TIME_MACRO25(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y) \
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y)
-
-#define PIPE_RECORD_EVENT_TIME_MACRO27(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA) \
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA)
-#define PIPE_RECORD_EVENT_TIME_MACRO29(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA,BB,CC) \
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA,BB,CC)
-#define PIPE_RECORD_EVENT_TIME_MACRO31(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA,BB,CC,DD,EE) \
-        pipe_record_event_time(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA,BB,CC,DD,EE)
-
-
-
-
-#define PIPE_RECORD_EXISTS_MACRO(A) (pipe_record_exists(A))
-#define PIPE_RECORD_DATA_MACRO(A,B,C) pipe_record_data(A,B,C)
-#define PIPE_OPEN_ASIM_RECORD_MACRO(A,B,C,D) pipe_open_asim_record_inst(A,B,C,D)
-#define PIPE_CLOSE_RECORD_MACRO(A) pipe_close_record(A)
-
-#else
 #define PIPE_RECORD_EVENT_TIME_MACRO4(A,B,C,D)           pipe_record_event_time(A,B,C,D)
 #define PIPE_RECORD_EVENT_TIME_MACRO5(A,B,C,D,E)         pipe_record_event_time(A,B,C,D,E)
 #define PIPE_RECORD_EVENT_TIME_MACRO6(A,B,C,D,E,F)       pipe_record_event_time(A,B,C,D,E,F)
@@ -128,8 +89,7 @@ extern Knob<uint32> perfplot_start_from_end;
 #define PIPE_RECORD_DATA_MACRO(A,B,C) pipe_record_data(A,B,C)
 #define PIPE_OPEN_ASIM_RECORD_MACRO(A,B,C,D) pipe_open_asim_record_inst(A,B,C,D)
 #define PIPE_CLOSE_RECORD_MACRO(A) pipe_close_record(A)
-#endif
-
+#define PIPE_CLOSE_RECORD_COMPLETELY_MACRO(A) pipe_close_record_completely(A)
 
 #define CFG_ARGS_MAX 64
 

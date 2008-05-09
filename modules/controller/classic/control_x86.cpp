@@ -295,9 +295,7 @@ CONTROLLER_X86_CLASS::CMD_Init (UINT32 fdArgc, char **fdArgv, UINT32 pmArgc, cha
      
     pipe_threads_per_proc(nthread);
     pipe_init(pipetrace_dump_max);
-#if !PTV_EVENTS
     pipe_quiet();
-#endif
     //This has to be called after all the event types have been registered !!!
     stat_generic_init();
 
@@ -837,10 +835,8 @@ CMD_PTV_CLASS::PmAction (void)
              << "..." );   
     if(on)
     {
-#if !PTV_EVENTS
       pipe_enable_collection();
       pipetrace_quiet_mode_on=false;
-#endif
       if(!pt.empty())
 	{
 	  pipe_open_file(pt.c_str(),
@@ -851,10 +847,8 @@ CMD_PTV_CLASS::PmAction (void)
     }
     else
     {
-#if !PTV_EVENTS
         pipe_quiet();
         pipetrace_quiet_mode_on=true;
-#endif
 	if (!pt.empty() && !pipetrace_closed)
 	  {
 	    pipe_close_file(PIPE_NO_RECORD);
