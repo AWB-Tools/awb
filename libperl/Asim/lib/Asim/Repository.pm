@@ -513,8 +513,26 @@ sub dump {
   my $self = shift;
   my $level = shift;
 
+  printf "Repository type: %s\n",             _safe_string($self->{method});
+  printf "Repository access: %s\n",           _safe_string($self->{access});
+  printf "Repository module: %s\n",           _safe_string($self->{module});
+  printf "Repository tag: %s\n",              _safe_string($self->{tag});
+  printf "Repository browseURL: %s\n",        _safe_string($self->{browseURL});
+  printf "Repository target directory: %s\n", _safe_string($self->{target});
+  printf "Repository changes file: %s\n",     _safe_string($self->{changes});
+
 }
 
+
+sub _safe_string {
+  my $value = shift;
+
+  if (! defined($value)) {
+     return "undef";
+  }
+
+  return $value;
+}
 
 ################################################################
 #

@@ -139,7 +139,8 @@ sub attempted_completion {
       return (max_common($text, @list), @list);
 
   } elsif ($prefix =~ /checkout\s+package\s+$/ ||
-           $prefix =~ /use\s+package\s+$/      ) {
+           $prefix =~ /use\s+package\s+$/      ||
+           $prefix =~ /show\s+repository\s+$/  ) {
     #
     # Handle packages that can be checked out
     #

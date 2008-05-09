@@ -75,6 +75,9 @@ Commands:
   
   awb                                    - invoke awb on current workspace
 
+  new repository                         - create a new repository
+  show repository                        - show characteristics of a repository
+
   rehash repositories                    - rehash the repository list
   list repositories                      - list repositories
 

@@ -446,6 +446,16 @@ sub new_repository {
 
 }
 
+sub show_repository {
+  my $repositoryname  = shift;
+  my $repositoryDB = get_repositoryDB() || return undef;
+
+  my $repository = $repositoryDB->get_repository($repositoryname)
+    || shell_error("Repository ($repositoryname) was missing or malformed in packfile\n") && return undef;
+
+  $repository->dump();
+}
+
 ################################################################
 #
 # Bundle functions

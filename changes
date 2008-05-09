@@ -4425,3 +4425,24 @@ Added asim-shell command 'clone workspace', which copies
 a workspace to a new directory. Adding a '--link' switch
 to the clone command results in the creation of a clone
 created with hard links.
+
+----------
+spartha1    Date: Fri May  9 19:17:15 EDT 2008  CSN: CSN-asimcore-232
+                  Fri May  9 23:17:15 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          231 
+ Completion.pm             Locally Modified          231 
+ Commands.pm               Locally Modified          231 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          231 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          231 
+
+Updating with simcore changes (rev. 2556 - Joel Emer)
+
+Added an asim-shell command (show repository) to show
+the attributes of a repository.
