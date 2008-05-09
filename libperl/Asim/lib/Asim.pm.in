@@ -17,6 +17,11 @@
 # 
 #
 
+#
+# WARNING:
+# Do NOT edit Asim.pm - edit Asim.pm.in instead.
+#
+
 package Asim;
 
 use warnings;
@@ -510,6 +515,155 @@ search path.
 
 sub file2package {
   return $Asim::default_workspace->file2package(@_);
+}
+
+################################################################
+
+=item Asim::invoke_editor($file..., [--eof], [--background])
+
+Edit $file in editor obtained from Asim::get_editor.
+
+=cut
+
+################################################################
+
+sub invoke_editor {
+  local @ARGV = @_;
+
+  my $at_eof     = 0;
+  my $background = "";
+  my @files;
+
+  my $editor_cmd;
+  my $editor_options = "";
+
+  my $status;
+
+  # Get the editor
+
+  $editor_cmd = Asim::get_editor() || return undef;
+
+  # Parse options
+
+  $status = GetOptions( "eof"        => \$at_eof,
+                        "background" => sub { $background = "&"} );
+
+  return 0 if (!$status);
+
+  @files = @ARGV;
+
+  #
+  # Figure out proper switches if user wants to be at the eof
+  #
+  if ($at_eof) {
+
+    if ($editor_cmd =~ "gvim") {
+      # go to end of file; don't fork while starting GUI   
+      $editor_options = "-f +"; 
+
+    } elsif ($editor_cmd =~ "vim?") {
+      # go to end of file
+      $editor_options = "+";
+
+    } elsif ($editor_cmd =~ "x?emacs") {
+      # go to end of file (well, far back at least)
+      $editor_options = "+1000000"; 
+
+    } else {
+      $editor_options = "";
+    }
+  }
+
+  #
+  # Run the editor
+  #
+  $status = system("$editor_cmd $editor_options " . join(" ", @files) ."$background");
+
+  if ($status != 0) {
+    return undef;
+  }
+
+  return 1;
+}
+
+################################################################
+
+=item Asim::get_editor($file..., [--eof], [--background])
+
+Get the name of the editor specified in environment variable ASIMEDITOR
+or EDITOR or fallbacks of xemacs, emacs and gvim. 
+
+
+=cut
+
+################################################################
+
+sub get_editor {
+
+  my $editor_cmd = undef;
+
+  #
+  # Make sure we have an editor
+  #
+  $editor_cmd  = $ENV{ASIMEDITOR}
+              || $ENV{EDITOR};
+
+  #
+  # If user didn't specify an editor look for one
+  #
+  if (! defined($editor_cmd) || $editor_cmd eq "") {
+
+    if (-x "xemacs") {
+      $editor_cmd = "xemacs";
+
+    } elsif ( -x "emacs" ) {
+      $editor_cmd = "emacs";
+
+    } elsif ( -x "gvim" ) {
+      $editor_cmd = "gvim";
+
+    } else {
+      print STDERR "No editor found\n";
+      return undef;
+    }
+  }
+
+  #
+  # Check if editor is executable
+  #
+#  if (! -x $editor_cmd) {
+#    print STDERR "Editor $editor_cmd is not executable\n"
+#    return undef;
+#  }
+
+  return $editor_cmd;
+
+}
+
+################################################################
+
+=item Asim::get_tmpdir()
+
+Get a temporary directory specified in environment variables ASIMTMPDIR,
+TMPDIR with a fallback of /tmp.
+
+=cut
+
+################################################################
+
+sub get_tmpdir {
+
+  my $TMPDIR = $ENV{'TMPDIR'};
+
+  if ( ! defined($TMPDIR) || ! -d $TMPDIR ) {
+    $TMPDIR = "/tmp"
+  }
+
+  if ( ! -d $TMPDIR ) {
+    return undef;
+  }
+
+  return $TMPDIR;
 }
 
 ###########################################################################

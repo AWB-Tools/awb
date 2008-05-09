@@ -193,11 +193,10 @@ sub check {
   #
   # Get $TMPDIR
   #
-  $TMPDIR = $ENV{'TMPDIR'};
-  if ( ! defined($TMPDIR) || ! -d $TMPDIR ) {
-    $TMPDIR = "/tmp"
-  }
-  if ( ! -d $TMPDIR ) {
+  
+  $TMPDIR = Asim::get_tmpdir();
+
+  if ( ! defined($TMPDIR)) {
     ierror("Sorry \$TMPDIR is not set and /tmp does not exist");
     return 0;
   }

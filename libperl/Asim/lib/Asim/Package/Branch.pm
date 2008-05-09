@@ -51,9 +51,6 @@ our $HOSTNAME;
 our $DATE;
 our $DATE_UTC;
 
-our $EDITOR;
-our $EDITOR_OPTIONS;
-
 our $TMPDIR;
 our $HOST;
 our $USER;
@@ -140,14 +137,6 @@ sub release {
              "         CVS branch named $branchname already exists.\n");
       return 0;
     }
-  }
-
-  #
-  # Make sure we have an editor
-  #
-  if (! ($EDITOR = $ENV{EDITOR})) {
-    ierror("Environment variable EDITOR must be set");
-    return 0;
   }
 
   #########      ###########      ###########      ###########      ###########
@@ -525,7 +514,7 @@ sub branch {
     print  COMMENT "        From URL:             $cur_url\n";
     print  COMMENT "        To URL:               $branch_url\n";
     close  COMMENT;
-    system "$EDITOR " . $self->{commentfile};
+    Asim::invoke_editor("--eof", $self->{commentfile});
     
     # create the branch in the repository, using the supplied branch name:
     $self->svn("copy $cur_url $branch_url --file " . $self->{commentfile});

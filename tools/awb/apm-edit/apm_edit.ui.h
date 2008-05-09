@@ -756,9 +756,7 @@ void apm_edit::moduleViewAwbAction_activated()
     my $module = Asim::Module->new($module_filename)  || return;
     my $filename = $Asim::default_workspace->resolve($module->filename());
 
-    my $editor = $ENV{EDITOR} || "emacs";
-
-    system("$editor $filename &");
+    Asim::invoke_editor("--background", $filename);
 }
 
 
@@ -773,7 +771,6 @@ void apm_edit::moduleViewSourceAction_activated()
     my $module = Asim::Module->new($module_filename)  || return;
     my $dir = $module->base_dir();
 
-    my $editor = $ENV{EDITOR} || "emacs";
     my @files = ();
 
     push(@files, $Asim::default_workspace->resolve($module->filename()));
@@ -786,7 +783,8 @@ void apm_edit::moduleViewSourceAction_activated()
         push(@files, $Asim::default_workspace->resolve("$dir/$f"));
     }
 
-    system("$editor " . join(" ", @files) . "&");
+    Asim::invoke_editor("--background", @files);
+
 }
 
 

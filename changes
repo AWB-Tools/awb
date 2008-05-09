@@ -4346,3 +4346,63 @@ add a macro for the close completely piperecord type.
 remove the use of the ptv_events macro since the quiet bool will
 give you the same speed as turning off the pipetrace events but still
 allow you to generate pipetraces.
+
+----------
+spartha1    Date: Fri May  9 19:13:10 EDT 2008  CSN: CSN-asimcore-230
+                  Fri May  9 23:13:10 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          229 
+ Completion.pm             Locally Modified          229 
+ Commands.pm               Locally Modified          229 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          229 
+
+Directory libperl/Asim/lib/Asim
+ BuildTree.pm              Locally Modified          229 
+ Regression.pm             Locally Modified          229 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          229 
+ Branch.pm                 Locally Modified          229 
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          229 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          229 
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          229 
+
+Updating with simcore changes (rev. 2554 - Joel Emer)
+
+In asim-shell and awb:
+Generalized many of the package commands to take 'all' or a list of
+package names.
+
+
+Just in asim-shell:
+Added --source switch to 'install package' to install a public version
+of a package. Underlying support for this was aded to Asim perl library.
+
+
+In Asim perl library and apm-edit:
+Use Asim::invoke_editor(), Asim::get_editor() and Asim::get_tmpdir()
+
+
+In Asim.pm
+Centralized the definitions and use of the EDITOR and TMPDIR environment
+variables and added use of ASIMEDITOR and ASIMTMPDIR by adding the
+following functions:
+
+Asim::invoke_editor() - to invoke an editor on a file. Editor is
+obtained from Asim::get_editor()
+
+Asim::get_editor() - get the GUI-style editor command defined by
+ASIMEDITOR or EDITOR
+
+Asim::get_tmpdir() - to get the name of the temporary directory
+defined by ASIMTMPDIR or TMPDIR.

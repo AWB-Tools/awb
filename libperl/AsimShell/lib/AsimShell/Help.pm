@@ -87,7 +87,7 @@ Commands:
 
   new package <name>                     - create a new package
 
-  checkout package <repository>[/<tag>]  - CVS checkout a package
+  checkout package <repository>[/<tag>]  - checkout a package
     [--user=<user>]                      - do checkout as <user>
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
@@ -96,27 +96,24 @@ Commands:
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
 
-  delete package <name>                  - delete a checked out package
-  show package [<package>]               - show info about package
-
   add package <directory>                - prepend package at directory to 
                                            search path
+  delete package [all|<package>...]      - delete a checked out package
+
+  show package [<package>]               - show info about package
 
   regtest package [<package>]            - run regression test on package
 
-  update package [<package>]             - CVS update a package
+  update package [all|<package>...]      - update a package
     [--nobuild]                          - prevent ./configure and build of package
 
-  update package * | all                 - CVS update all checked out packages
-    [--nobuild]                          - prevent ./configure and build of package
-
-  commit package [<package>]             - CVS commit a package
+  commit package [all|<package>...]      - commit a package
     [--nodependent]                      - prevent commit of dependent packages
     [--commitlog=<commit comments file>] - Use in batch mode to supply commit comments
 
   release package [<package>] version    - create a new release of a package
-  branch package [<package>] branch      - create CVS branch named "branch"
-  merge package [<package>] [CSN]        - CVS merge a branch with the
+  branch package [<package>] branch      - create a branch named "branch"
+  merge package [<package>] [CSN]        - merge a branch with the
                                            main trunk (HEAD/CSN)
 
   lock package [<package>]               - lock a package
@@ -129,13 +126,18 @@ Commands:
 
   svn package [<package>] <command>      - issue svn command on a package
 
-  build package [<package> ...]          - configure and make package(s)
-  configure package [<package> ...]      - configure package(s)
-  make package [<package> ...]           - build package(s)
-  install package [<package> ...]        - install package(s)
-  clean package [<package> ...]          - clean up object files in package(s)
+  build package [all|<package> ...]      - configure and make package(s)
 
-  status package [<package> ...]         - print status of package(s) against repository
+  configure package [all|<package> ...]  - configure package(s)
+
+  make package [all|<package> ...]       - build package(s)
+
+  install package [all|<package> ...]    - install package(s)
+    [--source]                           - install sharable source copy of package(s)
+
+  clean package [all|<package> ...]      - clean up object files in package(s)
+
+  status package [all|<package> ...]     - print status of package(s) against repository
     [--verbose]                          - print status of every file
 
   rehash locks                           - rehash lock list
@@ -257,23 +259,24 @@ Environment:
     If AWB_BENCHMARK is set , it is used to set the default benchmark.
     AWB_BENCHMARK must point to a benchmark configuration file (*.cfg).
 
+  ASIMEDITOR or EDITOR
+    The ASIMEDITOR or EDITOR environment variable is used when a file needs 
+    to be edited, e.g. the changes file during a commit procedure. If neither
+    is defined emacs and gvim are tried.
+
+  ASIMTMPDIR or TMPDIR
+    Various procedures in asim-shell need to create temporary files.
+    these variables point to the directory where these temporary files 
+    will be created. If neither is defined /tmp will be used.
+
   PAGER
     If PAGER is set, its value us used as the name of the program to
     page through text output one screenful at a time. If it is not defined,
     "more" is used for paging.
 
-  EDITOR
-    The EDITOR environment variable is used when a file needs to be
-    edited, e.g. the changes file during a commit procedure.
-
   SHELL
     The SHELL environment variable is used as the program to start
     for the "shell package" command.
-
-  TMPDIR
-    Various procedures in asim-shell need to create temporary files.
-    TMPDIR points to the directory where these temporary files will be
-    created in.
 
   CVS_RSH
     In order to start cvs commands on packages / repositories, CVS_RSH
@@ -288,12 +291,18 @@ Files:
   $Asim::sysconfdir/asim/asimrc
     Global configuration file
 
-  ~/.asim/asim.pack
+  ~/.asim/repositories.d/<name>.pack
     User-specific description of repositories (optional)
 
+  ~/.asim/asim.pack
+    User-specific description of repositories (deprecated/optional)
+
+  $Asim::sysconfdir/asim/repositories.d/*.pack
+    Global descriptions of repositories.
+
   $Asim::sysconfdir/asim/asim.pack
-    Global description of repositories, which is used 
-    if ~/.asim/asim.pack does not exist.
+    More global descriptions of repositories (legacy).
+
 
 END
 

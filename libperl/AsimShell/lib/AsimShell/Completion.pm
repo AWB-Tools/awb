@@ -238,6 +238,12 @@ sub attempted_completion {
     return $term->completion_matches($text,
                                      $term->Attribs->{'username_completion_function'});
 
+  } elsif ($prefix =~ /--commitlog\s*$/ || $prefix =~ /--commitlog=[^ ]*$/ ) {
+    #
+    # Handle user on --commitlog switch - filename completion
+    #
+    return ();
+
   } elsif (0) {
     #
     # Another  model for other things to do...

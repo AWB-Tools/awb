@@ -130,16 +130,17 @@ our @COMMANDS= ( keys %COMPOUNDCOMMANDS,
 # These should be of a form the GetOptions can use directly!!!
 #
 our %OPTIONS = (
-    checkout_bundle    => [ "--user=", "--user=<username>", "--build", "--nobuild", 
+    checkout_bundle    => [ "--user=", "--user", "--build", "--nobuild", 
                             "--addpath", "--noaddpath", "--golden" ],
     use_bundle         => [ "--build", "--nobuild", "--addpath", "--noaddpath", "--golden" ],
 
-    checkout_package   => [ "--user=", "--user=<username>", "--build", "--nobuild", 
+    checkout_package   => [ "--user=", "--user", "--build", "--nobuild", 
                             "--addpath", "--noaddpath" ],
     use_package        => [ "--build", "--nobuild", "--addpath", "--noaddpath" ],
-    commit_package     => [ "--dependent", "--nodependent", "--commitlog=<commitlog file>" ],
+    commit_package     => [ "--dependent", "--nodependent", "--commitlog" ],
     status_package     => [ "--verbose", "--noverbose" ],
     update_package     => [ "--build", "--nobuild" ],
+    install_package    => [ "--source" ],
 
     clean_model        => [ "--builddir" ],
     nuke_model         => [ "--builddir" ],

@@ -1068,13 +1068,15 @@ sub add_dependent_packages {
 #
 # configure, make, build, install, or clean one or more packages,
 # returning 1 if all succeeded.  These all take as arguments a list
-# of package names, or "all" or "*" to denote all pacages in the workspace.
+# of package names, or "all" or "*" may be the first and only argument
+# and denotes to act on all pacages in the workspace.
 #
 sub configure_package {
-  while ( my $name = shift ) {
-    if ( $name eq 'all' || $name eq '*' ) {
-      return configure_package( $default_packageDB->directory() );
-    }
+
+  # get the list of packages
+  my @package_names = _expand_package_names(@_);
+
+  while ( my $name = shift @package_names) {
     my $package = get_package($name) || return undef;
     $package->configure()            || return undef;
   }
@@ -1082,10 +1084,11 @@ sub configure_package {
 }
 
 sub make_package {
-  while ( my $name = shift ) {
-    if ( $name eq 'all' || $name eq '*' ) {
-      return make_package( $default_packageDB->directory() );
-    }
+
+  # get the list of packages
+  my @package_names = _expand_package_names(@_);
+
+  while ( my $name = shift @package_names) {
     my $package = get_package($name) || return undef;
     $package->build()                || return undef;
   }
@@ -1093,36 +1096,46 @@ sub make_package {
 }
 
 sub build_package {
-  while ( my $name = shift ) {
-    if ( $name eq 'all' || $name eq '*' ) {
-      my @all_packages = ();
-      foreach my $pn ( $default_packageDB->directory() ) {
-        push @all_packages, get_package( $pn );
-      }
-      return configure_and_build_packages( @all_packages );
-    }
-    my $package = get_package($name)       || return undef;
-    configure_and_build_packages($package) || return undef;
-  }
-  return 1;
+
+ # get the list of packages
+ my @package_names = _expand_package_names(@_);
+
+ my @all_packages = ();
+
+ while ( my $name = shift @package_names) {
+   push(@all_packages, get_package( $name ));
+ }
+
+ configure_and_build_packages(@all_packages) || return undef;
+ return 1;
 }
 
 sub install_package {
-  while ( my $name = shift ) {
-    if ( $name eq 'all' || $name eq '*' ) {
-      return install_package( $default_packageDB->directory() );
-    }
+  my    $target = "install";
+  local @ARGV   = @_;
+
+  # Parse options
+
+  my $status = GetOptions( "source" => sub {$target = "install-src-public"});
+  return undef if (!$status);
+
+  # get the list of packages
+  my @package_names = _expand_package_names(@ARGV);
+
+  while ( my $name = shift @package_names ) {
     my $package = get_package($name) || return undef;
-    $package->install()              || return undef;
+    $package->install($target)       || return undef;
   }
+
   return 1;
 }
 
 sub clean_package {
-  while ( my $name = shift ) {
-    if ( $name eq 'all' || $name eq '*' ) {
-      return clean_package( $default_packageDB->directory() );
-    }
+
+  # get the list of packages
+  my @package_names = _expand_package_names(@_);
+
+  while ( my $name = shift @package_names) {
     my $package = get_package($name) || return undef;
     if ( $package->isprivate() ) {
       $package->clean()              || return undef;
@@ -1376,15 +1389,10 @@ sub update_package {
   my $status = GetOptions( "build!" => \$build);
   return undef if (!$status);
 
-  my $pkgspec = shift @ARGV;
+  # get the list of packages
+  my @package_names = _expand_package_names(@ARGV);
 
-  # handle special case of "all packages"
-  if (defined($pkgspec) && ($pkgspec eq '*' || $pkgspec eq 'all')) {
-      return update_all_packages($build);
-  }
-
-  # normal case of updating one or more packages
-  do {
+  while ( my $pkgspec = shift @package_names) {
     # each package in the list could be a simple name,
     # or a name and version or branch identifier, like this:
     #   <pkgname>
@@ -1409,8 +1417,6 @@ sub update_package {
       push @build_list, $package;
     }
   }
-  # remaining argument(s) is (are) package name(s)
-  while ( $pkgspec = shift @ARGV );
 
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.
@@ -1425,6 +1431,7 @@ sub update_package {
 
 # This should be generalized for more commands!!!
 # TBD: This does not honor package dependencies
+# TBD: Delete this routine - it doesn't appear to be used any more 
 
 sub update_all_packages {
   my $build = shift;
@@ -1479,14 +1486,52 @@ sub update_all_packages {
 }
 
 #
+# print status of files in (a) package(s),
+# i.e. modified, needs-update, etc.
+#
+sub status_package {
+  local @ARGV = @_;
+  my $verbose = 0;
+
+  # Parse options
+  my $status = GetOptions( "verbose!" => \$verbose) || return undef;
+  
+  # get the list of packages
+  my @packages = _expand_package_names(@ARGV);
+
+  # print status for each package in turn
+  foreach my $pkgname ( @packages ) {
+    my $package = get_package( $pkgname ) || next;
+    if ( ! $package->isprivate() ) {
+      # shared packages, incorporated by reference:
+      printf("Package %s is a shared package\n", $pkgname );
+    } else {
+      # private packages, in the user's workspace:
+      printf("Package %s status against %s repository:\n", $pkgname, uc($package->type()) );
+      foreach my $fstate ( $package->status() ) {
+	(my $dir, my $file, my $state, my $version) = @$fstate;
+	if ( $verbose || $state ne 'Up-to-date' ) {
+          if ( $dir ) { $dir .= '/'; }
+	  printf("%-16s  %-6s  %s%s\n", $state, $version, $dir, $file);
+	}
+      }
+    }
+  }
+
+  return 1;
+}
+
+#
 # commit one or more packages, returning 1 if all succeeded
 #
 sub commit_package {
   my $deps = 1;
   my $commitlog_file = undef;
+
   local @ARGV = @_;
 
   # Parse options
+
   my $status = GetOptions( "dependent!"     => \$deps,
 			   "commitlog=s"    => \$commitlog_file,
 			 );
@@ -1522,6 +1567,7 @@ sub commit_package {
 sub commit_all_packages {
   my $deps = shift;
   my $commitlog_file = shift;
+
   my @plist;
 
   #
@@ -1542,7 +1588,6 @@ sub commit_all_packages {
   #
   for my $p (@plist) {
         print "Commiting package " . $p->name() . "\n\n";
-
 	$p->commit(!$deps, $commitlog_file) || return undef;
 	print "\n";
   }
@@ -1670,6 +1715,38 @@ sub show_package {
 # Package utility functions
 #
 
+#
+# Expand a list a package name arguments honoring 'all' and '*'
+# TBD: If the list is empty we could ask the user for a name
+# TBD: We could do more error checking here
+#
+sub _expand_package_names {
+
+  # Check for empty list
+
+  if (! @_ ) {
+    if (defined($default_package)) {
+      return ($default_package->name());
+    } else {
+      return ();
+    }
+  }
+
+  # Check if 'all' or '*'
+
+  if ( $#_ == 0 && ($_[0] eq 'all' || $_[0] eq '*' )) {
+    return ( $default_packageDB->directory() );
+  }
+
+  # Default just use what we were given
+
+  return (@_);
+}
+
+#
+# Get a package based on its name
+# TBD: The behavior of this method should match _expand_package_names()
+#
 sub get_package {
   my $name = shift;
   my $package = undef;
@@ -1689,55 +1766,7 @@ sub get_package {
       || shell_error("No package or default package defined\n") && return ();
 }
 
-#
-# print status of files in (a) package(s),
-# i.e. modified, needs-update, etc.
-#
-sub status_package {
-  local @ARGV = @_;
-  my $verbose = 0;
 
-  # Parse options
-  my $status = GetOptions( "verbose!" => \$verbose) || return undef;
-  
-  # get the list of packages
-  my @packages;
-  if ( ! @ARGV ) {
-    # if no package argument given, use default package
-    if ( ! $default_package ) {
-      print "status package command requires a package name argument!\n";
-      return undef;
-    }
-    @packages = ( $default_package->name() );
-  } elsif ( $ARGV[0] eq 'all' || $ARGV[0] eq '*' ) {
-    # if all packages, get a directory of all packages
-    @packages = $default_packageDB->directory();
-  } else {
-    # otherwise, use an explicit list (better not contain 'all' !!)
-    @packages = @ARGV;
-  }
-
-  # print status for each package in turn
-  foreach my $pkgname ( @packages ) {
-    my $package = get_package( $pkgname ) || next;
-    if ( ! $package->isprivate() ) {
-      # shared packages, incorporated by reference:
-      printf("Package %s is a shared package\n", $pkgname );
-    } else {
-      # private packages, in the user's workspace:
-      printf("Package %s status against %s repository:\n", $pkgname, uc($package->type()) );
-      foreach my $fstate ( $package->status() ) {
-	(my $dir, my $file, my $state, my $version) = @$fstate;
-	if ( $verbose || $state ne 'Up-to-date' ) {
-          if ( $dir ) { $dir .= '/'; }
-	  printf("%-16s  %-6s  %s%s\n", $state, $version, $dir, $file);
-	}
-      }
-    }
-  }
-
-  return 1;
-}
 
 ################################################################
 #

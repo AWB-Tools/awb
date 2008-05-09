@@ -1301,6 +1301,14 @@ void awb_dialog::updatePushButton_clicked()
     }
 
     if ($delete) {
+        if (updateAllCheckBox->isChecked()) {
+           Qt::MessageBox::information(
+             this, 
+             "awb", 
+            "You cannot delete all packages\n");
+           return;
+        }
+
         my $status = Qt::MessageBox::warning ( 
             this, 
             "awb", 
@@ -1330,14 +1338,6 @@ void awb_dialog::updatePushButton_clicked()
     }
 
     if (updateAllCheckBox->isChecked()) {
-        if (! $update) {
-           Qt::MessageBox::information(
-             this, 
-             "awb", 
-            "Only update can be performed on all packages\n");
-           return;
-        }
-
         $command .= " all";
     } else {
         my $max = updatePackagesListBox->count();

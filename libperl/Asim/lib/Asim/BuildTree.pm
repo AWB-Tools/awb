@@ -133,9 +133,10 @@ sub build {
 
 ################################################################
 
-=item $build_tree-E<gt>install()
+=item $build_tree-E<gt>install([target])
 
-Install this package
+Install this package by running 'make <target>'.
+Default target is 'install'.
 
 =cut
 
@@ -143,8 +144,10 @@ Install this package
 
 sub install {
   my $self = shift;
+  my $target = shift || "install";
+
   my $location = $self->location();
-  my $command = "cd $location; make install";
+  my $command = "cd $location; make $target";
 
   return 1 if (! -e "$location/Makefile");
 

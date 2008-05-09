@@ -52,9 +52,6 @@ our $HOSTNAME;
 our $DATE;
 our $DATE_UTC;
 
-our $EDITOR;
-our $EDITOR_OPTIONS;
-
 our $TMPDIR;
 our $HOST;
 our $USER;
@@ -123,7 +120,7 @@ sub commit {
   $self->step("Sanity Check", 0);
   $self->banner();
 
-  $self->sanity_stage()
+  $self->sanity_stage($commitlog_file)
     || return ();
 
   # Find dependent packages that are checked out....
@@ -229,20 +226,27 @@ sub commit {
 
 sub sanity_stage {
   my $self = shift;
-
+  my $commitlog_file = shift;
 
   $| = 1;
 
   #
-  # Make sure we have an editor
+  # Check that we have an editor
   #
-  $EDITOR = $ENV{EDITOR}
-    || commit_failure("Environment variable EDITOR must be set") && return 0;
+  if (! defined (Asim::get_editor())) {
+    commit_failure("Sorry: \$ASIMEDITOR or \$EDITOR is not set to a editor");
+    return 0;
+  }
+    
+  #
+  # Check for a /tmp directory
+  #
+  $TMPDIR = Asim::get_tmpdir();
 
-#  if (! -x $EDITOR) {
-#    commit_failure("Environment variable EDITOR must be executable");
-#    return 0;
-#  }
+  if ( ! defined($TMPDIR)) {
+    commit_failure("Sorry: neither \$ASIMTMPDIR or \$TMPDIR were not found and /tmp does not exist");
+    return 0;
+  }
 
 
   #
@@ -253,18 +257,6 @@ sub sanity_stage {
           "I've set it to \"ssh2\", which should be what you want for ASIM");
 
     $ENV{CVS_RSH} = "ssh2";
-  }
-
-  #
-  # Check for a /tmp directory
-  #
-  $TMPDIR = $ENV{'TMPDIR'};
-  if ( ! defined($TMPDIR) || ! -d $TMPDIR ) {
-    $TMPDIR = "/tmp"
-  }
-  if ( ! -d $TMPDIR ) {
-    commit_failure("Sorry: \$TMPDIR is not set and /tmp does not exist");
-    return 0;
   }
 
   #
@@ -284,6 +276,15 @@ sub sanity_stage {
 
   $USER = $ENV{'USER'};
 
+  #
+  # If user specified a commitlog make sure it exists
+  #
+  if (defined($commitlog_file)) {
+    if ( ! -r $commitlog_file ) {
+      commit_failure("Sorry: user specified commitlog ($commitlog_file) is not readable or does not exist");
+      return 0;
+    }
+  }
 
   #
   # Indicate we haven't seen big problems yet
@@ -901,30 +902,32 @@ sub edit_changes_manual {
   #
   # Launch a window so that the user types in an explanation for his changes
   #
-  print "\n\n";
-  if ($mode eq "interactive") {
-      print "Launching your favorite editor on the 'changes' file ($changes)\n";
-      print "Please type your comments at the *end* of the 'changes' file...\n\n";
-      Asim::choose("Enter <CR> to edit changes file");
+
+  if (! defined($commitlog_file)) {
+    print "\n\n";
+    print "Launching your favorite editor on the 'changes' file ($changes)\n";
+    print "Please type your comments at the *end* of the 'changes' file...\n\n";
+    Asim::choose("Enter <CR> to edit changes file");
   }
 
-  if ($EDITOR =~ "gvim") {   
-    $EDITOR_OPTIONS = "-f +"; # go to end of file; don't fork while starting GUI
-  } elsif ($EDITOR =~ "vim?") {
-    $EDITOR_OPTIONS = "+"; # go to end of file
-  } elsif ($EDITOR =~ "x?emacs") {
-    $EDITOR_OPTIONS = "+1000000"; # go to end of file (well, far back at least)
-  } else {
-    $EDITOR_OPTIONS = "";
-  }
 
   if (($self->type() eq "cvs") || ($self->type() eq "bitkeeper")) {
-    system("$EDITOR $EDITOR_OPTIONS $changes") if ($mode eq "interactive");
-    system("cat $commitlog_file >> $changes") if ($mode eq "batch");
+
+    if (! defined($commitlog_file)) {
+      Asim::invoke_editor("--eof", $changes) 
+        || commit_failure("Could not edit changes file") && return undef;
+    } else {
+      system("cat $commitlog_file >>$changes");
+    }
   }
   elsif (($self->type() eq "svn")) {
-    system("$EDITOR $EDITOR_OPTIONS $reportfile") if ($mode eq "interactive");
-    system("cat $commitlog_file >> $reportfile") if ($mode eq "batch");
+
+    if (! defined($commitlog_file)) {
+      Asim::invoke_editor("--eof", $reportfile)
+        || commit_failure("Could not edit changes file") && return undef;
+    } else {
+      system("cat $commitlog_file >>$reportfile");
+    }
     
     CORE::open(RPT, "<$reportfile");
     CORE::open(CMT, ">$commentfile");
