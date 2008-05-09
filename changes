@@ -4489,3 +4489,20 @@ saves and will report problems. This fixes a Mantis bug.
 Added some print banners around the activities associated with
 each package on asim-shell operations on multiple packages. This
 addresses the suggestion by Michael Adler.
+
+----------
+spartha1    Date: Fri May  9 19:23:39 EDT 2008  CSN: CSN-asimcore-235
+                  Fri May  9 23:23:39 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          234 
+ Completion.pm             Locally Modified          234 
+ Commands.pm               Locally Modified          234 
+
+Updating with simcore changes (rev. 2560 - Joel Emer)
+
+In asim-shell:
+Added printouts around each package for a few more package commands.
+
+Added 'all' as option for 'show package' command.

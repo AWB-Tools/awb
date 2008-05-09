@@ -105,7 +105,7 @@ Commands:
                                            search path
   delete package [all|<package>...]      - delete a checked out package
 
-  show package [<package>]               - show info about package
+  show package [all|<package>...]        - show info about package
 
   regtest package [<package>]            - run regression test on package
 

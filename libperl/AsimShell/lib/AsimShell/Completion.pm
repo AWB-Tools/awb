@@ -294,7 +294,7 @@ sub is_multi_package_command {
 #
 sub package_command_takes_all_arg {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
+  return ( $cmd =~ m/^((status)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
 }
 
 

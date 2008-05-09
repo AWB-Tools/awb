@@ -1450,6 +1450,25 @@ sub edit_package {
 }
 
 #
+# Show information about one or more packages
+
+sub show_package {
+
+  my @package_names = _expand_package_names(@_);
+
+  foreach my $name (@package_names) {
+    _print_package_start("show", $name);
+
+    my $package = get_package($name) || return ();
+    $package->dump();
+
+    _print_package_finish("show", $name);
+    if ( @_ ) { print "\n" }
+  }
+  return 1;
+}
+
+#
 # update one or more packages, returning 1 if all succeeded.
 #
 sub update_package {
@@ -1498,12 +1517,12 @@ sub update_package {
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.
   while ( my $package = shift @build_list ) {
-    _print_package_start("build/configure", $package->name());
+    _print_package_start("configure/build", $package->name());
 
     $package->configure() || return undef;
     $package->build()     || return undef;
 
-    _print_package_finish("build/configure", $package->name());
+    _print_package_finish("configure/build", $package->name());
   }
 
   return 1;
@@ -1536,8 +1555,8 @@ sub update_all_packages {
   #
   my @failed_packs = ();
   for my $p (@plist) {
-      print "Updating package " . $p->name() . "\n\n";
-      
+      _print_package_start("update", $p->name(), "(" . $p->type() . " repository)");
+
       my $status = $p->update();
       if (!defined($status) || ($status == 0)) {
 	  if (Asim::mode() eq "batch") {
@@ -1547,9 +1566,9 @@ sub update_all_packages {
 	      return undef;
 	  }
       }
-      print "\n";
+      _print_package_finish("update", $p->name());
   }
-  
+
   #
   # Optionally configure and build each package
   #
@@ -1562,7 +1581,7 @@ sub update_all_packages {
       print "*** Build is incomplete." . "\n";
       return undef;
   }
-  
+
   return 1;
 }
 
@@ -1576,22 +1595,21 @@ sub status_package {
 
   # Parse options
   my $status = GetOptions( "verbose!" => \$verbose) || return undef;
-  
+
   # get the list of packages
   my @packages = _expand_package_names(@ARGV);
 
   # print status for each package in turn
   foreach my $pkgname ( @packages ) {
-    _print_package_start("status", $pkgname);
-
-
     my $package = get_package( $pkgname ) || next;
+
+    _print_package_start("status", $pkgname, "(" . $package->type() . " repository)");
+
     if ( ! $package->isprivate() ) {
       # shared packages, incorporated by reference:
       printf("Package %s is a shared package\n", $pkgname );
     } else {
       # private packages, in the user's workspace:
-      printf("Package %s status against %s repository:\n", $pkgname, uc($package->type()) );
       foreach my $fstate ( $package->status() ) {
 	(my $dir, my $file, my $state, my $version) = @$fstate;
 	if ( $verbose || $state ne 'Up-to-date' ) {
@@ -1787,14 +1805,6 @@ sub shell_package {
   return 1;
 }
 
-sub show_package {
-  while ( my $name = shift ) {
-    my $package = get_package($name) || return ();
-    $package->dump();
-    if ( @_ ) { print "\n" }
-  }
-  return 1;
-}
 
 
 #
