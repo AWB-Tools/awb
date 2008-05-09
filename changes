@@ -4406,3 +4406,22 @@ ASIMEDITOR or EDITOR
 
 Asim::get_tmpdir() - to get the name of the temporary directory
 defined by ASIMTMPDIR or TMPDIR.
+
+----------
+spartha1    Date: Fri May  9 19:15:57 EDT 2008  CSN: CSN-asimcore-231
+                  Fri May  9 23:15:57 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          230 
+ Commands.pm               Locally Modified          230 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          230 
+
+Updating with simcore changes (rev. 2555 - Joel Emer)
+
+Added asim-shell command 'clone workspace', which copies
+a workspace to a new directory. Adding a '--link' switch
+to the clone command results in the creation of a clone
+created with hard links.

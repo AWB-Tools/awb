@@ -48,6 +48,8 @@ Commands:
   set workspace <workspace>              - set default workspace
 
   new workspace <path>                   - create new workspace
+  clone workspace <path>                 - clone the current workspace to <path>
+    [--link]                             - create hard links to files in current workspace
 
   rehash workspace                       - rehash workspace
   edit workspace                         - edit workspace

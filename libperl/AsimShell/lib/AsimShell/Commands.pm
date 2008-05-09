@@ -240,6 +240,52 @@ sub new_workspace {
   return 1;
 }
 
+sub clone_workspace {
+  my $workspacedir =  $Asim::default_workspace->rootdir();
+
+  my $path;
+  my $link = 0;
+
+  local @ARGV = @_;
+
+  my $status;
+  my $command;
+
+  # Parse options
+
+  $status = GetOptions( "link!"      => \$link);
+
+  return 0 if (!$status);
+
+   $path = $ARGV[0];
+
+   if (! defined($path) || $path eq "") {
+      shell_error("Target path for clone must be specified\n");
+      return undef;
+   }
+
+   if (-e $path) {
+      shell_error("New workspace directory cannot already exist\n");
+      return undef;
+   }
+
+   $command = "cp -r" . ($link?"l":"") . " $workspacedir $path";
+
+   print "Cloning new workspace...\n";
+   $status = system($command);
+   if ($status) {
+     shell_error("Clone of new workspace failed\n");
+     return undef;
+   }
+
+    print "\n";
+    print "To switch to the new workspace type:\n";
+    print "    set workspace $path\n";
+    print "\n";
+
+    return 1;
+}
+
 sub rehash_workspace {
   my $workspace = get_workspace() || return ();
 
@@ -251,6 +297,7 @@ sub rehash_workspace {
 
   return 1;
 }
+
 
 sub edit_workspace {
   my $workspace = get_workspace() || return ();

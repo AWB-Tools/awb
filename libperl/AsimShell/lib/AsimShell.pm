@@ -89,6 +89,7 @@ our %COMPOUNDCOMMANDS =
     build     => [ qw(model package) ],
     cd        => [ qw(model package) ],
     checkout  => [ qw(bundle package) ],
+    clone     => [ qw(workspace) ],
     commit    => [ qw(package) ],
     configure => [ qw(model package) ],
     clean     => [ qw(model package) ],
@@ -130,6 +131,8 @@ our @COMMANDS= ( keys %COMPOUNDCOMMANDS,
 # These should be of a form the GetOptions can use directly!!!
 #
 our %OPTIONS = (
+    clone_workspace    => [ "--link" ],
+
     checkout_bundle    => [ "--user=", "--user", "--build", "--nobuild", 
                             "--addpath", "--noaddpath", "--golden" ],
     use_bundle         => [ "--build", "--nobuild", "--addpath", "--noaddpath", "--golden" ],
