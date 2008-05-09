@@ -4519,3 +4519,22 @@ Updating with simcore changes (rev. 2562 - Carl Beckmann)
 
 - Added a clockserver parameter. For this non-clockserver system 
 module, made all clockserver params into %const's with inactive values.
+
+----------
+spartha1    Date: Fri May  9 19:40:09 EDT 2008  CSN: CSN-asimcore-237
+                  Fri May  9 23:40:09 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          236 
+
+Directory tools/scripts
+ asim-batch                Locally Modified          236 
+
+Updating with simcore changes (rev. 2565 - Joel Emer)
+
+Allow retained environment variables specifed in ~/.asim/asimrc
+for asim-batch to be separated with commas (,) and/or spaces ( ).
+
+Allow more interactive specification of package names in
+asim-shell.

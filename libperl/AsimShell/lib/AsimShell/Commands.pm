@@ -1821,11 +1821,9 @@ sub _expand_package_names {
   # Check for empty list
 
   if (! @_ ) {
-    if (defined($default_package)) {
-      return ($default_package->name());
-    } else {
-      return ();
-    }
+    my $package = get_package() || return ();
+
+    return ($package->name());
   }
 
   # Check if 'all' or '*'

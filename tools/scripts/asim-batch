@@ -233,7 +233,7 @@ system ("touch $runlogfl; chmod 777 $runlogfl");
 
 # Determine list of environment variables to use, and clear out the
 # rest of the environment and setup default values.
-my @env = split (/ /, $env);
+my @env = split (/\s*[ ,]\s*/, $env);
 &setup_def_env();
 
 #if (system ("env -i $envstr $execscript $params > $runlogfl 2>&1")) {
@@ -374,7 +374,7 @@ sub kill_cleanup {
 
 sub get_env_names {
   my $env = shift;
-  my @env = split (" ", $env);
+  my @env = split (/\s*[ ,]\s*/, $env);
   my $envstr = "";
     
   foreach my $var (@env) {
