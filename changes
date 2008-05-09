@@ -4463,3 +4463,29 @@ Updating with simcore changes (rev. 2557 - Joel Emer)
 During commit, do not include nominally dependent, but
 actually non-existent or non-private packages as being
 required for the commit.
+
+----------
+spartha1    Date: Fri May  9 19:21:18 EDT 2008  CSN: CSN-asimcore-234
+                  Fri May  9 23:21:18 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          233 
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          233 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          233 
+ BitKeeper.pm              Locally Modified          233 
+ Copy.pm                   Locally Modified          233 
+ Cvs.pm                    Locally Modified          233 
+
+Updating with simcore changes (rev. 2559 - Joel Emer)
+
+apm-edit now will properly check for write accessibily on file
+saves and will report problems. This fixes a Mantis bug.
+
+Added some print banners around the activities associated with
+each package on asim-shell operations on multiple packages. This
+addresses the suggestion by Michael Adler.

@@ -1134,8 +1134,12 @@ sub configure_package {
   my @package_names = _expand_package_names(@_);
 
   while ( my $name = shift @package_names) {
+    _print_package_start("configure", $name);
+
     my $package = get_package($name) || return undef;
     $package->configure()            || return undef;
+
+    _print_package_finish("configure", $name);
   }
   return 1;
 }
@@ -1146,8 +1150,12 @@ sub make_package {
   my @package_names = _expand_package_names(@_);
 
   while ( my $name = shift @package_names) {
+    _print_package_start("make", $name);
+
     my $package = get_package($name) || return undef;
     $package->build()                || return undef;
+
+    _print_package_finish("make", $name);
   }
   return 1;
 }
@@ -1180,8 +1188,12 @@ sub install_package {
   my @package_names = _expand_package_names(@ARGV);
 
   while ( my $name = shift @package_names ) {
+    _print_package_start("install", $name);
+
     my $package = get_package($name) || return undef;
     $package->install($target)       || return undef;
+
+    _print_package_finish("install", $name);
   }
 
   return 1;
@@ -1195,7 +1207,11 @@ sub clean_package {
   while ( my $name = shift @package_names) {
     my $package = get_package($name) || return undef;
     if ( $package->isprivate() ) {
+      _print_package_start("clean", $name);
+
       $package->clean()              || return undef;
+
+      _print_package_finish("clean", $name);
     }
   }
   return 1;
@@ -1212,7 +1228,7 @@ sub configure_and_build_packages {
   my @failed_packs = ();
   
   for my $p (@plist) {
-    print "Building package " . $p->name() . "\n\n";
+    _print_package_start("configure/build", $p->name());
 
     my $status = $p->configure();
     if (!defined($status) || ($status == 0)) {
@@ -1234,7 +1250,7 @@ sub configure_and_build_packages {
 	    }
 	}
     }
-    print "\n";
+    _print_package_finish("configure/build", $p->name());
   }
   
   if (scalar @failed_packs) {
@@ -1462,6 +1478,8 @@ sub update_package {
 
     my $package = get_package($pkgname) || return undef;
 
+    _print_package_start("update", $pkgname, "(" . $package->type() . " repository)");
+
     if (!$package->isprivate()) {
       shell_error("Cannot update a non-private package\n")  && return undef;
     }
@@ -1473,13 +1491,19 @@ sub update_package {
       # if we are also building, add the package to the list of ones to build
       push @build_list, $package;
     }
+
+    _print_package_finish("update", $pkgname);
   }
 
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.
   while ( my $package = shift @build_list ) {
+    _print_package_start("build/configure", $package->name());
+
     $package->configure() || return undef;
     $package->build()     || return undef;
+
+    _print_package_finish("build/configure", $package->name());
   }
 
   return 1;
@@ -1558,6 +1582,9 @@ sub status_package {
 
   # print status for each package in turn
   foreach my $pkgname ( @packages ) {
+    _print_package_start("status", $pkgname);
+
+
     my $package = get_package( $pkgname ) || next;
     if ( ! $package->isprivate() ) {
       # shared packages, incorporated by reference:
@@ -1573,6 +1600,8 @@ sub status_package {
 	}
       }
     }
+
+    _print_package_finish("status", $pkgname);
   }
 
   return 1;
@@ -1799,6 +1828,28 @@ sub _expand_package_names {
 
   return (@_);
 }
+
+
+sub _print_package_start {
+  my $action = shift;
+  my $name = shift;
+  my $comment = shift || "";
+
+  print "----------------------------------------------\n";
+  print " Starting $action on $name $comment\n";
+  print "----------------------------------------------\n";
+}
+
+sub _print_package_finish {
+  my $action = shift;
+  my $name = shift;
+  my $comment = shift || "";
+
+  print "----------------------------------------------\n";
+  print " Finishing $action on $name\n";
+  print "----------------------------------------------\n";
+}
+
 
 #
 # Get a package based on its name

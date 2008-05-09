@@ -118,7 +118,6 @@ sub update {
   my $version = shift;
 
   my $location = $self->location();
-  print "Updating package from SVN repository \n";
   
   if ( $version ) {
     # a version to update to was explicitly specified.

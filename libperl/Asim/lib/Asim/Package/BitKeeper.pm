@@ -156,7 +156,6 @@ sub update {
       return undef;
   }
 
-  print "Updating package from BK repository \n";
   my   $retcode  = system "cd $location; bk pull";
   if ( $retcode != 0 ) {
       Asim::Package::ierror( "BitKeeper \"pull\" command returned error code: $retcode\n" );

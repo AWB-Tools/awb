@@ -153,7 +153,7 @@ sub update {
   my $self = shift;
 
   my $location = $self->location();
-  print "Updating package from CVS repository \n";
+
   eval {print `(cd $location; cvs -f -q update -dP)`};
 
   if ($@) {

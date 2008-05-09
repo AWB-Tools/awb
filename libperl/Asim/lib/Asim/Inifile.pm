@@ -23,10 +23,13 @@ use warnings;
 use strict;
 
 use Fcntl ':flock';
+use File::Basename;
 use File::Copy;
 use File::stat;
 
-my $debug = 0;
+my $debug =  (($ENV{ASIM_DEBUG} || 0) >= 2) 
+          || defined($ENV{ASIM_DEBUG_INIFILE});
+
 
 =head1 NAME
 
@@ -294,12 +297,14 @@ sub save {
   my %groups_done = ();
   my %items_done;
 
+  my $status;
+
   #
   # Open an temporary file that we will write to and
   # then move on top of the original file
   #
   CORE::open(INI, "> $tmpfile")
-    || ierror("Inifile open failed ($tmpfile)\n") && return ();
+    || ierror("Temporary inifile open for write failed ($tmpfile)\n") && return ();
 
   #
   # Go through original INI file updating lines that are there,
@@ -453,18 +458,43 @@ NEWFILE:
   CORE::close(INI);
 
   if (defined($oldfile)) {
-      if ("$file" ne $self->filename())  {	# write to a new file
+
+      # Re-save an exisiting file
+
+      if ("$file" ne $self->filename())  {
+
+        # Write to a new file (saveas)
+
 	CORE::close(OLDINI);
- 	system("mv $tmpfile $file");
+
+        my $dir = dirname($file);
+
+        if ( -e $file && ! -w $file) {
+          ierror("File not writable ($file)\n");
+          return ();
+        } elsif ( ! -d $dir || ! -w $dir) {
+          ierror("Directory not writable ($dir)\n");
+          return ();
+        }
+
+ 	$status = system("mv $tmpfile $file");
+        if ($status) {
+          ierror("Move to final destination ($file) failed\n");
+          return ();
+        }
       }
-      else {	      # move the contents from the temporary file
-	CORE::open(INI, "< $tmpfile") || ierror("Inifile open failed ($tmpfile); cannot update $oldfile\n") && return ();
+      else {
+
+        # save replacing original file
+        # move the contents from the temporary file
+
+	CORE::open(INI, "< $tmpfile") || ierror("Temporary inifile open for read failed ($tmpfile); cannot update $oldfile\n") && return ();
 	my @lines = <INI>;
 	CORE::close(INI);      
 	system("rm $tmpfile");
 	  
-	seek(OLDINI, 0, 0);	
-	truncate(OLDINI, 0);	
+	seek(OLDINI, 0, 0)   || ierror("Cannot seek in $oldfile\n") && return ();
+	truncate(OLDINI, 0)  || ierror("Cannot truncate $oldfile\n") && return ();
 	print OLDINI @lines;
 	CORE::close(OLDINI);
 	  
@@ -472,7 +502,26 @@ NEWFILE:
       print "Unlocked file $oldfile\n" if $debug;
   }
   else {
-      system("mv $tmpfile $file");
+
+    # Save a brand new file
+    print "Saving file $file\n" if ($debug);
+
+
+    my $dir = dirname($file);
+
+    if ( -e $file && ! -w $file) {
+      ierror("File not writable ($file)\n");
+      return ();
+    } elsif ( ! -d $dir || ! -w $dir) {
+      ierror("Directory not writable ($dir)\n");
+      return ();
+    }
+
+    $status = system("mv $tmpfile $file");
+    if ($status) {
+      ierror("Move to final destination ($file) failed\n");
+      return ();
+    }
   }
 
   $self->{filename} = $file;
