@@ -4446,3 +4446,20 @@ Updating with simcore changes (rev. 2556 - Joel Emer)
 
 Added an asim-shell command (show repository) to show
 the attributes of a repository.
+
+----------
+spartha1    Date: Fri May  9 19:18:40 EDT 2008  CSN: CSN-asimcore-233
+                  Fri May  9 23:18:40 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          232 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          232 
+
+Updating with simcore changes (rev. 2557 - Joel Emer)
+
+During commit, do not include nominally dependent, but
+actually non-existent or non-private packages as being
+required for the commit.

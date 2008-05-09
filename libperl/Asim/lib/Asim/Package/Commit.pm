@@ -128,7 +128,16 @@ sub commit {
   if ($only_self) {
     @all = ($self);
   } else {
-    @all = ($self->get_dependent_packages());
+    @all = ();
+
+    foreach my $dp ($self->get_dependent_packages()) {
+      if ( ! $dp->isprivate()) {
+        print "Commit: Skipping private dependent package: " . $dp->name() . "\n";
+        next;
+      }
+
+      push(@all, $dp);
+    }
   }
 
 #########      ###########      ###########      ###########      ###########

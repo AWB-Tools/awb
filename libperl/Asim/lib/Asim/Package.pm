@@ -623,7 +623,7 @@ sub get_dependent_packages {
     print "Found dependency on $n\n";
     
     $p = $packageDB->get_package($n)
-      || ierror("Could not find package ($n)\n") && next;
+      || iwarn("Could not find package ($n)\n") && next;
 
     # TODO: check tag...
 
