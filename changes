@@ -4293,3 +4293,15 @@ Directory lib/libawb
 
 Add EVENTS to the awb.config and awb-resolver options processing to control
 building models with support for events.  Default is off.
+
+----------
+spartha1    Date: Fri May  9 16:36:18 EDT 2008  CSN: CSN-asimcore-226
+                  Fri May  9 20:36:18 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          225 
+
+Updating with simcore changes (rev. 2536 - Sailashri Parthasarathy)
+
+Bug fix: Adding a command line check to check if the specified experiment and benchmark files exist.

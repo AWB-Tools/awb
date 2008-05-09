@@ -1702,6 +1702,11 @@ sub run_one_benchmark
 sub parse_exp_file 
 {
     my $file = shift;
+    if (!(-e $file)) {
+      print "The experiments file ($file) does not exist. Exiting....\n";
+      exit;
+    }
+
     my $exps = {};
     my $name;
     my @explist;
@@ -1888,6 +1893,11 @@ sub exps
 sub parse_bm_file 
 {
   my ($file) = shift;
+  if (!(-e $file)) {
+    print "The benchmarks file ($file) does not exist. Exiting....\n";
+    exit;
+  }
+
   my $allexps = shift;
   my $bms = shift;
   
