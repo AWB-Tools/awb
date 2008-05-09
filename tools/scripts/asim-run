@@ -150,6 +150,9 @@ my $NETBATCH_PRE_USE_SMARTCLASS = Asim::Util::get_asimrc_val("asim-run", "NETBAT
 # Arguments to launch threaded jobs
 $NETBATCH_MT_SLOTS_PER_CORE   = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_MT_SLOTS_PER_CORE", 2);
 
+# Wait for children or move on to other work?
+my $WAIT_FOR_CHILDREN = Asim::Util::get_asimrc_val("asim-run", "WAIT_FOR_CHILDREN", 1);
+
 ## Global variables used for scheduling. 
 
 # Number of jobs submitted this cycle.  
@@ -1082,14 +1085,16 @@ sub wait_for_children
  
     my $ecode = 0;
    
-    for (my $child = wait(); $child != -1; $child = wait()) {
-        my $child_ecode = $? >> 8;
-        my $child_signum = $? & 127;
-        my $child_dumped_core = $? & 128;
+    if ($WAIT_FOR_CHILDREN) {
+        for (my $child = wait(); $child != -1; $child = wait()) {
+            my $child_ecode = $? >> 8;
+            my $child_signum = $? & 127;
+            my $child_dumped_core = $? & 128;
 
-        print_info("Done Waiting For Child PID $child with Exit Code $child_ecode\n");
+            print_info("Done Waiting For Child PID $child with Exit Code $child_ecode\n");
 
-        $ecode += $child_ecode;
+            $ecode += $child_ecode;
+        }
     }
 
     return $ecode;

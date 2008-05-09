@@ -4538,3 +4538,16 @@ for asim-batch to be separated with commas (,) and/or spaces ( ).
 
 Allow more interactive specification of package names in
 asim-shell.
+
+----------
+spartha1    Date: Fri May  9 19:43:33 EDT 2008  CSN: CSN-asimcore-238
+                  Fri May  9 23:43:33 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          237 
+
+Updating with simcore changes (rev. 2566 - Michael Adler)
+
+Add option not to wait for one package to complete before exiting.
+Default is previous behavior (wait).
