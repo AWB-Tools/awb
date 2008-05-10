@@ -29,6 +29,7 @@ use strict;
 
 
 # Load all the required modules
+use Getopt::Long;
 
 use Asim::Rcfile;
 

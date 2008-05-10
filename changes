@@ -4551,3 +4551,13 @@ Updating with simcore changes (rev. 2566 - Michael Adler)
 
 Add option not to wait for one package to complete before exiting.
 Default is previous behavior (wait).
+
+----------
+emer        Date: Sat May 10 12:19:09 EDT 2008  CSN: CSN-asimcore-239
+                  Sat May 10 16:19:09 UTC 2008
+
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          238 
+
+Fixed incomplete patch of Asim.pm.in from CSN-asimcore-230.
