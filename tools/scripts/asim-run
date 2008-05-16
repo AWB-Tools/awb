@@ -259,6 +259,7 @@ my $limit = 1;
 my $quiet = 0;
 my $verbose = 0;
 my $help = 0;
+my $options = 0;
 my $delay =0;
 my $persist = 0;
 my $remoteresdir = undef;
@@ -304,6 +305,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
 			"debug"          => \$debug,
                         "verbose!"       => \$verbose,
                         "help"           => \$help,
+                        "options"        => \$options,
                         "delay=i"        => \$delay,
                         "remote!"        => \$remote,
                         "remotehost=s"   => \$remotehost,
@@ -342,6 +344,10 @@ if ($help) {
   wait_and_exit(0);
 }
 
+if ($options) {
+  Options();
+  wait_and_exit(0);  
+}
 
 if (! $status || 
     ! $experiments || 
@@ -2785,6 +2791,12 @@ sub controlled_exit
     }
 }
 
+# -----------------------------------------------------------------------------
+# print program options
+sub Options {
+  $Asim::default_workspace->dump_options();
+}
+
 __END__
 
 =head1 NAME
@@ -2796,6 +2808,7 @@ Asim-run - Program to run a set of asim experiments
      % asim-run  
           --experiments <experiments-file>  (AKA: models file)
           --benchmarks <benchmarks-file>
+
           [--resdir <results-directory>]
           [--nicelevel <Number between Nicemin (usually 10) & Nicemax (usually 19)>]
           [--execscript <Name of script to execute to simulate each benchmark>]
@@ -2813,7 +2826,9 @@ Asim-run - Program to run a set of asim experiments
           [--[no]dryrun]
           [--[no]quiet]
           [--[no]verbose]
+
           [--help]
+          [--options]
 
 =head1 DESCRIPTION
 
@@ -2956,6 +2971,10 @@ reverses the sense of the command. Default is NOT to be verbose.
 =item --help
 
 Get this help information.
+
+=item --options
+
+List the awb.config/asimrc options for this program
 
 =back
 
@@ -3152,6 +3171,17 @@ documentation.
 =head1 ENVIRONMENT VARIABLES
 
 ASIMRUNOPT - contains additional command line switches.
+
+=head1 OPTIONS
+
+Defaults for many of the asim-run switches can be set in the Asim rcfiles.
+Like serveral asim programs asim-run looks for these options first in
+the user's <workspace>/awb.config file, then in the user's ~/.asim/asimrc
+file, and finally in the system's <installdir>/etc/asim/asimrc file.
+
+A listing of the available options that can be set can be obtained with:
+
+        % asim-run --options
 
 =head1 BUGS
 

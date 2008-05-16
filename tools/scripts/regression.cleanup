@@ -49,21 +49,32 @@ my $quiet      = Asim::Util::get_asimrc_val("regression.launcher", "QUIET", 0);
 my $rundir;
 my $regdir;
 my $purge;
+my $help = 0;
+my $options = 0;
 
 my $status = GetOptions("rundir=s"     => \$rundir,
 			"regdir=s"     => \$regdir,
                         "purge!"       => \$purge,
                         "quiet!"       => \$quiet,
+                        "help"         => \$help,
+                        "options"      => \$options,
                        );
 
-if ( ! $status ) {
-  print "Usage: regression.cleanup  [--rundir=<regression.launcher time-stamped run directory>]\n";
-  print "                           [--regdir=<root directory for regression results>]\n";
-  print "                           [--[no]purge]\n";
-  print "                           [--[no]quiet]\n";
-  print "\n";
-  exit;
+if ( ! $status) {
+  Usage();
+  exit 1;
 }
+
+if ($help) {
+  Usage();
+  exit 0;
+}
+
+if ($options) {
+  Options();
+  exit 0;
+}
+
 
 if ((defined $rundir && $rundir ne "") && (defined $regdir && $regdir ne "")) {
     print "\t\tError, Cannot accept both 'rundir' and 'regdir' arguments.\n";
@@ -208,4 +219,25 @@ sub remove_dir
     
     print "\t\t - Removed directory $dir \n" unless ($quiet);
     return 0;
+}
+
+sub Usage {
+  print "Usage: regression.cleanup\n";
+  print "                 [--regdir=<root directory for regression results>]\n";
+  print "                 [--rundir=<regression.launcher time-stamped run directory>]\n";
+  print "                 [--[no]purge]\n";
+  print "                 [--[no]quiet]\n";
+  print "\n";
+  print "                 [--help]\n";
+  print "                 [--options]\n";
+  print "\n";
+  print "              Default regdir is: <workspace>/run/regtest\n";
+  print "              Default rundir is most recent directory in regdir\n";
+  print "\n";
+
+  Options();
+}
+
+sub Options {
+  $Asim::default_workspace->dump_options();
 }

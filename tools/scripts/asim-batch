@@ -74,6 +74,10 @@ $exp="";
 #
 $nicelevel="";
 
+# Some help options
+$help=0;
+$options=0;
+
 # Some status flags used to determine what I need to clean up. 
 $runflset=0;
 $rmrundir=0;
@@ -88,26 +92,24 @@ $status = GetOptions(   "benchmark=s"   => \$benchmark,
                         "rsynchost=s"   => \$rsynchost,
                         "rsyncresdir=s" => \$rsyncresdir,
                         "tmpdir=s"      => \$tmpdir,
+                        "help"          => \$help,
+                        "options"       => \$options,
                     );
 
+
+if ($help) {
+  Usage();
+  exit 0;
+}
+
+if ($options) {
+  Options();
+  exit 0;
+}
+
 if (! $status || ! $benchmark || ! $resdir || ! $exp) {
-  my $prog = basename($0);
-  print STDERR "\n";
-  print STDERR "$prog: Inputs are \n";
-  print STDERR "tmpdir=<for temporary asim-batch outputs>\n";
-  print STDERR "benchmark=<name of benchmark, e.g., gzip_00>\n";
-  print STDERR "resdir=<full path to results directory>\n";
-  print STDERR "env=<space separated list of environment variables to use from you current environment>\n";
-  print STDERR "exp=<Name of experiment configuration file>\n";
-  print STDERR "rsynchost=<optional host for results to be rsyncd to>\n";
-  print STDERR "rsyncresdir=<optional dir for results to be rsyncd to>\n";
-  print STDERR "compress=none|no|gzip|gz|bzip2|bz2\n";
-  print STDERR "-- <list of params to model>\n";
-  print STDERR "\n";
-  print STDERR "compress is optional and defaults to 'gzip'.\n";
-  print STDERR "ALL OTHER INPUTS ARE REQUIRED.\n";
-  print STDERR "\n";
-  exit;
+  Usage();
+  exit 1;
 }
 
 if ($rsynchost eq "") {
@@ -503,4 +505,33 @@ sub rsync_results
             }
         }
     }
+}
+
+
+sub Usage {
+  my $prog = basename($0);
+  print STDERR "\n";
+  print STDERR "Usage: $prog\n"; 
+  print STDERR "\n";
+  print STDERR "Switches are:\n";
+  print STDERR "    --exp=<Name of experiment configuration file> (REQUIRED)\n";
+  print STDERR "    --benchmark=<name of benchmark, e.g., gzip_00> (REQUIRED)\n";
+  print STDERR "    --resdir=<full path to results directory> (REQUIRED)\n";
+  print STDERR "\n";
+  print STDERR "    --env=<list of environment variables to use from your environment>\n";
+  print STDERR "    --compress=none|no|gzip|gz|bzip2|bz2 (default:gzip)\n";
+  print STDERR "    --rsynchost=<optional host for results to be rsyncd to>\n";
+  print STDERR "    --rsyncresdir=<optional dir for results to be rsyncd to>\n";
+  print STDERR "    --tmpdir=<for temporary asim-batch outputs>\n";
+  print STDERR "\n";
+  print STDERR "    --help\n";
+  print STDERR "    --options\n";
+  print STDERR "    -- <list of params to model>\n";
+  print STDERR "\n";
+
+  Options();
+}
+
+sub Options {
+  $Asim::default_workspace->dump_options();
 }

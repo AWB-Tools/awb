@@ -23,6 +23,7 @@ use warnings;
 use strict;
 
 our $DEBUG = ($ENV{ASIM_DEBUG} || 0) >= 3;
+
 our $RESOLVER = "awb-resolver";
 
 =head1 NAME
@@ -43,32 +44,6 @@ Utility functions....
 
 =cut
 
-################################################################
-
-=item Asim::Util::resolve($file)
-
-Resolve file $FILE. 
-Algorithm:
-
-    Step 1: if its a real file just return it.
-
-    Step 2: use awb-resolve to find it.
-
-=cut
-
-################################################################
-
-sub resolve {
-  my $file = shift;
-  my $result;
-
-  chomp ($result = `$RESOLVER $file 2>&1`);
-  if ($?) {
-    die "Error:Resolve of $file failed with result \n$result\n";
-  }
-
-  return $result;
-}
 
 
 ################################################################
@@ -231,46 +206,6 @@ sub expand_tilda {
   return $file;
 }
 
-################################################################
-
-=item Asim::Util::get_asimrc_val($group, $item, $def)
-
-Read a value from asimrc file. 
-Inputs are: asim object, group, item, and default value
-
-=cut
-
-################################################################
-sub get_asimrc_val
-{
-  my $group = shift;
-  my $item = shift;
-  my $def = shift;
-  my $val;
-
-  if (!(defined($Asim::rcfile)))
-  {
-      return $def;
-  }
-
-  $val = $Asim::rcfile->get($group, $item);
-  
-  # Is this value really defined, or are we just getting some white spaces....
-  if ($val)
-  {
-    $val =~ s/\"//g;
-    $val =~ s/^\s*(.*)\s*$/$1/;
-  }
-  
-  if (!defined($val) || ($val eq ""))
-  {
-    $val = $def;
-  }
-  
-  return $val;
-}
-
-
 
 
 ################################################################
@@ -294,6 +229,59 @@ sub get_homedir {
   return $dir;
 }
 
+
+################################################################
+
+=item Asim::Util::resolve($file)
+
+Resolve file $FILE. 
+Algorithm:
+
+    Step 1: if its a real file just return it.
+
+    Step 2: use awb-resolve to find it.
+
+Use of this function is deprecated use Asim::resolve() 
+directly...
+
+=cut
+
+################################################################
+
+sub resolve {
+  my $file = shift;
+  my $result;
+
+  chomp ($result = `$RESOLVER $file 2>&1`);
+  if ($?) {
+    die "Error:Resolve of $file failed with result \n$result\n";
+  }
+
+  return $result;
+}
+
+################################################################
+
+=item Asim::Util::get_asimrc_val($group, $item, $def)
+
+Read a value from asimrc file. 
+Inputs are: asim object, group, item, and default value
+
+Use of this function is deprecated use Asim::get_option() 
+directly...
+
+=cut
+
+################################################################
+
+sub get_asimrc_val
+{
+  my $group = shift;
+  my $item = shift;
+  my $def = shift;
+
+  return Asim::get_option($group, $item, $def);
+}
 
 
 ################################################################

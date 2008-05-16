@@ -102,19 +102,28 @@ my $slechtafetch       = Asim::Util::get_asimrc_val('fetch-trace', 'SLECHTA_FETC
 #
 # get command line options
 #
-$debug    = 0;
-$verbose  = 0;
-my $fetch = 1;
+$debug      = 0;
+$verbose    = 0;
+my $fetch   = 1;
+my $help    = 0;
+my $options = 0;
+
 $status = GetOptions(   "fetch!"         => \$fetch,
 			"debug"          => \$debug,
                         "verbose!"       => \$verbose,
-                        "help"           => \$help,
                         "forcersync!"    => \$forcersync,
                         "slechtafetch!"  => \$slechtafetch,
+                        "help"           => \$help,
+                        "options"        => \$options,
                     );
 
 if ($help) {
   system "perldoc $0";
+  exit 0;
+}
+
+if ($options) {
+  $Asim::default_workspace->dump_options();
   exit 0;
 }
 
@@ -414,6 +423,7 @@ fetch-trace - Utility to fetch benchmark trace files into a local disk cache
           [--[no]fetch]
           [--[no]verbose]
           [--help]
+          [--options]
 
 =head1 DESCRIPTION
 

@@ -35,6 +35,10 @@ our %a =  ( workspace =>            [ "workspace",
                                       "SCALAR" ],
           );
 
+our $DEBUG =  0
+           || defined($ENV{ASIM_DEBUG})
+           || defined($ENV{ASIM_DEBUG_RCFILE});
+
 =head1 NAME
 
 Asim::Rcfile - Library for manipulating ASIM rcfile
@@ -157,6 +161,7 @@ sub open {
   }
 
   $inifile = Asim::Inifile->new($file);
+  print "Rcfile: User rcfile: $file\n" if ($DEBUG);
 
   $self->{filename} = $file;
   $self->{inifile} = $inifile;
@@ -165,6 +170,7 @@ sub open {
   # Open global rcfile
 
   $file2 = File::Spec->rel2abs($file2);
+  print "Rcfile: Global rcfile: $file2\n" if ($DEBUG);
 
   $inifile2 = Asim::Inifile->new($file2);
 
@@ -267,12 +273,21 @@ sub get {
 
   if (!defined($newval)) {
     if (!defined($self->{inifile2})) {
+      print STDERR "Option [$group] $item = undef (not in user inifile/no global inifile)\n" if ($DEBUG);
       return undef;
     }
 
     $newval = $self->{inifile2}->get($group,$item);
+    if (! defined($newval)) {
+      print STDERR "Option [$group] $item = undef (neither user or global inifile)\n" if ($DEBUG);
+      return undef;
+    }
+
+    print STDERR "Option [$group] $item = $newval (Global inifile)\n" if ($DEBUG);
+    return $newval;
   }
 
+  print STDERR "Option [$group] $item = $newval (User inifile)\n" if ($DEBUG);
   return $newval;
 }
 

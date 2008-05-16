@@ -78,6 +78,8 @@ my $rerun = 0;
 my $package_db;
 my $package_limit_warn = 0;
 my $shared_package_area = Asim::Datadir();
+my $help = 0;
+my $options = 0;
 
 my $status = GetOptions("package=s"     =>  \@packages,
 			"packageexps=s" =>  \@package_exps,
@@ -91,31 +93,23 @@ my $status = GetOptions("package=s"     =>  \@packages,
 			"remote!"       =>  \$remote,
 			"remoteroot=s"  =>  \$remoteroot,
 			"remoteregdir=s"=>  \$remoteregdir,
-			"rerun"         =>  \$rerun
+			"rerun"         =>  \$rerun,
+			"help"          =>  \$help,
+			"options"       =>  \$options
                        );
-if ( ! $status ) {
-  print "Usage: regression.launcher\n";
-  print "\t\t [--package=ipf|arana|...]\n";
-  print "\t\t [--runtype=regression|nightly] \n";
-  print "\t\t [--runstyle=pruned|list] \n";
-  print "\t\t [--regdir=<directory to place regression results>]\n";
-  print "\t\t [--runcmds=<asim-run commands>]\n";
-  print "\t\t [--compress=none|gzip|bzip2]\n";
-  print "\t\t [--queue=<netbatch queue - e.g. /fast or /slow/asim>]\n";
-  print "\t\t [--[no]remote]\n";
-  print "\t\t [--remoteroot=<remote root directory to place regression results>]\n";
-  print "\t\t [--remoteregdir=<where to run regressions on remote host>]\n";
-  print "\t\t [--[no]dryrun]\n";
-  print "\t\t [--rerun]\n";
-  print "\n";
-  print "\t\tDefault packages are: " . join(" ", @default_packages) . "\n";
-  print "\t\tDefault runtype is: regression\n";
-  print "\t\tDefault runstyle is: list\n";
-  print "\t\tDefault regdir is: <workspace>/run/regtest/YYYY-MM-DD-HH-MM-SS\n";
-  print "\t\tDefault compression is gzip.\n";
-  print "\n";
-  print "Multiple packages can be provided at the same time as a space separated list.  \n";
+if ( ! $status) {
+  Usage();
   exit 1;
+}
+
+if ($help) {
+  Usage();
+  exit 0;
+}
+
+if ($options) {
+  Options();
+  exit 0;
 }
 
 @packages = split(/\s*[ ,]\s*/,join(',',@packages));
@@ -552,4 +546,40 @@ sub Cleanup {
 #  system ("$command");
   system ("rm -rf $resdir > /dev/null 2>&1");
   exit 1;
+}
+
+sub Usage {
+  print "Usage: regression.launcher\n";
+  print "\t\t [--package=ipf|arana|...]\n";
+  print "\t\t [--runtype=regression|nightly] \n";
+  print "\t\t [--runstyle=pruned|list] \n";
+  print "\t\t [--runcmds=<asim-run commands>]\n";
+  print "\t\t [--compress=none|gzip|bzip2]\n";
+  print "\t\t [--queue=<netbatch queue - e.g. /fast or /slow/asim>]\n";
+  print "\t\t [--regdir=<directory to place regression results>]\n";
+  print "\n";
+  print "\t\t [--[no]remote]\n";
+  print "\t\t [--remoteroot=<remote root directory to place regression results>]\n";
+  print "\t\t [--remoteregdir=<where to run regressions on remote host>]\n";
+  print "\n";
+  print "\t\t [--rerun]\n";
+  print "\t\t [--[no]dryrun]\n";
+  print "\n";
+  print "\t\t [--help]\n";
+  print "\t\t [--options]\n";
+  print "\n";
+  print "\t\tDefault packages are: " . join(" ", @default_packages) . "\n";
+  print "\t\tDefault runtype is: regression\n";
+  print "\t\tDefault runstyle is: list\n";
+  print "\t\tDefault compression is gzip.\n";
+  print "\t\tDefault regdir is: <workspace>/run/regtest/YYYY-MM-DD-HH-MM-SS\n";
+  print "\n";
+  print "Multiple packages can be provided at the same time as a space separated list.  \n";
+  print "\n";
+
+  Options();
+}
+
+sub Options {
+  $Asim::default_workspace->dump_options();
 }

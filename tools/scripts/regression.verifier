@@ -55,25 +55,35 @@ my $runtype;
 my $errorlog   = Asim::Util::get_asimrc_val("regression.launcher", "ERRORLOG", 1);
 my $modelcheck = Asim::Util::get_asimrc_val("regression.launcher", "MODELCHECK", 1);
 my $quiet      = Asim::Util::get_asimrc_val("regression.launcher", "QUIET", 0);
+my $help       = 0;
+my $options    = 0;
 
 my $status = GetOptions("package=s"    => \$package,
 			"runtype=s"    => \$runtype,
-			"rundir=s"     => \$rundir,
 			"regdir=s"     => \$regdir,
+			"rundir=s"     => \$rundir,
                         "errorlog!"    => \$errorlog,
                         "modelcheck!"  => \$modelcheck,
                         "quiet!"       => \$quiet,
+			"help"         => \$help,
+			"options"      => \$options
                        );
 
-if ( ! $status ) {
-  print "Usage: regression.verifier [--rundir=<regression.launcher time-stamped run directory>]\n";
-  print "                           [--regdir=<root directory for regression results>]\n";
-  print "                           [--[no]errorlog]\n";
-  print "                           [--[no]modelcheck]\n";
-  print "                           [--[no]quiet]\n";
-  print "\n";
+if ( ! $status) {
+  Usage();
   exit 4;
 }
+
+if ($help) {
+  Usage();
+  exit 0;
+}
+
+if ($options) {
+  Options();
+  exit 0;
+}
+
 
 if ((defined $rundir && $rundir ne "") && (defined $regdir && $regdir ne "")) {
     print "\t\tError, Cannot accept both 'rundir' and 'regdir' arguments.\n";
@@ -467,4 +477,27 @@ sub show_errorlog
   }
 
   print("\n");
+}
+
+
+sub Usage {
+  print "Usage: regression.verifier\n";
+  print "                 [--regdir=<root directory for regression results>]\n";
+  print "                 [--rundir=<regression.launcher time-stamped run directory>]\n";
+  print "                 [--[no]errorlog]\n";
+  print "                 [--[no]modelcheck]\n";
+  print "                 [--[no]quiet]\n";
+  print "\n";
+  print "                 [--help]\n";
+  print "                 [--options]\n";
+  print "\n";
+  print "              Default regdir is: <workspace>/run/regtest\n";
+  print "              Default rundir is most recent directory in regdir\n";
+  print "\n";
+
+  Options()
+}
+
+sub Options {
+  $Asim::default_workspace->dump_options();
 }

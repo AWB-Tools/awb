@@ -39,7 +39,7 @@
 // gcc 3.2.2 complains about these lines inside the class def.
 static const char* const IncludeRegexp ="^#include[ \t]+\"([^\"]*[^ \t])\"";
 static const char* const CommentRegexp = "^[ \t]*(#.*)?$";
-static const char* const GroupRegexp = "^\\[([A-Za-z0-9/()+ :;,_-]*)\\]$";
+static const char* const GroupRegexp = "^\\[([A-Za-z0-9/()+ :;,_.-]*)\\]$";
 static const char* const ItemRegexp  = "^([A-Za-z0-9_-]*) *= *(.*) *$";
 
 /**

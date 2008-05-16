@@ -34,6 +34,10 @@ use Asim::Workspace::Template;
 
 our $DEBUG = (($ENV{ASIM_DEBUG} || 0) >= 1) || defined($ENV{ASIM_DEBUG_WORKSPACE});
 
+our $DEBUG_OPTIONS = $DEBUG 
+                   || defined($ENV{ASIM_DEBUG_OPTIONS});
+
+
 our @ISA = qw(Asim::Base Asim::UnionDir);
 
 our %a =  ( name =>                 [ "name",
@@ -170,6 +174,7 @@ sub _initialize {
                version => 1.2,
 	       filename => "",
 	       inifile => {},
+	       options => {}
 	     };
 
   return $self;
@@ -957,6 +962,139 @@ sub file2package {
 
 ################################################################
 
+=item $workspace-E<gt>get_option($group, $item)
+
+Return value from [$group] for $item in awb.config file as
+a program option. Remember the set of options requested, so
+they can be returned with list_options()
+
+=cut
+
+################################################################
+
+sub get_option {
+  my $self = shift;
+  my $group = shift;
+  my $item = shift;
+  my $def = shift;
+
+  my $val = $self->get($group, $item);
+
+  if (defined($val)) {
+    # Strip leading and trailing spaces and double quotes from around string
+
+    $val =~ s/^\s*(\"?)(.*)\1\s*$/$2/;
+
+    # Is this value not just an empty string
+    
+    if ($val ne "") {
+      print STDERR "Option [$group] $item = \'$val\' (in awb.config)\n" if $DEBUG_OPTIONS;
+
+      $self->{options}->{$group}->{$item} = $val;
+      return $val;
+    }  
+  }
+  
+
+  # Check in rcfile's - probably this should be in the workspace
+
+  if (!(defined($Asim::rcfile)))
+  {
+      if (! defined($def)) {
+        print STDERR "Option [$group] $item = undef (no rcfile/no default)\n" if $DEBUG_OPTIONS;
+
+	$self->{options}->{$group}->{$item} = "undef";
+        return undef;
+      }
+
+      print STDERR "Option [$group] $item = \'$def\' (no rcfile/default)\n" if $DEBUG_OPTIONS;
+
+      $self->{options}->{$group}->{$item} = $def;
+      return $def;
+  }
+
+  $val = $Asim::rcfile->get($group, $item);
+  
+  if (defined($val)) {
+    # Strip leading and trailing spaces and double quotes from around string
+
+    $val =~ s/^\s*(\"?)(.*)\1\s*$/$2/;
+#    $val =~ s/^\s*(.*)\s*$/$1/;
+
+    # Is this value just an empty string
+
+    if ($val ne "") {
+      print STDERR "Option [$group] $item = \'$val\' (user or global rcfile)\n" if $DEBUG_OPTIONS;
+
+      $self->{options}->{$group}->{$item} = $val;
+      return $val;
+    }
+  }
+
+  # It wasn't in any files - so return default value, if any.
+  
+  if (! defined($def)) {
+    print STDERR "Option [$group] $item = undef (no default)\n" if $DEBUG_OPTIONS;
+
+    $self->{options}->{$group}->{$item} = "undef";
+    return undef;
+  }
+
+  print STDERR "Option [$group] $item = \'$def\' (default)\n" if $DEBUG_OPTIONS;
+
+  $self->{options}->{$group}->{$item} = $def;
+  return $def;
+}
+
+################################################################
+
+=item $workspace-E<gt>get($group, $item)
+
+Return value from [$group] for $item in awb.config file
+
+=cut
+
+################################################################
+
+sub get {
+  my $self = shift;
+  my $group = shift;
+  my $item = shift;
+
+  my $newval;
+
+  $newval = $self->{inifile}->get($group,$item);
+
+  if (!defined($newval)) {
+    print STDERR "Option [$group] $item = undef (not in awb.config)\n" if ($DEBUG);
+    return undef;
+  }
+
+  print STDERR "Option [$group] $item = $newval (awb.config)\n" if ($DEBUG);
+  return $newval;
+}
+
+
+
+################################################################
+
+=item $workspace-E<gt>list_options()
+
+Return hash with all options used by this program
+
+=cut
+
+################################################################
+
+sub list_options {
+  my $self = shift;
+
+  return $self->{options}
+}
+
+
+################################################################
+
 =item $workspace-E<gt>modified([$value])
 
 Return a boolean indicating whether the object has been modified,
@@ -1064,9 +1202,42 @@ sub dump {
   print "Description: $desc\n";
   print "Workspace directory: $rootdir\n";
 
-  return $self->Asim::UnionDir::dump();
+  $self->Asim::UnionDir::dump();
+  $self->dump_options();
+
+  return;
 }
 
+
+
+################################################################
+
+=item $workspace-E<gt>dump_options()
+
+Print list of options used by this program
+
+=cut
+
+
+################################################################
+
+sub dump_options {
+  my $self = shift;
+
+  my $options = $self->list_options();
+
+  print "Options in awb.config or asimrc:\n";
+  foreach my $group (sort(keys(%$options))) {
+    print "  [$group]\n";
+
+    foreach my $item (sort(keys(%{$options->{$group}}))) {
+      my $value = $options->{$group}->{$item};
+      print "    $item=$value\n";
+    }
+  }
+
+  return;
+}
 
 ################################################################
 #

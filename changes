@@ -4561,3 +4561,56 @@ Directory libperl/Asim/lib
  Asim.pm.in                Locally Modified          238 
 
 Fixed incomplete patch of Asim.pm.in from CSN-asimcore-230.
+
+----------
+jsemer      Date: Fri May 16 09:57:14 EDT 2008  CSN: CSN-asimcore-240
+                  Fri May 16 13:57:14 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim
+ Rcfile.pm                 Locally Modified          239 
+ Util.pm                   Locally Modified          239 
+ Workspace.pm              Locally Modified          239 
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          239 
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          239 
+ fetch-trace               Locally Modified          239 
+ regression.verifier       Locally Modified          239 
+ regression.cleanup        Locally Modified          239 
+ asim-run                  Locally Modified          239 
+ asim-batch                Locally Modified          239 
+
+Directory lib/libawb
+ inifile.cpp               Locally Modified          239 
+
+Enhanced the search for rcfile options to include the file
+<workspace>awb.config. So now program's such as regression.*
+and asim-run will look for their options first in awb.config,
+then in ~/.asim/asimrc and then in <installdir>/etc/asim/asimrc.
+
+All the scripts that use options have been enchanced with an
+--options switch that lists the options that the program uses,
+and their current values.
+
+All of this means that one can set options on a per workspace
+basis, so if, for example, one has a workspace for working on
+hasim, then they can set up default regressions for that workspace
+to regress the hasim packages by adding the following to their
+awb.config file for that workspace.
+
+awb.config:
+.
+.
+.
+[regression.launcher]
+PACKAGES=hasim,hasim-mips
+.
+.
+.
+
+Finally, the change to inifile.cpp in libawb is to allow dot (.)
+in a inifile group name, and must be installed system-wide before
+the above funcionality will function correctly.

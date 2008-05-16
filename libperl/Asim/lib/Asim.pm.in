@@ -667,6 +667,22 @@ sub get_tmpdir {
   return $TMPDIR;
 }
 
+################################################################
+
+=item Asim::get_option($group, $item, [$default])
+
+Get an option first looking in awb.config, then in ~/.asim/asimrc
+and then in the global asimrc. If all that fails use the provided
+default.
+
+=cut
+
+################################################################
+
+sub get_option {
+  return $Asim::default_workspace->get_option(@_);
+}
+
 ###########################################################################
 
 sub cleanup_and_exit {
