@@ -23,6 +23,7 @@ nobase_include_HEADERS = asim/xmlout.h \
 		asim/alphaops.h\
 		asim/arch_register.h\
 		asim/arraylist.h\
+		asim/atoi.h\
 		asim/atomic.h\
 		asim/buffer.h\
 		asim/cache.h\

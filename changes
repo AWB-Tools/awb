@@ -4629,3 +4629,18 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2579 - Michael Adler)
 
 Record whether a parameter is an integer, string or unknown.
+
+----------
+jsemer      Date: Fri May 30 21:00:31 EDT 2008  CSN: CSN-asimcore-242
+                  Sat May 31 01:00:31 UTC 2008
+
+
+Directory lib/libasim/include
+ Makefile.in               Locally Modified          240 
+ Makefile.am               Locally Modified          240 
+
+Updating with simcore changes (rev. 2580 - Joel Emer)
+
+Add longstanding absence of asim/atoh.i to installation.
+
+
