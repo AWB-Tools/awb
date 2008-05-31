@@ -4614,3 +4614,18 @@ PACKAGES=hasim,hasim-mips
 Finally, the change to inifile.cpp in libawb is to allow dot (.)
 in a inifile group name, and must be installed system-wide before
 the above funcionality will function correctly.
+
+----------
+jsemer      Date: Fri May 30 20:09:30 EDT 2008  CSN: CSN-asimcore-241
+                  Sat May 31 00:09:30 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Module
+ Param.pm                  Locally Modified          240 
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          240 
+
+Updating with simcore changes (rev. 2579 - Michael Adler)
+
+Record whether a parameter is an integer, string or unknown.

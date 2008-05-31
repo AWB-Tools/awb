@@ -91,6 +91,8 @@ sub _initialize {
 		global => 0,
 		value => undef,
 		default => undef,
+                isInt => 0,
+                isString => 0,
 		@_
 	     };
 
@@ -125,6 +127,8 @@ sub dup {
 					name        => $self->{name},
 					default     => $self->{default},
 					value       => $self->{value},
+                                        isInt       => $self->{isInt},
+                                        isString    => $self->{isString},
 					description => $self->{description});
 
 
@@ -149,6 +153,8 @@ sub accessors {
              dynamic
              default
              value
+             isInt
+             isString
 	   );
 }
 
@@ -256,6 +262,38 @@ sub isexport {
   my $self = shift;
 
   return ($self->{type} eq "export");
+}
+
+################################################################
+
+=item $model-E<gt>isString([$value])
+
+Return true if this is a string value parameter
+
+=cut
+
+################################################################
+
+sub isString {
+  my $self = shift;
+
+  return $self->{isString};
+}
+
+################################################################
+
+=item $model-E<gt>isInt([$value])
+
+Return true if this is an integer value parameter
+
+=cut
+
+################################################################
+
+sub isInt {
+  my $self = shift;
+
+  return $self->{isInt};
 }
 
 ################################################################

@@ -358,6 +358,7 @@ sub open {
     my $p_switches = '(%dynamic\s+|--dynamic\s+)?(%global\s+|--global\s+)?';
     my $p_name     = '\w+';
     my $p_string   = '\"[^"]*\"';
+    my $p_number   = '\d+';
     my $p_default  = '\'?\w+';
     my $p_desc     = '[^"]+';
 
@@ -366,6 +367,21 @@ sub open {
       # Add string parameter
       #
       my $param = Asim::Module::Param->new( type => $1,
+                                            isString => 1,
+                                            dynamic => ((defined $2) ? 1 : 0),
+                                            global => ((defined $3) ? 1 : 0),
+                                            name => $4,
+                                            default => "$5",
+                                            description => "$6");
+
+      push(@{$self->{params}}, $param);
+      next;
+    } elsif (/^.*(${p_cmd})\s+${p_switches}\s*(${p_name})\s+(${p_number})\s+\"(${p_desc})\"/) {
+      #
+      # Add numeric parameter
+      #
+      my $param = Asim::Module::Param->new( type => $1,
+                                            isInt => 1,
                                             dynamic => ((defined $2) ? 1 : 0),
                                             global => ((defined $3) ? 1 : 0),
                                             name => $4,
@@ -376,7 +392,7 @@ sub open {
       next;
     } elsif (/^.*(${p_cmd})\s+${p_switches}\s*(${p_name})\s+(${p_default})\s+\"(${p_desc})\"/) {
       #
-      # Add normal (numeric) parameter
+      # Add unknown type parameter
       #
       my $param = Asim::Module::Param->new( type => $1,
                                             dynamic => ((defined $2) ? 1 : 0),
