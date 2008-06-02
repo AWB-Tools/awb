@@ -1611,7 +1611,14 @@ sub status_package {
     } else {
       # private packages, in the user's workspace:
       foreach my $fstate ( $package->status() ) {
+
+        if (! defined($fstate)) {
+          print("Could not determine status - skipping package\n");
+          next;
+        }
+
 	(my $dir, my $file, my $state, my $version) = @$fstate;
+
 	if ( $verbose || $state ne 'Up-to-date' ) {
           if ( $dir ) { $dir .= '/'; }
 	  printf("%-16s  %-6s  %s%s\n", $state, $version, $dir, $file);

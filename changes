@@ -4644,3 +4644,15 @@ Updating with simcore changes (rev. 2580 - Joel Emer)
 Add longstanding absence of asim/atoh.i to installation.
 
 
+
+----------
+spartha1    Date: Mon Jun  2 15:52:34 EDT 2008  CSN: CSN-asimcore-243
+                  Mon Jun  2 19:52:34 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          242 
+
+Updating with simcore changes (rev. 2567 - Joel Emer)
+
+More gracefully handle failures on status checks on packages.
