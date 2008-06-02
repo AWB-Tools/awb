@@ -4840,3 +4840,16 @@ on entry to a child, so that a pending error code in the
 parent isn't propagated to all the children.
 
 In Inifile.pm, fix a minor bug in the perldoc directives.
+
+----------
+spartha1    Date: Mon Jun  2 17:19:59 EDT 2008  CSN: CSN-asimcore-251
+                  Mon Jun  2 21:19:59 UTC 2008
+
+
+Directory tools/scripts
+ asim-batch                Locally Modified          250 
+
+Updating with simcore changes (rev. 2578 - Joel Emer)
+
+Report environment variables that are supposed to be retained but
+that are not defined.

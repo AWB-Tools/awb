@@ -394,6 +394,10 @@ sub get_env_names {
     
 sub setup_def_env {
   print( "Nuking environment\n" );
+
+  #
+  # Delete all but specified keys
+  #
   foreach $key (keys %ENV) {
     # Save certain environment variables
     if ( !(grep /^$key$/, @env) ) {
@@ -401,7 +405,16 @@ sub setup_def_env {
     }
     else 
     {
-      print "Retaining $key=$ENV{$key}\n";
+      print "Retaining: $key=$ENV{$key}\n";
+    }
+  }
+
+  #
+  # Find missing keys
+  #
+  foreach $key (@env) {
+    if (! defined($ENV{$key})) {
+      print "Not defined: $key\n";
     }
   }
 
