@@ -4700,3 +4700,17 @@ make sure you re-build appropriate libraries using:
 
 asim-shell clean package <packagename>
 asim-shell build package <packagename>
+
+----------
+spartha1    Date: Mon Jun  2 16:29:53 EDT 2008  CSN: CSN-asimcore-245
+                  Mon Jun  2 20:29:53 UTC 2008
+
+
+Directory lib/libdral/src
+ dralServer.cpp            Locally Modified          244 
+
+Updating with simcore changes (rev. 2570 - Brian Slechta)
+
+fixed compile bug introduced in my last commit when
+
+CONFIGFLAGS = --enable-ptv=no

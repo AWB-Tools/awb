@@ -1382,6 +1382,10 @@ DRAL_SERVER_CLASS::CvtStlListDralToPackedListPtv(
     void *p, 
     DRAL_DATA_LIST_T & dl)
 {
+    UINT32 va_size = 0;
+
+#   if COMPILE_DRAL_WITH_PTV
+
     if (dl.empty())
     {
         dst_pdpp[0] = PIPE_NO_DATATYPE;
@@ -1402,7 +1406,6 @@ DRAL_SERVER_CLASS::CvtStlListDralToPackedListPtv(
     } pos;
 
     pos.p = p;
-    UINT32 va_size = 0;
 
     for (DRAL_DATA_LIST_T::iterator i = dl.begin(); i != dl.end(); )
     {
@@ -1442,6 +1445,8 @@ DRAL_SERVER_CLASS::CvtStlListDralToPackedListPtv(
         pos.uintp += sizeof(PTV_DATA_TYPE_CLASS *);    
         va_size   += sizeof(PTV_DATA_TYPE_CLASS *);
     }
+
+#   endif
 
     return va_size;
 }
