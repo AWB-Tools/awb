@@ -518,8 +518,8 @@ Submit a new batch command.
 sub submit {
   my $self       = shift;
   my $command    = shift;
-  my $batch_log  = shift;
-  my $submit_log = shift;
+  my $batch_log  = shift ||  "/dev/null";
+  my $submit_log = shift || ">/dev/null";
   my $block      = shift || 0;
 
   my $flags_queue   = $self->{flags_queue};
@@ -533,8 +533,8 @@ sub submit {
   my $nbcommand = "$BATCH_SUBMIT_COMMAND $flags -J $batch_log $command $submit_log";
   my $status = 0;
 
-  $status = system($nbcommand);
   print "$nbcommand\n" if ($DEBUG);
+  $status = system($nbcommand);
 
   return $status;
 }

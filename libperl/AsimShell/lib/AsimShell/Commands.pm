@@ -1311,7 +1311,7 @@ sub configure_and_build_packages {
   @plist = sort { $a->buildorder() <=> $b->buildorder() } @plist;
 
   for my $p (@plist) {
-    _print_package_start("configure/build", $p->name());
+    _print_package_start("configure/build", $p->name(), "(" .$p->buildorder().")");
 
     # TBD: Should we filter out non-private packages?
 

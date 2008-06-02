@@ -4780,3 +4780,30 @@ Changes to many of the asim-shell command on sets of packages so
 that they continue to process all the packages in the set even in
 the event of various problems on an individual package. A summary
 of the failures is then printed at the end of the command.
+
+----------
+spartha1    Date: Mon Jun  2 17:10:21 EDT 2008  CSN: CSN-asimcore-249
+                  Mon Jun  2 21:10:21 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          248 
+
+Directory libperl/Asim/lib/Asim
+ Fork.pm                   Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/Batch
+ Netbatch.pm               Locally Modified          248 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          248 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          248 
+
+Updating with simcore changes (rev. 2576 - Joel Emer)
+
+Refactored forking code from asim-run into separate perl module
+for use in other programs. Also added emdedding of logs from
+forked processes or batch runs into the main log when a error
+is detected.

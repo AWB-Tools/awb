@@ -50,11 +50,10 @@ use Cwd 'realpath';
 use Asim;
 Asim::init();
 
+use Asim::Fork;
 use Asim::Batch;
 use Asim::Workspace;
 use Asim::Util;
-
-use POSIX ":sys_wait_h";
 
 # # for forking control.  shared data variable and associated lock.
 # use IPC::Shareable;
@@ -69,7 +68,6 @@ use POSIX ":sys_wait_h";
 #
 # Per process global variables
 #
-my $process_name = "asim-run";
 my $exit_code = 0;
 
 #
@@ -86,7 +84,6 @@ my $BM_ENTRY = ".. ";
 my $EXP_ENTRY = ":::";
 my $BAD_BM_ENTRY = "<UNKNOWN>";
 
-my @children = ();
 my $local_maxchildren = 10;
 my $batch_maxchildren = 10;
 
@@ -447,6 +444,7 @@ print_debug("asim_runlogfl:$asim_runlogfl\n");
 
 #--------------------------------------------------------------------
 
+Asim::Fork::init("asim-run", $WAIT_FOR_CHILDREN);
 print_info("Eldest PID ".getpid()."\n");
 
 
@@ -1100,57 +1098,7 @@ sub check_current_workspace_against_modelpath
     
 
 # -----------------------------------------------------------------------------
-sub getpid
-{
-    return $$;
-}
 
-# -----------------------------------------------------------------------------
-sub wait_for_children
-{
-    my $pid = getpid();
- 
-    my $ecode = 0;
-   
-    if ($WAIT_FOR_CHILDREN) {
-        for (my $child = wait(); $child != -1; $child = wait()) {
-            my $child_ecode = $? >> 8;
-            my $child_signum = $? & 127;
-            my $child_dumped_core = $? & 128;
-
-            print_info("Done Waiting For Child PID $child with Exit Code $child_ecode\n");
-
-            $ecode += $child_ecode;
-        }
-    }
-
-    return $ecode;
-}
-
-# -----------------------------------------------------------------------------
-sub wait_and_exit
-{
-    my $ecode = shift;
-
-    if (!defined $ecode) {
-        $ecode = 0;
-    }
-
-    $ecode += wait_for_children();
-
-    print_debug("About to exit $process_name\n");
-    print_info("Exiting with Exit Code $ecode\n");
-
-    #
-    # Get rid of logfile...
-    #   TBD: Maybe we should leave it if there was an error
-
-    if (defined($asim_runlogfl) && -f $asim_runlogfl) {
-      run_command ("rm -f $asim_runlogfl > /dev/null 2>&1");
-    }
-
-    exit $ecode;
-}
 
 # -----------------------------------------------------------------------------
 #
@@ -1356,8 +1304,9 @@ sub run_benchmarks
             controlled_exit($forklocal);
         }
     }
-    
-    $exit_code += wait_for_children();
+ 
+#    I don't think we need this - jse   
+#    $exit_code += wait_for_children();
 
     return;
 }
@@ -2188,9 +2137,16 @@ sub submit_job
 
         if ( $run_error ) {
             # There was an error in the submission.
-            print_error("Unable to finish submit_cmd; $submit_cmd\n",
-                       "Netbatch returned error.See $log\n",
-                       "Failed Model build.\n");
+
+            print_error( "Netbatch returned error.Submission not finished\n",
+                         "Submitted command: $submit_cmd\n",
+                         "Submission log: $log\n",
+                         "Run log: $dashj\n",
+                         "Failed Model build.\n");
+
+            # Embed batch log contianing error in output
+            cat_log($dashj);
+
             return 1;
         }
     }
@@ -2217,8 +2173,14 @@ sub submit_job
 
         if ($runerror) {
             # There was an error in the submission.
-            print_error("Unable to submit submit_cmd; $submit_cmd\n",
-                        "Netbatch returned error. See $log\n");
+            print_error( "Netbatch returned error.Submission not finished\n",
+                         "Submitted command: $submit_cmd\n",
+                         "Submission log: $log\n",
+                         "Run log: $dashj\n",
+                         "Failed Model build.\n");
+
+            # Embed batch log contianing error in output
+            cat_log($dashj);
 
             cleanup_queue_problems($log);
             return 1;
@@ -2284,6 +2246,24 @@ sub schedule_job
 }
 
 
+
+# -----------------------------------------------------------------------------
+#
+# Embed batch log contianing error in output
+#      Note: output of a system() command will not appear in a forked log
+#      TBD: Print only head/tail of very long logs
+#
+sub cat_log
+{
+    my $log = shift;
+
+   open (BATCHERR, "<$log") || return;
+   while (<BATCHERR>) {
+       print $_;
+   }
+
+   return;
+}
 
 # -----------------------------------------------------------------------------
 #
@@ -2502,173 +2482,72 @@ sub dump_env_to_debug_outfile
 
 
 # -----------------------------------------------------------------------------
-# searches through the list of children and counts the number of active 
-# children in the list.  will reap the completed children from the list if that
-# param is passed as true.
-sub count_children {
-    my ($reap) = @_;
+# Interface to fork routines
 
-    my $num = 0;
+# -----------------------------------------------------------------------------
+sub controlled_fork {
+  my $name = shift;
+  my $forkname = shift;
+  my $dofork = shift;
+  my $throttle = shift;
 
-    my @alive = ();
+  my $pid;
 
-    foreach $child (@children) {
-        my $p = waitpid($child, WNOHANG);
+  if (! $dofork) {
+    return 0;
+  }
 
-        if ($p < 0) {
-            # no such child
-        }
-        elsif ($p == 0) {
-            # still running
-            $num++;
-            push @alive, $child;
-        }
-        else {
-            # child is diseased
-            if (defined $reap && $reap)
-            {
-                my $child_ecode = $? >> 8;
-                my $child_signum = $? & 127;
-                my $child_dumped_core = $? & 128;
+  # Expand name into full path for log
+  $name = "$resdir/$name/ADMIN/experiment.log";
 
-                # sum up the exit codes from the children and this process
-                $exit_code += $child_ecode;
-            }
-        }
-    }
+  $pid = Asim::Fork::controlled_fork($name, $forkname, $WAIT_FOR_CHILDREN, $throttle);
 
-    if (defined $reap && $reap) {
-        my $num_alive = @alive;
-        print_debug("reaping dead children from list.  new child list size is $num_alive\n");
-        @children = @alive;
-    }
+  if ($pid) {
+    # This is the parent
+    print_info("Consult $name");
+  }
 
-    return $num;
+  return $pid;
+
 }
 
 # -----------------------------------------------------------------------------
-# fork with some throttling.  any process started with this needs to exit with
-# controlled_exit().  increment the reference count.
-sub controlled_fork 
-{
-    my ($name, $forkname, $dofork, $throttle) = @_;
+sub controlled_exit {
+  my $dofork = shift;
 
-    # zero throttle means infinite, basically
-    if ($throttle == 0) {
-        $throttle = 9999999;
-    }
+  if (!$dofork) {
+    return;
+  }
 
-    if ($dofork) {
-        
-        # we are in forking mode, so fork! 
-        my $done = 0;
-
-        # let's throttle a bit if specified
-        if ($delay > 0 ) { sleep($delay); };
-
-        # loop while checking the maxchildren.  dont exceed the max.
-        while (1) {
-            # $child_count_lock->shlock();
-            # if ($child_count < $dofork) {
-            #     $done = 1;
-            #     $child_count = $child_count + 1;
-            # }
-            # $child_count_lock->shunlock();
-
-            my $num_children = count_children(1);
-
-            print_debug("trying to fork with num_children=$num_children and throttle=$throttle\n");
-
-            if ($num_children < $throttle) {
-                $done = 1;
-            }
-
-            if ($done) {
-                # we are allowed to breed a new child.
-                my $pid = fork();
-
-                if ($pid == 0) {
-                    # this is the child
-                    $process_name .= "->".$forkname;
-                    $exit_code = 0;
-                    @children = ();
-
-                    print_debug("starting fork $process_name\n");
-                    print_info("Starting Fork From PPID ".getppid()."\n");
-
-                    if (defined $name) {
-                        my $stdoutfile = "$resdir/$name/ADMIN/experiment.log";
-                        
-                        print_info("Consult $stdoutfile");
-                        
-                        open(LOGFILE, ">>$stdoutfile") || die ("Unable to open $stdoutfile\n");
-                        *STDOUT = *LOGFILE;
-                        *STDERR = *LOGFILE;
-                    }
-                }
-                else {
-                    push @children, $pid;
-                    print_debug("adding $pid to list of children (".@children.")\n");
-                }
-                
-                # $child_count_lock = tie $child_count, 'IPC::Shareable', undef, { destroy => 0 };
-                
-                return $pid;
-            }
-            else {
-                # no more children allowed now.  let's wait and try again.
-                print_debug("too many children right now, sleeping for a bit...\n");
-                if ($dofork > 50) {
-                    sleep(10);
-                }
-                elsif ($dofork > 30) {
-                    sleep(5);
-                }
-                elsif ($dofork > 20) {
-                    sleep(3);
-                }
-                elsif ($dofork > 5) {
-                    sleep(2);
-                }
-                else {
-                    sleep(1);
-                }
-            }   
-        }
-    }
-    else {
-        # we are not in forking mode
-        return 0;
-    }
+  print_info("Exiting Fork From PPID ".getpid()."\n");
+  Asim::Fork::controlled_exit($exit_code);
 }
 
+
 # -----------------------------------------------------------------------------
-# exit a thread that was started with controlled_fork().  decrement the
-# reference count.
-sub controlled_exit 
+sub wait_and_exit
 {
-    my ($dofork) = @_;
+    my $ecode = shift || 0;
 
-    # BE CAREFUL WITH PRINTING MESSAGES HERE
-    # THIS MIGHT BE CALLED VERY EARLY
 
-    if ($dofork) {
-        # we are in forking mode, so deal with ref count and exit
-        
-        # decrement the reference count
-        # $child_count_lock->shlock();
-        # $child_count = $child_count - 1;;
-        # $child_count_lock->shunlock();
-        
-        print_info("Exiting Fork From PPID ".getppid()."\n");
+    $ecode += Asim::Fork::wait_for_children();
 
-        # exit with the specified args
-        wait_and_exit($exit_code);
+    #
+    # Get rid of logfile...
+    #   TBD: Maybe we should leave it if there was an error
+
+    if (defined($asim_runlogfl) && -f $asim_runlogfl) {
+      run_command ("rm -f $asim_runlogfl > /dev/null 2>&1");
     }
-    else {
-        # we are not in forking mode, so dont exit
-        return;
-    }
+
+    exit $ecode;
+}
+
+
+# -----------------------------------------------------------------------------
+sub getpid
+{
+    return $$;
 }
 
 # -----------------------------------------------------------------------------
