@@ -43,6 +43,40 @@ hack_ptv_s(
 }
 
 // ----------------------------------------------------------------------------
+std::ostream & operator << (std::ostream & os, const DRAL_BASE_DATA_VAL_T& x)
+{
+    os << "0x" << hex << x.u64 << dec;
+
+    return os;
+}
+
+// ----------------------------------------------------------------------------
+std::ostream & operator << (std::ostream & os, const DRAL_DATA_PAIR_T& x)
+{
+    if (x.dd)
+    {
+        os << *(x.dd) << " --> " << x.bdv;
+    }
+    else
+    {
+        os << "NULL";
+    }
+ 
+    return os;
+}
+
+// ----------------------------------------------------------------------------
+std::ostream & operator << (std::ostream & os, const DRAL_DATA_LIST_T& x)
+{
+    for (DRAL_DATA_LIST_T::const_iterator i = x.begin(); i != x.end(); ++i)
+    {
+        os << (*i) << endl;
+    }
+
+    return os;
+}
+
+// ----------------------------------------------------------------------------
 DRAL_ITEM_DESC_CLASS::DRAL_ITEM_DESC_CLASS()
   : name("none"),
     desc("none"),
@@ -337,7 +371,10 @@ DRAL_DATA_DESC_CLASS::GetDralDataStr(
 
 #if ENABLE_VALIST_CODE
 
-    va_list tmpap = ap;
+    va_list copyap; va_copy(copyap, ap);
+
+    va_list & tmpap = advance_ap ? ap : copyap;
+
     DRAL_BASE_DATA_VAL_T val;
 
     switch (bdt)
@@ -412,10 +449,7 @@ DRAL_DATA_DESC_CLASS::GetDralDataStr(
 
     }    
 
-    if (advance_ap)
-    {
-        ap = tmpap;
-    }
+    va_end(copyap);
 
 #endif
 
@@ -426,8 +460,7 @@ DRAL_DATA_DESC_CLASS::GetDralDataStr(
 // given the var-args list pointer to the data value, return the string
 // representation of the data.
 UINT32
-DRAL_DATA_DESC_CLASS::GetVaSize(
-    va_list ap)
+DRAL_DATA_DESC_CLASS::GetVaSize()
 {
     switch (bdt)
     {

@@ -42,6 +42,8 @@
 #include "asim/dralStorage.h"
 #include "asim/dralServerDefines.h"
 #include "asim/dralCommonDefines.h"
+#include "asim/dralDesc.h"
+
 
 // forward declarations
 class DRAL_ITEM_DESC_CLASS;
@@ -1275,12 +1277,17 @@ private:
     void DumpLiveItemIds();
     void UpdateEdgeMaxBandwidth();
 
+    // iterate over the var-args list
+    static DRAL_DATA_DESC_CLASS *ChompNextDd(va_list & ap);
+    static DRAL_BASE_DATA_VAL_T ChompNextBdv(DRAL_DATA_DESC_CLASS *dd, va_list & ap);
+
+    // create a list of desc/value pairs from a var args list; return size in bytes
+    static UINT32 CvtVaListDralToStlListDral(DRAL_DATA_LIST_T & dl, DRAL_DATA_DESC_CLASS *dd, va_list & ap);
 
     // get the size, in bytes, of the var-args list
-    static UINT32 GetDralVaListSize(DRAL_DATA_DESC_CLASS *dd, va_list ap);
+    static UINT32 GetVaListSize(DRAL_DATA_DESC_CLASS *dd, va_list & ap);
 
-    // we expect the dst list to already have allocated storage
-    static void CvtApListDralToPtv(va_list & dst, DRAL_DATA_DESC_CLASS *src_dd, va_list src, UINT32 size);
+    static UINT32 CvtStlListDralToPackedListPtv(PTV_DATA_TYPE_CLASS **dst_pdpp, void *p, DRAL_DATA_LIST_T & dl);
 
     /*
      * Private counters. They are used when creating new items, new nodes,

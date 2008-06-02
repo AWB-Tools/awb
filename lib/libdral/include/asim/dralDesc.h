@@ -24,6 +24,7 @@
 
 #include <ostream>
 #include <string>
+#include <list>
 
 // for var args
 #include <stdarg.h>
@@ -237,17 +238,6 @@ static const char * DRAL_BASE_DATA_STR[DRAL_BASE_DATA_END-DRAL_BASE_DATA_INVALID
 };
 
 // ----------------------------------------------------------------------------
-union DRAL_BASE_DATA_VAL_UNION
-{
-    UINT32 u32;
-    INT32  i32;
-    UINT64 u64;
-    INT8*  data;
-    char*  chars;
-};
-typedef union DRAL_BASE_DATA_VAL_UNION DRAL_BASE_DATA_VAL_T;
-
-// ----------------------------------------------------------------------------
 // we currently need the ability to compile with and without PTV dependance.
 // these declarations help resolve that.
 #if COMPILE_DRAL_WITH_PTV
@@ -263,6 +253,48 @@ typedef void PTV_EVENT_TYPE_CLASS;
 typedef DRAL_COLOR_T PTV_COLOR_T;
 typedef DRAL_BASE_DATA_T PTV_BASE_DATA_T;
 #endif
+
+// ----------------------------------------------------------------------------
+union DRAL_BASE_DATA_VAL_UNION
+{
+    // those that we are need for sure...
+    UINT32 u32;
+    INT32  i32;
+    UINT64 u64;
+    INT8*  data;
+    char*  chars;
+
+    // added for good measure...
+    UINT8  u8;
+    INT8   i8;
+    UINT16 u16;
+    INT16  i16;
+    INT64  i64;
+};
+typedef union DRAL_BASE_DATA_VAL_UNION DRAL_BASE_DATA_VAL_T;
+
+std::ostream & operator << (std::ostream & os, const DRAL_BASE_DATA_VAL_T& x);
+
+// ----------------------------------------------------------------------------
+// forward declarations
+class DRAL_ITEM_DESC_CLASS;
+class DRAL_DATA_DESC_CLASS;
+class DRAL_EVENT_DESC_CLASS;
+
+// ----------------------------------------------------------------------------
+struct DRAL_DATA_PAIR_STRUCT
+{
+    DRAL_DATA_DESC_CLASS *dd;
+    DRAL_BASE_DATA_VAL_T bdv;
+};
+typedef struct DRAL_DATA_PAIR_STRUCT DRAL_DATA_PAIR_T;
+    
+std::ostream & operator << (std::ostream & os, const DRAL_DATA_PAIR_T& x);
+
+// ----------------------------------------------------------------------------
+typedef std::list<DRAL_DATA_PAIR_T> DRAL_DATA_LIST_T;
+
+std::ostream & operator << (std::ostream & os, const DRAL_DATA_LIST_T& x);
 
 // ----------------------------------------------------------------------------
 // The DRAL Item Descriptor (or PTV record type) by providing a  name and a desc.
@@ -440,8 +472,8 @@ class DRAL_DATA_DESC_CLASS
     // representation of the data.  will not advance va_list
     std::string GetDralDataStr(va_list & ap, bool advance_ap = false);
 
-    // the size of the va list in number of bytes
-    UINT32 GetVaSize(va_list ap);
+    // the size of the va argument for this descriptor in number of bytes
+    UINT32 GetVaSize();
 
     // conversion functions from PTV to DRAL enumerations
     static PTV_BASE_DATA_T  CvtBaseDataDralToPtv(const DRAL_BASE_DATA_T dral_data);

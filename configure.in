@@ -395,10 +395,15 @@ AC_CACHE_CHECK([if ptv should be used] ,
       asim_cv_enable_ptv,
       asim_cv_enable_ptv=no)
 
-if test $asim_cv_enable_ptv = yes; then
-    PTVFLAGS="-DCOMPILE_DRAL_WITH_PTV"
+PTVFLAGS=""
+if test $asim_cv_enable_ptv = new; then
+    PTVFLAGS="-DCOMPILE_DRAL_WITH_PTV -DCOMPILE_DRAL_WITH_PTV_NEW"
 else
+  if test $asim_cv_enable_ptv = yes; then
+    PTVFLAGS="-DCOMPILE_DRAL_WITH_PTV"
+  else
     PTVFLAGS=""
+  fi
 fi
 AC_SUBST(PTVFLAGS)
 

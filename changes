@@ -4656,3 +4656,47 @@ Directory libperl/AsimShell/lib/AsimShell
 Updating with simcore changes (rev. 2567 - Joel Emer)
 
 More gracefully handle failures on status checks on packages.
+
+----------
+spartha1    Date: Mon Jun  2 16:27:12 EDT 2008  CSN: CSN-asimcore-244
+                  Mon Jun  2 20:27:12 UTC 2008
+
+
+Directory .
+ configure                 Locally Modified          243 
+ configure.in              Locally Modified          243 
+
+Directory lib/libdral/include/asim
+ dralServer.h              Locally Modified          243 
+ dralDesc.h                Locally Modified          243 
+
+Directory lib/libdral/src
+ dralServer.cpp            Locally Modified          243 
+ dralDesc.cpp              Locally Modified          243 
+
+Updating with simcore changes (rev. 2569 - Brian Slechta)
+
+fixed DRAL/PTV to work on x86-64 machines compiling in 64-bit. actually, this
+library still has non-portable var-args code. there is no portable way to
+create a va_list and we currently need that to interface with the ptv
+library. once we are able to modify the ptv library api to accept lists
+instead of var-args, we can eliminate this portability issue.
+
+since gcc has changed the way var-args work with x86-64, we need to compile
+with slightly different code. to enable ptv, use the following in your
+awb.config.
+
+For 32-bit (IA-32 and x86-64 machines):
+
+[Package]
+CONFIGFLAGS=--enable-64bit=0 --enable-ptv=yes
+
+For 64-bit:
+
+[Package]
+CONFIGFLAGS=--enable-64bit=1 --enable-ptv=new
+
+make sure you re-build appropriate libraries using:
+
+asim-shell clean package <packagename>
+asim-shell build package <packagename>
