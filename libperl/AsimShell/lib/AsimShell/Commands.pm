@@ -94,6 +94,7 @@ our $default_module;
 
 our $default_user = $ENV{USER};
 
+our @failures = ();
 
 ################################################################
 #
@@ -564,7 +565,13 @@ sub checkout_bundle {
 
   foreach my $b (@packages) {
     print "--- checkout package $b " . join(" ",@args) . "\n";
-    $pkg = checkout_package($b, @args) || return undef;
+    $pkg = checkout_package($b, @args);
+
+    if (! defined($pkg)) {
+      _add_failure($b, "checkout failed");
+      next;
+    }
+
     push(@plist, $pkg);
   }
 
@@ -572,7 +579,9 @@ sub checkout_bundle {
     configure_and_build_packages(@plist);
   }
 
-  return 1;
+  $status = _report_failures();
+
+  return $status;
 }
 
 # Hugely redundant with checkout_bundle
@@ -625,7 +634,13 @@ sub use_bundle {
 
   foreach my $b (@packages) {
     print "--- use package $b " . join(" ",@args) . "\n";
-    $pkg = use_package($b, @args) || return undef;
+    $pkg = use_package($b, @args);
+
+    if (! defined($pkg)) {
+      _add_failure($b, "use failed");
+      next;
+    }
+
     push(@plist, $pkg);
   }
 
@@ -633,7 +648,9 @@ sub use_bundle {
     configure_and_build_packages(@plist);
   }
 
-  return 1;
+  $status = _report_failures();
+
+  return $status;
 }
 
 #
@@ -666,16 +683,18 @@ sub update_bundle {
   my @plist = ();
   foreach my $b (@packages) {
     print "--- update package $b " . join(" ",@args) . "\n";
-    update_package($b, @args) || return undef;
-    (my $pkgname, my $pkgvers) = split('/',$b);
-    push(@plist, get_package($pkgname));
+    update_package($b, "--noreport", @args);
+    (my $name, my $pkgvers) = split('/',$b);
+    push(@plist, get_package($name));
   }
 
   if ($build) {
     configure_and_build_packages(@plist);
   }
 
-  return 1;
+  $status = _report_failures();
+
+  return $status;
 }
 
 
@@ -1129,50 +1148,89 @@ sub add_dependent_packages {
 # and denotes to act on all pacages in the workspace.
 #
 sub configure_package {
-
   # get the list of packages
   my @package_names = _expand_package_names(@_);
+
+  my $status;
 
   while ( my $name = shift @package_names) {
     _print_package_start("configure", $name);
 
-    my $package = get_package($name) || return undef;
-    $package->configure()            || return undef;
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("configure", $name, "(No such package)");
+      next;
+    }
+
+    # TBD: Should we filter out non-private packages?
+
+    $package->configure() || _add_failure($name, "configure failed");
 
     _print_package_finish("configure", $name);
   }
-  return 1;
+
+  $status = _report_failures();
+
+  return $status;
 }
 
 sub make_package {
-
   # get the list of packages
   my @package_names = _expand_package_names(@_);
+
+  my $status;
 
   while ( my $name = shift @package_names) {
     _print_package_start("make", $name);
 
-    my $package = get_package($name) || return undef;
-    $package->build()                || return undef;
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("make", $name, "(No such package)");
+      next;
+    }
+
+    # TBD: Should we filter out non-private packages?
+
+    $package->build() || _add_failure($name, "make failed");
 
     _print_package_finish("make", $name);
   }
-  return 1;
+
+  $status = _report_failures();
+
+  return $status;
 }
 
 sub build_package {
+  # get the list of packages
+  my @package_names = _expand_package_names(@_);
 
- # get the list of packages
- my @package_names = _expand_package_names(@_);
+  my @all_packages = ();
+  my $status;
 
- my @all_packages = ();
+  while ( my $name = shift @package_names) {
 
- while ( my $name = shift @package_names) {
-   push(@all_packages, get_package( $name ));
- }
+    # No start/finish brackets here...
 
- configure_and_build_packages(@all_packages) || return undef;
- return 1;
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      next;
+    }
+
+    push(@all_packages, $package);
+  }
+
+  configure_and_build_packages(@all_packages);
+
+  $status = _report_failures();
+
+  return $status;
 }
 
 sub install_package {
@@ -1190,31 +1248,57 @@ sub install_package {
   while ( my $name = shift @package_names ) {
     _print_package_start("install", $name);
 
-    my $package = get_package($name) || return undef;
-    $package->install($target)       || return undef;
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("install", $name, "No such package");
+      next;
+    }
+
+    $package->install($target) || _add_failure($name, "install failed");
 
     _print_package_finish("install", $name);
   }
 
-  return 1;
+  $status = _report_failures();
+
+  return $status;
 }
 
 sub clean_package {
-
   # get the list of packages
   my @package_names = _expand_package_names(@_);
 
+  my $status;
+
   while ( my $name = shift @package_names) {
-    my $package = get_package($name) || return undef;
-    if ( $package->isprivate() ) {
-      _print_package_start("clean", $name);
 
-      $package->clean()              || return undef;
+    _print_package_start("clean", $name);
 
-      _print_package_finish("clean", $name);
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("clean", $name, "(No such package)");
+      next;
     }
+
+    if ( ! $package->isprivate() ) {
+      print "Cannot clean a non-private package\n";
+      _add_failure($name, "not private");
+      _print_package_finish("clean", $name, "(Not private)");
+      next;
+    }
+
+    $package->clean()              || _add_failure($name, "clean failed");
+
+    _print_package_finish("clean", $name);
   }
-  return 1;
+
+  $status = _report_failures();
+
+  return $status;
 }
 
 #
@@ -1222,40 +1306,25 @@ sub clean_package {
 #
 sub configure_and_build_packages {
   my @plist = @_;
+  my $status;
 
   @plist = sort { $a->buildorder() <=> $b->buildorder() } @plist;
 
-  my @failed_packs = ();
-  
   for my $p (@plist) {
     _print_package_start("configure/build", $p->name());
 
-    my $status = $p->configure();
-    if (!defined($status) || ($status == 0)) {
-	if (Asim::mode() eq "batch") {
-	    push(@failed_packs, $p->name());
-	}
-	else {
-	    return undef;
-	}
-    }
-    else {
-	$status = $p->build();
-	if (!defined($status) || ($status == 0)) {	
-	    if (Asim::mode() eq "batch") {
-		push(@failed_packs, $p->name());
-	    }
-	    else {
-		return undef;
-	    }
-	}
-    }
+    # TBD: Should we filter out non-private packages?
+
+    $p->configure() || _add_failure($p->name(), "configure failed") && next;
+    $p->build()     || _add_failure($p->name(), "make failed");
+
     _print_package_finish("configure/build", $p->name());
   }
-  
-  if (scalar @failed_packs) {
-      print "Failed to configure and build packages: " . join(", ", @failed_packs) . "\n\n";
-      return undef;
+
+  # Note we don't _report_failures() here. The caller must do that.
+
+  if ($#failures >= 0) {
+    return undef;
   }
 
   return 1;
@@ -1453,19 +1522,31 @@ sub edit_package {
 # Show information about one or more packages
 
 sub show_package {
-
+  # get the list of packages
   my @package_names = _expand_package_names(@_);
+
+  my $status;
 
   foreach my $name (@package_names) {
     _print_package_start("show", $name);
 
-    my $package = get_package($name) || return ();
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("show", $name, "(No such package)");
+      next;
+    }
+
     $package->dump();
 
     _print_package_finish("show", $name);
     if ( @_ ) { print "\n" }
   }
-  return 1;
+
+  $status = _report_failures();
+
+  return $status;
 }
 
 #
@@ -1473,17 +1554,19 @@ sub show_package {
 #
 sub update_package {
   my $build = 1;
+  my $report = 1;
+
   my @build_list = ();
   local @ARGV = @_;
 
   # Parse options
 
-  my $status = GetOptions( "build!" => \$build);
+  my $status = GetOptions( "build!"  => \$build,
+                           "report!" => \$report);
   return undef if (!$status);
 
   # get the list of packages
   my @package_names = _expand_package_names(@ARGV);
-  my @failed_packs = ();
 
   while ( my $pkgspec = shift @package_names) {
     # each package in the list could be a simple name,
@@ -1492,29 +1575,34 @@ sub update_package {
     #   <pkgname>/HEAD
     #   <pkgname>/CSN-<pkgname>-<number>
     #   <pkgname>/<branchname>
-    my $pkgname;
+    my $name;
     my $version;
-    ($pkgname,$version) = split('/',$pkgspec);
+    ($name,$version) = split('/',$pkgspec);
 
-    my $package = get_package($pkgname) || return undef;
+    my $package = get_package($name);
 
-    _print_package_start("update", $pkgname, "(" . $package->type() . " repository)");
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      next;
+    }
+
+    _print_package_start("update", $name, "(" . $package->type() . " repository)");
 
     if (!$package->isprivate()) {
       print("Cannot update a non-private package\n");
-      _print_package_finish("update", $pkgname, "(FAILED)");
+      _print_package_finish("update", $name, "(skipped)");
       next;
     }
 
     # update the package to the specified version
-    $package->update($version) || return undef;
+    $package->update($version) || _add_failure($package->name(),"update failed");
 
     if ($build) {
       # if we are also building, add the package to the list of ones to build
       push @build_list, $package;
     }
 
-    _print_package_finish("update", $pkgname);
+    _print_package_finish("update", $name);
   }
 
   # if updating more than one package, and building,
@@ -1522,71 +1610,22 @@ sub update_package {
   while ( my $package = shift @build_list ) {
     _print_package_start("configure/build", $package->name());
 
-    $package->configure() || return undef;
-    $package->build()     || return undef;
+    $package->configure() || _add_failure($package->name(),"configure failed");
+    $package->build()     || _add_failure($package->name(),"make failed");
 
     _print_package_finish("configure/build", $package->name());
   }
 
-  return 1;
+  if ($report) {
+    $status = _report_failures();
+  } else {
+    $status = ($#failures < 0) || undef;
+  }
+
+  return $status;
 }
 
 
-# This should be generalized for more commands!!!
-# TBD: This does not honor package dependencies
-# TBD: Delete this routine - it doesn't appear to be used any more 
-
-sub update_all_packages {
-  my $build = shift;
-  my @plist;
-
-  #
-  # Generate list of checked-out packages
-  #
-  foreach my $pname ($default_packageDB->directory()) {
-    my $p = get_package($pname);
-
-    if ($p->isprivate()) {
-      push(@plist, $p);
-    } else {
-      print "Skipping public package $pname\n";
-    }
-  }
-
-  #
-  # Do a CVS update on each package
-  #
-  my @failed_packs = ();
-  for my $p (@plist) {
-      _print_package_start("update", $p->name(), "(" . $p->type() . " repository)");
-
-      my $status = $p->update();
-      if (!defined($status) || ($status == 0)) {
-	  if (Asim::mode() eq "batch") {
-	      push(@failed_packs, $p->name());
-	  }
-	  else {
-	      return undef;
-	  }
-      }
-      _print_package_finish("update", $p->name());
-  }
-
-  #
-  # Optionally configure and build each package
-  #
-  if ($build) {
-    configure_and_build_packages(@plist) || return undef;
-  }
-
-  if (scalar @failed_packs) {
-      print "*** Failed to update packages: " . join(", ", @failed_packs) . "\n";
-      print "*** Build is incomplete." . "\n";
-      return undef;
-  }
-
-  return 1;
-}
 
 #
 # print status of files in (a) package(s),
@@ -1603,36 +1642,48 @@ sub status_package {
   my @packages = _expand_package_names(@ARGV);
 
   # print status for each package in turn
-  foreach my $pkgname ( @packages ) {
-    my $package = get_package( $pkgname ) || next;
+  foreach my $name ( @packages ) {
 
-    _print_package_start("status", $pkgname, "(" . $package->type() . " repository)");
+    _print_package_start("status", $name);
+
+    my $package = get_package( $name );
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("status", $name, "(No such package)");
+      next;
+    }
 
     if ( ! $package->isprivate() ) {
       # shared packages, incorporated by reference:
-      printf("Package %s is a shared package\n", $pkgname );
-    } else {
-      # private packages, in the user's workspace:
-      foreach my $fstate ( $package->status() ) {
+      printf("Package %s is a shared package\n", $name );
+      _print_package_finish("status", $name, "(Skipped)");
+      next;
+    }
 
-        if (! defined($fstate)) {
-          print("Could not determine status - skipping package\n");
-          next;
-        }
+    # private packages, in the user's workspace:
+    foreach my $fstate ( $package->status() ) {
 
-	(my $dir, my $file, my $state, my $version) = @$fstate;
+      if (! defined($fstate)) {
+        print("Could not determine status - skipping package\n");
+        _add_failure($package->name(), "could not determine status");
+        next;
+      }
 
-	if ( $verbose || $state ne 'Up-to-date' ) {
-          if ( $dir ) { $dir .= '/'; }
-	  printf("%-16s  %-6s  %s%s\n", $state, $version, $dir, $file);
-	}
+      (my $dir, my $file, my $state, my $version) = @$fstate;
+
+      if ( $verbose || $state ne 'Up-to-date' ) {
+        if ( $dir ) { $dir .= '/'; }
+        printf("%-16s  %-6s  %s%s\n", $state, $version, $dir, $file);
       }
     }
 
-    _print_package_finish("status", $pkgname);
+    _print_package_finish("status", $name);
   }
 
-  return 1;
+  $status = _report_failures();
+
+  return $status;
 }
 
 #
@@ -2660,6 +2711,56 @@ sub status {
 
 
   return 1;
+}
+
+################################################################
+#
+# Utility functions
+#
+################################################################
+
+#
+# Remember a failed operation on a package, repository, ....
+#    Note the object must support a name() method.
+#
+sub _add_failure {
+  my $name    = shift;
+  my $message = shift;
+
+  push(@failures, "$name -- $message");
+
+  # TBD: We might want to return undef on some conditions,
+  # like "interative" mode, and let the caller stop loops if
+  # it wants.
+
+  return 1;
+}
+
+#
+# Report all failures and clear list of failures
+#
+sub _report_failures {
+
+  if ( $#failures < 0) {
+    @failures = ();
+    return 1;
+  }
+
+  print "\n";
+  print "##################################################################\n";
+  print "Summary of failed operations:\n";
+  print "\n";
+
+  for my $failure  (@failures) {
+    print "    $failure\n";
+  }
+
+  print "\n";
+  print "##################################################################\n";
+  print "\n";
+
+  @failures = ();
+  return undef;
 }
 
 

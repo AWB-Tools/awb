@@ -77,10 +77,8 @@ sub configure {
   return 1 if (! -x "$location/configure");
 
   print "% $command\n";
-  eval {print `($command)`};
-
-  if ($@) {
-      warn $@;
+  if (system($command)) {
+      warn("Configure failed\n");
       return undef;
   }
 
