@@ -78,8 +78,8 @@ File looks like:
 
 The following public methods are supported:
 
-=cut
 =over 4
+=cut
 
 ################################################################
 

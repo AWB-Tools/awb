@@ -32,7 +32,6 @@ use strict;
 
 use POSIX ":sys_wait_h";
 
-
 # Global constants
 
 our $delay = 0;
@@ -108,6 +107,7 @@ sub init {
 # controlled_exit().  increment the reference count.
 
 sub controlled_fork {
+  my $dofork = shift  || return 1;
   my $log = shift;
   my $forkname = shift;
   my $wait = shift;
@@ -145,9 +145,14 @@ sub controlled_fork {
         print_debug("Starting forked pid $$ as $process_name with PPID ".getppid()."\n");
 
         if (defined $log) {
-          open(LOGFILE, ">>$log") || die ("Unable to open $log\n");
-          *STDOUT = *LOGFILE;
-          *STDERR = *LOGFILE;
+#          open(LOGFILE, ">>$log") || die ("Unable to open $log\n");
+#          *STDOUT = *LOGFILE;
+#          *STDERR = *LOGFILE;
+
+          close(STDOUT);
+          open(STDOUT, ">$log");
+          close(STDERR);
+          open(STDERR, ">&STDOUT");
 
           print_info("Running in fork...\n");
         }
@@ -185,7 +190,12 @@ sub controlled_fork {
 # exit a thread that was started with controlled_fork().  decrement the
 # reference count.
 sub controlled_exit {
+  my $dofork = shift;
   my $exit_code = shift;
+
+  if (! $dofork) {
+    return $exit_code;
+  }
 
   # BE CAREFUL WITH PRINTING MESSAGES HERE
   # THIS MIGHT BE CALLED VERY EARLY

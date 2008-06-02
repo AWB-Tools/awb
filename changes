@@ -4807,3 +4807,36 @@ Refactored forking code from asim-run into separate perl module
 for use in other programs. Also added emdedding of logs from
 forked processes or batch runs into the main log when a error
 is detected.
+
+----------
+spartha1    Date: Mon Jun  2 17:19:03 EDT 2008  CSN: CSN-asimcore-250
+                  Mon Jun  2 21:19:03 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          249 
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          249 
+ Fork.pm                   Locally Modified          249 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          249 
+
+Updating with simcore changes (rev. 2577 - Joel Emer)
+
+In asim-shell, have 'update package' build using the common
+configure_and_build_packages subroutine. This routine
+includes properly ordering builds by package priority.
+
+In Fork.pm, open child's STDOUT/STDERR logfile in a way
+that preserves the redirection in subprocesses of the child.
+Also, added a convenience predicate argument in the
+controlled_fork and controlled_exit routines.
+
+In asim-run, use the new interface to controlled_fork and
+controlled_exit and properly reset the $exit_code value
+on entry to a child, so that a pending error code in the
+parent isn't propagated to all the children.
+
+In Inifile.pm, fix a minor bug in the perldoc directives.

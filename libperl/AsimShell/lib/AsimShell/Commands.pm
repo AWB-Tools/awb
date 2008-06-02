@@ -1607,14 +1607,9 @@ sub update_package {
 
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.
-  while ( my $package = shift @build_list ) {
-    _print_package_start("configure/build", $package->name());
 
-    $package->configure() || _add_failure($package->name(),"configure failed");
-    $package->build()     || _add_failure($package->name(),"make failed");
+  configure_and_build_packages(@build_list);
 
-    _print_package_finish("configure/build", $package->name());
-  }
 
   if ($report) {
     $status = _report_failures();

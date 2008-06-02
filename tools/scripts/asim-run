@@ -2500,11 +2500,16 @@ sub controlled_fork {
   # Expand name into full path for log
   $name = "$resdir/$name/ADMIN/experiment.log";
 
-  $pid = Asim::Fork::controlled_fork($name, $forkname, $WAIT_FOR_CHILDREN, $throttle);
+  $pid = Asim::Fork::controlled_fork(1, $name, $forkname, $WAIT_FOR_CHILDREN, $throttle);
 
   if ($pid) {
     # This is the parent
     print_info("Consult $name");
+  } else {
+    # This is the child
+
+    # Don't propagate parents exit code to child
+    $exit_code = 0;
   }
 
   return $pid;
@@ -2520,7 +2525,7 @@ sub controlled_exit {
   }
 
   print_info("Exiting Fork From PPID ".getpid()."\n");
-  Asim::Fork::controlled_exit($exit_code);
+  Asim::Fork::controlled_exit(1, $exit_code);
 }
 
 
