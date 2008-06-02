@@ -14,6 +14,11 @@ lib/Asim/Package/Util.pm
 lib/Asim/Repository/DB.pm
 lib/Asim/Workspace/Template.pm
 lib/Asim/Base.pm
+lib/Asim/Batch.pm
+lib/Asim/Batch/Base.pm
+lib/Asim/Batch/Local.pm
+lib/Asim/Batch/Netbatch.pm
+lib/Asim/Batch/NetbatchRemote.pm
 lib/Asim/Benchmark.pm
 lib/Asim/Package/BitKeeper.pm
 lib/Asim/Package/Svn.pm

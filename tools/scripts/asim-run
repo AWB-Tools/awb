@@ -45,12 +45,14 @@ use Getopt::Long;
 use IO::Handle;
 use Term::ReadKey;
 use Cwd 'realpath';
+
 # This is necessary to read the asimrc file
 use Asim;
 Asim::init();
 
-use Asim::Util;
+use Asim::Batch;
 use Asim::Workspace;
+use Asim::Util;
 
 use POSIX ":sys_wait_h";
 
@@ -67,18 +69,15 @@ use POSIX ":sys_wait_h";
 #
 # Per process global variables
 #
-my $exit_code = 0;
 my $process_name = "asim-run";
-
+my $exit_code = 0;
 
 #
 # Hard coded global values.  These are not controlled by the asimrc file. 
 #
 my $debug = 0;
-my $BATCH_SUBMIT_COMMAND  = "nbq";
-my $BATCH_STATUS_COMMAND = "nbqstat";
 my $BATCH_SCR_NM = "tools/scripts/asim-batch";
-my $NETBATCH_PRE_NM = "tools/scripts/netbatch-pre";
+
 my $AWB_RESOLVER = "awb-resolver";
 my $ASIM_EXEC_SCRIPT = "./run";
 my $SUMMARY_FILE = "run.summary";
@@ -91,7 +90,9 @@ my @children = ();
 my $local_maxchildren = 10;
 my $batch_maxchildren = 10;
 
+#
 # Some global information
+#
 my $TMP_DIR = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
 if (!-e $TMP_DIR) {
   # we can't find $TMP_DIR
@@ -153,10 +154,6 @@ $NETBATCH_MT_SLOTS_PER_CORE   = Asim::Util::get_asimrc_val("asim-run", "NETBATCH
 # Wait for children or move on to other work?
 my $WAIT_FOR_CHILDREN = Asim::Util::get_asimrc_val("asim-run", "WAIT_FOR_CHILDREN", 1);
 
-## Global variables used for scheduling. 
-
-# Number of jobs submitted this cycle.  
-my $JOBS_SUBMITTED_CURRENT_CYCLE = 0;   
 
 # Global variable used to determine current pool & qslot. 
 my $CURRENT_POOL = "";                  
@@ -332,7 +329,6 @@ if ($debugoutfile ne "") {
   || die "could not open debugoutfile=$debugoutfile\n$!\n";
 }
 
-#$BATCH_STATUS_COMMAND = $BATCH_STATUS_COMMAND . " slot=$queue "; 
 
 # Quiet overrides verbose...
 if ($quiet) {
@@ -361,15 +357,10 @@ if (! $status ||
   wait_and_exit($exit_code++);
 }
 
-# create a logfile and make it removable by anyone
-my $start_time = `date +%s`;
-chomp($start_time);
-my $runuser = $ENV{"USER"} ? $ENV{"USER"} : "unknown";
-chomp($runuser);
-my $asim_runlogfl = "$TMP_DIR/log\.$runuser\.$start_time\.$$";
-system ("touch $asim_runlogfl; chmod 666 $asim_runlogfl");
 
-print_debug("asim_runlogfl:$asim_runlogfl\n");
+#
+# Make sure a variety of variables are rational
+#
 
 # buildbatch overrides runbatch
 if (defined $buildbatch && $buildbatch) {
@@ -441,13 +432,31 @@ if (!(defined $remoteresdir)) {
   $remoteresdir = $resdir;
 };
 
+#--------------------------------------------------------------------
+#
+# Create a logfile and make it removable by anyone
+#
+my $start_time = `date +%s`;
+chomp($start_time);
+my $runuser = $ENV{"USER"} ? $ENV{"USER"} : "unknown";
+chomp($runuser);
+my $asim_runlogfl = "$TMP_DIR/log\.$runuser\.$start_time\.$$";
+system ("touch $asim_runlogfl; chmod 666 $asim_runlogfl");
+
+print_debug("asim_runlogfl:$asim_runlogfl\n");
+
+#--------------------------------------------------------------------
+
 print_info("Eldest PID ".getpid()."\n");
+
+
 
 ###########################
 # Parse experiments
 ###########################
 #$experiments = `$AWB_RESOLVER $experiments` 
 #                || die ("Unable to resolve experiments file $experiments.\n");
+
 chomp $experiments;
 $experiments = (realpath(dirname($experiments)) . "/" . basename($experiments));
 $exps = parse_exp_file ($experiments);
@@ -463,6 +472,7 @@ print_debug("setting batch_maxchildren = $forkbatch / @exp_ordered + 1 ==> $batc
 ###########################
 #$benchmarks = `$AWB_RESOLVER $benchmarks` || \
 #               die ("Unable to resolve benchmarks file $benchmarks.\n");
+
 chomp $benchmarks;
 $benchmarks = (realpath (dirname($benchmarks)) . "/" . basename($benchmarks));
 parse_bm_file ($benchmarks, $exps, $bms);
@@ -470,6 +480,7 @@ parse_bm_file ($benchmarks, $exps, $bms);
 ###########################
 # Get results directory
 ###########################
+
 $resdir = $Asim::default_workspace->build_dir() unless (defined $resdir);
 ( -d $resdir ) || die ("Unable to find results directory $resdir.\n");
 chomp ($resdir);
@@ -478,6 +489,7 @@ $resdir = realpath($resdir);
 ###########################################################
 # Get the path of the asim-batch scripts using resolver.
 ##########################################################
+
 $batch_scr = `$AWB_RESOLVER $BATCH_SCR_NM`;
 if ($? != 0) {
   die "Batch script $BATCH_SCR_NM does not exist.\n";
@@ -493,62 +505,28 @@ $batch_scr = realpath(dirname($batch_scr)) . "/$filename";
 ##########################################################
 # Add auto-requeue to netbatch if specified.
 ##########################################################
+
 print_verbose("Checking auto requeue....");
 if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
     $batch_flags = $batch_flags . " --autoreq \"$NETBATCH_AUTO_REQUEUE:NBErr\" ";
 }
-########
+
+#
 # Maintain separate build and run netbatch flags because they could
 # potentially use different pools and args
+#
 if (defined $EXTRA_NBQ_FLAGS) {
     $batch_flags = $batch_flags . " $EXTRA_NBQ_FLAGS ";
 }
 $batch_flags_build = $batch_flags;
-########
-##########################################################
-# Make sure that the netbatch pool specified exists. 
-##########################################################
-print_verbose("Checking netbatch pool....");
-if ( $runbatch && $pool ne "" ) {
-  if (system ("$BATCH_STATUS_COMMAND -P$pool  slot=$queue > $asim_runlogfl")) {
-    # We couldn't find the pool.  Exit
-    print_error("Unknown pool $pool.\n");
-
-    system ("cat $asim_runlogfl");
-    system ("rm -f $asim_runlogfl");
-    wait_and_exit($exit_code++);
-  }
-  else {
-    $batch_flags = $batch_flags . "-P$pool ";
-  }
-}
-if ($buildbatch) {
-    if ($pool_build ne "" ) {
-	print_verbose("Checking netbatch build pool....");	
-	if (system ("$BATCH_STATUS_COMMAND -P$pool_build  slot=$queue> $asim_runlogfl")) {
-	    # We couldn't find the pool.  Exit
-	    print_error("Unknown build pool $pool_build.\n");
-
-	    system ("cat $asim_runlogfl");
-	    system ("rm -f $asim_runlogfl");
-	    wait_and_exit($exit_code++);
-	}
-	else {
-	    $batch_flags_build = $batch_flags_build . "-P$pool_build ";
-	}
-    }
-    else {
-	if (defined $pool && $pool ne "") {
-	    $batch_flags_build = $batch_flags_build . "-P$pool ";
-	}
-    }
-}
 
 ##########################################################
 # Make sure that the specified netbatch queue is one of the 
 # LEGAL QSLOTS.
 ##########################################################
+
 print_verbose("Checking netbatch queue...");
+
 if ($runbatch && defined $queue) {
   if ($checklegal && scalar(@LEGAL_QSLOTS) > 0) {
     my $legal = grep /^$queue$/, @LEGAL_QSLOTS;
@@ -556,12 +534,11 @@ if ($runbatch && defined $queue) {
       # We couldn't find the qslot.  Exit
       my $legal_queues=join(", ", @LEGAL_QSLOTS);
       print_error("Unknown queue slot $queue: Acceptable queue slots are $legal_queues.\n");
-      system ("rm -f $asim_runlogfl");
       wait_and_exit($exit_code++);
     }
   }
-  $batch_flags = $batch_flags . "-Q $queue ";
 }
+
 if ($buildbatch) {
     if (defined $queue_build) {
 	if ($checklegal && scalar(@LEGAL_QSLOTS_BUILD) > 0) {
@@ -570,23 +547,24 @@ if ($buildbatch) {
 		# We couldn't find the qslot.  Exit
 		my $legal_queues=join(", ", @LEGAL_QSLOTS_BUILD);
 		print_error("Unknown build queue slot $queue: Acceptable queue slots are $legal_queues.\n");
-		system ("rm -f $asim_runlogfl");
 		wait_and_exit($exit_code++);
 	    }
 	}
-	$batch_flags_build = $batch_flags_build . "-Q $queue_build ";
     }
     else {
 	if (defined $queue && $queue ne "") {
-	    $batch_flags_build = $batch_flags_build . "-Q $queue ";
+	    $queue_build = $queue;
 	}
     }
 }
+
 ##########################################################
 # Make sure that the specified netbatch queue is one of the 
 # LEGAL CLASSES
 ##########################################################
+
 print_verbose("Checking netbatch class...");
+
 if ($runbatch && defined $class) {
   if ($checklegal && scalar(@LEGAL_CLASSES) > 0) 
   {
@@ -595,12 +573,11 @@ if ($runbatch && defined $class) {
       # We couldn't find the class.  Exit
       my $legal_classes=join(", ", @LEGAL_CLASSES);
       print_error("Unknown class $class: Acceptable queues are $legal_classes.\n");
-      system ("rm -f $asim_runlogfl");
       wait_and_exit($exit_code++);
     }
   }
-  $batch_flags = $batch_flags . "-C $class ";
 }
+
 if ($buildbatch) {
     if (defined $class_build) {
 	if ($checklegal && scalar(@LEGAL_CLASSES_BUILD) > 0) 
@@ -610,77 +587,122 @@ if ($buildbatch) {
 		# We couldn't find the class.  Exit
 		my $legal_classes=join(", ", @LEGAL_CLASSES_BUILD);
 		print_error("Unknown build class $class_build: Acceptable queues are $legal_classes.\n");
-		system ("rm -f $asim_runlogfl");
 		wait_and_exit($exit_code++);
 	    }
 	}
-	$batch_flags_build = $batch_flags_build . "-C $class_build ";
     }
     else {
 	if (defined $class && $class ne "") {
-	    $batch_flags_build = $batch_flags_build . "-C $class ";
+	    $class_build = $class;
 	}
     }
 }
 
+
 ##########################################################
-# REMOTE NETBATCH.
+# Create Asim::Batch objects for running jobs
 ##########################################################
-if ($runbatch && $remote && defined $remotenbqopt) {
-  $batch_flags = $batch_flags . " " . $remotenbqopt . " ";
+
+if ($runbatch) {
+  if (! $remote) {
+    $run_sys = Asim::Batch->new("NETBATCH",
+				pool  =>  $pool,
+				queue =>  $queue,
+				class =>  $class,
+				flags =>  $batch_flags,
+				temp  =>  $TMP_DIR,
+				quiet =>  $quiet
+			       );
+  } else {
+    $run_sys = Asim::Batch->new("NETBATCH_REMOTE",
+				pool  =>  $pool,
+				queue =>  $queue,
+				class =>  $class,
+				flags =>  $remotenbqopt,
+				temp  =>  $TMP_DIR,
+				quiet =>  $quiet,
+				env   =>  [
+					   "NBWD"        => $remotenbwd,
+					   "USER_ITOOLS" => $remoteitools,
+					   "HOME"        => $remotehome,
+					   "AWBLOCAL"    => $remoteawblcl
+					  ]
+			       );
+  }
+} else {
+  $run_sys = Asim::Batch->new("LOCAL",
+			      temp  =>  $TMP_DIR,
+			      quiet =>  $quiet
+			     );
+}
+
+if ($buildbatch) {
+  $build_sys = Asim::Batch->new("NETBATCH",
+				pool  =>  $pool_build,
+				queue =>  $queue_build,
+				class =>  $class_build,
+				flags =>  $batch_flags_build,
+				temp  =>  $TMP_DIR,
+				quiet =>  $quiet
+			       );
+} else {
+  $build_sys = Asim::Batch->new("LOCAL",
+				temp  =>  $TMP_DIR,
+				quiet =>  $quiet
+			       );
+}
+                              
+
+
+##########################################################
+# Make sure that the batch pools specified exist. 
+##########################################################
+
+print_verbose("Checking batch run pool....");
+
+$status = $run_sys->check_pool();
+if (! $status) {
+  print_error("Unknown pool for run: $pool.\n");
+  wait_and_exit($exit_code++);
+}
+
+print_verbose("Checking batch build pool....");	
+
+$status = $build_sys->check_pool();
+if (! $status) {
+  # TBD: Try to switch to using run pool...
+
+  print_error("Unknown pool for build: $pool.\n");
+  wait_and_exit($exit_code++);
 }
 
 
-###########################################################
-# Get the path of the Netbatch pre-exec script to test machine viability,
-# but don't bother if we're not submitting as batch jobs,
-# or if our version of netbatch is not high enough.
-# FIXME: does not currently work with remote virtual netbatch
 ##########################################################
-if ( !($remote) && $runbatch && $ENABLE_NETBATCH_PRE ) {
-  $nbqver = `$BATCH_SUBMIT_COMMAND -v`;
-  if ($NETBATCH_PRE_USE_SMARTCLASS == 0) {
-      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 ) ) {
-      print "WARNING: $BATCH_SUBMIT_COMMAND version does not support pre-exec check, jobs might be lost.\n";
-      } else {
-      $netbatch_pre_scr = `$AWB_RESOLVER $NETBATCH_PRE_NM`;
-      if ($? != 0) {
-          print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
-      } else {
-          # Generate a real path for pre-exec script (no links)
-          chomp ($netbatch_pre_scr);
-          $filename = basename($netbatch_pre_scr);
-          $netbatch_pre_scr = realpath(dirname($netbatch_pre_scr)) . "/$filename";
-          if ( ! ( -f $netbatch_pre_scr )) {
-          print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
-          } else {
-          # found pre-exec script file ok?  Then add a pre-exec option to netbatch args.
-          # for now, we'll just hardwire the minimum space requirement to 10 MB:
-          $batch_flags = $batch_flags . "--pre-exec \"$netbatch_pre_scr -tempdir $TMP_DIR $MIN_TMP_SPACE_MB\" ";
-          }
-      }
-      }
-  }
-  else {
-      if ( ! ( $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./ && $1 >= 6 && $2 >= 3) ) {
-	  print "WARNING: $BATCH_SUBMIT_COMMAND version does not support smart class check, jobs might be lost.\n";
-      }
-      else {
-	  $batch_flags = $batch_flags . "-C \"fDS\(\'$TMP_DIR\'\)\>$MIN_TMP_SPACE_MB\" ";
-      }
-  }
+# Make sure that there is enough space in the tmpdir for
+# the run
+#
+# NOTE: We don't explictly disable the use of smartclass
+# checking using the $NETBATCH_PRE_USE_SMARTCLASS option...
+##########################################################
+
+print_verbose("Added space check to run...");
+
+$status = $run_sys->check_space($TMP_DIR, $MIN_TMP_SPACE_MB);
+if (! $status) {
+  print_warning("No space check will be performed\n");
 }
 
 ##########################################################
 # Make sure that the value specified for nice is correct
 # (i.e., integer value between 0 and 19)
 ##########################################################
+
 print_verbose("Checking nice value...");
+
 if (defined $nicelevel) {
   if ($nicelevel < $NICEMIN || $nicelevel > $NICEMAX) {
     # Illegal value for nice 
     print_error("Unknown nice level: $nicelevel: Legal values are integer values between $NICEMIN and $NICEMAX.\n");
-    system ("rm -f $asim_runlogfl");
     wait_and_exit($exit_code++);
   }
   $batch_scr_inputs = $batch_scr_inputs . "-nicelevel=\"$nicelevel\" ";
@@ -705,7 +727,6 @@ sub main
     }
     
     # Cleanup
-    run_command ("rm -f $asim_runlogfl > /dev/null 2>&1");
     
     print_debug ("exit_code: $exit_code\n");
     wait_and_exit($exit_code);
@@ -1117,8 +1138,16 @@ sub wait_and_exit
 
     $ecode += wait_for_children();
 
-    print_debug("about to exit $process_name\n");
+    print_debug("About to exit $process_name\n");
     print_info("Exiting with Exit Code $ecode\n");
+
+    #
+    # Get rid of logfile...
+    #   TBD: Maybe we should leave it if there was an error
+
+    if (defined($asim_runlogfl) && -f $asim_runlogfl) {
+      run_command ("rm -f $asim_runlogfl > /dev/null 2>&1");
+    }
 
     exit $ecode;
 }
@@ -1265,13 +1294,13 @@ sub batch_build_run
 
 	if ($build) 
 	{
-	    put_env("AWB_MODEL", "$model");
-	    print_info(".... AWB_MODEL : $model\n");
+#	    put_env("AWB_MODEL", "$model");
+#	    print_info(".... AWB_MODEL : $model\n");
 	    print_info(".... Submitting model build\n");
 	    
 	    # Build model (optimized)
 
-            my $submit_cmd = "asim-shell --batch build model -- --builddir $model_buildarea --options=$buildopt";
+            my $submit_cmd = "asim-shell --batch --model $model -- build model --builddir $model_buildarea --options=$buildopt";
 
             my $submiterror = submit_job($name, $model_name, "not_used", $submit_cmd, 1, 0);
 
@@ -2122,7 +2151,9 @@ sub full_path
 sub submit_job 
 {
     my ($name, $model_name, $bm_name, $submit_cmd, $model_submit, $mt_run) = @_;
-  
+
+    # Check if we should run the job locally
+
     if (! $runbatch) {
         # Run submit_cmd directly...
         if (run_command($submit_cmd)) {
@@ -2132,77 +2163,69 @@ sub submit_job
         }
         return 0;
     }
-    # Do batch submission after making sure we can schedule job.  Whenever the 
-    # routine returns, we can schedule a job. 
+
+    # Do batch submission after making sure we can schedule job.
+    # Whenever the routine returns, we can schedule a job.
+
     schedule_job();
-    
+
+    # Either submit a model build or a benchmark run
+
+    my $dashj;
+    my $log;
+    my $run_error;
+
     if (defined $model_submit && $model_submit) {
-        
+
         # setup param for nbq to specify where the -J log goes.
-        my $dashj = "-J $resdir/$name/BUILD/$model_name.SUBMITTED";
-        
-        my $stdoutfile = "$resdir/$name/ADMIN/experiment.log";
-        
+
+        $dashj = "$resdir/$name/BUILD/$model_name.SUBMITTED";
+
+        $log = "$resdir/$name/ADMIN/experiment.log";
+
         # actually run the nbq submit_cmd
-        if (run_command("$BATCH_SUBMIT_COMMAND $batch_flags_build $dashj --block $submit_cmd >> $stdoutfile 2>&1" ) ) {
-            # There was an error in the submission.      
+        $run_error = $build_sys->submit($submit_cmd, $dashj, ">>$log 2>&1", 1);
+
+        if ( $run_error ) {
+            # There was an error in the submission.
             print_error("Unable to finish submit_cmd; $submit_cmd\n",
-                       "Netbatch returned error.\n",
+                       "Netbatch returned error.See $log\n",
                        "Failed Model build.\n");
             return 1;
         }
     }
     else {
-        # save ENV variables that might be changed temporarily
-        my $temp_nwbd   = $ENV{"NWBD"};
-        my $temp_itools = $ENV{"USER_ITOOLS"};
-        my $temp_home   = $ENV{"HOME"};
-        my $temp_awblcl = $ENV{"AWBLOCAL"};
-        
-        # setup params for nbq.  the job inherits the current env so we may have
-        # to change some env variables and retore them after submission.
-        my $dashj;
+	# threaded model runs have to be scheduled on multi-cores.
+        if (defined $mt_run && $mt_run > 0) {
+            $run_sys->check_threads($NETBATCH_MT_SLOTS_PER_CORE);
+	} else {
+	    $run_sys->check_threads(1);
+	}
+
         if ($remote) {
-            if (defined $remotenbwd  ) { put_env("NBWD"       , $remotenbwd  ); };
-            if (defined $remoteitools) { put_env("USER_ITOOLS", $remoteitools); };
-            if (defined $remotehome  ) { put_env("HOME"       , $remotehome  ); };
-            if (defined $remoteawblcl) { put_env("AWBLOCAL"   , $remoteawblcl); };
-            
-            # DumpEnvToDebugOutfile();
-            
-            $dashj = "-J $remoteresdir/$name/ADMIN/$bm_name.asimlog";
+            $dashj = "$remoteresdir/$name/ADMIN/$bm_name.asimlog";
         }
         else {
-            $dashj = "-J $resdir/$name/ADMIN/$bm_name.asimlog";
+            $dashj = "$resdir/$name/ADMIN/$bm_name.asimlog";
         }
 
-	# threaded model runs have to be scheduled on multi-cores.
-	my $batch_mt_args = "";
-        if (defined $mt_run && $mt_run > 0) {
-	    $batch_mt_args = " -C \"CPUCount>=$NETBATCH_MT_SLOTS_PER_CORE\" ";
-	}
+	# log file
+	$log = "$resdir/$name/$bm_name.SUBMITTED";
+
         # submit run job to netbatch
-        my $runerror = run_command("$BATCH_SUBMIT_COMMAND $batch_flags $batch_mt_args $dashj $submit_cmd > $resdir/$name/$bm_name.SUBMITTED");
-        
-        # restore ENV variables after submission
-        if ($remote) {
-            if (defined $remotenbwd  ) { put_env("NBWD"       , $temp_nwbd  ); };
-            if (defined $remoteitools) { put_env("USER_ITOOLS", $temp_itools); };
-            if (defined $remotehome  ) { put_env("HOME"       , $temp_home  ); };
-            if (defined $remoteawblcl) { put_env("AWBLOCAL"   , $temp_awblcl); };
-        }
+        $runerror = $run_sys->submit($submit_cmd, $dashj, ">$log 2>&1");
 
         if ($runerror) {
             # There was an error in the submission.
             print_error("Unable to submit submit_cmd; $submit_cmd\n",
-                       "Netbatch returned error.\n");
-            
-            cleanup_queue_problems($name, $bm_name);
+                        "Netbatch returned error. See $log\n");
+
+            cleanup_queue_problems($log);
             return 1;
         }
         else {
             if (! $buildbatch) {
-                system ("cat $resdir/$name/$bm_name.SUBMITTED");
+                system ("cat $log");
             }
             print_info("........ Queued up benchmark: $bm_name\n");
         }
@@ -2220,8 +2243,7 @@ sub schedule_job
     # If the current user is ASIM1, then don't limit the number of jobs it can submit. 
     my $user = $ENV{USER} || "UNKNOWN_USER";
     my $unrestricted = grep /^${user}$/, @UNRESTRICTED_USERS;
-    if ($unrestricted)
-    {
+    if ($unrestricted) {
         return;
     }
     
@@ -2235,57 +2257,17 @@ sub schedule_job
         return;
     }
 
-    #
-    # Determine the current pool
-    #
-    if ( $CURRENT_POOL eq "") {
-        if (defined $pool) {
-            $CURRENT_POOL = $pool;
-        }
-        elsif (defined $ENV{NBPOOL}) {
-            $CURRENT_POOL = $ENV{NBPOOL};
-        }
-        else {
-            # Determine default pool using netbatch command.
-            run_command ("$BATCH_STATUS_COMMAND -w  slot=$queue> $TMP_DIR/pool.$$");
-            open (POOL_FILE, "< $TMP_DIR/pool.$$");
-            while (<POOL_FILE>) {
-                if ( /NetBatch\s*QUEUE\s*status\s*-\s*pool\s*(\S+)\s*$/ ) {
-                    $CURRENT_POOL = $1;
-                    last;
-                }
-            }
-            # Cleanup
-            close (POOL_FILE);
-            run_command ("rm $TMP_DIR/pool.$$");
-        }
-    }
+    # get the current pool
 
-    #
-    # Determine the current QSLOT
-    #
-    if ($CURRENT_QSLOT eq "") {
-        if (defined $queue) {
-            $CURRENT_QSLOT = $queue;
-        }
-        elsif (defined $ENV{NBQSLOT}) {
-            $CURRENT_QSLOT = $ENV{NBQSLOT};
-        }
-        else {
-            # It's difficult to determine the default qslot.  THerefore, just print warning and 
-            # return 
-            print_warning("Unable to determine default qslot because no -queue specified, and no environment variable NBQSLOT defined.\n");
-            print_warning("Cannot apply ASIM scheduler restrictions. ");
-            return;
-        }
-    }
+    $CURRENT_POOL = $run_sys->get_pool();
 
-    
     # If the current pool is not restricted, then return. 
     my $restricted = grep /^$CURRENT_POOL$/, @RESTRICTED_POOLS;
     if ( ! $restricted ) {
         return;
     }
+
+    $CURRENT_QSLOT = $run_sys->get_queue();
 
     # If the current queue slot is not restricted, then return. 
     $restricted = grep /^$CURRENT_QSLOT$/, @RESTRICTED_QSLOTS;
@@ -2293,123 +2275,15 @@ sub schedule_job
         return;
     }
 
-    #
-    # Algorithm for scheduling jobs
-    # Schedule if:
-    # a.) User has less than $MAX_WAITING_JOBS waiting jobs in queue 
-    # b.) Total ASIM jobs running is less than $MAX_ASIM_JOBS
-    # c.) If the number of jobs owned by user is > MAX_RUNNING_JOBS, then
-    #     user can submit at most $MAX_JOBS_PER_PERIOD jobs before going 
-    #     to sleep.
-    #
-
-    # Else, loop until we can submit another jobs 
-    while (1) {
-        #
-        # Check for waiting jobs
-        #
-        my $num_waiting = 0;
-
-        # nbqstat will report jobs with either the hierarchical name (using the -n argument)
-        # or the numerical slot name.  Depending on which format your asimrc file uses,
-        # we need to check BOTH formats to make sure we really know how many waiting
-        # jobs you have.
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL  -w -n slot=$queue> $TMP_DIR/wait.$$");
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL  -w slot=$queue>> $TMP_DIR/wait.$$");
-        open (WAIT_JOBS, "<$TMP_DIR/wait.$$");
-        while (<WAIT_JOBS>) {
-            chomp;
-            if ( /\s+$CURRENT_QSLOT\s+$user\s+/ ) {
-                $num_waiting++;
-            }
-        }
-        close (WAIT_JOBS);
-        run_command ("rm $TMP_DIR/wait.$$");
-        print_info(".... Waiting Jobs for $user: $num_waiting\n");
-        
-        #
-        # Check for running jobs submitted by user.  
-        #
-        my $num_user_running = 0;
-        my $num_total_running = 0;
-        run_command ("$BATCH_STATUS_COMMAND -P$CURRENT_POOL  -r -j -f  slot=$queue> $TMP_DIR/run.$$");
-        open (RUN_JOBS, "<$TMP_DIR/run.$$");
-        while (<RUN_JOBS>) {
-	    chomp;
-	    if (/^User: $user(.*)/) {
-		my $jobname = <RUN_JOBS>;
-		if ($jobname =~ /^Job Name:(.*)\.asimlog(.*)/) {
-		    $num_total_running++;
-		    $num_user_running++;
-		}
-	    }
-	    elsif (/^Job Name:(.*)\.asimlog(.*)/) {
-		$num_total_running++;
-	    }
-        }
-        close (RUN_JOBS);
-        run_command ("rm $TMP_DIR/run.$$");
-        print_info(".... Running Jobs for $user: $num_user_running\n");
-        print_info(".... Running Jobs for ASIM users: $num_total_running\n");
-
-        my $sleep = 0;
-
-        if ($num_waiting > $MAX_WAITING_JOBS) {
-            #
-            # Exceeding limit.... go to sleep.
-            #
-            print_info("........ Number of waiting jobs ($num_waiting) exceeds limit ($MAX_WAITING_JOBS)");
-            $sleep = 1;
-        }
-
-        if ( $num_total_running > $MAX_ASIM_JOBS ) {
-            #
-            # Exceeding limit.... go to sleep.
-            #
-            print_info("........ Number of running ASIM jobs ($num_total_running) exceeds $MAX_ASIM_JOBS.\n");
-            $sleep = 1;
-        }
-        
-        # If we've exceeded a given limit, then slow injection down. 
-        if (($num_user_running > $MAX_RUNNING_JOBS) && 
-            ($JOBS_SUBMITTED_CURRENT_CYCLE > $MAX_JOBS_PER_PERIOD)) {
-            #
-            # Exceeding limit.... go to sleep.
-            #
-            print_info("........ Number of running ASIM jobs ($num_user_running) exceeds fast injection limit ($MAX_RUNNING_JOBS)");
-            print_info("........ Only $MAX_JOBS_PER_PERIOD can be submitted at any time once this limit is reached.\n");
-            $sleep = 1;
-        }
-        
-        if ($sleep == 1)
-        {
-            sleep_sample_period();
-            $JOBS_SUBMITTED_CURRENT_CYCLE = 0;
-        }
-        else
-        {
-            # Schedule job
-            $JOBS_SUBMITTED_CURRENT_CYCLE++;
-            return;
-        }
-    }
+    $run_sys->scheduler( max_waiting_jobs    => $MAX_WAITING_JOBS,
+                         max_running_jobs    => $MAX_RUNNING_JOBS,
+                         max_asim_jobs       => $MAX_ASIM_JOBS,
+                         max_jobs_per_period => $MAX_JOBS_PER_PERIOD,
+                         min_sample_period   => $MIN_SAMPLE_PERIOD
+                       );
 }
 
-# -----------------------------------------------------------------------------
-#
-# Cleansup if netbatch was unable to run. 
-#
-sub sleep_sample_period()
-{
-    my $time_stamp = `date`;
-    my $duration = rand;
-    $duration = $MIN_SAMPLE_PERIOD + int($duration * 1200);
-	
-    chomp($time_stamp);
-    print_info("\t\t$time_stamp: Going to sleep for $duration seconds\n");
-    run_command("sleep $duration");
-    return;
-}
+
 
 # -----------------------------------------------------------------------------
 #
@@ -2417,9 +2291,9 @@ sub sleep_sample_period()
 #
 sub cleanup_queue_problems 
 {
-    my ($name, $bm_name) = @_;
+    my $log = shift;
 
-    system ("rm -f $resdir/$name/$bm_name.SUBMITTED");
+    system ("rm -f $log");
 }
 
 # -----------------------------------------------------------------------------
@@ -2448,21 +2322,11 @@ sub handle_build_failure
     system("touch $model_buildarea/$model_name.ERROR"); 
 }
 
-# -----------------------------------------------------------------------------
-sub get_timepid_str
-{
-    my $timestr = ""; 
-    if ($printtimes) {
-        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
-        $timestr = sprintf "%02d:%02d:%02d ",$hour,$min,$sec;
-    }
-    
-    my $pid = getpid();
-    my $pidstr = sprintf "%05d", $pid;
-    
-    return $timestr.$pidstr;
-}
 
+# -----------------------------------------------------------------------------
+#
+# A series of stylized print routnes
+#
 # -----------------------------------------------------------------------------
 sub print_info 
 {
@@ -2558,6 +2422,22 @@ sub dprint
 }
 
 # -----------------------------------------------------------------------------
+sub get_timepid_str
+{
+    my $timestr = ""; 
+    if ($printtimes) {
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+        $timestr = sprintf "%02d:%02d:%02d ",$hour,$min,$sec;
+    }
+    
+    my $pid = getpid();
+    my $pidstr = sprintf "%05d", $pid;
+    
+    return $timestr.$pidstr;
+}
+
+# -----------------------------------------------------------------------------
+
 #
 # Ask a question with a timeout
 #
@@ -3187,6 +3067,8 @@ A listing of the available options that can be set can be obtained with:
 
 Control of compression should probably be under the control of the
 model itself not this program.
+
+Use of the logfile in /tmp seems pretty incoherent.
 
 This documentation lives in two places in two formats: docbook in the
 main documentation and perl pod in the tools itself. These need to be

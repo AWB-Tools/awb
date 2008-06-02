@@ -4714,3 +4714,38 @@ Updating with simcore changes (rev. 2570 - Brian Slechta)
 fixed compile bug introduced in my last commit when
 
 CONFIGFLAGS = --enable-ptv=no
+
+----------
+spartha1    Date: Mon Jun  2 16:58:48 EDT 2008  CSN: CSN-asimcore-246
+                  Mon Jun  2 20:58:48 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim
+ Batch/                    Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/Batch
+ NetbatchRemote.pm         Locally Added               0 
+ Netbatch.pm               Locally Added               0 
+ Base.pm                   Locally Added               0 
+ Local.pm                  Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Batch.pm                  Locally Added               0 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          245 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          245 
+
+Updating with simcore changes (rev. 2572 - Joel Emer)
+
+Refactored the batch code in asim-run so that the batch subsystem code
+is in separate perl modules. The idea is that there are separate
+modules for supporting netbatch, netbatch-remote, local and eventually
+other batch subsystems. Each module needs to support the batch
+operations that we supported directly in asim-rum in a batch system
+specific way, e.g., check size of a directory, check number of
+threads, schedule to reduce number of jobs in-flight, and submit the
+job. The data sloshing for the remote runs is still done manually in
+asim-run and asim-batch.
