@@ -4749,3 +4749,16 @@ specific way, e.g., check size of a directory, check number of
 threads, schedule to reduce number of jobs in-flight, and submit the
 job. The data sloshing for the remote runs is still done manually in
 asim-run and asim-batch.
+
+----------
+spartha1    Date: Mon Jun  2 17:00:38 EDT 2008  CSN: CSN-asimcore-247
+                  Mon Jun  2 21:00:38 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          246 
+
+Updating with simcore changes (rev. 2573 - Joel Emer)
+
+Attempts to 'update' a 'private' package in asim-shell are not
+treated as fatal errors any more.

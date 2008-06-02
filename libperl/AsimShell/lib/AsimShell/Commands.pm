@@ -1483,6 +1483,7 @@ sub update_package {
 
   # get the list of packages
   my @package_names = _expand_package_names(@ARGV);
+  my @failed_packs = ();
 
   while ( my $pkgspec = shift @package_names) {
     # each package in the list could be a simple name,
@@ -1500,7 +1501,9 @@ sub update_package {
     _print_package_start("update", $pkgname, "(" . $package->type() . " repository)");
 
     if (!$package->isprivate()) {
-      shell_error("Cannot update a non-private package\n")  && return undef;
+      print("Cannot update a non-private package\n");
+      _print_package_finish("update", $pkgname, "(FAILED)");
+      next;
     }
 
     # update the package to the specified version
@@ -1861,7 +1864,7 @@ sub _print_package_finish {
   my $comment = shift || "";
 
   print "----------------------------------------------\n";
-  print " Finishing $action on $name\n";
+  print " Finishing $action on $name $comment\n";
   print "----------------------------------------------\n";
 }
 
