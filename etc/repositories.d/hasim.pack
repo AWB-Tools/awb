@@ -1,0 +1,101 @@
+###### Hasim trunk
+
+[hasim]
+Description=Hardware Asim Model
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim
+Module=undefined
+Tag=HEAD
+Target=hasim
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM
+
+[hasim/HEAD]
+Description=Hardware Asim Model
+Access=https://asim.csail.mit.edu/svn/hasim
+Tag=HEAD
+
+###### Hasim platforms trunk
+
+[platforms]
+Description=FPGA Platforms
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim-platforms
+Module=undefined
+Tag=HEAD
+Target=platforms
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-PLATFORMS
+
+[platforms/HEAD]
+Description=FPGA Platforms
+Access=https://asim.csail.mit.edu/svn/hasim-platforms
+Tag=HEAD
+
+###### Hasim-models trunk
+
+[hasim-models]
+Description=Basic hasim timing models
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim-models/
+Module=undef
+Tag=HEAD
+Target=hasim-models
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=hasim-models
+
+[hasim-models/HEAD]
+Description=Basic hasim timing models
+Access=https://asim.csail.mit.edu/svn/hasim-models/
+Tag=HEAD
+
+###### Hasim-alpha trunk
+
+[hasim-alpha]
+Description=Hardware Asim Model for ALPHA
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim-alpha
+Module=undefined
+Tag=HEAD
+Target=hasim-alpha
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-ALPHA
+
+[hasim-alpha/HEAD]
+Description=Hardware Asim Model for ALPHA
+Access=https://asim.csail.mit.edu/svn/hasim-alpha
+Tag=HEAD
+
+###### Hasim-mips trunk
+
+[hasim-mips]
+Description=Hardware Asim Model for MIPS
+Method=svn
+Access=https://asim.csail.mit.edu/svn/hasim-mips
+Module=undefined
+Tag=HEAD
+Target=hasim-mips
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-MIPS
+
+[hasim-mips/HEAD]
+Description=Hardware Asim Model for MIPS
+Access=https://asim.csail.mit.edu/svn/hasim-mips
+Tag=HEAD
+
+###### M5 trunk
+
+[m5]
+Description=M5 model
+Method=svn
+Access=https://asim.csail.mit.edu/svn/m5
+Module=undefined
+Tag=HEAD
+Target=m5
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=M5
+
+[m5/HEAD]
+Description=M5 model
+Access=https://asim.csail.mit.edu/svn/m5
+Tag=HEAD

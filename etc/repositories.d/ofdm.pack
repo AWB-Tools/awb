@@ -1,0 +1,16 @@
+###### OFDM trunk
+
+[ofdm]
+Description=OFDM design
+Method=svn
+Access=https://asim.csail.mit.edu/svn/ofdm
+Module=undefined
+Tag=HEAD
+Target=odfm
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OFDM
+
+[ofdm/HEAD]
+Description=OFDM design
+Access=https://asim.csail.mit.edu/svn/ofdm
+Tag=HEAD

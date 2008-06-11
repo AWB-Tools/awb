@@ -4853,3 +4853,20 @@ Updating with simcore changes (rev. 2578 - Joel Emer)
 
 Report environment variables that are supposed to be retained but
 that are not defined.
+
+----------
+emer        Date: Wed Jun 11 16:07:20 EDT 2008  CSN: CSN-asimcore-252
+                  Wed Jun 11 20:07:20 UTC 2008
+
+
+Directory etc
+ asim.pack                 Locally Modified          251 
+
+Directory etc/repositories.d
+ h264.pack                 Locally Added               0 
+ ofdm.pack                 Locally Added               0 
+ hasim.pack                Locally Added               0 
+
+Created repository information for hasim-model and h264
+repositories. Reorganized repository information into
+separate files for different projects.
