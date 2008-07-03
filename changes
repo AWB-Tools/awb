@@ -5008,3 +5008,15 @@ Directory libperl/Benchmarks/lib/Benchmarks
 Updating with simcore changes (rev. 2588 - Michael Adler)
 
 Add definitions for SPEC CPU2006. Tweak a few comparisons for CPU2000.
+
+----------
+spartha1    Date: Thu Jul  3 11:01:02 EDT 2008  CSN: CSN-asimcore-258
+                  Thu Jul  3 15:01:02 UTC 2008
+
+
+Directory libperl/Benchmarks/lib/Benchmarks
+ CPU2006_data.pm           Locally Modified          257 
+
+Updating with simcore changes (rev. 2589 - Michael Adler)
+
+SPEC CPU2006 specrand isn't really a benchmark.

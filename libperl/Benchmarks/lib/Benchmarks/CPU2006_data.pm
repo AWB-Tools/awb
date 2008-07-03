@@ -55,8 +55,6 @@ our %isFP = (
     '481.wrf' => 1,
     '482.sphinx3' => 1,
     '483.xalancbmk' => 0,
-    '998.specrand' => 1,
-    '999.specrand' => 0,
 );
 
 our %spec2006;
@@ -396,16 +394,6 @@ $spec2006{test} = {
             'specdiff -l 10 data/test/output/test.out test.out',
         ],
     },
-    '999.specrand' => {
-        'program' => 'specrand',
-        'args' => '324342 24239',
-        'input' => '',
-        'output' => 'rand.24239.out',
-        'errout' => 'rand.24239.err',
-        'compare' => [
-            'specdiff -l 10 --floatcompare data/test/output/rand.24239.out rand.24239.out',
-        ],
-    },
     '410.bwaves' => {
         'program' => 'bwaves',
         'args' => '',
@@ -599,16 +587,6 @@ $spec2006{test} = {
             'specdiff -l 10 --reltol 0.001 --floatcompare data/test/output/an4.log an4.log',
             'specdiff -l 10 --reltol 0.0004 --floatcompare data/test/output/considered.out considered.out',
             'specdiff -l 10 --reltol 1e-06 --floatcompare data/test/output/total_considered.out total_considered.out',
-        ],
-    },
-    '998.specrand' => {
-        'program' => 'specrand',
-        'args' => '324342 24239',
-        'input' => '',
-        'output' => 'rand.24239.out',
-        'errout' => 'rand.24239.err',
-        'compare' => [
-            'specdiff -l 10 --floatcompare data/test/output/rand.24239.out rand.24239.out',
         ],
     },
 };
@@ -879,16 +857,6 @@ $spec2006{train} = {
             'specdiff -l 10 data/train/output/train.out train.out',
         ],
     },
-    '999.specrand' => {
-        'program' => 'specrand',
-        'args' => '1 3',
-        'input' => '',
-        'output' => 'rand.3.out',
-        'errout' => 'rand.3.err',
-        'compare' => [
-            'specdiff -l 10 --floatcompare data/train/output/rand.3.out rand.3.out',
-        ],
-    },
     '410.bwaves' => {
         'program' => 'bwaves',
         'args' => '',
@@ -1097,16 +1065,6 @@ $spec2006{train} = {
             'specdiff -l 10 --reltol 0.001 --floatcompare data/train/output/an4.log an4.log',
             'specdiff -l 10 --reltol 0.0004 --floatcompare data/train/output/considered.out considered.out',
             'specdiff -l 10 --reltol 1e-06 --floatcompare data/train/output/total_considered.out total_considered.out',
-        ],
-    },
-    '998.specrand' => {
-        'program' => 'specrand',
-        'args' => '1 3',
-        'input' => '',
-        'output' => 'rand.3.out',
-        'errout' => 'rand.3.err',
-        'compare' => [
-            'specdiff -l 10 --floatcompare data/train/output/rand.3.out rand.3.out',
         ],
     },
 };
@@ -1468,16 +1426,6 @@ $spec2006{ref} = {
             'specdiff -l 10 data/ref/output/ref.out ref.out',
         ],
     },
-    '999.specrand' => {
-        'program' => 'specrand',
-        'args' => '1255432124 234923',
-        'input' => '',
-        'output' => 'rand.234923.out',
-        'errout' => 'rand.234923.err',
-        'compare' => [
-            'specdiff -l 10 --floatcompare data/ref/output/rand.234923.out rand.234923.out',
-        ],
-    },
     '410.bwaves' => {
         'program' => 'bwaves',
         'args' => '',
@@ -1732,16 +1680,6 @@ $spec2006{ref} = {
             'specdiff -l 10 --reltol 0.001 --floatcompare data/ref/output/an4.log an4.log',
             'specdiff -l 10 --reltol 0.0004 --floatcompare data/ref/output/considered.out considered.out',
             'specdiff -l 10 --reltol 1e-06 --floatcompare data/ref/output/total_considered.out total_considered.out',
-        ],
-    },
-    '998.specrand' => {
-        'program' => 'specrand',
-        'args' => '1255432124 234923',
-        'input' => '',
-        'output' => 'rand.234923.out',
-        'errout' => 'rand.234923.err',
-        'compare' => [
-            'specdiff -l 10 --floatcompare data/ref/output/rand.234923.out rand.234923.out',
         ],
     },
 };
