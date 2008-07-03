@@ -4870,3 +4870,15 @@ Directory etc/repositories.d
 Created repository information for hasim-model and h264
 repositories. Reorganized repository information into
 separate files for different projects.
+
+----------
+spartha1    Date: Thu Jul  3 10:36:17 EDT 2008  CSN: CSN-asimcore-253
+                  Thu Jul  3 14:36:17 UTC 2008
+
+
+Directory lib/libasim/include/asim
+ registry.h                Locally Modified          252 
+
+Updating with simcore changes (rev. 2581 - Brian Slechta)
+
+added stat Register functions for vectors of stats.

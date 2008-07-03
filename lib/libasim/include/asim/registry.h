@@ -158,6 +158,25 @@ public:
 			    const char * const n, 
 			    const char * const d, bool sus = true);
 
+
+
+  ASIM_STATE RegisterState (std::vector<UINT64>& s, const UINT32 sz, const char * const n,
+			    const char * const d, bool sus =true)
+  {
+      return RegisterState (&s[0], sz, n, d, sus);
+  }
+  ASIM_STATE RegisterState (std::vector<double>& s, const UINT32 sz, const char * const n,
+			    const char * const d, bool sus =true)
+  {
+      return RegisterState (&s[0], sz, n, d, sus);
+  }
+  ASIM_STATE RegisterState (std::vector<RESOURCE_TEMPLATE<false> >& s, 
+			    const UINT32 sz, 
+			    const char * const n, const char * const d, bool sus = true)
+  {
+      return RegisterState (&s[0], sz, n, d, sus);
+  }
+
 };
 
 #endif /* _REGISTRY_ */
