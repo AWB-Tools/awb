@@ -211,7 +211,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 tooldir = @tooldir@
-SUBDIRS = Asim AsimShell PlotShell PinPoints
+SUBDIRS = Asim AsimShell Benchmarks PlotShell PinPoints
 all: all-recursive
 
 .SUFFIXES:

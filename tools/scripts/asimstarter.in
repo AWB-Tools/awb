@@ -302,7 +302,7 @@ if ($? == 0) {
   foreach $dir (split ' ', $path) {
 
     # Check new location for perl library
-    foreach $lib ("Asim", "AsimShell", "PinPoints", "PlotShell", "HAsim") {
+    foreach $lib ("Asim", "AsimShell", "Benchmarks", "PinPoints", "PlotShell", "HAsim") {
       $libperl = "$dir/libperl/$lib/lib";
       if (-e $libperl) {
         push @asim_inc, $libperl;

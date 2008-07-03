@@ -23715,6 +23715,8 @@ fi
 
           ac_config_commands="$ac_config_commands libperl/AsimShell/Makefile                                   "
 
+          ac_config_commands="$ac_config_commands libperl/Benchmarks/Makefile                                  "
+
           ac_config_commands="$ac_config_commands libperl/PinPoints/Makefile                                   "
 
           ac_config_commands="$ac_config_commands libperl/PlotShell/Makefile                                   "
@@ -24347,6 +24349,7 @@ prefix=$prefix
 prefix=$prefix
 prefix=$prefix
 prefix=$prefix
+prefix=$prefix
 
 _ACEOF
 
@@ -24398,6 +24401,7 @@ do
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "libperl/Asim/Makefile" ) CONFIG_COMMANDS="$CONFIG_COMMANDS libperl/Asim/Makefile" ;;
   "libperl/AsimShell/Makefile" ) CONFIG_COMMANDS="$CONFIG_COMMANDS libperl/AsimShell/Makefile" ;;
+  "libperl/Benchmarks/Makefile" ) CONFIG_COMMANDS="$CONFIG_COMMANDS libperl/Benchmarks/Makefile" ;;
   "libperl/PinPoints/Makefile" ) CONFIG_COMMANDS="$CONFIG_COMMANDS libperl/PinPoints/Makefile" ;;
   "libperl/PlotShell/Makefile" ) CONFIG_COMMANDS="$CONFIG_COMMANDS libperl/PlotShell/Makefile" ;;
   "include/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS include/config.h" ;;
@@ -25421,6 +25425,7 @@ done
  ;;
     libperl/Asim/Makefile ) cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
     libperl/AsimShell/Makefile ) cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
+    libperl/Benchmarks/Makefile ) cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
     libperl/PinPoints/Makefile ) cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
     libperl/PlotShell/Makefile ) cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
   esac

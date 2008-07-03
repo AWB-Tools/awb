@@ -4912,3 +4912,41 @@ asim-shell> clean regression
 Coded ability for asim-shell for fork the configure/build
 of packages. Currently disabled. Added a place in the workspace
 for fork logs: <workspace>/var/log.
+
+----------
+spartha1    Date: Thu Jul  3 10:47:42 EDT 2008  CSN: CSN-asimcore-255
+                  Thu Jul  3 14:47:42 UTC 2008
+
+
+Directory .
+ configure                 Locally Modified          254 
+ configure.in              Locally Modified          254 
+
+Directory libperl
+ Makefile.in               Locally Modified          254 
+ Makefile.am               Locally Modified          254 
+ Benchmarks/               Locally Added               0 
+
+Directory libperl/Benchmarks
+ MANIFEST                  Locally Added               0 
+ lib/                      Locally Added               0 
+
+Directory libperl/Benchmarks/lib
+ Benchmarks.pm             Locally Added               0 
+ Benchmarks/               Locally Added               0 
+
+Directory libperl/Benchmarks/lib/Benchmarks
+ CPU2000_data.pm           Locally Added               0 
+
+Directory libperl/Benchmarks
+ Makefile.PL               Locally Added               0 
+ README                    Locally Added               0 
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          254 
+
+Updating with simcore changes (rev. 2583 - Michael Adler)
+
+Add a Benchmarks Perl library to define ISA-independent properties of
+workloads. The CPU2000_data module defines all CPU2000 arguments,
+inputs, outputs and specdiff commands to check the output.

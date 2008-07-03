@@ -826,6 +826,9 @@ AC_CONFIG_COMMANDS( libperl/Asim/Makefile                                       
 AC_CONFIG_COMMANDS( libperl/AsimShell/Makefile                                   ,
 		[cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix; cd ../..],
 		                        		       [prefix=$prefix  ])
+AC_CONFIG_COMMANDS( libperl/Benchmarks/Makefile                                  ,
+		[cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		                        		       [prefix=$prefix  ])
 AC_CONFIG_COMMANDS( libperl/PinPoints/Makefile                                   ,
 		[cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix; cd ../..],
 		                        		       [prefix=$prefix  ])
