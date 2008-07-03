@@ -146,12 +146,16 @@ Commands:
     [--verbose]                          - print status of every file
 
 
-  clean regression                       - cleanup after regression
+  list regressions                       - list existing regressions
 
   run regression [default|all|<pkg>...]  - run regression on packages
     [<swtiches>]                           switches to send to regression launcher
 
   verify regression                      - verify regression results
+
+  clean regression                       - cleanup after regression
+
+  delete regression                      - delete the latest regression
 
   rehash locks                           - rehash lock list
   list locks                             - list of all locks
@@ -186,16 +190,20 @@ Commands:
     [--builddir <build-directory>]       - directory for model build
     [--buildopt <make-options>]          - make options for build
 
-  setup model [<model>] <benchmark>      - setup benchmark on a model
-    [--rundir <run-directory>]           - directory for benchmark run
-
-  run model [<model>] <benchmark>        - run benchmark on a model
-    [--rundir <rundirectory>]            - directory for benchmark run
-    [--runopt <run-options>]             - options for benchmark run
-
   show model [<model>]                   - show a model configuration
 
   cd model [<model>]                     - cd to build directory of model
+
+  set benchmark <benchmark>              - set default benchmark
+
+  setup benchmark [<benchmark>]          - setup benchmark on a model
+    [--model  <model>]                   - model to setup benchmark for
+    [--rundir <run-directory>]           - directory for benchmark run
+
+  run benchmark [<benchmark>]            - run benchmark on a model
+    [--model  <model>]                   - model to run benchmark
+    [--rundir <rundirectory>]            - directory for benchmark run
+    [--runopt <run-options>]             - options for benchmark run
 
   list models                            - list the models
   rehash models                          - rehash the model list
@@ -231,10 +239,18 @@ Commands:
 
   where,
     <workspace> is a directory containing an asim workspace
+
     <repository> is a repository name from a .pack file
     <tag> is a version or branch tag
+
     <package> is the name of a package (run 'list packages' for choices)
-    <model> is a model .apm filename
+
+    <model> is a model .apm file
+        default: \$AWB_MODEL or last model configured/built
+
+    <benchmark> is a benchmark .cfg file
+        default: \$AWB_BENCHARK or last benchmark setup/run
+
     <module> is a module .awb filename
 
   Note command completion and editing exists at the command prompt 

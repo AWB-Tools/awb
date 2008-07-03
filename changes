@@ -4950,3 +4950,48 @@ Updating with simcore changes (rev. 2583 - Michael Adler)
 Add a Benchmarks Perl library to define ISA-independent properties of
 workloads. The CPU2000_data module defines all CPU2000 arguments,
 inputs, outputs and specdiff commands to check the output.
+
+----------
+spartha1    Date: Thu Jul  3 10:56:46 EDT 2008  CSN: CSN-asimcore-256
+                  Thu Jul  3 14:56:46 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          255 
+ Commands.pm               Locally Modified          255 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          255 
+
+Directory libperl/Asim/lib/Asim
+ Workspace.pm              Locally Modified          255 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          255 
+
+Updating with simcore changes (rev. 2585 - Joel Emer)
+
+Some random minor enhancements to asim-shell:
+
+Improved the behavior of commands to build/run models by
+separating model and benchmark commands and having the
+commands remember the current model and benchmark so that
+one needn't specify them repeatedly. So to configure, build
+and run a model on a benchmark one can do the following:
+
+asim-shell> configure model <model apm file>
+asim-shell> build model
+asim-shell> setup benchmark <benchmark .cfg file>
+asim-shell> run benchmark
+
+
+Added some regression related commands:
+
+asim-shell> list regressions
+asim-shell> delete regression
+
+
+Finally package build options CONFIGFLAGS and MAKEFLAGS are now
+obtained using the standard options search path, i.e., first
+look in awb.config, then ~/.asim/asimrc and finally in
+<installdir>/etc/asim/asimrc.

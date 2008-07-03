@@ -484,7 +484,7 @@ Return the awb Package config flags
 sub awb_package_configflags {
   my $self = shift;
 
-  return $self->{inifile}->get("Package","CONFIGFLAGS");
+  return $self->get_option("Package","CONFIGFLAGS");
 }
 
 ################################################################
@@ -500,7 +500,7 @@ Return the awb Package make flags
 sub awb_package_makeflags {
   my $self = shift;
 
-  return $self->{inifile}->get("Package","MAKEFLAGS");
+  return $self->get_option("Package","MAKEFLAGS");
 }
 
 ################################################################

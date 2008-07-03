@@ -1429,8 +1429,9 @@ sub run_one_benchmark
         if ( ! -d "$rundir" ) {
             # Setup benchmark. 
             print_info("........ Setting up benchmark: $bm_name for experiment $name\n");
-            print "asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir" if ($debug);
-            if ( run_command ("asim-shell -batch setup model -- --builddir $resdir/$name/BUILD --rundir $rundir > $asim_runlogfl 2>&1") ) {
+            my $cmd = "asim-shell -batch setup benchmark -- --builddir $resdir/$name/BUILD --rundir $rundir > $asim_runlogfl 2>&1";
+            print "$cmd\n" if ($debug);
+            if ( run_command ($cmd) ) {
                 # We have an error in the setup.
                 print_error("Unable to setup benchmark $bm_name\n",
                            "Not running benchmark $bm_name for experiment $name.\n");

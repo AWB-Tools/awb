@@ -1974,6 +1974,26 @@ sub get_package {
 
 ################################################################
 #
+# regression DB functions
+#
+################################################################
+
+sub list_regressions {
+
+  # Like all of the regression programs, this routine assumes far too 
+  # much about the strcutre of the regressions
+
+  my $regdir = $Asim::default_workspace->rootdir(). "/run/regtest";
+
+  system("ls -t1 $regdir");
+
+  print "\n";
+  print "All regression commands will operate on the newest of these\n";
+}
+
+
+################################################################
+#
 # regression functions
 #
 ################################################################
@@ -2029,17 +2049,24 @@ sub run_regression {
 
 }
 
+sub verify_regression {
+
+  system("regression.verifier");
+  return 1;
+}
+
 sub clean_regression {
+
   system("regression.cleanup");
   return 1;
 }
 
 
-sub verify_regression {
-  system("regression.verifier");
+sub delete_regression {
+
+  system("regression.cleanup --purge");
   return 1;
 }
-
 
 ################################################################
 #
@@ -2381,6 +2408,12 @@ sub configure_model {
   $file = shift @ARGV;
   $model = get_model($file) || return ();
 
+  # Remember this model
+
+  $default_model = $model;
+
+  # Configure the model
+
   $status = $model->configure("--builddir" => "$builddir");
 
   return $status;
@@ -2405,6 +2438,10 @@ sub build_model {
   $file = shift @ARGV;
   $model = get_model($file) || return ();
 
+  # Remember this model
+
+  $default_model = $model;
+
   # Build it...
 
   $status = $model->build("--builddir" => "$builddir",
@@ -2417,99 +2454,20 @@ sub make_model {
   build_model(@_);
 }
 
-#
-# Setup model - parameter defaulting
-#
-#   setup_model                 -> setup_model ($default_model || prompt user) $default_benchmark
-#   setup_model BENCHMARK       -> setup_model ($default_model || prompt user) BENCHMARK
-#   setup_model MODEL BENCHMARK -> setup MODEL BENCHMARK
-#
 
 sub setup_model {
-  my $model_file = "";
-  my $benchmark_file;
+  print "The command 'setup model' is has been replaced by 'setup benchmark'\n";
+  print "See 'help commands' for more information\n";
 
-  my $model;
-  my $benchmark;
-  my $builddir = "";
-  my $rundir = "";
-
-  my $status;
-  local @ARGV = @_;
-
-  # Parse options
-
-  $status = GetOptions( "builddir=s" => \$builddir,
-                        "rundir=s"  => \$rundir);
-
-  # Model and/or benchmark are remaining argv values
-
-  if (defined $ARGV[1] && defined $ARGV[2]) {
-    $model_file = shift @ARGV;
-  }
-  $benchmark_file = shift @ARGV;
-
-  $model = get_model($model_file) || return ();
-  $benchmark = get_benchmark($benchmark_file) || return ();
-
-  print "Trying to set up benchmark $benchmark\n";
-
-  $status = $model->setup($benchmark,
-                          "--builddir" => "$builddir",
-                          "--rundir" => "$rundir");
-
-  return $status;
+  return undef;
 }
-
-#
-# Run model - parameter defaulting
-#
-#   run_model                 -> run_model ($default_model || prompt user) $defaul_benchmark
-#   run_model BENCHMARK       -> run_model ($default_model || prompt user) BENCHMARK
-#   run_model MODEL BENCHMARK -> run MODEL BENCHMARK
-#
 
 sub run_model {
-  my $model_file = "";
-  my $benchmark_file;
+  print "The command 'run model' is has been replaced by 'run benchmark'\n";
+  print "See 'help commands' for more information\n";
 
-  my $model;
-  my $benchmark;
-  my $builddir = "";
-  my $rundir = "";
-  my $options = "";
-
-  my $status;
-  local @ARGV = @_;
-
-  # Parse options
-
-  $status = GetOptions( "builddir=s" => \$builddir,
-                        "rundir=s"  => \$rundir,
-                        "runopt=s" => \$options,
-                        "options=s" => \$options);
-
-  # Model and/or benchmark are remaining argv values
-
-  if (defined $ARGV[1] && defined $ARGV[2]) {
-    $model_file = shift @ARGV;
-  }
-  $benchmark_file = shift @ARGV;
-
-  $model = get_model($model_file) || return ();
-  $benchmark = get_benchmark($benchmark_file) || return ();
-
-  print "Trying to run benchmark $benchmark\n";
-
-  $status = $model->run($benchmark,
-                        "--builddir" => "$builddir",
-                        "--rundir" => "$rundir",
-                        "--runopt" => "$options");
-
-  return $status;
+  return undef;
 }
-
-
 
 sub cd_model {
   my $file = shift;
@@ -2585,6 +2543,100 @@ sub set_benchmark {
 
   return $default_benchmark;
 }
+
+#
+# Setup model - parameter defaulting
+#
+#   setup_benchmark                 -> setup_model $default_benchmark
+#   setup_benchmark BENCHMARK       -> setup_model BENCHMARK
+#
+
+sub setup_benchmark {
+  my $benchmark_file;
+
+  my $model;
+  my $benchmark;
+
+  my $model_file = undef;
+  my $builddir = "";
+  my $rundir = "";
+
+  my $status;
+  local @ARGV = @_;
+
+  # Parse options
+
+  $status = GetOptions( "model=s"    => \$model_file,
+                        "builddir=s" => \$builddir,
+                        "rundir=s"  => \$rundir);
+
+  # Model and/or benchmark are remaining argv values
+
+  $benchmark_file = shift @ARGV;
+  $benchmark = get_benchmark($benchmark_file) || return ();
+
+  $model = get_model($model_file) || return ();
+
+
+  # Remember benchmark
+
+  $default_benchmark = $benchmark;
+
+  print "Trying to set up benchmark $benchmark\n";
+
+  $status = $model->setup($benchmark,
+                          "--builddir" => "$builddir",
+                          "--rundir" => "$rundir");
+
+  return $status;
+}
+
+#
+# Run model - parameter defaulting
+#
+#   run_benchmark             -> run_model $defaul_benchmark
+#   run_benchmark BENCHMARK   -> run_model BENCHMARK
+#
+
+sub run_benchmark {
+  my $benchmark_file;
+
+  my $model_file = undef;
+  my $builddir = "";
+  my $rundir = "";
+  my $options = "";
+
+  my $model;
+  my $benchmark;
+
+  my $status;
+  local @ARGV = @_;
+
+  # Parse options
+
+  $status = GetOptions( "model=s"    => \$model_file,
+                        "builddir=s" => \$builddir,
+                        "rundir=s"   => \$rundir,
+                        "runopt=s"   => \$options,
+                        "options=s"  => \$options);
+
+  # Model and/or benchmark are remaining argv values
+
+  $benchmark_file = shift @ARGV;
+  $benchmark = get_benchmark($benchmark_file) || return ();
+
+  $model = get_model($model_file) || return ();
+
+  print "Trying to run benchmark $benchmark\n";
+
+  $status = $model->run($benchmark,
+                        "--builddir" => "$builddir",
+                        "--rundir" => "$rundir",
+                        "--runopt" => "$options");
+
+  return $status;
+}
+
 
 sub get_benchmark {
   my $file = shift;
