@@ -1125,7 +1125,10 @@ sub local_build_run
              print_info("........ Submitting benchmarks for $name\n");
              run_benchmarks($model, $name, $build, $model_name);
          }
-
+	 else {
+	     print_info(".... Model \'$resdir/name/BUILD/$model_name\' does not exist and no build specified.  Runs will not be scheduled on this model.\n");
+	 }
+	 
          controlled_exit($forklocal);
      }
 
