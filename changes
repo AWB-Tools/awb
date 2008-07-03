@@ -5020,3 +5020,25 @@ Directory libperl/Benchmarks/lib/Benchmarks
 Updating with simcore changes (rev. 2589 - Michael Adler)
 
 SPEC CPU2006 specrand isn't really a benchmark.
+
+----------
+spartha1    Date: Thu Jul  3 11:08:55 EDT 2008  CSN: CSN-asimcore-259
+                  Thu Jul  3 15:08:55 UTC 2008
+
+
+Directory modules/controller/classic
+ args_x86.cpp              Locally Removed           258 
+ control_x86.cpp           Locally Removed           258 
+ main_x86e.cpp             Locally Removed           258 
+ control_x86e.h            Locally Removed           258 
+ controller_x86.awb        Locally Removed           258 
+ controller_x86_alg.h      Locally Removed           258 
+ controller_x86e.awb       Locally Removed           258 
+ controller_x86e_alg.h     Locally Removed           258 
+ main_x86.cpp              Locally Removed           258 
+ control_x86e.cpp          Locally Removed           258 
+ control_x86.h             Locally Removed           258 
+
+Updating with simcore changes (rev. 2590 - Carl Beckmann)
+
+- Moved x86-specific controllers out of simcore and into x86 package
