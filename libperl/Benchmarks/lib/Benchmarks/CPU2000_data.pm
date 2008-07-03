@@ -18,7 +18,7 @@
 # 
 
 ##
-## SPEC CPU2000 benchmark configuration
+## SPEC CPU2000 benchmark configuration, version 1.3
 ##
 
 package CPU2000_data;
@@ -74,7 +74,6 @@ $spec2k{test} = {
         'output' => 'route_log.out',
         'errout' => 'route_log.err',
         'compare' => [
-            'specdiff -l 10 -r 0.1 data/test/output/costs.out costs.out',
             'specdiff -l 10 -r 0.015 data/test/output/route.out route.out',
             'specdiff -l 10 -r 0.015 data/test/output/route_log.out route_log.out',
         ],
@@ -86,6 +85,7 @@ $spec2k{test} = {
         'output' => 'place_log.out',
         'errout' => 'place_log.err',
         'compare' => [
+            'specdiff -l 10 -r 0.1 data/test/output/costs.out costs.out',
             'specdiff -l 10 -r 0.015 data/test/output/place_log.out place_log.out',
         ],
     },
@@ -445,7 +445,6 @@ $spec2k{train} = {
         'output' => 'route_log.out',
         'errout' => 'route_log.err',
         'compare' => [
-            'specdiff -l 10 -r 0.05 data/train/output/costs.out costs.out',
             'specdiff -l 10 -r 0.015 data/train/output/route.out route.out',
             'specdiff -l 10 -r 0.015 data/train/output/route_log.out route_log.out',
         ],
@@ -457,6 +456,7 @@ $spec2k{train} = {
         'output' => 'place_log.out',
         'errout' => 'place_log.err',
         'compare' => [
+            'specdiff -l 10 -r 0.05 data/train/output/costs.out costs.out',
             'specdiff -l 10 -r 0.015 data/train/output/place_log.out place_log.out',
         ],
     },
@@ -817,6 +817,7 @@ $spec2k{ref} = {
         'output' => 'place_log.out',
         'errout' => 'place_log.err',
         'compare' => [
+            'specdiff -l 10 -r 0.05 data/ref/output/costs.out costs.out',
             'specdiff -l 10 -r 0.015 data/ref/output/place_log.out place_log.out',
         ],
     },
@@ -827,7 +828,6 @@ $spec2k{ref} = {
         'output' => 'route_log.out',
         'errout' => 'route_log.err',
         'compare' => [
-            'specdiff -l 10 -r 0.05 data/ref/output/costs.out costs.out',
             'specdiff -l 10 -r 0.015 data/ref/output/route.out route.out',
             'specdiff -l 10 -r 0.015 data/ref/output/route_log.out route_log.out',
         ],

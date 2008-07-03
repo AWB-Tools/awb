@@ -4995,3 +4995,16 @@ Finally package build options CONFIGFLAGS and MAKEFLAGS are now
 obtained using the standard options search path, i.e., first
 look in awb.config, then ~/.asim/asimrc and finally in
 <installdir>/etc/asim/asimrc.
+
+----------
+spartha1    Date: Thu Jul  3 10:59:46 EDT 2008  CSN: CSN-asimcore-257
+                  Thu Jul  3 14:59:46 UTC 2008
+
+
+Directory libperl/Benchmarks/lib/Benchmarks
+ CPU2006_data.pm           Locally Added               0 
+ CPU2000_data.pm           Locally Modified          256 
+
+Updating with simcore changes (rev. 2588 - Michael Adler)
+
+Add definitions for SPEC CPU2006. Tweak a few comparisons for CPU2000.
