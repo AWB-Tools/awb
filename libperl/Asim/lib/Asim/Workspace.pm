@@ -456,6 +456,23 @@ sub benchmark_dir {
 
 ################################################################
 
+=item $workspace-E<gt>log_dir()
+
+Return the awb build directory
+
+=cut
+
+################################################################
+
+sub log_dir {
+  my $self = shift;
+
+  return $self->rootdir() . "/var/log";
+}
+
+
+################################################################
+
 =item $workspace-E<gt>awb_package_configflags()
 
 Return the awb Package config flags
@@ -1172,7 +1189,20 @@ sub upgrade {
 
     $self->{inifile}->put("Global", "Class", "Asim::Workspace");
     $self->version("1.2");
-   $self->save();
+    $self->save();
+  }
+
+  if ($self->version() == 1.2) {
+    print "Upgrading workspace from version 1.2 to 1.3\n";
+
+    my $logdir = $self->log_dir();
+
+    if (! -d $logdir) {
+      mkdir $logdir;
+    }
+
+    $self->version("1.3");
+    $self->save();
   }
 
 }

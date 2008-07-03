@@ -92,7 +92,7 @@ our %COMPOUNDCOMMANDS =
     clone     => [ qw(workspace) ],
     commit    => [ qw(package) ],
     configure => [ qw(model package) ],
-    clean     => [ qw(model package) ],
+    clean     => [ qw(model package regression) ],
     create    => [ qw(repository workspace package model module lock) ],
     cvs       => [ qw(package) ],
     delete    => [ qw(lock package) ],
@@ -114,11 +114,12 @@ our %COMPOUNDCOMMANDS =
     regtest   => [ qw(package) ],
     release   => [ qw(package) ],
     show      => [ qw(bundle workspace package lock model module repository) ],
-    run       => [ qw(model) ],
+    run       => [ qw(model regression) ],
     unlock    => [ qw(package lock) ],
     unset     => [ qw(package lock model module) ],
     update    => [ qw(bundle package) ],
     use       => [ qw(bundle package) ],
+    verify    => [ qw(regression) ],
     svn       => [ qw(package) ],
   );
 
@@ -152,6 +153,19 @@ our %OPTIONS = (
     build_model        => [ "--builddir", "--buildopt", "--options" ],
     setup_model        => [ "--builddir", "--rundir" ],
     run_model          => [ "--builddir", "--rundir", "--runopt", "--options" ],
+
+    # Most of these switches go directly to regression.launcher command (need to manually synced)
+
+    run_regression     => [ "--regdir",
+                            "--runtype=regression", "--runtype=nightly",
+                            "--runstyle=pruned", "--runstyle=list",
+                            "--runcmds",
+                            "--compress=none", "--compress=gzip", "--compress=bzip2",
+                            "-queue",
+                            "--remote", "--noremote", "--remoteroot", "--remoteregdir",
+                            "--rerun",
+                            "--dryrun", "--nodryrun",
+                            "--help", "--options" ],
   );
 
 

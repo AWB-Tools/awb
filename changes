@@ -4882,3 +4882,33 @@ Directory lib/libasim/include/asim
 Updating with simcore changes (rev. 2581 - Brian Slechta)
 
 added stat Register functions for vectors of stats.
+
+----------
+spartha1    Date: Thu Jul  3 10:37:42 EDT 2008  CSN: CSN-asimcore-254
+                  Thu Jul  3 14:37:42 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          253 
+ Completion.pm             Locally Modified          253 
+ Commands.pm               Locally Modified          253 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          253 
+
+Directory libperl/Asim/lib/Asim
+ Fork.pm                   Locally Modified          253 
+ Workspace.pm              Locally Modified          253 
+
+Updating with simcore changes (rev. 2582 - Joel Emer)
+
+Added some commands to asim-shell for running, cleaning
+and verifying regressions:
+
+asim-shell> run regression <package>... <switches>
+asim-shell> verify regression
+asim-shell> clean regression
+
+Coded ability for asim-shell for fork the configure/build
+of packages. Currently disabled. Added a place in the workspace
+for fork logs: <workspace>/var/log.

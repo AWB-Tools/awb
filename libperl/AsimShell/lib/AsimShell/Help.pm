@@ -107,7 +107,7 @@ Commands:
 
   show package [all|<package>...]        - show info about package
 
-  regtest package [<package>]            - run regression test on package
+  regtest package [<package>]            - run regression test on package (obsolete)
 
   update package [all|<package>...]      - update a package
     [--nobuild]                          - prevent ./configure and build of package
@@ -144,6 +144,14 @@ Commands:
 
   status package [all|<package> ...]     - print status of package(s) against repository
     [--verbose]                          - print status of every file
+
+
+  clean regression                       - cleanup after regression
+
+  run regression [default|all|<pkg>...]  - run regression on packages
+    [<swtiches>]                           switches to send to regression launcher
+
+  verify regression                      - verify regression results
 
   rehash locks                           - rehash lock list
   list locks                             - list of all locks

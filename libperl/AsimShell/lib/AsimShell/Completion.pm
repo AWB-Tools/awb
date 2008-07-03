@@ -64,22 +64,29 @@ our $default_module;
 # Utility function to help parsing
 #
 sub attempted_completion {
-  my ($text, $line, $start, $end) = @_;
+  my $text  = shift;     # The text word being completed
+  my $line  = shift;     # The entire line
+  my $start = shift;     # The start index of $text in $line
+  my $end   = shift;     # The end index of $text in $line
+
   my $prefix;
   my @list;
 
-  # Strip leading spaces
-  $line =~ s/^\s*//;
-
   $prefix = substr($line, 0, $start);
+
+  # Strip leading spaces (now $start and $end are wrong!!!)
+
+  $line =~ s/^\s*//;
+  $prefix =~ s/^\s*//;
 
   $term->Attribs->{completion_append_character} = " ";
 
-  if ($start == 0) {
+  if ($prefix eq "") {
     #
     # Handle first symbol of command
     #
     @list = grep /^$text/, @COMMANDS;
+
     return (max_common($text, @list), @list);
 
   } elsif ($text =~ /--[^=]*$/) {
@@ -91,7 +98,7 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ( $prefix =~ /^(\w+)\s*$/) {
+  } elsif ( $prefix =~ /^(\w+)\s+$/) {
 
     #
     # Handle second symbol of command (if first is a legal keyword)
@@ -106,10 +113,10 @@ sub attempted_completion {
     @list = grep /^$text/, @subcommands;
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /checkout\s+bundle\s+$/ ||
-           $prefix =~ /use\s+bundle\s+$/      ||
-           $prefix =~ /show\s+bundle\s+$/     ||
-           $prefix =~ /update\s+bundle\s+$/   ){
+  } elsif ($prefix =~ /^checkout\s+bundle\s+$/ ||
+           $prefix =~ /^use\s+bundle\s+$/      ||
+           $prefix =~ /^show\s+bundle\s+$/     ||
+           $prefix =~ /^update\s+bundle\s+$/   ){
     #
     # Handle bundles that can be checked out
     #
@@ -138,9 +145,9 @@ sub attempted_completion {
       
       return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /checkout\s+package\s+$/ ||
-           $prefix =~ /use\s+package\s+$/      ||
-           $prefix =~ /show\s+repository\s+$/  ) {
+  } elsif ($prefix =~ /^checkout\s+package\s+$/ ||
+           $prefix =~ /^use\s+package\s+$/      ||
+           $prefix =~ /^show\s+repository\s+$/  ) {
     #
     # Handle packages that can be checked out
     #
@@ -165,7 +172,7 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /add\s+public_package\s+$/) {
+  } elsif ($prefix =~ /^add\s+public_package\s+$/) {
     #
     # Handle packages that can be checked out
     #
@@ -174,7 +181,7 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /^\s*(\w+)\s+package(\s+[a-zA-Z]\w+)*\s+$/ && is_multi_package_command( $1 ) ) {
+  } elsif ($prefix =~ /^(\w+)\s+package(\s+[a-zA-Z][\w-]+)*\s+$/ && is_multi_package_command( $1 )) {
     #
     # Handle commands that take one or more package names as arguments
     #
@@ -183,6 +190,21 @@ sub attempted_completion {
     # "all" is only valid as first argument
     if ($prefix =~ /^\s*(\w+)\s+package\s+$/ && package_command_takes_all_arg( $1 ) ) {
       push(@packages, "all");
+    }
+
+    @list = grep /^$text/, @packages;
+
+    return (max_common($text, @list), @list);
+
+  } elsif ($prefix =~ /^run\s+regression(\s+[a-zA-Z][\w-]+)*\s+$/) {
+    #
+    # Handle regression commands that take one or more package names as arguments
+    #
+    my @packages = $default_packageDB->directory();
+
+    # "all" and "default" are only valid as first argument
+    if ($prefix =~ /^\s*run\s+regression\s+$/ ) {
+      push(@packages, "default", "all");
     }
 
     @list = grep /^$text/, @packages;
@@ -232,18 +254,23 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /--user\s*$/ || $prefix =~ /--user=[^ ]*$/ ) {
+  } elsif ($prefix =~ /--user\s*$/ || $prefix =~ /--user=$/ ) {
     #
     # Handle user on --user switch
     #
     return $term->completion_matches($text,
                                      $term->Attribs->{'username_completion_function'});
 
-  } elsif ($prefix =~ /--commitlog\s*$/ || $prefix =~ /--commitlog=[^ ]*$/ ) {
+  } elsif ($prefix =~ /--commitlog\s*$/ || $prefix =~ /--commitlog=$/ ) {
     #
     # Handle user on --commitlog switch - filename completion
     #
     return ();
+
+  } elsif (0) {
+    #
+    # TBD: Figure out how to handle string options to other switches (following = or not)
+    #
 
   } elsif (0) {
     #
@@ -294,7 +321,7 @@ sub is_multi_package_command {
 #
 sub package_command_takes_all_arg {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
+  return ( $cmd =~ m/^((status)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(run))$/ );
 }
 
 

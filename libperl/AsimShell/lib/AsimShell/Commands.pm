@@ -64,6 +64,7 @@ use strict;
 
 use Asim;
 use Asim::Inifile;
+use Asim::Fork;
 
 use Getopt::Long;
 use File::Spec;
@@ -95,6 +96,9 @@ our $default_module;
 our $default_user = $ENV{USER};
 
 our @failures = ();
+
+
+Asim::Fork::init("asim-shell", 1);
 
 ################################################################
 #
@@ -448,7 +452,7 @@ sub new_repository {
 }
 
 sub show_repository {
-  my $repositoryname  = shift;
+  my $repositoryname  = shift           || return undef;
   my $repositoryDB = get_repositoryDB() || return undef;
 
   my $repository = $repositoryDB->get_repository($repositoryname)
@@ -1306,20 +1310,53 @@ sub clean_package {
 #
 sub configure_and_build_packages {
   my @plist = @_;
+
+  my $dofork = 0;
+  my $logdir = $Asim::default_workspace->log_dir();
   my $status;
 
   @plist = sort { $a->buildorder() <=> $b->buildorder() } @plist;
 
+  my $last_buildorder = 1;
+
   for my $p (@plist) {
-    _print_package_start("configure/build", $p->name(), "(" .$p->buildorder().")");
+    my $pname = $p->name();
+    my $buildorder = $p->buildorder();
+
+    # On change of buildorder priority - wait for all lower priority builds
+
+    if ($buildorder != $last_buildorder) {
+      print "Waiting for all builds of priority $last_buildorder\n";
+      Asim::Fork::wait_for_children() && _add_failure("unknown", "forked configure/make failed");;
+
+      $last_buildorder = $buildorder;
+    }
+
+    _print_package_start("configure/build", $pname, "($buildorder)");
 
     # TBD: Should we filter out non-private packages?
 
-    $p->configure() || _add_failure($p->name(), "configure failed") && next;
-    $p->build()     || _add_failure($p->name(), "make failed");
+    unless (Asim::Fork::controlled_fork($dofork, "$logdir/build.$pname.log", "build.$pname", 1)) {
+
+      $status = $p->configure();
+
+      if (!$status) {
+        _add_failure($p->name(), "configure failed");
+      } else {
+
+        $status = $p->build();
+        if (! $status) {
+          _add_failure($p->name(), "make failed");
+        }
+      }
+
+      Asim::Fork::controlled_exit($dofork, ! (defined($status) && ($status)));
+    }
 
     _print_package_finish("configure/build", $p->name());
   }
+
+  Asim::Fork::wait_for_children() && _add_failure("unknown", "forked configure/make failed");
 
   # Note we don't _report_failures() here. The caller must do that.
 
@@ -1492,14 +1529,9 @@ sub unset_package {
 
 
 sub regtest_package {
-  my $name = shift;
-  my $package = get_package($name) || return ();
+  print "Obsolete: Use {clean,run,verify} regression instead\n";
 
-  my $location = $package->location();
-
-  system("cd $location; regtest.pl");
-
-  return 1;
+  return undef;
 }
 
 
@@ -1938,6 +1970,75 @@ sub get_package {
       || shell_error("No package or default package defined\n") && return ();
 }
 
+
+
+################################################################
+#
+# regression functions
+#
+################################################################
+
+sub run_regression {
+
+  local @ARGV = @_;
+
+  my $cleanup = 0;
+
+  my $status;
+
+  # Parse options (passing through raw regression.launcher switches)
+
+  Getopt::Long::Configure("pass_through");
+
+  $status = GetOptions( "cleanup!"    => \$cleanup);
+
+  Getopt::Long::Configure("default");
+
+  return 0 if (!$status);
+
+  # Create base regression command
+
+  my $command = "regression.launcher ";
+
+  # Then, add expanded package name list
+
+  my @package_names = grep(!/^[-]/, @ARGV);
+
+  if ($#package_names >= 0) {
+    @package_names = _expand_package_names(@package_names);
+
+    if ($package_names[0] ne "default") {
+      $command .= " --package=" . join(",",@package_names);
+    }
+  }
+
+  # Then, add on regression switches
+
+  $command  .= " " . join(" ", grep(/^[-]/, @ARGV));
+
+  # Do the requested actions
+
+  if ($cleanup) {
+    clean_regression();
+  }
+
+  print "% $command\n";
+  system($command);
+
+  return 1;
+
+}
+
+sub clean_regression {
+  system("regression.cleanup");
+  return 1;
+}
+
+
+sub verify_regression {
+  system("regression.verifier");
+  return 1;
+}
 
 
 ################################################################

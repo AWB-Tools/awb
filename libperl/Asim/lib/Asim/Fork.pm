@@ -107,7 +107,7 @@ sub init {
 # controlled_exit().  increment the reference count.
 
 sub controlled_fork {
-  my $dofork = shift  || return 1;
+  my $dofork = shift  || return 0;
   my $log = shift;
   my $forkname = shift;
   my $wait = shift;
@@ -247,7 +247,7 @@ sub wait_for_children {
       $ecode += $child_ecode;
     }
 
-    print_debug("Finished waiting for $num children\n");
+    print_debug("Finished waiting for $num children - exit code=$ecode\n");
 
     return $ecode;
 }
