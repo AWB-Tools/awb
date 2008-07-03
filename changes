@@ -5054,3 +5054,15 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2592 - Krishna Rangan)
 
 - an informative mesg replaces a mysterious silent exit.
+
+----------
+spartha1    Date: Thu Jul  3 11:13:39 EDT 2008  CSN: CSN-asimcore-261
+                  Thu Jul  3 15:13:39 UTC 2008
+
+
+Directory lib/libasim/src
+ clockserver.cpp           Locally Modified          260 
+
+Updating with simcore changes (rev. 2593 - Sailashri Parthasarathy)
+
+Fixing a bug in the Random clock server.The clockserver was clocking all the modules and rate matchers associated with a time event before moving on to the next time event (also scheduled for this cycle). Changing its behavior to clock all the modules of all the time events scheduled for this cycle before clocking the rate matcher ports. This is now similar to the behavior of the regular clock server.

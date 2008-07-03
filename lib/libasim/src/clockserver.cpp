@@ -1235,83 +1235,98 @@ UINT64 ASIM_CLOCK_SERVER_CLASS::RandomClock()
 
     ASSERT(!threaded, "Threaded random clocking not implemented by now!");
 
+    deque<CLOCK_REGISTRY> lClockedEvents;
+
     CLOCK_REGISTRY currentEvent = lTimeEvents.front();
     UINT64 currentBaseCycle = currentEvent->nBaseCycle;
-    
-    while(true)
+
+    // Loop through all the time events scheduled for this cycle 
+    // and clock all the associated modules
+    while(lTimeEvents.size() > 0)
     {
-  
-        currentEvent = lTimeEvents.front();                
-        if(currentBaseCycle != currentEvent->nBaseCycle)
-        {
-            UINT64 inc = currentBaseCycle / 100 - internalBaseCycle;
-            internalBaseCycle = currentBaseCycle / 100;
-            return inc;
+        currentEvent = lTimeEvents.front();
+
+        if(currentBaseCycle != currentEvent->nBaseCycle) {
+            break;
         }
+            
         lTimeEvents.pop_front();
+
+        // Add the current event to a list - this events list will be used to clock the rate matchers
+        lClockedEvents.push_back(currentEvent);
 
         // We clock all the frequencies that must be clocked at current time
         // Generate a random order between all the elements inside the frequency
         size_t vSize = currentEvent->lModules.size();
+
         while(vSize)
         {
-            
             // We have to set the random_state before calling the random generator
             char *tmp_state = setstate((char *)random_state);            
             UINT32 i = random() % vSize;
             setstate(tmp_state);
 
             EVENT ( currentEvent->lModules[i].second->cReg->DralNewCycle(); )
-            
+
             currentEvent->lModules[i].second->currentCycle = currentEvent->nCycle;
             currentEvent->lModules[i].second->Clock();
 
             // Swap the selected element with the last one
             pair<ASIM_CLOCKABLE, CLOCK_CALLBACK_INTERFACE>
                 tmp = currentEvent->lModules[vSize - 1];
+
             currentEvent->lModules[vSize - 1] = currentEvent->lModules[i];
             currentEvent->lModules[i] = tmp;
-            --vSize;
-        }
 
-        // We clock all the WriterRateMatcher that
+            --vSize;
+        }        
+    }
+
+    // Loop through all the time events scheduled for this cycle
+    // and clock all the associated rate matchers
+
+    deque<CLOCK_REGISTRY>::iterator it_event = lClockedEvents.begin();
+
+    for( ; it_event != lClockedEvents.end(); ++it_event)
+    {     
+        // We clock all the WriterRateMatchers that
         // must be clocked at current time
-        vSize = currentEvent->lWriterRM.size();
+        size_t vSize = (*it_event)->lWriterRM.size();
+
         while(vSize)
         {
-            
             // We have to set the random_state before calling
             // the random generator
             char *tmp_state = setstate((char *)random_state);            
             UINT32 i = random() % vSize;
             setstate(tmp_state);
 
-            EVENT ( currentEvent->lWriterRM[i].second->cReg->DralNewCycle(); )
-            
-            currentEvent->lWriterRM[i].second->currentCycle = currentEvent->nCycle;
-            currentEvent->lWriterRM[i].second->Clock();
+            EVENT ( (*it_event)->lWriterRM[i].second->cReg->DralNewCycle(); )
+
+            (*it_event)->lWriterRM[i].second->currentCycle = (*it_event)->nCycle;
+            (*it_event)->lWriterRM[i].second->Clock();
 
             // Swap the selected element with the last one
             pair<ASIM_CLOCKABLE, CLOCK_CALLBACK_INTERFACE>
-                tmp = currentEvent->lWriterRM[vSize - 1];
-            currentEvent->lWriterRM[vSize - 1] = currentEvent->lWriterRM[i];
-            currentEvent->lWriterRM[i] = tmp;
+              tmp = (*it_event)->lWriterRM[vSize - 1];
+
+            (*it_event)->lWriterRM[vSize - 1] = (*it_event)->lWriterRM[i];
+            (*it_event)->lWriterRM[i] = tmp;
+
             --vSize;
-            
         }
 
-        currentEvent->nCycle++;
+        (*it_event)->nCycle++;
         
         // WARNING! The step may have been modified at setDomainFrequency
-        currentEvent->nBaseCycle += currentEvent->nStep;
+        (*it_event)->nBaseCycle += (*it_event)->nStep;
         
-        AddTimeEvent(currentEvent->nBaseCycle, currentEvent);
-    
+        AddTimeEvent((*it_event)->nBaseCycle, (*it_event));
     }
-    
-    VERIFYX(false);
-    return 0;    
-    
+
+    UINT64 inc = currentBaseCycle / 100 - internalBaseCycle;
+    internalBaseCycle = currentBaseCycle / 100;
+    return inc;    
 }
 
 
