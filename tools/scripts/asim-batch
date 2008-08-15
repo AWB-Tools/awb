@@ -1,6 +1,5 @@
-: # -*- perl -*-
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##################################################################################
 # 
@@ -42,6 +41,11 @@ use Asim;
 Asim::init();
 
 use Asim::Util;
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 #
 # Hard coded defaults.  In other words, defautls that cannot be changed using

@@ -1,6 +1,5 @@
-: # -*-Perl-*-
-eval 'exec perl -w "$0" ${1+"$@"}'
-    if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 #
 # Copyright (C) 2004-2006 Intel Corporation
@@ -34,6 +33,12 @@ use strict;
 
 use File::Basename;
 use Getopt::Long;
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
 
 my $csv = 0;
 my $help = 0;

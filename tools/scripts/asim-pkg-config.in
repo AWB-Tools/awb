@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##############################################################################
 # Copyright (C) 2003-2006 Intel Corporation
@@ -44,6 +43,12 @@ foreach my $arg (@ARGV) {
     $debug = 1;
   }
 }
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
 
 # autoconf variables
 my $package="@package@";

@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##################################################################################
 #
@@ -28,5 +27,10 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 # Purpose:
 #       A GUI interface to find, build and run models
 #
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 

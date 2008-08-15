@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 # *****************************************************************
 # *                                                               *
@@ -31,6 +30,11 @@ use Text::ParseWords;
 
 use Asim;
 use PlotShell;
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 #
 # Argument handling

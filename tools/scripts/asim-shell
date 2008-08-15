@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 #
 # Copyright (C) 2002-2006 Intel Corporation
@@ -31,6 +30,11 @@ use Text::ParseWords;
 
 use Asim;
 use AsimShell;
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 #
 # Argument handling

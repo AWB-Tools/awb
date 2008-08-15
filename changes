@@ -5066,3 +5066,74 @@ Directory lib/libasim/src
 Updating with simcore changes (rev. 2593 - Sailashri Parthasarathy)
 
 Fixing a bug in the Random clock server.The clockserver was clocking all the modules and rate matchers associated with a time event before moving on to the next time event (also scheduled for this cycle). Changing its behavior to clock all the modules of all the time events scheduled for this cycle before clocking the rate matcher ports. This is now similar to the behavior of the regular clock server.
+
+----------
+joel        Date: Fri Aug 15 10:08:48 EDT 2008  CSN: CSN-asimcore-262
+                  Fri Aug 15 14:08:48 UTC 2008
+
+
+Directory scripts
+ install-rcfile            Locally Modified          261 
+
+Directory tools/scripts
+ reglevel.pl               Locally Removed           261 
+ asim-pkg-config.in        Locally Modified          261 
+ regression.launcher       Locally Modified          261 
+ asim-benchmark            Locally Modified          261 
+ sanity.pl                 Locally Removed           261 
+ plot-shell                Locally Modified          261 
+ test-xpath-function       Locally Removed           261 
+ regtest.pl                Locally Removed           261 
+ random.pl                 Locally Removed           261 
+ random_mt.pl              Locally Removed           261 
+ regression.verifier       Locally Modified          261 
+ asim-shell                Locally Modified          261 
+ asimcommit                Locally Removed           261 
+ asimstarter.in            Locally Modified          261 
+ cvs-sync                  Locally Removed           261 
+ xcheck                    Locally Modified          261 
+ regression.cleanup        Locally Modified          261 
+ summarize-stats           Locally Modified          261 
+ rsync-traces              Locally Removed           261 
+ asim-admin                Locally Removed           261 
+ multitrace.pl             Locally Removed           261 
+ newbox_template.h         Locally Removed           261 
+ asimtools.pl              Locally Removed           261 
+ trc2eng_2_gtrace.pl       Locally Removed           261 
+ sum-simpoints             Locally Modified          261 
+ model-coverage            Locally Modified          261 
+ asim-run                  Locally Modified          261 
+ sum-unweighted            Locally Modified          261 
+ apm-fixup                 Locally Modified          261 
+ asim-batch                Locally Modified          261 
+ asim-compare-stats        Locally Modified          261 
+ random_setup_mt.pl        Locally Removed           261 
+ newbox.pl                 Locally Removed           261 
+ getChecksum.pl            Locally Removed           261 
+ stat-to-text              Locally Modified          261 
+ newbox_template.cpp       Locally Removed           261 
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace_head.pl  Locally Modified          261 
+
+Directory tools/awb/awb-wizard
+ awb_wizard_head.pl        Locally Modified          261 
+
+Directory tools/awb/awb2
+ awb_head.pl               Locally Modified          261 
+
+Updated all scripts to support running with dash as /bin/sh, 
+which is the default on Ubuntu. The change involves substituting 
+the incantation for invoking perl from:
+
+:
+eval 'exec perl -w "$0" ${1+"$@"}'
+       if 0;
+
+to:
+
+#!/usr/bin/env perl
+# -*- perl -*-
+
+$^W = 1;
+

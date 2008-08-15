@@ -1,6 +1,5 @@
-: # -*- perl -*-
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##################################################################################
 # 
@@ -45,6 +44,12 @@ Asim::init();
 use Asim::Util;
 use Asim::Package;
 use Asim::Package::DB;
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
 
 # terminal default
 $Term::ANSIColor::AUTORESET = 1;

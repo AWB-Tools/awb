@@ -1,6 +1,5 @@
-: # -*- perl -*-
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##################################################################################
 # 
@@ -64,6 +63,11 @@ use Asim::Util;
 # $child_count = 1;
 
 #$SIG{INT} = sub { die "$$ dying\n" };
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 #
 # Per process global variables

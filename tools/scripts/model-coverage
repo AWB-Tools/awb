@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 #--------------------------------------------------------------------
 #                                                                      
@@ -45,6 +44,11 @@ use Asim::Model;
 use Asim::Module;
 use Asim::Module::DB;
 use Asim::Regression;
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 $RESOLVER = 'awb-resolver';
 

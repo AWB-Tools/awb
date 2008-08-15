@@ -1,6 +1,5 @@
-: # -*- perl -*-
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##################################################################################
 # 
@@ -39,6 +38,10 @@ use Asim::Package;
 
 Asim::init();
 
+#
+# Turn on warnings
+#
+$^W = 1;
 
 # Global information
 $SUMMARY_FILE = "run.summary";

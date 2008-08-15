@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env
+# -*- perl -*-
 
 #
 # Copyright (C) 2002-2006 Intel Corporation
@@ -68,6 +67,11 @@ use File::Basename;
 use Getopt::Long;
 use Asim::Stats::ToText;
 use Asim::Stats::ToText::LongNames;
+
+#
+# Turn on warnings
+#
+$^W = 1;
 
 #
 # filter routine to disable printing if name does not

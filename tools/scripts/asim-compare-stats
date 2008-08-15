@@ -1,6 +1,6 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
+
 ##
 ## Author: Isaac Hernandez 
 ## Modified by: Oscar Rosell (XML support)
@@ -13,6 +13,12 @@ use Getopt::Long;
 ## XML Parser
 ## For information on XML Specs go to www.w3.org
 use XML::GDOME;
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
 
 my %STATSFILE_0=();
 my %STATSFILE_1=();

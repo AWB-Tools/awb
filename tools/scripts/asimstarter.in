@@ -1,6 +1,6 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
+
 
 # *****************************************************************
 # *                                                               *
@@ -31,6 +31,10 @@ use File::Basename;
 
 $debug = 0 || defined($ENV{ASIMSTARTER_DEBUG});
 
+#
+# Turn on warnings
+#
+$^W = 1;
 
 # autoconf variables
 
@@ -176,34 +180,13 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
 # Obsoleted tools - 
 #
-  "asim"                => "awb/asim",
-  "awb1"                => "awb/awb",
-  "awb-edit-model"      => "awb/awb-edit-model",
-  "getconfig"           => "awb/getconfig",
   "asim_filter"         => "tools/scripts/asim_filter",
-  "asimtools.pl"        => "tools/scripts/asimtools.pl",
-  "cvs-sync"            => "tools/scripts/cvs-sync",
   "gen-spec95-config"   => "tools/scripts/gen-spec95-config",
-  "random.pl"           => "tools/scripts/random.pl",
-  "random_mt.pl"        => "tools/scripts/random_mt.pl",
-  "random_setup_mt.pl"  => "tools/scripts/random_setup_mt.pl",
-  "reglevel.pl"         => "tools/scripts/reglevel.pl",
-  "regtest.pl"          => "tools/scripts/regtest.pl",
-  "sanity.pl"           => "tools/scripts/sanity.pl",
   "xcheck"              => "tools/scripts/xcheck",
 #
   "asim.R"              => "tools/scripts/asim.R",
   "grab.R"              => "tools/scripts/grab.R",
   "param.R"             => "tools/scripts/param.R",
-#
-# Direct use of the following is deprecated - use asim-shell instead
-#
-# "asim-admin"          => "tools/scripts/asim-admin",
-# "asimbranch"          => "tools/scripts/asimbranch",
-# "asimchanges"         => "tools/scripts/asimchanges",
-# "asimcommit"          => "tools/scripts/asimcommit",
-# "asimmerge"           => "tools/scripts/asimmerge",
-# "newbox.pl"           => "tools/scripts/newbox.pl",
 
 );
 

@@ -1,6 +1,5 @@
-:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 ##################################################################################
 #
@@ -29,4 +28,8 @@ eval 'exec perl -w "$0" ${1+"$@"}'
 #       A GUI interface to create a new module
 #
 
+#
+# Turn on warnings
+#
+$^W = 1;
 

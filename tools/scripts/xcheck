@@ -1,6 +1,5 @@
-:
-eval 'exec perl "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 #
 # Copyright (C) 2002-2006 Intel Corporation
