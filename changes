@@ -5137,3 +5137,14 @@ to:
 
 $^W = 1;
 
+
+----------
+jsemer      Date: Fri Aug 15 14:06:52 EDT 2008  CSN: CSN-asimcore-263
+                  Fri Aug 15 18:06:52 UTC 2008
+
+
+Directory tools/scripts
+ regression.cleanup        Locally Modified          262 
+ stat-to-text              Locally Modified          262 
+
+Fixed some typos in incantation to invoke perl.
