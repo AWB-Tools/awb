@@ -29,6 +29,7 @@
 
 #include <sstream>
 #include <unistd.h>
+#include <stdlib.h>
 #include <vector>
 #include <map>
 #include <string>

@@ -23,6 +23,7 @@
  */
 
 #include "asim/dralStringMapping.h"
+#include <stdlib.h>
 #include <iostream>
 #include <assert.h>
 

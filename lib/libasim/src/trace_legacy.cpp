@@ -29,7 +29,10 @@
 #include "asim/message_handler_log.h"
 
 
+#include <stdlib.h>
 #include <ostream>
+#include <strings.h>
+#include <string.h>
 #include <iomanip>
 #include <list>
 using namespace std;

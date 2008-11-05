@@ -5148,3 +5148,49 @@ Directory tools/scripts
  stat-to-text              Locally Modified          262 
 
 Fixed some typos in incantation to invoke perl.
+
+----------
+jsemer      Date: Wed Nov  5 10:59:27 EST 2008  CSN: CSN-asimcore-264
+                  Wed Nov  5 15:59:27 UTC 2008
+
+
+Directory tools/awb/amc
+ amc.cpp                   Locally Modified          263 
+
+Directory tools/awb/awb-resolver
+ awb-resolver.cpp          Locally Modified          263 
+
+Directory lib/libasim/include/asim
+ resource_stats.h          Locally Modified          263 
+ arch_register.h           Locally Modified          263 
+ threaded_log.h            Locally Modified          263 
+
+Directory lib/libasim/src
+ xcheck.cpp                Locally Modified          263 
+ ioformat.cpp              Locally Modified          263 
+ trace_legacy.cpp          Locally Modified          263 
+ mesg.cpp                  Locally Modified          263 
+ regexobj.cpp              Locally Modified          263 
+ stateout.cpp              Locally Modified          263 
+ stackdump.cpp             Locally Modified          263 
+
+Directory lib/libawb
+ model.cpp                 Locally Modified          263 
+ model_builder.cpp         Locally Modified          263 
+ util.cpp                  Locally Modified          263 
+ inifile.cpp               Locally Modified          263 
+ module.cpp                Locally Modified          263 
+ benchmark.cpp             Locally Modified          263 
+
+Directory lib/libdral/include/asim
+ dralStorage.h             Locally Modified          263 
+ dralServer.h              Locally Modified          263 
+
+Directory lib/libdral/src
+ dralListenerConverter.cpp Locally Modified          263 
+ dralDesc.cpp              Locally Modified          263 
+ dralServerAscii.cpp       Locally Modified          263 
+ dralStringMapping.cpp     Locally Modified          263 
+
+Added #include <> updates from Guo Rui to support gcc 4.3.2.
+Mostly these are inclusions of stdlib.

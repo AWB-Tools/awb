@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <pdsc.h>
 #include <excpt.h>
+#include <stdlib.h>
 #include <pthread_exception.h>
 #include <machine/fpu.h>
 #include <st.h>

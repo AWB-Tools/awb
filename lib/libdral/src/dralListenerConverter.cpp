@@ -24,6 +24,8 @@
  
 #include "asim/dralListenerConverter.h"
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 
 DRAL_LISTENER_CONVERTER_CLASS::DRAL_LISTENER_CONVERTER_CLASS(DRAL_LISTENER_OLD listener)
 {

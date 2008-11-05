@@ -27,6 +27,7 @@
 
 // ASIM core
 #include "asim/ioformat.h"
+#include <stdlib.h>
 
 namespace IoFormat {
 

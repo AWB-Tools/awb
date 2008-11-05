@@ -22,6 +22,7 @@
 using namespace std;
 
 #include "asim/dralDesc.h"
+#include <string.h>
 
 #define ENABLE_VALIST_CODE COMPILE_DRAL_WITH_PTV
 

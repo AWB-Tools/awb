@@ -24,6 +24,8 @@
 
 // generic (C++)
 #include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
 // local
 #include "model.h"

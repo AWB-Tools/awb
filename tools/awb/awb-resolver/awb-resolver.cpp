@@ -24,6 +24,7 @@
 
 // generic (C)
 #include <popt.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 // generic (c++)

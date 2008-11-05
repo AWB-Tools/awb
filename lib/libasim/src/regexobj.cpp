@@ -32,6 +32,7 @@
 
 #include <asim/regexobj.h>
 #include <iostream>
+#include <stdlib.h>
 
 Regex::Regex(const char *pattern, bool caseSensitive)
 {

@@ -26,6 +26,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <string.h>
 #include <cerrno>
 
 // ASIM core

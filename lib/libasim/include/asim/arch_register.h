@@ -40,6 +40,7 @@
 #define _ARCHREGISTER_
 
 #include <iostream>
+#include <string.h>
 
 // ASIM core
 #include "asim/syntax.h"

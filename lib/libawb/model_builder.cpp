@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
 
 // generic (C++)
 #include <iostream>

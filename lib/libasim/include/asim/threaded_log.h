@@ -26,6 +26,7 @@
 #include <fstream>
 #include <iostream>
 #include <sched.h>
+#include <stdlib.h>
 
 typedef  int LONG;
 typedef  int DWORD; 

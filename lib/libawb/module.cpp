@@ -26,6 +26,7 @@
 
 // generic (C++)
 #include <iostream>
+#include <stdlib.h>
 #include <fstream>
 
 // local
