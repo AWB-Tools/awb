@@ -181,7 +181,9 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /^(\w+)\s+package(\s+[a-zA-Z][\w-]+)*\s+$/ && is_multi_package_command( $1 )) {
+  } elsif (   ($prefix =~ /^(\w+)\s+package(\s+[a-zA-Z][\w-]+)*\s+$/ && is_multi_package_command( $1 ))
+           || ($prefix =~ /^((show)|(verify))\s+configuration/                                        )
+          ) {
     #
     # Handle commands that take one or more package names as arguments
     #

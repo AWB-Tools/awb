@@ -24,6 +24,7 @@
 #
 
 package Asim::BuildTree;
+use Asim::BuildTree::Configuration;
 use warnings;
 use strict;
 
@@ -182,6 +183,23 @@ sub clean {
   }
 
   return 1;
+}
+
+################################################################
+
+=item $build_tree-E<gt>get_configuration()
+
+Return a Asim::BuildTree::Configuration object that can be used
+to query code configuration for the build tree.
+
+=cut
+
+################################################################
+
+sub get_configuration {
+  my $self = shift;
+  my $location = $self->location();
+  return Asim::BuildTree::Configuration->new($location);
 }
 
 =back

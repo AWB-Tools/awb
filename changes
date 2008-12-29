@@ -5428,3 +5428,60 @@ Directory lib/libasim/include/asim
 Updating with simcore changes (rev. 2650 - Carl Beckmann)
 
 - Added a necessary include of <set> which fixes a model build failure
+
+----------
+spartha1    Date: Mon Dec 29 13:02:42 EST 2008  CSN: CSN-asimcore-278
+                  Mon Dec 29 18:02:42 UTC 2008
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          277 
+ Completion.pm             Locally Modified          277 
+ Commands.pm               Locally Modified          277 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          277 
+
+Directory libperl/Asim/lib/Asim
+ BuildTree/                Locally Added               0 
+
+Directory libperl/Asim/lib/Asim/BuildTree
+ Configuration.pm          Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ BuildTree.pm              Locally Modified          277 
+
+Directory tools/scripts
+ asim-shell                Locally Modified          277 
+
+Updating with simcore changes (rev. 2655 - Carl Beckmann)
+
+- Added an object class to query build tree configuration information
+  from autoconf configure script output.
+
+- Added an asim-shell command "show configuration <packages...>" to print
+  build tree configuration information
+
+- Added an asim-shell command "verify configuration <packages...>" to
+  verify compatibility of the build tree configurations for the listed
+  packages.  The most common usage is "verify configuration all" check checks
+  all packages for consistency.
+  
+  The check is normally done using only a small amount of information from
+  configure, i.e. the machine type and OS release version, the C++ compiler
+  and version, and the ARCHFLAGS setting.  But a more exhaustive check can
+  be done using the --exhaustive switch to this asim-shell command (although
+  this usually results in spurious mismatches).
+
+- Added some automated checks of package build tree configurations that get
+  invoked in asim-shell upon:
+  + startup
+  + checkout or update of packages
+  + manually configuring packages
+  + adding public or other packages
+  The checks are disabled in batch mode.  They can also be explicitly
+  disabled using a new command line switch --noconfigcheck
+
+  This check should catch the most common configuration mismatches, e.g.
+  checking out different packages on different host architectures, or
+  inconsistent 32/64-bit build settings.

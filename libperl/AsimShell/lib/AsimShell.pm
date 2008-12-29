@@ -36,6 +36,7 @@ use AsimShell::Help;
 # Control variables
 #
 our $show_warnings;
+our $check_package_configurations;
 
 #
 # Default data values
@@ -113,13 +114,13 @@ our %COMPOUNDCOMMANDS =
     rehash    => [ qw(repositories locks packages models modules workspace) ],
     regtest   => [ qw(package) ],
     release   => [ qw(package) ],
-    show      => [ qw(bundle workspace package lock model module repository) ],
+    show      => [ qw(bundle workspace package lock model module repository configuration) ],
     run       => [ qw(benchmark regression) ],
     unlock    => [ qw(package lock) ],
     unset     => [ qw(package lock model module) ],
     update    => [ qw(bundle package) ],
     use       => [ qw(bundle package) ],
-    verify    => [ qw(regression) ],
+    verify    => [ qw(regression configuration) ],
     svn       => [ qw(package) ],
   );
 
@@ -229,6 +230,16 @@ sub init {
   $show_warnings = 1;
   if (defined($switches{warnings})) {
     $show_warnings = $switches{warnings};
+  }
+  
+  # package configuration checks enabled?
+  
+  $check_package_configurations = 1;
+  if (defined($switches{configcheck})) {
+    $check_package_configurations = $switches{configcheck};
+  }
+  if (Asim::mode() eq 'batch') {
+    $check_package_configurations = 0;
   }
 
   return 1;

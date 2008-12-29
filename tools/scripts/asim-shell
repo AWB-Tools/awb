@@ -59,6 +59,7 @@ my $batch = 0;
 my $interactive = 1;
 my $warnings = 1;
 my $locking = 0;
+my $configcheck = 1;
 
 my $batchfile = "";
 
@@ -77,7 +78,8 @@ $status = GetOptions( "repositoryDB=s" => \$repositoryDB,
                       "file=s"         => \$batchfile,
                       "locking!"       => \$locking,
                       "warnings!"      => \$warnings,
-                      "help"           => \$help
+                      "help"           => \$help,
+                      "configcheck!"   => \$configcheck
                     );
 
 
@@ -115,7 +117,8 @@ Asim::init()
 
 
 AsimShell::init(mode => $runmode,
-                warnings => $warnings)
+                warnings => $warnings,
+                configcheck => $configcheck)
   || die("Unable to intialize AsimShell::\n");
 
 
@@ -185,6 +188,9 @@ if ($batchfile) {
   $status = AsimShell::run_command(@ARGV);
 
 } else {
+  # do a quick check of package consistency before going interactive:
+  AsimShell::maybe_check_package_configurations();
+
   print "Current workspace=" . $Asim::default_workspace->rootdir(). "\n";
 
   $status = AsimShell::shell();
@@ -220,6 +226,10 @@ asim-shell [--workspace <workspace>]
            [--module <module>] 
            [--repositoryDB <repositoryDB>] 
            [--file <commandfile>]
+           [--help]
+           [--[no]locking]
+           [--[no]warnings]
+           [--[no]configcheck]
            [[--] command...]
 
 =head1 DESCRIPTION
@@ -293,6 +303,17 @@ ignored.
 =item --help
 
 Get this help information.
+
+=item --[no]configcheck
+   
+Perform, or skip, a check of package configuration consistency on interactive startup.
+This checks that packages were built with a consistent set of configuration switches
+and host machine architectures.
+The default is to perform this check.
+Note that this check is skipped on batch invocations of asim-shell.
+   
+See also the asim-shell commands "show configuration" and "verify configuration".
+When this check is enabled, a "verify configuration all" command is performed on startup.
 
 =item [--] command...
 

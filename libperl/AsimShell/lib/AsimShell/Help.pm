@@ -146,6 +146,13 @@ Commands:
     [--verbose]                          - print status of every file
 
 
+  show configuration [all|<package> ...] - show build tree configuration info for package
+    [--verbose]                          - include a more extensive list of output vars
+
+  verify configuration [all|<pkg> ...]   - verify compatibility of package configurations
+    [--exhaustive]                       - check the full list of 'configure' output variables
+
+
   list regressions                       - list existing regressions
 
   run regression [default|all|<pkg>...]  - run regression on packages
@@ -483,6 +490,8 @@ sub help_code {
                     "Asim/Package/DB.pm",
                     "Asim/Package/Svn.pm",
                     "Asim/Package/Template.pm",
+                    "Asim/BuildTree.pm",
+                    "Asim/BuildTree/Configuration.pm",
                     "Asim/Lock.pm",
                     "Asim/Model.pm",
                     "Asim/Module/DB.pm",

@@ -92,6 +92,10 @@ our $default_model;
 our $default_benchmark;
 our $default_module;
 
+# these are the items we display or check on a "show configuration" or
+# "verify configuration" command.  We may want to make configurable via asimrc, eventually:
+our @default_buildtree_config_itemlist = qw(machine os_release2 cxx_compiler cxx_compiler_version);
+our @default_buildtree_config_varlist  = qw(CXX ARCHFLAGS);
 
 our $default_user = $ENV{USER};
 
@@ -946,6 +950,7 @@ sub checkout_package {
   if (defined($build) && $build ) {
     $package->configure();
     $package->build();
+    maybe_check_package_configurations();
   }
 
   #
@@ -1031,6 +1036,7 @@ sub use_package {
   if (defined($build) && $build ) {
     $package->configure();
     $package->build();
+    maybe_check_package_configurations();
   }
 
   #
@@ -1114,6 +1120,8 @@ sub add_package {
   if ($recurse) {
     add_dependent_packages($file);
   }
+  
+  maybe_check_package_configurations();
 
   return 1;
 }
@@ -1176,6 +1184,7 @@ sub configure_package {
   }
 
   $status = _report_failures();
+  maybe_check_package_configurations();
 
   return $status;
 }
@@ -1357,6 +1366,8 @@ sub configure_and_build_packages {
   }
 
   Asim::Fork::wait_for_children() && _add_failure("unknown", "forked configure/make failed");
+  
+  maybe_check_package_configurations();
 
   # Note we don't _report_failures() here. The caller must do that.
 
@@ -1971,6 +1982,136 @@ sub get_package {
 }
 
 
+################################################################
+#
+# Build configuration functions
+#
+################################################################
+
+sub show_configuration {
+  local @ARGV = @_;
+  my $verbose = 0;
+
+  # Parse options
+  my $status = GetOptions( "verbose!" => \$verbose) || return undef;
+
+  # get the list of packages
+  my @packages = _expand_package_names(@ARGV);
+
+  # print status for each package in turn
+  foreach my $name ( @packages ) {
+    my $package = get_package($name);
+    my $configuration = $package->get_configuration();
+    _print_package_start('show configuration', $name, '');
+
+    my @itemlist = @default_buildtree_config_itemlist;
+    my @varlist  = @default_buildtree_config_varlist;
+    if ($verbose) {
+      @itemlist = $configuration->get_item_list();
+      @varlist  = $configuration->get_variable_list();
+    }
+    foreach my $item (@itemlist) {
+      my $value = $configuration->get_item($item);
+      if (defined($value)) {print $item, ' : ', $value, "\n"}
+    }
+    if ($verbose) {print "----------------------------------------------\n"}
+    foreach my $var (@varlist) {
+      my $value = $configuration->get_variable($var);
+      if (defined($value)) {print $var, ' = ', $value, "\n"}
+    }
+
+    _print_package_finish('show configuration', $name, '');
+  }
+}
+
+sub verify_configuration {
+  local @ARGV = @_;
+  my $exhaustive = 0;
+
+  # Parse options
+  my $status = GetOptions( "exhaustive!" => \$exhaustive) || return undef;
+
+  # get the list of packages
+  my @packages = _expand_package_names(@ARGV);
+  if ($#packages < 1) {
+    print "You must supply at least two packages to compare\n";
+    return 0;
+  }
+
+  # check each package in turn
+  my $success = 1;
+  my %itemvalues;
+  my %varvalues;
+  foreach my $pkgname ( @packages ) {
+    my $package = get_package($pkgname);
+    my $configuration = $package->get_configuration();
+
+    my @itemlist = @default_buildtree_config_itemlist;
+    my @varlist  = @default_buildtree_config_varlist;
+    if ($exhaustive) {
+      @itemlist = $configuration->get_item_list();
+      @varlist  = $configuration->get_variable_list();
+    }
+
+    foreach my $item (@itemlist) {
+      my $value = $configuration->get_item($item);
+      if (defined($value)) {
+        if (defined($itemvalues{$item})) {
+          if ($value ne $itemvalues{$item}) {
+            if ($success) {print "---------------------------------------------------------------------------\n"}
+            $success = 0;
+            print_configuration_mismatch($item,$itemvalues{$item},$value,$pkgname);
+          }
+        } else {
+          $itemvalues{$item} = $value;
+        }
+      }
+    }
+
+    foreach my $var (@varlist) {
+      my $value = $configuration->get_variable($var);
+      if (defined($value)) {
+        if (defined($varvalues{$var})) {
+          if ($value ne $varvalues{$var}) {
+            if ($success) {print "---------------------------------------------------------------------------\n"}
+            $success = 0;
+            print_configuration_mismatch($var,$varvalues{$var},$value,$pkgname);
+          }
+        } else {
+          $varvalues{$var} = $value;
+        }
+      }
+    }
+
+  }
+  
+  if (! $success) {
+    print "WARNING:\n";
+    print "  The configuration of packages in your workspace appears inconsistent.\n";
+    print "  Consider using \'clean package\' followed by \'build package\' on the\n";
+    print "  mismatching packages noted above.\n";
+    print "---------------------------------------------------------------------------\n";
+  }
+  return $success;
+}
+
+sub print_configuration_mismatch {
+  my $itemname = shift;
+  my $expected = shift;
+  my $actual   = shift;
+  my $pkgname  = shift;
+  print "WARNING: in ", $pkgname, ": \'", $itemname, "\' mismatch,",
+        " expected \'", $expected, "\', got \'", $actual, "\'\n";
+}
+
+# internal utility function that gets called whenever we change package configurations
+sub maybe_check_package_configurations {
+  if ($AsimShell::check_package_configurations) {
+    return verify_configuration('all');
+  } else {
+    return 1;
+  }
+}
 
 ################################################################
 #
