@@ -5260,3 +5260,15 @@ Updating with simcore changes (rev. 2612 - Sailashri Parthasarathy)
 
 Continuation of the null model commit. Moving the null modules out of the x86 package and into the feeder and simcore packages. The null model no longer depends on the x86 package, so non-x86 projects dont have to check it out.
 
+
+----------
+spartha1    Date: Mon Dec 29 10:32:24 EST 2008  CSN: CSN-asimcore-268
+                  Mon Dec 29 15:32:24 UTC 2008
+
+
+Directory tools/dreams
+ null_adf_file.h           Locally Modified          267 
+
+Updating with simcore changes (rev. 2614 - Sailashri Parthasarathy)
+
+Fixed a glibc error in the null model.

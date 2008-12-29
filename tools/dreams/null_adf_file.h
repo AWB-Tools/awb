@@ -51,6 +51,6 @@ char *DefaultADF (void) { return ""; }
 #define _DEFAULT_ADF_ 1
 
 /// create default adf string 
-char *DefaultADF (void) { return ""; }
+char *DefaultADF (void) { return NULL; }
 
 #endif // _DEFAULT_ADF_
