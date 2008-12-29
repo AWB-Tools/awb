@@ -623,12 +623,12 @@ if ($runbatch) {
 				flags =>  $remotenbqopt,
 				temp  =>  $TMP_DIR,
 				quiet =>  $quiet,
-				env   =>  [
+				env   =>  {
 					   "NBWD"        => $remotenbwd,
 					   "USER_ITOOLS" => $remoteitools,
 					   "HOME"        => $remotehome,
 					   "AWBLOCAL"    => $remoteawblcl
-					  ]
+					  }
 			       );
   }
 } else {

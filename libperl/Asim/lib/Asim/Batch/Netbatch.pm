@@ -184,7 +184,7 @@ sub _set_default_pool {
     system("rm $TMP_DIR/pool.$$");
   }
 
-  $self->{queue} = $CURRENT_POOL;
+  $self->{pool} = $CURRENT_POOL;
   return $CURRENT_POOL;
 }
 

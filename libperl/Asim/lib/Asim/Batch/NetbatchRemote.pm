@@ -83,7 +83,9 @@ sub new {
 
   $self = {};
 
-  $self->_set_tempdir($args->{temp});
+  bless	$self, $class;
+
+  $self->_set_temp($args->{temp});
 
   $self->_set_default_queue($args->{queue});
   $self->_set_default_pool($args->{pool});
@@ -94,8 +96,6 @@ sub new {
   $self->{quiet} = $args->{quiet} || 0;
 
   $self->{env} = $args->{env} || {};
-
-  bless	$self, $class;
 
   return $self;
 }

@@ -5194,3 +5194,20 @@ Directory lib/libdral/src
 
 Added #include <> updates from Guo Rui to support gcc 4.3.2.
 Mostly these are inclusions of stdlib.
+
+----------
+spartha1    Date: Mon Dec 29 10:20:53 EST 2008  CSN: CSN-asimcore-265
+                  Mon Dec 29 15:20:53 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ NetbatchRemote.pm         Locally Modified          264 
+ Netbatch.pm               Locally Modified          264 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          264 
+
+Updating with simcore changes (rev. 2605 - Eric Borch)
+
+- fixes for remote netbatch pool usage, per Joel's suggestion
+Eric
