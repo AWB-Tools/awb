@@ -5211,3 +5211,30 @@ Updating with simcore changes (rev. 2605 - Eric Borch)
 
 - fixes for remote netbatch pool usage, per Joel's suggestion
 Eric
+
+----------
+spartha1    Date: Mon Dec 29 10:25:34 EST 2008  CSN: CSN-asimcore-266
+                  Mon Dec 29 15:25:34 UTC 2008
+
+
+Directory modules/warmup
+ null_warmup_manager.h     Locally Added               0 
+ null_warmup_manager.awb   Locally Added               0 
+
+Updating with simcore changes (rev. 2610 - Sailashri Parthasarathy)
+
+Adding a null model (null_model.apm) that contains a null core and a null feeder. The original feeder interface has been retained. Adding the following null modules to the model:
+1. Null cpu
+2. Null core
+3. Null hardware context
+4. Null software context
+5. Null context scheduler
+6. Null micro inst class
+7. Null macro inst class
+8. Null isa
+9. Null instruction address class
+10. Null feeder implementation
+11. Null cpu mode
+12. Null warmup manager (provided by Carl)
+
+For some modules, all the public functions have been retained and they return null. For some other modules, only relevant functions (such as constructor/destructor) have been retained while the remaining ones have been removed.

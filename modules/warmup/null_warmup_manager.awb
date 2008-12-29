@@ -1,0 +1,10 @@
+%AWB_START
+
+%name Null Warm-up Manager
+%desc Warm-up Manager -- Null implementation for models not using warmup
+%provides warmup_manager
+%public null_warmup_manager.h
+
+%const ENABLE_WARMUP 0 "Use warm-up data supplied by feeder"
+
+%AWB_END
