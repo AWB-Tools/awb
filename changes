@@ -5529,3 +5529,15 @@ Updating with simcore changes (rev. 2661 - Carl Beckmann)
   when deciding whether to launch a netbatch job as a parallel job.
   Also, fixed a bug in scanning model arguments (previously it was only
   able to detect parallel jobs from parameters in the .apm file)
+
+----------
+spartha1    Date: Mon Dec 29 13:21:38 EST 2008  CSN: CSN-asimcore-282
+                  Mon Dec 29 18:21:38 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim
+ PlotStats.pm              Locally Modified          281 
+
+Updating with simcore changes (rev. 2673 - Alex Settle)
+
+Fixed perl printfs to prevent them from expanding the '%' character found in many of the benchmark names.  This fix allows plot.nightly to complete without error and mail out a gif image of performance metrics with the nightly regression emails.

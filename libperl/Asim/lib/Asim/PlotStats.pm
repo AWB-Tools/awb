@@ -1277,7 +1277,7 @@ sub _plot_data {
     my $stackval = 0;
 
     foreach $cluster_elem ( @{$map->{"cluster"}{labels}} ) {
-      printf DATA_FL "$cluster_elem ";
+      printf DATA_FL "%s ", $cluster_elem;
       foreach $bar_elem ( @{$map->{"bar"}{labels}} ) {
         foreach $stack_elem ( @{$map->{"stack"}{labels}} ) {
           
@@ -1316,7 +1316,7 @@ sub _plot_data {
           }
             
           $stackval = $stackval + $val;
-          printf DATA_FL "$val ";
+          printf DATA_FL "%s ", $val;
           
         }
         if ($maxval < $stackval) {
@@ -1339,7 +1339,7 @@ sub _plot_data {
     # Doing a box plot
     #
     foreach $box_elem ( @{$map->{"box"}{labels}} ) {
-      printf DATA_FL "$box_elem ";
+      printf DATA_FL "%s ", $box_elem;
       foreach $cluster_elem ( @{$map->{"cluster"}{labels}} ) {
         foreach $bar_elem ( @{$map->{"bar"}{labels}} ) {
 
@@ -1376,7 +1376,7 @@ sub _plot_data {
             return 1;
           }
           
-          printf DATA_FL "$val ";
+          printf DATA_FL "%s ", $val;
           if ($maxval < ($val+0)) {
             $maxval = $val;
           }
@@ -1396,7 +1396,7 @@ sub _plot_data {
     my $line_elem;
     my $x_elem;
     foreach $x_elem ( @{$map->{"xaxis"}{"labels"}} ) {
-      printf DATA_FL "\"$x_elem\" ";
+      printf DATA_FL "\"%s\" ",  $x_elem;
       foreach $line_elem ( @{$map->{"line"}{"labels"}} ) {
         # Determine the name of exp, bm, and param based on the mapping
         # Do the mapping
@@ -1430,7 +1430,7 @@ sub _plot_data {
           close DATA_FL;
           return 1;
         }
-        printf DATA_FL "$val ";
+        printf DATA_FL "%s ", $val;
         if ($maxval < ($val+0)) {
           $maxval = $val;
         }
