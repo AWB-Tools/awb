@@ -5416,3 +5416,15 @@ Updating with simcore changes (rev. 2649 - Eric Borch)
   file for regression.launcher.
 
 Eric
+
+----------
+spartha1    Date: Mon Dec 29 12:47:33 EST 2008  CSN: CSN-asimcore-277
+                  Mon Dec 29 17:47:33 UTC 2008
+
+
+Directory lib/libasim/include/asim
+ module.h                  Locally Modified          276 
+
+Updating with simcore changes (rev. 2650 - Carl Beckmann)
+
+- Added a necessary include of <set> which fixes a model build failure

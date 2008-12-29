@@ -28,6 +28,7 @@
 // generic
 #include <errno.h>
 #include <iostream>
+#include <set>
 
 // ASIM core
 #include "asim/syntax.h"
