@@ -5310,3 +5310,18 @@ This script takes a Portland-style tracelist, and converts it to an
 ASIM-style benchmark file using 'run-with-params.cfx'. This allows us
 to run traces with the same parameters as other groups (including
 simulation length, skipping, and start-point).
+
+----------
+spartha1    Date: Mon Dec 29 12:29:18 EST 2008  CSN: CSN-asimcore-271
+                  Mon Dec 29 17:29:18 UTC 2008
+
+
+Directory tools/scripts/bm/tracecache
+ run-with-params.cfx       Locally Added               0 
+
+Directory tools/scripts
+ tlist2bm.pl               Locally Added               0 
+
+Updating with simcore changes (rev. 2629 - Steve Raasch)
+
+Actually add the files specified in the previous commit.

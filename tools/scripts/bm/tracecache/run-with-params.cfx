@@ -1,0 +1,136 @@
+: # -*-Perl-*-
+eval 'exec perl -w "$0" ${1+"$@"}'
+    if 0;
+
+my $debug = 0;
+
+use Asim;
+use Asim::GenCFG::Auto;
+use strict;
+
+
+
+#
+#  Actual input format:
+#     tools/scripts/bm/tracecache/single-with-params.cfx/$/path/to/trace1.gal$/path/to/trace2.gal$@-m:6000000:-rsm:1000000@-st:73200000@-other@.cfg
+#                                                         ^                  ^                   ^                        ^            ^       
+#                                                         |                  |                   |                        |            |
+#                                                         | <path_to_trace>  |  <path_to_trace>  | <model_params>         | <feeder>   |  <system params>
+
+
+# CONSTANTS: BE VERY CAREFUL HOW YOU PICK THESE
+my $section_delimiter    = '%';
+my $subsection_delimiter = '@';
+my $space_delimiter    = ':';
+
+
+# get the argument string, which follows the --emit arg, remove the ".cfg" suffix
+die "unknown trace path" if ( $ARGV[0] ne '--emit' );
+(my $arg_string = $ARGV[1]) =~ s/\.cfg$//;
+
+print "My args string: '$arg_string'\n" if $debug;
+
+# Leading section delimiters confuse things...
+$arg_string =~ s/^$section_delimiter//;
+
+my @sections = split /$section_delimiter/, $arg_string;
+my $num_sections = scalar(@sections);
+
+print "   Found $num_sections sections\n" if $debug;
+
+if ($num_sections < 2) {
+    die "Must have at least 2 sections: \$<trace>\$<params>\$\n";
+}
+
+my $num_traces = $num_sections - 1;   # last section is params
+
+
+my @trace_path;
+my @trace_name;
+
+for (my $t=0; $t<$num_traces; $t++) {
+    print ">> $sections[$t]\n" if $debug;
+
+    $trace_path[$t] = $sections[$t];
+
+    my @path_parts = split /\//, $sections[$t];
+    $trace_name[$t] = $path_parts[$#path_parts];
+
+    print "Trace path: '$trace_path[$t]'\n" if $debug;
+    print "Trace name: '$trace_name[$t]'\n" if $debug;
+}    
+
+# Leading section delimiters confuse things...
+$sections[$#sections] =~ s/^$subsection_delimiter//;
+
+my @subsection_pieces = split /$subsection_delimiter/, $sections[$#sections];
+
+# Extrace the different parameters
+my $model_params  = shift @subsection_pieces;
+my $feeder_params = shift @subsection_pieces;
+my $system_params = shift @subsection_pieces;
+
+if ($model_params) {
+    $model_params  =~ s/$space_delimiter/ /g;
+}
+else {
+    $model_params = " ";
+}
+if ($feeder_params) {
+    $feeder_params =~ s/$space_delimiter/ /g;
+}
+else {
+    $feeder_params = " ";
+}
+if ($system_params) {
+    $system_params =~ s/$space_delimiter/ /g;
+}
+else {
+    $system_params = " ";
+}
+
+if ($debug) {
+    print "    model_params:  '$model_params'\n";
+    print "    feeder_params: '$feeder_params'\n";
+    print "    system_params: '$system_params'\n";
+}
+
+
+
+my $SetupScriptTemplate = "#!/bin/sh\n";
+for (my $i=0; $i<$num_traces; $i++) {
+    $SetupScriptTemplate .= "trace=`fetch-trace $trace_path[$i] | tail -1`; ln -sf \$trace* \$2/\n";
+}
+$SetupScriptTemplate .= "cp -f \@RUNSCRIPT@ \$2/run\n";
+
+
+my $RunScriptTemplate = "#!/bin/sh\n".
+  "PATH=\$PATH:/p/asim/i386_linux24/bin\n".
+  "command=\"\$model $model_params \$genFlags --feeder ";
+
+for (my $i=0; $i<$num_traces; $i++) {
+    $RunScriptTemplate .= "-t $trace_name[$i] ";
+}
+$RunScriptTemplate .= "$feeder_params \$feedFlags --system $system_params \$sysFlags\"\n";
+$RunScriptTemplate .= "echo \$command; eval \$command\n";
+
+
+if ($debug) {
+    print "--------------------------------------\n";
+    print "$SetupScriptTemplate\n";
+    print "--------------------------------------\n";
+    print "$RunScriptTemplate\n";
+    print "--------------------------------------\n";
+}
+
+
+if (not $debug) {
+    # use default setup and run scripts:
+    Asim::GenCFG::Auto::Generate(setup_script=>$SetupScriptTemplate, 
+                                 run_script=>$RunScriptTemplate);
+}
+
+	
+
+exit(0);
+
