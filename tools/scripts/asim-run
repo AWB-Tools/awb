@@ -1355,7 +1355,7 @@ sub rsync_model
 
             # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
             # different from experiment name.
-            run_command_rsync("--quiet -l $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/");
+            run_command_rsync("--quiet -z -l $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/");
         }
     }
 
@@ -1449,7 +1449,7 @@ sub run_one_benchmark
         if ( ! -d "$rundir" ) {
             # Setup benchmark. 
             print_info("........ Setting up benchmark: $bm_name for experiment $name\n");
-            my $cmd = "asim-shell -batch setup benchmark -- --builddir $resdir/$name/BUILD --rundir $rundir > $asim_runlogfl 2>&1";
+            my $cmd = "asim-shell -batch setup benchmark $full_bm -- --builddir $resdir/$name/BUILD --rundir $rundir --model $model > $asim_runlogfl 2>&1";
             print "$cmd\n" if ($debug);
             if ( run_command ($cmd) ) {
                 # We have an error in the setup.
@@ -1587,6 +1587,48 @@ sub run_one_benchmark
                 "-rsyncresdir=\"$resdir/$name\" ".
                 "-tmpdir=\"$remotetmpdir\" ".
                 "-- $input";                
+
+
+            # maybe this approach will work... it seems a bit cumbersome 
+            
+            # figure out which local paths to change out
+            # work back until the remote path exists on local volume
+            my @remoteresdir = split(/\//, $remoteresdir);
+            my $localresdir;
+            while (@remoteresdir) {
+              my $tmprrd = join('/', @remoteresdir);
+              $localresdir = realpath($tmprrd);
+              last if ($localresdir);
+              pop @remoteresdir;
+            }
+
+            # continue to identify the differing tree between the old and the new to make our filter
+            my @localresdir = split(/\//, $localresdir);
+
+            while (@localresdir, @remoteresdir) {
+              my ($ll, $rl) = ($localresdir[-1], $remoteresdir[-1]);
+              last if ($ll ne $rl);
+              pop @localresdir;
+              pop @remoteresdir;
+            }
+
+            my $localbase = join('/', @localresdir);
+            my $remotebase = join('/', @remoteresdir);
+
+            # run the full resulting $submit_cmd through the filter
+            $submit_cmd =~ s/$localbase/$remotebase/g;
+
+            # done fixing command line, now we must mirror files
+            # needed remotely, including apm, cfg file(s) and pb file
+            for ($model, @{$exps->{"$name"}{files}}) {
+              my ($from, $to) = ($_, $_);
+              $to =~ s/$localbase/$remotebase/;
+              run_command("ssh -q $remotehost 'mkdir -p " . dirname($to) . "' > /dev/null 2>&1");
+              run_command_rsync("--quiet -l $from $remotehost:$to");
+            }
+
+            $exps->{"$name"}{files} = [];
+
         }
         else
         {
@@ -1772,6 +1814,44 @@ sub parse_exp_file
         push(@exp_ordered, $name);
         $exps->{"$name"}{"model"} = shift(@exp);
         $exps->{"$name"}{"params"} = join " ", @exp;
+
+
+        # resolve local file paths to be filtered later (handles embedded `awb-resolver <file>` patterns)
+        $exps->{"$name"}{params} = `echo $exps->{"$name"}{params}`;
+
+        # FIXME: generate list of files to rsync if needed, detecting
+        # -cfg and -pb patterns, note that cfg files are hierarchical
+        @exp = split (/\s+/, $exps->{"$name"}{params});
+        my @files;
+        while (@exp) {
+          my $arg = shift @exp;
+          if ($arg =~ /-cfg/) {
+            my $file = shift(@exp);
+            next if grep (/$file/, @files);
+            push (@files, $file);
+
+            # process the hierarchy, add all found files to this file list
+            for (my $i = @files-1; $i < @files; $i++) {
+              my $file = $files[$i];;
+              open(my $fh, "<$file") or die " couldn't open file <$file";
+              while (<$fh>) {
+                s/(^s+|#.*)//g;
+                if (/-cfg\s+(\/\S+)/) {
+                  push (@files, $1);
+                }
+                elsif (/-cfg\s+(\S+)/) { # we will need to make this an absolute path
+                  $subfile = realpath(dirname($file) . '/' . $1);
+                  next if grep (/$subfile/, @files);
+                  push (@files, $subfile);
+                }
+              }
+            }
+          }
+          elsif ($arg =~ /-pb/) {
+            push (@files, shift(@exp));
+          }
+        }
+        $exps->{"$name"}{files} = \@files;
     }
 
     return $exps;
@@ -2159,7 +2239,7 @@ sub submit_job
         if ( $run_error ) {
             # There was an error in the submission.
 
-            print_error( "Netbatch returned error.Submission not finished\n",
+            print_error( "Netbatch returned error ($run_error).Submission not finished\n",
                          "Submitted command: $submit_cmd\n",
                          "Submission log: $log\n",
                          "Run log: $dashj\n",
@@ -2194,7 +2274,7 @@ sub submit_job
 
         if ($runerror) {
             # There was an error in the submission.
-            print_error( "Netbatch returned error.Submission not finished\n",
+            print_error( "Netbatch returned error ($run_error).Submission not finished\n",
                          "Submitted command: $submit_cmd\n",
                          "Submission log: $log\n",
                          "Run log: $dashj\n",
@@ -2417,6 +2497,10 @@ sub dprint
 
   if ($debugoutfile ne "") {
       print DEBUGOUTFILE @printargs;
+  }
+
+  if ($debug) {
+    print @printargs;
   }
 
   return;

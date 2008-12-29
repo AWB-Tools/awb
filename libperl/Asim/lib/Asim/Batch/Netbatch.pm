@@ -199,7 +199,8 @@ sub _set_flags {
   my $pool  = $self->{pool};
   my $class = $self->{class};
 
-  $self->{flags_queue} = "-P $pool -Q $queue -C $class";
+  $self->{flags_queue} = "-P $pool -Q $queue";
+  $self->{flags_queue} .= " -C $class" if ($class ne "TBD");
 
   # Set flags for checking space
 

@@ -223,8 +223,8 @@ sub submit {
 
   # restore ENV variables after submission
 
-  foreach my $name (keys(%{$env})) {
-    if (defined($env->{$name})) {
+  foreach my $name (keys %save) {
+    if (defined($save{$name})) {
       $ENV{$name} = $save{$name};
     }
   }

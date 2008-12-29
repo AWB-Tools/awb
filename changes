@@ -5344,3 +5344,19 @@ asim-batch: now creates 'run.info' file in the benchmark's RUN
 directory that describes how the simulation was invoked. This file
 duplicates the content of 'run.error.*' except that it is created for
 all runs, not just those that fail
+
+----------
+spartha1    Date: Mon Dec 29 12:34:02 EST 2008  CSN: CSN-asimcore-273
+                  Mon Dec 29 17:34:02 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ NetbatchRemote.pm         Locally Modified          272 
+ Netbatch.pm               Locally Modified          272 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          272 
+
+Updating with simcore changes (rev. 2633 - Carl Beckmann)
+
+- miscellaneous remote netbatch bug fixes provided by Jimmy Mason
