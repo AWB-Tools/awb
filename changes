@@ -5511,3 +5511,21 @@ Updating with simcore changes (rev. 2657 - Carl Beckmann)
 - Fixed a bug introduced in last commit which broke "asimstarter -- program" usage
 
 - Also added the ability to use absolute, relative, and union-directory-relative paths for "program" in the "asimstarter program" and "asimstarter -- program" usages.
+
+----------
+spartha1    Date: Mon Dec 29 13:18:21 EST 2008  CSN: CSN-asimcore-281
+                  Mon Dec 29 18:18:21 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          280 
+
+Updating with simcore changes (rev. 2661 - Carl Beckmann)
+
+- Asim-run now recognized both syntaxes:
+     -param LIMIT_PTHREADS=4
+  and
+     -limit_pthreads 4
+  when deciding whether to launch a netbatch job as a parallel job.
+  Also, fixed a bug in scanning model arguments (previously it was only
+  able to detect parallel jobs from parameters in the .apm file)

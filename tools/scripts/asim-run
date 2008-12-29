@@ -1568,7 +1568,7 @@ sub run_one_benchmark
 	# netbatch.
 	# TODO: the runtime LIMIT_PTHREADS argument is checked, but the decl
 	# in awb file has to be checked as well.
-	if ((defined ${$input}) && ${$input} =~ /\s*(LIMIT_PTHREADS)\s*=\s*(\d+)\s*/) {
+	if ((defined $input) && $input =~ m/\s*-?(LIMIT_PTHREADS)\s*=?\s*(\d+)\s*/i) {
 	    $nthreads = $2;
 	    $checkApm = 0 unless ($nthreads == 0);
 	}
@@ -1583,6 +1583,7 @@ sub run_one_benchmark
 	    }
 	    close(APMFILE);
 	}
+        if ($nthreads > 1) { print_info("........ Parallel job with $nthreads worker threads\n"); }
 
         my $submit_cmd;
         if ($remote)
