@@ -118,13 +118,14 @@ sub update {
   my $version = shift;
 
   my $location = $self->location();
+  my $command = 'update';
+  my $args = '';
   
   if ( $version ) {
     # a version to update to was explicitly specified.
     
     # if the version is a fixed version, i.e. a CSN number,
     # then get the SVN revision number this corresponds to.
-    my $args = '';
     if ( $self->is_fixed_version( $version ) ) {
       $args .= '-r ' . $self->get_revision_number( $version );
     }
@@ -134,22 +135,20 @@ sub update {
     # NOTE! that we do not simply compare the version against 'HEAD' here,
     # because we might be on a branch and we want to update to 'HEAD',
     # which means we want to do an 'svn switch' to get back to the trunk.
-    my $command = 'update';
+
     my $url = $self->get_version_url( $version );
     if ( $url ne $self->get_working_url() ) {
       $command = 'switch ' . $url;
     }
     
-    # do the update
-    eval {print `(cd $location; svn $command $args)`};
   
-  } else {
-    # default case: no version specified.  Just do an "update"
-    eval {print `(cd $location; svn update)`};
   }
 
-  if ($@) {
-      warn $@;
+  # do the update
+  
+  my $status = system("cd $location; svn $command $args");
+
+  if ($status) {
       return undef;
   }
 

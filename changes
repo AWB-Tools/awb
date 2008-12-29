@@ -5272,3 +5272,16 @@ Directory tools/dreams
 Updating with simcore changes (rev. 2614 - Sailashri Parthasarathy)
 
 Fixed a glibc error in the null model.
+
+----------
+spartha1    Date: Mon Dec 29 12:10:44 EST 2008  CSN: CSN-asimcore-269
+                  Mon Dec 29 17:10:44 UTC 2008
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          268 
+ Cvs.pm                    Locally Modified          268 
+
+Updating with simcore changes (rev. 2616 - Joel Emer)
+
+Properly report failed updates for both CVS and SVN repositories.

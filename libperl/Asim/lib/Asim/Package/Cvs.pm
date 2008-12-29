@@ -154,10 +154,9 @@ sub update {
 
   my $location = $self->location();
 
-  eval {print `(cd $location; cvs -f -q update -dP)`};
+  my $status = system("cd $location; cvs -f -q update -dP");
 
-  if ($@) {
-      warn $@;
+  if ($status) {
       return undef;
   }
 
