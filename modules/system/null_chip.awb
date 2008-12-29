@@ -1,0 +1,19 @@
+Awb module specification
+
+%AWB_START
+
+%name Null chip
+%desc Null chip
+%attributes chip
+
+
+%provides chip
+%requires cpu
+
+%public null_chip.h
+%private null_chip.cpp
+
+%export TOTAL_NUM_CPUS 1 "Number of CPUs"
+
+%AWB_END
+

@@ -1,0 +1,16 @@
+#/********************************************************************
+# *
+# * Awb module specification
+# *
+# *******************************************************************/
+
+#/*
+# %AWB_START
+#
+# %name Null Package
+# %desc Null Package
+# %provides packages
+# %private null.pack
+#
+# %AWB_END
+# */

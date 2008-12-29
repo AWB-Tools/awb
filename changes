@@ -5238,3 +5238,25 @@ Adding a null model (null_model.apm) that contains a null core and a null feeder
 12. Null warmup manager (provided by Carl)
 
 For some modules, all the public functions have been retained and they return null. For some other modules, only relevant functions (such as constructor/destructor) have been retained while the remaining ones have been removed.
+
+----------
+spartha1    Date: Mon Dec 29 10:30:48 EST 2008  CSN: CSN-asimcore-267
+                  Mon Dec 29 15:30:48 UTC 2008
+
+
+Directory tools/dreams
+ null_adf_file.h           Locally Added               0 
+ null_adf.awb              Locally Added               0 
+
+Directory modules/system
+ null_chip.awb             Locally Added               0 
+ null_chip.cpp             Locally Added               0 
+ null_chip.h               Locally Added               0 
+
+Directory modules
+ null_package.awb          Locally Added               0 
+
+Updating with simcore changes (rev. 2612 - Sailashri Parthasarathy)
+
+Continuation of the null model commit. Moving the null modules out of the x86 package and into the feeder and simcore packages. The null model no longer depends on the x86 package, so non-x86 projects dont have to check it out.
+
