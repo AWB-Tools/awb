@@ -5383,3 +5383,18 @@ BUILD directory.
 location if the --nobuild option is specified.
 
 Eric
+
+----------
+spartha1    Date: Mon Dec 29 12:38:32 EST 2008  CSN: CSN-asimcore-275
+                  Mon Dec 29 17:38:32 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          274 
+
+Updating with simcore changes (rev. 2635 - Michael Adler)
+
+Version 2633 (Carl's change) broke HAsim regressions, which depend on
+getting quoted strings through to the run script.  I added a hack on top
+of the hack in parse_exp_file() that quotes the sequence \" before passing
+it to the shell.

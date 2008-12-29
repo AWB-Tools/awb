@@ -1825,9 +1825,12 @@ sub parse_exp_file
         $exps->{"$name"}{"model"} = shift(@exp);
         $exps->{"$name"}{"params"} = join " ", @exp;
 
-
         # resolve local file paths to be filtered later (handles embedded `awb-resolver <file>` patterns)
-        $exps->{"$name"}{params} = `echo $exps->{"$name"}{params}`;
+        # First we escape escaped quotes so they won't be lost.  Without
+        # it the shell will drop escaping of arguments such as "--foo=\"-m 50\",
+        # which is required for the quoted arguments finally to reach the run script.
+        $exps->{"$name"}{"params"} =~ s/\\"/\\\\\\"/g;
+        $exps->{"$name"}{"params"} = `echo $exps->{"$name"}{params}`;
 
         # FIXME: generate list of files to rsync if needed, detecting
         # -cfg and -pb patterns, note that cfg files are hierarchical
