@@ -74,6 +74,8 @@ my $runstyle = Asim::Util::get_asimrc_val("regression.launcher", "RUNSTYLE", "li
 my $runcmds = Asim::Util::get_asimrc_val("regression.launcher", "ASIMRUN_COMMANDS", undef);
 my $compress = Asim::Util::get_asimrc_val("regression.launcher", "COMPRESS", "gzip");
 my $queue = Asim::Util::get_asimrc_val("regression.launcher", "QSLOT", undef);
+my $pool = Asim::Util::get_asimrc_val("regression.launcher", "POOL", undef);
+my $class = Asim::Util::get_asimrc_val("regression.launcher", "CLASS", undef);
 my $remote = Asim::Util::get_asimrc_val("regression.launcher", "REMOTE", 0);
 my $remoteroot = Asim::Util::get_asimrc_val("regression.launcher", "REMOTE_ROOT", "");
 my $remoteregdir = "";
@@ -94,6 +96,8 @@ my $status = GetOptions("package=s"     =>  \@packages,
                         "runcmds=s"     =>  \$runcmds,
                         "compress=s"    =>  \$compress,
                         "queue=s"       =>  \$queue,
+                        "pool=s"       =>  \$pool,
+                        "class=s"       =>  \$class,
                         "dryrun!"       =>  \$dryrun,
 			"remote!"       =>  \$remote,
 			"remoteroot=s"  =>  \$remoteroot,
@@ -520,8 +524,17 @@ sub run_regression {
     if (defined $queue)  {
       $cmd = $cmd . "-queue=$queue ";
     }
+    if (defined $pool)  {
+      $cmd = $cmd . "-pool=$pool ";
+    }
+    if (defined $class)  {
+      $cmd = $cmd . "-class=$class ";
+    }
     if (defined $remote && $remote) {
-      $cmd = $cmd . " -remote -remoteresdir=$remoteresdir ";
+      $cmd = $cmd . "-remote -remoteresdir=$remoteresdir ";
+    }
+    else {
+      $cmd = $cmd . "-noremote ";
     }
     if (defined $runcmds) {
       $cmd = $cmd . "$runcmds";
@@ -560,7 +573,9 @@ sub Usage {
   print "\t\t [--runstyle=pruned|list] \n";
   print "\t\t [--runcmds=<asim-run commands>]\n";
   print "\t\t [--compress=none|gzip|bzip2]\n";
-  print "\t\t [--queue=<netbatch queue - e.g. /fast or /slow/asim>]\n";
+  print "\t\t [--queue=<netbatch queue>]\n";
+  print "\t\t [--pool=<netbatch pool>]\n";
+  print "\t\t [--class=<netbatch class>]\n";
   print "\t\t [--regdir=<directory to place regression results>]\n";
   print "\n";
   print "\t\t [--[no]remote]\n";

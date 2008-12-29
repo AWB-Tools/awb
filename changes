@@ -5398,3 +5398,21 @@ Version 2633 (Carl's change) broke HAsim regressions, which depend on
 getting quoted strings through to the run script.  I added a hack on top
 of the hack in parse_exp_file() that quotes the sequence \" before passing
 it to the shell.
+
+----------
+spartha1    Date: Mon Dec 29 12:44:33 EST 2008  CSN: CSN-asimcore-276
+                  Mon Dec 29 17:44:33 UTC 2008
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          275 
+ asim-run                  Locally Modified          275 
+
+Updating with simcore changes (rev. 2649 - Eric Borch)
+
+- fixed a typo in an asim-run error message.
+
+- added ability to specify netbatch pool and class info in the asimrc
+  file for regression.launcher.
+
+Eric
