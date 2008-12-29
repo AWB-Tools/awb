@@ -252,11 +252,20 @@ if ($iam eq "asimstarter") {
   } else {
     $show_which = 0;
   }
-  $iam = shift @ARGV;
+
+# Strip any remaining command line switches...
+
+  while (defined $ARGV[0] && $ARGV[0] =~ m/^-?-/ ) {
+    my $swtch = shift @ARGV;
+    if ($swtch ne '--') {
+      die "Unknown $iam switch: $swtch\n";
+    }
+  }
 
 # Check if we should execute the first argument as the program
 
-  if (defined $iam && -x $iam) {
+  $iam = shift @ARGV;
+  if (defined $iam) {
     $program = $iam;
   }
 }
@@ -395,8 +404,16 @@ if ( defined $tool{$iam} ) {
 
 # ...or from first argument of command line
 
-} elsif ( defined $program && -x $program ) {
-  $runme = $program;
+} elsif ( defined $program ) {
+  if ( -x $program ) {
+    $runme = $program;
+  } else {
+    chomp($runme = `$RESOLVER $program`);
+    if ( ! (defined $runme && -x $runme) ) {
+      print STDERR "asimstarter: Cannot find executable \"$program\"\n";
+      exit 1;
+    }
+  }
 
 # ...or we've got a problem
 

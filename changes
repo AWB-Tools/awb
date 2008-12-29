@@ -5497,3 +5497,17 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2656 - Carl Beckmann)
 
 - fixed a bug that was preventing asimstarter from launching foreign programs
+
+----------
+spartha1    Date: Mon Dec 29 13:16:14 EST 2008  CSN: CSN-asimcore-280
+                  Mon Dec 29 18:16:14 UTC 2008
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          279 
+
+Updating with simcore changes (rev. 2657 - Carl Beckmann)
+
+- Fixed a bug introduced in last commit which broke "asimstarter -- program" usage
+
+- Also added the ability to use absolute, relative, and union-directory-relative paths for "program" in the "asimstarter program" and "asimstarter -- program" usages.
