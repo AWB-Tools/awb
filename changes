@@ -5325,3 +5325,22 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2629 - Steve Raasch)
 
 Actually add the files specified in the previous commit.
+
+----------
+spartha1    Date: Mon Dec 29 12:32:35 EST 2008  CSN: CSN-asimcore-272
+                  Mon Dec 29 17:32:35 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          271 
+ asim-batch                Locally Modified          271 
+
+Updating with simcore changes (rev. 2632 - Steve Raasch)
+
+asim-run: add output reminding the user of which pool jobs are being
+submitted to
+
+asim-batch: now creates 'run.info' file in the benchmark's RUN
+directory that describes how the simulation was invoked. This file
+duplicates the content of 'run.error.*' except that it is created for
+all runs, not just those that fail

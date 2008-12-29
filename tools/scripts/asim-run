@@ -1406,6 +1406,7 @@ sub run_one_benchmark
             $bm_name=~ s/.cfg//;
         }
         print_info("........ " . ($runbatch?"Submitting":"Running") . " benchmark $bm_name for experiment $name\n");
+        print_info("........ Using netbatch pool '".$run_sys->get_pool()."'\n");
 
         # Setup flag indicating that the benchmark has been submitted. 
         if ( -f "$resdir/$name/$bm_name.SUBMITTED" ) {

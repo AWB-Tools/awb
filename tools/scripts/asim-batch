@@ -242,10 +242,13 @@ system ("touch $runlogfl; chmod 777 $runlogfl");
 my @env = split (/\s*[ ,]\s*/, $env);
 &setup_def_env();
 
+# Dump run info
+&setup_rerun_script("info");
+
 #if (system ("env -i $envstr $execscript $params > $runlogfl 2>&1")) {
 if (system ("$exec_command $params >> $runlogfl 2>&1")) {
   # We have an error in the run somewhere. 
-  &setup_error_script();
+  &setup_rerun_script("error.$$");
   open (ERROR_FL, ">$resdir/$bm.ERROR") || die "Unable to create error file $resdir/$bm.ERROR.\n";
   my $hostname = `hostname`;
   chomp $hostname;
@@ -453,19 +456,21 @@ sub PutEnv {
 #
 # Subroutine sets up a run error script so that we can duplicate the results of an error. 
 #
-sub setup_error_script {
-  my $run_error = $rundir . "/run\.error\.$$";
-  open(ERROR_SCRIPT, ">$run_error") ||
-    die "ERROR: Unable to open file $run_error.\n\n";
-  print( "Dumping environment\n" );
-  print ERROR_SCRIPT "#!/bin/sh\n";
-  foreach $key (keys %ENV) {
-    print ERROR_SCRIPT "$key=\"$ENV{$key}\"\n";
-    print ERROR_SCRIPT "export $key\n";
-  } 
-  print ERROR_SCRIPT "$execscript $params > $runlogfl 2>&1\n";
-  close ERROR_SCRIPT;
-  system ("chmod 777 $run_error");
+sub setup_rerun_script {
+    my $tag = shift;
+
+    my $run_script = $rundir . "/run\.$tag";
+    open(SCRIPT, ">$run_script") ||
+      die "ERROR: Unable to open file $run_script.\n\n";
+    print( "Dumping environment\n" );
+    print SCRIPT "#!/bin/sh\n";
+    foreach $key (keys %ENV) {
+        print SCRIPT "$key=\"$ENV{$key}\"\n";
+        print SCRIPT "export $key\n";
+    } 
+    print SCRIPT "$execscript $params > $runlogfl 2>&1\n";
+    close SCRIPT;
+    system ("chmod 777 $run_script");
 }
 
 #
