@@ -336,7 +336,8 @@ CONTROLLER_CLASS::ResolveConfigFile( ifstream &cfg_file, char *relative_name )
         bool abs2exists = false;
         if ( cfg_filename_stack.size() > 0 )
         {
-            char *cfg_dir = (char *)alloca( 1 + strlen( cfg_filename_stack.front() ) );
+            //            char *cfg_dir = (char *)alloca( 1 + strlen( cfg_filename_stack.front() ) );
+            char *cfg_dir = (char *)strdupa(cfg_filename_stack.front());
             strcpy( cfg_dir, cfg_filename_stack.front() );
 	    abs2 << dirname( cfg_dir ) << "/" << relative_name << '\0';
             abs2exists = file_exists( abs2.str() );

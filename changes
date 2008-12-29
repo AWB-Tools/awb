@@ -5541,3 +5541,16 @@ Directory libperl/Asim/lib/Asim
 Updating with simcore changes (rev. 2673 - Alex Settle)
 
 Fixed perl printfs to prevent them from expanding the '%' character found in many of the benchmark names.  This fix allows plot.nightly to complete without error and mail out a gif image of performance metrics with the nightly regression emails.
+
+----------
+spartha1    Date: Mon Dec 29 14:37:17 EST 2008  CSN: CSN-asimcore-283
+                  Mon Dec 29 19:37:17 UTC 2008
+
+
+Directory modules/controller/classic
+ args.cpp                  Locally Modified          282 
+
+Updating with simcore changes (rev. 2599 - Carl Beckmann)
+
+- bug fix in relative path name resolution for resursive config files,
+  (thanks to James Mason for providing the fix).
