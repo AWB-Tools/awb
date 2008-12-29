@@ -5285,3 +5285,28 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2616 - Joel Emer)
 
 Properly report failed updates for both CVS and SVN repositories.
+
+----------
+spartha1    Date: Mon Dec 29 12:26:31 EST 2008  CSN: CSN-asimcore-270
+                  Mon Dec 29 17:26:31 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          269 
+
+Updating with simcore changes (rev. 2628 - Steve Raasch)
+
+* Minor update to asim-run adds the "--nbtask <netbatch-taskname>"
+option. Using this option adds <netbatch-taskname> to the NB queuing
+command and makes it available to other NB tools as a job identifier.
+
+* Add run-with-params.cfx
+This CFX allows you to specify an arbitrary number of traces plus
+options for the model, the feeder, and the system portions of the
+command-line.
+
+* Add tlist2bm.pl
+This script takes a Portland-style tracelist, and converts it to an
+ASIM-style benchmark file using 'run-with-params.cfx'. This allows us
+to run traces with the same parameters as other groups (including
+simulation length, skipping, and start-point).

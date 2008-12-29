@@ -198,6 +198,7 @@ my $forklocal   = Asim::Util::get_asimrc_val("asim-run", "FORK_LOCAL",    0);
 my $forkbatch   = Asim::Util::get_asimrc_val("asim-run", "FORK_BATCH",   32);
 my $distccjlevel= Asim::Util::get_asimrc_val("asim-run", "DISTCC_JLEVEL",    "");
 
+my $netbatch_taskname = "";
 
 #
 # Get the legal queue slots, if any.  If no legal queue slots are specified, then 
@@ -323,6 +324,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "forklocal=s"    => \$forklocal,
                         "forkbatch=s"    => \$forkbatch,
                         "distccjlevel=s" => \$distccjlevel,
+                        "nbtask=s"       => \$netbatch_taskname,
                     );
 
 if ($debugoutfile ne "") {
@@ -513,6 +515,16 @@ if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
     $batch_flags = $batch_flags . " --autoreq \"$NETBATCH_AUTO_REQUEUE:NBErr\" ";
 }
 
+##########################################################
+# Add netbatch task name if specified
+##########################################################
+
+if ($runbatch && $netbatch_taskname ne "") {
+    $batch_flags = $batch_flags . " --task-name \"$netbatch_taskname\" ";
+}
+
+
+##########################################################
 #
 # Maintain separate build and run netbatch flags because they could
 # potentially use different pools and args
@@ -2594,6 +2606,7 @@ Asim-run - Program to run a set of asim experiments
           [--pool <netbatch-poolname>] 
           [--queue <netbatch-qslot-name>]
           [--class <netbatch-classname>]
+          [--nbtask <netbatch-taskname>]
           [--[no]limit]
           [--[no]dryrun]
           [--[no]quiet]
@@ -2714,6 +2727,11 @@ use the netbatch default queue slot.
 
 Specifies the name of the netbatch class to use. Default is to use the
 netbatch default class. 
+
+=item --netbatch_taskname <netbatch-taskname>
+
+Specifies the name of task that netbatch will use to identify the set of
+jobs. Default is to use no task name. 
 
 =item --[no]dryrun
 
