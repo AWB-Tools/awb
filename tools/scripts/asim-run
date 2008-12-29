@@ -197,6 +197,7 @@ my $printtimes  = Asim::Util::get_asimrc_val("asim-run", "PRINT_TIMES",    1);
 my $forklocal   = Asim::Util::get_asimrc_val("asim-run", "FORK_LOCAL",    0);
 my $forkbatch   = Asim::Util::get_asimrc_val("asim-run", "FORK_BATCH",   32);
 my $distccjlevel= Asim::Util::get_asimrc_val("asim-run", "DISTCC_JLEVEL",    "");
+my $run_time_dir = Asim::Util::get_asimrc_val("asim-run", "RUN_TIME_DIR",    undef);
 
 my $netbatch_taskname = "";
 
@@ -283,6 +284,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "benchmarks=s"   => \$benchmarks,
                         "resdir=s"       => \$resdir,
 			"buildarea=s"    => \$buildarea,
+                        "run_time_dir=s" => \$run_time_dir,
                         "nicelevel=i"    => \$nicelevel,
                         "build!"         => \$build,
                         "nuke!"          => \$nuke,
@@ -1335,7 +1337,7 @@ sub rsync_model
 {
     my ($model, $name, $build, $model_name) = @_;
 
-    if ($remote) {
+    if ($remote && $build) {
 
         print_info("........ Rsyncing executable $model_name to remote host ...");
 
@@ -1347,6 +1349,10 @@ sub rsync_model
             run_command("mkdir -p $remoteresdir/$name/ADMIN/ > /dev/null 2>&1");
 
             run_command_rsync("--quiet --copy-links $resdir/$name/BUILD/$name $remoteresdir/$name/BUILD/");
+
+            if (defined $run_time_dir && -e "$resdir/$name/BUILD/$run_time_dir") {
+                run_command_rsync("--quiet -a --copy-links $resdir/$name/BUILD/$run_time_dir $remoteresdir/$name/BUILD/");
+            }
         }
         else {
             run_command("ssh -q $remotehost 'mkdir -p $remoteresdir/$name/RUN/' > /dev/null 2>&1");
@@ -1356,6 +1362,10 @@ sub rsync_model
             # asim bug #0000767: asim-run: rsync of binary to remote host fails if model name is
             # different from experiment name.
             run_command_rsync("--quiet -z -l $resdir/$name/BUILD/$model_name $remotehost:$remoteresdir/$name/BUILD/");
+
+            if (defined $run_time_dir && -e "$resdir/$name/BUILD/$run_time_dir") {
+                run_command_rsync("--quiet -az $resdir/$name/BUILD/$run_time_dir $remotehost:$remoteresdir/$name/BUILD/");
+            }
         }
     }
 
@@ -2684,6 +2694,7 @@ Asim-run - Program to run a set of asim experiments
           [--[no]build]
           [--[no]buildall]
           [--buildarea <Alternate location to build models or look for pre-built model(s)>]
+          [--run_time_dir <name of directory that holds files needed at run time>}
           [--[no]persist]
           [--[no]replace]
           [--compress none|no|gzip|gz|bzip2|bz2]
@@ -2772,6 +2783,14 @@ If build is specified, build models in this area.  If nobuild is specified,
 look for pre-built models in this area.  Each model is first looked after
 adding exp_name/pm/model_name to the path specified; if no model is found,
 just adding exp_name/model_name to the path specified is tried.
+
+=item --run_time_dir <name of directory that holds files needed at run time>
+
+This is the name of the directory that holds files needed by the executable
+at run time.  This is needed so that if you're running on a remote netbatch
+machine, this directory will get copied to the remote location by asim_run.
+Otherwise these run time files may not be available at the remote location.
+This directory is expected to be in the BUILD directory.
 
 =item --[no]persist 
 

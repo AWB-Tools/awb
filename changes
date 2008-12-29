@@ -5360,3 +5360,26 @@ Directory tools/scripts
 Updating with simcore changes (rev. 2633 - Carl Beckmann)
 
 - miscellaneous remote netbatch bug fixes provided by Jimmy Mason
+
+----------
+spartha1    Date: Mon Dec 29 12:36:15 EST 2008  CSN: CSN-asimcore-274
+                  Mon Dec 29 17:36:15 UTC 2008
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          273 
+
+Updating with simcore changes (rev. 2634 - Eric Borch)
+
+- added ability to specify a directory in the BUILD directory to hold
+files that are read in at run time.  This is needed for remote
+netbatch environments.  With this feature, these run time files
+will be copied to the remote netbatch location by asim-run.  The directory
+can be specified in asimrc with RUN_TIME_DIR= or on the command line with
+--run_time_dir.  Right now this ONLY allows directories that are in the
+BUILD directory.
+
+- there's also a change to not rsync anything to a remote netbatch
+location if the --nobuild option is specified.
+
+Eric
