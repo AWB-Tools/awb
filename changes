@@ -5485,3 +5485,15 @@ Updating with simcore changes (rev. 2655 - Carl Beckmann)
   This check should catch the most common configuration mismatches, e.g.
   checking out different packages on different host architectures, or
   inconsistent 32/64-bit build settings.
+
+----------
+spartha1    Date: Mon Dec 29 13:14:34 EST 2008  CSN: CSN-asimcore-279
+                  Mon Dec 29 18:14:34 UTC 2008
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          278 
+
+Updating with simcore changes (rev. 2656 - Carl Beckmann)
+
+- fixed a bug that was preventing asimstarter from launching foreign programs

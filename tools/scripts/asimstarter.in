@@ -256,8 +256,8 @@ if ($iam eq "asimstarter") {
 
 # Check if we should execute the first argument as the program
 
-  if (defined $ARGV[0] && -x $ARGV[0]) {
-    $program = shift;
+  if (defined $iam && -x $iam) {
+    $program = $iam;
   }
 }
 
