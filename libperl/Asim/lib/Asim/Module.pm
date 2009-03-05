@@ -812,9 +812,13 @@ sub decipher_type_from_extension
     # capture params
     my $filename = shift;
 
-    if ($filename =~ /.bs[vh]$/)
+    if ($filename =~ /.bsv$/)
     {
         return "BSV";           # Bluespec
+    }
+    elsif ($filename =~ /.bsh$/)
+    {
+        return "BSH";           # Bluespec include
     }
     elsif ($filename =~ /.\.c$/)
     {

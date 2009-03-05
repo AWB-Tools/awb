@@ -5554,3 +5554,13 @@ Updating with simcore changes (rev. 2599 - Carl Beckmann)
 
 - bug fix in relative path name resolution for resursive config files,
   (thanks to James Mason for providing the fix).
+
+----------
+mcadler     Date: Wed Mar  4 22:36:28 EST 2009  CSN: CSN-asimcore-284
+                  Thu Mar  5 03:36:28 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          283 
+
+Treat BSH (Bluespec header) files as a separate class than BSV.
