@@ -26,6 +26,7 @@ use Fcntl ':flock';
 use File::Basename;
 use File::Copy;
 use File::stat;
+use File::Temp qw(mktemp);
 
 my $debug =  (($ENV{ASIM_DEBUG} || 0) >= 2) 
           || defined($ENV{ASIM_DEBUG_INIFILE});
@@ -284,8 +285,9 @@ sub save {
       return 1;
   }
   
-
-  my $tmpfile = "$file.$$";
+  # create a temporary file, with the filaname to be saved prepended for debug
+  my $tmpfile = "$file." . mktemp("XXXXXX") . ".$$";
+  
   my $oldfile = $self->filename();
 
   # BUG we should update the filename here!!!!
