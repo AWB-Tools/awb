@@ -216,7 +216,7 @@ sub status {
     # Bobbie seems to always get a CVS status 'abort' :-) So we better take care of it
     #
     if ( /abort/ ) {
-      ierror("status: 'svn status' failed on $location!\nSorry, commiting is not possible\n");
+      Asim::Package::ierror("status: 'svn status' failed on $location!\nSorry, commiting is not possible\n");
       return undef;
     }
 
@@ -665,6 +665,29 @@ sub find_branchtags
   return @branches;
 }
 
+=item $svn->find_labels()
+
+Search a repository file for all symbolic tags (labels).
+
+For SVN repositories, this returns a list of all subdirectory names
+underneath the "tags" directory below the repository root.
+
+=cut
+
+sub find_labels
+{
+  my $self = shift;
+  my @labels = ();
+  my $url = $self->get_repository_url() . '/tags';
+  foreach my $label ( `svn list $url` ) {
+    if ( $label =~ m/non-existent/ ) { last; }
+    chomp $label;
+    $label =~ s/\/\s*$//;
+    push @labels, $label;
+  }
+  return @labels;
+}
+
 =item $svn-E<gt>branch_name()
 
 Return the name of the branch that this repository was checked
@@ -829,7 +852,7 @@ sub increment_csn {
   system("cd $location;svn status -v > $tmp_svn_status 2>&1");
 
   if (!CORE::open(SVN,"< $tmp_svn_status") ) {
-    ierror("Can't cat status file: $!\n");
+    Asim::Package::ierror("Can't cat status file: $!\n");
     return undef;
   }
 
@@ -853,6 +876,83 @@ sub increment_csn {
   return $csn;
 }
 
+=item $package-E<gt>label($tag)
+
+Label the currently checked out version of the repository
+with the given $tag.  Returns 1 on success.
+
+For SVN packages, this is similar to creating a branch in the repository,
+under the directory tags/$tag.
+
+=cut
+
+sub label {
+  my $self = shift;
+  my $labelname = shift ||
+    Asim::Package::ierror("Label: tag name must be specified\n") && return 0;
+
+  print "\nLabel the repository with a symbolic tag\n\n";
+
+  $self->step('Sanity checks', 0);
+  
+  # check the syntax of the tag
+  $labelname =~ m/^[a-z0-9_]+$/i ||
+    Asim::Package::ierror("Label: tag must contain only alphanumeric and underscore characters\n") && return 0;
+
+  # check the commit environment, since we need to commit a copy to the repository
+  $self->sanity_stage();
+
+  # Check that there doesn't already exist a branch or tag with this name.
+  foreach my $tag ( $self->find_branchtags(), $self->find_labels() ) {
+    $tag ne $labelname ||
+      Asim::Package::ierror("Label: A tag or branch named \"$labelname\" already exists.\n") && return 0;
+  }
+
+  $self->step('Lock repository');
+
+  $self->acquire_lock()
+    || Asim::Package::ierror("Label: Could not acquire lock\n") && return 0;
+
+  $self->step('Check that no updates needed in this package');
+
+  $self->up_to_date() ||
+    Asim::Package::iwarn("Branch: Package not up to date - consider updating and/or commiting changes first\n");
+
+  print "\nLabel: The checked out revision of the repository is about to be labelled with tag \"$labelname\"\n\n";
+  Asim::choose_yes_or_no('Are you sure you want to proceed', 'no', 'yes') ||
+    $self->release_lock() && return 0;
+
+  $self->step('Label the repository');
+  
+  Asim::Xaction::start();
+
+  my $cur_url = $self->get_working_url();
+  my $tag_url = $self->get_repository_url() . '/tags/' . $labelname;
+
+  # create a comment file header, nicely formatted so it gets past SVN pre-commit hook:
+  $self->{commentfile} = "$Asim::Package::TMPDIR/asim_label_comment.$$.txt";
+  open COMMENT, '>'.$self->{commentfile};
+  my $csn = $self->csn();
+  my $rev = $self->get_working_revision();
+  chomp(my $date     = `$Asim::Package::DATE`);
+  chomp(my $date_utc = `$Asim::Package::DATE_UTC`);
+  printf COMMENT "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n", $Asim::Package::USER, $date, $csn, '', $date_utc;
+  print  COMMENT "        Tag revision: $rev\n";
+  print  COMMENT "        From URL:     $cur_url\n";
+  print  COMMENT "        To URL:       $tag_url\n";
+  close  COMMENT;
+  Asim::invoke_editor("--eof", $self->{commentfile});
+
+  # create the branch in the repository, using the supplied branch name:
+  $self->svn("copy $cur_url -r $rev $tag_url --file " . $self->{commentfile});
+
+  $self->step('Unlock repository');
+
+  Asim::Xaction::commit();
+  $self->release_lock();
+  return 1;
+}
+
 =back
 
 =head1 BUGS
@@ -865,7 +965,7 @@ Sailashri Parthasarathy, Carl Beckmann based on Bitkeeper.pm by
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2006
+Copyright (c) Intel Corporation, 2006-09
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.

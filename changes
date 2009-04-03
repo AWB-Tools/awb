@@ -5708,3 +5708,32 @@ Directory modules/dral_api
 Updating with simcore changes (rev. 2721 - Sailashri Parthasarathy)
 
 Adding a DRAL API file that uses PTV from the golden archlib package.
+
+----------
+spartha1    Date: Fri Apr  3 14:54:02 EDT 2009  CSN: CSN-asimcore-292
+                  Fri Apr  3 18:54:02 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          291 
+ Commands.pm               Locally Modified          291 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          291 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          291 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          291 
+
+Directory tools/scripts
+ model-coverage            Locally Modified          291 
+
+Updating with simcore changes (rev. 2726 - Carl Beckmann)
+
+- Created a "tag package" command so we can easily label package revisions
+  with symbolic tags, without resorting to manual SVN commands or bypassing
+  the SVN pre-commit hooks
+
+- Fixed a minor bug in model-coverage

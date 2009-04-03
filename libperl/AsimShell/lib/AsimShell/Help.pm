@@ -128,6 +128,7 @@ Commands:
     [--nodependent]                      - prevent commit of dependent packages
     [--commitlog=<commit comments file>] - Use in batch mode to supply commit comments
 
+  tag package [<package>] label          - tag current package revision with symbolic label
   release package [<package>] version    - create a new release of a package
   branch package [<package>] branch      - create a branch named "branch"
   merge package [<package>] [CSN]        - merge a branch with the

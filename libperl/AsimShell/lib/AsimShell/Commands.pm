@@ -1936,6 +1936,17 @@ sub commit_all_packages {
   return 1;
 }
 
+sub tag_package {
+  my $name = shift if (defined($_[1]));
+  my $package = get_package($name) || return ();
+  my $tag = shift
+    || Asim::choose("Enter label (format: alphanumeric or underscore characters only)")
+    || shell_error("Label must be specified\n") && return ();
+
+  return $package->label($tag)
+    || shell_error("Label package failed\n") && return ();
+}
+
 sub release_package {
   my $name = shift if (defined($_[1]));
   my $package = get_package($name) || return ();

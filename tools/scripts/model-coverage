@@ -150,9 +150,9 @@ if ( $Options{'verbosity'} >= 3 ) {
 # Return a path relative to the top of the workspace (NOT a union-directory relative path).
 #
 sub ResolveRelative {
-  my($filename) = shift;
-  $filename = Asim::resolve($filename);
-  if ($?) {
+  my($f) = shift;
+  my($filename) = Asim::resolve($f);
+  if ($? || !defined $filename) {
     # if we were unable to resolve file, maybe print warning and return empty string:
     if ( $Options{'verbosity'} >= 4 ) { print STDERR "$filename\n"; }
     return undef;

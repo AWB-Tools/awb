@@ -820,6 +820,23 @@ sub baseline_tag
 
 ################################################################
 
+=item $package-E<gt>label($tag)
+
+Label the currently checked out version of the repository
+with the given $tag.  Returns 1 on success.
+
+=cut
+
+################################################################
+
+sub label {
+  my $self = shift;
+  ierror('Package::label() not implemented for package type ' . $self->type() . "\n");
+  return 0;
+}
+
+################################################################
+
 =item $package-E<gt>branch_name()
 
 Return the name of the branch that this repository was checked
@@ -1298,7 +1315,7 @@ Joel Emer, Roger Espasa, Artur Klauser, Pritpal Ahuja, Saila Parthasarathy, Carl
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2001-2006
+Copyright (c) Intel Corporation, 2001-09
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.
