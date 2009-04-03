@@ -5564,3 +5564,15 @@ Directory libperl/Asim/lib/Asim
  Module.pm                 Locally Modified          283 
 
 Treat BSH (Bluespec header) files as a separate class than BSV.
+
+----------
+spartha1    Date: Fri Apr  3 13:38:19 EDT 2009  CSN: CSN-asimcore-285
+                  Fri Apr  3 17:38:19 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          284 
+
+Updating with simcore changes (rev. 2691 - Sailashri Parthasarathy)
+
+Changing the commit functionality to include the user's comments in the CVS log (similar to Svn).

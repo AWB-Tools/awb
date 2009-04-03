@@ -920,7 +920,7 @@ sub edit_changes_manual {
   }
 
 
-  if (($self->type() eq "cvs") || ($self->type() eq "bitkeeper")) {
+  if (($self->type() eq "bitkeeper")) {
 
     if (! defined($commitlog_file)) {
       Asim::invoke_editor("--eof", $changes) 
@@ -929,7 +929,7 @@ sub edit_changes_manual {
       system("cat $commitlog_file >>$changes");
     }
   }
-  elsif (($self->type() eq "svn")) {
+  elsif (($self->type() eq "svn") || ($self->type() eq "cvs")) {
 
     if (! defined($commitlog_file)) {
       Asim::invoke_editor("--eof", $reportfile)
@@ -972,7 +972,7 @@ sub edit_changes_manual {
   }
   print "\n\n";
 
-  if (($self->type() eq "svn")) {
+  if (($self->type() eq "svn") || ($self->type() eq "cvs")) {
     system("cat $reportfile >> $changes");
     system("rm $reportfile");
   }
