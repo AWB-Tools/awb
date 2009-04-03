@@ -5673,3 +5673,26 @@ Updating with simcore changes (rev. 2712 - Carl Beckmann)
 
 - Fixed some bugs involving resolving file locations, due to the fact
   that we were not using Asim perl objects to find things.
+
+----------
+spartha1    Date: Fri Apr  3 14:31:36 EDT 2009  CSN: CSN-asimcore-290
+                  Fri Apr  3 18:31:36 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Package
+ BitKeeper.pm              Locally Modified          289 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          289 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          289 
+
+Updating with simcore changes (rev. 2716 - Carl Beckmann)
+
+- Better handling of revisions and tags for BitKeeper.
+  The command baseline packages now works for BK repositories, too,
+  extracting a symbolic tag if available, or defaulting to a numeric tag.
+  Branches/clones are still a little problematic.
+
+

@@ -28,6 +28,7 @@ use warnings;
 use strict;
 
 use File::Basename;
+use File::Temp qw(tempfile tempdir);
 
 our @ISA = qw(Asim::Package);
 
@@ -384,6 +385,7 @@ sub bk {
          $bk->{regtestdir} is cleared
 
     Another side effect is that it writes a file with the status
+
 =cut
 
 ################################################################
@@ -465,18 +467,149 @@ sub commit_check {
   return 1;
 }
 
+=item $package-E<gt>has_local_changesets()
+
+Return 1 if and only if the local repository has changesets
+that are not in the parent repository
+
+=cut
+
+sub has_local_changesets
+{
+  my $self = shift;
+  (my $fh, my $fname) = tempfile();
+  system "bk changes -L >& $fname";
+  open STATUS, $fname
+    || ( Asim::Package::ierror("BitKeeper::has_local_changesets() could not open bk changes -L output!\n")
+       && return ()
+       );
+  my $result = 0;
+  while ( <STATUS> ) {
+    if ( /ChangeSet/ ) {
+      $result = 1;
+      last;
+    }
+  }
+  close STATUS;
+  close $fh;
+  return $result;
+}
+
+=item $package-E<gt>get_repository_location()
+
+Return the location of the local repository as a string
+of the form that can be used in a baseline tag.
+
+=cut
+
+sub get_repository_location
+{
+  my $self = shift;
+  chomp(my $host = `hostname --long`);
+  return $host . ':' . $self->location;
+}
+
+=item $package-E<gt>get_current_revision_or_tag()
+
+Return the curren revision number of the repository,
+or a symbolic tag if the current revision has been tagged.
+This string can be used in a baseline tag.
+
+=cut
+
+sub get_current_revision_or_tag
+{
+  my $self = shift;
+  my $location = $self->location();
+
+  # look for the first ChangeSet mentioned in the bk log output, to get revision number:
+  open STATUS, "cd $location; bk log |"
+    || ( Asim::Package::ierror("BitKeeper::get_current_revision_or_tag() could not open bk log output!\n")
+       && return ()
+       );
+  my $result;
+  my $tag;
+  while ( <STATUS> ) {
+    if ( /ChangeSet\s+([0-9\.]+)/ ) {
+      if (defined $result) {
+        last;
+      } else {
+        $result = $1;
+      }
+    } elsif ( /TAG:\s*(.*)$/ && defined $result ) {
+      $tag = $1;
+      last;
+    }
+  }
+  close STATUS;
+
+  # if we couldn't extract a revision number, default to using CSN.
+  # if we couldn't find a tag, just the revision number:
+  return $self->csn() unless defined $result;
+  return $result unless defined $tag;
+  return $tag;
+}
+
+=item $package-E<gt>baseline_tag([<use_csn>])
+
+Return a tag that can be used later
+to retrieve exactly the version of the package that is currently
+checked out in the working copy (minus any uncommitted changes).
+
+In Asim BK repositories (unlike in CVS) we do not maintain the branch
+name and revision numbers as part of the CSN in the admin/packages file.
+Instead, we extract the branch or tag name and revision from the local
+repository as follows.
+
+If there are no changesets in the local repository that are not in
+the parent repository, then we are assumed to be "on the head",
+and we return the revision number of the repository, or the tag
+if the current revision is tagged.
+
+If there are changesets in the local repository that are not in the parent,
+then the local repository is considered a "branch" and we return the
+URL of the local repo, plus a local revision number or tag.
+
+In either case, this is enough information to clone a copy of the
+current local repository (minus any changes that have not been
+locally checked in).
+
+If the optional <use_csn> flag is passed in as '1', then use the
+CSN information from the admin/packages file instead of querying
+BK directly to get the working copy revision information.  But this CSN
+number is probably not accurate, because commits to BK repositories
+are not done via asim-shell, so this option (which is here for
+compatibility with SVN) should probably not be used.
+
+=cut
+
+sub baseline_tag
+{
+  my $self = shift;
+  my $use_csn = shift;
+  if ( $use_csn ) {
+    return $self->csn();
+  }
+  if ( $self->has_local_changesets() ) {
+    return $self->get_repository_location()
+      .':'.$self->get_current_revision_or_tag();
+  } else {
+    return $self->get_current_revision_or_tag();
+  }
+}
+
 =back
 
 =head1 BUGS
 
 =head1 AUTHORS
 
-Oscar Rosell based on Cvs.pm by
-    Joel Emer, Roger Espasa, Artur Klauser and  Pritpal Ahuja
+Oscar Rosell, Carl Beckmann based on Cvs.pm by
+Joel Emer, Roger Espasa, Artur Klauser and  Pritpal Ahuja
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2005
+Copyright (c) Intel Corporation, 2005-09
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.

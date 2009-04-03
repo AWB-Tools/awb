@@ -229,15 +229,15 @@ sub checkout {
   
   my $tag_branch = '';
   my $tag_csn = 0;
-  if      ( $tag =~ m/^CSN-(.+)-([0-9]+)$/ ) {
+  if      ( $tag =~ m/^CSN-(.+)-([0-9\.]+)$/ ) {
     $tag_branch = $1;
     $tag_csn    = $2;
-  } elsif ( $tag =~     m/^(.+):([0-9]+)$/ ) {
+  } elsif ( $tag =~     m/^(.+):([0-9\.]+)$/ ) {
     $tag_branch = $1;
     $tag_csn    = $2;
-  } elsif ( $tag =~          m/^([0-9]+)$/ ) {
+  } elsif ( $tag =~          m/^([0-9\.]+)$/ ) {
     $tag_csn    = $1;
-  } elsif ( $tag =~              m/^(.+)$/ ) {
+  } elsif ( $tag =~                m/^(.+)$/ ) {
     $tag_branch = $1;
   }
   if ( $tag_branch eq $self->packagename() ) {
@@ -333,6 +333,9 @@ sub checkout {
     }
 
   } elsif ( $method eq "bitkeeper" ) {
+
+    # FIX!
+    # deal with branches, which in the case of BK are just separate clones...
 
     my $url = "$access";
     if ($user ne "anonymous") {

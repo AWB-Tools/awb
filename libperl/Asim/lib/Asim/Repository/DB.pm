@@ -326,13 +326,15 @@ sub get_repository {
 
   ($name, $tag) = (split("/",$fullname), "HEAD");
 
+  $desc    = $self->_get_item($fullname, "Description");
+  $method  = $self->_get_item($fullname, "Method") || return undef;
+
   # Make CVS happy by converting  .'s to _'s in tag
 
   $cvstag = $tag;
-  $cvstag =~ s/\./_/g;
-
-  $desc    = $self->_get_item($fullname, "Description");
-  $method  = $self->_get_item($fullname, "Method") || return undef;
+  if ($method ne "bitkeeper") {
+    $cvstag =~ s/\./_/g;
+  }
 
   # Following will eventually be conditional on "Method";
 
