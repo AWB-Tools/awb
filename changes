@@ -5576,3 +5576,15 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2691 - Sailashri Parthasarathy)
 
 Changing the commit functionality to include the user's comments in the CVS log (similar to Svn).
+
+----------
+spartha1    Date: Fri Apr  3 13:40:56 EDT 2009  CSN: CSN-asimcore-286
+                  Fri Apr  3 17:40:56 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          285 
+
+Updating with simcore changes (rev. 2692 - Sailashri Parthasarathy)
+
+Continuation of previous commit. Adding Jim Fung's changes.

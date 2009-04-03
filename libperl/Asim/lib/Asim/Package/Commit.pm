@@ -824,14 +824,14 @@ sub edit_changes_for_commit {
   }
 
   print CHANGES "\n----------\n";
-  if (($self->type() eq "cvs") || ($self->type() eq "bitkeeper")) {
+  if (($self->type() eq "bitkeeper")) {
   #  print CHANGES "$USER\tDate: $date\tCSN: $csn\tTAR: $tarfile\n\n";
   printf CHANGES "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n",
     $USER, $date, $csn, "", $date_utc;
   }
   safe_close(*CHANGES);
 
-  if (($self->type() eq "svn")) {
+  if (($self->type() eq "svn") || ($self->type() eq "cvs")) {
   my $tmp  = "/tmp/asim-shell-rpt-file.$$";
   CORE::open(RPT, "<$reportfile");
    
@@ -850,7 +850,7 @@ sub edit_changes_for_commit {
   #
   # Concatentate report of modified files
   #
-  if (($self->type() eq "cvs") || ($self->type() eq "bitkeeper")) {
+  if (($self->type() eq "bitkeeper")) {
     system("cat $reportfile >>$changes");
     system("rm $reportfile");
   }
@@ -1047,7 +1047,7 @@ sub commit_archive {
   if ($self->type() eq "cvs")
   {
     # lets try to commit:
-    $command = "commit -m\"${csn}\"";
+    $command = "commit -F $commentfile";
     while (! $self->cvs_command($command)) {
       ierror("Commit: Fatal error during cvs commit: \n".
              "Commit: Your commit might be partially done \n",
