@@ -665,6 +665,24 @@ sub find_branchtags
   return @branches;
 }
 
+=item $svn-E<gt>branch_name()
+
+Return the name of the branch that this repository was checked
+out of.  If it was checked out of the main trunk, return the
+value 'HEAD'.
+
+=cut
+
+sub branch_name
+{
+  my $self = shift;
+  my $url  = $self->get_working_url();
+  if ( is_branch_url( $url ) ) {
+    return branch_name_from_url( $url );
+  }
+  return 'HEAD';
+}
+
 =item $svn-E<gt>commit_check()
 
 A set of checks to make sure that we have a 

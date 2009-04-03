@@ -113,7 +113,8 @@ sub attempted_completion {
     @list = grep /^$text/, @subcommands;
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /^checkout\s+bundle\s+$/ ||
+  } elsif ($prefix =~ /^new\s+bundle\s+$/      ||
+           $prefix =~ /^checkout\s+bundle\s+$/ ||
            $prefix =~ /^use\s+bundle\s+$/      ||
            $prefix =~ /^show\s+bundle\s+$/     ||
            $prefix =~ /^update\s+bundle\s+$/   ){

@@ -741,6 +741,144 @@ sub choose_bundle {
 }
 
 
+sub new_bundle {
+
+  # Parse options
+  local @ARGV = @_;
+  my $model      = '';
+  my $experiment = '';
+  my $packages   = '';
+  my $type       = 'release';
+  my $status     = 'Unknown';
+  my $file       = '';
+  my $install    = 0;
+  my $head       = 0;
+  my $options_ok = GetOptions(
+    'model=s'      => \$model,
+    'experiment=s' => \$experiment,
+    'packages=s'   => \$packages,
+    'type=s'       => \$type,
+    'status=s'     => \$status,
+    'file=s'       => \$file,
+    'install!'     => \$install,
+    'head!'        => \$head
+  );
+  return 0 if (!$options_ok);
+
+  # --model, --experiment, and --packages are mutually exclusive
+  if (($model && $experiment) || ($model && $packages) || ($experiment && $packages)) {
+    shell_error("Please specify only one of --model, --experiment, or --packages!\n") && return ();
+  }
+
+  # --file and --install are mutually exclusive
+  if ($file && $install) {
+    shell_error("Please specify only one of --file or --install!\n") && return ();
+  }
+  
+  # type must be 'baseline' or 'release'
+  if ($type ne 'baseline' && $type ne 'release') {
+    shell_error("Type must be either 'baseline' or 'release'!\n") && return ();
+  }
+  
+  # --status only used if --type=baseline
+  if ($type ne 'baseline' && $status ne 'Unknown') {
+    shell_error("Option --status only valid if --type=baseline!\n") && return ();
+  }
+  
+  # get and parse the name and tag of the bundle the user wants to create:
+  my $bundle_arg = shift @ARGV;
+  (my $name, my $tag, my @dummy) = split /\//, $bundle_arg;
+  if (!defined $tag) {$tag='default'}
+  
+  # make sure the bundle doesn't exist already
+  my @bundle_dir = $default_repositoryDB->bundle_ids($name);
+  if (0 < grep {$_ eq $tag} @bundle_dir) {
+    if (!Asim::choose_yes_or_no("Bundle $name/$tag already exists.  Overwrite", "no", "no")) {
+      return ();
+    }
+  }
+  
+  # get the list of packages that make up the bundle
+  my @package_list = ();
+  my $runtype;
+  if ($model) {
+    # get the list of packages that $model depends on.
+    # The special value '.' designates the current default model:
+    my $workspace = get_workspace() || return ();
+    my $root = $workspace->rootdir();
+    if ($model eq '.') { $model = undef; }
+    my $model_obj = get_model($model) || return ();
+    $model = $model_obj->filename();
+    print "# getting package dependencies of model $model\n"; # DEBUG
+    chomp($packages = `model-coverage --workspace=$root --model=$model --print=packages`);
+    @package_list = split ' ', $packages;
+
+  } elsif ($experiment) {
+    # get the list of packages that all models in $experiment depend on
+    if ($experiment =~ m/^([^\/]+)\/([^\/]+)$/) {
+      my $package = $1;
+      $runtype = $2;
+      my $workspace = get_workspace() || return ();
+      my $root = $workspace->rootdir();
+      my $models_file = "experiments/$package/$runtype/$runtype.models";
+      Asim::resolve($models_file)
+       || shell_error("Cannot find models file $models_file!\n") && return ();
+      print "# getting package dependencies of experiment $models_file\n"; # DEBUG
+      chomp(my $pkg_names = `model-coverage --workspace=$root --package=$package --experiments=$runtype --print=packages`);
+      @package_list = split ' ', $pkg_names;
+    } else {
+      shell_error("Badly formed experiment $experiment, should be: <package>/<runtype>!\n") && return ();
+    }
+
+  } elsif ($packages) {
+    # the list of packages is specified literally
+    @package_list = split ',', $packages;
+
+  } else {
+    # otherwise get the list of all packages in the current workspace
+    @package_list = $default_packageDB->directory();
+  }
+  
+  # get the destination filename:
+  my $show_bundle = 0;
+  if (!$file) {
+    $show_bundle = 1;
+    my $loc;
+    if ($install) {
+      $loc = Asim::Sysconfdir() . '/asim/bundles/';
+    } else {
+      $loc = Asim::Util::expand_tilda('~/.asim/bundles/');
+    }
+    $file = "$loc$type/$name.$type";
+  }
+  
+  # append the bundle info to the file
+  print "# writing bundle information to file $file\n"; # DEBUG
+  if (! -e $file) {system "touch $file"} # create empty file if it doesn't exist
+  my $file_obj = Asim::Inifile->new($file) || return ();
+  if ($type eq 'baseline') {
+    if ($experiment) {$file_obj->put($tag, 'Type', $runtype)}
+    $file_obj->put($tag, 'Status', $status);
+  }
+  my $packages_string = '';
+  foreach my $name (@package_list) {
+    my $package = get_package($name);
+    my $revision;
+    if ($head) {
+      $revision = $package->branch_name();
+    } else {
+      $revision = $package->baseline_tag(0);
+    }
+    $packages_string .= "$name/$revision ";
+  }
+  $file_obj->put($tag, 'Packages', $packages_string);
+  $file_obj->save($file) || return ();
+  
+  # show the user what you just created (unless you wrote it to nonstandard location)
+  if ($show_bundle) {show_bundle($bundle_arg)}
+}
+
+
 ################################################################
 #
 # Package DB functions

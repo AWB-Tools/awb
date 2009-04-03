@@ -5603,3 +5603,60 @@ Updating with simcore changes (rev. 2701 - Carl Beckmann)
 - added a "--persist" option to the model configure and ncfg commands,
   identical to the --persist flag of asim-run:  When this flag is given,
   the model build area uses hard links instead of soft links to the source area.
+
+----------
+spartha1    Date: Fri Apr  3 14:26:55 EDT 2009  CSN: CSN-asimcore-288
+                  Fri Apr  3 18:26:55 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          287 
+ Completion.pm             Locally Modified          287 
+ Commands.pm               Locally Modified          287 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          287 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          287 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          287 
+
+Updating with simcore changes (rev. 2707 - Carl Beckmann)
+
+- Added a "new bundle" command to asim-shell.  See online help.
+
+  Here are some typical example usage models:
+
+  To create a bundle consisting of the HEAD version of all packages
+  in the current workspace, named "mybundle" do:
+
+    asim> new bundle mybundle --head
+
+  To create a bundle named "mybundle/2008_01_26" consisting of the
+  packages "axp", "simcore" and "x86" only, do:
+
+    asim> new bundle mybundle/2009_01_26 --packages=axp,simcore,x86
+
+  To create a bundle consisting of the current versions of those
+  packages needed to build the model "config/pm/my/broken/model.apm":
+
+    asim> set model config/pm/my/broken/model.apm
+    asim> new bundle mybundle/BAD_JAN_26_09 --model=.
+
+  To create a bundle consisting of the current versions of all those
+  packages needed to build all the models used in the asim-run file
+  in experiments/axp/my_axp_exps/my_axp_exps.model, do:
+
+    asim> new bundle mybundle/MY_AXP_EXPS --experiment=axp/my_axp_exps
+
+  If you goof and want to redo a previous bundle, just redo the command
+  and it will prompt you whether to overwrite the bundle information.
+
+  Normally it stores bundle information under $HOME/.asim/bundles, but
+  if you have privileges (e.g. asim1) you can use --install to write into
+  <install>/etc/asim/bundles (where <install> is probably something like
+  /p/asim/x86_64_linux26/).  You can also use the --file option to redirect
+  bundle information to an arbitrary file (for example if you want to send
+  the bundle information to someone else, to reproduce an error elsewhere).

@@ -820,6 +820,24 @@ sub baseline_tag
 
 ################################################################
 
+=item $package-E<gt>branch_name()
+
+Return the name of the branch that this repository was checked
+out of.  If it was checked out of the main trunk, return the
+value 'HEAD'.
+
+=cut
+
+################################################################
+
+sub branch_name
+{
+  my $self = shift;
+  return 'HEAD';
+}
+
+################################################################
+
 =item $package-E<gt>buildorder([$value])
 
 Set package "buildorder" to $value if supplied. 

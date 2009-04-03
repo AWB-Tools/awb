@@ -73,6 +73,18 @@ Commands:
 
   show bundle <bundle>                   - show the packages in a bundle
   
+  new bundle <bundle>[/<tag>]            - create a new bundle
+    [--model=[<apmfile>|.]        |      - from package dependencies of <apmfile> or default model,
+     --experiment=<pkg>/<runtype> |      - or models in experiments/<pkg>/<runtype>/<runtype>.models,
+     --packages=<packagelist>     |      - or comma-separated package list <packagelist>,
+                                  ]      - or from all packages in the current workspace (default).
+    [--head]                             - specify HEAD or branch name instead of current revision
+    [--type=[release|baseline]]          - bundle type (defaults to "release")
+    [--status=[Unknown|Success|Failure]] - status, for baseline bundles (defaults to "Unknown")
+    [--file=<bundlefile> |               - write bundle information to file <bundlefile>,
+     --install           |               - or to <sysprefix>/etc/asim/bundles/<type>/<bundle>.<type>,
+                         ]               - or to default file ~/.asim/bundles/<type>/<bundle>.<type>
+  
   awb                                    - invoke awb on current workspace
 
   new repository                         - create a new repository
