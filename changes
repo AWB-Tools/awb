@@ -5737,3 +5737,16 @@ Updating with simcore changes (rev. 2726 - Carl Beckmann)
   the SVN pre-commit hooks
 
 - Fixed a minor bug in model-coverage
+
+----------
+spartha1    Date: Fri Apr  3 16:27:36 EDT 2009  CSN: CSN-asimcore-293
+                  Fri Apr  3 20:27:36 UTC 2009
+
+
+Directory modules/dral_api
+ classic_dral_api_ptv_gold.awb Locally Modified          292 
+
+Updating with simcore changes (rev. 2757 - Sailashri Parthasarathy)
+
+The xfopen files in archlib have been moved to a new dir with a separate Conscript. Adding a reference to the xfopen library in the awb f\
+ile.

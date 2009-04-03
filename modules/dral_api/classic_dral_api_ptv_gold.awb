@@ -35,6 +35,7 @@
 %library export-gold/lib/libsupport.a
 %library lib/libsupport/ptlib/libptlib.a
 %library util/cohoperfchecker/libcohoperfchecker.a
+%library lib/libsupport/xfopen/libxfopen.a
 
 %param %dynamic pt          ""  "Pipetrace filename"
 %param %dynamic pt_dump     ""  "Pipetrace filename dump on fail"
