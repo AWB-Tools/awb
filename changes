@@ -5660,3 +5660,16 @@ Updating with simcore changes (rev. 2707 - Carl Beckmann)
   /p/asim/x86_64_linux26/).  You can also use the --file option to redirect
   bundle information to an arbitrary file (for example if you want to send
   the bundle information to someone else, to reproduce an error elsewhere).
+
+----------
+spartha1    Date: Fri Apr  3 14:29:42 EDT 2009  CSN: CSN-asimcore-289
+                  Fri Apr  3 18:29:42 UTC 2009
+
+
+Directory tools/scripts
+ model-coverage            Locally Modified          288 
+
+Updating with simcore changes (rev. 2712 - Carl Beckmann)
+
+- Fixed some bugs involving resolving file locations, due to the fact
+  that we were not using Asim perl objects to find things.

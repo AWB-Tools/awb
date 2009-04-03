@@ -50,8 +50,6 @@ use Asim::Regression;
 #
 $^W = 1;
 
-$RESOLVER = 'awb-resolver';
-
 ################## HANDLE ARGUMENTS #######################
 
 $argv0 = 'model-coverage';
@@ -148,12 +146,12 @@ if ( $Options{'verbosity'} >= 3 ) {
 ################## COMMON SUBROUTINES #######################
 
 #
-# use awb-resolver to resolve the location of a file in the source
-# union directory.  Return a relative path (relative to the top of the workspace).
+# Resolve the location of a file in the source union directory.
+# Return a path relative to the top of the workspace (NOT a union-directory relative path).
 #
 sub ResolveRelative {
   my($filename) = shift;
-  chomp ($filename = `$RESOLVER $filename 2>&1`);
+  $filename = Asim::resolve($filename);
   if ($?) {
     # if we were unable to resolve file, maybe print warning and return empty string:
     if ( $Options{'verbosity'} >= 4 ) { print STDERR "$filename\n"; }
@@ -171,8 +169,8 @@ sub ResolveRelative {
 #
 sub GetPackageDir {
   my($pkg) = shift;
-  my($pkgdir) = ResolveRelative( "admin/packages/$pkg" );
-  $pkgdir =~ s/\/admin\/packages\/${pkg}$//;
+  my($pkgobj) = Asim::packageDB()->get_package($pkg);
+  my($pkgdir) = $pkgobj->location();
   return $pkgdir;
 }
 
@@ -181,14 +179,12 @@ sub GetPackageDir {
 #
 sub GetPackageContainingFile {
   my($filename) = shift;
-  if      ( $filename =~ m/^src\/asim-([^\/]+)\// ) {
-    return $1;
-  } elsif ( $filename =~ m/^\/p\/asim\/.*\/share\/asim\/([A-Za-z0-9_]+)\/HEAD/ ) {
-    return $1;
-  } elsif ( $Options{'verbosity'} >= 4 ) {
+  my($pkg) = Asim::file2package( $filename );
+  if (! $pkg && $Options{'verbosity'} >= 4 ) {
     print "WARNING: cannot find package containing $filename\n";
-    return '';
+    $pkg = '';
   }
+  return $pkg;
 }
 
 #
