@@ -189,9 +189,11 @@ Commands:
 
   configure model [<model>]              - configure a model
     [--builddir <build-directory>]       - directory for model build
+    [--[no]persist]                      - hard links [soft links] from build area to source files
 
   ncfg model [<model>]                   - nuke & configure a model
     [--builddir <build-directory>]       - directory for model build
+    [--[no]persist]                      - hard links [soft links] from build area to source files
 
   build model [<model>]                  - build a model
     [--builddir <build-directory>]       - directory for model build

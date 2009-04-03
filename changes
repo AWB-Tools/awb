@@ -5588,3 +5588,18 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with simcore changes (rev. 2692 - Sailashri Parthasarathy)
 
 Continuation of previous commit. Adding Jim Fung's changes.
+
+----------
+spartha1    Date: Fri Apr  3 14:23:21 EDT 2009  CSN: CSN-asimcore-287
+                  Fri Apr  3 18:23:21 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          286 
+ Commands.pm               Locally Modified          286 
+
+Updating with simcore changes (rev. 2701 - Carl Beckmann)
+
+- added a "--persist" option to the model configure and ncfg commands,
+  identical to the --persist flag of asim-run:  When this flag is given,
+  the model build area uses hard links instead of soft links to the source area.

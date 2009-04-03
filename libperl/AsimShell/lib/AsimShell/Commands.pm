@@ -2512,13 +2512,15 @@ sub nuke_model {
 sub ncfg_model {
   my $file;
   my $builddir="";
+  my $persist=0;
   my $model;
   my $status;
   local @ARGV = @_;
 
   # Parse options
 
-  $status = GetOptions( "builddir=s" => \$builddir);
+  $status = GetOptions( "builddir=s" => \$builddir,
+                        "persist!"   => \$persist );
 
   # Model is remaining argument
 
@@ -2528,7 +2530,8 @@ sub ncfg_model {
   $status = $model->nuke("--builddir" => "$builddir");
   return if (! $status);
 
-  $status = $model->configure("--builddir" => "$builddir");
+  $status = $model->configure("--builddir" => "$builddir",
+                              "--persist"  => "$persist" );
 
   return $status;
 }
@@ -2536,13 +2539,15 @@ sub ncfg_model {
 sub configure_model {
   my $file;
   my $builddir="";
+  my $persist=0;
   my $model;
   my $status;
   local @ARGV = @_;
 
   # Parse options
 
-  $status = GetOptions( "builddir=s" => \$builddir);
+  $status = GetOptions( "builddir=s" => \$builddir,
+                        "persist!"   => \$persist );
 
   # Model is remaining argument
 
@@ -2555,7 +2560,8 @@ sub configure_model {
 
   # Configure the model
 
-  $status = $model->configure("--builddir" => "$builddir");
+  $status = $model->configure("--builddir" => "$builddir",
+                              "--persist"  => "$persist" );
 
   return $status;
 }
