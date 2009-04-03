@@ -100,7 +100,8 @@ ModelBuilder::CreateBuildTree (int persist)
         CreateBuildTreeForModel() &&
         CreateDynamicParams() &&
         CreateSimConfig() &&
-        CreateMakefiles()
+        CreateMakefiles() &&
+	CreateConscripts()
     );
 }
 
@@ -356,6 +357,47 @@ ModelBuilder::CreateMakefiles (void)
     // now substitute placeholders and copy file
     SubstitutePlaceholders (makefileTemplate, makefileDest);
 
+    return true;
+}
+
+/**
+ * Handle Conscript files; just copy for now.
+ *
+ */
+bool ///< returns true for success, false otherwise
+ModelBuilder::CreateConscripts (void)
+{
+    bool success;
+    
+    const ModuleInstance * rootModuleInstance = model.GetRootModule();
+    const Module & rootModule = rootModuleInstance->GetModule();
+    const string & rootModuleLocation = rootModule.GetLocation();
+    
+    // copy the 'other' files - to be defined what these could be in cons-based builds.
+    Module::StringList rootConscriptOtherList = rootModule.GetConscript();
+    if (rootConscriptOtherList.size() > 1) {
+	for (unsigned i = 1; i < rootConscriptOtherList.size(); ++i) {
+	    FileCopy(sourceTree.FullName(FileJoin(workspace.GetDirectory(Workspace::RelSourceModelDir), rootConscriptOtherList[i])), buildDir); 
+	}
+    }
+    
+    // handle the top-level conscript/construct file.
+    string conscriptSourceFileName;
+    if (rootModule.GetConscript().size() != 0) {
+	conscriptSourceFileName =  MakePath(SourceFile, rootModuleLocation, "system", rootModule.GetConscript().front(), Source);
+        if (conscriptSourceFileName == "") {
+            cerr << "ERROR: can't find user specified top-level Conscript " << rootModule.GetConscript().front() << endl;
+            cerr << "       specified in Module '" << rootModule.GetFileName()
+                 << "' named '" << rootModule.GetName() << endl;
+            return false;
+        }
+	string conscriptFullPath = sourceTree.FullName(conscriptSourceFileName);
+	FileCopy(conscriptFullPath, buildDir);
+    } 
+    else {
+	// cerr << "ERROR: No top-level Conscript file specified." << endl;
+    }
+    
     return true;
 }
 

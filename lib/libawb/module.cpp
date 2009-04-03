@@ -336,7 +336,17 @@ Module::Parse (
             //    return false;
             //}
             //SetMakefile (matchArray[1]);
-	
+        // %consript
+        } else if ( ! matchLine.Match (
+              "%conscript[[:space:]]+([^[:space:]].+[^[:space:]])",
+              matchArray).empty())
+        {
+            SplitString split(matchArray[1], " \t");
+            FOREACH (SplitString, it, split) {
+                if ( ! (*it).empty()) {
+                    AddConscript (*it);
+                }
+            }
         // %target
         } else if ( ! matchLine.Match (
               "%target[[:space:]]+([^[:space:]].+[^[:space:]])",

@@ -5750,3 +5750,18 @@ Updating with simcore changes (rev. 2757 - Sailashri Parthasarathy)
 
 The xfopen files in archlib have been moved to a new dir with a separate Conscript. Adding a reference to the xfopen library in the awb f\
 ile.
+
+----------
+spartha1    Date: Fri Apr  3 16:31:40 EDT 2009  CSN: CSN-asimcore-294
+                  Fri Apr  3 20:31:40 UTC 2009
+
+
+Directory lib/libawb
+ model_builder.cpp         Locally Modified          293 
+ model_builder.h           Locally Modified          293 
+ module.cpp                Locally Modified          293 
+ module.h                  Locally Modified          293 
+
+Updating with simcore changes (rev. 2761 - Krishna Rangan)
+
+- added %conscript tag; copies the arguments to the build dir for now.

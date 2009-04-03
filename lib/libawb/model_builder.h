@@ -178,6 +178,7 @@ class ModelBuilder {
     bool CreateBuildTreeForModule (const ModuleInstance & moduleInstance,
         const string & modulePath, const string & moduleShortPath,
         const ModParamInstanceList & inheritedParams);
+    bool CreateConscripts (void);
     bool CreateMakefiles (void);
     bool CreateSubMakefiles ( const ModuleInstance & moduleInstance,
         const string & modulePath, const string & moduleShortPath);

@@ -74,6 +74,7 @@ class Module {
     string baseDir;               ///< base directory of module config file
     string fullFileName;          ///< full filename of module config file
     StringList makefileList;      ///< list for module's makefile and config file
+    StringList conscriptList;      ///< list for module's makefile and config file
     StringList targetList;        ///< list of module's targets
 
   public:
@@ -147,6 +148,10 @@ class Module {
     const StringList & GetMakefile (void) const { return makefileList; }
     void AddMakefile (const string & theMakefile)
         { makefileList.push_back (theMakefile); }
+    //
+    const StringList & GetConscript (void) const { return conscriptList; }
+    void AddConscript (const string & theConscript)
+        { conscriptList.push_back (theConscript); }
     //
     const StringList & GetTarget (void) const { return targetList; }
     void AddTarget (const string & target) { targetList.push_back (target); }
