@@ -5696,3 +5696,15 @@ Updating with simcore changes (rev. 2716 - Carl Beckmann)
   Branches/clones are still a little problematic.
 
 
+
+----------
+spartha1    Date: Fri Apr  3 14:41:16 EDT 2009  CSN: CSN-asimcore-291
+                  Fri Apr  3 18:41:16 UTC 2009
+
+
+Directory modules/dral_api
+ classic_dral_api_ptv_gold.awb Locally Added               0 
+
+Updating with simcore changes (rev. 2721 - Sailashri Parthasarathy)
+
+Adding a DRAL API file that uses PTV from the golden archlib package.
