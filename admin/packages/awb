@@ -17,7 +17,7 @@
 # 
 #
 [Global]
-Description=Asim Base Library
+Description=AWB Base
 CSN=CSN-asimcore-295
 Name=asimcore
 Tag=HEAD
