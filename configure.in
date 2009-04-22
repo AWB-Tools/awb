@@ -451,7 +451,7 @@ AC_SUBST(AM_LDFLAGS)
 
 # This is the asim package name
 AC_SUBST(package)
-package=asimcore
+package=awb
 
 # This is the release tag out of the package file.
 # The tag is assumed to be in a line that looks like: Tag=<tagname>
@@ -695,35 +695,6 @@ AC_CONFIG_FILES(etc/awb.config.template)
 
 # lib top level
 AC_CONFIG_FILES(lib/Makefile)
-
-# lib/libasim
-AC_CONFIG_FILES(lib/libasim/Makefile lib/libasim/include/Makefile)
-AC_CONFIG_FILES(lib/libasim/pkgconfig/libasim.pc)
-AC_CONFIG_FILES(lib/libasim/pkgconfig/libasim-uninstalled.pc)
-libasimDir="lib/libasim"
-libasimIncDir="$libasimDir/include/asim"
-libasimSrcDir="$libasimDir/src"
-if test $asim_cv_enable_xmlgdome = yes; then
-  xmlout="xmlout-gdome"
-else
-  if test $asim_cv_enable_xmlgz = yes; then
-    xmlout="xmlout-nolib-gz"
-  else
-    xmlout="xmlout-nolib"
-  fi
-fi
-AC_CONFIG_LINKS($libasimIncDir/xmlout.h:$libasimIncDir/$xmlout.h)
-AC_CONFIG_LINKS($libasimSrcDir/xmlout.cpp:$libasimSrcDir/$xmlout.cpp)
-
-# lib/libdral
-AC_CONFIG_FILES(lib/libdral/Makefile lib/libdral/include/Makefile)
-AC_CONFIG_FILES(lib/libdral/pkgconfig/libdral.pc)
-AC_CONFIG_FILES(lib/libdral/pkgconfig/libdral-uninstalled.pc)
-
-# lib/libnullptlib
-AC_CONFIG_FILES(lib/libnullptlib/Makefile lib/libnullptlib/include/Makefile)
-AC_CONFIG_FILES(lib/libnullptlib/pkgconfig/libnullptlib.pc)
-AC_CONFIG_FILES(lib/libnullptlib/pkgconfig/libnullptlib-uninstalled.pc)
 
 # lib/libawb
 AC_CONFIG_FILES(lib/libawb/Makefile)

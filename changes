@@ -5778,3 +5778,59 @@ Updating with simcore changes (rev. 2771 - Krishna Rangan)
 
 - possible fix for asimrc file corruption in the nightly workspace;
   decreased the possibility of temporary files ending up with same names.
+
+----------
+jsemer      Date: Wed Apr 22 15:54:49 EDT 2009  CSN: CSN-awb-300
+                  Wed Apr 22 19:54:49 UTC 2009
+
+
+Directory .
+ configure                 Locally Modified          299 
+ Makefile.in               Locally Modified          299 
+
+Directory include
+ config.h.in               Locally Modified          299 
+
+Directory .
+ configure.in              Locally Modified          299 
+
+Directory libperl
+ Makefile.in               Locally Modified          299 
+
+Directory tools
+ Makefile.in               Locally Modified          299 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          299 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          299 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          299 
+
+Directory lib
+ Makefile.in               Locally Modified          299 
+
+Directory .
+ aclocal.m4                Locally Modified          299 
+
+Updated configure.in for awb-only repository.
