@@ -1,3 +1,0 @@
-uic icons.ui > icons_add.h
-uic -impl icons_add.h icons.ui > icons_add.cpp
-
