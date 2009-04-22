@@ -5834,3 +5834,12 @@ Directory .
  aclocal.m4                Locally Modified          299 
 
 Updated configure.in for awb-only repository.
+----------
+jsemer      Date: Wed Apr 22 16:09:28 EDT 2009  CSN: CSN-awb-301
+                  Wed Apr 22 20:09:28 UTC 2009
+
+
+Directory etc
+ asim.pack                 Locally Modified          300 
+
+Add awb repository to pack file.

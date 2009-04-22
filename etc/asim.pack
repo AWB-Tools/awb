@@ -28,6 +28,29 @@ Version=1.1
 Name=Asim Packages
 Description=Software package dependencies for Asim performance models
 
+##############################################################################
+# Asim packages
+#
+##############################################################################
+
+
+###### AWB trunk
+
+[awb-mit]
+Description=AWB
+Method=svn
+Access=https://asim.csail.mit.edu/svn/awb/
+Module=undef
+Tag=HEAD
+Target=awb-mit
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=AWB
+
+[awb-mit/HEAD]
+Description=AWB HEAD
+Access=https://asim.csail.mit.edu/svn/awb/
+Tag=HEAD
+
 ###### Asim trunk
 
 [asimcore]
