@@ -17,9 +17,9 @@
 # 
 #
 [Global]
-Description=AWB Base
-CSN=CSN-asimcore-295
-Name=asimcore
+Description=Architects Workbench
+CSN=CSN-awb-298
+Name=awb
 Tag=HEAD
 Lock=asim-asimcore
 Buildorder=1

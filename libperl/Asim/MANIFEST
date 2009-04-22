@@ -6,9 +6,12 @@ lib/Asim/Module/DB.pm
 lib/Asim/Module/Param.pm
 lib/Asim/Module/SourceList.pm
 lib/Asim/Package/Branch.pm
+lib/Asim/Package/BitKeeper.pm
 lib/Asim/Package/Commit.pm
+lib/Asim/Package/Cvs.pm
 lib/Asim/Package/DB.pm
 lib/Asim/Package/Stats.pm
+lib/Asim/Package/Svn.pm
 lib/Asim/Package/Template.pm
 lib/Asim/Package/Util.pm
 lib/Asim/Repository/DB.pm
@@ -48,4 +51,3 @@ lib/Asim/Util.pm
 lib/Asim/Workspace.pm
 lib/Asim/Xaction.pm
 lib/Asim.pm
-META.yml                                 Module meta-data (added by MakeMaker)

@@ -2,4 +2,3 @@ lib/AsimShell/Completion.pm
 lib/AsimShell/Commands.pm
 lib/AsimShell/Help.pm
 lib/AsimShell.pm
-META.yml                                 Module meta-data (added by MakeMaker)

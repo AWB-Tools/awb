@@ -18,14 +18,16 @@
 #
 
 # tool programs for libexec
-tool_SCRIPTS = asim-shell plot-shell sum-simpoints sum-unweighted summarize-stats model-coverage
+tool_SCRIPTS = awb-shell plot-shell sum-simpoints sum-unweighted summarize-stats model-coverage
 
 # install asimstarter in bindir
 nodist_bin_SCRIPTS = asimstarter
 
 # asimstarter needs post-install processing
+# create soft links to old tool names
 install-data-hook:
 	@(cd $(DESTDIR)$(bindir); ./asimstarter -install)
+	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-shell asim-shell)
 
 # cores should get cleaned
 MOSTLYCLEANFILES = core *.core

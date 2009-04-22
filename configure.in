@@ -20,9 +20,9 @@
 # Process this file with autoconf to produce a configure script.
 # This is the configure.in file for asim.
 
-AC_INIT([ASIM Core], [2.0a], [joel.emer@intel.com], [asimcore])
+AC_INIT([AWB], [3.0a], [joel.emer@intel.com], [awb])
 AC_PREREQ(2.59) dnl required autoconf version
-AC_CONFIG_SRCDIR([admin/packages/asimcore])
+AC_CONFIG_SRCDIR([admin/packages/awb])
 
 # Installation defaults
 # AC_PREFIX_DEFAULT(/usr/local)
@@ -336,7 +336,7 @@ AC_ARG_WITH(stlport-dir,   [  --with-stlport-dir=DIR     stlport-dir in DIR])
 #
 AC_ARG_ENABLE([warning],
       AC_HELP_STRING([--enable-warning=ARG],
-                     [warning level [[ARG=no|warn|error]] (default=warn)]),
+                     [warning level [[ARG=no|warn|error]] (default=error)]),
       asim_cv_enable_warning=$enableval,
       asim_cv_enable_warning=warn)
 
@@ -383,31 +383,6 @@ fi
 AC_SUBST(OPTFLAGS)
 
 #
-# --enable-ptv
-#
-AC_ARG_ENABLE([ptv],
-      AC_HELP_STRING([--enable-ptv=ARG],
-                     [ptv logs enabled? [[ARG=no|yes]] (default=no)]),
-      asim_cv_enable_ptv=$enableval,
-      asim_cv_enable_ptv=no)
-
-AC_CACHE_CHECK([if ptv should be used] ,
-      asim_cv_enable_ptv,
-      asim_cv_enable_ptv=no)
-
-PTVFLAGS=""
-if test $asim_cv_enable_ptv = new; then
-    PTVFLAGS="-DCOMPILE_DRAL_WITH_PTV -DCOMPILE_DRAL_WITH_PTV_NEW"
-else
-  if test $asim_cv_enable_ptv = yes; then
-    PTVFLAGS="-DCOMPILE_DRAL_WITH_PTV"
-  else
-    PTVFLAGS=""
-  fi
-fi
-AC_SUBST(PTVFLAGS)
-
-#
 # --enable-distcc
 #
 AC_ARG_ENABLE([distcc],
@@ -420,68 +395,6 @@ AC_CACHE_CHECK([if distcc compiler should be used] ,
       asim_cv_enable_distcc,
       asim_cv_enable_distcc=no)
 
-#
-# --enable-xmlgdome
-#
-AC_ARG_ENABLE([xmlgdome],
-      AC_HELP_STRING([--enable-xmlgdome=ARG],
-                     [use XML gdome library [[ARG=no|yes]] (default=no)]),
-      asim_cv_enable_xmlgdome=$enableval,
-      asim_cv_enable_xmlgdome=no)
-
-AC_CACHE_CHECK([if XML gdome library should be used] ,
-      asim_cv_enable_xmlgdome,
-      asim_cv_enable_xmlgdome=no)
-
-#
-# --enable-xml-gz
-#
-AC_ARG_ENABLE([xmlgz],
-      AC_HELP_STRING([--enable-xmlgz=ARG],
-                     [use XML gdome library [[ARG=no|yes]] (default=no)]),
-      asim_cv_enable_xmlgz=$enableval,
-      asim_cv_enable_xmlgz=no)
-
-AC_CACHE_CHECK([if XML compression options should be used] ,
-    asim_cv_enable_xmlgz,
-    asim_cv_enable_xmlgz=no)
-
-
-# --------------------------------------------------------------------------
-#  XML support:
-# 
-#    The following libraries are required:
-#      libxml2   XML, XPath          http://www.xmlsoft.org/
-#      gdome2    DOM 2.0             http://phd.cs.unibo.it/gdome2/
-#      gmetadom  DOM C++ bindings    http://gmetadom.sourceforge.net/
-# 
-#    The following libraries are also recommended:
-#      libxslt   XSLT 1.0            http://xmlsoft.org/XSLT/
-# 
-# --------------------------------------------------------------------------
-if test $asim_cv_enable_xmlgdome = yes; then
-  XML_CFLAGS=`gmetadom-config --module=gdome_cpp_smart --cflags`
-  XML_LFLAGS=`gmetadom-config --module=gdome_cpp_smart --libs`
-  AC_SUBST(XML_CFLAGS)
-  AC_SUBST(XML_LFLAGS)
-fi
-
-#
-# --enable-pthreads
-#
-AC_ARG_ENABLE([pthreads],
-      AC_HELP_STRING([--enable-pthreads=ARG],
-                     [use pthreads library [[ARG=no|yes]] (default=no)]),
-      asim_cv_enable_pthreads=$enableval,
-      asim_cv_enable_pthreads=no)
-if test $asim_cv_enable_pthreads != "no"; then
-        asim_pthreads="-DASIM_PTHREADS"
-fi
-AC_SUBST([asim_pthreads])
-
-AC_CACHE_CHECK([if pthread library should be used] ,
-      asim_cv_enable_pthreads,
-      asim_cv_enable_pthreads=no)
 
 #
 # --enable-64bit
@@ -839,33 +752,6 @@ AC_CONFIG_COMMANDS( libperl/PlotShell/Makefile                                  
 # tools top level
 AC_CONFIG_FILES(tools/Makefile)
 
-# tools/dreams
-
-if test $qt_available = 1; then
-    AC_CONFIG_FILES(lib/libagt/Makefile lib/libagt/include/Makefile)
-    AC_CONFIG_FILES(lib/libdraldb/Makefile lib/libdraldb/include/Makefile)
-    AC_CONFIG_FILES(tools/dreams/Makefile)
-    AC_CONFIG_FILES(tools/dreams/dbtest/Makefile tools/dreams/dbtest/src/Makefile)
-    # tools/lib/libdreams
-    # AC_CONFIG_FILES(tools/lib/libdreams/Makefile)
-    # tools/dreams/dralTranslator
-    # dralServerFilesLink=""
-    # for i in $(ls base/dral* | cut -d '/' -f 2)
-    # do
-    #    dralServerFilesLink=$dralServerFilesLink$srcdir/tools/lib/libdreams/$i":"base/$i" "
-    # done
-    # AC_CONFIG_LINKS($dralServerFilesLink)
-else
-    echo ""
-    echo "*******************************************************************"
-    echo "*******************************************************************"
-    echo "You don't have the QT Library configured. Therefore,"
-    echo "StripChartViewer, 2Dreams, ligdreams, dralTranslator and libagt"
-    echo "will not be compiled"
-    echo "*******************************************************************"
-    echo "*******************************************************************"
-    echo ""
-fi
 # tools/scripts
 AC_CONFIG_FILES(tools/scripts/Makefile)
 AC_CONFIG_FILES(tools/scripts/asimstarter, [chmod +x tools/scripts/asimstarter])
