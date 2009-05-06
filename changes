@@ -5843,3 +5843,13 @@ Directory etc
  asim.pack                 Locally Modified          300 
 
 Add awb repository to pack file.
+
+----------
+jsemer      Date: Wed May  6 15:44:26 EDT 2009  CSN: CSN-awb-302
+                  Wed May  6 19:44:26 UTC 2009
+
+
+Directory etc/repositories.d
+ platform-acp.pack         Locally Added               0 
+
+Added repository for ACP platform support.

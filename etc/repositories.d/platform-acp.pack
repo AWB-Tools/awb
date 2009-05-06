@@ -1,0 +1,21 @@
+##############################################################################
+# Asim packages
+#
+##############################################################################
+
+
+###### Platform-ACP trunk
+
+[platform-acp]
+Description=Platform modules for ACP board
+Method=svn
+Access=svn+ssh://hulk.ece.utexas.edu/platform-acp/
+Module=undef
+Tag=HEAD
+Target=platform-acp
+Changes=changes
+
+[platform-acp/HEAD]
+Description=Platform modules for ACP board (HEAD)
+Access=svn+ssh://hulk.ece.utexas.edu/platform-acp/
+Tag=HEAD
