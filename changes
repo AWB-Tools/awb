@@ -5853,3 +5853,13 @@ Directory etc/repositories.d
  platform-acp.pack         Locally Added               0 
 
 Added repository for ACP platform support.
+
+----------
+jsemer      Date: Fri May  8 17:49:14 EDT 2009  CSN: CSN-awb-303
+                  Fri May  8 21:49:14 UTC 2009
+
+
+Directory etc/repositories.d
+ platform-acp.pack         Locally Modified          302 
+
+Added browseURL for platform-acp package.

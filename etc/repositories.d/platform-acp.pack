@@ -14,6 +14,7 @@ Module=undef
 Tag=HEAD
 Target=platform-acp
 Changes=changes
+BrowseURL=https://hulk.ece.utexas.edu/websvn/listing.php?repname=platform-acp
 
 [platform-acp/HEAD]
 Description=Platform modules for ACP board (HEAD)
