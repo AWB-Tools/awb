@@ -19,7 +19,7 @@ $cmd_line = join ' ', ($0, @ARGV);
 #
 #  Process the command-line
 #
-getopts('cl:dh');
+getopts('ncl:dh');
 
 $dont_check_traces = $opt_c;
 $debug = $opt_d;
@@ -30,6 +30,7 @@ if ($opt_h or scalar(@ARGV)<1) {
     print "          Convert a PDX-style trace-list into an ASIM CFX-style benchmark list\n\n";
     print "          Options:\n";
     print "             -l <length>   Specify trace_length (default='$default_length')\n";
+    print "             -n            Just dump the trace file names\n";
     print "             -c            Don't check to be sure that the trace file is available\n";
     print "             -d            Print debugging information\n";
     print "             -h            This help\n\n";
@@ -142,7 +143,7 @@ print STDERR "\n";
 
 
 #
-#  Let's make a not of how we got here
+#  Let's make a note of how we got here
 #
 $num_skipped   = scalar keys %skip_trace;
 $num_converted = $num_pdx - $num_skipped;
@@ -209,6 +210,11 @@ foreach $pdx_t (@pdx_traces) {
         $model_flags .= " -rsm ".$len_skip_knob{$pdx_t};  # reset stats after 'r' macro insts
     }
 
+    if ($opt_n) {
+        $line = "";
+        $section_delim = "";
+    }
+
     #
     #  Output trace-spec sections
     #
@@ -223,21 +229,25 @@ foreach $pdx_t (@pdx_traces) {
         $line .= $section_delim . $asim_trace_map{$pdx_t};
     }
 
-    #
-    #  Output params subsections
-    #
-    $line .= $section_delim;                      # Start of section
+    if (not $opt_n) {
+        #
+        #  Output params subsections
+        #
+        $line .= $section_delim;                      # Start of section
+        
+        # Build up subsection
+        $line .= $subsection_delim . $model_flags;
+        $line .= $subsection_delim . $feeder_flags;
+        $line .= $subsection_delim . $system_flags;
+        
+        $line .= $subsection_delim . $section_delim;   # End of subsection & section
 
-    # Build up subsection
-    $line .= $subsection_delim . $model_flags;
-    $line .= $subsection_delim . $feeder_flags;
-    $line .= $subsection_delim . $system_flags;
-
-    $line .= $subsection_delim . $section_delim;   # End of subsection & section
+        $line .= ".cfg";
+    }
 
     # get rid of any extraneous spaces, and add the CFG that ASIM needs
     $line =~ s/ /$space_delim/g;
-    print $line . ".cfg\n";
+    print "$line\n";
 }
 
 exit;

@@ -5951,3 +5951,15 @@ Updating with awb changes (rev. 2774 - Carl Beckmann)
   - Added awb-doc to asim.pack file
 
   - added new awb-* tool name aliases for old asim-* tools to asimstarter
+
+----------
+spartha1    Date: Tue Jun  9 18:04:15 EDT 2009  CSN: CSN-awb-307
+                  Tue Jun  9 22:04:15 UTC 2009
+
+
+Directory tools/scripts
+ tlist2bm.pl               Locally Modified          305 
+
+Updating with asim-awb changes (rev. 2777 - Steve Raasch)
+
+Update to add option to simply dump trace names
