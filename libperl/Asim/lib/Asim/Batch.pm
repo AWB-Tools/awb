@@ -57,6 +57,39 @@ batch systems.
 
 ################################################################
 
+=head1 VARIABLES
+
+The following global parameters control the behavior of this class:
+
+=over 4
+
+=item $Asim::Batch::ENABLE_NETBATCH_PRE
+
+In Netbatch feeders, enable a pre-execution script to be run prior to the actual job,
+to verify minimum disk space requirements on the compute resource.
+
+This feature may not be available on older versions of Netbatch.
+
+=cut
+
+our $ENABLE_NETBATCH_PRE = 1;
+
+=over 4
+
+=item $Asim::Batch::NETBATCH_PRE_USE_SMARTCLASS
+
+In Netbatch feeders, enable the use of a "smart class" argument in the job submission command
+to automatically check for minimum disk space requirements before assigning a job
+to a compute resource.
+
+This feature may not be available on older versions of Netbatch.
+If available and enabled, this feature supersedes ENABLE_NETBATCH_PRE.
+
+=cut
+
+our $NETBATCH_PRE_USE_SMARTCLASS = 1;
+
+################################################################
 
 =head1 METHODS
 

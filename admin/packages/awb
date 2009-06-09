@@ -18,7 +18,7 @@
 #
 [Global]
 Description=Architects Workbench
-CSN=CSN-awb-303
+CSN=CSN-awb-304
 Name=awb
 Tag=HEAD
 Lock=asim-asimcore

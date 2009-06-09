@@ -144,13 +144,14 @@ my $MIN_TMP_SPACE_MB    = Asim::Util::get_asimrc_val("asim-run", "MIN_TMP_SPACE_
 my $NETBATCH_AUTO_REQUEUE = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_AUTO_REQUEUE",   0);
 
 # Should we do the pre-execution check to determine minimum disk space?
-my $ENABLE_NETBATCH_PRE = Asim::Util::get_asimrc_val("asim-run", "ENABLE_NETBATCH_PRE",    1);
+$Asim::Batch::ENABLE_NETBATCH_PRE = Asim::Util::get_asimrc_val("asim-run", "ENABLE_NETBATCH_PRE",    1);
 
 # Should we do a smart class based pre-execution check or a script based pre-execution check?
-my $NETBATCH_PRE_USE_SMARTCLASS = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_PRE_USE_SMARTCLASS", 0);
+$Asim::Batch::NETBATCH_PRE_USE_SMARTCLASS = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_PRE_USE_SMARTCLASS", 1);
 
 # Arguments to launch threaded jobs
 $NETBATCH_MT_SLOTS_PER_CORE   = Asim::Util::get_asimrc_val("asim-run", "NETBATCH_MT_SLOTS_PER_CORE", 2);
+my $NETBATCH_MT_RESERVE_ALL_CORES= Asim::Util::get_asimrc_val("asim-run", "NETBATCH_MT_RESERVE_ALL_CORES", 0);
 
 # Wait for children or move on to other work?
 my $WAIT_FOR_CHILDREN = Asim::Util::get_asimrc_val("asim-run", "WAIT_FOR_CHILDREN", 1);
@@ -696,16 +697,15 @@ if (! $status) {
 ##########################################################
 # Make sure that there is enough space in the tmpdir for
 # the run
-#
-# NOTE: We don't explictly disable the use of smartclass
-# checking using the $NETBATCH_PRE_USE_SMARTCLASS option...
 ##########################################################
 
-print_verbose("Added space check to run...");
+if ($MIN_TMP_SPACE_MB > 0 && $TMP_DIR ne '') {
+  print_verbose("Added space check to run...");
 
-$status = $run_sys->check_space($TMP_DIR, $MIN_TMP_SPACE_MB);
-if (! $status) {
-  print_warning("No space check will be performed\n");
+  $status = $run_sys->check_space($TMP_DIR, $MIN_TMP_SPACE_MB);
+  if (! $status) {
+    print_warning("No space check will be performed\n");
+  }
 }
 
 ##########################################################

@@ -28,6 +28,7 @@
 package Asim::Batch::Netbatch;
 use warnings;
 use strict;
+use File::Basename;
 
 our @ISA = qw(Asim::Batch::Base);
 
@@ -286,9 +287,6 @@ sub check_space {
     return;
   }
 
-  # I don't know why we would disable this!!!
-  my $NETBATCH_PRE_USE_SMARTCLASS = 1;
-
   my $nbqver = `$BATCH_SUBMIT_COMMAND -v`;
   $nbqver =~ m/netbatch\s+release\s+([0-9]+)\.([0-9]+)\./;
 
@@ -297,22 +295,22 @@ sub check_space {
 
   # First see if we can use the smart class scheduler
 
-  if ( $NETBATCH_PRE_USE_SMARTCLASS && (($major == 6 && $minor >= 3) || $major >= 7))  {
+  if ( $Asim::Batch::NETBATCH_PRE_USE_SMARTCLASS && (($major == 6 && $minor >= 3) || $major >= 7))  {
     $self->{flags_space} .= " -C \"fDS\(\'$dir\'\)\>$size\" ";
     return 1;
   }
 
   # Now see if we can use the pre-exec facility
 
-  if ( $major >= 6 ) {
-    my $netbatch_pre_scr = Asim::Resolve($NETBATCH_PRE_NM);
+  if ( $Asim::Batch::ENABLE_NETBATCH_PRE && $major >= 6 ) {
+    my $netbatch_pre_scr = Asim::resolve($NETBATCH_PRE_NM);
 
     if (! -f $netbatch_pre_scr) {
       print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
     } else {
       # Generate a real path for pre-exec script (no links)
       my $filename = basename($netbatch_pre_scr);
-      $netbatch_pre_scr = realpath(dirname($netbatch_pre_scr)) . "/$filename";
+      $netbatch_pre_scr = ::realpath(dirname($netbatch_pre_scr)) . "/$filename";
 
       if ( ! ( -f $netbatch_pre_scr )) {
 	print "WARNING: Netbatch pre-exec script $NETBATCH_PRE_NM does not exist.\n";
@@ -352,6 +350,7 @@ sub check_threads {
 
   if ($threads <= 1) {
     $self->{flags_threads} = "";
+    return 1;
   }
 
   # TBD: Do we need to make sure the class scheduler works!!!
@@ -508,6 +507,38 @@ sub scheduler {
 
 ################################################################
 
+=item $flags = Asim::Batch::Netbatch::consolidate_smartclass_expressions($flags)
+
+Internal utility function to transform a series of class expressions
+of the form "-C class1 -C class2 -C class3" into a boolean expression
+of the form "-C class1&&class2&&class3" so Netbatch gets a single class
+expression to digest.
+
+=cut
+
+################################################################
+
+sub consolidate_smartclass_expressions {
+  my $flags = shift;
+  my @exprs = ();
+  while ($flags =~ s/-C\s+(\S+)//) {
+    my $exp = $1;
+    # strip any enclosing single- or double-quotes:
+    if ($exp =~ m/^\s*\"(.*)\"\s*$/) {$exp = $1}
+    if ($exp =~ m/^\s*\'(.*)\'\s*$/) {$exp = $1}
+    # enclose in parens if necessary
+    if ($exp =~ m/[\*\/\+\-|&><=!]/) {
+      unless ($exp =~ m/^\s*\(.*\)\s*$/) {$exp = '('.$exp.')'}
+    }
+    push @exprs, $exp;
+  }
+  # enclose the result in double quotes, and add remaining flags:
+  return '-C "' . join('&&',@exprs) . '" ' . $flags;
+}
+
+
+################################################################
+
 =item $batch-E<gt>submit($command, $batch_log, $submit_log, $block)
 
 Submit a new batch command.
@@ -530,6 +561,8 @@ sub submit {
 
   my $flags = "$flags_queue $flags_space $flags_threads $flags_extra"
             . ($block?" --block":"");
+
+  $flags = consolidate_smartclass_expressions($flags);
 
   my $nbcommand = "$BATCH_SUBMIT_COMMAND $flags -J $batch_log $command $submit_log";
   my $status = 0;

@@ -5863,3 +5863,38 @@ Directory etc/repositories.d
  platform-acp.pack         Locally Modified          302 
 
 Added browseURL for platform-acp package.
+
+----------
+spartha1    Date: Tue Jun  9 15:38:11 EDT 2009  CSN: CSN-awb-304
+                  Tue Jun  9 19:38:11 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          303 
+
+Directory libperl/Asim/lib/Asim/Batch
+ NetbatchRemote.pm         Locally Modified          303 
+ Netbatch.pm               Locally Modified          303 
+
+Directory libperl/Asim/lib/Asim
+ Batch.pm                  Locally Modified          303 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          303 
+
+Directory etc
+ asimrc.template           Locally Modified          303 
+
+Updating with awb changes (rev. 2780 - Carl Beckmann)
+
+- A number of small changes to make it easier to configure netbatch operation
+  in Portland correctly:
+
+  + re-enabled the asim-run configuration variables ENABLE_NETBATCH_PRE and
+    NETBATCH_PRE_USE_SMARTCLASS so we can independently disable the use of a pre-exec script or the smart class specifiers to check for minimum disk space requirements (some netbatch queues apparently do not support the disk space check smart class), and also setting the minimum disk space (MIN_TMP_SPACE_MB) to zero disables the check.
+
+  + multiple "-C" class specifiers to netbatch are now consolidated into a single "-C" boolean AND expression, since netbatch seems to either ignore all but the last -C or assumes a boolean OR.
+
+  + added some missing code modules to the "help code" command, and fixed a few minor documentation items.
+
+  + updated the asimrc template with some missing parameter descriptions

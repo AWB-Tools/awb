@@ -433,10 +433,11 @@ ENABLE_NETBATCH_PRE=
 
 #
 # Purpose: Use Smart class or a script based pre-execution check (prior to running
-#          netbatch jobs).
+#          netbatch jobs).  If enabled, and available on this version of netbatch,
+#          setting this to 1 will override ENABLE_NETBATCH_PRE.
 # Type:    Boolean
 # Default: 0
-# NETBATCH_PRE_USE_SMARTCLASS=0
+# NETBATCH_PRE_USE_SMARTCLASS=1
 NETBATCH_PRE_USE_SMARTCLASS=
 
 #
@@ -455,6 +456,16 @@ NETBATCH_AUTO_REQUEUE=
 # Default: 2
 # NETBATCH_MT_SLOTS_PER_CORE=2
 NETBATCH_MT_SLOTS_PER_CORE=4
+
+#
+# Purpose: for multithreaded model runs, reserver all cores on the netbatch machine.
+#          This prevents other jobs from competing with this job on the machine, thus
+#          allowing the multithreaded job to attain maximum speedup.
+#
+# Type:    Boolean
+# Default: 1
+# NETBATCH_MT_RESERVE_ALL_CORES=0
+NETBATCH_MT_RESERVE_ALL_CORES=0
 
 #***********************************************************************#
 # asim-batch is invoked by asim-run to submit one asim job, i.e., run

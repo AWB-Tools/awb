@@ -40,7 +40,7 @@ my $BATCH_SUBMIT_COMMAND = "nbq";
 
 =head1 NAME
 
-Asim::Batch::Netbatch - Library for manipulating netbatch batch jobs
+Asim::Batch::NetbatchRemote - Library for manipulating remote-netbatch batch jobs
 
 =head1 SYNOPSIS
 
