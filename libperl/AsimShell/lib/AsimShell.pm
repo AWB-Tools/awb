@@ -41,7 +41,7 @@ our $check_package_configurations;
 #
 # Default data values
 #
-our $VERSION=0.1;
+our $VERSION='1.0';
 
 our $default_repositoryDB;
 our $default_packageDB;
@@ -53,6 +53,7 @@ our $default_model;
 our $default_benchmark;
 our $default_module;
 
+our $prompt = 'awb>';
 
 
 #
@@ -259,7 +260,6 @@ Type help to see available commands.
 
 
 sub shell {
-  my $prompt = "asim> ";
 
   # Force interactive mode in case it hasn't been set
 
@@ -270,7 +270,7 @@ SHELLCOMMAND:
   while () {
 
     $term->Attribs->{attempted_completion_function} = \&attempted_completion;
-    $_ = $term->readline($prompt) ;
+    $_ = $term->readline("$prompt ") ;
 
     last SHELLCOMMAND unless defined $_;
     chomp;

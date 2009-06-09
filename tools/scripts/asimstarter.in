@@ -150,12 +150,11 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "apm-edit"            => "tools/awb/apm-edit/apm-edit",
   "apm-find-replace"    => "tools/awb/apm-find-replace/apm-find-replace",
   "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
-  "asim-shell"          => "tools/scripts/awb-shell",
   "awb-shell"           => "tools/scripts/awb-shell",
-  "asim-benchmark"      => "tools/scripts/asim-benchmark",
+  "awb-benchmark"       => "tools/scripts/asim-benchmark",
   "plot-shell"          => "tools/scripts/plot-shell",
-  "asim-run"            => "tools/scripts/asim-run",
-  "asim-batch"          => "tools/scripts/asim-batch",
+  "awb-run"             => "tools/scripts/asim-run",
+  "awb-batch"           => "tools/scripts/asim-batch",
   "hasim-bsc-mkdepend"  => "tools/scripts/hasim-bsc-mkdepend",
   "hasim-configure"     => "tools/scripts/hasim-configure",
   "hasim-connect"       => "tools/scripts/hasim-connect",
@@ -169,15 +168,24 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "summarize-stats"     => "tools/scripts/summarize-stats",
   "sum-simpoints"       => "tools/scripts/sum-simpoints",
   "sum-unweighted"      => "tools/scripts/sum-unweighted",
-  "asim-compare-stats"  => "tools/scripts/asim-compare-stats",
+  "awb-compare-stats"   => "tools/scripts/asim-compare-stats",
   "grab.pl"             => "tools/scripts/grab.pl",
-  "asim-pkg-config"     => "tools/scripts/asim-pkg-config",
+  "awb-pkg-config"      => "tools/scripts/asim-pkg-config",
   "test-xpath-function" => "tools/scripts/test-xpath-function",
   "sync-archlib-repos"  => "tools/scripts/sync-archlib-repos",
   "install-rcfile"      => "scripts/install-rcfile",
   "fetch-trace"         => "tools/scripts/fetch-trace",
   "create-benchmark-file" => "tools/scripts/create-benchmark-file",
   "hasim-front-panel"   => "tools/hasim/hasim-front-panel/hasim-front-panel",
+#
+# old names for AWB tools
+#
+  "asim-shell"          => "tools/scripts/awb-shell",
+  "asim-benchmark"      => "tools/scripts/asim-benchmark",
+  "asim-run"            => "tools/scripts/asim-run",
+  "asim-batch"          => "tools/scripts/asim-batch",
+  "asim-compare-stats"  => "tools/scripts/asim-compare-stats",
+  "asim-pkg-config"     => "tools/scripts/asim-pkg-config",
 #
 # Obsoleted tools - 
 #

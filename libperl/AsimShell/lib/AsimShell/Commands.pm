@@ -2183,8 +2183,8 @@ sub verify_configuration {
   # get the list of packages
   my @packages = _expand_package_names(@ARGV);
   if ($#packages < 1) {
-    print "You must supply at least two packages to compare\n";
-    return 0;
+    # only zero or one package?  trivial success!
+    return 1;
   }
 
   # check each package in turn

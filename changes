@@ -5910,3 +5910,44 @@ Directory libperl/Asim/lib/Asim
 Updating with awb changes (rev. 2781 - Carl Beckmann)
 
 - fixed a formatting error in the perldoc output introducted in last commit
+
+----------
+spartha1    Date: Tue Jun  9 17:57:22 EDT 2009  CSN: CSN-awb-306
+                  Tue Jun  9 21:57:22 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          305 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          305 
+
+Directory libperl/Asim/lib/Asim/Workspace
+ Template.pm               Locally Modified          305 
+
+Directory libperl/Asim/lib/Asim
+ Workspace.pm              Locally Modified          305 
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          305 
+ awb-shell                 Locally Modified          305 
+
+Directory etc
+ asimrc.template           Locally Modified          305 
+ awb.config.template.in    Locally Modified          305 
+
+Updating with awb changes (rev. 2774 - Carl Beckmann)
+
++ Going live with split of simcore into simcore, awb, and awb-doc:
+
+  - fixed a minor bug in awb-shell that was causing a spurious warning
+    message on startup
+
+  - added a check to awb-shell to make sure we have awb in our workspace
+
+  - fixed various templates in /etc to include he new awb package
+    and some new awb-shell asimrc configuration parameters
+
+  - Added awb-doc to asim.pack file
+
+  - added new awb-* tool name aliases for old asim-* tools to asimstarter

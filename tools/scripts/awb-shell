@@ -67,6 +67,15 @@ if (defined($ENV{ASIMSHELLOPT})) {
    unshift(@ARGV, split(" ", $ENV{ASIMSHELLOPT}));
 }
 
+# initialize Asim, and read configuration file settings
+Asim::init()
+  || die("Unable to initialize Asim::\n");
+
+$warnings          = Asim::Util::get_asimrc_val("awb-shell", "WARNINGS",    $warnings         );          
+$configcheck       = Asim::Util::get_asimrc_val("awb-shell", "CONFIGCHECK", $configcheck      );          
+$AsimShell::prompt = Asim::Util::get_asimrc_val("awb-shell", "PROMPT",      $AsimShell::prompt);          
+
+# parse command line arguments
 $status = GetOptions( "repositoryDB=s" => \$repositoryDB,
                       "workspace=s"    => \$workspace,
                       "package=s"      => \$package,
@@ -109,12 +118,8 @@ if ($interactive) {
 # Announce the shell in interactive mode
 #
 if (!$batchfile && ! @ARGV) {
-  print "Asim shell - V0.3 (" . Asim::Release() . ")\n";
+  print 'AWB shell - V', $AsimShell::VERSION, ' (', Asim::Release(), ")\n";
 }
-
-Asim::init()
-  || die("Unable to initialize Asim::\n");
-
 
 AsimShell::init(mode => $runmode,
                 warnings => $warnings,
@@ -188,6 +193,11 @@ if ($batchfile) {
   $status = AsimShell::run_command(@ARGV);
 
 } else {
+  # make sure we have AWB package, or ask user to add it
+  AsimShell::check_dependent_package('awb/HEAD')
+    unless defined  $Asim::Workspace::check_for_awb_package
+                && !$Asim::Workspace::check_for_awb_package;
+
   # do a quick check of package consistency before going interactive:
   AsimShell::maybe_check_package_configurations();
 
@@ -215,11 +225,11 @@ __END__
 
 =head1 NAME
 
-Asim-shell - Shell to manipulate ASIM objects
+Awb-shell - Shell to manipulate ASIM objects
 
 =head1 SYNOPSIS
 
-asim-shell [--workspace <workspace>]
+awb-shell  [--workspace <workspace>]
            [--package <package>]
            [--model <model>] 
            [--benchmark <benchmark>] 
@@ -304,25 +314,29 @@ ignored.
 
 Get this help information.
 
+=item --[no]warnings
+
+Generate, or suppress, certain warning messages.
+
 =item --[no]configcheck
    
 Perform, or skip, a check of package configuration consistency on interactive startup.
 This checks that packages were built with a consistent set of configuration switches
 and host machine architectures.
 The default is to perform this check.
-Note that this check is skipped on batch invocations of asim-shell.
+Note that this check is skipped on batch invocations of awb-shell.
    
-See also the asim-shell commands "show configuration" and "verify configuration".
+See also the awb-shell commands "show configuration" and "verify configuration".
 When this check is enabled, a "verify configuration all" command is performed on startup.
 
 =item [--] command...
 
-An asim-shell command. A summary of asim-shell commands can be
-obtained by invoking the 'help' command, e.g., 'asim-shell
+An awb-shell command. A summary of awb-shell commands can be
+obtained by invoking the 'help' command, e.g., 'awb-shell
 help'. Information on the various objects supported can be obtained by
 invoking the command 'help abstractions';
 
-Note that for asim-shell commands with options themselves the "--" in
+Note that for awb-shell commands with options themselves the "--" in
 front of the command is not optional.
 
 =back
@@ -330,29 +344,29 @@ front of the command is not optional.
 
 =head1 EXAMPLES
 
-    % asim-shell help quickstart
+    % awb-shell help quickstart
 
-    % asim-shell
-    asim> set model pm/Arana/arana_aint_dev.apm
-    asim> clean model
-    asim> configure model
-    asim> build model
-    asim> run model bm/Micro/maxipc.cfg
-    asim> quit
-
-
-    % asim-shell --package=arana commit package
+    % awb-shell
+    awb> set model pm/Arana/arana_aint_dev.apm
+    awb> clean model
+    awb> configure model
+    awb> build model
+    awb> run model bm/Micro/maxipc.cfg
+    awb> quit
 
 
-    % asim-shell help
+    % awb-shell --package=arana commit package
 
-    % asim-shell help code
+
+    % awb-shell help
+
+    % awb-shell help code
 
 
 =head1 ENVIRONMENT VARIABLES
 
 AWBLOCAL - this variable defines the root directory of your workspace
-and is needed for asim-shell to function. It is normally set
+and is needed for awb-shell to function. It is normally set
 automatically by asimstarter.Setting it explicitly is discouraged.
 
 ASIMSHELLOPT - contains additional command line switches.
@@ -369,20 +383,37 @@ INSTALLPREFIX/etc/asim/asim.pack - global description of repositories, which
 is used if ~/.asim/asim.pack does not exist.
 
 
+=head1 ASIMRC CONFIGURATION SETTINGS
+
+The following parameters can be set in the system or user asimrc file,
+or in the workspace's awb.config to control awb-shell's behavior.
+Note that command line switches override these settings.
+
+=over 4
+
+=item WARNINGS
+
+Same as the --[no-]warnings command line switch.
+
+=item CONFIGCHECK
+
+Same as the --[no-]configcheck command line switch
+
+=item PROMPT
+
+The interactive shell prompt, defaults to "awb>"
+
+=back
+
+
 =head1 BUGS
 
 The asim perl libraries must be in your perl path or the 'use AsimShell'
 statement won\'t work. The easiest way to make this true is to invoke
-asim-shell through asimstarter....you can also set the environment
+awb-shell through asimstarter....you can also set the environment
 variable PERL5LIB.
 
-Maybe the command line format should allow one to specify commands
-with a '-e' switch and a bare word is a file to read commands from.
-
-Maybe asim-shell should also parse an environment variable and/or
-.rc file for switches.
-
-Asim-shell depends on the 'etc' directory being at $AWBSYSTEM/etc, 
+awb-shell depends on the 'etc' directory being at $AWBSYSTEM/etc, 
 while ./configure could have put it somewhere else. We need to have
 a way of communicating where all the pieces of asim are not just
 the root.
@@ -395,7 +426,7 @@ Joel Emer
 
  ********************************************************
  *                                                      *
- *   Copyright (c) Compaq Computer Corporation, 2001    *
+ *   Copyright (c) Compaq, Intel 2001-2009              *
  *                                                      *
  *   All Rights Reserved.  Unpublished rights reserved  *
  *   under the copyright laws of the United States.     *

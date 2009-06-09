@@ -96,6 +96,7 @@ sub create {
     mkpath "$path/build";
     mkpath "$path/run";
     mkpath "$path/var";
+    mkpath "$path/var/log";
 
     $self->_create_awbconfig("$path/awb.config");
 
@@ -114,13 +115,15 @@ sub _create_awbconfig {
   open(AWBCONFIG, ">$awbconfig");
   print AWBCONFIG <<"EOF";
 [Global]
-VERSION=1.1
+VERSION=1.4
+Class=Asim::Workspace
 # Display splash (1) or not (0)
 SPLASH=1
 
 [Vars]
 private=src
 shared=$Asim::packagedir
+components={private,awb,simcore}
 
 [Paths]
 # Directory containing ASIM source tree
@@ -133,7 +136,7 @@ BENCHMARKDIR=$Asim::datadir/benchmarks
 #BUILDDIR=build
 
 # Path where we search for ASIM files
-SEARCHPATH=\$(private)/private:\$(shared)/$Asim::package/$Asim::release
+SEARCHPATH=\$(private)private:\$(shared)awb/$Asim::release:\$(shared)simcore/$Asim::release
 
 [Package]
 # Configure flags for all packages in this workspace

@@ -46,6 +46,10 @@ our %a =  ( name =>                 [ "name",
                                       "SCALAR" ],
           );
 
+# set this flag to force a check for the AWB package,
+# if the workspace is created prior to the AWB split:
+our $check_for_awb_package = 0;
+
 =head1 NAME
 
 Asim::Workspace - Library for manipulating ASIM workspace
@@ -1202,6 +1206,16 @@ sub upgrade {
     }
 
     $self->version("1.3");
+    $self->save();
+  }
+
+  if ($self->version() == 1.3) {
+    print "Upgrading workspace from version 1.3 to 1.4\n";
+
+    # make sure we have AWB package, or ask user to add it
+    $check_for_awb_package = 1;
+
+    $self->version("1.4");
     $self->save();
   }
 

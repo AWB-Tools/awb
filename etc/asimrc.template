@@ -564,3 +564,28 @@ ASIM_TRACE_CACHE=
 # the server to rsync Asim traces from
 # ASIM_TRACE_SERVER=asim.intel.com
 ASIM_TRACE_SERVER=
+
+#***********************************************************************
+# awb-shell is the command line shell for interacting with Architect's
+# Workbench objects (formerly known as asim-shell).
+#  
+#***********************************************************************
+#
+[awb-shell]
+#
+# Purpose: enable or disable warning messages
+# Type: boolean
+# Default: 1
+# WARNINGS=0
+
+#
+# Purpose: enable or disable the package configuration check at startup
+# Type: boolean
+# Default: 1
+# CONFIGCHECK=0
+
+#
+# Purpose: the command prompt displayed to interactive users
+# Type: string
+# Default: awb>
+# PROMPT=%
