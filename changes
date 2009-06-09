@@ -5898,3 +5898,15 @@ Updating with awb changes (rev. 2780 - Carl Beckmann)
   + added some missing code modules to the "help code" command, and fixed a few minor documentation items.
 
   + updated the asimrc template with some missing parameter descriptions
+
+----------
+spartha1    Date: Tue Jun  9 15:41:06 EDT 2009  CSN: CSN-awb-305
+                  Tue Jun  9 19:41:06 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Batch.pm                  Locally Modified          304 
+
+Updating with awb changes (rev. 2781 - Carl Beckmann)
+
+- fixed a formatting error in the perldoc output introducted in last commit

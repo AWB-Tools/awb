@@ -70,6 +70,8 @@ to verify minimum disk space requirements on the compute resource.
 
 This feature may not be available on older versions of Netbatch.
 
+=back
+
 =cut
 
 our $ENABLE_NETBATCH_PRE = 1;
@@ -84,6 +86,8 @@ to a compute resource.
 
 This feature may not be available on older versions of Netbatch.
 If available and enabled, this feature supersedes ENABLE_NETBATCH_PRE.
+
+=back
 
 =cut
 
