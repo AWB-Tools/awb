@@ -5963,3 +5963,16 @@ Directory tools/scripts
 Updating with asim-awb changes (rev. 2777 - Steve Raasch)
 
 Update to add option to simply dump trace names
+
+----------
+pellauer    Date: Wed Jun 10 14:44:57 EDT 2009  CSN: CSN-awb-308
+                  Wed Jun 10 18:44:57 UTC 2009
+
+
+Directory etc
+ asim.pack                 Locally Modified          307 
+
+
+Updating name of public AWB repository to be "awb" from "awb-mit".
+
+Michael P.

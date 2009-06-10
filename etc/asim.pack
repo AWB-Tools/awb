@@ -36,17 +36,17 @@ Description=Software package dependencies for Asim performance models
 
 ###### AWB trunk
 
-[awb-mit]
+[awb]
 Description=AWB
 Method=svn
 Access=https://asim.csail.mit.edu/svn/awb/
 Module=undef
 Tag=HEAD
-Target=awb-mit
+Target=awb
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=AWB
 
-[awb-mit/HEAD]
+[awb/HEAD]
 Description=AWB HEAD
 Access=https://asim.csail.mit.edu/svn/awb/
 Tag=HEAD
