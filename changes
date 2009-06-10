@@ -5976,3 +5976,17 @@ Directory etc
 Updating name of public AWB repository to be "awb" from "awb-mit".
 
 Michael P.
+
+----------
+pellauer    Date: Wed Jun 10 17:26:58 EDT 2009  CSN: CSN-awb-309
+                  Wed Jun 10 21:26:58 UTC 2009
+
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          308 
+
+
+* Added Libdir and Includedir to Asim.pm.
+
+Michael P.
+

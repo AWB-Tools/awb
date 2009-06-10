@@ -73,6 +73,8 @@ our $prefix      = "@prefix@";
 our $exec_prefix = "@exec_prefix@";
 our $bindir      = "@bindir@";
 our $mandir      = "@mandir@";
+our $libdir      = "@libdir@";
+our $includedir  = "@includedir@";
 
 our $sysconfdir  = "@sysconfdir@";
 our $configdir   = "@configdir@";
@@ -190,6 +192,14 @@ Binary installation directory (default: $exec_prefix/bin)
 
 Manual pages (default: $prefix/man)
 
+=item $Asim::libdir
+
+Library directory (default: $exec_prefix/lib)
+
+=item $Asim::includedir
+
+Include Headers directory (default: $prefix/include)
+
 =item $Asim::sysconfdir
 
 Configuration directory (default: $prefix/etc)
@@ -286,6 +296,14 @@ sub Bindir {
 
 sub Mandir {
   return "$mandir";
+}
+
+sub Libdir {
+  return "$libdir";
+}
+
+sub Includedir {
+  return "$includedir";
 }
 
 sub Sysconfdir {
