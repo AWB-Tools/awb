@@ -5990,3 +5990,17 @@ Directory libperl/Asim/lib
 
 Michael P.
 
+
+----------
+pellauer    Date: Thu Jun 11 14:33:33 EDT 2009  CSN: CSN-awb-310
+                  Thu Jun 11 18:33:33 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Workspace
+ Template.pm               Locally Modified          309 
+
+
+* Update broken searchpath in Template.
+
+Michael P.
+
