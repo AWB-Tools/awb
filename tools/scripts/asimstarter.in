@@ -146,39 +146,60 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 
 # tool mappings
 %tool = (
+#
+# Awb commands
+#
   "awb"                 => "tools/awb/awb2/awb2",
   "awb2"                => "tools/awb/awb2/awb2",
+  "awb-shell"           => "tools/scripts/awb-shell",
+  "awb-run"             => "tools/scripts/asim-run",
+  "awb-batch"           => "tools/scripts/asim-batch",
+  "awb-benchmark"       => "tools/scripts/asim-benchmark",
   "amc"                 => "tools/awb/amc/amc",
+#
+# Model/Module commands
+#
   "apm-edit"            => "tools/awb/apm-edit/apm-edit",
   "apm-find-replace"    => "tools/awb/apm-find-replace/apm-find-replace",
   "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
-  "awb-shell"           => "tools/scripts/awb-shell",
-  "awb-benchmark"       => "tools/scripts/asim-benchmark",
-  "plot-shell"          => "tools/scripts/plot-shell",
-  "awb-run"             => "tools/scripts/asim-run",
-  "awb-batch"           => "tools/scripts/asim-batch",
+#
+# HAsim commands
+#
   "hasim-bsc-mkdepend"  => "tools/scripts/hasim-bsc-mkdepend",
   "hasim-configure"     => "tools/scripts/hasim-configure",
   "hasim-connect"       => "tools/scripts/hasim-connect",
   "hasim-dict"          => "tools/scripts/hasim-dict",
   "hasim-rrr-stubgen"   => "tools/scripts/hasim-rrr-stubgen",
-  "model-coverage"      => "tools/scripts/model-coverage",
+  "hasim-front-panel"   => "tools/hasim/hasim-front-panel/hasim-front-panel",
+#
+# Regression commands
+#
   "regression.launcher" => "tools/scripts/regression.launcher",
   "regression.verifier" => "tools/scripts/regression.verifier",
   "regression.cleanup"  => "tools/scripts/regression.cleanup",
+#
+# Stats commands
+#
+  "awb-compare-stats"   => "tools/scripts/asim-compare-stats",
+  "plot-shell"          => "tools/scripts/plot-shell",
   "stat-to-text"        => "tools/scripts/stat-to-text",
   "summarize-stats"     => "tools/scripts/summarize-stats",
   "sum-simpoints"       => "tools/scripts/sum-simpoints",
   "sum-unweighted"      => "tools/scripts/sum-unweighted",
-  "awb-compare-stats"   => "tools/scripts/asim-compare-stats",
   "grab.pl"             => "tools/scripts/grab.pl",
+#
+# Miscelaneous commands
+#
   "awb-pkg-config"      => "tools/scripts/asim-pkg-config",
+  "model-coverage"      => "tools/scripts/model-coverage",
   "test-xpath-function" => "tools/scripts/test-xpath-function",
-  "sync-archlib-repos"  => "tools/scripts/sync-archlib-repos",
   "install-rcfile"      => "scripts/install-rcfile",
-  "fetch-trace"         => "tools/scripts/fetch-trace",
   "create-benchmark-file" => "tools/scripts/create-benchmark-file",
-  "hasim-front-panel"   => "tools/hasim/hasim-front-panel/hasim-front-panel",
+#
+# Intel-only scripts
+#
+#  "fetch-trace"         => "tools/scripts/fetch-trace",
+#  "sync-archlib-repos"  => "tools/scripts/sync-archlib-repos",
 #
 # old names for AWB tools
 #
@@ -191,13 +212,13 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
 # Obsoleted tools - 
 #
-  "asim_filter"         => "tools/scripts/asim_filter",
-  "gen-spec95-config"   => "tools/scripts/gen-spec95-config",
-  "xcheck"              => "tools/scripts/xcheck",
+#  "asim_filter"         => "tools/scripts/asim_filter",
+#  "gen-spec95-config"   => "tools/scripts/gen-spec95-config",
+#  "xcheck"              => "tools/scripts/xcheck",
 #
-  "asim.R"              => "tools/scripts/asim.R",
-  "grab.R"              => "tools/scripts/grab.R",
-  "param.R"             => "tools/scripts/param.R",
+#  "asim.R"              => "tools/scripts/asim.R",
+#  "grab.R"              => "tools/scripts/grab.R",
+#  "param.R"             => "tools/scripts/param.R",
 
 );
 

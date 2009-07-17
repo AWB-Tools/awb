@@ -6015,3 +6015,13 @@ Directory tools/scripts
 
 Use regular expression parsing of perl version instead of integer
 arithmetic. This should fix the parsing problems with perl 5.10.0.
+
+----------
+emer        Date: Fri Jul 17 09:56:40 EDT 2009  CSN: CSN-awb-312
+                  Fri Jul 17 13:56:40 UTC 2009
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          311 
+
+Removed some obsolete tools from asimstarter.
