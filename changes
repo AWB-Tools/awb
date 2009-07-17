@@ -6004,3 +6004,14 @@ Directory libperl/Asim/lib/Asim/Workspace
 
 Michael P.
 
+
+----------
+emer        Date: Fri Jul 17 08:26:00 EDT 2009  CSN: CSN-awb-311
+                  Fri Jul 17 12:26:00 UTC 2009
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          310 
+
+Use regular expression parsing of perl version instead of integer
+arithmetic. This should fix the parsing problems with perl 5.10.0.

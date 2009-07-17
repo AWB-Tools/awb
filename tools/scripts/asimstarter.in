@@ -64,9 +64,11 @@ $perlqt_search_path="@perlqt_search_path@";
 $config_perl_version="@config_perl_version@";
 
 # get actual perl version as a canonical dot-separated integer string:
-$my_perl_v1 = int(                     $]                                   );
-$my_perl_v2 = int(            1000 * ( $] - $my_perl_v1 )                   );
-$my_perl_v3 = int( 1000 * ( ( 1000 * ( $] - $my_perl_v1 ) ) - $my_perl_v2 ) );
+$perlversion = $];
+$perlversion =~ /([^.]*)\.(...)(...)/;
+$my_perl_v1 = int($1);
+$my_perl_v2 = int($2);
+$my_perl_v3 = int($3);
 $my_perl_version = "$my_perl_v1.$my_perl_v2.$my_perl_v3";
 
 if ($debug) {
