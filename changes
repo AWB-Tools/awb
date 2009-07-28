@@ -6035,3 +6035,13 @@ Directory etc/repositories.d
  mit-6.375.pack            Locally Added               0 
 
 Added repository for 6.375 class.
+
+----------
+emer        Date: Tue Jul 28 18:17:34 EDT 2009  CSN: CSN-awb-314
+                  Tue Jul 28 22:17:34 UTC 2009
+
+
+Directory etc/repositories.d
+ mit-6.375.pack            Locally Modified          313 
+
+Fix typo in comment.
