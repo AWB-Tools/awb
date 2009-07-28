@@ -6025,3 +6025,13 @@ Directory tools/scripts
  asimstarter.in            Locally Modified          311 
 
 Removed some obsolete tools from asimstarter.
+
+----------
+emer        Date: Tue Jul 28 18:15:47 EDT 2009  CSN: CSN-awb-313
+                  Tue Jul 28 22:15:47 UTC 2009
+
+
+Directory etc/repositories.d
+ mit-6.375.pack            Locally Added               0 
+
+Added repository for 6.375 class.
