@@ -6045,3 +6045,15 @@ Directory etc/repositories.d
  mit-6.375.pack            Locally Modified          313 
 
 Fix typo in comment.
+
+----------
+emer        Date: Sat Aug  1 15:52:31 EDT 2009  CSN: CSN-awb-315
+                  Sat Aug  1 19:52:31 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          313 
+
+Fixed tempfile creation so that they are placed in a proper temp
+directory. Also some removed Unix dependencies on file operations, 
+so Inifile is more OS independent.

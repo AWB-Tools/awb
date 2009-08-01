@@ -26,7 +26,7 @@ use Fcntl ':flock';
 use File::Basename;
 use File::Copy;
 use File::stat;
-use File::Temp qw(mktemp);
+use File::Temp qw(tempfile);
 
 my $debug =  (($ENV{ASIM_DEBUG} || 0) >= 2) 
           || defined($ENV{ASIM_DEBUG_INIFILE});
@@ -284,10 +284,12 @@ sub save {
   if ((! $self->modified()) && ("$file" eq $self->filename())) {
       return 1;
   }
-  
-  # create a temporary file, with the filaname to be saved prepended for debug
-  my $tmpfile = "$file." . mktemp("XXXXXX") . ".$$";
-  
+
+  # File handle and file name for temporary file
+
+  my $tmp_fh;
+  my $tmpfile;
+
   my $oldfile = $self->filename();
 
   # BUG we should update the filename here!!!!
@@ -305,8 +307,11 @@ sub save {
   # Open an temporary file that we will write to and
   # then move on top of the original file
   #
-  CORE::open(INI, "> $tmpfile")
-    || ierror("Temporary inifile open for write failed ($tmpfile)\n") && return ();
+  # TBD: Name tempfile after original filename
+  #
+  ($tmp_fh, $tmpfile) = tempfile(TMPDIR => 1, UNLINK => 0);
+
+  print "Using temporary file $tmpfile\n" if $debug;  
 
   #
   # Go through original INI file updating lines that are there,
@@ -334,20 +339,20 @@ sub save {
       # Finish off items from previous group that weren't there...
       #
       if (defined($curgroup)) {
-        print INI "# Rest of group - $curgroup\n" if $debug;
+        print $tmp_fh "# Rest of group - $curgroup\n" if $debug;
 		
 	foreach my $i ($self->get_itemlist($curgroup)) {
 	  next if $items_done{$i};
 
-	  print INI "# New item - $i\n" if $debug;
-	  print INI "$i=" . $self->get($curgroup, $i) . "\n";
+	  print $tmp_fh "# New item - $i\n" if $debug;
+	  print $tmp_fh "$i=" . $self->get($curgroup, $i) . "\n";
 	}
       }
 
       #
       # Spill comments
       #
-      print INI @comments;
+      print $tmp_fh @comments;
       @comments = ();
 
       #
@@ -358,8 +363,8 @@ sub save {
       %items_done = ();
 
       if (defined($data->{"$curgroup"})) {
-	print INI "# Existing group - $curgroup\n" if $debug;
-        print INI "[$curgroup]\n";
+	print $tmp_fh "# Existing group - $curgroup\n" if $debug;
+        print $tmp_fh "[$curgroup]\n";
       }
       next;
 
@@ -369,7 +374,7 @@ sub save {
       #
       # Spill comments;
       #
-      print INI @comments;
+      print $tmp_fh @comments;
       @comments = ();
 
       #
@@ -377,8 +382,8 @@ sub save {
       #
       $items_done{$1} = 1;
       if (defined($data->{"$curgroup"}) && defined($data->{"$curgroup"}{"$1"})) {
-	print INI "# Existing item - $1\n" if $debug;
-        print INI "$1=" . $data->{"$curgroup"}{"$1"} . "\n";
+	print $tmp_fh "# Existing item - $1\n" if $debug;
+        print $tmp_fh "$1=" . $data->{"$curgroup"}{"$1"} . "\n";
       }
 	
     } elsif (/$include_regexp/) {
@@ -423,14 +428,14 @@ sub save {
       foreach my $i ($self->get_itemlist($curgroup)) {
 	  next if $items_done{$i};
 	  
-	  print INI "# New item - $i\n" if $debug;
-	  print INI "$i=" . $self->get($curgroup, $i) . "\n";
+	  print $tmp_fh "# New item - $i\n" if $debug;
+	  print $tmp_fh "$i=" . $self->get($curgroup, $i) . "\n";
       }
       
       #
       # Then, print the leftover comments
       #
-      print INI @comments;
+      print $tmp_fh @comments;
       
   }
 
@@ -444,20 +449,20 @@ NEWFILE:
 
     next if $groups_done{$g};
 
-    print INI "\n";
+    print $tmp_fh "\n";
 
-    print INI "# New group - $g\n" if $debug;
-    print INI "[$g]\n";
+    print $tmp_fh "# New group - $g\n" if $debug;
+    print $tmp_fh "[$g]\n";
 
     foreach my $i ($self->get_itemlist($g)) {
       next if !defined($i);
 
-      print INI "# New item - $i\n" if $debug;
-      print INI "$i=" . $self->get($g, $i) . "\n";
+      print $tmp_fh "# New item - $i\n" if $debug;
+      print $tmp_fh "$i=" . $self->get($g, $i) . "\n";
     }
   }
 
-  CORE::close(INI);
+  CORE::close($tmp_fh);
 
   if (defined($oldfile)) {
 
@@ -479,21 +484,19 @@ NEWFILE:
           return ();
         }
 
- 	$status = system("mv $tmpfile $file");
-        if ($status) {
-          ierror("Move to final destination ($file) failed\n");
-          return ();
-        }
+ 	$status = move($tmpfile, $file)
+           || ierror("Move to final destination ($file) failed\n") && return ();
       }
       else {
 
         # save replacing original file
         # move the contents from the temporary file
 
-	CORE::open(INI, "< $tmpfile") || ierror("Temporary inifile open for read failed ($tmpfile); cannot update $oldfile\n") && return ();
+	CORE::open(INI, "< $tmpfile") 
+              || ierror("Temporary inifile open for read failed ($tmpfile); cannot update $oldfile\n") && return ();
 	my @lines = <INI>;
 	CORE::close(INI);      
-	system("rm $tmpfile");
+	unlink($tmpfile);
 	  
 	seek(OLDINI, 0, 0)   || ierror("Cannot seek in $oldfile\n") && return ();
 	truncate(OLDINI, 0)  || ierror("Cannot truncate $oldfile\n") && return ();
@@ -519,11 +522,8 @@ NEWFILE:
       return ();
     }
 
-    $status = system("mv $tmpfile $file");
-    if ($status) {
-      ierror("Move to final destination ($file) failed\n");
-      return ();
-    }
+    $status = move($tmpfile, $file)
+      || ierror("Move to final destination ($file) failed\n") && return ();
   }
 
   $self->{filename} = $file;
@@ -537,7 +537,7 @@ NEWFILE:
 
 ################################################################
 
-=item $inifile-E<gt>backup()[$file])
+=item $inifile-E<gt>backup([$file])
 
 Save the inifile (or optionally the specificed $file) into a
 new file with a suffix of the form .~<version>~.
