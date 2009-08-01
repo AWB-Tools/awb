@@ -6057,3 +6057,17 @@ Directory libperl/Asim/lib/Asim
 Fixed tempfile creation so that they are placed in a proper temp
 directory. Also some removed Unix dependencies on file operations, 
 so Inifile is more OS independent.
+
+----------
+emer        Date: Sat Aug  1 16:08:19 EDT 2009  CSN: CSN-awb-316
+                  Sat Aug  1 20:08:19 UTC 2009
+
+
+Directory libperl
+ Benchmarks/               Locally Modified          314 
+
+Added svn:ignore property to . to ignore pm_to_blib, blib and Makefile.
+
+This is done with:
+          % svn propedit svn:ignore .
+
