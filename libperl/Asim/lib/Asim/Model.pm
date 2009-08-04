@@ -45,6 +45,8 @@ our %a =  ( version =>              [ "version",
                                       "SCALAR" ],
             build_dir =>            [ "build_dir",
                                       "SCALAR" ],
+            default_benchmark =>    [ "default_benchmark",
+                                      "SCALAR" ],
             saveparams =>           [ "saveparams",
                                       "SCALAR" ],
             type =>                 [ "type",
@@ -132,6 +134,8 @@ sub _initialize {
   $self->name("New Asim Model");
   $self->description("");
   $self->default_attributes("");
+
+  $self->default_benchmark("");
   $self->saveparams(0);
 
   $self->modified(0);
@@ -411,6 +415,7 @@ sub save {
   $new_inifile->put("Global", "Description", $self->description());
   $new_inifile->put("Global", "Type", $self->type());
   $new_inifile->put("Global", "SaveParameters", $self->saveparams());
+  $new_inifile->put("Global", "DefaultBenchmark", $self->default_benchmark());
 
   my $name = basename($file);
   $name =~ s/\.[^.]*$//;
@@ -522,7 +527,7 @@ Return a list of accessor functions for this object
 ################################################################
 
 sub accessors {
-    return qw(version name description dependencies saveparams type);
+    return qw(version name description dependencies saveparams default_benchmark type);
 }
 
 
@@ -681,6 +686,20 @@ Always return current model "description".
 ################################################################
 
 sub description { return $_[0]->_accessor("Global","Description",$_[1]) || ""; }
+
+################################################################
+
+=item $model-E<gt>default_benchmark([$value])
+
+Set model "default_benchmark" to $value if supplied. 
+Always return "default_benchmark".
+
+=cut
+
+################################################################
+
+sub default_benchmark  { return $_[0]->_accessor("Global","DefaultBenchmark",$_[1]) || 0; }
+
 
 ################################################################
 
@@ -976,6 +995,23 @@ sub requires {
 
 ################################################################
 
+=item $model-E<gt>notes()
+
+Return the notes files. Just here for compabitility 
+with a module, and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub notes {
+  my $self = shift;
+
+  return ();
+}
+
+################################################################
+
 =item $model-E<gt>public()
 
 Return the public files. Just here for compabitility with a module,
@@ -1004,6 +1040,41 @@ and so always returns an empty list.
 ################################################################
 
 sub private {
+  my $self = shift;
+
+  return ();
+}
+
+
+################################################################
+
+=item $model-E<gt>makefile()
+
+Return the Makefiles. Just here for compabitility with a module,
+and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub makefile {
+  my $self = shift;
+
+  return ();
+}
+
+################################################################
+
+=item $model-E<gt>scons()
+
+Return the scons files. Just here for compabitility with a module,
+and so always returns an empty list.
+
+=cut
+
+################################################################
+
+sub scons {
   my $self = shift;
 
   return ();
@@ -1366,7 +1437,7 @@ sub clean {
   # determine correct command (Asim v. Hasim)
   my $cmd = "cd $builddir; make clean";
   if ($self->type() eq "HAsim") {
-      $cmd = "cd $builddir; make realclean";
+      $cmd = "cd $builddir; make clean";
   }
 
   return _process_command($cmd,%args);

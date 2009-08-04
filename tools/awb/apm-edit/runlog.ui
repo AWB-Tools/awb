@@ -69,7 +69,7 @@
                                 <bool>false</bool>
                             </property>
                             <property name="text">
-                                <string>Ok</string>
+                                <string>&amp;Ok</string>
                             </property>
                         </widget>
                         <widget class="QPushButton">
@@ -80,7 +80,7 @@
                                 <bool>false</bool>
                             </property>
                             <property name="text">
-                                <string>Kill</string>
+                                <string>&amp;Kill</string>
                             </property>
                         </widget>
                     </hbox>
@@ -100,7 +100,7 @@
         <sender>Ok</sender>
         <signal>clicked()</signal>
         <receiver>runlog</receiver>
-        <slot>close()</slot>
+        <slot>Ok_clicked()</slot>
     </connection>
 </connections>
 <includes>
@@ -109,7 +109,12 @@
 <slots>
     <slot>init()</slot>
     <slot>run()</slot>
+    <slot>receivedLineStdout()</slot>
+    <slot>receivedLineStderr()</slot>
+    <slot>receivedProcessExited()</slot>
     <slot>Kill_clicked()</slot>
+    <slot>Ok_clicked()</slot>
+    <slot>wait()</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

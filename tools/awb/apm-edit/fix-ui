@@ -1,0 +1,15 @@
+#!/bin/sh
+
+#
+# Later versions of qt3 designer create output that is not compatible
+# with perlqt's puic. This script attempts to revert the changes that
+# make the ui file compatible once again.
+#
+
+# Fixes for apm_edit
+
+# Patch actiongroup and iconsets
+patch <apm_edit.ui.patch
+
+# Just in case we missed the verion degrade...
+sed -i 's/version=\"3.3\"/version=\"3.0\"/' apm_edit.ui

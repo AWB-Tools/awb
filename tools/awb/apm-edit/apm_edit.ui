@@ -180,7 +180,7 @@
                     <property name="clickable">
                         <bool>true</bool>
                     </property>
-                    <property name="resizeable">
+                    <property name="resizable">
                         <bool>true</bool>
                     </property>
                 </column>
@@ -191,7 +191,7 @@
                     <property name="clickable">
                         <bool>true</bool>
                     </property>
-                    <property name="resizeable">
+                    <property name="resizable">
                         <bool>true</bool>
                     </property>
                 </column>
@@ -251,7 +251,7 @@
                                 <property name="clickable">
                                     <bool>true</bool>
                                 </property>
-                                <property name="resizeable">
+                                <property name="resizable">
                                     <bool>true</bool>
                                 </property>
                             </column>
@@ -271,6 +271,9 @@
                             </property>
                             <property name="text">
                                 <string>Refresh</string>
+                            </property>
+                            <property name="accel">
+                                <string>F5</string>
                             </property>
                             <property name="toolTip" stdset="0">
                                 <string>Refresh the module database cache</string>
@@ -401,18 +404,23 @@
         <action name="editFindAction"/>
         <action name="editFindMissingAction"/>
     </item>
-    <item text="Model" name="PopupMenu">
+    <item text="&amp;Model" name="PopupMenu">
         <action name="modelNukeAction"/>
         <action name="modelConfigureAction"/>
+        <action name="modelCleanAction"/>
         <action name="modelBuildAction"/>
+        <separator/>
+        <action name="modelSetupAction"/>
+        <action name="modelRunAction"/>
         <separator/>
         <action name="modelAutoBuild"/>
         <action name="modelRefresh"/>
     </item>
-    <item text="Module" name="moduleMenu">
+    <item text="Mod&amp;ule" name="moduleMenu">
         <action name="moduleNewAction"/>
         <separator/>
         <action name="moduleEditAction"/>
+        <action name="moduleNotesAction"/>
         <separator/>
         <action name="InsertActionGroup"/>
         <action name="moduleDeleteAction"/>
@@ -489,7 +497,7 @@
             <string>&amp;New</string>
         </property>
         <property name="accel">
-            <number>4194382</number>
+            <string>Ctrl+N</string>
         </property>
     </action>
     <action>
@@ -506,7 +514,7 @@
             <string>&amp;Open...</string>
         </property>
         <property name="accel">
-            <number>4194383</number>
+            <string>Ctrl+O</string>
         </property>
     </action>
     <action>
@@ -523,7 +531,7 @@
             <string>&amp;Save</string>
         </property>
         <property name="accel">
-            <number>4194387</number>
+            <string>Ctrl+S</string>
         </property>
     </action>
     <action>
@@ -537,7 +545,7 @@
             <string>Save &amp;As...</string>
         </property>
         <property name="accel">
-            <number>0</number>
+            <string></string>
         </property>
     </action>
     <action>
@@ -554,7 +562,7 @@
             <string>&amp;Print...</string>
         </property>
         <property name="accel">
-            <number>4194384</number>
+            <string>Ctrl+P</string>
         </property>
     </action>
     <action>
@@ -568,7 +576,7 @@
             <string>E&amp;xit</string>
         </property>
         <property name="accel">
-            <number>4194385</number>
+            <string>Ctrl+Q</string>
         </property>
     </action>
     <action>
@@ -585,7 +593,7 @@
             <string>&amp;Undo</string>
         </property>
         <property name="accel">
-            <number>4194394</number>
+            <string>Ctrl+Z</string>
         </property>
     </action>
     <action>
@@ -602,7 +610,7 @@
             <string>&amp;Redo</string>
         </property>
         <property name="accel">
-            <number>4194393</number>
+            <string>Ctrl+Y</string>
         </property>
     </action>
     <action>
@@ -619,7 +627,7 @@
             <string>&amp;Cut</string>
         </property>
         <property name="accel">
-            <number>4194392</number>
+            <string>Ctrl+X</string>
         </property>
     </action>
     <action>
@@ -636,7 +644,7 @@
             <string>C&amp;opy</string>
         </property>
         <property name="accel">
-            <number>4194371</number>
+            <string>Ctrl+C</string>
         </property>
     </action>
     <action>
@@ -653,7 +661,7 @@
             <string>&amp;Paste</string>
         </property>
         <property name="accel">
-            <number>4194390</number>
+            <string>Ctrl+V</string>
         </property>
     </action>
     <action>
@@ -670,7 +678,7 @@
             <string>&amp;Find...</string>
         </property>
         <property name="accel">
-            <number>4194374</number>
+            <string>Ctrl+F</string>
         </property>
     </action>
     <action>
@@ -684,7 +692,7 @@
             <string>&amp;Contents...</string>
         </property>
         <property name="accel">
-            <number>0</number>
+            <string></string>
         </property>
     </action>
     <action>
@@ -698,7 +706,7 @@
             <string>&amp;Index...</string>
         </property>
         <property name="accel">
-            <number>0</number>
+            <string></string>
         </property>
     </action>
     <action>
@@ -712,7 +720,7 @@
             <string>&amp;About...</string>
         </property>
         <property name="accel">
-            <number>0</number>
+            <string></string>
         </property>
     </action>
     <action>
@@ -720,6 +728,9 @@
             <cstring>moduleViewSourceAction</cstring>
         </property>
         <property name="text">
+            <string>View source</string>
+        </property>
+        <property name="menuText">
             <string>View source</string>
         </property>
     </action>
@@ -730,12 +741,18 @@
         <property name="text">
             <string>View AWB</string>
         </property>
+        <property name="menuText">
+            <string>View AWB</string>
+        </property>
     </action>
     <action>
         <property name="name">
             <cstring>moduleReplaceAction</cstring>
         </property>
         <property name="text">
+            <string>&amp;Replace</string>
+        </property>
+        <property name="menuText">
             <string>&amp;Replace</string>
         </property>
         <property name="toolTip">
@@ -749,11 +766,14 @@
         <property name="text">
             <string>&amp;Delete</string>
         </property>
+        <property name="menuText">
+            <string>&amp;Delete</string>
+        </property>
         <property name="toolTip">
             <string>Delete the selected module or submodel from the model</string>
         </property>
         <property name="accel">
-            <number>4194372</number>
+            <string>Ctrl+D</string>
         </property>
     </action>
     <action>
@@ -763,11 +783,14 @@
         <property name="text">
             <string>Autobuild</string>
         </property>
+        <property name="menuText">
+            <string>Autobuild</string>
+        </property>
         <property name="toolTip">
             <string>Automatically build model based on attributes</string>
         </property>
         <property name="accel">
-            <number>4194370</number>
+            <string>Ctrl+B</string>
         </property>
     </action>
     <action>
@@ -777,11 +800,14 @@
         <property name="text">
             <string>Refresh</string>
         </property>
+        <property name="menuText">
+            <string>Refresh</string>
+        </property>
         <property name="statusTip">
             <string>Refresh module database and current model</string>
         </property>
         <property name="accel">
-            <number>4194380</number>
+            <string>Ctrl+R</string>
         </property>
     </action>
     <action>
@@ -791,8 +817,11 @@
         <property name="text">
             <string>Find Missing</string>
         </property>
+        <property name="menuText">
+            <string>Find Missing</string>
+        </property>
         <property name="accel">
-            <number>4194381</number>
+            <string>Ctrl+M</string>
         </property>
     </action>
     <action>
@@ -805,16 +834,25 @@
         <property name="text">
             <string>What's this</string>
         </property>
+        <property name="menuText">
+            <string>What's this</string>
+        </property>
     </action>
     <action>
         <property name="name">
             <cstring>modelConfigureAction</cstring>
         </property>
         <property name="text">
-            <string>Configure</string>
+            <string>&amp;Configure</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Configure</string>
         </property>
         <property name="toolTip">
-            <string>Configure a model</string>
+            <string>Configure the model into a build tree</string>
+        </property>
+        <property name="accel">
+            <string>F9</string>
         </property>
     </action>
     <action>
@@ -822,10 +860,16 @@
             <cstring>modelBuildAction</cstring>
         </property>
         <property name="text">
-            <string>Build</string>
+            <string>&amp;Build</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Build</string>
         </property>
         <property name="toolTip">
-            <string>Build model</string>
+            <string>Build the model</string>
+        </property>
+        <property name="accel">
+            <string>F10</string>
         </property>
     </action>
     <action>
@@ -833,10 +877,13 @@
             <cstring>modelNukeAction</cstring>
         </property>
         <property name="text">
-            <string>Clean</string>
+            <string>&amp;Nuke</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Nuke</string>
         </property>
         <property name="toolTip">
-            <string>Clean (Nuke) model</string>
+            <string>Nuke (delete) the model's build tree</string>
         </property>
     </action>
     <action>
@@ -844,6 +891,9 @@
             <cstring>moduleNewAction</cstring>
         </property>
         <property name="text">
+            <string>&amp;New</string>
+        </property>
+        <property name="menuText">
             <string>&amp;New</string>
         </property>
         <property name="toolTip">
@@ -857,8 +907,14 @@
         <property name="text">
             <string>&amp;Edit</string>
         </property>
+        <property name="menuText">
+            <string>&amp;Edit</string>
+        </property>
         <property name="toolTip">
             <string>Edit the selected module or submodel</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+E</string>
         </property>
     </action>
     <action>
@@ -868,12 +924,18 @@
         <property name="text">
             <string>&amp;Add submodel</string>
         </property>
+        <property name="menuText">
+            <string>&amp;Add a submodel</string>
+        </property>
     </action>
     <actiongroup>
         <property name="name">
             <cstring>InsertActionGroup</cstring>
         </property>
         <property name="text">
+            <string>&amp;Insert</string>
+        </property>
+        <property name="menuText">
             <string>&amp;Insert</string>
         </property>
         <property name="usesDropDown">
@@ -889,8 +951,11 @@
             <property name="text">
                 <string>Module</string>
             </property>
+            <property name="menuText">
+                <string>Module</string>
+            </property>
             <property name="toolTip">
-                <string>Insert a module</string>
+                <string>Insert the currently selected alternative module</string>
             </property>
         </action>
         <action>
@@ -901,6 +966,9 @@
                 <bool>false</bool>
             </property>
             <property name="text">
+                <string>Submodel</string>
+            </property>
+            <property name="menuText">
                 <string>Submodel</string>
             </property>
             <property name="toolTip">
@@ -917,11 +985,79 @@
             <property name="text">
                 <string>As root</string>
             </property>
+            <property name="menuText">
+                <string>As root</string>
+            </property>
             <property name="toolTip">
                 <string>Reinsert selected module as root of model</string>
             </property>
         </action>
     </actiongroup>
+    <action>
+        <property name="name">
+            <cstring>moduleNotesAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Notes</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Notes</string>
+        </property>
+        <property name="toolTip">
+            <string>Display the notes for this module</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+I</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelSetupAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Setup</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Setup</string>
+        </property>
+        <property name="toolTip">
+            <string>Set up the default benchmark for this model</string>
+        </property>
+        <property name="accel">
+            <string>F11</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelRunAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Run</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Run</string>
+        </property>
+        <property name="toolTip">
+            <string>Run the default benchmark on this model</string>
+        </property>
+        <property name="accel">
+            <string>F12</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>modelCleanAction</cstring>
+        </property>
+        <property name="text">
+            <string>C&amp;lean</string>
+        </property>
+        <property name="menuText">
+            <string>C&amp;lean</string>
+        </property>
+        <property name="toolTip">
+            <string>Clean the model's build tree (make clean)</string>
+        </property>
+    </action>
 </actions>
 <connections>
     <connection>
@@ -1206,6 +1342,30 @@
         <receiver>apm_edit</receiver>
         <slot>moduleInsertAsRootAction_activated()</slot>
     </connection>
+    <connection>
+        <sender>moduleNotesAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleNotesAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>modelRunAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelRunAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>modelSetupAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelSetupAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>modelCleanAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelCleanAction_activated()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Name</tabstop>
@@ -1244,10 +1404,13 @@
     <slot>modelNuke()</slot>
     <slot>modelConfigure()</slot>
     <slot>modelBuild()</slot>
+    <slot>modelSetupAction_activated()</slot>
+    <slot>modelRunAction_activated()</slot>
     <slot>modelAutoBuild_activated()</slot>
     <slot>modelRefresh_activated()</slot>
     <slot>moduleNewAction_activated()</slot>
     <slot>moduleEditAction_activated()</slot>
+    <slot>moduleNotesAction_activated()</slot>
     <slot>moduleViewAwbAction_activated()</slot>
     <slot>moduleViewSourceAction_activated()</slot>
     <slot>moduleAddSubmodelAction_activated()</slot>
@@ -1256,6 +1419,7 @@
     <slot>moduleInsertModuleAction_activated()</slot>
     <slot>moduleInsertAsRootAction_activated()</slot>
     <slot>moduleDeleteAction_activated()</slot>
+    <slot>moduleDelete( QListViewItem * )</slot>
     <slot>helpIndex()</slot>
     <slot>helpContents()</slot>
     <slot>helpAbout()</slot>
@@ -1277,8 +1441,11 @@
     <slot>ParamChange_clicked()</slot>
     <slot returnType="int">Model_find()</slot>
     <slot returnType="int *">Model_walk()</slot>
-    <slot>moduleDelete( QListViewItem * )</slot>
+    <slot>modelCleanAction_activated()</slot>
 </slots>
+<functions>
+    <function access="private">modelOperation()</function>
+</functions>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>

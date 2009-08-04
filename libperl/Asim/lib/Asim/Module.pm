@@ -43,6 +43,8 @@ our %a =  ( name =>                 [ "name",
                                       "SCALAR" ],
             requires =>             [ "requires",
                                       "ARRAY" ],
+            notes =>                [ "notes",
+                                      "ARRAY" ],
             public =>               [ "public",
                                       "ARRAY" ],
             private =>              [ "private",
@@ -139,6 +141,7 @@ sub _initialize {
 		 parent => undef,
 		 requires => [],
 		 submodules => [],
+		 notes => [],
 		 public => [],
 		 private => [],
 		 sourcematrix => [],
@@ -278,6 +281,16 @@ sub open {
       next;
     }
 
+    # %notes FILENAME...
+
+    if (/^.*%notes$spaces($words)/) {
+      #
+      # Add files to list of notes files
+      #
+      push(@{$self->{notes}}, split(' ', $1));
+      next;
+    }
+
     # %public FILENAME... backward compatibility
 
     if (/^.*%public$spaces($words)/) {
@@ -335,6 +348,7 @@ sub open {
       #
       my $class = $1;
       my $fName = $2;
+
       if (! defined($class)) {
         $class = 'top';
       }
@@ -346,7 +360,7 @@ sub open {
         return undef;
       }
 
-      $self->{scons}{$class} = $fName;
+      push(@{$self->{scons}->{$class}}, split(' ', $fName));
       next;
     }
 
@@ -491,6 +505,10 @@ sub save {
     print M " * %requires $i\n";
   }
 
+  foreach my $i ($self->notes()) {
+    print M " * %notes $i\n";
+  }
+
   # foreach my $i ($self->public()) {
   #   print M " * %public $i\n";
   # }
@@ -513,7 +531,9 @@ sub save {
   }
 
   foreach my $k (keys %{$self->{scons}}) {
-    print M " * %scons %" . $self->{scons}{$k} . "\n";
+    foreach my $i ($self->{scons}->{$k}) {
+      print M " * %scons %$k $i\n";
+    }
   }
 
   foreach my $i ($self->library()) {
@@ -599,6 +619,7 @@ sub accessors {
 	    provides
 	    parent
 	    requires
+            notes
 	    public
 	    private
 	    makefile
@@ -800,82 +821,56 @@ sub remove_submodule {
 }
 
 ################################################################
-#
-# Decipher the source "type" of a file from its extension
-# e.g., "foo.cpp" => CPP
-#       "bar.v"   => VERILOG
-#
+
+=item $module-E<gt>inventory([--editable-only => 0|1])
+
+Return the list of all source files associated with the module
+
+Notes: 
+    1) All files are relative to the file including the .awb file
+    2) The .awb file itself is not included.
+    3) Files from %library and %include directives are not included
+
+=cut
+
 ################################################################
 
-sub decipher_type_from_extension
-{
-    # capture params
-    my $filename = shift;
+sub inventory {
+  my $self = shift;
 
-    if ($filename =~ /.bsv$/)
-    {
-        return "BSV";           # Bluespec
-    }
-    elsif ($filename =~ /.bsh$/)
-    {
-        return "BSH";           # Bluespec include
-    }
-    elsif ($filename =~ /.\.c$/)
-    {
-        return "CPP";           # C++
-    }
-    elsif ($filename =~ /.\.cpp$/)
-    {
-        return "CPP";           # C++
-    }
-    elsif ($filename =~ /.\.dic$/)
-    {
-        return "DICT";          # HAsim dictionary
-    }
-    elsif ($filename =~ /.\.[hH]$/)
-    {
-        return "H";             # C++
-    }
-    elsif ($filename =~ /.\.ngc$/)
-    {
-        return "NGC";           # Xilinx netlist
-    }
-    elsif ($filename =~ /.\.pack$/)
-    {
-        return "PACK";          # Asim package file
-    }
-    elsif ($filename =~ /.\.prj$/)
-    {
-        return "PRJ";           # Xilinx project
-    }
-    elsif ($filename =~ /.\.rrr$/)
-    {
-        return "RRR";           # HAsim request-response
-    }
-    elsif ($filename =~ /.\.ucf$/)
-    {
-        return "UCF";           # Xilinx constraint file
-    }
-    elsif ($filename =~ /.\.ut$/)
-    {
-        return "UT";            # Xilinx script
-    }
-    elsif ($filename =~ /.\.v$/)
-    {
-        return "VERILOG";       # Verilog
-    }
-    elsif ($filename =~ /.\.vhd$/)
-    {
-        return "VHD";           # VHDL
-    }
-    elsif ($filename =~ /.\.xst$/)
-    {
-        return "XST";           # Xilinx script
-    }
-    else
-    {
-        return "";
-    }
+  my @files = ();
+
+  push(@files, $self->notes());
+  push(@files, $self->sources("*", "*"));
+  push(@files, $self->makefile());
+  push(@files, $self->scons("*"));
+
+  return (@files);
+}
+
+################################################################
+
+=item $module-E<gt>notes([$list])
+
+Optionally update the list of notes for this module to $list
+
+Return the current (updated) list of notes files for this module
+
+Note: All filenames are relative to the directory containing the awbfile...
+
+=cut
+
+################################################################
+
+sub notes {
+  my $self = shift;
+  my @value = (@_);
+
+  if (@value) {
+    @{$self->{"notes"}} = (@value);
+  }
+
+  return @{$self->{"notes"}};
 }
 
 
@@ -1147,6 +1142,86 @@ sub addsources
 
 
 ################################################################
+#
+# Decipher the source "type" of a file from its extension
+# e.g., "foo.cpp" => CPP
+#       "bar.v"   => VERILOG
+#
+################################################################
+
+sub decipher_type_from_extension
+{
+    # capture params
+    my $filename = shift;
+
+    if ($filename =~ /.bsv$/)
+    {
+        return "BSV";           # Bluespec
+    }
+    elsif ($filename =~ /.bsh$/)
+    {
+        return "BSH";           # Bluespec include
+    }
+    elsif ($filename =~ /.\.c$/)
+    {
+        return "CPP";           # C++
+    }
+    elsif ($filename =~ /.\.cpp$/)
+    {
+        return "CPP";           # C++
+    }
+    elsif ($filename =~ /.\.dic$/)
+    {
+        return "DICT";          # HAsim dictionary
+    }
+    elsif ($filename =~ /.\.[hH]$/)
+    {
+        return "H";             # C++
+    }
+    elsif ($filename =~ /.\.ngc$/)
+    {
+        return "NGC";           # Xilinx netlist
+    }
+    elsif ($filename =~ /.\.pack$/)
+    {
+        return "PACK";          # Asim package file
+    }
+    elsif ($filename =~ /.\.prj$/)
+    {
+        return "PRJ";           # Xilinx project
+    }
+    elsif ($filename =~ /.\.rrr$/)
+    {
+        return "RRR";           # HAsim request-response
+    }
+    elsif ($filename =~ /.\.ucf$/)
+    {
+        return "UCF";           # Xilinx constraint file
+    }
+    elsif ($filename =~ /.\.ut$/)
+    {
+        return "UT";            # Xilinx script
+    }
+    elsif ($filename =~ /.\.v$/)
+    {
+        return "VERILOG";       # Verilog
+    }
+    elsif ($filename =~ /.\.vhd$/)
+    {
+        return "VHD";           # VHDL
+    }
+    elsif ($filename =~ /.\.xst$/)
+    {
+        return "XST";           # Xilinx script
+    }
+    else
+    {
+        return "";
+    }
+}
+
+
+################################################################
 
 =item $module-E<gt>makefile([$list])
 
@@ -1174,7 +1249,7 @@ sub makefile {
 
 ################################################################
 
-=item $module-E<gt>scons($category, $update)
+=item $module-E<gt>scons($category, $update, ...)
 
 Optionally update the scons file for specified category to $update
 
@@ -1190,19 +1265,29 @@ the awbfile...
 sub scons {
   my $self = shift;
   my $category = shift;
-  my $value = shift;
+  my @value = (@_);
 
   $category = 'top' if (! defined($category));
-  if (defined($value)) {
-    $self->{"scons"}{$category} = $value;
+  if (@value) {
+    die("Asim::Module::scons: Cannot assign with a category of *") if ($category eq "*");
+
+    @{$self->{"scons"}->{$category}} = (@value);
   }
 
-  if (exists($self->{"scons"}{$category})) {
-    return $self->{"scons"}{$category};
+  if ($category eq "*") {
+    my @files = ();
+
+    foreach my $c (keys %{$self->{"scons"}}) {
+      push(@files, @{$self->{"scons"}->{$c}});
+    }
+    return (@files);
   }
-  else {
-    return undef;
+
+  if (!defined($self->{"scons"}->{$category})) {
+    return ();
   }
+
+  return @{$self->{"scons"}->{$category}};
 }
 
 ################################################################

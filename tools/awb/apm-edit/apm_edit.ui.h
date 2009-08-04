@@ -504,92 +504,129 @@ void apm_edit::editFindMissing()
 void apm_edit::modelNuke()
 {
     our $model;
-    my $filename = $model->filename() || return;
-    my $w;
+
     my $cmd;
 
-    while (defined($model) && $model->modified()) {
-        my $status = Qt::MessageBox::warning ( 
-            this, 
-            "apm-edit nuke", 
-            "The current model has been modified. Do you want to save it first?",
-            "&Yes",
-            "&No",
-            "Cancel",
-            0,
-            2);
+    $cmd = $model->nuke("--getcommand" => 1);
 
-        fileSave()           if ($status == 0);
-        last                 if ($status == 1);
-        return               if ($status == 2);
-    }
-
-  $w = runlog(0, 0, 1);
-
-  $cmd = $model->nuke("--getcommand" => 1);
-  $w->run($cmd);
-
+    modelOperation("clean", $cmd);
 }
+
 
 void apm_edit::modelConfigure()
 {
     our $model;
-    my $filename = $model->filename() || return;
-    my $w;
+
     my $cmd;
 
-    while (defined($model) && $model->modified()) {
-        my $status = Qt::MessageBox::warning ( 
-            this, 
-            "apm-edit configure", 
-            "The current model has been modified. Do you want to save it first?",
-            "&Yes",
-            "&No",
-            "Cancel",
-            0,
-            2);
-
-        fileSave()           if ($status == 0);
-        last                 if ($status == 1);
-        return               if ($status == 2);
-    }
-
-    $w = runlog(0, 0, 1);
-
     $cmd = $model->configure("--getcommand" => 1);
-    $w->run($cmd);
+
+    modelOperation("configure", $cmd);
 }
 
+
+void apm_edit::modelCleanAction_activated()
+{
+    our $model;
+
+    my $cmd;
+
+    $cmd = $model->clean("--getcommand" => 1);
+
+    modelOperation("clean", $cmd);
+}
 
 void apm_edit::modelBuild()
 {
     our $model;
-    my $filename = $model->filename() || return;
-    my $w;
+
     my $cmd;
 
-    while (defined($model) && $model->modified()) {
-        my $status = Qt::MessageBox::warning ( 
-            this, 
-            "apm-edit build", 
-            "The current model has been modified. Do you want to save it first?",
-            "&Yes",
-            "&No",
-            "Cancel",
-            0,
-            2);
+    $cmd = $model->build("--getcommand" => 1);
 
-        fileSave()           if ($status == 0);
-        last                 if ($status == 1);
-        return               if ($status == 2);
+    modelOperation("build", $cmd);
+}
+
+
+void apm_edit::modelSetupAction_activated()
+{
+    our $model;
+
+    my $benchmark;
+    my $cmd;
+
+    $benchmark = $model->default_benchmark();
+    if (! $benchmark) {
+      Qt::MessageBox::information(
+	  this, 
+          "apm-edit run", 
+          "Model has no default benchmark");
+
+      return;
+    }
+
+    $cmd = $model->setup($benchmark, "--getcommand" => 1);
+
+    modelOperation("clean", $cmd);
+}
+
+
+void apm_edit::modelRunAction_activated()
+{
+    our $model;
+
+    my $benchmark;
+    my $cmd;
+
+    $benchmark = $model->default_benchmark();
+    if (! $benchmark) {
+      Qt::MessageBox::information(
+	  this, 
+          "apm-edit run", 
+          "Model has no default benchmark");
+
+      return;
+    }
+
+    $cmd = $model->run($benchmark, "--getcommand" => 1);
+
+    modelOperation("run", $cmd);
+}
+
+
+
+void apm_edit::modelOperation()
+{
+    my $operation = shift;
+    my $cmd = shift;
+
+    our $model;
+
+    my $filename = $model->filename() || return;
+    my $w;
+
+    while (defined($model) && $model->modified()) {
+      my $status = Qt::MessageBox::warning ( 
+	               this, 
+                       "apm-edit $operation", 
+                       "The current model has been modified.\n"
+                       . "Do you want to save it first?",
+                       "&Yes",
+                       "&No",
+                       "Cancel",
+		       0,
+		       2);
+
+      fileSave()           if ($status == 0);
+      last                 if ($status == 1);
+      return               if ($status == 2);
     }
 
     $w = runlog(0, 0, 1);
 
-    $cmd = $model->build("--getcommand" => 1);
     $w->run($cmd);
-
 }
+
 
 
 void apm_edit::modelAutoBuild_activated()
@@ -742,7 +779,78 @@ void apm_edit::moduleEditAction_activated()
         return;
     }
 
-    moduleViewSourceAction_activated();
+    my $current_module = Model->selectedItem()        || return;
+
+    my $module_filename = $current_module->text(2)    || return;
+    my $module = Asim::Module->new($module_filename)  || return;
+    my $dir = $module->base_dir();
+
+    my @files = ();
+
+    push(@files, Asim::resolve($module->filename()));
+
+    foreach my $f ($module->inventory()) {
+      my $resolved_f = Asim::resolve("$dir/$f");
+
+      if (!defined($resolved_f)) {
+	print "apm_edit: Skipping non-existent file $f\n";
+	next;
+      }
+
+      push(@files, $resolved_f);
+    }
+
+    Asim::invoke_editor("--background", @files);
+
+}
+
+#
+# Open the notes for this module
+#
+
+void apm_edit::moduleNotesAction_activated()
+{
+    my $current_module = Model->selectedItem()        || return;
+
+    my $module_filename = $current_module->text(2)    || return;
+
+    # Handle submodels...
+
+    if ($module_filename =~ /\.apm$/) {
+        Qt::MessageBox::information(
+            this, 
+            "apm-edit Notes", 
+            "Apm files currently have no notes");
+        return;
+    }
+
+    my $module = Asim::Module->new($module_filename)  || return;
+    my $dir = $module->base_dir();
+
+    my @files = ();
+
+    foreach my $f ($module->notes()) {
+      if (!($f =~ /\.txt$/)) {
+        Qt::MessageBox::information(
+	    this, 
+            "apm-edit Notes", 
+            "Non-text files are currently not supported - $f will not be displayed");
+        next;
+      }
+        push(@files, $Asim::default_workspace->resolve("$dir/$f"));
+    }
+
+    if (! @files) {
+      Qt::MessageBox::information(
+	  this, 
+          "apm-edit Notes", 
+          "This module contains no notes.\n" .
+          "Add a notes file and the line '%notes <name>.txt' to the .awb file.");
+
+      return;
+    }
+      
+    Asim::invoke_editor("--background", @files);
 }
 
 #
@@ -1297,6 +1405,9 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     Info->insertItem("Provides:    " . $module->provides());
     Info->insertItem("Requires:    " . join(" ", ($module->requires())));
     Info->insertItem("Filename:    " . $module->filename());
+    Info->insertItem("Notes:       " . join(" ", ($module->notes())));
+    Info->insertItem("Makefiles:   " . join(" ", ($module->makefile())));
+    Info->insertItem("Scons:       " . join(" ", ($module->scons("*"))));
     Info->insertItem("Public:      " . join(" ", ($module->public())));
     Info->insertItem("Private:     " . join(" ", ($module->private())));
     Info->insertItem("Parameters: ");
