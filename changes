@@ -6227,3 +6227,24 @@ Directory tools/awb/awb2
 
 Fix bug which prevented one from seeing model and benchmark 
 directories for newly checked out packages.
+
+----------
+emer        Date: Fri Aug  7 17:38:59 EDT 2009  CSN: CSN-awb-320
+                  Fri Aug  7 21:38:59 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          319 
+ Model.pm                  Locally Modified          319 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          319 
+ apm_edit.ui               Locally Modified          319 
+
+Enhancement to apm-edit suggested by Elliot:
+
+On insertion of a module, if the parameters of the module (or
+any of children) have non-default values, then the user is
+queried whether they want to change ALL the parameters for the
+module (and its children) to their default value.
+

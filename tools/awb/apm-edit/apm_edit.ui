@@ -1377,6 +1377,9 @@
 </slots>
 <functions>
     <function access="private">modelOperation()</function>
+    <function access="private">moduleCheckParams()</function>
+    <function access="private">moduleDefaultParams()</function>
+    <function access="private">moduleInsertParams()</function>
 </functions>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

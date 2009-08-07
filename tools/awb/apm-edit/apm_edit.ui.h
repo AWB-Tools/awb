@@ -1516,6 +1516,11 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
     $model->smart_add_submodule($module);
         
     #
+    # Check for non-default parameters
+    #
+    moduleInsertParams($module);
+ 
+    #
     # Remove children of module being replaced
     #
 
@@ -1578,6 +1583,11 @@ void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
     $model->smart_add_submodule($submodel);
 
     #
+    # Check for non-default parameters
+    #
+    moduleInsertParams($submodel);
+ 
+    #
     # Remove children of module being replaced
     #
 
@@ -1602,6 +1612,83 @@ void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
     return;
 }
 
+#
+# Utility functions for checking and defaulting parameters
+#
+
+void apm_edit::moduleInsertParams()
+{
+   my $module = shift;
+
+   if (moduleCheckParams($module)) {
+        my $status = Qt::MessageBox::warning ( 
+            this, 
+            "apm-edit insert", 
+            "The newly inserted module (or its children) have non-default parameter values\n"
+          . "Do you want to change them ALL to the default values?",
+            "&Yes",
+            "&No",
+            "",
+            0,
+            1);
+
+        if ($status == 0) {
+            moduleDefaultParams($module);
+        }
+    }
+}
+
+#
+# Check a module tree for any module has non-default parameter values
+# Note: only examines global parameters of submodels
+#
+
+void apm_edit::moduleCheckParams()
+{
+    my $module = shift || return;
+
+    if ($module->is_submodel()) {
+        $module = $module->owner();
+    }
+
+    foreach my $p ($module->parameters()) {
+        my $v = $p->value();
+
+        if (defined($v) && $p->value() ne $p->default()) {
+           return 1;
+        }
+    }
+
+    foreach my $s ($module->submodules()) {
+        my $m = moduleCheckParams($s);
+
+        return 1 if $m;
+    }
+
+    return 0;
+}
+
+#
+# Set all parameters in a module tree to their default values
+# Note: only sets global parameters of submodels
+#
+
+void apm_edit::moduleDefaultParams()
+{
+    my $module = shift || return;
+
+    if ($module->is_submodel()) {
+        $module = $module->owner();
+    }
+
+    foreach my $p ($module->parameters()) {
+        $p->value($p->default());
+    }
+
+    foreach my $s ($module->submodules()) {
+        moduleDefaultParams($s);
+    }
+}
 
 #
 # Module information box

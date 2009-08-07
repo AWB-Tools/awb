@@ -836,6 +836,25 @@ sub modelroot  {
 
 ################################################################
 
+=item $module-E<gt>is_submodel()
+
+Return TRUE if $self is the root of a submodel, but we return
+0 since this is a MODEL
+
+Only here for compatibility with Asim::Module::is_submodel
+
+=cut
+
+################################################################
+
+sub is_submodel {
+  my $self = shift;
+
+  return 0;
+}
+
+################################################################
+
 =item $model-E<gt>submodules()
 
 Return submodules of this model, which is the null set since 
