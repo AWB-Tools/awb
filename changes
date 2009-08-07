@@ -6216,3 +6216,14 @@ Directory .
     - Added default_runopts property to Model.pm
     - Fixed some bugs in Base.pm (modified property was set improperly)
     - Upgraded to new version to autoconf tools
+
+----------
+emer        Date: Fri Aug  7 15:11:28 EDT 2009  CSN: CSN-awb-319
+                  Fri Aug  7 19:11:28 UTC 2009
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          317 
+
+Fix bug which prevented one from seeing model and benchmark 
+directories for newly checked out packages.

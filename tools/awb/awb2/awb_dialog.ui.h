@@ -1217,10 +1217,12 @@ void awb_dialog::checkoutPushButton_clicked()
     }
 
     #
-    # TBD: This is causing crashes...
+    # TBD: setupInit was is causing crashes...
+    #      so we just use the refresh action
     #
 #    setupInit();
 
+    refreshPushButton_clicked();
 }
 
 
