@@ -209,23 +209,3 @@
           </property>
           <property name="text">
               <string>What's this</string>
-***************
-*** 1408,1414 ****
-      <slot>editFindMissing()</slot>
-      <slot>modelNuke()</slot>
-      <slot>modelConfigure()</slot>
--     <slot>modelCleanAction_activated()</slot>
-      <slot>modelBuild()</slot>
-      <slot>modelSetupAction_activated()</slot>
-      <slot>modelRunAction_activated()</slot>
---- 1403,1408 ----
-***************
-*** 1447,1452 ****
---- 1441,1447 ----
-      <slot>ParamChange_clicked()</slot>
-      <slot returnType="int">Model_find()</slot>
-      <slot returnType="int *">Model_walk()</slot>
-+     <slot>modelCleanAction_activated()</slot>
-  </slots>
-  <functions>
-      <function access="private">modelOperation()</function>

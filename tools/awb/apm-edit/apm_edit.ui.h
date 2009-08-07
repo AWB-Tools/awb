@@ -115,9 +115,7 @@ void apm_edit::fileNew()
     
     $model = Asim::Model->new();
 
-    Name->setText("New Asim Model");
-    Description->setText("Add a model description here");
-    Attributes->setText("");
+    Name->setText("Unnamed project");
 
     $model->modified(0);
 
@@ -189,8 +187,6 @@ void apm_edit::fileOpen()
     $model = $m;
 
     Name->setText($model->name());
-    Description->setText($model->description());
-    Attributes->setText(join(" ", $model->default_attributes()));
 
     $model->modified(0);
 
@@ -576,6 +572,8 @@ void apm_edit::modelRunAction_activated()
     our $model;
 
     my $benchmark;
+    my $runopts;
+
     my $cmd;
 
     $benchmark = $model->default_benchmark();
@@ -588,7 +586,9 @@ void apm_edit::modelRunAction_activated()
       return;
     }
 
-    $cmd = $model->run($benchmark, "--getcommand" => 1);
+    $runopts = $model->default_runopts() || "";
+    
+    $cmd = $model->run($benchmark, "--runopt" => "$runopts", "--getcommand" => 1);
 
     modelOperation("run", $cmd);
 }
@@ -640,8 +640,8 @@ void apm_edit::modelAutoBuild_activated()
     #
     # Save Autoselect old state - then turn it on
     #
-    $previous_autoselect = Autoselect->state();
-    Autoselect->setState(1);
+    $previous_autoselect = $model->autoselect();
+    $model->autoselect(1);
 
     #
     # Walk tree autoselecting for empty modules
@@ -666,7 +666,7 @@ void apm_edit::modelAutoBuild_activated()
     #
     # Restore autoselect state
     #
-    Autoselect->setState($previous_autoselect);
+    $model->autoselect($previous_autoselect);
 
     #
     # Display root of model tree
@@ -722,6 +722,27 @@ void apm_edit::modelRefresh_activated()
     #
     my $item=Model->selectedItem() || return;
     Model_selectionChanged($item)
+}
+
+
+
+void apm_edit::modelProperties_clicked()
+{
+    modelPropertiesAction_activated();
+}
+
+void apm_edit::modelPropertiesAction_activated()
+{
+    our $model;
+
+    use apm_edit_properties;
+
+    my $w = apm_edit_properties;
+
+    $w->show();
+    $w->exec();
+
+    Name->setText($model->name());
 }
 
 
@@ -1165,7 +1186,7 @@ void apm_edit::Search_returnPressed()
 
 
 #
-# Name, Description, Attributes text boxes
+# Name text box
 #
 
 void apm_edit::Name_textChanged( const QString & )
@@ -1175,21 +1196,6 @@ void apm_edit::Name_textChanged( const QString & )
     $model->name(shift);
 }
 
-
-void apm_edit::Description_textChanged( const QString & )
-{
-    our $model;
-
-    $model->description(shift);
-}
-
-
-void apm_edit::Attributes_textChanged( const QString & )
-{
-    our $model;
-
-    $model->default_attributes(shift);
-}
 
 #
 # Model view
@@ -1312,7 +1318,7 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     # Optionally autoselect a module...
     #
 
-    if ( Autoselect->state() && !defined($module)) {
+    if ( $model->autoselect() && !defined($module)) {
         statusBar()->message("Autoselecting....\n", 2000);
         if (defined($module_default)) {
             statusBar()->message("Autoselecting....selected a module for $provides\n", 2000);

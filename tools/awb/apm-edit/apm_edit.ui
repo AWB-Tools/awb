@@ -8,14 +8,14 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>726</width>
-            <height>512</height>
+            <width>750</width>
+            <height>531</height>
         </rect>
     </property>
     <property name="caption">
         <string>apm-edit</string>
     </property>
-    <vbox>
+    <grid>
         <property name="name">
             <cstring>unnamed</cstring>
         </property>
@@ -25,295 +25,131 @@
         <property name="spacing">
             <number>6</number>
         </property>
-        <widget class="QLayoutWidget">
+        <widget class="QLayoutWidget" row="0" column="0">
             <property name="name">
-                <cstring>Layout4</cstring>
+                <cstring>layout20</cstring>
             </property>
-            <hbox>
+            <vbox>
                 <property name="name">
                     <cstring>unnamed</cstring>
-                </property>
-                <property name="margin">
-                    <number>0</number>
-                </property>
-                <property name="spacing">
-                    <number>6</number>
-                </property>
-                <widget class="QLabel">
-                    <property name="name">
-                        <cstring>TextLabel1</cstring>
-                    </property>
-                    <property name="minimumSize">
-                        <size>
-                            <width>100</width>
-                            <height>0</height>
-                        </size>
-                    </property>
-                    <property name="text">
-                        <string>Name:</string>
-                    </property>
-                </widget>
-                <widget class="QLineEdit">
-                    <property name="name">
-                        <cstring>Name</cstring>
-                    </property>
-                    <property name="toolTip" stdset="0">
-                        <string>Enter the name of the model here</string>
-                    </property>
-                    <property name="whatsThis" stdset="0">
-                        <string>Enter into this field the name of the model</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget class="QLayoutWidget">
-            <property name="name">
-                <cstring>Layout6</cstring>
-            </property>
-            <hbox>
-                <property name="name">
-                    <cstring>unnamed</cstring>
-                </property>
-                <property name="margin">
-                    <number>0</number>
-                </property>
-                <property name="spacing">
-                    <number>6</number>
-                </property>
-                <widget class="QLabel">
-                    <property name="name">
-                        <cstring>TextLabel1_2</cstring>
-                    </property>
-                    <property name="minimumSize">
-                        <size>
-                            <width>100</width>
-                            <height>0</height>
-                        </size>
-                    </property>
-                    <property name="text">
-                        <string>Description:</string>
-                    </property>
-                </widget>
-                <widget class="QLineEdit">
-                    <property name="name">
-                        <cstring>Description</cstring>
-                    </property>
-                    <property name="toolTip" stdset="0">
-                        <string>Enter a description of the model here</string>
-                    </property>
-                    <property name="whatsThis" stdset="0">
-                        <string>Enter into this field a description of the model</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget class="QLayoutWidget">
-            <property name="name">
-                <cstring>Layout5</cstring>
-            </property>
-            <hbox>
-                <property name="name">
-                    <cstring>unnamed</cstring>
-                </property>
-                <property name="margin">
-                    <number>0</number>
-                </property>
-                <property name="spacing">
-                    <number>6</number>
-                </property>
-                <widget class="QLabel">
-                    <property name="name">
-                        <cstring>TextLabel1_3</cstring>
-                    </property>
-                    <property name="minimumSize">
-                        <size>
-                            <width>100</width>
-                            <height>0</height>
-                        </size>
-                    </property>
-                    <property name="text">
-                        <string>Attributes:</string>
-                    </property>
-                </widget>
-                <widget class="QLineEdit">
-                    <property name="name">
-                        <cstring>Attributes</cstring>
-                    </property>
-                    <property name="toolTip" stdset="0">
-                        <string>Enter a space separated list of attributes of the model</string>
-                    </property>
-                    <property name="whatsThis" stdset="0">
-                        <string>Enter into this field a space separated list of attributes for the model. These attributes are used to determine the default module when the autoselect button is toggled.</string>
-                    </property>
-                </widget>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>Autoselect</cstring>
-                    </property>
-                    <property name="text">
-                        <string>Autoselect</string>
-                    </property>
-                    <property name="toggleButton">
-                        <bool>true</bool>
-                    </property>
-                    <property name="toolTip" stdset="0">
-                        <string>Toggle Autoselect to cause modules to be autoselected by attribute</string>
-                    </property>
-                    <property name="whatsThis" stdset="0">
-                        <string>When this button is toggled, clicking on an undefined module in the "Model" pane will result in the 'best' module (based on the model attributes) to be automatically chosen.</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget class="QSplitter">
-            <property name="name">
-                <cstring>Splitter10</cstring>
-            </property>
-            <property name="orientation">
-                <enum>Vertical</enum>
-            </property>
-            <widget class="QListView">
-                <column>
-                    <property name="text">
-                        <string>Type</string>
-                    </property>
-                    <property name="clickable">
-                        <bool>true</bool>
-                    </property>
-                    <property name="resizable">
-                        <bool>true</bool>
-                    </property>
-                </column>
-                <column>
-                    <property name="text">
-                        <string>Implementation</string>
-                    </property>
-                    <property name="clickable">
-                        <bool>true</bool>
-                    </property>
-                    <property name="resizable">
-                        <bool>true</bool>
-                    </property>
-                </column>
-            <item>
-                <property name="text">
-                    <string>Model</string>
-                </property>
-                <property name="text">
-                    <string></string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-            </item>
-                <property name="name">
-                    <cstring>Model</cstring>
-                </property>
-                <property name="rootIsDecorated">
-                    <bool>true</bool>
-                </property>
-                <property name="toolTip" stdset="0">
-                    <string>Select a module to insert or replace</string>
-                </property>
-                <property name="whatsThis" stdset="0">
-                    <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type "model". Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the "Alternative Modules" pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
-                </property>
-            </widget>
-            <widget class="QSplitter">
-                <property name="name">
-                    <cstring>Splitter9</cstring>
-                </property>
-                <property name="orientation">
-                    <enum>Horizontal</enum>
                 </property>
                 <widget class="QLayoutWidget">
                     <property name="name">
-                        <cstring>Layout38</cstring>
+                        <cstring>layout19</cstring>
                     </property>
-                    <vbox>
+                    <hbox>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <property name="margin">
-                            <number>0</number>
-                        </property>
-                        <property name="spacing">
-                            <number>6</number>
-                        </property>
-                        <widget class="QListView">
-                            <column>
-                                <property name="text">
-                                    <string>Alternative Modules</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
+                        <widget class="QLabel">
                             <property name="name">
-                                <cstring>Alternatives</cstring>
+                                <cstring>Name</cstring>
                             </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Double click an alternative module to replace the current module in the model</string>
+                            <property name="sizePolicy">
+                                <sizepolicy>
+                                    <hsizetype>5</hsizetype>
+                                    <vsizetype>0</vsizetype>
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
                             </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>This pane shows the possible alternatives for the module selected in the "Model" pane. The currently selected module here is described in the "Description" pane to the right. Double clicking on a module will insert the selected module into the model.</string>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>100</width>
+                                    <height>0</height>
+                                </size>
+                            </property>
+                            <property name="text">
+                                <string>Name:</string>
                             </property>
                         </widget>
                         <widget class="QPushButton">
                             <property name="name">
-                                <cstring>cacheRefresh</cstring>
+                                <cstring>Change</cstring>
+                            </property>
+                            <property name="sizePolicy">
+                                <sizepolicy>
+                                    <hsizetype>0</hsizetype>
+                                    <vsizetype>0</vsizetype>
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
                             </property>
                             <property name="text">
-                                <string>Refresh</string>
-                            </property>
-                            <property name="accel">
-                                <string>F5</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Refresh the module database cache</string>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>The list of available modules is maintained in a cache. If a newly created module is not being offered as an alternative, click here to refresh the cache.</string>
+                                <string>Change</string>
                             </property>
                         </widget>
-                    </vbox>
+                    </hbox>
                 </widget>
-                <widget class="QLayoutWidget">
+                <widget class="QSplitter">
                     <property name="name">
-                        <cstring>Layout40</cstring>
+                        <cstring>Splitter10</cstring>
                     </property>
-                    <vbox>
+                    <property name="orientation">
+                        <enum>Vertical</enum>
+                    </property>
+                    <widget class="QListView">
+                        <column>
+                            <property name="text">
+                                <string>Type</string>
+                            </property>
+                            <property name="clickable">
+                                <bool>true</bool>
+                            </property>
+                            <property name="resizable">
+                                <bool>true</bool>
+                            </property>
+                        </column>
+                        <column>
+                            <property name="text">
+                                <string>Implementation</string>
+                            </property>
+                            <property name="clickable">
+                                <bool>true</bool>
+                            </property>
+                            <property name="resizable">
+                                <bool>true</bool>
+                            </property>
+                        </column>
+                    <item>
+                        <property name="text">
+                            <string>Model</string>
+                        </property>
+                        <property name="text">
+                            <string></string>
+                        </property>
+                        <property name="pixmap">
+                            <pixmap></pixmap>
+                        </property>
+                        <property name="pixmap">
+                            <pixmap></pixmap>
+                        </property>
+                    </item>
                         <property name="name">
-                            <cstring>unnamed</cstring>
+                            <cstring>Model</cstring>
                         </property>
-                        <property name="margin">
-                            <number>0</number>
+                        <property name="rootIsDecorated">
+                            <bool>true</bool>
                         </property>
-                        <property name="spacing">
-                            <number>6</number>
+                        <property name="toolTip" stdset="0">
+                            <string>Select a module to insert or replace</string>
                         </property>
-                        <widget class="QListBox">
-                            <property name="name">
-                                <cstring>Info</cstring>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Description of module selected in alternatives pane to the left</string>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
-                            </property>
-                        </widget>
+                        <property name="whatsThis" stdset="0">
+                            <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type "model". Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the "Alternative Modules" pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
+                        </property>
+                    </widget>
+                    <widget class="QSplitter">
+                        <property name="name">
+                            <cstring>Splitter9</cstring>
+                        </property>
+                        <property name="orientation">
+                            <enum>Horizontal</enum>
+                        </property>
                         <widget class="QLayoutWidget">
                             <property name="name">
-                                <cstring>Layout39</cstring>
+                                <cstring>Layout38</cstring>
                             </property>
-                            <hbox>
+                            <vbox>
                                 <property name="name">
                                     <cstring>unnamed</cstring>
                                 </property>
@@ -323,61 +159,143 @@
                                 <property name="spacing">
                                     <number>6</number>
                                 </property>
-                                <widget class="QLabel">
+                                <widget class="QListView">
+                                    <column>
+                                        <property name="text">
+                                            <string>Alternative Modules</string>
+                                        </property>
+                                        <property name="clickable">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="resizable">
+                                            <bool>true</bool>
+                                        </property>
+                                    </column>
                                     <property name="name">
-                                        <cstring>ParamName</cstring>
-                                    </property>
-                                    <property name="enabled">
-                                        <bool>true</bool>
-                                    </property>
-                                    <property name="minimumSize">
-                                        <size>
-                                            <width>200</width>
-                                            <height>0</height>
-                                        </size>
-                                    </property>
-                                    <property name="text">
-                                        <string>Parameter</string>
-                                    </property>
-                                    <property name="alignment">
-                                        <set>AlignVCenter|AlignRight</set>
-                                    </property>
-                                </widget>
-                                <widget class="QLineEdit">
-                                    <property name="name">
-                                        <cstring>ParamValue</cstring>
-                                    </property>
-                                    <property name="enabled">
-                                        <bool>false</bool>
+                                        <cstring>Alternatives</cstring>
                                     </property>
                                     <property name="toolTip" stdset="0">
-                                        <string>New value for this parameter</string>
+                                        <string>Double click an alternative module to replace the current module in the model</string>
                                     </property>
                                     <property name="whatsThis" stdset="0">
-                                        <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+                                        <string>This pane shows the possible alternatives for the module selected in the "Model" pane. The currently selected module here is described in the "Description" pane to the right. Double clicking on a module will insert the selected module into the model.</string>
                                     </property>
                                 </widget>
                                 <widget class="QPushButton">
                                     <property name="name">
-                                        <cstring>ParamChange</cstring>
-                                    </property>
-                                    <property name="enabled">
-                                        <bool>false</bool>
+                                        <cstring>cacheRefresh</cstring>
                                     </property>
                                     <property name="text">
-                                        <string>Change</string>
+                                        <string>Refresh</string>
+                                    </property>
+                                    <property name="accel">
+                                        <string>F5</string>
                                     </property>
                                     <property name="toolTip" stdset="0">
-                                        <string>Change value for this parameter</string>
+                                        <string>Refresh the module database cache</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>The list of available modules is maintained in a cache. If a newly created module is not being offered as an alternative, click here to refresh the cache.</string>
                                     </property>
                                 </widget>
-                            </hbox>
+                            </vbox>
                         </widget>
-                    </vbox>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>Layout40</cstring>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <property name="margin">
+                                    <number>0</number>
+                                </property>
+                                <property name="spacing">
+                                    <number>6</number>
+                                </property>
+                                <widget class="QListBox">
+                                    <property name="name">
+                                        <cstring>Info</cstring>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Description of module selected in alternatives pane to the left</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLayoutWidget">
+                                    <property name="name">
+                                        <cstring>Layout39</cstring>
+                                    </property>
+                                    <hbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <property name="margin">
+                                            <number>0</number>
+                                        </property>
+                                        <property name="spacing">
+                                            <number>6</number>
+                                        </property>
+                                        <widget class="QLabel">
+                                            <property name="name">
+                                                <cstring>ParamName</cstring>
+                                            </property>
+                                            <property name="enabled">
+                                                <bool>true</bool>
+                                            </property>
+                                            <property name="minimumSize">
+                                                <size>
+                                                    <width>200</width>
+                                                    <height>0</height>
+                                                </size>
+                                            </property>
+                                            <property name="text">
+                                                <string>Parameter</string>
+                                            </property>
+                                            <property name="alignment">
+                                                <set>AlignVCenter|AlignRight</set>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLineEdit">
+                                            <property name="name">
+                                                <cstring>ParamValue</cstring>
+                                            </property>
+                                            <property name="enabled">
+                                                <bool>false</bool>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>New value for this parameter</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QPushButton">
+                                            <property name="name">
+                                                <cstring>ParamChange</cstring>
+                                            </property>
+                                            <property name="enabled">
+                                                <bool>false</bool>
+                                            </property>
+                                            <property name="text">
+                                                <string>Change</string>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Change value for this parameter</string>
+                                            </property>
+                                        </widget>
+                                    </hbox>
+                                </widget>
+                            </vbox>
+                        </widget>
+                    </widget>
                 </widget>
-            </widget>
+            </vbox>
         </widget>
-    </vbox>
+    </grid>
 </widget>
 <menubar>
     <property name="name">
@@ -413,6 +331,7 @@
         <action name="modelSetupAction"/>
         <action name="modelRunAction"/>
         <separator/>
+        <action name="modelPropertiesAction"/>
         <action name="modelAutoBuild"/>
         <action name="modelRefresh"/>
     </item>
@@ -422,7 +341,12 @@
         <action name="moduleEditAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
-        <action name="InsertActionGroup"/>
+        <actiongroup name="InsertActionGroup"/>
+        <item text="&amp;Insert" name="popupMenu_34" accel="">
+            <action name="moduleInsertModuleAction"/>
+            <action name="moduleInsertSubmodelAction"/>
+            <action name="moduleInsertAsRootAction"/>
+        </item>
         <action name="moduleDeleteAction"/>
     </item>
     <item text="&amp;Help" name="helpMenu">
@@ -1058,6 +982,23 @@
             <string>Clean the model's build tree (make clean)</string>
         </property>
     </action>
+    <action>
+        <property name="name">
+            <cstring>modelPropertiesAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Properties</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Properties</string>
+        </property>
+        <property name="toolTip">
+            <string>Open a dialog to modify the properties of the model</string>
+        </property>
+        <property name="accel">
+            <string>Alt+Return</string>
+        </property>
+    </action>
 </actions>
 <connections>
     <connection>
@@ -1143,24 +1084,6 @@
         <signal>activated()</signal>
         <receiver>apm_edit</receiver>
         <slot>helpAbout()</slot>
-    </connection>
-    <connection>
-        <sender>Name</sender>
-        <signal>textChanged(const QString&amp;)</signal>
-        <receiver>apm_edit</receiver>
-        <slot>Name_textChanged(const QString&amp;)</slot>
-    </connection>
-    <connection>
-        <sender>Description</sender>
-        <signal>textChanged(const QString&amp;)</signal>
-        <receiver>apm_edit</receiver>
-        <slot>Description_textChanged(const QString&amp;)</slot>
-    </connection>
-    <connection>
-        <sender>Attributes</sender>
-        <signal>textChanged(const QString&amp;)</signal>
-        <receiver>apm_edit</receiver>
-        <slot>Attributes_textChanged(const QString&amp;)</slot>
     </connection>
     <connection>
         <sender>Model</sender>
@@ -1366,11 +1289,20 @@
         <receiver>apm_edit</receiver>
         <slot>modelCleanAction_activated()</slot>
     </connection>
+    <connection>
+        <sender>modelPropertiesAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelPropertiesAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>Change</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>modelProperties_clicked()</slot>
+    </connection>
 </connections>
 <tabstops>
-    <tabstop>Name</tabstop>
-    <tabstop>Description</tabstop>
-    <tabstop>Attributes</tabstop>
     <tabstop>Model</tabstop>
     <tabstop>Alternatives</tabstop>
 </tabstops>
@@ -1403,11 +1335,14 @@
     <slot>editFindMissing()</slot>
     <slot>modelNuke()</slot>
     <slot>modelConfigure()</slot>
+    <slot>modelCleanAction_activated()</slot>
     <slot>modelBuild()</slot>
     <slot>modelSetupAction_activated()</slot>
     <slot>modelRunAction_activated()</slot>
     <slot>modelAutoBuild_activated()</slot>
     <slot>modelRefresh_activated()</slot>
+    <slot>modelProperties_clicked()</slot>
+    <slot>modelPropertiesAction_activated()</slot>
     <slot>moduleNewAction_activated()</slot>
     <slot>moduleEditAction_activated()</slot>
     <slot>moduleNotesAction_activated()</slot>
@@ -1426,8 +1361,6 @@
     <slot>Search_textChanged( const QString &amp; )</slot>
     <slot>Search_returnPressed()</slot>
     <slot>Name_textChanged( const QString &amp; )</slot>
-    <slot>Description_textChanged( const QString &amp; )</slot>
-    <slot>Attributes_textChanged( const QString &amp; )</slot>
     <slot>Model_selectionChanged( QListViewItem * )</slot>
     <slot>Model_contextMenuRequested( QListViewItem *, const QPoint &amp;, int )</slot>
     <slot>Model_doubleClicked( QListViewItem * )</slot>
@@ -1441,7 +1374,6 @@
     <slot>ParamChange_clicked()</slot>
     <slot returnType="int">Model_find()</slot>
     <slot returnType="int *">Model_walk()</slot>
-    <slot>modelCleanAction_activated()</slot>
 </slots>
 <functions>
     <function access="private">modelOperation()</function>

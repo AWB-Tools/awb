@@ -82,8 +82,11 @@ sub name {
   my $value = shift;
 
   if (defined($value)) {
-      $self->{"name"} = $value;
-      $self->modified(1);
+      my $oldvalue = $self->{"name"};
+      if (! defined($oldvalue) || ("$value" ne "$oldvalue")) {
+	  $self->{"name"} = $value;
+	  $self->modified(1);
+      }
   }
 
   return $self->{"name"};
@@ -107,8 +110,12 @@ sub description {
   my $value = shift;
 
   if (defined($value)) {
-      $self->{"description"} = $value;
-      $self->modified(1);
+      my $oldvalue = $self->{"description"};
+
+      if (! defined($oldvalue) || ("$value" ne "$oldvalue")) {
+	  $self->{"description"} = $value;
+	  $self->modified(1);
+      }
   }
 
   return $self->{"description"};
@@ -178,8 +185,12 @@ sub location {
   my $value = shift;
 
   if (defined($value)) {
-      $self->{"location"} = $value;
-      $self->modified(1);
+      my $oldvalue = $self->{"location"};
+
+      if (! defined($oldvalue) || ("$value" ne "$oldvalue")) {
+	  $self->{"location"} = $value;
+	  $self->modified(1);
+      }
   }
 
   return $self->{"location"};
@@ -203,10 +214,16 @@ sub _accessor {
 
   my $newval;
 
-  if (defined $value) {
+  if (defined($value)) {
     #print "Setting [$group] $item=$value\n";
+
+    $self->{inifile}->modified(0);
+
     $self->{inifile}->put($group,$item,$value);
-    $self->modified(1);
+
+    if ($self->{inifile}->modified()) {
+      $self->modified(1);
+    }
   }
 
   $newval = $self->{inifile}->get($group,$item);
@@ -242,8 +259,13 @@ sub _accessor_array_set {
 
   my @list = (@_);
 
+  $self->{inifile}->modified(0);
+
   $self->{inifile}->put($group, $item, join($delim, @list));
-  $self->modified(1);
+
+  if ($self->{inifile}->modified()) {
+    $self->modified(1);
+  }
 
   return ($self->_accessor_array($group, $item, $delim));
 }

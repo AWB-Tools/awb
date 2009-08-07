@@ -25,6 +25,8 @@ apm_edit_SOURCES = apm-edit.pro \
                    apm_edit.ui \
                    apm_edit.ui.h \
                    apm_edit_about.ui \
+                   apm_edit_properties.ui \
+                   apm_edit_properties.ui.h \
                    runlog.ui \
                    runlog.ui.h \
                    apm_edit_images.pm \
@@ -51,20 +53,23 @@ IMAGES= images/editcopy.png     \
         images/submodel.png
 
 
-apm-edit$(EXEEXT): apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl
-	cat apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl >apm-edit
+apm-edit$(EXEEXT): apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl
+	cat apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl >apm-edit
 	chmod +x apm-edit
 
 apm_edit.ui.pm: apm_edit.ui apm_edit.ui.h
 
-apm_edit_about.ui.pm: apm_edit_about.ui
+apm_edit_properties.ui.pm: apm_edit_properties.ui.h
 
 runlog.ui.pm: runlog.ui runlog.ui.h
+
+apm_edit_about.ui.pm: apm_edit_about.ui
 
 apm_edit_images.pm: apm-edit.pro ${IMAGES}
 	puic -o apm_edit_images.pm -embed apm-edit.pro ${IMAGES}
 
 %.ui.pm: %.ui
+	sed -i 's/version=\"3\..\"/version="3.0"/' $<
 	puic -o $@ $<
 
 CLEANFILES = *.ui.pm apm_edit_images.pm

@@ -6112,3 +6112,107 @@ Directory tools/awb/apm-edit
       - Added the concept of 'notes' to a module.
       - Made scons() method uniform with other source file methods by accepting and returning a list
            (hasim-configure only deals with lists of length one)
+
+----------
+emer        Date: Fri Aug  7 11:11:24 EDT 2009  CSN: CSN-awb-318
+                  Fri Aug  7 15:11:24 UTC 2009
+
+
+Directory m4
+ ltsugar.m4                Locally Added               0 
+ libtool.m4                Locally Added               0 
+ ltversion.m4              Locally Added               0 
+ lt~obsolete.m4            Locally Added               0 
+ ltoptions.m4              Locally Added               0 
+
+Directory .
+ m4/                       Locally Added               0 
+ configure                 Locally Modified          317 
+ Makefile.in               Locally Modified          317 
+
+Directory include
+ config.h.in               Locally Modified          317 
+
+Directory .
+ configure.in              Locally Modified          317 
+
+Directory scripts
+ mkinstalldirs             Locally Modified          317 
+ depcomp                   Locally Modified          317 
+ missing                   Locally Modified          317 
+ config.guess              Locally Modified          317 
+ config.sub                Locally Modified          317 
+ ltmain.sh                 Locally Modified          317 
+ install-sh                Locally Modified          317 
+
+Directory libperl
+ Makefile.in               Locally Modified          317 
+
+Directory libperl/Asim/lib/Asim
+ Base.pm                   Locally Modified          317 
+ Inifile.pm                Locally Modified          317 
+ Model.pm                  Locally Modified          317 
+
+Directory .
+ README                    Locally Modified          317 
+
+Directory tools
+ Makefile.in               Locally Modified          317 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          317 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          317 
+
+Directory tools/awb
+ apm-edit/                 Locally Modified          317 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          317 
+ apm-edit.db               Locally Removed           317 
+ apm_edit.ui.h             Locally Modified          317 
+ apm_edit.ui.patch         Locally Modified          317 
+ apm_edit.ui               Locally Modified          317 
+ apm-edit.pro              Locally Modified          317 
+ apm_edit_properties.ui.h  Locally Added               0 
+ Makefile.am               Locally Modified          317 
+ apm_edit_properties.ui    Locally Added               0 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          317 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          317 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          317 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          317 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          317 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          317 
+
+Directory lib
+ Makefile.in               Locally Modified          317 
+
+Directory .
+ INSTALL                   Locally Modified          317 
+ aclocal.m4                Locally Modified          317 
+
+- Added some enchancements to apm-edit
+    - Added a separate properites dialog accessed via
+       - Menu:     Model->Properties menu
+       - Button:   "Change" button to left of model name
+       - Shortcut: Alt-Enter
+
+    - Added support for default benchmark run options
+
+- Supporting changes
+    - Added default_runopts property to Model.pm
+    - Fixed some bugs in Base.pm (modified property was set improperly)
+    - Upgraded to new version to autoconf tools

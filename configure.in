@@ -29,6 +29,7 @@ AC_CONFIG_SRCDIR([admin/packages/awb])
 AC_PREFIX_PROGRAM(asimstarter)
 
 AC_CONFIG_AUX_DIR(scripts)
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.8.3 foreign subdir-objects]) dnl automake version + options
 AM_CONFIG_HEADER(include/config.h)
@@ -499,8 +500,10 @@ AC_PROG_CXX("$distcxx" g++ cxx)
 AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+
 # tools for building libraries
+LT_INIT
+
 AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 

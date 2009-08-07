@@ -639,8 +639,8 @@ sub put {
 
   my $oldvalue = $data->{"$group"}{"$item"};
 
-  if ((!defined($oldvalue)) || ($oldvalue ne "$value")) {
-      #print "Setting [$group] $item=$value\n";
+  if ((!defined($oldvalue)) || ("$oldvalue" ne "$value")) {
+      print "Setting [$group] $item=$value (was $oldvalue)\n" if ($debug);
       $data->{"$group"}{"$item"} = $value;
 
       $self->modified(1);

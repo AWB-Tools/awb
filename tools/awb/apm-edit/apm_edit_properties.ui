@@ -1,0 +1,399 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>apm_edit_properties</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>apm_edit_properties</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>725</width>
+            <height>285</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Properties</string>
+    </property>
+    <property name="sizeGripEnabled">
+        <bool>true</bool>
+    </property>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout5</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>9</x>
+                <y>81</y>
+                <width>704</width>
+                <height>27</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>TextLabel1_3</cstring>
+                </property>
+                <property name="minimumSize">
+                    <size>
+                        <width>100</width>
+                        <height>0</height>
+                    </size>
+                </property>
+                <property name="text">
+                    <string>Attributes:</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>Attributes</cstring>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Enter a space separated list of attributes of the model</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Enter into this field a space separated list of attributes for the model. These attributes are used to determine the default module when the autoselect button is toggled.</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>Autoselect</cstring>
+                </property>
+                <property name="text">
+                    <string>Autoselect</string>
+                </property>
+                <property name="toggleButton">
+                    <bool>true</bool>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Toggle Autoselect to cause modules to be autoselected by attribute</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>When this button is toggled, clicking on an undefined module in the "Model" pane will result in the 'best' module (based on the model attributes) to be automatically chosen.</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout6_2</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>8</x>
+                <y>142</y>
+                <width>704</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>TextLabel1_2_2</cstring>
+                </property>
+                <property name="minimumSize">
+                    <size>
+                        <width>100</width>
+                        <height>0</height>
+                    </size>
+                </property>
+                <property name="text">
+                    <string>Benchmark:</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>Benchmark</cstring>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Enter the name of a benchmark configuration file here</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>This field contains a path to a benchmark configuraiton file</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout6_3</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>8</x>
+                <y>174</y>
+                <width>704</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>TextLabel1_2_3</cstring>
+                </property>
+                <property name="minimumSize">
+                    <size>
+                        <width>100</width>
+                        <height>0</height>
+                    </size>
+                </property>
+                <property name="text">
+                    <string>Run Options</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>RunOpts</cstring>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Enter switches for the benchmark run</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Enter a default set of switches to be given to a benchmark run.</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>240</y>
+                <width>700</width>
+                <height>33</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>propertiesHelp</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Help</string>
+                </property>
+                <property name="accel">
+                    <string>F1</string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <spacer>
+                <property name="name">
+                    <cstring>Horizontal Spacing2</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>20</width>
+                        <height>20</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>propertiesOk</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;OK</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+                <property name="default">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>propertiesCancel</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Cancel</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout6</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>8</x>
+                <y>51</y>
+                <width>704</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>TextLabel1_2</cstring>
+                </property>
+                <property name="minimumSize">
+                    <size>
+                        <width>100</width>
+                        <height>0</height>
+                    </size>
+                </property>
+                <property name="text">
+                    <string>Description:</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>Description</cstring>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Enter a description of the model here</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Enter into this field a description of the model</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout6_4</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>7</x>
+                <y>19</y>
+                <width>704</width>
+                <height>24</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>TextLabel1_2_4</cstring>
+                </property>
+                <property name="minimumSize">
+                    <size>
+                        <width>100</width>
+                        <height>0</height>
+                    </size>
+                </property>
+                <property name="text">
+                    <string>Name:</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>Name</cstring>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Enter a name for the model here</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Enter into this field the name for the model</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>propertiesCancel</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit_properties</receiver>
+        <slot>reject()</slot>
+    </connection>
+    <connection>
+        <sender>propertiesHelp</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit_properties</receiver>
+        <slot>propertiesHelp_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>propertiesOk</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit_properties</receiver>
+        <slot>propertiesOk_clicked()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">apm_edit_properties.ui.h</include>
+</includes>
+<slots>
+    <slot>init()</slot>
+    <slot>propertiesHelp_clicked()</slot>
+    <slot>propertiesOk_clicked()</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

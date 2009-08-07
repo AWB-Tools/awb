@@ -47,7 +47,11 @@ our %a =  ( version =>              [ "version",
                                       "SCALAR" ],
             default_benchmark =>    [ "default_benchmark",
                                       "SCALAR" ],
+            default_runopts =>      [ "default_runopts",
+                                      "SCALAR" ],
             saveparams =>           [ "saveparams",
+                                      "SCALAR" ],
+            autoselect =>           [ "autoselect",
                                       "SCALAR" ],
             type =>                 [ "type",
                                       "SCALAR" ],
@@ -136,7 +140,10 @@ sub _initialize {
   $self->default_attributes("");
 
   $self->default_benchmark("");
+  $self->default_runopts("");
+
   $self->saveparams(0);
+  $self->autoselect(0);
 
   $self->modified(0);
   return $self;
@@ -416,6 +423,7 @@ sub save {
   $new_inifile->put("Global", "Type", $self->type());
   $new_inifile->put("Global", "SaveParameters", $self->saveparams());
   $new_inifile->put("Global", "DefaultBenchmark", $self->default_benchmark());
+  $new_inifile->put("Global", "DefaultRunOpts", $self->default_runopts());
 
   my $name = basename($file);
   $name =~ s/\.[^.]*$//;
@@ -527,7 +535,7 @@ Return a list of accessor functions for this object
 ################################################################
 
 sub accessors {
-    return qw(version name description dependencies saveparams default_benchmark type);
+    return qw(version name description dependencies saveparams default_benchmark default_runopts type);
 }
 
 
@@ -698,7 +706,21 @@ Always return "default_benchmark".
 
 ################################################################
 
-sub default_benchmark  { return $_[0]->_accessor("Global","DefaultBenchmark",$_[1]) || 0; }
+sub default_benchmark  { return $_[0]->_accessor("Global","DefaultBenchmark",$_[1]) || ""; }
+
+
+################################################################
+
+=item $model-E<gt>default_runopts([$value])
+
+Set model "default_runopts" to $value if supplied. 
+Always return "default_runopts".
+
+=cut
+
+################################################################
+
+sub default_runopts  { return $_[0]->_accessor("Global","DefaultRunOpts",$_[1]) || ""; }
 
 
 ################################################################
@@ -713,6 +735,31 @@ Always return "saveparams".
 ################################################################
 
 sub saveparams  { return $_[0]->_accessor("Global","SaveParameters",$_[1]) || 0; }
+
+
+
+################################################################
+
+=item $model-E<gt>autoselect([$value])
+
+Set model "autoselect" to $value if supplied. 
+Always return "autoselect".
+
+Note: this value is not saved in the .apm file
+=cut
+
+################################################################
+
+sub autoselect {
+    my $self = shift;
+    my $value = shift;
+
+    if (defined($value)) {
+	$self->{autoselect} = $value;
+    }
+
+    return $self->{autoselect};
+}
 
 
 ################################################################
