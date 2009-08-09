@@ -6248,3 +6248,24 @@ any of children) have non-default values, then the user is
 queried whether they want to change ALL the parameters for the
 module (and its children) to their default value.
 
+
+----------
+emer        Date: Sun Aug  9 12:20:17 EDT 2009  CSN: CSN-awb-321
+                  Sun Aug  9 16:20:17 UTC 2009
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          320 
+ apm_edit.ui.patch         Locally Modified          320 
+ apm_edit.ui               Locally Modified          320 
+ apm_edit_properties.ui    Locally Modified          320 
+
+More enchancements to apm-edit:
+
+* Improved alternative modules informatino pane
+** Information shown in tabbed dialog
+** Displays module notes
+* Allow editing of alternative modules (resolves bug #4). Access by:
+** 'Alternatives' menu
+** alternatives list context menu (right click)
+** Button in 'Files' tab in module description pane

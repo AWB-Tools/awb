@@ -387,13 +387,24 @@
         <slot>propertiesOk_clicked()</slot>
     </connection>
 </connections>
+<tabstops>
+    <tabstop>Name</tabstop>
+    <tabstop>Description</tabstop>
+    <tabstop>Attributes</tabstop>
+    <tabstop>Autoselect</tabstop>
+    <tabstop>Benchmark</tabstop>
+    <tabstop>RunOpts</tabstop>
+    <tabstop>propertiesOk</tabstop>
+    <tabstop>propertiesCancel</tabstop>
+    <tabstop>propertiesHelp</tabstop>
+</tabstops>
 <includes>
     <include location="local" impldecl="in implementation">apm_edit_properties.ui.h</include>
 </includes>
 <slots>
     <slot>init()</slot>
-    <slot>propertiesHelp_clicked()</slot>
     <slot>propertiesOk_clicked()</slot>
+    <slot>propertiesHelp_clicked()</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>

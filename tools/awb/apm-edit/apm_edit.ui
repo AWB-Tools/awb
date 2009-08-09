@@ -8,14 +8,14 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>750</width>
-            <height>531</height>
+            <width>753</width>
+            <height>521</height>
         </rect>
     </property>
     <property name="caption">
         <string>apm-edit</string>
     </property>
-    <grid>
+    <vbox>
         <property name="name">
             <cstring>unnamed</cstring>
         </property>
@@ -25,139 +25,148 @@
         <property name="spacing">
             <number>6</number>
         </property>
-        <widget class="QLayoutWidget" row="0" column="0">
+        <widget class="QLayoutWidget">
             <property name="name">
-                <cstring>layout20</cstring>
+                <cstring>layout15</cstring>
             </property>
-            <vbox>
+            <hbox>
                 <property name="name">
                     <cstring>unnamed</cstring>
                 </property>
-                <widget class="QLayoutWidget">
+                <widget class="QLabel">
                     <property name="name">
-                        <cstring>layout19</cstring>
+                        <cstring>Name</cstring>
                     </property>
-                    <hbox>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>100</width>
+                            <height>25</height>
+                        </size>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Sunken</enum>
+                    </property>
+                    <property name="text">
+                        <string>Name:</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>Change</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>0</hsizetype>
+                            <vsizetype>0</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="text">
+                        <string>Change</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
+        <widget class="QSplitter">
+            <property name="name">
+                <cstring>splitter11</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Vertical</enum>
+            </property>
+            <widget class="QListView">
+                <column>
+                    <property name="text">
+                        <string>Type</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+                <column>
+                    <property name="text">
+                        <string>Implementation</string>
+                    </property>
+                    <property name="clickable">
+                        <bool>true</bool>
+                    </property>
+                    <property name="resizable">
+                        <bool>true</bool>
+                    </property>
+                </column>
+            <item>
+                <property name="text">
+                    <string>Model</string>
+                </property>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+                <property name="pixmap">
+                    <pixmap></pixmap>
+                </property>
+            </item>
+                <property name="name">
+                    <cstring>Model</cstring>
+                </property>
+                <property name="rootIsDecorated">
+                    <bool>true</bool>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Select a module to insert or replace</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type "model". Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the "Alternative Modules" pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
+                </property>
+            </widget>
+            <widget class="QSplitter">
+                <property name="name">
+                    <cstring>splitter10</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <widget class="QFrame">
+                    <property name="name">
+                        <cstring>frame3</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>200</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="frameShape">
+                        <enum>StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Raised</enum>
+                    </property>
+                    <grid>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <widget class="QLabel">
+                        <widget class="QLayoutWidget" row="0" column="0">
                             <property name="name">
-                                <cstring>Name</cstring>
-                            </property>
-                            <property name="sizePolicy">
-                                <sizepolicy>
-                                    <hsizetype>5</hsizetype>
-                                    <vsizetype>0</vsizetype>
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                </sizepolicy>
-                            </property>
-                            <property name="minimumSize">
-                                <size>
-                                    <width>100</width>
-                                    <height>0</height>
-                                </size>
-                            </property>
-                            <property name="text">
-                                <string>Name:</string>
-                            </property>
-                        </widget>
-                        <widget class="QPushButton">
-                            <property name="name">
-                                <cstring>Change</cstring>
-                            </property>
-                            <property name="sizePolicy">
-                                <sizepolicy>
-                                    <hsizetype>0</hsizetype>
-                                    <vsizetype>0</vsizetype>
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                </sizepolicy>
-                            </property>
-                            <property name="text">
-                                <string>Change</string>
-                            </property>
-                        </widget>
-                    </hbox>
-                </widget>
-                <widget class="QSplitter">
-                    <property name="name">
-                        <cstring>Splitter10</cstring>
-                    </property>
-                    <property name="orientation">
-                        <enum>Vertical</enum>
-                    </property>
-                    <widget class="QListView">
-                        <column>
-                            <property name="text">
-                                <string>Type</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                        <column>
-                            <property name="text">
-                                <string>Implementation</string>
-                            </property>
-                            <property name="clickable">
-                                <bool>true</bool>
-                            </property>
-                            <property name="resizable">
-                                <bool>true</bool>
-                            </property>
-                        </column>
-                    <item>
-                        <property name="text">
-                            <string>Model</string>
-                        </property>
-                        <property name="text">
-                            <string></string>
-                        </property>
-                        <property name="pixmap">
-                            <pixmap></pixmap>
-                        </property>
-                        <property name="pixmap">
-                            <pixmap></pixmap>
-                        </property>
-                    </item>
-                        <property name="name">
-                            <cstring>Model</cstring>
-                        </property>
-                        <property name="rootIsDecorated">
-                            <bool>true</bool>
-                        </property>
-                        <property name="toolTip" stdset="0">
-                            <string>Select a module to insert or replace</string>
-                        </property>
-                        <property name="whatsThis" stdset="0">
-                            <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type "model". Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the "Alternative Modules" pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
-                        </property>
-                    </widget>
-                    <widget class="QSplitter">
-                        <property name="name">
-                            <cstring>Splitter9</cstring>
-                        </property>
-                        <property name="orientation">
-                            <enum>Horizontal</enum>
-                        </property>
-                        <widget class="QLayoutWidget">
-                            <property name="name">
-                                <cstring>Layout38</cstring>
+                                <cstring>layout10</cstring>
                             </property>
                             <vbox>
                                 <property name="name">
                                     <cstring>unnamed</cstring>
-                                </property>
-                                <property name="margin">
-                                    <number>0</number>
-                                </property>
-                                <property name="spacing">
-                                    <number>6</number>
                                 </property>
                                 <widget class="QListView">
                                     <column>
@@ -200,102 +209,220 @@
                                 </widget>
                             </vbox>
                         </widget>
-                        <widget class="QLayoutWidget">
+                    </grid>
+                </widget>
+                <widget class="QTabWidget">
+                    <property name="name">
+                        <cstring>alternativesTabWidget</cstring>
+                    </property>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>tab</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Summary</string>
+                        </attribute>
+                        <grid>
                             <property name="name">
-                                <cstring>Layout40</cstring>
+                                <cstring>unnamed</cstring>
                             </property>
-                            <vbox>
+                            <widget class="QListBox" row="0" column="0">
                                 <property name="name">
-                                    <cstring>unnamed</cstring>
+                                    <cstring>Info</cstring>
                                 </property>
-                                <property name="margin">
-                                    <number>0</number>
+                                <property name="toolTip" stdset="0">
+                                    <string>Description of module selected in alternatives pane to the left</string>
                                 </property>
-                                <property name="spacing">
-                                    <number>6</number>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
                                 </property>
-                                <widget class="QListBox">
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>TabPage</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Files</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListBox" row="0" column="0">
+                                <property name="name">
+                                    <cstring>Files</cstring>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Description of module selected in alternatives pane to the left</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+                                </property>
+                            </widget>
+                            <widget class="QLayoutWidget" row="1" column="0">
+                                <property name="name">
+                                    <cstring>layout8</cstring>
+                                </property>
+                                <hbox>
                                     <property name="name">
-                                        <cstring>Info</cstring>
+                                        <cstring>unnamed</cstring>
                                     </property>
-                                    <property name="toolTip" stdset="0">
-                                        <string>Description of module selected in alternatives pane to the left</string>
-                                    </property>
-                                    <property name="whatsThis" stdset="0">
-                                        <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
-                                    </property>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>Layout39</cstring>
-                                    </property>
-                                    <hbox>
+                                    <spacer>
                                         <property name="name">
-                                            <cstring>unnamed</cstring>
+                                            <cstring>spacer1</cstring>
                                         </property>
-                                        <property name="margin">
-                                            <number>0</number>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
                                         </property>
-                                        <property name="spacing">
-                                            <number>6</number>
+                                        <property name="sizeType">
+                                            <enum>Expanding</enum>
                                         </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>ParamName</cstring>
-                                            </property>
-                                            <property name="enabled">
-                                                <bool>true</bool>
-                                            </property>
-                                            <property name="minimumSize">
-                                                <size>
-                                                    <width>200</width>
-                                                    <height>0</height>
-                                                </size>
-                                            </property>
-                                            <property name="text">
-                                                <string>Parameter</string>
-                                            </property>
-                                            <property name="alignment">
-                                                <set>AlignVCenter|AlignRight</set>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit">
-                                            <property name="name">
-                                                <cstring>ParamValue</cstring>
-                                            </property>
-                                            <property name="enabled">
-                                                <bool>false</bool>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>New value for this parameter</string>
-                                            </property>
-                                            <property name="whatsThis" stdset="0">
-                                                <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QPushButton">
-                                            <property name="name">
-                                                <cstring>ParamChange</cstring>
-                                            </property>
-                                            <property name="enabled">
-                                                <bool>false</bool>
-                                            </property>
-                                            <property name="text">
-                                                <string>Change</string>
-                                            </property>
-                                            <property name="toolTip" stdset="0">
-                                                <string>Change value for this parameter</string>
-                                            </property>
-                                        </widget>
-                                    </hbox>
-                                </widget>
-                            </vbox>
-                        </widget>
+                                        <property name="sizeHint">
+                                            <size>
+                                                <width>441</width>
+                                                <height>21</height>
+                                            </size>
+                                        </property>
+                                    </spacer>
+                                    <widget class="QPushButton">
+                                        <property name="name">
+                                            <cstring>alternativesEdit</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>&amp;Open</string>
+                                        </property>
+                                        <property name="accel">
+                                            <string>Alt+O</string>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>Edit all the source files for this module</string>
+                                        </property>
+                                        <property name="whatsThis" stdset="0">
+                                            <string>Open in your editor all the source files for the module selected in the Alternative Modules pane.</string>
+                                        </property>
+                                    </widget>
+                                </hbox>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>tab</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Parameters</string>
+                        </attribute>
+                        <vbox>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListBox">
+                                <property name="name">
+                                    <cstring>Parameters</cstring>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Description of module selected in alternatives pane to the left</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+                                </property>
+                            </widget>
+                            <widget class="QLayoutWidget">
+                                <property name="name">
+                                    <cstring>Layout39</cstring>
+                                </property>
+                                <hbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <property name="margin">
+                                        <number>0</number>
+                                    </property>
+                                    <property name="spacing">
+                                        <number>6</number>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>ParamName</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>200</width>
+                                                <height>0</height>
+                                            </size>
+                                        </property>
+                                        <property name="text">
+                                            <string>Parameter</string>
+                                        </property>
+                                        <property name="alignment">
+                                            <set>AlignVCenter|AlignRight</set>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit">
+                                        <property name="name">
+                                            <cstring>ParamValue</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>New value for this parameter</string>
+                                        </property>
+                                        <property name="whatsThis" stdset="0">
+                                            <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QPushButton">
+                                        <property name="name">
+                                            <cstring>ParamChange</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                        <property name="text">
+                                            <string>Change</string>
+                                        </property>
+                                        <property name="toolTip" stdset="0">
+                                            <string>Change value for this parameter</string>
+                                        </property>
+                                    </widget>
+                                </hbox>
+                            </widget>
+                        </vbox>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>TabPage</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Notes</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListBox" row="0" column="0">
+                                <property name="name">
+                                    <cstring>Notes</cstring>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Description of module selected in alternatives pane to the left</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This pane describes the module selected in the "Module Alternatives" pane to the right. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+                                </property>
+                            </widget>
+                        </grid>
                     </widget>
                 </widget>
-            </vbox>
+            </widget>
         </widget>
-    </grid>
+    </vbox>
 </widget>
 <menubar>
     <property name="name">
@@ -322,7 +449,7 @@
         <action name="editFindAction"/>
         <action name="editFindMissingAction"/>
     </item>
-    <item text="&amp;Model" name="PopupMenu">
+    <item text="&amp;Model" name="modelMenu">
         <action name="modelNukeAction"/>
         <action name="modelConfigureAction"/>
         <action name="modelCleanAction"/>
@@ -333,7 +460,6 @@
         <separator/>
         <action name="modelPropertiesAction"/>
         <action name="modelAutoBuild"/>
-        <action name="modelRefresh"/>
     </item>
     <item text="Mod&amp;ule" name="moduleMenu">
         <action name="moduleNewAction"/>
@@ -341,13 +467,13 @@
         <action name="moduleEditAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
-        <actiongroup name="InsertActionGroup"/>
-        <item text="&amp;Insert" name="popupMenu_34" accel="">
-            <action name="moduleInsertModuleAction"/>
-            <action name="moduleInsertSubmodelAction"/>
-            <action name="moduleInsertAsRootAction"/>
-        </item>
+        <action name="InsertActionGroup"/>
         <action name="moduleDeleteAction"/>
+    </item>
+    <item text="&amp;Alternatives" name="alternativesMenu">
+        <action name="alternativesInsertAction"/>
+        <action name="alternativesEditAction"/>
+        <action name="modelRefresh"/>
     </item>
     <item text="&amp;Help" name="helpMenu">
         <action name="helpContentsAction"/>
@@ -725,7 +851,7 @@
             <string>Refresh</string>
         </property>
         <property name="menuText">
-            <string>Refresh</string>
+            <string>&amp;Refresh</string>
         </property>
         <property name="statusTip">
             <string>Refresh module database and current model</string>
@@ -999,6 +1125,34 @@
             <string>Alt+Return</string>
         </property>
     </action>
+    <action>
+        <property name="name">
+            <cstring>alternativesInsertAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Insert</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Insert</string>
+        </property>
+        <property name="toolTip">
+            <string>Insert the selected alternative into the model</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>alternativesEditAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Edit</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Edit</string>
+        </property>
+        <property name="toolTip">
+            <string>Edit the source files for the selected alternative</string>
+        </property>
+    </action>
 </actions>
 <connections>
     <connection>
@@ -1206,10 +1360,10 @@
         <slot>ParamChange_clicked()</slot>
     </connection>
     <connection>
-        <sender>Info</sender>
+        <sender>Parameters</sender>
         <signal>selectionChanged(QListBoxItem*)</signal>
         <receiver>apm_edit</receiver>
-        <slot>Info_selectionChanged(QListBoxItem*)</slot>
+        <slot>Parameters_selectionChanged(QListBoxItem*)</slot>
     </connection>
     <connection>
         <sender>ParamValue</sender>
@@ -1301,10 +1455,45 @@
         <receiver>apm_edit</receiver>
         <slot>modelProperties_clicked()</slot>
     </connection>
+    <connection>
+        <sender>alternativesEdit</sender>
+        <signal>clicked()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>alternativesEdit_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>alternativesInsertAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>alternativesInsertAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>alternativesEditAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>alternativesEditAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>Alternatives</sender>
+        <signal>contextMenuRequested(QListViewItem*,const QPoint&amp;,int)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Alternatives_contextMenuRequested(QListViewItem*,const QPoint&amp;,int)</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Model</tabstop>
+    <tabstop>Change</tabstop>
     <tabstop>Alternatives</tabstop>
+    <tabstop>cacheRefresh</tabstop>
+    <tabstop>Search</tabstop>
+    <tabstop>alternativesTabWidget</tabstop>
+    <tabstop>Info</tabstop>
+    <tabstop>Files</tabstop>
+    <tabstop>alternativesEdit</tabstop>
+    <tabstop>Parameters</tabstop>
+    <tabstop>ParamValue</tabstop>
+    <tabstop>ParamChange</tabstop>
+    <tabstop>Notes</tabstop>
 </tabstops>
 <includes>
     <include location="local" impldecl="in implementation">apm_edit.ui.h</include>
@@ -1355,6 +1544,8 @@
     <slot>moduleInsertAsRootAction_activated()</slot>
     <slot>moduleDeleteAction_activated()</slot>
     <slot>moduleDelete( QListViewItem * )</slot>
+    <slot>alternativesInsertAction_activated()</slot>
+    <slot>alternativesEditAction_activated()</slot>
     <slot>helpIndex()</slot>
     <slot>helpContents()</slot>
     <slot>helpAbout()</slot>
@@ -1365,11 +1556,13 @@
     <slot>Model_contextMenuRequested( QListViewItem *, const QPoint &amp;, int )</slot>
     <slot>Model_doubleClicked( QListViewItem * )</slot>
     <slot>Alternatives_selectionChanged( QListViewItem * )</slot>
+    <slot>Alternatives_contextMenuRequested( QListViewItem *, const QPoint &amp;, int )</slot>
     <slot>Alternatives_doubleClicked( QListViewItem * )</slot>
     <slot>Alternatives_returnPressed( QListViewItem * )</slot>
     <slot>Alternatives_returnPressed_onModule( QListViewItem * )</slot>
     <slot>Alternatives_returnPressed_onSubmodel( QListViewItem * )</slot>
-    <slot>Info_selectionChanged( QListBoxItem * )</slot>
+    <slot>alternativesEdit_clicked()</slot>
+    <slot>Parameters_selectionChanged( QListBoxItem * )</slot>
     <slot>ParamValue_returnPressed()</slot>
     <slot>ParamChange_clicked()</slot>
     <slot returnType="int">Model_find()</slot>
@@ -1377,9 +1570,11 @@
 </slots>
 <functions>
     <function access="private">modelOperation()</function>
+    <function access="private">moduleInsertParams()</function>
     <function access="private">moduleCheckParams()</function>
     <function access="private">moduleDefaultParams()</function>
-    <function access="private">moduleInsertParams()</function>
+    <function access="private">moduleEditFiles()</function>
+    <function access="private">alternativesModule()</function>
 </functions>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

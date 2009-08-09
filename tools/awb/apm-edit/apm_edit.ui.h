@@ -785,12 +785,12 @@ void apm_edit::moduleNewAction_activated()
 
 #
 # Edit the selected module or submodel as appropriate
+# TBD: Unify this action with the edit action for 'alternative modules'
 #
 void apm_edit::moduleEditAction_activated()
 {
-    my $current_item = Model->selectedItem();
-
-    my $filename = $current_item->text(2);
+    my $current_item = Model->selectedItem()          || return;
+    my $filename = $current_item->text(2)             || return;
 
     # Handle submodels...
 
@@ -800,29 +800,9 @@ void apm_edit::moduleEditAction_activated()
         return;
     }
 
-    my $current_module = Model->selectedItem()        || return;
+    my $module = Asim::Module->new($filename)          || return;
 
-    my $module_filename = $current_module->text(2)    || return;
-    my $module = Asim::Module->new($module_filename)  || return;
-    my $dir = $module->base_dir();
-
-    my @files = ();
-
-    push(@files, Asim::resolve($module->filename()));
-
-    foreach my $f ($module->inventory()) {
-      my $resolved_f = Asim::resolve("$dir/$f");
-
-      if (!defined($resolved_f)) {
-	print "apm_edit: Skipping non-existent file $f\n";
-	next;
-      }
-
-      push(@files, $resolved_f);
-    }
-
-    Asim::invoke_editor("--background", @files);
-
+    moduleEditFiles($module);
 }
 
 #
@@ -894,26 +874,7 @@ void apm_edit::moduleViewAwbAction_activated()
 #
 void apm_edit::moduleViewSourceAction_activated()
 {
-    my $current_module = Model->selectedItem()        || return;
-
-    my $module_filename = $current_module->text(2)    || return;
-    my $module = Asim::Module->new($module_filename)  || return;
-    my $dir = $module->base_dir();
-
-    my @files = ();
-
-    push(@files, $Asim::default_workspace->resolve($module->filename()));
-
-    foreach my $f ($module->public()) {
-        push(@files, $Asim::default_workspace->resolve("$dir/$f"));
-    }
-
-    foreach my $f ($module->private()) {
-        push(@files, $Asim::default_workspace->resolve("$dir/$f"));
-    }
-
-    Asim::invoke_editor("--background", @files);
-
+    moduleEditAction_activated();
 }
 
 
@@ -1097,6 +1058,24 @@ void apm_edit::moduleDelete( QListViewItem * )
 
     return;
 }
+
+# Alternatives menu
+
+
+
+void apm_edit::alternativesInsertAction_activated()
+{
+  my $item = Alternatives->selectedItem() || return;
+
+  Alternatives_returnPressed($item);
+}
+
+
+void apm_edit::alternativesEditAction_activated()
+{
+  alternativesEdit_clicked();
+}
+
 	        
 
 # Help menu
@@ -1250,7 +1229,11 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     my @models = $modelDB->find($provides);
 
     Alternatives->clear();
+
     Info->clear();
+    Files->clear();
+    Parameters->clear();
+    Notes->clear();
 
     #
     # Display <<NEW>> module
@@ -1357,45 +1340,30 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     our $model;
 
     my $item = shift;
+
     my $module = undef;
     my $delimiter;   # Used to distinquish if part of real model
+   
+    $module = alternativesModule($item) || return;
 
     #
-    # Open the selected module, 
-    #    either from the current model, or the .awb file itself
+    # Determine if this item is part of real model
     #
-    #    Note: implicit dependence on single provides
-    #
-    my $name = $item->text(0);
 
-    if ($name =~ ">> .+ <<") {
-        # From current model
-
-        my $module_item = Model->selectedItem();
-        my $provides = $module_item->text(0);
-
-        $module = $model->find_module_providing($provides);
-        if ($module->isroot() && ($module != $model->modelroot())) {
-            # This is a submodel...
-
-            $module = $module->owner();
-        }
-
+    if ($item->text(0) =~ ">> .+ <<") {
         $delimiter = "=";
     } else {
-        # From .apm/.awb file
-
-        my $filename = $item->text(1);
-
-        if ($filename =~ /.awb/) {
-            $module = Asim::Module->new($filename);
-        } elsif ($filename =~ /.apm/) {
-            $module = Asim::Model->new($filename);
-        }
         $delimiter = "~";
     }
 
+    #
+    # Fill in information boxes
+    #
+
     Info->clear();
+    Files->clear();
+    Parameters->clear();
+    Notes->clear();
 
     if (! defined($module)) {
         Info->insertItem("Module not found - refresh probably needed!!!");
@@ -1410,28 +1378,69 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     Info->insertItem("Attributes:  " . join(" ", $module->attributes()));
     Info->insertItem("Provides:    " . $module->provides());
     Info->insertItem("Requires:    " . join(" ", ($module->requires())));
-    Info->insertItem("Filename:    " . $module->filename());
-    Info->insertItem("Notes:       " . join(" ", ($module->notes())));
-    Info->insertItem("Makefiles:   " . join(" ", ($module->makefile())));
-    Info->insertItem("Scons:       " . join(" ", ($module->scons("*"))));
-    Info->insertItem("Public:      " . join(" ", ($module->public())));
-    Info->insertItem("Private:     " . join(" ", ($module->private())));
-    Info->insertItem("Parameters: ");
+
+    Files->insertItem("Filename:    " . $module->filename());
+    Files->insertItem("Notes:       " . join(" ", ($module->notes())));
+    Files->insertItem("Makefiles:   " . join(" ", ($module->makefile())));
+    Files->insertItem("Scons:       " . join(" ", ($module->scons("*"))));
+    Files->insertItem("Public:      " . join(" ", ($module->public())));
+    Files->insertItem("Private:     " . join(" ", ($module->private())));
+
+    Parameters->insertItem("Parameters: ");
 
     #
     # Write out parameters
     #    Note: the format is parsed textually - be careful changing it.
     #
     foreach my $p ($module->parameters()) {
-        Info->insertItem("   " . $p->description() . ($p->dynamic()?" (dynamic)":""));
-        Info->insertItem("       " . $p->name() . $delimiter .
+        Parameters->insertItem("   " . $p->description() . ($p->dynamic()?" (dynamic)":""));
+        Parameters->insertItem("       " . $p->name() . $delimiter .
                      $p->value() . " [" . $p->default() . "]");
     }
-    
+
+
+    #
+    # Get notes file and fill into Notes pane
+    #
+    my $notes;
+    my $dir;
+
+    foreach my $n ($module->notes()) {
+      if ($n =~ /\.txt$/) {
+        $dir = $module->base_dir();
+	$notes = Asim::resolve("$dir/$n");
+      }
+    }
+
+    if (defined($notes) && -r $notes) {
+        open(NOTES, $notes);
+
+        while (<NOTES>) {
+            chomp;
+            Notes->insertItem($_);
+	}
+
+        close(NOTES);
+    }
+
     Info->setCurrentItem(0);
+    Files->setCurrentItem(0);
+    Parameters->setCurrentItem(0);
+    Notes->setCurrentItem(0);
 }
  
  
+
+void apm_edit::Alternatives_contextMenuRequested( QListViewItem *, const QPoint &, int )
+{
+    my $item = shift;
+    my $point = shift;
+
+    alternativesMenu->popup($point);
+    alternativesMenu->exec();
+
+}
+
 #
 # Replace selected module into parent module 
 # that requires a module of this type.
@@ -1694,7 +1703,17 @@ void apm_edit::moduleDefaultParams()
 # Module information box
 #
 
-void apm_edit::Info_selectionChanged( QListBoxItem * )
+
+void apm_edit::alternativesEdit_clicked()
+{
+  my $item   = Alternatives->selectedItem() || return;
+  my $module = alternativesModule($item)    || return;
+
+  moduleEditFiles($module);
+}
+
+
+void apm_edit::Parameters_selectionChanged( QListBoxItem * )
 {
     my $item = shift;
     my $line = $item->text();
@@ -1723,8 +1742,8 @@ void apm_edit::ParamChange_clicked()
 {
     our $model;
 
-    my $itemno = Info->currentItem();
-    my $line = Info->text($itemno);
+    my $itemno = Parameters->currentItem();
+    my $line = Parameters->text($itemno);
 
     #
     # Parse out information on parameter
@@ -1752,7 +1771,7 @@ void apm_edit::ParamChange_clicked()
     # Update information on parameter
     #    Note: implicit dependence on format of line
     #
-    Info->changeItem("       $name=$value [$default]", $itemno);
+    Parameters->changeItem("       $name=$value [$default]", $itemno);
 
 
     #
@@ -1783,6 +1802,86 @@ void apm_edit::ParamChange_clicked()
 #
 #
 #
+
+void apm_edit::moduleEditFiles()
+{
+    my $module = shift;
+
+    # Handle submodels...
+
+    my $filename = $module->filename();
+
+    if ($filename =~ /\.apm$/) {
+        $filename = $Asim::default_workspace->resolve($filename);
+        system("apm-edit $filename &");
+        return;
+    }
+
+    # It's really a module
+
+    my $dir = $module->base_dir();
+
+    my @files = ();
+
+    push(@files, $Asim::default_workspace->resolve($module->filename()));
+
+    foreach my $f ($module->inventory()) {
+      my $resolved_f = Asim::resolve("$dir/$f");
+
+      if (!defined($resolved_f)) {
+        print "apm_edit: Skipping non-existent file $f\n";
+        next;
+      }
+
+      push(@files, $resolved_f);
+    }
+
+    Asim::invoke_editor("--background", @files);
+}
+
+
+void apm_edit::alternativesModule()
+{
+    my $item = shift || return;
+
+    our $model;
+
+    #
+    # Open the selected module, 
+    #    either from the current model, or the .awb file itself
+    #
+    #    Note: implicit dependence on single provides
+    #
+    my $module;
+    my $name = $item->text(0);
+
+    if ($name =~ ">> .+ <<") {
+        # From current model
+
+        my $module_item = Model->selectedItem() || return;
+        my $provides = $module_item->text(0);
+
+        $module = $model->find_module_providing($provides);
+        if ($module->isroot() && ($module != $model->modelroot())) {
+            # This is a submodel...
+
+            $module = $module->owner();
+        }
+    } else {
+        # From .apm/.awb file
+
+        my $filename = $item->text(1);
+
+        if ($filename =~ /.awb/) {
+            $module = Asim::Module->new($filename);
+        } elsif ($filename =~ /.apm/) {
+            $module = Asim::Model->new($filename);
+        }
+    }
+
+    return $module;
+}
+
 
 int apm_edit::Model_find()
 {
