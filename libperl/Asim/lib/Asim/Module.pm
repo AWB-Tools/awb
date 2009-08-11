@@ -39,6 +39,8 @@ our %a =  ( name =>                 [ "name",
                                       "ARRAY" ],
             provides =>             [ "provides",
                                       "SCALAR" ],
+            template =>             [ "template",
+                                      "SCALAR" ],
             parent =>               [ "parent",
                                       "SCALAR" ],
             requires =>             [ "requires",
@@ -138,6 +140,7 @@ sub _initialize {
 		 name => "" ,
 		 description => "",
 		 provides => "",
+		 template => 0,
 		 parent => undef,
 		 requires => [],
 		 submodules => [],
@@ -193,7 +196,7 @@ sub open {
   $self->{filename} = $file;
 
   my $space = "[ \t]";
-  my $spaces = "$space*";
+  my $spaces = "$space+";
   my $nospace = "[^ \t]";
   my $word = "$nospace+";
   my $words = "$nospace.+$nospace";
@@ -205,14 +208,9 @@ sub open {
 
     if (/^.*%name$spaces($words)/) {
       #
-      # Record name of module and add name to list of attributes
-      #   (eliminate spaces from module name for attributes)
+      # Record name of module
       #
       $self->{name} = $1;
-
-      my $attr = $1;
-      $attr =~ s/ /_/g;
-      push(@{$self->{attributes}},  $attr);
 
       next;
     }
@@ -229,13 +227,16 @@ sub open {
 
     # %provides ASIMMODULETYPE
 
-    if (/^.*%provides$space($word)/) {
-      #
-      # Record type that module provides
-      #
-      # assure unique
-      $self->{provides} = $1;
-      next;
+    if (/^.*%provides$spaces($words)/) {
+        my $template = 0;
+
+        # parse switches
+        local @ARGV = split($spaces, $1);
+        GetOptions("template" => \$template);
+
+        $self->{provides} = $ARGV[0];
+	$self->{template} = $template;
+        next;
     }
 
     # %requires ASIMMODULETYPE...
@@ -244,7 +245,7 @@ sub open {
       #
       # Add requires to list of requires
       #
-      foreach my $r (split(' ', $1)) {
+      foreach my $r (split($spaces, $1)) {
         push(@{$self->{requires}}, $r);
         push(@{$self->{submodules}}, undef);
       }
@@ -257,7 +258,7 @@ sub open {
       #
       # Add attributes to list of attributes
       #
-      push(@{$self->{attributes}},  split(' ',$1));
+      push(@{$self->{attributes}},  split($spaces,$1));
       next;
     }
 
@@ -267,7 +268,7 @@ sub open {
       #
       # Add default attributes to list of default attributes
       #
-      push(@{$self->{default_attributes}}, split(' ', $1));
+      push(@{$self->{default_attributes}}, split($spaces, $1));
       next;
     }
 
@@ -277,7 +278,7 @@ sub open {
       #
       # Add mandatory attributes to list of mandartory attributes
       #
-      push(@{$self->{mandatory_attributes}}, split(' ', $1));
+      push(@{$self->{mandatory_attributes}}, split($spaces, $1));
       next;
     }
 
@@ -287,7 +288,7 @@ sub open {
       #
       # Add files to list of notes files
       #
-      push(@{$self->{notes}}, split(' ', $1));
+      push(@{$self->{notes}}, split($spaces, $1));
       next;
     }
 
@@ -297,7 +298,7 @@ sub open {
         #
         # Add files to list of public files
         #
-        my @files = split(' ', $1);
+        my @files = split($spaces, $1);
         $self->public(@files);
         next;
     }
@@ -308,20 +309,21 @@ sub open {
         #
         # Add files to list of private files
         #
-        my @files = split(' ', $1);
+        my @files = split($spaces, $1);
         $self->private(@files);
         next;
     }
 
-    # %sources -t TYPE -v PRIVATE/PUBLIC FILENAME...
+    # %sources --type TYPE --visibility PRIVATE/PUBLIC FILENAME...
+    # %sources -t TYPE -v PRIVATE|PUBLIC FILENAME...
 
-    if (/^.*%sources\s+($words)/)
+    if (/^.*%sources$spaces($words)/)
     {
         my $type = "";
         my $vis = "";
 
         # parse switches
-        local @ARGV = split(' ', $1);
+        local @ARGV = split($spaces, $1);
         GetOptions("type=s" => \$type,
                    "visibility=s" => \$vis);
 
@@ -336,11 +338,11 @@ sub open {
       #
       # Add files to list of makefiles
       #
-      push(@{$self->{makefile}}, split(' ', $1));
+      push(@{$self->{makefile}}, split($spaces, $1));
       next;
     }
 
-    # %scons FILENAME...
+    # %scons [%CLASS] FILENAME...
 
     if (/^.*%scons\s*(%[^ \t]*)?\s+($word)/) {
       #
@@ -360,13 +362,13 @@ sub open {
         return undef;
       }
 
-      push(@{$self->{scons}->{$class}}, split(' ', $fName));
+      push(@{$self->{scons}->{$class}}, split($spaces, $fName));
       next;
     }
 
-    # %param [%dynamic] NAME DEFAULT "DESCRIPTION"
-    # %export [%dynamic] NAME DEFAULT "DESCRIPTION"
-    # %const [%dynamic] NAME DEFAULT "DESCRIPTION"
+    # %param [--dynamic] [--global] NAME DEFAULT "DESCRIPTION"
+    # %export [--dynamic] [--global]  NAME DEFAULT "DESCRIPTION"
+    # %const [--dynamic] [--global] NAME DEFAULT "DESCRIPTION"
 
     my $p_cmd      = '%param|%export|%const';
     my $p_switches = '(%dynamic\s+|--dynamic\s+)?(%global\s+|--global\s+)?';
@@ -435,7 +437,7 @@ sub open {
       #
       # Add compiler library args to the list of syslibs
       #
-      push(@{$self->{syslibrary}}, split(' ', $1));
+      push(@{$self->{syslibrary}}, split($spaces, $1));
       next;
     }
 
@@ -499,7 +501,8 @@ sub save {
   }
 
   print M " * %desc " . $self->description() . "\n";
-  print M " * %provides " . $self->provides() . "\n";
+  print M " * %provides " . $self->template()?"--template ":"" 
+                          . $self->provides() . "\n";
 
   foreach my $i ($self->requires()) {
     print M " * %requires $i\n";
@@ -617,6 +620,7 @@ sub accessors {
 	    description
 	    attributes
 	    provides
+            template
 	    parent
 	    requires
             notes
@@ -684,6 +688,31 @@ sub provides {
   }
 
   return $self->{"provides"};
+}
+
+################################################################
+
+=item $module-E<gt>template([$value])
+
+Optionally update the flag indicating that this module is a template 
+with $value.
+Return the current (updated) ASIM module type this module provides.
+
+
+=cut
+
+################################################################
+
+
+sub template {
+  my $self = shift;
+  my $value = shift;
+
+  if (defined($value)) {
+      $self->{"template"} = $value;
+  }
+
+  return $self->{"template"};
 }
 
 ################################################################

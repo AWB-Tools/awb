@@ -6269,3 +6269,29 @@ More enchancements to apm-edit:
 ** 'Alternatives' menu
 ** alternatives list context menu (right click)
 ** Button in 'Files' tab in module description pane
+
+----------
+emer        Date: Tue Aug 11 15:52:17 EDT 2009  CSN: CSN-awb-322
+                  Tue Aug 11 19:52:17 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          321 
+ Model.pm                  Locally Modified          321 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          321 
+
+Added implementation of the notion of a 'template' module, which 
+can be used to hold a skeleton implementation for modules of the
+given awb-type and hold notes relevant to all modules of that awb-type.
+
+A template module is indicated by a --template flag on the %provides 
+directive in an .awb file
+
+Template modules show up as alternatives in apm-edit, but cannot be inserted
+into the model.
+
+Also put in a fix for the periodic crash experienced by apm-edit from 
+what appears to be a perlqt bug on certain ListView method calls. Fix was
+to put an eval{} expression around the suspect method calls.

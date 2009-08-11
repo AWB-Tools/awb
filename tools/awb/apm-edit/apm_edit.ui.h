@@ -1235,6 +1235,8 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     Parameters->clear();
     Notes->clear();
 
+    my $selected = undef;
+
     #
     # Display <<NEW>> module
     #
@@ -1254,14 +1256,16 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
         $next_root->setText(0, trUtf8($m->name()));
         $next_root->setText(1, trUtf8($m->filename()));
 
+	my $sortname = sprintf("%2d - %s", $m->template(), $m->name());
+	$next_root->setText(2, $sortname);
+
         if ($module_name eq $m->name()) {
             # 
             # This is module in current model
             #   Note: ">> ... <<" form is parsed elsewhere...
             #
             $next_root->setText(0, trUtf8(">> " . $m->name() . " <<"));
-            Alternatives->setSelected($next_root,1);
-            Alternatives->ensureItemVisible($next_root);
+	    $selected = $next_root;
         }
     
         # TBD: Score for submodels
@@ -1308,6 +1312,29 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
             Alternatives_returnPressed($module_default);
         }
     }
+
+    #
+    # Hightlight the appropriate module
+    #    NOTE: This is in an eval block since a perlqt bug
+    #          sometimes causes a SEGV on these operations
+    #
+
+    if (defined($selected)) {
+      eval { 
+           Alternatives->setCurrentItem($selected);
+           Alternatives->setSelected($selected,1);
+           Alternatives->ensureItemVisible($selected);
+      };
+
+      print $@ if $@;
+    }
+
+#
+#   Try to sort alphabetically, but with templates at bottom
+#   TBD: Figure out why this doesn't work
+# 
+#    Alternatives->setSorting(2);
+#    Alternatives->sort();
 }
 
 
@@ -1355,6 +1382,15 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     } else {
         $delimiter = "~";
     }
+
+    #
+    # Determine if we can insert this module
+    #
+
+    my $template = $module->template();
+
+    alternativesInsertAction->setEnabled(!$template);
+    moduleInsertModuleAction->setEnabled(!$template);
 
     #
     # Fill in information boxes
@@ -1519,6 +1555,15 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
     # TBD: Refactor this code with submodel insertion routines
     #
 
+    if ($module->template()) {
+        Qt::MessageBox::information(
+	    this, 
+            "apm-edit insert", 
+            "Cannot insert a template module");
+	return;
+    }
+
+    #
     # Add the new child module into the tree
     #
 

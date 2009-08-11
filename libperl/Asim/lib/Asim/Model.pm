@@ -1043,6 +1043,22 @@ sub provides {
 
 ################################################################
 
+=item $model-E<gt>template()
+
+Return TRUE if $self is a template, but we return 0 since this is a MODEL
+
+Only here for compatibility with Asim::Module::template()
+
+=cut
+
+################################################################
+
+sub template {
+  return 0;
+}
+
+################################################################
+
 =item $model-E<gt>requires()
 
 Return the asim-type of the submoodules requires. Just here for
