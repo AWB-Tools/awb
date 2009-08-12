@@ -1142,6 +1142,17 @@ void awb_dialog::checkoutListBox_highlighted( const QString & )
 
 
 
+
+
+void awb_dialog::repositoryBrowsePushButton_clicked()
+{
+    my $i = checkoutListBox->currentItem();
+    my $item = checkoutListBox->item($i);
+    return if (! defined($item));
+
+    checkoutListBox_doubleClicked($item);
+}
+
 void awb_dialog::checkoutListBox_doubleClicked( QListBoxItem * )
 {
     my $item = shift;
@@ -1240,6 +1251,21 @@ void awb_dialog::updatePackagesListBox_selected( QListBoxItem * )
     updateAllCheckBox->setChecked(0);
 }
 
+
+
+void awb_dialog::packagesBrowsePushButton_clicked()
+{
+    my $max = updatePackagesListBox->count();
+
+    for (my $i=0; $i < $max; $i++) {
+        if (updatePackagesListBox->isSelected($i)) {
+            my $item = updatePackagesListBox->item($i);
+
+            updatePackagesListBox_doubleClicked($item);
+        }
+    }
+
+}
 
 
 void awb_dialog::updatePackagesListBox_doubleClicked( QListBoxItem * )

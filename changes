@@ -6295,3 +6295,17 @@ into the model.
 Also put in a fix for the periodic crash experienced by apm-edit from 
 what appears to be a perlqt bug on certain ListView method calls. Fix was
 to put an eval{} expression around the suspect method calls.
+
+----------
+emer        Date: Wed Aug 12 18:31:07 EDT 2009  CSN: CSN-awb-323
+                  Wed Aug 12 22:31:07 UTC 2009
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          322 
+ awb.pro                   Locally Modified          322 
+ awb_dialog.ui.h           Locally Modified          322 
+
+Improvments to admin tab of awb
+* Added button to open a repository (using the BrowseURL from the .pack file)
+* Added button to browse a package - currently uses kdesvn
