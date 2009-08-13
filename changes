@@ -6309,3 +6309,15 @@ Directory tools/awb/awb2
 Improvments to admin tab of awb
 * Added button to open a repository (using the BrowseURL from the .pack file)
 * Added button to browse a package - currently uses kdesvn
+
+----------
+emer        Date: Thu Aug 13 17:42:39 EDT 2009  CSN: CSN-awb-324
+                  Thu Aug 13 21:42:39 UTC 2009
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          323 
+
+In apm-edit just remain at the same module on a substitution when
+there are no nodes without a module in the model. This seems better
+than jumping to the root of the model.

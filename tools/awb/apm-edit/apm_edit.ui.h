@@ -1504,7 +1504,7 @@ void apm_edit::Alternatives_doubleClicked( QListViewItem * )
 
 
     if (!defined($model_item)) {
-        $model_item = Model->firstChild();
+        return;
     }
 
     Model->setSelected($model_item, 1);
