@@ -47,8 +47,6 @@
 #   this is a warning that this code will not work if multiple modules of the 
 #   same asim-type exist in the model!!!
 #
-#   The contents of various columns (specified by number) are assumed in the code.
-#
 #   The format of the parameter lines in the Info pane are assumed.
 #
 #
@@ -85,7 +83,20 @@ void apm__edit::init()
     $moduleDB = Asim::Module::DB->new(".");
     $modelDB = Asim::Model::DB->new();
 
+    #
+    # Column setup
+    #
     Model->setSorting(-1,0);
+
+    module_type_col = 0;
+    module_param_col = 1;
+    module_submodule_col = 2;
+    module_implementation_col = 3;
+    module_file_col = 4;
+
+    alt_implementation_col = 0;
+    alt_file_col = 1;
+    alt_sort_col = 2;
 
     fileNew();
 }
@@ -126,10 +137,9 @@ void apm_edit::fileNew()
     my $root = Qt::ListViewItem(Model, undef);
     $root->setExpandable(1); 
     $root->setOpen(1); 
-    $root->setText(0, trUtf8($model->provides()));
-    $root->setPixmap(0, module_missing_pix);
-    $root->setText(1, trUtf8(""));
-    $root->setText(2, trUtf8(""));
+    
+    $root->setText(module_type_col, trUtf8($model->provides()));
+    modulePaint($root);
 
     Model->setSelected($root, 1);
     Model->ensureItemVisible($root);
@@ -198,7 +208,7 @@ void apm_edit::fileOpen()
 
     $root->setExpandable(1); 
     $root->setOpen(1); 
-    $root->setText(0, trUtf8($model->provides()));
+    $root->setText(module_type_col, trUtf8($model->provides()));
 
     my $module = $model->modelroot();
 
@@ -206,21 +216,12 @@ void apm_edit::fileOpen()
 
         # There is no root module
 
-        $root->setPixmap(0, module_missing_pix);
-        $root->setText(1, trUtf8(""));
-        $root->setText(2, trUtf8(""));
+        modulePaint($root, undef);
     } else {
 
         # There IS a root module
 
-        if ($model->is_default_module($module)) {
-            $root->setPixmap(0, module_default_pix);
-        } else {
-            $root->setPixmap(0, module_pix);
-        }
-
-        $root->setText(1, trUtf8($module->name()));
-        $root->setText(2, trUtf8($module->filename()));
+        modulePaint($root, $module);
 
         # Display rest of model...
 
@@ -285,32 +286,22 @@ void apm_edit::buildModel()
 
             my $next_root = Qt::ListViewItem($root, undef);
   
-            $next_root->setText(0, trUtf8($m->provides()));
+            $next_root->setText(module_type_col, trUtf8($m->provides()));
 
             if (! $m->isroot()) {
                 # Normal internal node
                 $next_root->setExpandable(1); 
                 $next_root->setOpen(1); 
 
-                if ($model->is_default_module($m)) {
-                    $next_root->setPixmap(0, module_default_pix);
-                } else {
-                    $next_root->setPixmap(0, module_pix);
-                }
+		modulePaint($next_root, $m);
 
-                $next_root->setText(1, trUtf8($m->name()));
-                $next_root->setText(2, trUtf8($m->filename()));
                 buildModel($next_root, $m, $level+1);
             } else {
                 # Submodel leaf node
-                my $owner = $m->owner();
-
                 $next_root->setExpandable(0); 
                 $next_root->setOpen(0); 
 
-                $next_root->setPixmap(0, submodel_pix);
-                $next_root->setText(1, trUtf8($owner->name()));
-                $next_root->setText(2, trUtf8($owner->filename()));
+		modulePaint($next_root, $m->owner());
             }
         } else {
             statusBar()->message("No implementation specified for module of type $r...", 2000);
@@ -318,10 +309,9 @@ void apm_edit::buildModel()
             my $empty_item = Qt::ListViewItem($root, undef);
             $empty_item->setExpandable(0); 
             $empty_item->setOpen(0); 
-            $empty_item->setText(0, trUtf8($r));
-            $empty_item->setPixmap(0, module_missing_pix);
-            $empty_item->setText(1, trUtf8(""));
-            $empty_item->setText(2, trUtf8(""));
+
+            $empty_item->setText(module_type_col, trUtf8($r));
+	    modulePaint($empty_item);
         }
     }
 
@@ -474,7 +464,7 @@ void apm_edit::editFindMissing()
     my $current_module = $start_module;
     
     while ($current_module = Model_walk($current_module)) {
-        if ($current_module->text(1) eq "") {
+        if ($current_module->text(module_implementation_col) eq "") {
             Model->setFocus();
             Model->setSelected($current_module, 1);
             Model->ensureItemVisible($current_module);
@@ -485,7 +475,7 @@ void apm_edit::editFindMissing()
     #
     # Nothing found --- wrap search if not a root
     #
-    #if ($start_module->text(0) ne "model") {
+    #if ($start_module->text(module_type_col) ne "model") {
     #    editFindMissing(Model->firstChild());
     #    return;
     #}
@@ -650,13 +640,13 @@ void apm_edit::modelAutoBuild_activated()
 
     while (defined($current_module)) {
 
-        if ($current_module->text(1) eq "") {
+        if ($current_module->text(module_implementation_col) eq "") {
             Model->setSelected($current_module,1);
         }
 
         # If still unspecified count it...
 
-        if ($current_module->text(1) eq "") {
+        if ($current_module->text(module_implementation_col) eq "") {
             $count++;
         }
 
@@ -758,7 +748,7 @@ void apm_edit::moduleNewAction_activated()
     # Find a reasonable directory to start in
     #
     my $item=Model->selectedItem() || return;
-    my $provides = $item->text(0)  || return;
+    my $provides = $item->text(module_type_col)  || return;
     my $parent = $model->find_module_requiring($provides) || return;
 
     my $dirname = $parent->base_dir();
@@ -789,8 +779,11 @@ void apm_edit::moduleNewAction_activated()
 #
 void apm_edit::moduleEditAction_activated()
 {
-    my $current_item = Model->selectedItem()          || return;
-    my $filename = $current_item->text(2)             || return;
+    my $current_item = Model->selectedItem()
+                       || return;
+
+    my $filename = $current_item->text(module_file_col)
+                   || return;
 
     # Handle submodels...
 
@@ -811,9 +804,11 @@ void apm_edit::moduleEditAction_activated()
 
 void apm_edit::moduleNotesAction_activated()
 {
-    my $current_module = Model->selectedItem()        || return;
+    my $current_module = Model->selectedItem()
+                         || return;
 
-    my $module_filename = $current_module->text(2)    || return;
+    my $module_filename = $current_module->text(module_file_col)
+                          || return;
 
     # Handle submodels...
 
@@ -859,10 +854,14 @@ void apm_edit::moduleNotesAction_activated()
 #
 void apm_edit::moduleViewAwbAction_activated()
 {
-    my $current_module = Model->selectedItem()        || return;
+    my $current_module = Model->selectedItem()
+                         || return;
 
-    my $module_filename = $current_module->text(2)    || return;
-    my $module = Asim::Module->new($module_filename)  || return;
+    my $module_filename = $current_module->text(module_file_col)
+                          || return;
+    my $module = Asim::Module->new($module_filename)
+                 || return;
+
     my $filename = $Asim::default_workspace->resolve($module->filename());
 
     Asim::invoke_editor("--background", $filename);
@@ -920,7 +919,7 @@ void apm_edit::moduleInsertSubmodelAction_activated()
         return;
     }
 
-    if ($submodel->provides() ne $item->text(0)) {
+    if ($submodel->provides() ne $item->text(module_type_col)) {
         Qt::MessageBox::information(
             this, 
             "apm-edit open submodel", 
@@ -954,10 +953,8 @@ void apm_edit::moduleInsertSubmodelAction_activated()
     $item->setExpandable(0); 
     $item->setOpen(0); 
 
-    $item->setPixmap(0, submodel_pix);
-    $item->setText(0, trUtf8($submodel->provides()));
-    $item->setText(1, trUtf8($submodel->name()));
-    $item->setText(2, trUtf8($submodel->filename()));
+    $item->setText(module_type_col, trUtf8($submodel->provides()));
+    modulePaint($item, $submodel);
 
     return;
 }
@@ -991,8 +988,8 @@ void apm_edit::moduleInsertAsRootAction_activated()
     our $model;
 
     my $item = Model->selectedItem() || return;
-    my $provides = $item->text(0);
-    my $filename = $item->text(2);
+    my $provides = $item->text(module_type_col);
+    my $filename = $item->text(module_file_col);
 
     if (! $filename =~ /\.awb$/) {
         Qt::MessageBox::information(
@@ -1037,17 +1034,15 @@ void apm_edit::moduleDelete( QListViewItem * )
     # Find the parent and child modules and remove them
     #    Note: implicit dependence on single provides
     #
-    my $child  = $model->find_module_providing($item->text(0)) || return;
-    my $parent = $model->find_module_requiring($item->text(0));
+    my $child  = $model->find_module_providing($item->text(module_type_col)) || return;
+    my $parent = $model->find_module_requiring($item->text(module_type_col));
 
     $model->remove_submodule($parent, $child);
 
     #
     # Clear the implementation info from the item and remove all children
     #
-    $item->setPixmap(0, module_missing_pix);
-    $item->setText(1, trUtf8(""));
-    $item->setText(2, trUtf8(""));
+    modulePaint($item);
 
     my $child_item = $item->firstChild();
     while( defined($child_item) ) {
@@ -1115,11 +1110,11 @@ void apm_edit::Search_textChanged( const QString & )
     # Search model tree for pattern
     #
     while (defined($current_module)) {
-        if (lc($current_module->text(0)) =~ /$pattern/) {
+        if (lc($current_module->text(module_type_col)) =~ /$pattern/) {
             last;
         }
 
-        if (lc($current_module->text(1)) =~ /$pattern/) {
+        if (lc($current_module->text(module_implementation_col)) =~ /$pattern/) {
             last;
         }
 
@@ -1131,7 +1126,8 @@ void apm_edit::Search_textChanged( const QString & )
     # Check if search failed
     #
     if (!defined($current_module)) {
-        if ($start_module->text(0) ne Model->firstChild->text(0)) {
+        if ($start_module->text(module_type_col) 
+            ne Model->firstChild->text(module_type_col)) {
             #
             # Wrap search to root of model
             #
@@ -1188,7 +1184,7 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
 
     my $item = shift;
 
-    my $provides = $item->text(0);
+    my $provides = $item->text(module_type_col);
 
     my $module = undef;
     my $module_name = "";
@@ -1207,7 +1203,7 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     
     if (defined($module)) {
 
-        if ($module->isroot() && ($module != $model->modelroot())) {
+        if ($model->is_submodel($module)) {
             # This is the root of a submodel
 
             my $submodel = $module->owner();
@@ -1242,9 +1238,9 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     #
     #$next_root = Qt::ListViewItem(Alternatives, undef);
 
-    #$next_root->setText(0, trUtf8("<<NEW>>"));
-    #$next_root->setText(1, trUtf8(""));
-    #$next_root->setPixmap(0, module_pix);
+    #$next_root->setPixmap(alt_implementation_col, module_pix);
+    #$next_root->setText(alt_implementation_col, trUtf8("<<NEW>>"));
+    #$next_root->setText(alt_file_col, trUtf8(""));
     
 
     #
@@ -1253,18 +1249,20 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     foreach my $m (@models, @modules) {
         my $next_root = Qt::ListViewItem(Alternatives, undef);
 
-        $next_root->setText(0, trUtf8($m->name()));
-        $next_root->setText(1, trUtf8($m->filename()));
+        $next_root->setText(alt_implementation_col, trUtf8($m->name()));
+        $next_root->setText(alt_file_col, trUtf8($m->filename()));
 
 	my $sortname = sprintf("%2d - %s", $m->template(), $m->name());
-	$next_root->setText(2, $sortname);
+	$next_root->setText(alt_sort_col, $sortname);
 
         if ($module_name eq $m->name()) {
             # 
             # This is module in current model
             #   Note: ">> ... <<" form is parsed elsewhere...
             #
-            $next_root->setText(0, trUtf8(">> " . $m->name() . " <<"));
+            $next_root->setText(alt_implementation_col, 
+                                trUtf8(">> " . $m->name() . " <<"));
+
 	    $selected = $next_root;
         }
     
@@ -1274,13 +1272,16 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
         my $score = $model->is_default_module($m);
 
         if ($is_model) {
-            $next_root->setPixmap(0, submodel_pix);
+            $next_root->setPixmap(alt_implementation_col, 
+                                  submodel_pix);
 
         } else {
             if ($score) {
-                $next_root->setPixmap(0, module_default_pix);
+                $next_root->setPixmap(alt_implementation_col, 
+                                      module_default_pix);
             } else {
-                $next_root->setPixmap(0, module_pix);
+                $next_root->setPixmap(alt_implementation_col,
+                                      module_pix);
             }
         }
     
@@ -1298,7 +1299,7 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     }
 
     if (defined($module_default)) {
-        $module_default->setPixmap(0, module_current_pix);
+        $module_default->setPixmap(alt_implementation_col, module_current_pix);
     }
 
     #
@@ -1370,14 +1371,14 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
 
     my $module = undef;
     my $delimiter;   # Used to distinquish if part of real model
-   
+
     $module = alternativesModule($item) || return;
 
     #
     # Determine if this item is part of real model
     #
 
-    if ($item->text(0) =~ ">> .+ <<") {
+    if ($item->text(alt_implementation_col) =~ ">> .+ <<") {
         $delimiter = "=";
     } else {
         $delimiter = "~";
@@ -1496,7 +1497,7 @@ void apm_edit::Alternatives_doubleClicked( QListViewItem * )
 
 
     while (defined($model_item)) {
-        if ($model_item->text(1) eq "") {
+        if ($model_item->text(module_implementation_col) eq "") {
             last;
         }
         $model_item = Model_walk($model_item);
@@ -1518,8 +1519,8 @@ void apm_edit::Alternatives_returnPressed( QListViewItem * )
 
     my $alt_item = shift;
 
-    my $name = $alt_item->text(0) || return;
-    my $filename = $alt_item->text(1) || return;
+    my $name = $alt_item->text(alt_implementation_col) || return;
+    my $filename = $alt_item->text(alt_file_col) || return;
 
     if ($name eq "<<NEW>>") {
         moduleNewAction_activated();
@@ -1534,6 +1535,7 @@ void apm_edit::Alternatives_returnPressed( QListViewItem * )
         Alternatives_returnPressed_onSubmodel($alt_item);
     }
 
+    Model_selectionChanged(Model->selectedItem());
 }
 
 
@@ -1546,8 +1548,8 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
     my $item = Model->selectedItem() || die("No item was selected in model");
     my $child_item;
 
-    my $module_name = $alt_item->text(0);
-    my $module_filename = $alt_item->text(1) || return;
+    my $module_name = $alt_item->text(alt_implementation_col);
+    my $module_filename = $alt_item->text(alt_file_col) || return;
 
     my $module = Asim::Module->new($module_filename) || return;
 
@@ -1592,15 +1594,9 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
     $item->setExpandable(1); 
     $item->setOpen(1); 
 
-    if ($model->is_default_module($module)) {
-        $item->setPixmap(0, module_default_pix);
-    } else {
-        $item->setPixmap(0, module_pix);
-    }
+    $item->setText(module_type_col, trUtf8($module->provides()));
+    modulePaint($item, $module);
 
-    $item->setText(0, trUtf8($module->provides()));
-    $item->setText(1, trUtf8($module->name()));
-    $item->setText(2, trUtf8($module->filename()));
 
     #
     # Display rest of model...
@@ -1621,8 +1617,8 @@ void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
     my $item = Model->selectedItem() || die("No item was selected in model");
     my $child_item;
 
-    my $model_name = $alt_item->text(0);
-    my $model_filename = $alt_item->text(1) || return;
+    my $model_name = $alt_item->text(alt_implementation_col);
+    my $model_filename = $alt_item->text(alt_file_col) || return;
 
     my $submodel = Asim::Model->new($model_filename) || return;
 
@@ -1658,12 +1654,49 @@ void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
     $item->setExpandable(0); 
     $item->setOpen(0); 
 
-    $item->setPixmap(0, submodel_pix);
-    $item->setText(0, trUtf8($submodel->provides()));
-    $item->setText(1, trUtf8($submodel->name()));
-    $item->setText(2, trUtf8($submodel->filename()));
+    $item->setPixmap(module_type_col, submodel_pix);
+    modulePaint($item, $submodel);
 
     return;
+}
+
+#
+# Utility functions for model tree
+#
+void apm_edit::modulePaint()
+{
+    my $item = shift;
+    my $module = shift;
+
+    if (! defined($module)) {
+        $item->setPixmap(module_type_col, module_missing_pix);
+        $item->setText(module_param_col, trUtf8(""));
+        $item->setText(module_submodule_col, trUtf8(""));
+        $item->setText(module_implementation_col, trUtf8(""));
+        $item->setText(module_file_col, trUtf8(""));
+	return;
+    }
+
+    our $model;
+
+    if (ref($module) eq "Asim::Model") {
+        $item->setPixmap(module_type_col, submodel_pix);
+    } else {
+        if ($model->is_default_module($module)) {
+            $item->setPixmap(module_type_col, module_default_pix);
+        } else {
+            $item->setPixmap(module_type_col, module_pix);
+        }
+    }
+
+    $item->setText(module_implementation_col, trUtf8($module->name()));
+
+    my $param_modified = moduleCheckParams($module, 0)?"p ":"  ";
+
+    $item->setText(module_param_col, trUtf8($param_modified));
+    $item->setText(module_submodule_col, trUtf8(""));
+    $item->setText(module_file_col, trUtf8($module->filename()));
+   
 }
 
 #
@@ -1674,7 +1707,7 @@ void apm_edit::moduleInsertParams()
 {
    my $module = shift;
 
-   if (moduleCheckParams($module)) {
+   if (moduleCheckParams($module, 1)) {
         my $status = Qt::MessageBox::warning ( 
             this, 
             "apm-edit insert", 
@@ -1700,8 +1733,11 @@ void apm_edit::moduleInsertParams()
 void apm_edit::moduleCheckParams()
 {
     my $module = shift || return;
+    my $recurse = shift || 0;
 
-    if ($module->is_submodel()) {
+    our $model;
+
+    if ($model->is_submodel($module)) {
         $module = $module->owner();
     }
 
@@ -1713,8 +1749,12 @@ void apm_edit::moduleCheckParams()
         }
     }
 
+    if (! $recurse) {
+        return 0;
+    }
+
     foreach my $s ($module->submodules()) {
-        my $m = moduleCheckParams($s);
+        my $m = moduleCheckParams($s, 1);
 
         return 1 if $m;
     }
@@ -1731,7 +1771,9 @@ void apm_edit::moduleDefaultParams()
 {
     my $module = shift || return;
 
-    if ($module->is_submodel()) {
+    our $model;
+
+    if ($model->is_submodel($module)) {
         $module = $module->owner();
     }
 
@@ -1824,7 +1866,7 @@ void apm_edit::ParamChange_clicked()
     #    Note: implicit dependence on single provides
     #
     my $module_item = Model->selectedItem();
-    my $provides = $module_item->text(0);
+    my $provides = $module_item->text(module_type_col);
     my $module = $model->find_module_providing($provides);
 
     #
@@ -1832,12 +1874,15 @@ void apm_edit::ParamChange_clicked()
     # In that case, we want to change the submodels's 'global' parameter,
     # which is in the model that is the owner() of the module.
     #
-    if ($module->isroot() && ($module != $model->modelroot())) {
-      $module = $module->owner();
+    if ($model->is_submodel($module)) {
+        $module = $module->owner();
     }
 
     $module->setparameter($name, $value);
+
     $model->modified(1);
+
+    modulePaint($module_item, $module);
 }
 
 
@@ -1898,16 +1943,16 @@ void apm_edit::alternativesModule()
     #    Note: implicit dependence on single provides
     #
     my $module;
-    my $name = $item->text(0);
+    my $name = $item->text(alt_implementation_col);
 
     if ($name =~ ">> .+ <<") {
         # From current model
 
         my $module_item = Model->selectedItem() || return;
-        my $provides = $module_item->text(0);
+        my $provides = $module_item->text(module_type_col);
 
         $module = $model->find_module_providing($provides);
-        if ($module->isroot() && ($module != $model->modelroot())) {
+        if ($model->is_submodel($module)) {
             # This is a submodel...
 
             $module = $module->owner();
@@ -1915,7 +1960,7 @@ void apm_edit::alternativesModule()
     } else {
         # From .apm/.awb file
 
-        my $filename = $item->text(1);
+        my $filename = $item->text(alt_file_col);
 
         if ($filename =~ /.awb/) {
             $module = Asim::Module->new($filename);

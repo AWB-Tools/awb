@@ -1598,22 +1598,6 @@ sub mandatory_attributes {
   return @{$self->{"mandatory_attributes"}};
 }
 
-################################################################
-
-=item $module-E<gt>is_submodel()
-
-Return TRUE if $self is the root of a submodel;
-
-=cut
-
-################################################################
-
-sub is_submodel {
-  my $self = shift;
-
-  return ($self->isroot() && $self != $self->owner());
-}
-
 
 ################################################################
 

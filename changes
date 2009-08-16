@@ -6321,3 +6321,24 @@ Directory tools/awb/apm-edit
 In apm-edit just remain at the same module on a substitution when
 there are no nodes without a module in the model. This seems better
 than jumping to the root of the model.
+
+----------
+emer        Date: Sun Aug 16 17:25:20 EDT 2009  CSN: CSN-awb-325
+                  Sun Aug 16 21:25:20 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          324 
+ Model.pm                  Locally Modified          324 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          324 
+ apm_edit.ui               Locally Modified          324 
+
+New feature in apm-edit
+* Column in model tree indicating non-default parameter values
+* Another column that will be used to indicate non-default submodules
+
+Implementation notes
+* Added symbolic references to columns in model tree
+* Refactored model tree item painting into a single routine

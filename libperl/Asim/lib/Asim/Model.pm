@@ -324,7 +324,8 @@ sub _get_submodel {
   #
   # A submodel is represented simply as a module in the tree, but
   # because it has the property isroot() and its owner() will not be
-  # the top-level model, one check check if it is a submodel.
+  # the top-level model, one can check if it is a submodel. The method
+  # 'is_submodel' does this check...
   #
 
   return $submodel->modelroot();
@@ -464,7 +465,8 @@ sub _put_module {
   if ($module->isroot() && $self != $module->owner()) {
     #
     # This is a submodel - put reference to submodel
-    # 
+    # (but we call it module for operations below)
+    #
     $module = $module->owner();
     $filename = $Asim::default_workspace->unresolve($module->filename());
   } else {
@@ -836,12 +838,11 @@ sub modelroot  {
 
 ################################################################
 
-=item $module-E<gt>is_submodel()
+=item $module-E<gt>is_submodel($module)
 
-Return TRUE if $self is the root of a submodel, but we return
-0 since this is a MODEL
-
-Only here for compatibility with Asim::Module::is_submodel
+Return TRUE if $module is a submodel inside $self. If given a model
+as $module we return FALSE, but otherwise we check if the module
+is the root a submodel different from $self.
 
 =cut
 
@@ -849,8 +850,14 @@ Only here for compatibility with Asim::Module::is_submodel
 
 sub is_submodel {
   my $self = shift;
+  my $module = shift;
 
-  return 0;
+  if (ref($module) eq "Asim::Model") {
+      return 0;
+  }
+
+  return ($module->isroot() && ($self->modelroot() != $module));
+  
 }
 
 ################################################################
