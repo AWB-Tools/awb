@@ -21,6 +21,20 @@ void apm_edit_properties::init()
     }
 
     Name->setText($model->name());
+
+    type_asim = 0;
+    type_hasim = 1;
+
+    my $type = $model->type();
+
+    if ($type eq "Asim") {
+        typeComboBox->setCurrentItem(type_asim);
+    } elsif ($type eq "HAsim") {
+        typeComboBox->setCurrentItem(type_hasim);
+    } else {
+        typeComboBox->setCurrentItem(type_hasim);
+    }
+        
     Description->setText($model->description());
     Attributes->setText($model->default_attributes());
 
@@ -36,6 +50,8 @@ void apm_edit_properties::propertiesOk_clicked()
     my $model = $apm_edit::model;
 
     $model->name(Name->text());
+    $model->type(typeComboBox->currentText());
+
     $model->description(Description->text());
     $model->default_attributes(Attributes->text());
 

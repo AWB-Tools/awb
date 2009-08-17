@@ -98,7 +98,13 @@ void apm__edit::init()
     alt_file_col = 1;
     alt_sort_col = 2;
 
-    fileNew();
+    $model = Asim::Model->new();
+    $model->name("Unamed project");
+    $model->modified(0);
+
+    # Create model tree
+
+    modelShow();
 }
 
 
@@ -125,26 +131,20 @@ void apm_edit::fileNew()
     }
     
     $model = Asim::Model->new();
-
-    Name->setText("Unnamed project");
-
+    $model->name("Unamed project");
     $model->modified(0);
 
     # Build root of model tree...
 
     Model->clear();
 
-    my $root = Qt::ListViewItem(Model, undef);
-    $root->setExpandable(1); 
-    $root->setOpen(1); 
-    
-    $root->setText(module_type_col, trUtf8($model->provides()));
-    modulePaint($root);
+    # Collect initial properties for model
 
-    Model->setSelected($root, 1);
-    Model->ensureItemVisible($root);
+    modelPropertiesAction_activated();
 
-    setCaption("Untitled - apm-edit");
+    # Create model tree
+
+    modelShow();
 }
 
 
@@ -195,38 +195,12 @@ void apm_edit::fileOpen()
     }
 
     $model = $m;
-
-    Name->setText($model->name());
-
     $model->modified(0);
+
 
     # Build root of model tree...
 
-    Model->clear();
-
-    my $root = Qt::ListViewItem(Model, undef);
-
-    $root->setExpandable(1); 
-    $root->setOpen(1); 
-    $root->setText(module_type_col, trUtf8($model->provides()));
-
-    my $module = $model->modelroot();
-
-    if (! defined($module)) {
-
-        # There is no root module
-
-        modulePaint($root, undef);
-    } else {
-
-        # There IS a root module
-
-        modulePaint($root, $module);
-
-        # Display rest of model...
-
-        buildModel($root, $model->modelroot());
-    }
+    modelShow();
 
     # Display error popup if needed
 
@@ -250,6 +224,48 @@ void apm_edit::fileOpen()
             $error);
     }
 
+    statusBar()->message("Model loaded...", 5000);
+}
+
+
+
+
+void apm_edit::modelShow()
+{
+    our $model;
+
+    # Set model name
+    
+    Name->setText($model->name());
+
+    # Fill in model tree
+
+    Model->clear();
+
+    my $root = Qt::ListViewItem(Model, undef);
+    $root->setExpandable(1); 
+    $root->setOpen(1); 
+
+    $root->setText(module_type_col, trUtf8($model->provides()));
+
+    my $module = $model->modelroot();
+
+    if (! defined($module)) {
+
+        # There is no root module
+
+        modulePaint($root, undef);
+    } else {
+
+        # There IS a root module
+
+        modulePaint($root, $module);
+
+        # Display rest of model...
+
+        buildModel($root, $model->modelroot());
+    }
+
     # Set focus to root of model
 
     Model->setSelected($root, 1);
@@ -257,11 +273,10 @@ void apm_edit::fileOpen()
 
     # Display captions and status
 
-    setCaption(basename($model->filename()) . " - apm-edit");
-    statusBar()->message("Model loaded...", 5000);
+    my $filename = basename($model->filename() || "Unnamed");
+    setCaption("$filename - apm-edit");
+
 }
-
-
 
 
 void apm_edit::buildModel()

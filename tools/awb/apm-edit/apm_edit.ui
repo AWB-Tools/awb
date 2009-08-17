@@ -546,6 +546,14 @@
         <property name="name">
             <cstring>Toolbar_2</cstring>
         </property>
+        <property name="geometry">
+            <rect>
+                <x>127</x>
+                <y>0</y>
+                <width>259</width>
+                <height>29</height>
+            </rect>
+        </property>
         <property name="label">
             <string>Toolbar_2</string>
         </property>
@@ -1624,13 +1632,14 @@
     <slot returnType="int *">Model_walk()</slot>
 </slots>
 <functions>
+    <function access="private">modelShow()</function>
     <function access="private">modelOperation()</function>
+    <function access="private">modulePaint()</function>
     <function access="private">moduleInsertParams()</function>
     <function access="private">moduleCheckParams()</function>
     <function access="private">moduleDefaultParams()</function>
     <function access="private">moduleEditFiles()</function>
     <function access="private">alternativesModule()</function>
-    <function access="private">modulePaint()</function>
 </functions>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

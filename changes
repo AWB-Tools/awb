@@ -6342,3 +6342,20 @@ New feature in apm-edit
 Implementation notes
 * Added symbolic references to columns in model tree
 * Refactored model tree item painting into a single routine
+
+----------
+emer        Date: Mon Aug 17 14:08:05 EDT 2009  CSN: CSN-awb-326
+                  Mon Aug 17 18:08:05 UTC 2009
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          325 
+ apm_edit.ui               Locally Modified          325 
+ apm_edit_properties.ui.h  Locally Modified          325 
+ apm_edit_properties.ui    Locally Modified          325 
+
+More improvements to apm-edit
+* Property dialog allows setting type of model. Current choices:
+** Asim  - these models use amc
+** HAsim - these models use hasim-configure
+* On creation of a new model the properies dialog is displayed
