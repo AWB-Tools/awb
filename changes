@@ -6359,3 +6359,13 @@ More improvements to apm-edit
 ** Asim  - these models use amc
 ** HAsim - these models use hasim-configure
 * On creation of a new model the properies dialog is displayed
+
+----------
+emer        Date: Mon Aug 17 17:10:34 EDT 2009  CSN: CSN-awb-327
+                  Mon Aug 17 21:10:34 UTC 2009
+
+
+Directory tools/awb/apm-edit
+ apm_edit_properties.ui.h  Locally Modified          326 
+
+Enabled "what's this mode" for help button on apm-edit properties dialog.

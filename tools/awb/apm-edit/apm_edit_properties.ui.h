@@ -65,7 +65,6 @@ void apm_edit_properties::propertiesOk_clicked()
 
 void apm_edit_properties::propertiesHelp_clicked()
 {
-    print "TBD: Display a what's this pointer\n";
-#    this->whatsThis();
+    Qt::WhatsThis::enterWhatsThisMode();
 }
 
