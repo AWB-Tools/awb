@@ -158,7 +158,7 @@ sub _initialize {
                  owner => [],
 		 library => [],
 		 syslibrary => [],
-		 include => [],
+		 include => {},
 		 };
 
   return $self;
@@ -441,14 +441,19 @@ sub open {
       next;
     }
 
-    # %include DIRNAME
+    # %include [--type=<type>] DIRNAME...
+    # where, <type>:=sw|verilog
 
-    if (/^.*%include$spaces($word)/) {
-      #
-      # Add file to list of library files
-      #
-      push(@{$self->{include}}, $1);
-      next;
+    if (/^.*%include$spaces($words)/)
+    {
+        my $type = "sw";
+
+        # parse switches
+        local @ARGV = split($spaces, $1);
+        GetOptions("type=s" => \$type);
+
+	push(@{$self->{include}->{$type}}, @ARGV);
+        next;
     }
   }
 
@@ -549,8 +554,10 @@ sub save {
   }
   print M "\n";
 
-  foreach my $i ($self->include()) {
-    print M " * %include $i\n";
+  foreach my $k (keys %{$self->{include}}) {
+    foreach my $i ($self->{include}->{$k}) {
+      print M " * %include --type=%$k $i\n";
+    }
   }
 
   # Save parameters too.
@@ -1374,12 +1381,11 @@ sub syslibrary {
 
 ################################################################
 
-=item $module-E<gt>include([$list])
+=item $module-E<gt>include([$type, [$update, ...]])
 
-Optionally update the list of include directories used to
-compile this module, to $list.
+Optionally update the include files for specified type $update...
 
-Return the current (updated) list of include directories used by this module.
+Return the current (updated) include files for this module
 
 Note: All include directories are relative to the top of a package,
 and are resolved using the package search path.
@@ -1388,16 +1394,32 @@ and are resolved using the package search path.
 
 ################################################################
 
-
 sub include {
   my $self = shift;
+  my $type = shift;
   my @value = (@_);
 
+  $type = 'sw' if (! defined($type));
   if (@value) {
-    @{$self->{"include"}} = (@value);
+    die("Asim::Module::include: Cannot assign with a type of *") if ($type eq "*");
+
+    @{$self->{"include"}->{$type}} = (@value);
   }
 
-  return @{$self->{"include"}};
+  if ($type eq "*") {
+    my @files = ();
+
+    foreach my $t (keys %{$self->{"include"}}) {
+      push(@files, @{$self->{"include"}->{$t}});
+    }
+    return (@files);
+  }
+
+  if (!defined($self->{"include"}->{$type})) {
+    return ();
+  }
+
+  return @{$self->{"include"}->{$type}};
 }
 
 ################################################################

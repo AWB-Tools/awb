@@ -6369,3 +6369,21 @@ Directory tools/awb/apm-edit
  apm_edit_properties.ui.h  Locally Modified          326 
 
 Enabled "what's this mode" for help button on apm-edit properties dialog.
+
+----------
+emer        Date: Wed Aug 19 19:30:36 EDT 2009  CSN: CSN-awb-328
+                  Wed Aug 19 23:30:36 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          327 
+ Model.pm                  Locally Modified          327 
+
+Added support for verilog %includes in .awb files. Syntax is:
+
+      %include --type=verilog <directory>
+
+@<name>@ substitution is performed in <directory>
+
+In Model.pm clear build_dir and run_dir on save to a new file
+name.

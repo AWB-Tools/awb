@@ -448,7 +448,12 @@ sub save {
   # and remember the possibly new filename
   #
   $self->{inifile} = $new_inifile;
-  $self->{filename} = $file;
+
+  if ($self->{filename} ne $file) {
+      $self->{filename} = $file;
+      $self->{build_dir} = undef;
+      $self->{run_dir} = undef;
+  }
 
   $self->modified(0);
   return 1;
