@@ -1573,7 +1573,7 @@ sub run_one_benchmark
           $checkApm = 0 unless ($pthreads == 0);
           # the value -1 for LIMIT_PTHREADS is special, and means "use as many pthreads as the number of host cores".
           # Set $pthreads to a positive number, to force submit_job() to run it multithreaded:
-          if ($pthreads == -1) { $pthreads = $NETBATCH_MT_SLOTS_PER_CORE; }
+          if ($pthreads == -1) { $pthreads = 2; }
 	if ($checkApm == 1) {
 	    open(APMFILE, "<$apmfile");
 	    while (<APMFILE>) {

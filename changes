@@ -6423,3 +6423,17 @@ Directory tools/scripts
 Updating with asim-awb changes (rev. 2796 - Carl Beckmann)
 
 - some minor changes to support remote netbatch with parallel simulation
+
+----------
+spartha1    Date: Mon Aug 24 14:22:11 EDT 2009  CSN: CSN-awb-331
+                  Mon Aug 24 18:22:11 UTC 2009
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          330 
+
+Updating with asim-awb changes (rev. 2798 - Carl Beckmann)
+
+- A small change which allows you to reserve all cores on a netbatch host
+  with NETBATCH_MT_RESERVE_All_CORES=1 even if the minimum number of cores
+  is set to only 1 with NETBATCH_MT_SLOTS_PER_CORE=1
