@@ -1560,7 +1560,7 @@ sub run_one_benchmark
         my $input = $exps->{"$name"}{params};
 	my $apmfile = &full_path($exps->{"$name"}{model});
 	my $checkApm = 1;
-	my $pthreads = 0;
+	my $nthreads = 0;
 	
 	# Check for threaded run of the model. The variable nthreads holds
 	# the number of threads this model launches.  At present this
@@ -1568,24 +1568,22 @@ sub run_one_benchmark
 	# netbatch.
 	# TODO: the runtime LIMIT_PTHREADS argument is checked, but the decl
 	# in awb file has to be checked as well.
-	if ((defined $input) && $input =~ m/\s*-?(LIMIT_PTHREADS)\s*=?\s*(\-?\d+)\s*/i) {
-          $pthreads = $2;
-          $checkApm = 0 unless ($pthreads == 0);
-          # the value -1 for LIMIT_PTHREADS is special, and means "use as many pthreads as the number of host cores".
-          # Set $pthreads to a positive number, to force submit_job() to run it multithreaded:
-          if ($pthreads == -1) { $pthreads = 2; }
+	if ((defined $input) && $input =~ m/\s*-?(LIMIT_PTHREADS)\s*=?\s*(\d+)\s*/i) {
+	    $nthreads = $2;
+	    $checkApm = 0 unless ($nthreads == 0);
+	}
 	if ($checkApm == 1) {
 	    open(APMFILE, "<$apmfile");
 	    while (<APMFILE>) {
 		chomp;
 		if (/\s*(MAX_PTHREADS)\s*=\s*(\d+)\s*/) {
-		    $pthreads = $2;
+		    $nthreads = $2;
 		    last;
 		}
 	    }
 	    close(APMFILE);
 	}
-        if ($pthreads > 1) { print_info("........ Parallel job with $nthreads worker threads\n"); }
+        if ($nthreads > 1) { print_info("........ Parallel job with $nthreads worker threads\n"); }
 
         my $submit_cmd;
         if ($remote)
@@ -1629,13 +1627,13 @@ sub run_one_benchmark
             my $remotebase = join('/', @remoteresdir);
 
             # run the full resulting $submit_cmd through the filter
-            if ($localbase) { $submit_cmd =~ s/$localbase/$remotebase/g; }
+            $submit_cmd =~ s/$localbase/$remotebase/g;
 
             # done fixing command line, now we must mirror files
             # needed remotely, including apm, cfg file(s) and pb file
             for ($model, @{$exps->{"$name"}{files}}) {
               my ($from, $to) = ($_, $_);
-              if ($localbase) { $to =~ s/$localbase/$remotebase/; }
+              $to =~ s/$localbase/$remotebase/;
               run_command("ssh -q $remotehost 'mkdir -p " . dirname($to) . "' > /dev/null 2>&1");
               run_command_rsync("--quiet -l $from $remotehost:$to");
             }
@@ -1655,7 +1653,7 @@ sub run_one_benchmark
 
         }
 
-        my $submiterror = submit_job($name, $model_name, $bm_name, $submit_cmd, 0, $pthreads);
+        my $submiterror = submit_job($name, $model_name, $bm_name, $submit_cmd, 0, $nthreads);
 
         if ($submiterror) {
             # There was an error in the submission.
@@ -1849,10 +1847,7 @@ sub parse_exp_file
             # process the hierarchy, add all found files to this file list
             for (my $i = @files-1; $i < @files; $i++) {
               my $file = $files[$i];;
-              if (!open(my $fh, "<$file")) {
-                print "INFO: couldn't open config file $file for rsync analysis\n";
-                next;
-              }
+              open(my $fh, "<$file") or die " couldn't open file <$file";
               while (<$fh>) {
                 s/(^s+|#.*)//g;
                 if (/-cfg\s+(\/\S+)/) {

@@ -6437,3 +6437,13 @@ Updating with asim-awb changes (rev. 2798 - Carl Beckmann)
 - A small change which allows you to reserve all cores on a netbatch host
   with NETBATCH_MT_RESERVE_All_CORES=1 even if the minimum number of cores
   is set to only 1 with NETBATCH_MT_SLOTS_PER_CORE=1
+
+----------
+emer        Date: Mon Aug 24 19:34:05 EDT 2009  CSN: CSN-awb-332
+                  Mon Aug 24 23:34:05 UTC 2009
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          331 
+
+Revert changes in r330, which broke asim-run.
