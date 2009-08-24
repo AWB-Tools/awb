@@ -6387,3 +6387,24 @@ Added support for verilog %includes in .awb files. Syntax is:
 
 In Model.pm clear build_dir and run_dir on save to a new file
 name.
+
+----------
+spartha1    Date: Mon Aug 24 13:29:42 EDT 2009  CSN: CSN-awb-329
+                  Mon Aug 24 17:29:42 UTC 2009
+
+
+Directory tools/scripts
+ fetch-trace               Locally Modified          328 
+
+Directory etc
+ asimrc.template           Locally Modified          328 
+
+Updating with asim-awb changes (rev. 2791 - Carl Beckmann)
+
+- Fixed fetch-trace to behave like a real cache, i.e. to evict old
+  files when it runs our of disk space.  This is controlled by two asimrc
+  parameters:
+
+    ASIM_MIN_FREE_MB    -- minimum amount of free space in the cache
+
+    ASIM_MAX_EVICTS     -- maximum number of files to evict each cleanup

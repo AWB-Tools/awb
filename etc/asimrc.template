@@ -565,6 +565,14 @@ ASIM_TRACE_CACHE=
 # ASIM_TRACE_SERVER=asim.intel.com
 ASIM_TRACE_SERVER=
 
+# minimum amount of free space in the cache
+# ASIM_MIN_FREE_MB=10
+ASIM_MIN_FREE_MB=
+
+# maximum number of files to evict each time when cleaning up the cache
+# ASIM_MAX_EVICTS=10
+ASIM_MAX_EVICTS=
+
 #***********************************************************************
 # awb-shell is the command line shell for interacting with Architect's
 # Workbench objects (formerly known as asim-shell).
@@ -577,15 +585,18 @@ ASIM_TRACE_SERVER=
 # Type: boolean
 # Default: 1
 # WARNINGS=0
+WARNINGS=
 
 #
 # Purpose: enable or disable the package configuration check at startup
 # Type: boolean
 # Default: 1
 # CONFIGCHECK=0
+CONFIGCHECK=
 
 #
 # Purpose: the command prompt displayed to interactive users
 # Type: string
 # Default: awb>
 # PROMPT=%
+PROMPT=

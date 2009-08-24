@@ -62,6 +62,8 @@ Asim::init();
 use Asim::Util;
 
 # function prototypes
+sub disk_available($);
+sub oldest_file($);
 sub find_trace_in_tcache($$);
 sub find_trace_in_tlist($$);
 
@@ -98,6 +100,10 @@ my $forcersync         = Asim::Util::get_asimrc_val('fetch-trace', 'FORCE_RSYNC'
 
 # debug option to manually rsync DPG trace rather than use fetch_trace script
 my $slechtafetch       = Asim::Util::get_asimrc_val('fetch-trace', 'SLECHTA_FETCH', 0);
+
+# minimum amount of free space in the cache, and maximum files to evict each go around
+my $ASIM_MIN_FREE_MB   = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_MIN_FREE_MB', 10);
+my $ASIM_MAX_EVICTS    = Asim::Util::get_asimrc_val('fetch-trace', 'ASIM_MAX_EVICTS',  10);
 
 #
 # get command line options
@@ -136,6 +142,8 @@ if ( $debug ) {
   print "# ASIM_MASTER_TLIST = $ASIM_MASTER_TLIST\n";
   print "# ASIM_TRACE_CACHE  = $ASIM_TRACE_CACHE\n";
   print "# ASIM_TRACE_SERVER = $ASIM_TRACE_SERVER\n";
+  print "# ASIM_MIN_FREE_MB  = $ASIM_MIN_FREE_MB\n";
+  print "# ASIM_MAX_EVICTS   = $ASIM_MAX_EVICTS\n";
 }
 
 #
@@ -320,6 +328,24 @@ if ( $files_exist ) {
   if ( $#local_files >= 0 ) {
     print "# files ${trace_path}* are available locally in cache\n" if ( $debug );
   } else {
+    #
+    # first see if there is enough disk space locally for the traces,
+    # and if not evict the oldest files from the cache
+    #
+    speed_debug("disk cleanup ...");
+    my $delete_count = 0;
+    while (disk_available($ASIM_TRACE_CACHE) < $ASIM_MIN_FREE_MB && $delete_count < $ASIM_MAX_EVICTS) {
+      my $oldest = oldest_file($ASIM_TRACE_CACHE);
+      if ($oldest && -e $oldest && unlink($oldest)) {
+        print "# disk cleanup deleted oldest file $oldest\n" if ( $debug );
+        $delete_count++;
+      } else {
+        last;
+      }
+    }
+    #
+    # finally, rsync the files into the local cache
+    #
     print
       "# copying files ${trace_path}* from remote server ${ASIM_TRACE_SERVER} to local cache $ASIM_TRACE_CACHE/\n"
       if ( $verbose );
@@ -333,6 +359,28 @@ if ( $files_exist ) {
   }
   print "$ASIM_TRACE_CACHE/${trace_name}\n";
 
+}
+
+#
+# return the available disk space, in megabytes, in the given directory
+#
+sub disk_available($) {
+  my $dir = shift;
+  my $df_output = `df $dir/ | tail -1`;
+  $df_output =~s/^\s*//;
+  my @df = split /\s+/, $df_output;
+  return $df[2] / 1024;
+}
+
+#
+# return the path to the oldest file in the given directory
+#
+sub oldest_file($) {
+  my $dir = shift;
+  my $ls_output = `ls -l -t $dir/ | tail -1`;
+  my @ls = split /\s+/, $ls_output;
+  my $oldest = pop @ls;
+  return $dir.'/'.$oldest;
 }
 
 sub find_trace_in_tcache($$) {
@@ -626,6 +674,16 @@ Location of the local disk cache for Asim traces.
 
 The server to rsync Asim traces from, e.g. "asim.intel.com".
 
+=item ASIM_MIN_FREE_MB
+
+The minimum amount of free space in the ASIM_TRACE_CACHE directory, in megabytes.
+If there is less space than this in the cache,
+the oldest cached files will be deleted prior to rsyncing the requested trace.
+
+=item ASIM_MAX_EVICTS
+
+The maximum number of files to delete, if disk space needs to be reclaimed.
+
 =back
 
 =head1 SEE ALSO
@@ -636,9 +694,6 @@ perldoc /nfs/site/proj/dpg/arch/bin/fetch_trace
 
 The Tlist file parsing is currently very ad hoc.
 It should be generalized, and put in a reusable perl module.
-
-Cache cleanup of the ASIM_LOCAL_CACHE directory, in the case of overflow,
-has not yet been implemented.
 
 There is no error checking of the rsync command to make sure
 that it transferred the files ok into the local Asim cache directory.
@@ -651,7 +706,7 @@ Carl Beckmann
 
  ********************************************************
  *                                                      *
- *   Copyright (c) Intel Corporation 2006               *
+ *   Copyright (c) Intel Corporation 2006-09            *
  *                                                      *
  *   All Rights Reserved.  Unpublished rights reserved  *
  *   under the copyright laws of the United States.     *
