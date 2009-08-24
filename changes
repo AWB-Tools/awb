@@ -6408,3 +6408,18 @@ Updating with asim-awb changes (rev. 2791 - Carl Beckmann)
     ASIM_MIN_FREE_MB    -- minimum amount of free space in the cache
 
     ASIM_MAX_EVICTS     -- maximum number of files to evict each cleanup
+
+----------
+spartha1    Date: Mon Aug 24 14:19:11 EDT 2009  CSN: CSN-awb-330
+                  Mon Aug 24 18:19:11 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ NetbatchRemote.pm         Locally Modified          329 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          329 
+
+Updating with asim-awb changes (rev. 2796 - Carl Beckmann)
+
+- some minor changes to support remote netbatch with parallel simulation

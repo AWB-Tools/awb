@@ -142,26 +142,6 @@ sub check_space {
 
 ################################################################
 
-=item $batch-E<gt>checks_threads($threads)
-
-Add a check that the batch job is run on a processor with at
-least $threads threads.
-
-Setting threads to 1 (or 0) cancels the check.
-
-=cut
-
-################################################################
-
-sub check_threads {
-  my $self = shift;
-  my $threads = shift;
-
-  return 1;
-}
-
-################################################################
-
 =item $batch-E<gt>scheduler();
 
 Local scheduler to wait until its appropriate to submit a job
@@ -194,10 +174,12 @@ sub submit {
 
   my $flags_queue   = $self->{flags_queue};
   my $flags_space   = $self->{flags_space};
+  my $flags_reserve = $self->{flags_thread_reserve_all};
   my $flags_threads = $self->{flags_threads};
   my $flags_extra   = $self->{flags_extra};
 
-  my $flags = "$flags_queue $flags_space $flags_threads $flags_extra";
+  my $flags = "$flags_queue $flags_space $flags_threads $flags_reserve $flags_extra";
+  $flags = Asim::Batch::Netbatch::consolidate_smartclass_expressions($flags);
 
   my $env = $self->{env};
   my %save;
@@ -246,11 +228,11 @@ responsibility of the user of this class.
 
 =head1 AUTHORS
 
-Joel Emer
+Joel Emer, Brian Slechta, Carl Beckmann
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2008
+Copyright (c) Intel Corporation, 2008-9
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.
