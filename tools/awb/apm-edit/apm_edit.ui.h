@@ -89,10 +89,9 @@ void apm__edit::init()
     Model->setSorting(-1,0);
 
     module_type_col = 0;
-    module_param_col = 1;
-    module_submodule_col = 2;
-    module_implementation_col = 3;
-    module_file_col = 4;
+    module_flags_col = 1;
+    module_implementation_col = 2;
+    module_file_col = 3;
 
     alt_implementation_col = 0;
     alt_file_col = 1;
@@ -1083,7 +1082,12 @@ void apm_edit::alternativesInsertAction_activated()
 
 void apm_edit::alternativesEditAction_activated()
 {
-  alternativesEdit_clicked();
+    my $item   = Alternatives->selectedItem() || return;
+    my $module = alternativesModule($item)    || return;
+
+    # Edit all the files belonging to the module
+
+    moduleEditFiles($module, "*");
 }
 
 	        
@@ -1425,13 +1429,14 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     #
     # Write out description of module
     #
+    Info->insertItem("Module:      " . $module->filename());
     Info->insertItem("Name:        " . $module->name());
     Info->insertItem("Description: " . $module->description());
     Info->insertItem("Attributes:  " . join(" ", $module->attributes()));
     Info->insertItem("Provides:    " . $module->provides());
     Info->insertItem("Requires:    " . join(" ", ($module->requires())));
 
-    Files->insertItem("Filename:    " . $module->filename());
+    Files->insertItem("Module:      " . basename($module->filename()));
     Files->insertItem("Notes:       " . join(" ", ($module->notes())));
     Files->insertItem("Makefiles:   " . join(" ", ($module->makefile())));
     Files->insertItem("Scons:       " . join(" ", ($module->scons("*"))));
@@ -1444,13 +1449,28 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     # Write out parameters
     #    Note: the format is parsed textually - be careful changing it.
     #
+
+    my $nondefault = 0;
+
     foreach my $p ($module->parameters()) {
         Parameters->insertItem("   " . $p->description() . ($p->dynamic()?" (dynamic)":""));
-        Parameters->insertItem("       " . $p->name() . $delimiter .
-                     $p->value() . " [" . $p->default() . "]");
+
+
+	my $name = $p->name();
+	my $value = $p->value();
+	my $default = $p->default();
+
+        Parameters->insertItem("       $name$delimiter$value [$default]");
+
+	$nondefault |= ($value ne $default);
     }
 
-
+    if ($nondefault) {
+        alternativesTabWidget->changeTab(ParametersPage, trUtf8("Parameters *"));
+    } else {
+        alternativesTabWidget->changeTab(ParametersPage, trUtf8("Parameters"));
+    }
+        
     #
     # Get notes file and fill into Notes pane
     #
@@ -1465,6 +1485,9 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     }
 
     if (defined($notes) && -r $notes) {
+
+        alternativesTabWidget->changeTab(NotesPage, trUtf8("Notes *"));
+
         open(NOTES, $notes);
 
         while (<NOTES>) {
@@ -1473,6 +1496,8 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
 	}
 
         close(NOTES);
+    } else {
+        alternativesTabWidget->changeTab(NotesPage, trUtf8("Notes"));
     }
 
     Info->setCurrentItem(0);
@@ -1685,8 +1710,7 @@ void apm_edit::modulePaint()
 
     if (! defined($module)) {
         $item->setPixmap(module_type_col, module_missing_pix);
-        $item->setText(module_param_col, trUtf8(""));
-        $item->setText(module_submodule_col, trUtf8(""));
+        $item->setText(module_flags_col, trUtf8("     "));
         $item->setText(module_implementation_col, trUtf8(""));
         $item->setText(module_file_col, trUtf8(""));
 	return;
@@ -1706,13 +1730,29 @@ void apm_edit::modulePaint()
 
     $item->setText(module_implementation_col, trUtf8($module->name()));
 
-    my $param_modified = moduleCheckParams($module, 0)?"p ":"  ";
+    my $flags = moduleFlags($module);
 
-    $item->setText(module_param_col, trUtf8($param_modified));
-    $item->setText(module_submodule_col, trUtf8(""));
+    $item->setText(module_flags_col, trUtf8($flags));
     $item->setText(module_file_col, trUtf8($module->filename()));
    
 }
+
+
+void apm_edit::moduleFlags()
+{
+    my $module = shift;
+
+    my $flags = "  "; 
+
+    $flags .= moduleCheckParams($module, 0)?"p":" ";
+    $flags .= ($module->notes())?"n":" ";
+
+    $flags .= "  ";
+
+    return $flags;
+}
+
+
 
 #
 # Utility functions for checking and defaulting parameters
@@ -1805,14 +1845,35 @@ void apm_edit::moduleDefaultParams()
 # Module information box
 #
 
+# Open button
 
 void apm_edit::alternativesEdit_clicked()
 {
-  my $item   = Alternatives->selectedItem() || return;
-  my $module = alternativesModule($item)    || return;
+    my $item   = Files->selectedItem() || return;
 
-  moduleEditFiles($module);
+    Files_doubleClicked($item);
 }
+
+
+# Double click on line in Files box
+
+void apm_edit::Files_doubleClicked( QListBoxItem * )
+{
+    my $fileitem = shift                      || return;
+    my $fileline = $fileitem->text();
+
+    # Get module from Alternatives box
+
+    my $item   = Alternatives->selectedItem() || return;
+    my $module = alternativesModule($item)    || return;
+
+    $fileline =~ /^.*: *(.*)/;
+    my $files = $1;
+   
+    moduleEditFiles($module, $files);
+}
+
+
 
 
 void apm_edit::Parameters_selectionChanged( QListBoxItem * )
@@ -1911,6 +1972,7 @@ void apm_edit::ParamChange_clicked()
 void apm_edit::moduleEditFiles()
 {
     my $module = shift;
+    my $filelist = shift || "*";
 
     # Handle submodels...
 
@@ -1927,10 +1989,16 @@ void apm_edit::moduleEditFiles()
     my $dir = $module->base_dir();
 
     my @files = ();
+    my @module_files = ();
 
-    push(@files, $Asim::default_workspace->resolve($module->filename()));
+    if ($filelist eq "*") {
+        push(@files, $Asim::default_workspace->resolve($module->filename()));
+	push(@module_files, $module->inventory());
+    } else {
+	push(@module_files, split(' ', $filelist));
+    }
 
-    foreach my $f ($module->inventory()) {
+    foreach my $f (@module_files) {
       my $resolved_f = Asim::resolve("$dir/$f");
 
       if (!defined($resolved_f)) {

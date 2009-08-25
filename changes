@@ -6447,3 +6447,25 @@ Directory tools/scripts
  asim-run                  Locally Modified          331 
 
 Revert changes in r330, which broke asim-run.
+
+----------
+emer        Date: Tue Aug 25 18:51:16 EDT 2009  CSN: CSN-awb-333
+                  Tue Aug 25 22:51:16 UTC 2009
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          332 
+ apm_edit.ui               Locally Modified          332 
+
+Minor apm-edit improvements:
+
+* Added column with 'flags' for each module in model
+** Flag 'p' -> module has a non-default parameter value
+** Flag 'n' -> module has notes
+* Tabs titles in info box show a star (*) if there are:
+** Non-default parameters
+** Non-empty notes
+* Selective opening of files in 'Files' tab of info box
+** Double click on line, or
+** Select line and click open button
+** Context menu in alternatives list box still opens all files

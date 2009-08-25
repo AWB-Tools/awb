@@ -97,18 +97,7 @@
                 </column>
                 <column>
                     <property name="text">
-                        <string>P </string>
-                    </property>
-                    <property name="clickable">
-                        <bool>false</bool>
-                    </property>
-                    <property name="resizable">
-                        <bool>false</bool>
-                    </property>
-                </column>
-                <column>
-                    <property name="text">
-                        <string>S </string>
+                        <string>Flags</string>
                     </property>
                     <property name="clickable">
                         <bool>false</bool>
@@ -137,12 +126,6 @@
                 </property>
                 <property name="text">
                     <string></string>
-                </property>
-                <property name="text">
-                    <string></string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
                 </property>
                 <property name="pixmap">
                     <pixmap></pixmap>
@@ -251,7 +234,7 @@
                     </property>
                     <widget class="QWidget">
                         <property name="name">
-                            <cstring>tab</cstring>
+                            <cstring>SummaryPage</cstring>
                         </property>
                         <attribute name="title">
                             <string>Summary</string>
@@ -275,7 +258,7 @@
                     </widget>
                     <widget class="QWidget">
                         <property name="name">
-                            <cstring>TabPage</cstring>
+                            <cstring>FilesPage</cstring>
                         </property>
                         <attribute name="title">
                             <string>Files</string>
@@ -343,7 +326,7 @@
                     </widget>
                     <widget class="QWidget">
                         <property name="name">
-                            <cstring>tab</cstring>
+                            <cstring>ParametersPage</cstring>
                         </property>
                         <attribute name="title">
                             <string>Parameters</string>
@@ -431,7 +414,7 @@
                     </widget>
                     <widget class="QWidget">
                         <property name="name">
-                            <cstring>TabPage</cstring>
+                            <cstring>NotesPage</cstring>
                         </property>
                         <attribute name="title">
                             <string>Notes</string>
@@ -1534,6 +1517,12 @@
         <receiver>apm_edit</receiver>
         <slot>Alternatives_contextMenuRequested(QListViewItem*,const QPoint&amp;,int)</slot>
     </connection>
+    <connection>
+        <sender>Files</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>apm_edit</receiver>
+        <slot>Files_doubleClicked(QListBoxItem*)</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Model</tabstop>
@@ -1560,8 +1549,7 @@
     <variable access="private">module_default_pix;</variable>
     <variable access="private">module_current_pix;</variable>
     <variable access="private">module_type_col;</variable>
-    <variable access="private">module_param_col;</variable>
-    <variable access="private">module_submodule_col;</variable>
+    <variable access="private">module_flags_col;</variable>
     <variable access="private">module_implementation_col;</variable>
     <variable access="private">module_file_col;</variable>
     <variable access="private">alt_implementation_col;</variable>
@@ -1630,6 +1618,7 @@
     <slot>ParamChange_clicked()</slot>
     <slot returnType="int">Model_find()</slot>
     <slot returnType="int *">Model_walk()</slot>
+    <slot>Files_doubleClicked( QListBoxItem * )</slot>
 </slots>
 <functions>
     <function access="private">modelShow()</function>
@@ -1640,6 +1629,7 @@
     <function access="private">moduleDefaultParams()</function>
     <function access="private">moduleEditFiles()</function>
     <function access="private">alternativesModule()</function>
+    <function access="private">moduleFlags()</function>
 </functions>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>
