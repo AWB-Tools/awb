@@ -6469,3 +6469,13 @@ Minor apm-edit improvements:
 ** Double click on line, or
 ** Select line and click open button
 ** Context menu in alternatives list box still opens all files
+
+----------
+emer        Date: Wed Aug 26 16:37:13 EDT 2009  CSN: CSN-awb-334
+                  Wed Aug 26 20:37:13 UTC 2009
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui               Locally Modified          333 
+
+Restored missing Model->Insert menu...

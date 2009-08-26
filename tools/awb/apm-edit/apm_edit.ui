@@ -484,12 +484,7 @@
         <action name="moduleEditAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
-        <actiongroup name="InsertActionGroup"/>
-        <item text="&amp;Insert" name="popupMenu_33" accel="">
-            <action name="moduleInsertModuleAction"/>
-            <action name="moduleInsertSubmodelAction"/>
-            <action name="moduleInsertAsRootAction"/>
-        </item>
+        <action name="InsertActionGroup"/>
         <action name="moduleDeleteAction"/>
     </item>
     <item text="&amp;Alternatives" name="alternativesMenu">
