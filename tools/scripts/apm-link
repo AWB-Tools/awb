@@ -1,0 +1,298 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+#
+# Copyright (C) 2009 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+
+#
+# Author:  Joel Emer
+#
+
+use File::Basename;
+use Getopt::Long;
+
+use Asim;
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
+#
+# Argument handling
+#
+my $prog = basename($0);
+my $debug = 0 || defined($ENV{APMLINK_DEBUG});
+my $status;
+
+my $output = "a.apm";
+my $root = "model project";
+my $verbose = 0;
+my $help = 0;
+
+$status = GetOptions( "output=s"       => \$output,
+		      "root=s"         => \$root,
+                      "verbose"        => \$verbose,
+                      "debug"          => \$debug,
+                      "help"           => \$help
+                    );
+
+
+if (!$status) {
+  print STDERR "$prog: Error: Illegal argument, try '$prog --help'\n";
+  exit 0;
+}
+
+if ($help) {
+  system "perldoc $0";
+  exit 0;
+}
+
+
+Asim::init()
+  || die("Unable to initialize Asim::\n");
+
+
+my %m;
+my $model;
+
+
+# Create database (hash) of all submodels/modules to link in
+
+foreach my $i (@ARGV) {
+    my $module;
+    my $provides;
+
+    print "$prog: Info: Input file $i\n" if ($verbose);
+
+    # Cannonicalize filepath
+    # TBD: The resolve should not be needed
+    # TBD: This should probably be done in Asim::{Module,Model}->new()
+
+    $i = Asim::unresolve(Asim::resolve($i));
+
+    # Open the right kind of object
+    # TBD: There should be a generic open for models and modules
+
+    if ($i =~ /.apm$/) {
+	$module = Asim::Model->new($i);
+    } elsif ($i =~ /.awb$/) {
+	$module = Asim::Module->new($i);
+    } else {
+	die("$prog: Unknown input file type: $i\n");
+    }
+
+    $provides = $module->provides();
+
+    print "$prog: Debug: Available $provides\n" if ($debug);
+    $m{$provides} = $module;
+ 
+}
+
+# Find and open the root of the model
+
+foreach my $p (split(" ", $root)) {
+    if (defined($m{$p})) {
+	print "$prog: Debug: Root at $p\n" if ($debug);
+
+	$model = $m{$p};
+
+	if (ref($model) ne "Asim::Model") {
+	    die("$prog: Error: root must be an .apm file\n");
+	}
+
+	$model->embed_submodels();
+
+	delete($m{$p});
+	last;
+    }
+}
+
+if (! defined($model)) {
+    die("$prog: No appropriate root for design\n");
+}
+
+
+# Look for missing modules and fill them in
+
+while (defined($p = find_missing($model->modelroot()))) {
+
+    if (! defined($m{$p})) {
+	die("$prog: No replacement for $p\n");
+    }
+
+    print "$prog: Info: Adding moduling providing $p\n" if ($verbose);
+
+    $model->smart_add_submodule($m{$p}) || die("Insert failed\n");
+    $model->embed_submodels();
+
+    delete($m{$p});
+}
+
+# Show unused inputs
+
+foreach my $p (keys %m) {
+    print "$prog: Warning: Unused input file type: $p\n";
+}
+
+# Save linked model
+
+print "$prog: Info: Writing file $output\n" if ($verbose);
+
+$model->save($output);
+
+
+exit !$status;
+
+
+# Traverse tree to find holes in model
+# Returns the awb-type of the missing module.
+
+sub find_missing {
+    my $module = shift;
+
+    my @requires = $module->requires();
+
+    foreach $m ($module->submodules()) {
+	my $p = shift(@requires);
+
+	if (! defined($m) ) {
+	    return $p;
+	}
+
+	$p = find_missing($m);
+	
+	if (defined($p)) {
+	    return $p;
+	}
+    }
+	
+    return undef;
+}
+
+
+__END__
+
+=head1 NAME
+
+Apm-link - Link together a set of .apm/.awb files into a single .apm file
+
+=head1 SYNOPSIS
+
+apm-link   [--output=<apm-file>]
+           [--root=<awb-type>]
+           [--verbose]
+           [--help]
+           <apm-file|awb-file>...
+
+=head1 DESCRIPTION
+
+This is a program that takes a set of .apm and .awb files and combines
+them together into a single output .apm file. The root of the new .apm
+file is the model in the input .apm file of the type specified with the
+--root switch. Any missing modules in that tree are filled in (recursively)
+with models/modules specified by the other input files. 
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --output=<apm-file>
+
+An .apm file to hold the linked combination of input .apm files.
+
+Default: a.apm
+
+=item --root=<awb-type of root model>
+
+The awb-type of the .apm file that should be used as the root of the
+new .apm file.
+
+Default: either model or project
+
+=item --verbose
+
+Print out some more information about what is happening.
+
+=item --debug
+
+Print out some more information about what is happening.
+
+=item --help
+
+Get this help information.
+
+=item [--] <apm-file|awb-file>...
+
+A list of .apm or .awb files to link together into a single .apm files.
+
+=back
+
+
+=head1 EXAMPLES
+
+
+=head1 ENVIRONMENT
+
+    This program operates on files in an awb workspace, so
+    one must either be in a workspace or the environment variable
+    AWBLOCAL must be set and point to an awb workspace.
+
+    This program uses the Asim perl modules, so they
+    must be in your perl library path. That is accompished
+    by running the script through asimstarter. That will
+    happen automatically is the awb tools have been installed.
+
+    You can also invoke it indirectly through asimstarter using:
+
+    % asimstarter -- apm-link ...
+
+    Or you can define the library path explictily with a command like:
+
+    % setenv PERL5LIB <worksapce>/src/asim-core/tools/libperl
+
+=head1 BUGS
+
+The output .apm file has been flattened so that all submodels are
+expanded out.
+
+One cannot substitute a module that is not 'missing' with a submodel
+or module specified on the command line.
+
+If after the link there are still missing modules the program does
+not try to fill them in with 'default' modules.
+
+=head1 AUTHORS
+
+Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Intel Corporation, 2009              *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

@@ -6479,3 +6479,17 @@ Directory tools/awb/apm-edit
  apm_edit.ui               Locally Modified          333 
 
 Restored missing Model->Insert menu...
+
+----------
+emer        Date: Fri Aug 28 17:05:11 EDT 2009  CSN: CSN-awb-335
+                  Fri Aug 28 21:05:11 UTC 2009
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          334 
+ apm-link                  Locally Added               0 
+
+Added an experimental program (apm-link) that can be used to
+combine (link) together a set of .apm and .awb files to form
+a new .apm file where missing modules (holes) in the input files
+have been filled with the other input files.

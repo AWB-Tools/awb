@@ -161,6 +161,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
   "apm-edit"            => "tools/awb/apm-edit/apm-edit",
   "apm-find-replace"    => "tools/awb/apm-find-replace/apm-find-replace",
+  "apm-link"            => "tools/scripts/apm-link",
   "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
 #
 # HAsim commands
