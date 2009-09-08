@@ -6493,3 +6493,15 @@ Added an experimental program (apm-link) that can be used to
 combine (link) together a set of .apm and .awb files to form
 a new .apm file where missing modules (holes) in the input files
 have been filled with the other input files.
+
+----------
+emer        Date: Tue Sep  8 17:10:10 EDT 2009  CSN: CSN-awb-336
+                  Tue Sep  8 21:10:10 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Local.pm                  Locally Modified          335 
+
+Added some methods for the 'local' batch subsystem that makes it
+consistent with real batch subsystems even though the values returned
+are meaningless constant values.
