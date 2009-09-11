@@ -6505,3 +6505,17 @@ Directory libperl/Asim/lib/Asim/Batch
 Added some methods for the 'local' batch subsystem that makes it
 consistent with real batch subsystems even though the values returned
 are meaningless constant values.
+
+----------
+emer        Date: Fri Sep 11 15:16:21 EDT 2009  CSN: CSN-awb-337
+                  Fri Sep 11 19:16:21 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          336 
+
+For 'global' awb parameters defined in a module within a submodel that
+itself is included in an outer submodel, we now allow changing such
+parameters at the level of the model that includes the outer submodel.
+In other words, 'global' awb parameters are always visible regardless of
+whether they are buried in multiple levels of submodels.

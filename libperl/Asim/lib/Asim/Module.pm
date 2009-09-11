@@ -1519,9 +1519,27 @@ Note: This method picks up the 'global' parameters from a
 
 sub find_global_parameters {
   my $self = shift;
-  my $recurse = shift || 0;
+  my $stop_at_submodel = shift || 0;
 
   my @result = ();
+
+
+  if ($stop_at_submodel && $self->isroot()) {
+
+    # Handle global parameters of a submodel
+
+    my $submodel = $self->owner();
+
+    foreach my $p ($submodel->parameters()) {
+      if ($p->global()) {
+        push(@result, $p);
+      }
+    }
+
+    return (@result);
+  }
+
+  # Collect parameters of this module
 
   foreach my $p ($self->parameters()) {
     if ($p->global()) {
@@ -1529,9 +1547,9 @@ sub find_global_parameters {
     }
   }
 
-  return if ($recurse && $self->isroot());
+  # Collect parameters from each submodule
 
-  foreach my $submodule ($self->submodules) {
+  foreach my $submodule ($self->submodules()) {
     next unless defined($submodule);
 
     push(@result, $submodule->find_global_parameters(1));
@@ -1691,14 +1709,14 @@ Note: this method does not recurse into submodels
 sub find_module_providing {
   my $self = shift;
   my $modtype = shift;
-  my $recurse = shift || undef;
+  my $stop_at_submodel = shift || undef;
 
   my $found;
 
   return $self if ($self->provides() eq $modtype);
 
   # Do not look at child of a submouule root;
-  return undef if  $recurse && $self->isroot();
+  return undef if  $stop_at_submodel && $self->isroot();
 
   foreach my $submodule ($self->submodules()) {
     next unless defined($submodule);
