@@ -225,7 +225,7 @@ sub _rehash_bundle_directory {
   $self->{bundles} = {};
 
   foreach my $f (@files) {
-    my ($base, $path, $type) = fileparse($f, '\..*');
+    my ($base, $path, $type) = fileparse($f, '\.[^.]*');
 
     # Eliminate meaningless files
     # TBD: Probabably should denand specific extensions

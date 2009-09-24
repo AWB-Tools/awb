@@ -1209,7 +1209,7 @@ void awb_dialog::checkoutBundleListBox_doubleClicked( QListBoxItem * )
     }
 
     my $repoDB = Asim::Repository::DB->new();
-    my $bundle = $repoDB->get_bundle($bundlename,$version) || return undef;
+    my $bundle = $repoDB->get_bundle("$bundlename/$version") || return undef;
 
     Qt::MessageBox::information(
 	this, 

@@ -6562,3 +6562,17 @@ Enhanced support for bundles
 ** Fixed bug on checkout for non-default version
 ** awb-shell branch of a svn repository can be a tag or branch
 ** Stopped conversion of dot (.) to underscore (_) for SVN
+
+----------
+emer        Date: Thu Sep 24 12:09:21 EDT 2009  CSN: CSN-awb-339
+                  Thu Sep 24 16:09:21 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          338 
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          338 
+
+Properly parse bundle file extensions and allow browsing 
+of non-default bundles.
