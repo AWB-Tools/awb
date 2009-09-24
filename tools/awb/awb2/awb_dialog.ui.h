@@ -1126,6 +1126,13 @@ void awb_dialog::workspaceSwitchPushButton_clicked()
 # Repository Group
 #
 
+void awb_dialog::respositoriesTabWidget_currentChanged( QWidget * )
+{
+    # Remember if we working on repositories or bundles
+
+    repoType = respositoriesTabWidget->currentPageIndex();
+}
+
 
 
 void awb_dialog::checkoutListBox_highlighted( const QString & )
@@ -1140,17 +1147,41 @@ void awb_dialog::checkoutListBox_highlighted( const QString & )
     }
 }
 
+void awb_dialog::checkoutBundleListBox_highlighted( const QString & )
+{
+    my $bundle = shift;
+
+    bundleVersionComboBox->clear();
+    bundleVersionComboBox->insertItem("<Optionally select alternate version>");
+
+    for my $v (sort keys  %{this->{bundles}->{$bundle}}) {
+        bundleVersionComboBox->insertItem($v);
+    }
+}
 
 
 
 
 void awb_dialog::repositoryBrowsePushButton_clicked()
 {
-    my $i = checkoutListBox->currentItem();
-    my $item = checkoutListBox->item($i);
-    return if (! defined($item));
+    if (repoType == 0) {
+        # Prepare to browse a repository
 
-    checkoutListBox_doubleClicked($item);
+        my $i = checkoutListBox->currentItem();
+        my $item = checkoutListBox->item($i);
+        return if (! defined($item));
+
+        checkoutListBox_doubleClicked($item);
+    } else {
+        # Prepare to browse a bundle
+
+        my $i = checkoutBundleListBox->currentItem();
+        my $item = checkoutBundleListBox->item($i);
+        return if (! defined($item));
+
+        checkoutBundleListBox_doubleClicked($item);
+    }
+      
 }
 
 void awb_dialog::checkoutListBox_doubleClicked( QListBoxItem * )
@@ -1165,23 +1196,76 @@ void awb_dialog::checkoutListBox_doubleClicked( QListBoxItem * )
 }
 
 
+
+
+void awb_dialog::checkoutBundleListBox_doubleClicked( QListBoxItem * )
+{
+    my $item = shift;
+    my $bundlename = $item->text();
+
+    my $version = bundleVersionComboBox->currentText();
+    if ($version =~ /<.*>/) {
+        $version = "default";
+    }
+
+    my $repoDB = Asim::Repository::DB->new();
+    my $bundle = $repoDB->get_bundle($bundlename,$version) || return undef;
+
+    Qt::MessageBox::information(
+	this, 
+	"$bundlename/$version - Bundle Information",
+	  "Type:    " . $bundle->type() . "\n"
+	. "Status:   " . $bundle->status() . "\n"
+	. "Packages: " . join(" ", $bundle->packages()) . "\n");
+
+}
+
+
+
+void awb_dialog::refreshReposPushButton_clicked()
+{
+    reposInit();
+}
+
+
 void awb_dialog::checkoutPushButton_clicked()
 {
-    my $command = "asim-shell --batch -- checkout package";
+    my $command = "asim-shell --batch -- checkout ";
 
-    my $w = awb_runlog(0,0,1);
+    if (repoType == 0) {
+        $command .= "package";
+    } else {
+        $command .= "bundle";
+    }
 
     #
     # Get name of package to check out
     #
-    my $i = checkoutListBox->currentItem();
-    my $item = checkoutListBox->item($i);
-    return if (! defined($item));
-    my $package = $item->text();
+    
+    my $package;
+    my $version;
 
-    my $version = repoVersionComboBox->currentText();
+    if (repoType == 0) {
+        # Get repository name and version
 
-    if (! $version =~ /<.*>/) {
+        my $i = checkoutListBox->currentItem();
+	my $item = checkoutListBox->item($i);
+	return if (! defined($item));
+
+	$package = $item->text();
+	$version = repoVersionComboBox->currentText();
+    } else {
+        # Get bundle name and version
+
+        my $i = checkoutBundleListBox->currentItem();
+	my $item = checkoutBundleListBox->item($i);
+	return if (! defined($item));
+
+	$package = $item->text();
+	$version = bundleVersionComboBox->currentText();
+    }
+
+    if (! ($version =~ /<.*>/)) {
         $package .= "/$version";
     }
 
@@ -1191,7 +1275,7 @@ void awb_dialog::checkoutPushButton_clicked()
     # Optionally add uesrname
     #
     my $username = usernameLineEdit->text();
-    print "$username\n";
+
     if ($username ne "") {
         $command .= " --user=$username";
     }
@@ -1209,6 +1293,8 @@ void awb_dialog::checkoutPushButton_clicked()
     if (! checkoutBuildCheckBox->isChecked() ) {
         $command .= " --nobuild ";
     }
+
+    my $w = awb_runlog(0,0,1);
 
     $w->run($command);
 
@@ -1438,20 +1524,21 @@ void awb_dialog::setupInit()
 void awb_dialog::reposInit()
 {
 
+    my $repoDB = Asim::Repository::DB->new();
+
     #
     # Set up repository list
     #
-    my $repoDB = Asim::Repository::DB->new();
-    my @repodirs = $repoDB->directory();
-
     checkoutListBox->clear();
     repoVersionComboBox->clear();
 
-    this->{repsos} = {};
+    #
+    # Keep a hash of repos each of which is a hash of versions
+    #
+    this->{repos} = {};
 
-    #
-    # Keep a hash of repos each of which is s hash of versions
-    #
+    my @repodirs = $repoDB->directory();
+
     foreach my $p (@repodirs) {
 
         if ($p =~ /^[^\/]*$/) {
@@ -1463,6 +1550,36 @@ void awb_dialog::reposInit()
             this->{repos}->{$1}->{$2} = 1;
         }
     }
+
+
+    #
+    # Set up bundles list
+    #
+
+    checkoutBundleListBox->clear();
+    bundleVersionComboBox->clear();
+
+    #
+    # Keep a hash of bundles each of which is a hash of versions
+    #
+
+    this->{bundles} = {};
+
+    my @bundledirs = $repoDB->bundle_directory();
+    my @versions;
+
+    foreach my $p (@bundledirs) {
+	checkoutBundleListBox->insertItem($p);
+
+        this->{bundles}->{$p} = {};
+
+	@versions = $repoDB->bundle_ids($p);
+
+	foreach my $v (@versions) {
+            this->{bundles}->{$p}->{$v} = 1;
+	}
+    }
+
 }
 
 
@@ -1517,5 +1634,4 @@ void awb_dialog::packagesInit()
 #      Sometimes {model,bencmark}_tree_expanded not called!
 #
 #           
-
 

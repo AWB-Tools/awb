@@ -43,6 +43,8 @@ use Asim::Regression;
 use Asim::Repository::DB;
 use Asim::Repository;
 
+use Asim::Bundle;
+
 use Asim::Model::DB;
 use Asim::Model;
 

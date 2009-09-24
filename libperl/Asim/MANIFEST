@@ -25,6 +25,7 @@ lib/Asim/Batch/NetbatchRemote.pm
 lib/Asim/Benchmark.pm
 lib/Asim/Package/BitKeeper.pm
 lib/Asim/Package/Svn.pm
+lib/Asim/Bundle.pm
 lib/Asim/BuildTree.pm
 lib/Asim/Package/Cvs.pm
 lib/Asim/Edit.pm

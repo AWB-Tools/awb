@@ -500,20 +500,27 @@ sub branch {
     ##########     SVN    ##########
   
     my $cur_url    = $self->get_working_url();
-    my $branch_url = $self->get_repository_url() . '/branches/' . $branchname;
+
+    my $use_tags = Asim::choose_yes_or_no("Put branch in tags/ instead of branches/?", "no", "no");
+    my $branch_dir = $use_tags?"/tags/":"/branches/";
+
+    my $branch_url = $self->get_repository_url() . $branch_dir . $branchname;
 
     # create a comment file header, nicely formatted so it gets past SVN pre-commit hook:
     $self->{commentfile} = "$TMPDIR/asimbranch_comment.$$.txt";
+
     open COMMENT, '>'.$self->{commentfile};
     my $csn = $self->csn();
     chomp(my $date     = `$DATE`);
     chomp(my $date_utc = `$DATE_UTC`);
-    printf COMMENT "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n",
-      $USER, $date, $csn, "", $date_utc;
-    print  COMMENT "        Branch from revision: $csn\n";
-    print  COMMENT "        From URL:             $cur_url\n";
-    print  COMMENT "        To URL:               $branch_url\n";
+    printf COMMENT "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n", $USER, $date, $csn, "", $date_utc;
+    print  COMMENT "";
+    print  COMMENT "Branch from revision: $csn\n";
+    print  COMMENT "From URL:             $cur_url\n";
+    print  COMMENT "To URL:               $branch_url\n";
+    print  COMMENT "";
     close  COMMENT;
+
     Asim::invoke_editor("--eof", $self->{commentfile});
     
     # create the branch in the repository, using the supplied branch name:

@@ -482,35 +482,29 @@ sub list_bundles {
 # return the list of packages in a bundle.
 # Common suborutine used  by many commands below,
 # NOT an asim-shell command!!
-# FIX FIX ?!? create a new perl class for dealing with bundles??
+# 
 #
 sub bundle_packages_ {
   my $bundlename = shift;
-  my $bundleid;
-
   chomp($bundlename);
-  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
-  $bundleid = "default" unless defined $bundleid;  
 
-  my @flist = $default_repositoryDB->bundle_files($bundlename);
-  (@flist == 0) && shell_error("No bundle file found for `$bundlename`!\n") && return ();
-  
-  my $inifile = Asim::Inifile->new();
-  foreach my $file (@flist) {
-      $inifile->include($file) || ($show_warnings && print("Cannot read file `$file` to collect bundle list!\n"));
+  my $bundle = $default_repositoryDB->get_bundle($bundlename);
+  if (!defined($bundle)) {
+    shell_error("No bundle file found for `$bundlename`!\n");
+    return ();
   }
-  
-  my $items = $inifile->get($bundleid);
-  if (!defined $items) {
-      shell_error("Bundle id `$bundleid` not found!\n") && return ();
-  }
-  elsif ((defined $items->{Status}) && ($items->{Status} eq "Failure")) {
+
+  if ($bundle->status() eq "Failure") {
       if (!Asim::choose_yes_or_no("This bundle has failure status.  Do you want to get it", "no", "no")) {
 	  return 0;
       }
   }
-  my @packages = split(" ", $items->{Packages});
-  (@packages == 0) && shell_error("Bundle id `$bundleid` did not result in any package!\n") && return ();
+  my @packages = $bundle->packages();
+
+  if (@packages == 0) {
+      shell_error("Bundle `$bundlename` did not result in any package!\n");
+      return ();
+  }
 
   return @packages;
 }
@@ -717,10 +711,14 @@ sub show_bundle {
 
   #
   # Determine the list of packages to check out from the bundle file
-  #	      
-  @packages = bundle_packages_( $bundlename );
+  #
 
-  print join("\n", @packages) . "\n";
+  my $bundle = $default_repositoryDB->get_bundle($bundlename);
+
+  print "Bundle:   $bundlename\n";
+  print "Type:     " . $bundle->type() . "\n";
+  print "Status:   " . $bundle->status() . "\n";
+  print "Packages: " . join(" ", $bundle->packages()) . "\n";
 
   return 1;
 }

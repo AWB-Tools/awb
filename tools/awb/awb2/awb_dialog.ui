@@ -9,84 +9,17 @@
             <x>0</x>
             <y>0</y>
             <width>661</width>
-            <height>638</height>
+            <height>690</height>
         </rect>
     </property>
     <property name="caption">
         <string>awb</string>
     </property>
-    <grid>
+    <vbox>
         <property name="name">
             <cstring>unnamed</cstring>
         </property>
-        <property name="margin">
-            <number>11</number>
-        </property>
-        <property name="spacing">
-            <number>6</number>
-        </property>
-        <widget class="QLayoutWidget" row="1" column="0">
-            <property name="name">
-                <cstring>layout23</cstring>
-            </property>
-            <grid>
-                <property name="name">
-                    <cstring>unnamed</cstring>
-                </property>
-                <widget class="QLabel" row="0" column="2">
-                    <property name="name">
-                        <cstring>version</cstring>
-                    </property>
-                    <property name="frameShape">
-                        <enum>Panel</enum>
-                    </property>
-                    <property name="frameShadow">
-                        <enum>Sunken</enum>
-                    </property>
-                    <property name="text">
-                        <string>AWB 2.0</string>
-                    </property>
-                    <property name="alignment">
-                        <set>AlignCenter</set>
-                    </property>
-                </widget>
-                <widget class="QLabel" row="0" column="0">
-                    <property name="name">
-                        <cstring>model_name</cstring>
-                    </property>
-                    <property name="frameShape">
-                        <enum>Panel</enum>
-                    </property>
-                    <property name="frameShadow">
-                        <enum>Sunken</enum>
-                    </property>
-                    <property name="text">
-                        <string>No Model Selected</string>
-                    </property>
-                    <property name="alignment">
-                        <set>AlignCenter</set>
-                    </property>
-                </widget>
-                <widget class="QLabel" row="0" column="1">
-                    <property name="name">
-                        <cstring>benchmark_name</cstring>
-                    </property>
-                    <property name="frameShape">
-                        <enum>Panel</enum>
-                    </property>
-                    <property name="frameShadow">
-                        <enum>Sunken</enum>
-                    </property>
-                    <property name="text">
-                        <string>No Benchmark Selected</string>
-                    </property>
-                    <property name="alignment">
-                        <set>AlignCenter</set>
-                    </property>
-                </widget>
-            </grid>
-        </widget>
-        <widget class="QTabWidget" row="0" column="0">
+        <widget class="QTabWidget">
             <property name="name">
                 <cstring>Tabs_main</cstring>
             </property>
@@ -1810,11 +1743,401 @@
                 <attribute name="title">
                     <string>Admin</string>
                 </attribute>
-                <grid>
+                <vbox>
                     <property name="name">
                         <cstring>unnamed</cstring>
                     </property>
-                    <widget class="QGroupBox" row="2" column="0">
+                    <widget class="QGroupBox">
+                        <property name="name">
+                            <cstring>groupBox7</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>true</bool>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>3</hsizetype>
+                                <vsizetype>3</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>0</width>
+                                <height>155</height>
+                            </size>
+                        </property>
+                        <property name="title">
+                            <string>Workspace</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>This group of controls allows one to create and switch workspaces. The top edit box contains a directory that contains (or will contain) workspace directories. The new workspace edit box contains the name for a new workspace, and the old workspace dropdown list contains the names of workspaces in the current directory. The create button creates a new workspace with the specified name and the switch button switches to the selected workspace.</string>
+                        </property>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QPushButton" row="0" column="2">
+                                <property name="name">
+                                    <cstring>workspaceBrowsePushButton</cstring>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>90</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="text">
+                                    <string>Browse</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Browse for a directory containing workspaces</string>
+                                </property>
+                            </widget>
+                            <widget class="QPushButton" row="1" column="2">
+                                <property name="name">
+                                    <cstring>workspaceCreatePushButton</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Create</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Create a new workspace</string>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="1" column="0">
+                                <property name="name">
+                                    <cstring>textLabel1_3</cstring>
+                                </property>
+                                <property name="sizePolicy">
+                                    <sizepolicy>
+                                        <hsizetype>0</hsizetype>
+                                        <vsizetype>0</vsizetype>
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>175</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="text">
+                                    <string>&lt;p align="right"&gt;New workspace name:&lt;/p&gt;</string>
+                                </property>
+                            </widget>
+                            <widget class="QPushButton" row="2" column="2">
+                                <property name="name">
+                                    <cstring>workspaceSwitchPushButton</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Switch</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Switch to the selected workspace</string>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="2" column="0">
+                                <property name="name">
+                                    <cstring>textLabel1_4</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>&lt;p align="right"&gt;Existing workspace name:&lt;/p&gt;</string>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="0" column="0" rowspan="1" colspan="2">
+                                <property name="name">
+                                    <cstring>workspaceDirLineEdit</cstring>
+                                </property>
+                                <property name="sizePolicy">
+                                    <sizepolicy>
+                                        <hsizetype>3</hsizetype>
+                                        <vsizetype>0</vsizetype>
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Enter a directory containing workspaces</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This is the name of a directory that contains subdirectories, each of which is a workspace.</string>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="1" column="1">
+                                <property name="name">
+                                    <cstring>workspaceNameLineEdit</cstring>
+                                </property>
+                                <property name="sizePolicy">
+                                    <sizepolicy>
+                                        <hsizetype>3</hsizetype>
+                                        <vsizetype>0</vsizetype>
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Enter a name for the new workspace</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This text box contains the name of a workspace to be created. Click the 'Create' button to the right to create it.</string>
+                                </property>
+                            </widget>
+                            <widget class="QComboBox" row="2" column="1">
+                                <property name="name">
+                                    <cstring>workspaceComboBox</cstring>
+                                </property>
+                                <property name="sizePolicy">
+                                    <sizepolicy>
+                                        <hsizetype>3</hsizetype>
+                                        <vsizetype>0</vsizetype>
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Select a workspace do switch to</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This drop-down box contains a list of workspaces in the directory shown two text boxes above. Use this drop-down box to select a different workspace and click the 'switch' button to the right to switch to that workspace.</string>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QGroupBox">
+                        <property name="name">
+                            <cstring>groupBox8</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>3</hsizetype>
+                                <vsizetype>3</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>165</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="title">
+                            <string>Repositories</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>This group of controls are used to check out a package. Select a repository name in the listbox and optionally provide a username and password for the checkout. Then click 'checkout'. The 'build' checkbox controls whether the package will be built after the checkout.</string>
+                        </property>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QCheckBox" row="4" column="1" rowspan="1" colspan="2">
+                                <property name="name">
+                                    <cstring>checkoutBuildCheckBox</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Build</string>
+                                </property>
+                                <property name="checked">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Check to build package after checkout</string>
+                                </property>
+                            </widget>
+                            <widget class="QPushButton" row="4" column="3">
+                                <property name="name">
+                                    <cstring>checkoutPushButton</cstring>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>90</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="text">
+                                    <string>Checkout</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Check out the selected package</string>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="2" column="2" rowspan="1" colspan="2">
+                                <property name="name">
+                                    <cstring>usernameLineEdit</cstring>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>140</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Enter a username for the checkout</string>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="3" column="1">
+                                <property name="name">
+                                    <cstring>textLabel1_2</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Password:</string>
+                                </property>
+                            </widget>
+                            <widget class="QLineEdit" row="3" column="2" rowspan="1" colspan="2">
+                                <property name="name">
+                                    <cstring>passwordLineEdit</cstring>
+                                </property>
+                                <property name="enabled">
+                                    <bool>false</bool>
+                                </property>
+                                <property name="echoMode">
+                                    <enum>Password</enum>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Enter a password for the checkout</string>
+                                </property>
+                            </widget>
+                            <widget class="QLabel" row="2" column="1">
+                                <property name="name">
+                                    <cstring>textLabel1</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Username:</string>
+                                </property>
+                            </widget>
+                            <spacer row="0" column="1" rowspan="2" colspan="1">
+                                <property name="name">
+                                    <cstring>spacer13_2</cstring>
+                                </property>
+                                <property name="orientation">
+                                    <enum>Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property name="sizeHint">
+                                    <size>
+                                        <width>20</width>
+                                        <height>16</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                            <widget class="QTabWidget" row="0" column="0" rowspan="5" colspan="1">
+                                <property name="name">
+                                    <cstring>respositoriesTabWidget</cstring>
+                                </property>
+                                <widget class="QWidget">
+                                    <property name="name">
+                                        <cstring>tab</cstring>
+                                    </property>
+                                    <attribute name="title">
+                                        <string>Packages</string>
+                                    </attribute>
+                                    <grid>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QComboBox" row="1" column="0">
+                                            <property name="name">
+                                                <cstring>repoVersionComboBox</cstring>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Select alternate version, if desired</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QListBox" row="0" column="0">
+                                            <property name="name">
+                                                <cstring>checkoutListBox</cstring>
+                                            </property>
+                                            <property name="selectionMode">
+                                                <enum>Single</enum>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Select a package to check out</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>This is a list of repositories containing packages that are available to be checked out. Select one;  optionally pick a version in the drop-down list below and click checkout to add the package to your workspace.</string>
+                                            </property>
+                                        </widget>
+                                    </grid>
+                                </widget>
+                                <widget class="QWidget">
+                                    <property name="name">
+                                        <cstring>tab</cstring>
+                                    </property>
+                                    <attribute name="title">
+                                        <string>Bundles</string>
+                                    </attribute>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QListBox">
+                                            <property name="name">
+                                                <cstring>checkoutBundleListBox</cstring>
+                                            </property>
+                                            <property name="selectionMode">
+                                                <enum>Single</enum>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Select a bundle to check out</string>
+                                            </property>
+                                            <property name="whatsThis" stdset="0">
+                                                <string>This is a list of bundle, where each bundle represents a set of packages that are available to be checked out as a group. Select one;  optionally pick a version in the drop-down list below and click checkout to add all the packages in the bundle to your workspace.</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QComboBox">
+                                            <property name="name">
+                                                <cstring>bundleVersionComboBox</cstring>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Select alternate version, if desired</string>
+                                            </property>
+                                        </widget>
+                                    </vbox>
+                                </widget>
+                            </widget>
+                            <widget class="QPushButton" row="1" column="3">
+                                <property name="name">
+                                    <cstring>refreshReposPushButton</cstring>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>0</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="text">
+                                    <string>Refresh</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Refresh the repository and bundle lists</string>
+                                </property>
+                            </widget>
+                            <widget class="QPushButton" row="0" column="3">
+                                <property name="name">
+                                    <cstring>repositoryBrowsePushButton</cstring>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>90</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property name="text">
+                                    <string>Browse</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Browse the selected repository</string>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QGroupBox">
                         <property name="name">
                             <cstring>groupBox9</cstring>
                         </property>
@@ -1865,6 +2188,11 @@
                                 </property>
                                 <property name="toolTip" stdset="0">
                                     <string>Select package(s)  to operate on</string>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This box contains a list of packages available in the current workspace. Select one or check the 'All' checkbox below; select an operation via a radio button to the right and then push the 'Execute' button.
+
+IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will determine if the packages will be re-built after they are updated.</string>
                                 </property>
                             </widget>
                             <spacer row="3" column="1">
@@ -2072,7 +2400,7 @@
                                     </property>
                                     <property name="sizeHint">
                                         <size>
-                                            <width>71</width>
+                                            <width>77</width>
                                             <height>20</height>
                                         </size>
                                     </property>
@@ -2197,318 +2525,71 @@
                             </spacer>
                         </grid>
                     </widget>
-                    <widget class="QGroupBox" row="1" column="0">
-                        <property name="name">
-                            <cstring>groupBox8</cstring>
-                        </property>
-                        <property name="sizePolicy">
-                            <sizepolicy>
-                                <hsizetype>3</hsizetype>
-                                <vsizetype>3</vsizetype>
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                            </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                            <size>
-                                <width>165</width>
-                                <height>0</height>
-                            </size>
-                        </property>
-                        <property name="title">
-                            <string>Repositories</string>
-                        </property>
-                        <property name="whatsThis" stdset="0">
-                            <string>This group of controls are used to check out a package. Select a repository name in the listbox and optionally provide a username and password for the checkout. Then click 'checkout'. The 'build' checkbox controls whether the package will be built after the checkout.</string>
-                        </property>
-                        <grid>
-                            <property name="name">
-                                <cstring>unnamed</cstring>
-                            </property>
-                            <widget class="QComboBox" row="3" column="0">
-                                <property name="name">
-                                    <cstring>repoVersionComboBox</cstring>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Select alternate version, if desired</string>
-                                </property>
-                            </widget>
-                            <widget class="QCheckBox" row="3" column="1" rowspan="1" colspan="2">
-                                <property name="name">
-                                    <cstring>checkoutBuildCheckBox</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Build</string>
-                                </property>
-                                <property name="checked">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Check to build package after checkout</string>
-                                </property>
-                            </widget>
-                            <widget class="QListBox" row="0" column="0" rowspan="3" colspan="1">
-                                <property name="name">
-                                    <cstring>checkoutListBox</cstring>
-                                </property>
-                                <property name="selectionMode">
-                                    <enum>Single</enum>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Select a package to check out</string>
-                                </property>
-                            </widget>
-                            <widget class="QPushButton" row="3" column="3">
-                                <property name="name">
-                                    <cstring>checkoutPushButton</cstring>
-                                </property>
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>90</width>
-                                        <height>0</height>
-                                    </size>
-                                </property>
-                                <property name="text">
-                                    <string>Checkout</string>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Check out the selected package</string>
-                                </property>
-                            </widget>
-                            <widget class="QLineEdit" row="1" column="2" rowspan="1" colspan="2">
-                                <property name="name">
-                                    <cstring>usernameLineEdit</cstring>
-                                </property>
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>140</width>
-                                        <height>0</height>
-                                    </size>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Enter a username for the checkout</string>
-                                </property>
-                            </widget>
-                            <widget class="QLabel" row="2" column="1">
-                                <property name="name">
-                                    <cstring>textLabel1_2</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Password:</string>
-                                </property>
-                            </widget>
-                            <widget class="QLineEdit" row="2" column="2" rowspan="1" colspan="2">
-                                <property name="name">
-                                    <cstring>passwordLineEdit</cstring>
-                                </property>
-                                <property name="enabled">
-                                    <bool>false</bool>
-                                </property>
-                                <property name="echoMode">
-                                    <enum>Password</enum>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Enter a password for the checkout</string>
-                                </property>
-                            </widget>
-                            <widget class="QLabel" row="1" column="1">
-                                <property name="name">
-                                    <cstring>textLabel1</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Username:</string>
-                                </property>
-                            </widget>
-                            <widget class="QPushButton" row="0" column="3">
-                                <property name="name">
-                                    <cstring>repositoryBrowsePushButton</cstring>
-                                </property>
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>90</width>
-                                        <height>0</height>
-                                    </size>
-                                </property>
-                                <property name="text">
-                                    <string>Browse</string>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Browse the selected repository</string>
-                                </property>
-                            </widget>
-                            <spacer row="0" column="1">
-                                <property name="name">
-                                    <cstring>spacer13_2</cstring>
-                                </property>
-                                <property name="orientation">
-                                    <enum>Vertical</enum>
-                                </property>
-                                <property name="sizeType">
-                                    <enum>Expanding</enum>
-                                </property>
-                                <property name="sizeHint">
-                                    <size>
-                                        <width>20</width>
-                                        <height>16</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                        </grid>
-                    </widget>
-                    <widget class="QGroupBox" row="0" column="0">
-                        <property name="name">
-                            <cstring>groupBox7</cstring>
-                        </property>
-                        <property name="enabled">
-                            <bool>true</bool>
-                        </property>
-                        <property name="sizePolicy">
-                            <sizepolicy>
-                                <hsizetype>3</hsizetype>
-                                <vsizetype>3</vsizetype>
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                            </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                            <size>
-                                <width>0</width>
-                                <height>155</height>
-                            </size>
-                        </property>
-                        <property name="title">
-                            <string>Workspace</string>
-                        </property>
-                        <property name="whatsThis" stdset="0">
-                            <string>This group of controls allows one to create and switch workspaces. The top edit box contains a directory that contains (or will contain) workspace directories. The new workspace edit box contains the name for a new workspace, and the old workspace dropdown list contains the names of workspaces in the current directory. The create button creates a new workspace with the specified name and the switch button switches to the selected workspace.</string>
-                        </property>
-                        <grid>
-                            <property name="name">
-                                <cstring>unnamed</cstring>
-                            </property>
-                            <widget class="QPushButton" row="0" column="2">
-                                <property name="name">
-                                    <cstring>workspaceBrowsePushButton</cstring>
-                                </property>
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>90</width>
-                                        <height>0</height>
-                                    </size>
-                                </property>
-                                <property name="text">
-                                    <string>Browse</string>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Browse for a directory containing workspaces</string>
-                                </property>
-                            </widget>
-                            <widget class="QPushButton" row="1" column="2">
-                                <property name="name">
-                                    <cstring>workspaceCreatePushButton</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Create</string>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Create a new workspace</string>
-                                </property>
-                            </widget>
-                            <widget class="QLabel" row="1" column="0">
-                                <property name="name">
-                                    <cstring>textLabel1_3</cstring>
-                                </property>
-                                <property name="sizePolicy">
-                                    <sizepolicy>
-                                        <hsizetype>0</hsizetype>
-                                        <vsizetype>0</vsizetype>
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                </property>
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>175</width>
-                                        <height>0</height>
-                                    </size>
-                                </property>
-                                <property name="text">
-                                    <string>&lt;p align="right"&gt;New workspace name:&lt;/p&gt;</string>
-                                </property>
-                            </widget>
-                            <widget class="QPushButton" row="2" column="2">
-                                <property name="name">
-                                    <cstring>workspaceSwitchPushButton</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Switch</string>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Switch to the selected workspace</string>
-                                </property>
-                            </widget>
-                            <widget class="QLabel" row="2" column="0">
-                                <property name="name">
-                                    <cstring>textLabel1_4</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>&lt;p align="right"&gt;Existing workspace name:&lt;/p&gt;</string>
-                                </property>
-                            </widget>
-                            <widget class="QLineEdit" row="0" column="0" rowspan="1" colspan="2">
-                                <property name="name">
-                                    <cstring>workspaceDirLineEdit</cstring>
-                                </property>
-                                <property name="sizePolicy">
-                                    <sizepolicy>
-                                        <hsizetype>3</hsizetype>
-                                        <vsizetype>0</vsizetype>
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Enter a directory containing workspaces</string>
-                                </property>
-                            </widget>
-                            <widget class="QLineEdit" row="1" column="1">
-                                <property name="name">
-                                    <cstring>workspaceNameLineEdit</cstring>
-                                </property>
-                                <property name="sizePolicy">
-                                    <sizepolicy>
-                                        <hsizetype>3</hsizetype>
-                                        <vsizetype>0</vsizetype>
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Enter a name for the new workspace</string>
-                                </property>
-                            </widget>
-                            <widget class="QComboBox" row="2" column="1">
-                                <property name="name">
-                                    <cstring>workspaceComboBox</cstring>
-                                </property>
-                                <property name="sizePolicy">
-                                    <sizepolicy>
-                                        <hsizetype>3</hsizetype>
-                                        <vsizetype>0</vsizetype>
-                                        <horstretch>0</horstretch>
-                                        <verstretch>0</verstretch>
-                                    </sizepolicy>
-                                </property>
-                                <property name="toolTip" stdset="0">
-                                    <string>Select a workspace do switch to</string>
-                                </property>
-                            </widget>
-                        </grid>
-                    </widget>
-                </grid>
+                </vbox>
             </widget>
         </widget>
-    </grid>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout23</cstring>
+            </property>
+            <grid>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QLabel" row="0" column="2">
+                    <property name="name">
+                        <cstring>version</cstring>
+                    </property>
+                    <property name="frameShape">
+                        <enum>Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Sunken</enum>
+                    </property>
+                    <property name="text">
+                        <string>AWB 2.0</string>
+                    </property>
+                    <property name="alignment">
+                        <set>AlignCenter</set>
+                    </property>
+                </widget>
+                <widget class="QLabel" row="0" column="0">
+                    <property name="name">
+                        <cstring>model_name</cstring>
+                    </property>
+                    <property name="frameShape">
+                        <enum>Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Sunken</enum>
+                    </property>
+                    <property name="text">
+                        <string>No Model Selected</string>
+                    </property>
+                    <property name="alignment">
+                        <set>AlignCenter</set>
+                    </property>
+                </widget>
+                <widget class="QLabel" row="0" column="1">
+                    <property name="name">
+                        <cstring>benchmark_name</cstring>
+                    </property>
+                    <property name="frameShape">
+                        <enum>Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Sunken</enum>
+                    </property>
+                    <property name="text">
+                        <string>No Benchmark Selected</string>
+                    </property>
+                    <property name="alignment">
+                        <set>AlignCenter</set>
+                    </property>
+                </widget>
+            </grid>
+        </widget>
+    </vbox>
 </widget>
 <menubar>
     <property name="name">
@@ -3249,6 +3330,30 @@
         <receiver>awb_dialog</receiver>
         <slot>packagesBrowsePushButton_clicked()</slot>
     </connection>
+    <connection>
+        <sender>respositoriesTabWidget</sender>
+        <signal>currentChanged(QWidget*)</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>respositoriesTabWidget_currentChanged(QWidget*)</slot>
+    </connection>
+    <connection>
+        <sender>checkoutBundleListBox</sender>
+        <signal>doubleClicked(QListBoxItem*)</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>checkoutBundleListBox_doubleClicked(QListBoxItem*)</slot>
+    </connection>
+    <connection>
+        <sender>checkoutBundleListBox</sender>
+        <signal>highlighted(const QString&amp;)</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>checkoutBundleListBox_highlighted(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>refreshReposPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>refreshReposPushButton_clicked()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Tabs_main</tabstop>
@@ -3270,6 +3375,7 @@
 <variables>
     <variable access="private">killed;</variable>
     <variable access="private">waiting;</variable>
+    <variable access="private">repoType;</variable>
 </variables>
 <slots>
     <slot>init()</slot>
@@ -3334,17 +3440,21 @@
     <slot>workspaceCreatePushButton_clicked()</slot>
     <slot>workspaceComboBox_activated( const QString &amp; )</slot>
     <slot>workspaceSwitchPushButton_clicked()</slot>
+    <slot>respositoriesTabWidget_currentChanged( QWidget * )</slot>
     <slot>checkoutListBox_highlighted( const QString &amp; )</slot>
+    <slot>checkoutBundleListBox_highlighted( const QString &amp; )</slot>
+    <slot>repositoryBrowsePushButton_clicked()</slot>
     <slot>checkoutListBox_doubleClicked( QListBoxItem * )</slot>
+    <slot>checkoutBundleListBox_doubleClicked( QListBoxItem * )</slot>
+    <slot>refreshReposPushButton_clicked()</slot>
     <slot>checkoutPushButton_clicked()</slot>
     <slot>updatePackagesListBox_selectionChanged()</slot>
     <slot>updatePackagesListBox_selected( QListBoxItem * )</slot>
+    <slot>packagesBrowsePushButton_clicked()</slot>
     <slot>updatePackagesListBox_doubleClicked( QListBoxItem * )</slot>
     <slot>updateAllCheckBox_toggled( bool )</slot>
     <slot>refreshPushButton_clicked()</slot>
     <slot>updatePushButton_clicked()</slot>
-    <slot>repositoryBrowsePushButton_clicked()</slot>
-    <slot>packagesBrowsePushButton_clicked()</slot>
 </slots>
 <functions>
     <function access="private">setupInit()</function>

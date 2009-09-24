@@ -155,6 +155,11 @@ sub rehash {
     return undef;
   }
 
+
+  # Collect the list of bundles
+
+  $self->_rehash_bundle_directory();
+
   return 1;
 }
 
@@ -184,6 +189,58 @@ sub _add_packfile {
     ierror("Invalid packfile version in $packfile - found $version - need $VERSION\n");
     return undef;
   }
+}
+
+sub _rehash_bundle_directory {
+  my $self = shift;
+  our @files;
+
+  sub wanted {
+      push(@files, $File::Find::name) if (-f $File::Find::name);
+  }
+
+  # Read in bundles from the system bundle directory
+  # Note: bundles.d is the prefrerred location
+
+  foreach my $dir ("/asim/bundles", "/asim/bundles.d") {
+    my $systembundles = Asim::Sysconfdir() . $dir;
+    if (-d $systembundles) {
+      find({wanted => \&wanted, follow => 1}, $systembundles);
+    }
+  }
+
+  # Now read in custom bundles in the user's area 
+  # Note: Again bundles.d is the preferred location
+
+  foreach my $dir ("~/.asim/bundles", "~/.asim/bundles.d") {
+    my $userbundles = Asim::Util::expand_tilda($dir);
+    if (-d $userbundles) {
+      find({wanted => \&wanted, follow => 1},  $userbundles);
+    }
+  }
+
+
+  # Iterate through the files and collect the list of filenames
+
+  $self->{bundles} = {};
+
+  foreach my $f (@files) {
+    my ($base, $path, $type) = fileparse($f, '\..*');
+
+    # Eliminate meaningless files
+    # TBD: Probabably should denand specific extensions
+
+    next if (not defined($type));
+    next if ($type eq "");
+    next if ($type =~ /~$/);
+
+    # For some reason we allow a bundle name to appear multiple times
+    # so a bundle is defined by a list of files
+
+    push(@{$self->{bundles}->{$base}},$f);
+  }
+
+  return;
 }
 
 ################################################################
@@ -332,7 +389,7 @@ sub get_repository {
   # Make CVS happy by converting  .'s to _'s in tag
 
   $cvstag = $tag;
-  if ($method ne "bitkeeper") {
+  if ($method eq "cvs") {
     $cvstag =~ s/\./_/g;
   }
 
@@ -426,32 +483,10 @@ List bundles in the bundles area.
 
 sub bundle_directory {
   my $self = shift;
-  our @files;
 
-  sub wanted {
-      push(@files, $File::Find::name) if (-f $File::Find::name);
-  }
-
-  # read in bundles from the system bundle directory
-  my $systembundles = Asim::Sysconfdir() . "/asim/bundles";
-  if (-d $systembundles) {
-    find({wanted => \&wanted, follow => 1}, $systembundles);
-  }
-
-  # also read in custom bundles in the user's area 
-  my $userbundles = Asim::Util::expand_tilda("~/.asim/bundles");
-  if (-d $userbundles) {
-      find({wanted => \&wanted, follow => 1},  $userbundles);
-  }
-
-  my $bundlelist = {};
-  foreach my $f (@files) {
-      my ($base, $path, $type) = fileparse($f, '\..*');
-      $bundlelist->{$base} = 1 if (defined($type) && $type ne "");
-  }
-
-  return sort(keys %$bundlelist);
+  return (sort(keys(%{$self->{bundles}})));
 }
+
 
 ################################################################
 
@@ -468,33 +503,15 @@ Get list of files that provide bundle given by $bundlename
 sub bundle_files {
   my $self = shift;
   my $bundle = shift;
-  our @files; 
-  my @flist;
 
-  find({wanted => \&wanted, follow => 1},  Asim::Sysconfdir() . "/asim/bundles");
-
-  # also read in custom bundles in the user's area 
-  my $userbundles = Asim::Util::expand_tilda("~/.asim/bundles");
-  if (-d $userbundles) {
-      find({wanted => \&wanted, follow => 1},  $userbundles);
-  }
-
-  my $bundlelist = {};
-  foreach my $f (@files) {
-      my ($base, $path, $type) = fileparse($f, '\..*');
-      if (defined($type) && $type ne "" && $base eq $bundle) {
-	  push(@flist, $f);
-      }
-  }
-
-  return @flist;
+  return @{$self->{bundles}->{$bundle}};
 }
 
 ################################################################
 
 ################################################################
 
-=item $repositoryDB-E<gt>bundle_files($bundlename)
+=item $repositoryDB-E<gt>bundle_ids($bundlename)
 
 Get list of ids available for bundle $bundlename
 
@@ -519,6 +536,45 @@ sub bundle_ids {
 
   return $inifile->get_grouplist();
 }
+
+################################################################
+
+=item $repositoryDB-E<gt>get_bundle($bundlename)
+
+Get a bundle object for $bundlename
+
+=cut
+
+################################################################
+
+sub get_bundle {
+  my $self = shift;
+  my $bundlename = shift;
+  my $bundleid;
+
+  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
+  $bundleid = "default" unless defined $bundleid;  
+
+  my @flist = $self->bundle_files($bundlename);
+  if (@flist == 0) {
+    print "No files for bundle named $bundlename\n";
+    return undef;
+  }
+  
+  my $inifile = Asim::Inifile->new();
+  foreach my $file (@flist) {
+      $inifile->include($file);
+  }
+  
+  # TBD: Even if we found the bundle files, there is no check that
+  #      we actually have a bundle with that bundleid
+
+  my $bundle = Asim::Bundle->new($inifile, $bundleid);
+
+  return $bundle;
+
+}
+
 
 ################################################################
 
@@ -595,8 +651,12 @@ sub ierror {
 
 =head1 BUGS
 
+Bundles probably should not be mixed into the repositoryDB.
+
 Bundles should also support a path of locations where
 bundles are defined.
+
+Bundle file should have specifically defined extensions.
 
 =head1 AUTHORS
 

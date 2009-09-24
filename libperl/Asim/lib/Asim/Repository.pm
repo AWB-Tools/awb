@@ -247,6 +247,9 @@ sub checkout {
   # now perform method-specific actions.
   # FIX FIX!! move into derived classes eventually, just like in Package.pm
 
+  print("Checkout: branch=($tag_branch) csn=($tag_csn)\n") if ($DEBUG);
+
+
   if ( $method eq "cvs") {
 
     # Do a checkout via CVS
@@ -375,6 +378,8 @@ sub checkout {
           }
 	}
 	close LIST;
+
+	last if ($is_tag_or_branch);
       }
       # couldn't find it in either tags or branches?
       # Tag must be a date, so try checking out using it as a date string:

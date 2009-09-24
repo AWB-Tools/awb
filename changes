@@ -6519,3 +6519,46 @@ itself is included in an outer submodel, we now allow changing such
 parameters at the level of the model that includes the outer submodel.
 In other words, 'global' awb parameters are always visible regardless of
 whether they are buried in multiple levels of submodels.
+
+----------
+emer        Date: Thu Sep 24 11:45:30 EDT 2009  CSN: CSN-awb-338
+                  Thu Sep 24 15:45:30 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          337 
+
+Directory libperl/Asim/lib/Asim/Package
+ Branch.pm                 Locally Modified          337 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          337 
+
+Directory libperl/Asim/lib/Asim
+ Bundle.pm                 Locally Added               0 
+ Repository.pm             Locally Modified          337 
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          337 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          337 
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          337 
+ awb_dialog.ui.h           Locally Modified          337 
+ awb.db                    Locally Removed           337 
+
+Enhanced support for bundles
+* awb admin tab supports bundle checkout and browsing
+* Bundles defined in {<INSTALLDIR>,~/.asim}/bundles.d}
+* Refactored bundle support
+** Bundles supported as a Perl module (Asim::Bundle)
+** Improved support of bundles in Repository::DB
+*** DB maintains cache of bundle information
+*** DB has method get_bundle() to get a bundle by name
+* Miscelaneous changes
+** Don't treat backup files as bundle files
+** Fixed bug on checkout for non-default version
+** awb-shell branch of a svn repository can be a tag or branch
+** Stopped conversion of dot (.) to underscore (_) for SVN
