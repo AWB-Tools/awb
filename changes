@@ -6576,3 +6576,13 @@ Directory tools/awb/awb2
 
 Properly parse bundle file extensions and allow browsing 
 of non-default bundles.
+
+----------
+emer        Date: Sat Sep 26 08:27:03 EDT 2009  CSN: CSN-awb-340
+                  Sat Sep 26 12:27:03 UTC 2009
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          339 
+
+Improved spacing and added splitters to 'Admin' tab.
