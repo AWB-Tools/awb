@@ -6586,3 +6586,13 @@ Directory tools/awb/awb2
  awb_dialog.ui             Locally Modified          339 
 
 Improved spacing and added splitters to 'Admin' tab.
+
+----------
+mcadler     Date: Wed Sep 30 12:52:54 EDT 2009  CSN: CSN-awb-341
+                  Wed Sep 30 16:52:54 UTC 2009
+
+
+Directory etc/repositories.d
+ platform-acp.pack         Locally Modified          340 
+
+Move platform-acp repository to new machine.
