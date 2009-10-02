@@ -504,6 +504,10 @@ sub bundle_files {
   my $self = shift;
   my $bundle = shift;
 
+  if (! defined($self->{bundles}->{$bundle})) {
+    return ();
+  }
+
   return @{$self->{bundles}->{$bundle}};
 }
 

@@ -6621,3 +6621,14 @@ Updating with asim-awb changes (rev. 2817 - Carl Beckmann).
 
 - asim-run now saves package baseline information in a bundle file
   named "run.baseline" in the results directory.
+
+----------
+emer        Date: Fri Oct  2 17:01:35 EDT 2009  CSN: CSN-awb-344
+                  Fri Oct  2 21:01:35 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          343 
+
+In bundle_files(), check if there are any files defined for a bundle, 
+and if not return an empty list.
