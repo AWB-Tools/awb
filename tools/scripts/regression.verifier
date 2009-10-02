@@ -108,7 +108,6 @@ if (defined $regdir && $regdir ne "") {
 else {
     $RESDIR = "$ENV{AWBLOCAL}/run/regtest";
 }
-die "Results directory \'$RESDIR\' does not exist.\n" unless ( -d $RESDIR );
 
 # Use the user specified run directory or get the newest regression directory
 if (defined $rundir && $rundir ne "") {
@@ -117,6 +116,7 @@ if (defined $rundir && $rundir ne "") {
     die "Cannot find run directory : $RESDIR\n" unless (-d "$RESDIR");
 }
 else {
+    die "Results directory \'$RESDIR\' does not exist.\n" unless ( -d $RESDIR );
     if (system("ls -td $RESDIR/* > /dev/null 2>&1")) {
 	print "Cannot get verify directory in $RESDIR/.  Exiting.\n";
 	exit 1;

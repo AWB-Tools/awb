@@ -6596,3 +6596,15 @@ Directory etc/repositories.d
  platform-acp.pack         Locally Modified          340 
 
 Move platform-acp repository to new machine.
+
+----------
+spartha1    Date: Fri Oct  2 16:20:40 EDT 2009  CSN: CSN-awb-342
+                  Fri Oct  2 20:20:40 UTC 2009
+
+
+Directory tools/scripts
+ regression.verifier       Locally Modified          341 
+
+Updating with asim-awb changes (rev. 2808 - Krishna Rangan).
+
+- a simple fix: regdir is not a must-have argument when rundir is present.
