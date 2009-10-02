@@ -777,6 +777,14 @@ sub generate_run_summary
 
     my $exists = (-f "$resdir/$SUMMARY_FILE");
     open(SUMMARYFILE, ">>$resdir/$SUMMARY_FILE") || die "Unable to open summary file : $resdir/$SUMMARY_FILE.\n";
+    
+    # generate a bundle with the package baseline information
+    chomp(my $date_string = `date +%Y_%m_%d_%H_%M_%S`);
+    if ($experiments =~ m/experiments\/(.*)\/(.*)\/(.*)\.models$/ && $2 eq $3) {
+        # bundle with only the model package dependencies (ignores AWB and any benchmark configs):
+        system("awb-shell -- new bundle run/MODELS_$date_string    --file=$resdir/run.baseline --experiment=$1/$2");
+    }
+    system    ("awb-shell -- new bundle run/WORKSPACE_$date_string --file=$resdir/run.baseline");
 
     my $summary;
     foreach $name (@exp_ordered) 

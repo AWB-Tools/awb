@@ -6608,3 +6608,16 @@ Directory tools/scripts
 Updating with asim-awb changes (rev. 2808 - Krishna Rangan).
 
 - a simple fix: regdir is not a must-have argument when rundir is present.
+
+----------
+spartha1    Date: Fri Oct  2 16:23:28 EDT 2009  CSN: CSN-awb-343
+                  Fri Oct  2 20:23:28 UTC 2009
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          342 
+
+Updating with asim-awb changes (rev. 2817 - Carl Beckmann).
+
+- asim-run now saves package baseline information in a bundle file
+  named "run.baseline" in the results directory.
