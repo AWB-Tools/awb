@@ -9,7 +9,7 @@
 [fast]
 Description=UT Fast Simulator
 Method=svn
-Access=svn+ssh://hulk.ece.utexas.edu/UTFAST/hasim-fast/
+Access=svn+ssh://hulk.ece.utexas.edu/UTFAST/hasim-fast
 Module=undef
 Tag=HEAD
 Target=fast
@@ -18,7 +18,7 @@ Changes=changes
 [hasim-intel/HEAD]
 Description=UT Fast Simulator
 Method=svn
-Access=svn+ssh://hulk.ece.utexas.edu/UTFAST/hasim-fast/
+Access=svn+ssh://hulk.ece.utexas.edu/UTFAST/hasim-fast
 Module=undef
 Tag=HEAD
 Target=fast

@@ -9,7 +9,7 @@
 [platform-acp]
 Description=Platform modules for ACP board
 Method=svn
-Access=svn+ssh://chiou.ece.utexas.edu/var/svn/repos/platform-acp/
+Access=svn+ssh://chiou.ece.utexas.edu/var/svn/repos/platform-acp
 Module=undef
 Tag=HEAD
 Target=platform-acp
@@ -18,5 +18,5 @@ BrowseURL=https://chiou.ece.utexas.edu/websvn/listing.php?repname=platform-acp
 
 [platform-acp/HEAD]
 Description=Platform modules for ACP board (HEAD)
-Access=svn+ssh://chiou.ece.utexas.edu/var/svn/repos/platform-acp/
+Access=svn+ssh://chiou.ece.utexas.edu/var/svn/repos/platform-acp
 Tag=HEAD

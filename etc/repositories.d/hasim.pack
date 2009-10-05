@@ -37,7 +37,7 @@ Tag=HEAD
 [hasim-models]
 Description=Basic hasim timing models
 Method=svn
-Access=https://asim.csail.mit.edu/svn/hasim-models/
+Access=https://asim.csail.mit.edu/svn/hasim-models
 Module=undef
 Tag=HEAD
 Target=hasim-models
@@ -46,7 +46,7 @@ BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=hasim-models
 
 [hasim-models/HEAD]
 Description=Basic hasim timing models
-Access=https://asim.csail.mit.edu/svn/hasim-models/
+Access=https://asim.csail.mit.edu/svn/hasim-models
 Tag=HEAD
 
 ###### Hasim-alpha trunk

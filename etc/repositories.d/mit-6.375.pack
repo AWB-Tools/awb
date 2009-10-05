@@ -9,7 +9,7 @@
 [mit-6.375]
 Description=MIT 6.375 Advanced Digital Design class
 Method=svn
-Access=https://asim.csail.mit.edu/svn/mit-6.375/
+Access=https://asim.csail.mit.edu/svn/mit-6.375
 Module=undef
 Tag=HEAD
 Target=mit-6.375
@@ -18,5 +18,5 @@ BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=mit-6.367
 
 [mit-6.375/HEAD]
 Description=MIT 6.375 Advanced Digital Design class
-Access=https://asim.csail.mit.edu/svn/mit-6.375/
+Access=https://asim.csail.mit.edu/svn/mit-6.375
 Tag=HEAD

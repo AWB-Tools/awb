@@ -6642,3 +6642,17 @@ Directory etc
  asim.pack                 Locally Modified          344 
 
 Removing an extra '/' at the end of the Access field for awb-mit.
+
+----------
+spartha1    Date: Mon Oct  5 17:01:56 EDT 2009  CSN: CSN-awb-346
+                  Mon Oct  5 21:01:56 UTC 2009
+
+
+Directory etc/repositories.d
+ h264.pack                 Locally Modified          345 
+ platform-acp.pack         Locally Modified          345 
+ mit-6.375.pack            Locally Modified          345 
+ fast.pack                 Locally Modified          345 
+ hasim.pack                Locally Modified          345 
+
+Continuation of the last commit. Removing the extra '/' at the end of the Access field.
