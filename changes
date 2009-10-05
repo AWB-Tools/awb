@@ -6632,3 +6632,13 @@ Directory libperl/Asim/lib/Asim/Repository
 
 In bundle_files(), check if there are any files defined for a bundle, 
 and if not return an empty list.
+
+----------
+spartha1    Date: Mon Oct  5 16:46:31 EDT 2009  CSN: CSN-awb-345
+                  Mon Oct  5 20:46:31 UTC 2009
+
+
+Directory etc
+ asim.pack                 Locally Modified          344 
+
+Removing an extra '/' at the end of the Access field for awb-mit.
