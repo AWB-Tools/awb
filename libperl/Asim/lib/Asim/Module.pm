@@ -227,7 +227,7 @@ sub open {
 
     # %provides ASIMMODULETYPE
 
-    if (/^.*%provides$spaces($words)/) {
+    if (/^.*%provides$spaces(.*$nospace)/) {
         my $template = 0;
 
         # parse switches

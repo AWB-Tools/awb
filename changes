@@ -6656,3 +6656,15 @@ Directory etc/repositories.d
  hasim.pack                Locally Modified          345 
 
 Continuation of the last commit. Removing the extra '/' at the end of the Access field.
+
+----------
+spartha1    Date: Thu Oct  8 11:16:18 EDT 2009  CSN: CSN-awb-349
+                  Thu Oct  8 15:16:18 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          348 
+
+Updating with asim-awb changes (rev. 2835 - Sailashri Parthasarathy).
+
+Fixed the unparsable module errors that the rehash command was throwing (thanks to Joel Emer for the fix).
