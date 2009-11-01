@@ -140,6 +140,7 @@ our %OPTIONS = (
     clone_workspace    => [ "--link" ],
     checkout_bundle    => [ "--user=", "--user", "--build", "--nobuild", 
                             "--addpath", "--noaddpath", "--golden" ],
+    update_bundle      => [ "--build", "--nobuild", "--golden" ],
     use_bundle         => [ "--build", "--nobuild", "--addpath", "--noaddpath", "--golden" ],
 
     checkout_package   => [ "--user=", "--user", "--build", "--nobuild", 

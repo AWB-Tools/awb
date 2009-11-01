@@ -6751,3 +6751,18 @@ Directory libperl/Asim/lib/Asim
 Updating with asim-awb changes (rev. 2842 - Mohit Gambhir).
 
 Added beta version of the Awb perl modules that handle git revision control system
+
+----------
+spartha1    Date: Sun Nov  1 17:46:27 EST 2009  CSN: CSN-awb-354
+                  Sun Nov  1 22:46:27 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          353 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          353 
+
+Updating with asim-awb changes (rev. 2843 - Krishna Rangan).
+
+- support to use golden qualifier on checkout and update bundle.

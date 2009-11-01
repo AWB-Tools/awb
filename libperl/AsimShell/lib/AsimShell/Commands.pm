@@ -32,7 +32,7 @@
 #
 # 1. Update the array %COMPOUNDCOMMANDS in the file AsimShell.pm
 #    in the directory above this one, if the new command is a compound command.
-#    For examp,e if "lubricate driveshaft" and "lubricate hingemounts" were
+#    For example, if "lubricate driveshaft" and "lubricate hingemounts" were
 #    both legal commands, you would add the following entry to this array:
 #
 #        lubricate => [ qw(driveshaft hingemounts) ],
@@ -471,12 +471,51 @@ sub show_repository {
 #
 ################################################################
 
+#
+# Bundle utility functions: alphanumeric sort module posted at perlmonks.org
+#
+
+sub _alphanum_sort
+{
+    my $x = uc(shift);
+    my $y = uc(shift);
+    
+    if (!($x =~ /\d+(\.\d+)?/)) 
+    {
+        return $x cmp $y;
+    }
+    my $xBefore = $`;
+    my $xMatch = $&;
+    my $xAfter = $';
+    if (!($y =~ /\d+(\.\d+)?/)) {
+        return $x cmp $y;
+    }
+    if ($xBefore eq $`) {
+        if ($xMatch == $&) {
+            return _alphanum_sort($xAfter, $');
+        } else {
+            return $xMatch <=> $&;
+        }
+    } else {
+        return $x cmp $y;
+    }
+}
+
+sub alphanum_sort
+{
+    _alphanum_sort($a, $b);
+}
+
 sub list_bundles {
 
   print join("\n", $default_repositoryDB->bundle_directory()) . "\n";
 
   return 1;
 }
+
+#
+# Bundle functions
+#
 
 #
 # return the list of packages in a bundle.
@@ -486,24 +525,53 @@ sub list_bundles {
 #
 sub bundle_packages_ {
   my $bundlename = shift;
+  my $golden = shift;
+  my $bundleid;
+  my @packages = ();
+
   chomp($bundlename);
+  ($bundlename, $bundleid) = (split("/", $bundlename), undef);
+  shell_error("Bundle id '$bundleid' cannot be used with golden qualifier!\n") && return () if (defined $bundleid && ($golden == 1));
+  $bundleid = "default" unless defined $bundleid;  
 
-  my $bundle = $default_repositoryDB->get_bundle($bundlename);
-  if (!defined($bundle)) {
-    shell_error("No bundle file found for `$bundlename`!\n");
-    return ();
+  my @flist = $default_repositoryDB->bundle_files($bundlename);
+  (@flist == 0) && shell_error("No bundle file found for `$bundlename`!\n") && return ();
+
+  my $inifile = Asim::Inifile->new();
+  foreach my $file (@flist) {
+      $inifile->include($file) || ($show_warnings && print("Cannot read file `$file` to collect bundle list!\n"));
   }
 
-  if ($bundle->status() eq "Failure") {
-      if (!Asim::choose_yes_or_no("This bundle has failure status.  Do you want to get it", "no", "no")) {
-	  return 0;
+  if ($golden == 1)
+  {
+      my @grouplist = $inifile->get_grouplist();
+      # this would be simpler if perl hash implementation preserves insertion order
+      foreach my $bundleid (reverse(sort{alphanum_sort}(@grouplist)))
+      {
+	  my $items = $inifile->get($bundleid);
+	  if ((defined $items->{Status}) && ($items->{Status} eq "Success"))
+	  {
+	      @packages = split(" ", $items->{Packages});
+	      (@packages == 0) && shell_error("Recent successful bundle id `$bundleid` did not result in any package!\n") && return ();
+	      print "#\n# Picked bundle id: $bundleid\n#\n";
+	      last;
+	  }
       }
+      (@packages == 0) && shell_error("No bundle id with success status found!\n") && return ();      
   }
-  my @packages = $bundle->packages();
-
-  if (@packages == 0) {
-      shell_error("Bundle `$bundlename` did not result in any package!\n");
-      return ();
+  else 
+  {
+      my $items = $inifile->get($bundleid);
+      if (!defined $items) {
+	  shell_error("Bundle id `$bundleid` not found!\n") && return ();
+      }
+      elsif ((defined $items->{Status}) && ($items->{Status} eq "Failure")) {
+	  if (!Asim::choose_yes_or_no("This bundle has failure status.  Do you want to get it", "no", "no")) {
+	      return 0;
+	  }
+      }
+      @packages = split(" ", $items->{Packages});
+      (@packages == 0) && shell_error("Bundle id `$bundleid` did not result in any package!\n") && return ();
   }
 
   return @packages;
@@ -513,7 +581,7 @@ sub checkout_bundle {
   my $user;
   my $addpath = 1;
   my $build = 1;
-  my $golden;
+  my $golden = 0;
   my $status;
   my $bundlename;
   local @ARGV = @_;
@@ -538,7 +606,7 @@ sub checkout_bundle {
   #
   # Determine the list of packages to check out from the bundle file
   #
-  @packages = bundle_packages_( $bundlename );
+  @packages = bundle_packages_( $bundlename, $golden );
   
   print "Checking out: " . join(" ", @packages) . "\n";
 
@@ -591,6 +659,7 @@ sub checkout_bundle {
 sub use_bundle {
   my $addpath = 1;
   my $build = 1;
+  my $golden = 0;
   my $status;
   my $bundlename;
   local @ARGV = @_;
@@ -600,7 +669,9 @@ sub use_bundle {
   # Parse options
 
   $status = GetOptions( "build!"   => \$build,
-		        "addpath!" => \$addpath);
+		        "addpath!" => \$addpath,
+			"golden"   => \$golden,
+			);
   return 0 if (!$status);
 
   # Bundle name is remaining argument
@@ -613,7 +684,7 @@ sub use_bundle {
   #
   # Determine the list of packages to check out from the bundle file
   #	
-  @packages = bundle_packages_( $bundlename );
+  @packages = bundle_packages_( $bundlename, $golden );
   
   print "Copying out: " . join(" ", @packages) . "\n";
 
@@ -746,18 +817,21 @@ sub update_bundle {
 
   # Parse options
   my $build = 1;
+  my $golden = 0;
   local @ARGV = @_;
-  my $status = GetOptions( "build!" => \$build );
+  
+  my $status = GetOptions("build!"     => \$build,
+			  "golden"     => \$golden);
   return 0 if (!$status);
 
   # Bundle name is remaining argument
-  my $bundlename = shift;
+  my $bundlename = shift @ARGV;
   if (!defined $bundlename) {
       $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
   }
   
   # Determine the list of packages to check out from the bundle file
-  my @packages = bundle_packages_( $bundlename );
+  my @packages = bundle_packages_( $bundlename, $golden );
   print "Updating: " . join(" ", @packages) . "\n";
 
   # Regenerate the arguments for update_package
@@ -831,7 +905,8 @@ sub show_bundle {
 
   #
   # Determine the list of packages to check out from the bundle file
-  #
+  #	      
+  @packages = bundle_packages_( $bundlename, 0 );
 
   my $bundle = $default_repositoryDB->get_bundle($bundlename);
 
