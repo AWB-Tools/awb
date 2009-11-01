@@ -6688,3 +6688,16 @@ Updating with asim-awb changes (rev 2836 - Carl Beckmann).
 
 - added support for moving an existing tag, with a new option "--existing"
 on the "tag package" command.
+
+----------
+spartha1    Date: Sun Nov  1 17:40:50 EST 2009  CSN: CSN-awb-351
+                  Sun Nov  1 22:40:50 UTC 2009
+
+
+Directory tools/scripts
+ asim-run                  Locally Modified          350 
+
+Updating with asim-awb changes (rev. 2837 - Carl Beckmann).
+
+- fixed a problem getting baseline information from awb-shell when
+  running without a terminal (e.g. from cron)

@@ -782,9 +782,9 @@ sub generate_run_summary
     chomp(my $date_string = `date +%Y_%m_%d_%H_%M_%S`);
     if ($experiments =~ m/experiments\/(.*)\/(.*)\/(.*)\.models$/ && $2 eq $3) {
         # bundle with only the model package dependencies (ignores AWB and any benchmark configs):
-        system("awb-shell -- new bundle run/MODELS_$date_string    --file=$resdir/run.baseline --experiment=$1/$2");
+        system("awb-shell --batch -- new bundle run/MODELS_$date_string    --file=$resdir/run.baseline --experiment=$1/$2");
     }
-    system    ("awb-shell -- new bundle run/WORKSPACE_$date_string --file=$resdir/run.baseline");
+    system    ("awb-shell --batch -- new bundle run/WORKSPACE_$date_string --file=$resdir/run.baseline");
 
     my $summary;
     foreach $name (@exp_ordered) 
