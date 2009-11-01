@@ -129,10 +129,11 @@ Commands:
     [--commitlog=<commit comments file>] - Use in batch mode to supply commit comments
 
   tag package [<package>] label          - tag current package revision with symbolic label
+    [--existing]                         - move an existing tag to the current revision
+
   release package [<package>] version    - create a new release of a package
   branch package [<package>] branch      - create a branch named "branch"
-  merge package [<package>] [CSN]        - merge a branch with the
-                                           main trunk (HEAD/CSN)
+  merge package [<package>] [CSN]        - merge a branch with the main trunk (HEAD/CSN)
 
   lock package [<package>]               - lock a package
   unlock package [<package>]             - unlock a package

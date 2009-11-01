@@ -1935,13 +1935,16 @@ sub commit_all_packages {
 }
 
 sub tag_package {
+  local @ARGV = @_;
   my $name = shift if (defined($_[1]));
+  my $existing = 0;
+  my $status = GetOptions( "existing!" => \$existing );
   my $package = get_package($name) || return ();
   my $tag = shift
     || Asim::choose("Enter label (format: alphanumeric or underscore characters only)")
     || shell_error("Label must be specified\n") && return ();
 
-  return $package->label($tag)
+  return $package->label($tag, $existing)
     || shell_error("Label package failed\n") && return ();
 }
 

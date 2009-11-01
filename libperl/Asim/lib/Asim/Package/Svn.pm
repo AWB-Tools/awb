@@ -876,7 +876,7 @@ sub increment_csn {
   return $csn;
 }
 
-=item $package-E<gt>label($tag)
+=item $package-E<gt>label($tag [,<existing>=0])
 
 Label the currently checked out version of the repository
 with the given $tag.  Returns 1 on success.
@@ -884,12 +884,17 @@ with the given $tag.  Returns 1 on success.
 For SVN packages, this is similar to creating a branch in the repository,
 under the directory tags/$tag.
 
+If the optional flag <existing> is set to 1, then an existing tag
+will be moved to the current revision.  If the flag is omitted or
+passed as zero, then an error will occur if the tag already exists.
+
 =cut
 
 sub label {
   my $self = shift;
   my $labelname = shift ||
     Asim::Package::ierror("Label: tag name must be specified\n") && return 0;
+  my $existing = shift || 0;
 
   print "\nLabel the repository with a symbolic tag\n\n";
 
@@ -903,9 +908,23 @@ sub label {
   $self->sanity_stage();
 
   # Check that there doesn't already exist a branch or tag with this name.
+  my $found = 0;
   foreach my $tag ( $self->find_branchtags(), $self->find_labels() ) {
-    $tag ne $labelname ||
-      Asim::Package::ierror("Label: A tag or branch named \"$labelname\" already exists.\n") && return 0;
+    if ($tag eq $labelname) {
+      $found = 1;
+      last;
+    }
+  }
+  if ($existing) { # we are moving an existing tag - it had better exist already!
+    if (!$found) {
+      Asim::Package::ierror("Label: A tag named \"$labelname\" does not exist yet.\n")
+        && return 0;
+    }
+  } else {         # we are creating a new tag - it had better not exist yet!
+    if ($found) {
+      Asim::Package::ierror("Label: A tag or branch named \"$labelname\" already exists.\n")
+        && return 0;
+    }
   }
 
   $self->step('Lock repository');

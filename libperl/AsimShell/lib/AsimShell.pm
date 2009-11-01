@@ -148,6 +148,7 @@ our %OPTIONS = (
     status_package     => [ "--verbose", "--noverbose" ],
     update_package     => [ "--build", "--nobuild" ],
     install_package    => [ "--source" ],
+    tag_package        => [ "--existing" ],
 
     clean_model        => [ "--builddir" ],
     nuke_model         => [ "--builddir" ],
