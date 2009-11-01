@@ -91,7 +91,7 @@ our %COMPOUNDCOMMANDS =
     build     => [ qw(model package) ],
     cd        => [ qw(model package) ],
     checkout  => [ qw(bundle package) ],
-    clone     => [ qw(workspace) ],
+    clone     => [ qw(workspace bundle package) ],
     commit    => [ qw(package) ],
     configure => [ qw(model package) ],
     clean     => [ qw(model package regression) ],
@@ -124,6 +124,8 @@ our %COMPOUNDCOMMANDS =
     use       => [ qw(bundle package) ],
     verify    => [ qw(regression configuration) ],
     svn       => [ qw(package) ],
+    push      => [ qw(package) ],
+    pull      => [ qw(bundle package) ]
   );
 
 
@@ -136,7 +138,6 @@ our @COMMANDS= ( keys %COMPOUNDCOMMANDS,
 #
 our %OPTIONS = (
     clone_workspace    => [ "--link" ],
-
     checkout_bundle    => [ "--user=", "--user", "--build", "--nobuild", 
                             "--addpath", "--noaddpath", "--golden" ],
     use_bundle         => [ "--build", "--nobuild", "--addpath", "--noaddpath", "--golden" ],
@@ -171,6 +172,16 @@ our %OPTIONS = (
                             "--rerun",
                             "--dryrun", "--nodryrun",
                             "--help", "--options" ],
+    push_package    =>    [ "--dependent", "--nodependent", "--url", "--url=" ],
+    clone_package   =>    [ "-user=", "--user", "--build", "--nobuild", 
+                            "--addpath", "--noaddpath", "--url", "--url=" ],
+    clone_bundle    =>    [ "-user=", "--user", "--build", "--nobuild", 
+                            "--addpath", "--noaddpath" ],
+    pull_package    =>    [ "--build", "--nobuild", "--report", "--noreport", 
+                            "--url", "--url=" ],
+    pull_bundle     =>    [ "--build", "--nobuild", "--report", "--noreport", 
+                            "--url", "--url=" ],
+
   );
 
 

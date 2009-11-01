@@ -117,6 +117,8 @@ sub attempted_completion {
            $prefix =~ /^checkout\s+bundle\s+$/ ||
            $prefix =~ /^use\s+bundle\s+$/      ||
            $prefix =~ /^show\s+bundle\s+$/     ||
+           $prefix =~ /^clone\s+bundle\s+$/    ||
+           $prefix =~ /^pull\s+bundle\s+$/     ||
            $prefix =~ /^update\s+bundle\s+$/   ){
     #
     # Handle bundles that can be checked out
@@ -316,7 +318,7 @@ sub build_command {
 #
 sub is_multi_package_command {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean))$/ );
+  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(pull)|(push))$/ );
 }
 
 #
@@ -324,7 +326,7 @@ sub is_multi_package_command {
 #
 sub package_command_takes_all_arg {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(run))$/ );
+  return ( $cmd =~ m/^((status)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(run)|(pull)|(push))$/ );
 }
 
 

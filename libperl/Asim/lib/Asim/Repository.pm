@@ -22,6 +22,12 @@ package Asim::Repository;
 use warnings;
 use strict;
 
+use Asim::Repository::Svn;
+use Asim::Repository::Cvs;
+use Asim::Repository::BitKeeper;
+use Asim::Repository::Copy;
+use Asim::Repository::Git;
+
 our $DEBUG =  0
            || defined($ENV{ASIM_DEBUG})
            || defined($ENV{ASIM_DEBUG_REPOSITORY});
@@ -29,8 +35,7 @@ our $DEBUG =  0
 
 =head1 NAME
 
-Asim::Repository - Library for manipulating a CVS repositry containing
-an Asim repository.
+Asim::Repository - Library for manipulating a CVS/Svn/Bitkeeper/Git repositry containing an Asim repository.
 
 =head1 SYNOPSIS
 
@@ -52,7 +57,7 @@ The following public methods are supported:
 =over 4
 
 =item $repository = Asim::Repository-E<gt>new(packagename => <name of package>,
-                                        method => [cvs|svn|bitkeeper],
+                                        method => [cvs|svn|bitkeeper|git],
                                         access => <accessinfo>,
                                         module => <CVSmodule>,
                                         tag => <CVStag>,
@@ -78,9 +83,17 @@ sub new {
 
   bless	$self, $class;
 
+  #
+  # Determine what type of repository we have
+  #
+  Asim::Repository::Copy::set_type     ( $self ) ||
+  Asim::Repository::Cvs::set_type      ( $self ) ||
+  Asim::Repository::BitKeeper::set_type( $self ) ||
+  Asim::Repository::Svn::set_type      ( $self ) ||
+  Asim::Repository::Git::set_type      ( $self );
+
   return $self;
 }
-
 
 ################################################################
 
@@ -178,28 +191,18 @@ return 1;
 
 =item $dir = $repository-E<gt>checkout([$user])
 
-Check out a repository. 
-Returns the directory the result was checked out into.
+Perform necessary checks before checking out a repository. 
 
 =cut
 
 ################################################################
 sub checkout {
+
   my $self = shift;
   my $archive = $self;
-  my $user = shift || "anonymous";
-
-  my $method = $archive->{method};
-
-  my $access = $archive->{access} || return undef;
-  my $tag    = $archive->{tag}    || return undef;
-  my $module = $archive->{module} || return undef;
-  my $target = $archive->{target} || return undef;
 
   my $targetdir = $self->_checkoutbasedir();
   my $package_dir = $self->checkoutdir();
-
-  my $status;
 
   # First check if the target dir exists
   # and if it is writable
@@ -222,216 +225,52 @@ sub checkout {
     print "Removing old version of package\n";
     system("rm -rf $package_dir");
   }
-
+  
   print "Beginning checkout\n";
+
+}
+
+################################################################
+
+=item $dir = $repository-E<gt>clone([$user])
+
+Clone a distributed repository. 
+Returns the directory the result was cloned into.
+
+=cut
+
+################################################################
+sub clone {
   
-  # first parse the tag into a branch name and CSN number
-  
-  my $tag_branch = '';
-  my $tag_csn = 0;
-  if      ( $tag =~ m/^CSN-(.+)-([0-9\.]+)$/ ) {
-    $tag_branch = $1;
-    $tag_csn    = $2;
-  } elsif ( $tag =~     m/^(.+):([0-9\.]+)$/ ) {
-    $tag_branch = $1;
-    $tag_csn    = $2;
-  } elsif ( $tag =~          m/^([0-9\.]+)$/ ) {
-    $tag_csn    = $1;
-  } elsif ( $tag =~                m/^(.+)$/ ) {
-    $tag_branch = $1;
-  }
-  if ( $tag_branch eq $self->packagename() ) {
-    $tag_branch = '';
-  }
-  
-  # now perform method-specific actions.
-  # FIX FIX!! move into derived classes eventually, just like in Package.pm
+  my $self = shift;
+  my $archive = $self;
 
-  print("Checkout: branch=($tag_branch) csn=($tag_csn)\n") if ($DEBUG);
+  my $targetdir = $self->_checkoutbasedir();
+  my $package_dir = $self->checkoutdir();
 
+  # First check if the target dir exists
+  # and if it is writable
 
-  if ( $method eq "cvs") {
-
-    # Do a checkout via CVS
-
-    if ($user ne "anonymous") {
-      $access =~ s/:pserver:anonymous/$user/;
-
-      if (! $ENV{CVS_RSH} ) {
-        ierror("Warning: Environment variable CVS_RSH not set.\n",
-             "Warning: I've set it to \"ssh2\", which should be what you want.\n");
-
-        $ENV{CVS_RSH} = "ssh2";
-      }
-    }
-
-    my $cmd = "";
-    if ($tag ne "HEAD") {
-      $cmd = "(cd $targetdir; cvs -f -d $access checkout -P -d $target -r $tag $module)";
-    } else {
-      $cmd ="(cd $targetdir; cvs -f -d $access checkout -P -d $target $module)";
-    }
-    printf STDERR "Executing: %s\n", $cmd;
-    $status = system($cmd);
-
-
-    if ($status) {
-      if ($user eq "anonymous" &&
-          Asim::choose_yes_or_no("Do you want to try a 'cvs login' and retry the checkout","no","no")) {
-	if (!system("(cd $targetdir; cvs -f -d $access login $module)")) {
-	  return $self->checkout($user);
-        }
-      }
-      ierror("Cvs checkout failed\n");
-      return undef;
-    }
-
-  } elsif ( $method eq "pserver" ) {
-
-    # Do a checkout via pserver access to CVS
-
-    if ($user ne "anonymous") {
-      $access =~ s/anonymous/$user/;
-    }
-
-    if ($tag ne "HEAD") {
-      $status = system("(cd $targetdir; cvs -f -d $access checkout -P -d $target -r $tag $module)");
-    } else {
-      $status = system("(cd $targetdir; cvs -f -d $access checkout -P -d $target $module)");
-    }
-
-    if ($status) {
-      if ($user eq "anonymous" &&
-          Asim::choose_yes_or_no("Do you want to try a 'cvs login' and retry the checkout","no","no")) {
-	if (!system("(cd $targetdir; cvs -f -d $access login $module)")) {
-	  return $self->checkout($user);
-        }
-      }
-      ierror("Cvs checkout failed\n");
-      return undef;
-    }
-
-  } elsif ( $method eq "copy" ) {
-
-    # Do a 'checkout' via a copy of a publically available version
-
-    # Force / at end of access
-    $access =~ s-([^/])$-$1/-;
-
-    if ( ! -d $access) {
-      ierror("No public package to copy available at $access\n");
-      return undef;
-    }
-
-    # Copy the package
-    #   Remember to exclude all repository administration files (CVS/, .svn/, SCCS/)
-    #   This must match the method Asim::Package::Copy::update()
-
-    $status =  system("rsync -av --exclude=CVS/ --exclude=.svn/ --exclude=SCCS/ $access $package_dir");
-    $status |= system("echo $access >$package_dir/COPY");
-
-    if ($status) {
-      ierror("Package rsync failed\n");
-      return undef;
-    }
-
-  } elsif ( $method eq "bitkeeper" ) {
-
-    # FIX!
-    # deal with branches, which in the case of BK are just separate clones...
-
-    my $url = "$access";
-    if ($user ne "anonymous") {
-      $url =~ s/anonymous/$user/;
-    }
-
-    my $cmd;
-    if ($tag eq "HEAD") {
-      $cmd ="(cd $targetdir; bk clone $url $target)";
-    } else {
-      $cmd ="(cd $targetdir; bk clone -r$tag $url $target)";
-    }
-    printf STDERR "Executing: %s\n", $cmd;
-    $status = system($cmd);
-
-  } elsif ( $method eq "svn" ) {
-  
-    ### get the URL
-
-    my $url = "$access";
-    if ( ! $tag_branch || $tag_branch eq 'HEAD' ) {
-      $url .= '/trunk';
-    } else {
-
-      # Non-head checkout,
-      # where tag is a general string.
-      # Look in both "tags" and "branches" to find the label and check that one out:
-      my $is_tag_or_branch = 0;
-      foreach my $subdir ( 'tags', 'branches' ) {
-	open LIST, "svn list $url/$subdir |";
-	while ( <LIST> ) {
-          if ( m/^$tag_branch\// ) {
-            # Pick up the tag directory
-            $url .= "/$subdir/$tag_branch";
-            $is_tag_or_branch = 1;
-	    last;
-          }
-	}
-	close LIST;
-
-	last if ($is_tag_or_branch);
-      }
-      # couldn't find it in either tags or branches?
-      # Tag must be a date, so try checking out using it as a date string:
-      if ( ! $is_tag_or_branch ) {
-        if ( $tag_csn ) {
-          ierror("branch or tag $tag_branch not found!\n");
-        } else {
-          $url .= '/trunk';
-          $tag_csn = "{\"$tag\"}";
-        }
-      }
-
-    }
-    
-    ### construct the checkout command
-    
-    my $cmd = "(cd $targetdir; svn checkout ";
-    if ( $tag_csn ) {
-      $cmd .= "-r $tag_csn ";
-    }
-    $cmd   .= "--username $user $url $target)";
-    
-    ### execute the command
-
-    printf STDERR "Executing: %s\n", $cmd;
-    $status = system($cmd);
-
-  } else {
-    ierror("Error: Asim::Repository->checkout() - Unimplemented checkout method ($method)\n");
+  if (! -d "$targetdir" || ! -w "$targetdir") {
+    ierror("Malformed workspace - check if src directory is present and if it is writable.\n");
     return undef;
   }
 
-  print("Package checked out at $package_dir\n") if ($DEBUG);
+  # Make sure we have a packagename
 
-  #
-  # Change the permissions on the directory just checked out,
-  # to keep it private to the current user:
-  #
-  system("chmod 0700 $package_dir");
+  if (! defined($self->packagename())) {
+    ierror("No packagename for this package.\n");
+    return undef;
+  }
 
-  #
-  # Rehash the workspace since we have a new package in it
-  #
-  $Asim::default_workspace->rehash();
+  # Remove pre-existing package
+  if (-d $package_dir) {
+    print "Removing old local repository\n";
+    system("rm -rf $package_dir");
+  }
 
-  #
-  # We return the base directory so that the caller can 
-  # see if it is in the path...since we do not add it.
-  #
-  return $package_dir;
+  print "Beginning clone\n";
 }
-
 
 
 ################################################################

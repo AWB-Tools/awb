@@ -377,31 +377,75 @@ sub get_repository {
   my $target;
   my $browseURL;
   my $changes;
+  my $type;
 
   my $repository;
-
 
   ($name, $tag) = (split("/",$fullname), "HEAD");
 
   $desc    = $self->_get_item($fullname, "Description");
-  $method  = $self->_get_item($fullname, "Method") || return undef;
+  $method  = $self->_get_item($fullname, "Method");
 
   # Make CVS happy by converting  .'s to _'s in tag
 
   $cvstag = $tag;
+  if (! $method) {
+    if( $fullname =~ m/^(.+):\/\/(.+)$/) {
+    # path to a distributed repository. method can be git/mercurial/bitkeeper
+    my $asim_package = basename($2);
+    $method = 'git'; #FIXME: Support other distributed repositories
+    $access = "$1:$2";
+    $module = $asim_package;
+    if ($asim_package =~ m/^asim-(.+)$/) {
+      $name = $2;
+      $target = $asim_package;
+    } else {
+      $name = $asim_package;
+      $target = "asim-$asim_package";
+    }
+    $tag='HEAD';
+    $changes = '';
+    $browseURL = '';
+    print "$name\n";
+    print "$method\n";
+    print "$access\n";
+    print "$module\n";
+    print "$target\n";
+    #FIXME: What to do with the change file?
+     $repository = Asim::Repository->new(packagename => $name,
+                                        method      => $method,
+                                        access      => $access,
+                                        module      => $module,
+                                        tag         => $tag,
+                                        browseURL   => $browseURL,
+                                        target      => $target,
+                                        changes     => $changes);
+    return $repository;
+
+    } else {
+      return undef;
+    }
+  }
+
   if ($method eq "cvs") {
     $cvstag =~ s/\./_/g;
   }
 
   # Following will eventually be conditional on "Method";
 
-  if (($method eq "cvs") || ($method eq "pserver") || ($method eq "bitkeeper") || ($method eq "svn")) {
+  if (($method eq "cvs") || ($method eq "pserver") || ($method eq "bitkeeper") || ($method eq "svn") || ($method eq "git")) {
     $access    = $self->_get_item($fullname, "Access")    || return undef;
     $module    = $self->_get_item($fullname, "Module")    || return undef;
     $target    = $self->_get_item($fullname, "Target")    || return undef;
     $browseURL = $self->_get_item($fullname, "BrowseURL");
     $changes   = $self->_get_item($fullname, "Changes");
-
+    
+    # Set repository type. Bitkeeper should be distributed eventually.
+    if (($method eq "git")) {
+      $type = "distributed";
+    } else {
+      $type = "centralized";
+    }
     # Note: 
     #   We depend on the packagename matching the package filename,
     #   i.e., the filename in the admin/package directory, 
@@ -414,7 +458,8 @@ sub get_repository {
                                         tag         => $cvstag,
                                         browseURL   => $browseURL,
                                         target      => $target,
-                                        changes     => $changes);
+                                        changes     => $changes, 
+                                        type        => $type );
 
   } else {
     ierror("Unknown access method $method");

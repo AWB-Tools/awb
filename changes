@@ -6713,3 +6713,41 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with asim-awb changes (rev. 2838 - Carl Beckmann).
 
 - awb-shell tag package command now works in batch mode
+
+----------
+spartha1    Date: Sun Nov  1 17:44:52 EST 2009  CSN: CSN-awb-353
+                  Sun Nov  1 22:44:52 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          352 
+ Completion.pm             Locally Modified          352 
+ Commands.pm               Locally Modified          352 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          352 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          352 
+ Commit.pm                 Locally Modified          352 
+ BitKeeper.pm              Locally Modified          352 
+ Cvs.pm                    Locally Modified          352 
+ Git.pm                    Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          352 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          352 
+ Svn.pm                    Locally Added               0 
+ BitKeeper.pm              Locally Added               0 
+ Copy.pm                   Locally Added               0 
+ Cvs.pm                    Locally Added               0 
+ Git.pm                    Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          352 
+
+Updating with asim-awb changes (rev. 2842 - Mohit Gambhir).
+
+Added beta version of the Awb perl modules that handle git revision control system

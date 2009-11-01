@@ -140,8 +140,6 @@ sub update {
     if ( $url ne $self->get_working_url() ) {
       $command = 'switch ' . $url;
     }
-    
-  
   }
 
   # do the update
@@ -153,6 +151,21 @@ sub update {
   }
 
   return 1;
+}
+
+=item $svn-E<gt>pull([version])
+
+#Alias to update
+
+=cut
+
+sub pull {
+
+  my $self = shift;
+  my $revision = shift;
+
+  return $self->update($revision);
+
 }
 
 =item $svn-E<gt>status()

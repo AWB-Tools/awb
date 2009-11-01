@@ -35,6 +35,7 @@ use Asim::Package::Copy;
 use Asim::Package::Cvs;
 use Asim::Package::BitKeeper;
 use Asim::Package::Svn;  
+use Asim::Package::Git;  
 use Asim::Package::Util;
 use Asim::Package::Commit;
 use Asim::Package::Branch;
@@ -346,6 +347,7 @@ sub open {
   Asim::Package::Cvs::set_type      ( $self ) ||
   Asim::Package::BitKeeper::set_type( $self ) ||
   Asim::Package::Svn::set_type      ( $self ) ||
+  Asim::Package::Git::set_type      ( $self ) ||
   Asim::Package::set_type           ( $self );
 
   return $self;
@@ -1035,6 +1037,22 @@ own repository-specific version of this.
 
 sub update {
   ierror("Cannot update unknown package type\n");
+  return undef;
+}
+
+
+################################################################
+
+=item $package-E<gt>pull()
+
+Fetch from or merge with another repository or local branch.
+This default one just prints an error, subclasses should provide their
+own repository-specific version of this.
+
+=cut
+
+sub pull {
+  ierror("Cannot pull unknown package type\n");
   return undef;
 }
 

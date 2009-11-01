@@ -63,6 +63,16 @@ Commands:
     [--noaddpath]                        - do not add package to search path
     [--golden]                           - check out the recent golden version
 
+  clone bundle <bundle>[/<tag>]          - clone a bundle of packages from their 'distributed' repositories
+    [--user=<user>]                      - do checkout as <user>
+    [--nobuild]                          - do not build package
+    [--noaddpath]                        - do not add package to search path
+    [--url]                              - url of the remote repository to clone
+ 
+  pull bundle <bundle>[/<tag>]           - update a bundle of packages in a workspace
+    [--nobuild]                          - do not rebuild updated packages
+    [--url]                              - url of the remote repository to pull 
+  
   use bundle <bundle>                    - copy a bundle of packages into workspace
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
@@ -70,7 +80,7 @@ Commands:
 
   update bundle <bundle>[/<tag>]         - update a bundle of packages in a workspace
     [--nobuild]                          - do not rebuild updated packages
-
+ 
   show bundle <bundle>                   - show the packages in a bundle
   
   new bundle <bundle>[/<tag>]            - create a new bundle
@@ -109,6 +119,12 @@ Commands:
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
 
+  clone package <repository>[/<tag>]     - clone a package
+    [--user=<user>]                      - do checkout as <user>
+    [--nobuild]                          - do not build package
+    [--noaddpath]                        - do not add package to search path
+    [--url]                              - url of the remote repository to clone
+
   use package <repository>[/<tag>]       - copy a package into workspace
     [--nobuild]                          - do not build package
     [--noaddpath]                        - do not add package to search path
@@ -117,6 +133,10 @@ Commands:
                                            search path
   delete package [all|<package>...]      - delete a checked out package
 
+  pull package [all|<package>...]        - update a package
+    [--nobuild]                          - prevent ./configure and build of package
+    [--url]                              -  url of the remote repository to pull
+  
   show package [all|<package>...]        - show info about package
 
   regtest package [<package>]            - run regression test on package (obsolete)
@@ -127,6 +147,10 @@ Commands:
   commit package [all|<package>...]      - commit a package
     [--nodependent]                      - prevent commit of dependent packages
     [--commitlog=<commit comments file>] - Use in batch mode to supply commit comments
+  
+  push package [all|<package>...]        - push a package from local to a remote repository
+    [--nodependent]                      - prevent commit of dependent packages
+    [--url]                              - url of the remote repository to push to
 
   tag package [<package>] label          - tag current package revision with symbolic label
     [--existing]                         - move an existing tag to the current revision

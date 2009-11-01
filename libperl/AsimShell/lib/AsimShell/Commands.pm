@@ -655,6 +655,87 @@ sub use_bundle {
   return $status;
 }
 
+sub clone_bundle {
+  my $user;
+  my $addpath = 1;
+  my $build = 1;
+  my $status;
+  my $bundlename;
+  local @ARGV = @_;
+  my @packages;
+  my $runstatus;
+  my $url = undef;
+
+  # Parse options
+
+  $status = GetOptions( "user=s"     => \$user,
+		        "build!"     => \$build,
+		        "url=s"     => \$url,
+		        "addpath!"   => \$addpath );
+
+  return 0 if (!$status);
+
+  # Bundle name is remaining argument
+  
+  $bundlename = shift @ARGV;
+  if (!defined $bundlename) {
+      $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
+  }
+  
+  #
+  # Determine the list of packages to clone from the bundle file
+  #
+  @packages = bundle_packages_( $bundlename );
+  
+  print "Cloning: " . join(" ", @packages) . "\n";
+
+  #
+  # Regenerate the arguments for clone_package
+  #     This is not a very aesthetic way of doing this
+  #     adding a subfunction to do the checkout would be better
+  #
+  my @args = ();
+
+  $default_user = $user
+    || Asim::choose("Repository user you want to do the checkout (e.g., your login name or anonymous)", $default_user)
+    || shell_error("Must select user for checkout\n") && return ();
+
+  push(@args, "--user=$default_user");
+  push(@args, "--url=$url");
+
+  if (defined($addpath)) {
+    push(@args, ("--" . ($addpath?"":"no") . "addpath"));
+  }
+
+  # Do not build since we do all the builds later...
+  push(@args, "--nobuild");
+
+  my $pkg;
+  my @plist;
+
+  foreach my $b (@packages) {
+    print "--- clone package $b " . join(" ",@args) . "\n";
+    $pkg = clone_package($b, @args);
+
+    if (! defined($pkg)) {
+      _add_failure($b, "clone failed");
+      next;
+    }
+
+    push(@plist, $pkg);
+  }
+
+  if ($build) {
+    configure_and_build_packages(@plist);
+  }
+
+  $status = _report_failures();
+
+  return $status;
+}
+
+
+
 #
 # update a bundle, being careful to update to the exact version specified in the bundle.
 # On a branch or on the trunk, update to the latest version, but if a package is
@@ -699,6 +780,45 @@ sub update_bundle {
   return $status;
 }
 
+sub pull_bundle {
+
+  # Parse options
+  my $build = 1;
+  my $url = undef;
+  local @ARGV = @_;
+  my $status = GetOptions( "build!" => \$build,
+                            "--url=s" => \$url );
+  return 0 if (!$status);
+
+  # Bundle name is remaining argument
+  my $bundlename = shift;
+  if (!defined $bundlename) {
+      $bundlename = choose_bundle() || shell_error("Bundle name must be selected!\n") && return ();
+  }
+  
+  # Determine the list of packages to update from the bundle file
+  my @packages = bundle_packages_( $bundlename );
+  print "Pulling: " . join(" ", @packages) . "\n";
+
+  # Regenerate the arguments for pull_package
+  # Do not build since we do all the builds later...
+  my @args = ("--nobuild", "--url=$url");
+  my @plist = ();
+  foreach my $b (@packages) {
+    print "--- pull package $b " . join(" ",@args) . "\n";
+    pull_package($b, "--noreport", @args);
+    (my $name, my $pkgvers) = split('/',$b);
+    push(@plist, get_package($name));
+  }
+
+  if ($build) {
+    configure_and_build_packages(@plist);
+  }
+
+  $status = _report_failures();
+
+  return $status;
+}
 
 sub show_bundle {
   my $bundlename = shift;
@@ -1037,7 +1157,7 @@ sub checkout_package {
   #
   # Check if targetdir already exists
   #
-  if (-e $targetdir) {
+  if (-e $targetdir && $repository->{type} ne 'distributed') {
     print "A package already exists in $targetdir and may have modified files in it!\n";
 
     if (! Asim::choose_yes_or_no("Do you want to overwrite package at $targetdir", "no", "yes")) {
@@ -1051,7 +1171,7 @@ sub checkout_package {
 
   my $target_packagename = $repository->packagename();
 
-  if (! -e $targetdir && defined($default_packageDB->get_package($target_packagename))) {
+  if (! -e $targetdir && defined($default_packageDB->get_package($target_packagename)) && $repository->{type} ne 'distributed') {
     print "A package of this name ($target_packagename) already exists in your searchpath!\n";
     my $q = "Do you want to remove the reference to this package from the searchpath";
 
@@ -1093,7 +1213,7 @@ sub checkout_package {
   # Check and if it is necessary to add package to search path...
   #     (return if package is not going to be on the path)
   #
-  if ($addpath) {
+  if ($addpath && $repository->{type} ne 'distributed') {
     add_path($targetdir, $addpath) || return $package;
   }
 
@@ -1108,6 +1228,121 @@ sub checkout_package {
   return $package;
 }
 
+sub clone_package {
+my $user = undef;
+  my $build = 1;
+  my $addpath = 1;
+  my $url = undef;
+  my $status;
+  local @ARGV = @_;
+
+  #
+  # Parse options
+  #
+  $status = GetOptions( "user=s"   => \$user,
+		        "build!"   => \$build,
+		        "addpath!" => \$addpath,
+                        "url=s"    => \$url);
+
+  return undef if (!$status);
+
+  #
+  # Repository name is remaining argument
+  #
+  my $repositoryname = shift @ARGV
+    || choose_repository()
+    || shell_error("Repository name must be selected!\n") && return undef;
+
+  #
+  # Get repository object, and determine checkout directory
+  #
+  
+  my $repository = $default_repositoryDB->get_repository($repositoryname) 
+    || shell_error("Repository ($repositoryname) was missing or malformed in packfile\n") && return undef;
+
+  if ($repository->{type} ne 'distributed') {
+     shell_error("Can only clone a distributed repository. $repositoryname is a $repository->{method} repository.\n") && return undef;
+  }
+  my $targetdir = $repository->checkoutdir()
+    || shell_error("Could not determine target for checkout\n") && return undef;
+
+  #
+  # Check if targetdir already exists
+  #
+  if (-e $targetdir) {
+    print "A package already exists in $targetdir and may have modified files in it!\n";
+
+    if (! Asim::choose_yes_or_no("Do you want to overwrite package at $targetdir", "no", "yes")) {
+      return $default_packageDB->get_package_by_dirname($targetdir);
+    }
+  }
+
+  #
+  # Check if package of this type already exists in searchpath
+  #
+
+  my $target_packagename = $repository->packagename();
+
+  if (! -e $targetdir && defined($default_packageDB->get_package($target_packagename))) {
+    print "A package of this name ($target_packagename) already exists in your searchpath!\n";
+    my $q = "Do you want to remove the reference to this package from the searchpath";
+
+    if (Asim::choose_yes_or_no($q, "yes", "yes")) {
+      my $workspace = $Asim::default_workspace;
+
+      $workspace->remove_path_by_packagename($target_packagename);
+      $workspace->save();
+    }
+  }
+
+  #
+  # Determine user to do a clone
+
+  $default_user = $user
+    || Asim::choose("Repository user you want to do the checkout (e.g., your login name or anonymous)", $default_user)
+    || shell_error("Must select user for checkout\n") && return undef;
+
+
+  # change repository url in case user specified a url on the command line
+  $repository->{access} = $url if ( defined ($url) ) ;
+
+  #
+  # Do the clone and get package object for cloned package
+  #
+  $repository->clone($default_user) 
+    || shell_error("Could not check out package ($repositoryname)\n") && return undef;
+
+  my $package = $default_packageDB->get_package_by_dirname($targetdir)
+    || shell_error("No legal package at $targetdir\n") && return undef;
+
+  #
+  # Optionally build the package
+  #
+  if (defined($build) && $build ) {
+    $package->configure();
+    $package->build();
+    maybe_check_package_configurations();
+  }
+
+  #
+  # Check and if it is necessary to add package to search path...
+  #     (return if package is not going to be on the path)
+  #
+  if ($addpath) {
+    add_path($targetdir, $addpath) || return $package;
+  }
+
+  #
+  # We've got a new package now, so it might be good to rehash the packageDB
+  #
+  $default_packageDB->rehash();
+
+  #
+  # Return the package we checked out
+  #
+  return $package;
+
+}
 
 #
 # Add a publically installed package to your workspace
@@ -1779,6 +2014,7 @@ sub update_package {
     if ($build) {
       # if we are also building, add the package to the list of ones to build
       push @build_list, $package;
+  # We will not commit dependent packages for git repositories. 
     }
 
     _print_package_finish("update", $name);
@@ -1799,6 +2035,83 @@ sub update_package {
   return $status;
 }
 
+#
+# pull one or more packages, returning 1 if all succeeded.
+#
+sub pull_package {
+  my $build = 1;
+  my $report = 1;
+  my $url = undef;
+  my $branch = undef;
+
+  my @build_list = ();
+  local @ARGV = @_;
+
+  # Parse options
+
+  my $status = GetOptions( "build!"  => \$build,
+                           "report!" => \$report, 
+                           "url=s"   => \$url);
+
+  return undef if (!$status);
+
+  # get the list of packages
+  my @package_names = _expand_package_names(@ARGV);
+
+  while ( my $pkgspec = shift @package_names) {
+    # each package in the list could be a simple name,
+    # or a name and version or branch identifier, like this:
+    #   <pkgname>
+    #   <pkgname>/HEAD
+    #   <pkgname>/<branchname>
+    #   <pkgname>/<tag>
+    my $name;
+    my $version;
+    ($name,$version) = split('/',$pkgspec);
+
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      next;
+    }
+
+    _print_package_start("pull", $name, "(" . $package->type() . " repository)");
+
+    if (!$package->isprivate()) {
+      print("Cannot update a non-private package\n");
+      _print_package_finish("update", $name, "(skipped)");
+      next;
+    }
+    
+    # set package url
+    $package->{url} = $url;
+
+    # update the package to the specified version
+    $package->pull($version) || _add_failure($package->name(),"update failed");
+
+    if ($build) {
+      # if we are also building, add the package to the list of ones to build
+      push @build_list, $package;
+    }
+
+    _print_package_finish("pull", $name);
+  }
+
+  # if updating more than one package, and building,
+  # do the builds after you have checked everything out.
+
+  configure_and_build_packages(@build_list);
+
+
+  if ($report) {
+    $status = _report_failures();
+  } else {
+    $status = ($#failures < 0) || undef;
+  }
+
+  return $status;
+}
 
 
 #
@@ -1900,7 +2213,6 @@ sub commit_package {
   return 1;
 }
 
-
 # Commits all packages in workspace
 
 sub commit_all_packages {
@@ -1933,6 +2245,94 @@ sub commit_all_packages {
 
   return 1;
 }
+
+
+#
+# push one or more packages to a remote distributed repository, 
+# returning 1 if all succeeded
+#
+sub push_package {
+  my $deps = 1;
+  my $url = undef;
+
+  local @ARGV = @_;
+
+  # Parse options
+
+  my $status = GetOptions( "dependent!"     => \$deps,
+			   "url=s"          => \$url
+			 );
+
+  return undef if (!$status);
+
+  my $name;
+  my $branch;
+
+  # Package names are remaining arguments
+  while ( my $fullname = shift @ARGV ) {
+    ($name, $branch) = (split("/",$fullname));
+    # handle special case of "all packages"
+    if (defined($name) && ($name eq "*" || $name eq "all")) {
+      return push_all_packages($deps, $url);
+    }
+    if (! defined ($url) ) {
+      my $repository = $default_repositoryDB->get_repository($name) 
+    || shell_error("Cannot retrieve URL to push package $name \n Use --url to specify location to push to \n") && return undef;
+      $url = $repository->{access};
+      if (! defined( $url) ) {
+          shell_error("Cannot retrieve URL to push package $name \n Use --url to specify location to push to \n") && return undef;
+      }
+    }
+    my $package = get_package($name) || return undef;
+    $package->{url} = $url;
+    $package->{branch} = $branch;
+    $package->push_package(!$deps) || return undef;
+  }
+  
+  return 1;
+}
+
+# Commits all packages in workspace
+
+sub push_all_packages {
+  my $deps = shift;
+
+  my @plist;
+
+  #
+  # Generate list of checked-out packages
+  #
+  foreach my $pname ($default_packageDB->directory()) {
+    my $p = get_package($pname);
+
+    if ($p->isprivate()) {
+      push(@plist, $p);
+    } else {
+      print "Skipping public package $pname\n";
+    }
+  }
+
+  my $repository = undef;
+  my $url = undef;
+  #
+  # Do a push on each package
+  #
+  for my $p (@plist) {
+        print "Pushing package " . $p->name() . "\n\n";
+        $repository = $default_repositoryDB->get_repository($p->name()) 
+    || shell_error("Cannot retrieve URL to push package $p->name() \n Use --url to specify repository URL \n") && return undef;
+        $url = $repository->{access};
+        if (! defined( $url) ) {
+          shell_error("Cannot retrieve URL to push package $p->name() \n Use --url to specify location to push to \n") && return undef;
+        }
+        $p->{url} = $url;
+	$p->push_package(!$deps) || return undef;
+	print "\n";
+  }
+
+  return 1;
+}
+
 
 sub tag_package {
   local @ARGV = @_;
