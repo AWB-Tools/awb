@@ -960,7 +960,8 @@ sub label {
   print  COMMENT "        From URL:     $cur_url\n";
   print  COMMENT "        To URL:       $tag_url\n";
   close  COMMENT;
-  Asim::invoke_editor("--eof", $self->{commentfile});
+  Asim::invoke_editor("--eof", $self->{commentfile})
+    unless Asim::mode() eq 'batch';
 
   # create the branch in the repository, using the supplied branch name:
   $self->svn("copy $cur_url -r $rev $tag_url --file " . $self->{commentfile});

@@ -6701,3 +6701,15 @@ Updating with asim-awb changes (rev. 2837 - Carl Beckmann).
 
 - fixed a problem getting baseline information from awb-shell when
   running without a terminal (e.g. from cron)
+
+----------
+spartha1    Date: Sun Nov  1 17:42:12 EST 2009  CSN: CSN-awb-352
+                  Sun Nov  1 22:42:12 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          351 
+
+Updating with asim-awb changes (rev. 2838 - Carl Beckmann).
+
+- awb-shell tag package command now works in batch mode
