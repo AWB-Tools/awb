@@ -170,6 +170,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "hasim-configure"     => "tools/scripts/hasim-configure",
   "hasim-connect"       => "tools/scripts/hasim-connect",
   "hasim-dict"          => "tools/scripts/hasim-dict",
+  "hasim-gen-black-box" => "tools/scripts/hasim-gen-black-box",
   "hasim-rrr-stubgen"   => "tools/scripts/hasim-rrr-stubgen",
   "hasim-front-panel"   => "tools/hasim/hasim-front-panel/hasim-front-panel",
 #

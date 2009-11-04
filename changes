@@ -6766,3 +6766,13 @@ Directory libperl/AsimShell/lib
 Updating with asim-awb changes (rev. 2843 - Krishna Rangan).
 
 - support to use golden qualifier on checkout and update bundle.
+
+----------
+mcadler     Date: Tue Nov  3 22:07:52 EST 2009  CSN: CSN-awb-355
+                  Wed Nov  4 03:07:52 UTC 2009
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          354 
+
+Add hasim-gen-black-box
