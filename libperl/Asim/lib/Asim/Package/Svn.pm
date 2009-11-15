@@ -901,6 +901,10 @@ If the optional flag <existing> is set to 1, then an existing tag
 will be moved to the current revision.  If the flag is omitted or
 passed as zero, then an error will occur if the tag already exists.
 
+An existing tag will not be moved if it already exists on the same
+revision of the same working URL.  In this case, a warning is printed,
+but this routine still returns 1 for success.
+
 =cut
 
 sub label {
@@ -940,6 +944,34 @@ sub label {
     }
   }
 
+  my $cur_url = $self->get_working_url();
+  my $tag_url = $self->get_repository_url() . '/tags/' . $labelname;
+  my $csn = $self->csn();
+  my $rev = $self->get_working_revision();
+  
+  # if you're moving an existing tag, don't bother moving it if you've already tagged the same revision.
+  # check this by looking at the last log entry for the destination URL,
+  # and scan for the formatted message generated further below:
+  if ($existing && $found) {
+    my $log_rev = 0;
+    my $log_from = '';
+    my $log_to = '';
+    open DESTLOG, "svn log $tag_url --limit 1 |";
+    while (<DESTLOG>) {
+      if (/Tag revision:\s+([0-9]+)/) {
+        $log_rev = $1;
+      } elsif (/From URL:\s+(\S+)/) {
+        $log_from = $1;
+      } elsif (/To URL:\s+(\S+)/) {
+        $log_to = $1;
+      }
+    }
+    if ($log_rev == $rev && $log_from eq $cur_url && $log_to eq $tag_url) {
+      Asim::Package::iwarn("Not applying tag $labelname since it already exists on revision $rev\n");
+      return 1;
+    }
+  }
+
   $self->step('Lock repository');
 
   $self->acquire_lock()
@@ -958,14 +990,9 @@ sub label {
   
   Asim::Xaction::start();
 
-  my $cur_url = $self->get_working_url();
-  my $tag_url = $self->get_repository_url() . '/tags/' . $labelname;
-
   # create a comment file header, nicely formatted so it gets past SVN pre-commit hook:
   $self->{commentfile} = "$Asim::Package::TMPDIR/asim_label_comment.$$.txt";
   open COMMENT, '>'.$self->{commentfile};
-  my $csn = $self->csn();
-  my $rev = $self->get_working_revision();
   chomp(my $date     = `$Asim::Package::DATE`);
   chomp(my $date_utc = `$Asim::Package::DATE_UTC`);
   printf COMMENT "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n", $Asim::Package::USER, $date, $csn, '', $date_utc;

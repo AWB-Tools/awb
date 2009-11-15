@@ -6790,3 +6790,16 @@ Updating with asim-awb changes (rev. 2847 - Steve Raasch).
 Modify the _substitute() subroutine to return a meaningful error
 message if the referenced variable is not defined. Routine now returns
 an empty string in this situation.
+
+----------
+spartha1    Date: Sun Nov 15 18:14:30 EST 2009  CSN: CSN-awb-357
+                  Sun Nov 15 23:14:30 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          356 
+
+Updating with asim-awb changes (rev. 2850 - Carl Beckmann).
+
+- The "tag package" command does not move an existing tag if it already
+exists on the same revision and URL
