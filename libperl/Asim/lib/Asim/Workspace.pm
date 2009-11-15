@@ -857,8 +857,17 @@ sub _substitute {
   my $s = shift;
 
   while ($s =~ /\$\((\w*)\)/) {
-    my $var = $self->_accessor("Vars", $1);
-    $s =~ s/\$\(\w*\)/$var/;
+      my $varname = $1;
+      my $var = $self->_accessor("Vars", $varname);
+
+      if (defined $var) {
+          $s =~ s/\$\(\w*\)/$var/;
+      }
+      else {
+          print "WARNING: Undefined variable '$varname' in workspace configuration file!\n";
+
+          $s = "";
+      }
   }
 
   return $s;
