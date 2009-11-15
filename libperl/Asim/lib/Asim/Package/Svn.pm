@@ -948,6 +948,8 @@ sub label {
   my $tag_url = $self->get_repository_url() . '/tags/' . $labelname;
   my $csn = $self->csn();
   my $rev = $self->get_working_revision();
+  chomp(my $date     = `$Asim::Package::DATE`);
+  chomp(my $date_utc = `$Asim::Package::DATE_UTC`);
   
   # if you're moving an existing tag, don't bother moving it if you've already tagged the same revision.
   # check this by looking at the last log entry for the destination URL,
@@ -966,9 +968,29 @@ sub label {
         $log_to = $1;
       }
     }
-    if ($log_rev == $rev && $log_from eq $cur_url && $log_to eq $tag_url) {
-      Asim::Package::iwarn("Not applying tag $labelname since it already exists on revision $rev\n");
-      return 1;
+    if ($log_from eq $cur_url && $log_to eq $tag_url) {
+      if ($log_rev == $rev) {
+        Asim::Package::iwarn("Not applying tag $labelname since it already exists on revision $rev\n");
+        return 1;
+      } elsif ($log_rev < $rev) {
+        # even if the revisions do not match, maybe there have been no commits
+        # to the source branch since the tag was applied.  Check this by looking at
+        # the log between the revision last copied from and the current revision:
+        my $min_rev = $log_rev+1;
+        open SOURCELOG, "svn log $cur_url -r $min_rev:$rev |";
+        my $commit_count = 0;
+        while (<SOURCELOG>) {
+          if (m/^\-+$/) {
+            # line of dashes separating commit messages
+          } else {
+            ++$commit_count;
+          }
+        }
+        if ($commit_count == 0) {
+          Asim::Package::iwarn("Not applying tag $labelname because no changes since revision $rev\n");
+          return 1;
+        }
+      }
     }
   }
 
@@ -989,9 +1011,6 @@ sub label {
   $self->step('Label the repository');
   
   Asim::Xaction::start();
-  
-  chomp(my $date     = `$Asim::Package::DATE`);
-  chomp(my $date_utc = `$Asim::Package::DATE_UTC`);
 
   # if we are moving an existing tag, we must remove the old one first
   # or we'll just end up copying into a trunk/ subdirectory there!!

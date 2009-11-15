@@ -1108,6 +1108,9 @@ sub commit_archive {
   }
   if ($self->type() eq "svn") {
      system ("rm $commentfile");
+     # force an update to make sure the local working directory
+     # is up-to-date with the revision we just committed:
+     $self->update();
   }
 
   #
