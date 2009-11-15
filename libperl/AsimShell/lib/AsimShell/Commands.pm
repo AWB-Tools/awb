@@ -1288,7 +1288,7 @@ sub checkout_package {
   # Check and if it is necessary to add package to search path...
   #     (return if package is not going to be on the path)
   #
-  if ($addpath && $repository->{type} ne 'distributed') {
+  if ($addpath && ($repository->{type} ne 'distributed' || !defined($default_packageDB->get_package($package->name())))) {
     add_path($targetdir, $addpath) || return $package;
   }
 

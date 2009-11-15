@@ -6816,3 +6816,15 @@ Updating with asim-awb changes (rev. 2851 - Carl Beckmann).
 
 - fixed a bug in the Package label() method when moving an existing tag.
 The previous revision of the tag must be removed first.
+
+----------
+spartha1    Date: Sun Nov 15 18:16:51 EST 2009  CSN: CSN-awb-359
+                  Sun Nov 15 23:16:51 UTC 2009
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          358 
+
+Updating with asim-awb changes (rev. 2852 - Carl Beckmann).
+
+- "checkout package" on Git repos should add the directory to the SEARCHPATH on a fresh checkout (clone) just like for non-distributed repos. This change is harmless if the package is already cloned in the workspace and we are doing a local checkout.
