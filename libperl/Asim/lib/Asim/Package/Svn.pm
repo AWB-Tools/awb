@@ -989,6 +989,12 @@ sub label {
   $self->step('Label the repository');
   
   Asim::Xaction::start();
+  
+  # if we are moving an existing tag, we must remove the old one first
+  # or we'll just end up copying into a trunk/ subdirectory there!!
+  if ($existing && $found) {
+    $self->svn("rm $tag_url -m \"moving tag $labelname to new revision $rev\"");
+  }
 
   # create a comment file header, nicely formatted so it gets past SVN pre-commit hook:
   $self->{commentfile} = "$Asim::Package::TMPDIR/asim_label_comment.$$.txt";

@@ -6803,3 +6803,16 @@ Updating with asim-awb changes (rev. 2850 - Carl Beckmann).
 
 - The "tag package" command does not move an existing tag if it already
 exists on the same revision and URL
+
+----------
+spartha1    Date: Sun Nov 15 18:15:39 EST 2009  CSN: CSN-awb-358
+                  Sun Nov 15 23:15:39 UTC 2009
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          357 
+
+Updating with asim-awb changes (rev. 2851 - Carl Beckmann).
+
+- fixed a bug in the Package label() method when moving an existing tag.
+The previous revision of the tag must be removed first.
