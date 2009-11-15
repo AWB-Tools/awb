@@ -990,17 +990,19 @@ sub label {
   
   Asim::Xaction::start();
   
+  chomp(my $date     = `$Asim::Package::DATE`);
+  chomp(my $date_utc = `$Asim::Package::DATE_UTC`);
+
   # if we are moving an existing tag, we must remove the old one first
   # or we'll just end up copying into a trunk/ subdirectory there!!
   if ($existing && $found) {
-    $self->svn("rm $tag_url -m \"moving tag $labelname to new revision $rev\"");
+    my $logmesg = $Asim::Package::USER."  Date: $date  CSN: $csn : moving tag $labelname to new revision $rev";
+    $self->svn("rm $tag_url -m \"$logmesg\"");
   }
 
   # create a comment file header, nicely formatted so it gets past SVN pre-commit hook:
   $self->{commentfile} = "$Asim::Package::TMPDIR/asim_label_comment.$$.txt";
   open COMMENT, '>'.$self->{commentfile};
-  chomp(my $date     = `$Asim::Package::DATE`);
-  chomp(my $date_utc = `$Asim::Package::DATE_UTC`);
   printf COMMENT "%-10s  Date: %s  CSN: %s\n%-10s        %s\n\n", $Asim::Package::USER, $date, $csn, '', $date_utc;
   print  COMMENT "        Tag revision: $rev\n";
   print  COMMENT "        From URL:     $cur_url\n";
