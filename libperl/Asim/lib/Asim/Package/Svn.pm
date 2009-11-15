@@ -987,7 +987,7 @@ sub label {
           }
         }
         if ($commit_count == 0) {
-          Asim::Package::iwarn("Not applying tag $labelname because no changes since revision $rev\n");
+          Asim::Package::iwarn("Not applying tag $labelname because no changes since revision $log_rev\n");
           return 1;
         }
       }
