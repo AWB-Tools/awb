@@ -6,7 +6,7 @@ Method=svn
 Access=https://asim.csail.mit.edu/svn/ofdm
 Module=undefined
 Tag=HEAD
-Target=odfm
+Target=ofdm
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OFDM
 

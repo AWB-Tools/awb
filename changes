@@ -6872,3 +6872,13 @@ Updating with asim-awb changes (rev. 2859 - Carl Beckmann).
 
 - fixed which revision number is reported in a warning message about not
 moving a tag if there have been no changes since the last tag move.
+
+----------
+kfleming    Date: Wed Feb 10 16:21:11 EST 2010  CSN: CSN-awb-363
+                  Wed Feb 10 21:21:11 UTC 2010
+
+
+Directory etc/repositories.d
+ ofdm.pack                 Locally Modified          362 
+
+Fixed typo in ofdm pack file
