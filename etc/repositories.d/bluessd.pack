@@ -1,0 +1,13 @@
+###### bluessd Repository
+[bluessd]
+Description=BlueSSD project repository
+Method=svn
+Access=https://asim.csail.mit.edu/svn/bluessh
+Module=undef
+Tag=HEAD
+Target=BlueSSD
+Changes=changes
+[bluessh/HEAD]
+Description=BlueSSD repository
+Access=https://asim.csail.mit.edu/svn/bluessh
+Tag=HEAD

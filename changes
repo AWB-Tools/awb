@@ -6882,3 +6882,14 @@ Directory etc/repositories.d
  ofdm.pack                 Locally Modified          362 
 
 Fixed typo in ofdm pack file
+
+----------
+kfleming    Date: Mon Feb 15 09:13:18 EST 2010  CSN: CSN-awb-364
+                  Mon Feb 15 14:13:18 UTC 2010
+
+
+Directory etc/repositories.d
+ bsv-libraries.pack        Locally Added               0 
+ bluessd.pack              Locally Added               0 
+
+Added awb files for BlueSSD and its dependency bsv-library.  This is so our SNU/UCSD friends can checkout packages more easily.

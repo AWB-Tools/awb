@@ -1,0 +1,17 @@
+###### 6.375 class trunk
+
+[bsv-libraries]
+Description=General Bluespec libraries
+Method=svn
+Access=https://asim.csail.mit.edu/svn/bsv-libraries/
+Module=undef
+Tag=HEAD
+Target=bsv-libraries
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=bsv-libraries
+
+[bsv-libraries/HEAD]
+Description=General Bluespec Libraries
+Access=https://asim.csail.mit.edu/svn/bsv-libraries/
+Tag=HEAD
+
