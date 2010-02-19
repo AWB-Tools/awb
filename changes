@@ -6893,3 +6893,13 @@ Directory etc/repositories.d
  bluessd.pack              Locally Added               0 
 
 Added awb files for BlueSSD and its dependency bsv-library.  This is so our SNU/UCSD friends can checkout packages more easily.
+
+----------
+kfleming    Date: Fri Feb 19 18:17:03 EST 2010  CSN: CSN-awb-365
+                  Fri Feb 19 23:17:03 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          364 
+
+Added support for generated BA file specification.  Bluespec synthesis boundaries are now supported at arbitrary points in the code.

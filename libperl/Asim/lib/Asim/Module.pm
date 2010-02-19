@@ -54,6 +54,9 @@ our %a =  ( name =>                 [ "name",
             sourcematrix =>         [ "sourcematrix",
                                       "ARRAY",
                                       "Asim::Module::SourceList" ],
+            generatedmatrix =>      [ "generatedmatrix",
+                                      "ARRAY",
+                                      "Asim::Module::SourceList" ],
             makefile =>             [ "makefile",
                                       "ARRAY" ],
             scons =>                [ "scons",
@@ -148,6 +151,7 @@ sub _initialize {
 		 public => [],
 		 private => [],
 		 sourcematrix => [],
+		 generatedmatrix => [],
 		 makefile => [],
 		 scons => {},
 		 attributes => [],
@@ -329,6 +333,26 @@ sub open {
 
         # insert into source matrix
         $self->addsources($type, $vis, 1, @ARGV);
+        next;
+    }
+
+    # The following permits users to list generated sources, which we can't 
+    # easily determine (i.e. Bluespec BA files), which should be included 
+    # in certain build steps.  This code is admittedly ugly, and it's no 
+    # more that a momentary work around. 
+    # %generated --type TYPE FILENAME...
+    # %generated -t TYPE FILENAME...
+    if (/^.*%generated$spaces($words)/)
+    {
+        my $type = "";
+        my $vis = "";
+
+        # parse switches
+        local @ARGV = split($spaces, $1);
+        GetOptions("type=s" => \$type);
+
+        # insert into source matrix
+        $self->addgenerated($type, @ARGV);
         next;
     }
 
@@ -1002,6 +1026,30 @@ sub private
     return @outfiles;
 }
 
+################################################################
+
+=item $module-E<gt>generated($t, [$list])
+
+Return the current list of generated files of specified type. A
+wildcard "*" can be used for type parameters.
+
+Note: All filenames are relative to the directory
+containing the awbfile...
+
+=cut
+
+################################################################
+
+sub generated
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+
+    return $self->getfilelist($type, "PUBLIC", $self->{generatedmatrix});
+}
+
+
 
 ################################################################
 
@@ -1025,11 +1073,33 @@ sub sources
     my $type = shift;
     my $vis  = shift;
 
+    return $self->getfilelist($type, $vis,$self->{sourcematrix});
+}
+
+################################################################
+
+=item $module-E<gt>getfilelist($t, $v, $matrix, [$list])
+
+Return the current list of source files of specified type and
+visibility, from the specified matrix. A wildcard "*" can be used for
+both type and visibility parameters.
+
+=cut
+
+################################################################
+sub getfilelist
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+    my $vis  = shift;
+    my $matrixReference = shift;
+
     # list of files I'll send out
     my @outfiles = ();
 
     # scan through source matrix
-    my @smat = @{$self->{sourcematrix}};
+    my @smat = @{$matrixReference};
     foreach my $slist (@smat)
     {
         # check for type and visibility match
@@ -1044,6 +1114,7 @@ sub sources
     # return
     return @outfiles;
 }
+
 
 ################################################################
 
@@ -1078,6 +1149,36 @@ sub source_types
     return @outtypes;
 }
 
+
+################################################################
+
+=item $module-E<gt>addgenerated($t, $requireType, [$list])
+
+Update the list of generated files of specified type with $list.  If
+the type combination is not found in the matrix of generated files,
+then create a new row for this combination. Wildcards are not allowed;
+type and visibility have to be explicit.
+
+Note: Generated files cannot have relative/absolute paths.  
+
+=cut
+
+################################################################
+sub addgenerated
+{
+    # capture params
+    my $self = shift;
+    my $specType = shift;
+    my @infiles = (@_);
+
+    $self->addfilematrix($specType, 
+                         "PUBLIC",      #has no meaning here, 
+                                        #but allows source share 
+                         0, 
+                         $self->{generatedmatrix},
+                         @infiles);
+}
+
 ################################################################
 
 =item $module-E<gt>addsources($t, $v, $requireType, [$list])
@@ -1094,7 +1195,6 @@ containing the awbfile...
 =cut
 
 ################################################################
-
 sub addsources
 {
     # capture params
@@ -1103,7 +1203,44 @@ sub addsources
     my $vis  = shift;
     my $requireType = shift;
     my @infiles = (@_);
+ 
+    $self->addfilematrix($specType, 
+                         $vis, 
+                         $requireType, 
+                         $self->{sourcematrix},
+                         @infiles);
+}
+
+
+################################################################
+
+=item $module-E<gt>addfilematrix($t, $v, $requireType, $matrixReference, [$list])
+
+Update the list of specified files of specified type and visibility
+with $list. If the type/visibility combination is not found in
+the matrix, then create a new row for this combination.
+Wildcards are not allowed; type and visibility have to be
+explicit.  This is intended to be generic, allowing the module to maintain 
+multiple source lists.
+
+Note: All source filenames are relative to the directory
+containing the awbfile...
+
+=cut
+
+################################################################
+
+sub addfilematrix
+{
+    # capture params
+    my $self = shift;
+    my $specType = shift;
+    my $vis  = shift;
+    my $requireType = shift;
+    my $matrixReference = shift; 
+    my @infiles = (@_);
     my $lastSlist = undef;
+    #my @smat = $matrixReference->();
 
     # Validate type claims against file suffixes
     foreach my $f (@infiles)
@@ -1145,7 +1282,7 @@ sub addsources
         }
         else {
             # scan through source matrix
-            my @smat = @{$self->{sourcematrix}};
+            my @smat = @{$matrixReference};#@{$self->{sourcematrix}};
             my $found = 0;
             foreach my $slist (@smat)
             {
@@ -1169,7 +1306,7 @@ sub addsources
                                                           visibility => "$vis",
                                                           files => []);
                 $slist->addfiles(($f));
-                push(@{$self->{sourcematrix}}, $slist);
+                push(@{$matrixReference}, $slist);
                 $lastSlist = $slist;
             }
         }
