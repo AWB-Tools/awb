@@ -522,9 +522,15 @@ sub branch {
     close  COMMENT;
 
     Asim::invoke_editor("--eof", $self->{commentfile});
+
+    # if we're not up to date, copy the currently checked out revision
+    my $rev_arg = '';
+    if (! $self->up_to_date() ) {
+      $rev_arg = '-r ' . $self->get_working_revision();
+    }
     
     # create the branch in the repository, using the supplied branch name:
-    $self->svn("copy $cur_url $branch_url --file " . $self->{commentfile});
+    $self->svn("copy $cur_url $rev_arg $branch_url --file " . $self->{commentfile});
     $self->svn("switch $branch_url");
  
   } else {
