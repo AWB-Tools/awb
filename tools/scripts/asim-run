@@ -654,7 +654,7 @@ if ($runnetbatch) {
   }
 } elsif($runcondor) {
     
-    `touch ~/condor.try`;
+
     $run_sys = Asim::Batch->new("CONDOR",				
                                 temp  =>  $TMP_DIR,
                                 quiet =>  $quiet,
@@ -669,7 +669,7 @@ if ($runnetbatch) {
 
 } else {
 
-    `touch ~/local.try`;
+
   $run_sys = Asim::Batch->new("LOCAL",
 			      temp  =>  $TMP_DIR,
 			      quiet =>  $quiet

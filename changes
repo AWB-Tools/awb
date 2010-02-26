@@ -6932,3 +6932,19 @@ Directory tools/scripts
  asim-batch                Locally Modified          366 
 
 Added support for Condor set USE_CONDOR to 1 in your asimrc.  Still a bit rough, but more refinement will come
+
+----------
+kfleming    Date: Fri Feb 26 14:25:05 EST 2010  CSN: CSN-awb-368
+                  Fri Feb 26 19:25:05 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Condor.pm                 Locally Modified          367 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          367 
+
+
+Removed spurious file touches, fixed regular experession for escaping
+quotes in asim-batch command, uncommented issuing of condor command.
+Things seem to be working reliably now.

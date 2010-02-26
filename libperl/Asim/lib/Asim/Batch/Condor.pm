@@ -123,15 +123,16 @@ sub submit {
       }
   }
 
-  #print OUTFILE "environment = $env_vars\n";
-
   # because condor wants cmd and args seperate, we must crack the 
   # cmd from awb.  Not terribly robust, since awb should be doing this 
   # already
 
   my @commands = split(/\s/,$command);
 
-  print OUTFILE "executable = asim-batch\n";
+  # need to pick up asim-batch from the environment
+  my $asimbatch = `which asim-batch`;
+
+  print OUTFILE "executable = $asimbatch\n";
 
   shift(@commands);
 
@@ -140,7 +141,7 @@ sub submit {
   my $newflags = join(" ", @commands);
 
   # remove " from the file
-  $newflags =~ s/\"/\\\"/g;
+  $newflags =~ s/([^\\])\"/$1\\\"/g;
 
   print OUTFILE "arguments = $newflags \n";
 
@@ -161,7 +162,7 @@ sub submit {
 
   close OUTFILE;
 
-#  system("ssh bl1.csail.mit.edu 'condor_submit $batch_log.job'"); 
+  system("condor_submit $batch_log.job"); 
 
   system("echo Submitted ${batch_log}.job");
 
