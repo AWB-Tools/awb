@@ -31,6 +31,7 @@ use strict;
 
 use Asim::Batch::Base;
 use Asim::Batch::Local;
+use Asim::Batch::Condor;
 use Asim::Batch::Netbatch;
 use Asim::Batch::NetbatchRemote;
 
@@ -121,6 +122,8 @@ sub new {
     return Asim::Batch::Local->new(@_);
   } elsif ( $type eq "NETBATCH") {
     return Asim::Batch::Netbatch->new(@_);
+  } elsif ( $type eq "CONDOR") {
+    return Asim::Batch::Condor->new(@_);
   } elsif ( $type eq "NETBATCH_REMOTE") {
     return Asim::Batch::NetbatchRemote->new(@_);
   } else {

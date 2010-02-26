@@ -42,6 +42,9 @@ Asim::init();
 
 use Asim::Util;
 
+#`touch ~/asim-batch.ran`;
+print "asim-batch called\n";
+
 #
 # Turn on warnings
 #
@@ -557,3 +560,5 @@ sub Usage {
 sub Options {
   $Asim::default_workspace->dump_options();
 }
+
+

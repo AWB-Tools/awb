@@ -91,6 +91,7 @@ my $BAD_BM_ENTRY = "<UNKNOWN>";
 my $local_maxchildren = 10;
 my $batch_maxchildren = 10;
 
+
 #
 # Some global information
 #
@@ -180,7 +181,8 @@ my $replace     = Asim::Util::get_asimrc_val("asim-run", "REPLACE",        0    
 my $buildall    = Asim::Util::get_asimrc_val("asim-run", "BUILD_ALL", "0"   );
 my $buildbatch  = Asim::Util::get_asimrc_val("asim-run", "BUILD_NETBATCH", "0"   );
 my $builddistcc = Asim::Util::get_asimrc_val("asim-run", "BUILD_DISTCC",   "0"   );
-my $runbatch    = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
+my $runnetbatch = Asim::Util::get_asimrc_val("asim-run", "USE_NETBATCH",   "1"   );
+my $runcondor   = Asim::Util::get_asimrc_val("asim-run", "USE_CONDOR",     "0"   );
 my $remote      = Asim::Util::get_asimrc_val("asim-run", "REMOTE",         "0"   );
 my $remotehost  = Asim::Util::get_asimrc_val("asim-run", "REMOTE_HOST",    ""    );
 my $remotenbqopt= Asim::Util::get_asimrc_val("asim-run", "REMOTE_NBQOPT",  "");
@@ -267,6 +269,7 @@ my $remoteresdir = undef;
 #
 # Additional computed variables. 
 #
+my $runbatch = 0;
 my $batch_flags = "";
 my $batch_flags_build = ""; 
 my $batch_scr_inputs = "";
@@ -297,7 +300,8 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "buildopt=s"     => \$buildopt,
                         "builddistcc!"   => \$builddistcc,
 			"persist!"       => \$persist,
-                        "batch!"         => \$runbatch,
+                        "netbatch!"      => \$runnetbatch,
+                        "condor!"        => \$runcondor,
 			"pool=s"         => \$pool,
                         "queue=s"        => \$queue,
                         "class=s"        => \$class,
@@ -370,6 +374,10 @@ if (! $status ||
 
 # buildbatch overrides runbatch
 if (defined $buildbatch && $buildbatch) {
+    $runnetbatch = "1";
+}
+
+if ($runnetbatch || $runcondor) {
     $runbatch = "1";
 }
 
@@ -496,7 +504,7 @@ $resdir = realpath($resdir);
 ###########################################################
 # Get the path of the asim-batch scripts using resolver.
 ##########################################################
-
+ 
 $batch_scr = `$AWB_RESOLVER $BATCH_SCR_NM`;
 if ($? != 0) {
   die "Batch script $BATCH_SCR_NM does not exist.\n";
@@ -513,8 +521,8 @@ $batch_scr = realpath(dirname($batch_scr)) . "/$filename";
 # Add auto-requeue to netbatch if specified.
 ##########################################################
 
-print_verbose("Checking auto requeue....");
-if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
+
+if ($runnetbatch && $NETBATCH_AUTO_REQUEUE != 0) {
     $batch_flags = $batch_flags . " --autoreq \"$NETBATCH_AUTO_REQUEUE:NBErr\" ";
 }
 
@@ -522,7 +530,7 @@ if ($runbatch && $NETBATCH_AUTO_REQUEUE != 0) {
 # Add netbatch task name if specified
 ##########################################################
 
-if ($runbatch && $netbatch_taskname ne "") {
+if ($runnetbatch && $netbatch_taskname ne "") {
     $batch_flags = $batch_flags . " --task-name \"$netbatch_taskname\" ";
 }
 
@@ -542,9 +550,8 @@ $batch_flags_build = $batch_flags;
 # LEGAL QSLOTS.
 ##########################################################
 
-print_verbose("Checking netbatch queue...");
 
-if ($runbatch && defined $queue) {
+if ($runnetbatch && defined $queue) {
   if ($checklegal && scalar(@LEGAL_QSLOTS) > 0) {
     my $legal = grep /^$queue$/, @LEGAL_QSLOTS;
     if ($legal != 1) {
@@ -580,9 +587,8 @@ if ($buildbatch) {
 # LEGAL CLASSES
 ##########################################################
 
-print_verbose("Checking netbatch class...");
 
-if ($runbatch && defined $class) {
+if ($runnetbatch && defined $class) {
   if ($checklegal && scalar(@LEGAL_CLASSES) > 0) 
   {
     my $legal = grep /^$class$/, @LEGAL_CLASSES;
@@ -620,7 +626,7 @@ if ($buildbatch) {
 # Create Asim::Batch objects for running jobs
 ##########################################################
 
-if ($runbatch) {
+if ($runnetbatch) {
   if (! $remote) {
     $run_sys = Asim::Batch->new("NETBATCH",
 				pool  =>  $pool,
@@ -646,7 +652,24 @@ if ($runbatch) {
 					  }
 			       );
   }
+} elsif($runcondor) {
+    
+    `touch ~/condor.try`;
+    $run_sys = Asim::Batch->new("CONDOR",				
+                                temp  =>  $TMP_DIR,
+                                quiet =>  $quiet,
+	 		        flags =>  $remotenbqopt,
+                                env   =>  {
+                                           "NBWD"        => $remotenbwd,
+                                           "USER_ITOOLS" => $remoteitools,
+                                           "HOME"        => $remotehome,
+                                           "AWBLOCAL"    => $remoteawblcl
+				}
+	);
+
 } else {
+
+    `touch ~/local.try`;
   $run_sys = Asim::Batch->new("LOCAL",
 			      temp  =>  $TMP_DIR,
 			      quiet =>  $quiet
@@ -1424,7 +1447,7 @@ sub run_one_benchmark
             $bm_name=~ s/.cfg//;
         }
         print_info("........ " . ($runbatch?"Submitting":"Running") . " benchmark $bm_name for experiment $name\n");
-        print_info("........ Using netbatch pool '".$run_sys->get_pool()."'\n");
+        print_info("........ Using netbatch pool XXX '".$run_sys->get_pool()."'\n");
 
         # Setup flag indicating that the benchmark has been submitted. 
         if ( -f "$resdir/$name/$bm_name.SUBMITTED" ) {
@@ -2261,7 +2284,7 @@ sub submit_job
         if ( $run_error ) {
             # There was an error in the submission.
 
-            print_error( "Netbatch returned error ($run_error).Submission not finished\n",
+            print_error( "Netbatch returned error ($run_error).Submission to build_sys not finished\n",
                          "Submitted command: $submit_cmd\n",
                          "Submission log: $log\n",
                          "Run log: $dashj\n",
@@ -2296,7 +2319,7 @@ sub submit_job
 
         if ($runerror) {
             # There was an error in the submission.
-            print_error( "Netbatch returned error ($run_error).Submission not finished\n",
+            print_error( "Netbatch returned error ($run_error).Submission to run_sys not finished\n",
                          "Submitted command: $submit_cmd\n",
                          "Submission log: $log\n",
                          "Run log: $dashj\n",

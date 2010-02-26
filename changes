@@ -6915,3 +6915,20 @@ Directory libperl/Asim/lib/Asim/Package
 Updating with asim-awb changes (rev. 2865 - Carl Beckmann)
 
 - fixed a bug in branching SVN packages from a revision older than the HEAD.
+
+----------
+kfleming    Date: Thu Feb 25 21:48:34 EST 2010  CSN: CSN-awb-367
+                  Fri Feb 26 02:48:34 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Condor.pm                 Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Batch.pm                  Locally Modified          366 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          366 
+ asim-batch                Locally Modified          366 
+
+Added support for Condor set USE_CONDOR to 1 in your asimrc.  Still a bit rough, but more refinement will come
