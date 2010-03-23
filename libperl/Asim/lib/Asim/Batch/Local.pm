@@ -155,6 +155,27 @@ sub ierror {
   return 1;
 }
 
+################################################################
+#
+# Run a command at the end of execution
+#
+################################################################
+
+sub submission_complete {
+  my $self       = shift;
+  my $resdir     = shift;
+  my $command    = shift;
+
+  if(defined $command) {
+    system("echo Running locally: $command > $resdir/completion_command.log");
+    system("$command > $resdir/completion_command.log 2>&1");
+  }
+
+  return 1;
+
+}
+
+
 
 =back
 

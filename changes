@@ -6948,3 +6948,27 @@ Directory tools/scripts
 Removed spurious file touches, fixed regular experession for escaping
 quotes in asim-batch command, uncommented issuing of condor command.
 Things seem to be working reliably now.
+
+----------
+kfleming    Date: Mon Mar 22 22:23:21 EDT 2010  CSN: CSN-awb-369
+                  Tue Mar 23 02:23:21 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Condor.pm                 Locally Modified          368 
+ NetbatchRemote.pm         Locally Modified          368 
+ Netbatch.pm               Locally Modified          368 
+ Local.pm                  Locally Modified          368 
+
+Directory tools/scripts
+ asim-run                  Locally Modified          368 
+
+
+Added a -completioncmd flag to asim-run.  This flag will run a
+specified command at the end of a regression run.  In the case of
+condor, this will cause a DAG of jobs to be specified.  For local
+runs, the command will run serially at the end of the last job in the
+regression.  I made no attempt at porting to Netbatch.  I use the
+feature for nightly regressions, when I want plot.nightly to run at
+the end of my regression, rather than guessing when I should run this
+script.

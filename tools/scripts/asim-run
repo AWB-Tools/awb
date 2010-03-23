@@ -332,6 +332,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "forkbatch=s"    => \$forkbatch,
                         "distccjlevel=s" => \$distccjlevel,
                         "nbtask=s"       => \$netbatch_taskname,
+                        "completioncmd=s"=> \$completion_command,
                     );
 
 if ($debugoutfile ne "") {
@@ -759,12 +760,16 @@ exit(-1);
 sub main
 {
     $exit_code += generate_run_summary();
-    
+ 
     foreach $name (@exp_ordered) 
     {    
         do_experiment($name);
     }
-    
+   
+    # now that we've prepare the experiments, issue the completion
+    # command.  
+    $run_sys->submission_complete($resdir, $completion_command);
+
     # Cleanup
     
     print_debug ("exit_code: $exit_code\n");
@@ -1356,7 +1361,7 @@ sub run_benchmarks
             controlled_exit($forklocal);
         }
     }
- 
+
 #    I don't think we need this - jse   
 #    $exit_code += wait_for_children();
 

@@ -77,7 +77,8 @@ sub new {
   my $class = ref($this) || $this;
   my $self;
 
-  $self = {@_};
+  $self = {@_,
+           jobs => []};
   bless	$self, $class;
 
   return $self;
@@ -101,7 +102,8 @@ sub submit {
   my $submit_log = shift;
   my $block      = shift || 0;
 
-  # Add my stuff here
+  # Build a list of jobs.  We need this for the dag file
+  unshift(@{$self->{jobs}},$batch_log);
 
   # need to know tempdir.
 
@@ -162,9 +164,9 @@ sub submit {
 
   close OUTFILE;
 
-  system("condor_submit $batch_log.job"); 
+  #system("condor_submit $batch_log.job"); 
 
-  system("echo Submitted ${batch_log}.job");
+  #system("echo Submitted ${batch_log}.job");
 
 
   return 0;
@@ -227,6 +229,94 @@ sub ierror {
   print "Asim::Betch::Netbatch: Error - $message";
 
   return 1;
+}
+
+
+sub submission_complete {
+  my $self       = shift;
+  my $resdir     = shift;
+  my $command    = shift;
+
+  #step one - dump result job if command exists 
+  if($command ne "") {
+    open(RESULTFILE, "> $resdir/completion_command.job");
+
+    print RESULTFILE "Universe = vanilla\n";
+    print RESULTFILE "GetEnv = True\n";
+ 
+    my $env = $self->{env};
+    my $env_vars = "";
+
+    foreach my $name (keys(%{$env})) {
+        if (defined($env->{$name})) {
+	    my $value = $env->{$name};
+            $env_vars = $env_vars . " $name=$value ";
+        }
+    }
+
+    # because condor wants cmd and args seperate, we must crack the 
+    # cmd from awb.  Not terribly robust, since awb should be doing this 
+    # already
+
+    my @commands = split(/\s/,$command);
+
+
+    print RESULTFILE "executable = $commands[0]\n";
+  
+    shift(@commands);
+
+    my $newflags = join(" ", @commands);
+
+    # remove " from the file
+    $newflags =~ s/([^\\])\"/$1\\\"/g;
+
+    print RESULTFILE "arguments = $newflags \n";
+
+    # get rid of any extra things in the submit log....
+    my @submit_logs = split(/\s/,$command);  
+
+    print RESULTFILE "log = $resdir/completion_command.log\n";
+
+    print RESULTFILE "output = $resdir/completion_command\n";
+
+    print RESULTFILE "error = $resdir/completion_command.error\n";
+
+    print RESULTFILE "requirements = Memory>750 && Arch==\"X86_64\" && (isPublic || isCSG)\n";
+
+    print RESULTFILE "queue\n";
+
+    close RESULTFILE;
+
+  }
+
+  # step two generate dag 
+
+  open(DAGFILE, "> $resdir/regression.dag");
+
+  foreach my $job (@{$self->{jobs}}) {
+     print DAGFILE "JOB $job ${job}.job\n";
+  }
+
+  print DAGFILE "Job completion_command $resdir/completion_command.job\n";
+
+  my $jobsglob = join(" ", @{$self->{jobs}});
+
+  if($command ne "") {
+    print DAGFILE "Parent $jobsglob Child completion_command\n";
+  }
+
+  close DAGFILE;
+
+  
+  system("condor_submit_dag $resdir/regression.dag"); 
+
+  system("echo Submitted $resdir/regression.dag");
+
+
+  return 0;
+
+
+
 }
 
 
