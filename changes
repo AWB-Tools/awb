@@ -6972,3 +6972,13 @@ regression.  I made no attempt at porting to Netbatch.  I use the
 feature for nightly regressions, when I want plot.nightly to run at
 the end of my regression, rather than guessing when I should run this
 script.
+
+----------
+kfleming    Date: Sat Mar 27 21:27:51 EDT 2010  CSN: CSN-awb-370
+                  Sun Mar 28 01:27:51 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          369 
+
+Added support for python libraries in SCons.  %scons %library will create a symlink in the new site_scons directory.  This enables, among other things, a relatively easy way to break down the monolithic makefile.  It also sets the stage for Altera support.  The edit is a little rough, and I would like to investigate using a more SConsy object-oriented approach with the Builder and Node classes.   

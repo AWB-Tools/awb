@@ -378,7 +378,7 @@ sub open {
       if (! defined($class)) {
         $class = 'top';
       }
-      elsif ($class =~ /^%(iface|hw|sw|top)$/) {
+      elsif ($class =~ /^%(iface|hw|sw|top|library)$/) {
         $class =~ s/^%//;
       }
       else {
@@ -1996,8 +1996,6 @@ sub edit_hierarchy {
     }
 
     my $c = $m->name();
-
-    print "Looking for a $r currently have '$c'\n";
 
     if (Asim::choose_yes_or_no("Replace:")) {
       $m = $m->_replace_module($r);
