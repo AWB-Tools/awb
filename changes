@@ -6982,3 +6982,13 @@ Directory libperl/Asim/lib/Asim
  Module.pm                 Locally Modified          369 
 
 Added support for python libraries in SCons.  %scons %library will create a symlink in the new site_scons directory.  This enables, among other things, a relatively easy way to break down the monolithic makefile.  It also sets the stage for Altera support.  The edit is a little rough, and I would like to investigate using a more SConsy object-oriented approach with the Builder and Node classes.   
+
+----------
+kfleming    Date: Tue Mar 30 09:45:09 EDT 2010  CSN: CSN-awb-371
+                  Tue Mar 30 13:45:09 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Condor.pm                 Locally Modified          370 
+
+Removed the email per job on condor runs.  Now it only emails if the job has an error.

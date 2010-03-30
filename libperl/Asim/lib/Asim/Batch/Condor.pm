@@ -114,6 +114,7 @@ sub submit {
 
   print OUTFILE "Universe = vanilla\n";
   print OUTFILE "GetEnv = True\n";
+  print OUTFILE "Notification = Error\n";
  
   my $env = $self->{env};
   my $env_vars = "";
