@@ -1050,6 +1050,24 @@ sub generated
 }
 
 
+################################################################
+
+=item $module-E<gt>generatedKeys($t, [$list])
+
+Return all categories of generated files available.
+
+=cut
+
+################################################################
+
+sub generatedtypes
+{
+    # capture params
+    my $self = shift;
+
+    return $self->getfiletypes($self->{generatedmatrix});
+}
+
 
 ################################################################
 
@@ -1115,6 +1133,34 @@ sub getfilelist
     return @outfiles;
 }
 
+################################################################
+
+=item $module-E<gt>getfiletypes($t, $v, $matrix, [$list])
+
+Return the types of the files in the filelist
+
+=cut
+
+################################################################
+sub getfiletypes
+{
+    # capture params
+    my $self = shift;
+    my $matrixReference = shift;
+
+    my %ftypes = ();
+
+    # scan through source matrix
+    my @smat = @{$matrixReference};
+    foreach my $slist (@smat)
+    {
+        # Use hash to remove duplicates
+        $ftypes{$slist->type()}=0; 
+    }
+
+    # return
+    return keys %ftypes;
+}
 
 ################################################################
 

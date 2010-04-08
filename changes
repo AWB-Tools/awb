@@ -6992,3 +6992,13 @@ Directory libperl/Asim/lib/Asim/Batch
  Condor.pm                 Locally Modified          370 
 
 Removed the email per job on condor runs.  Now it only emails if the job has an error.
+
+----------
+kfleming    Date: Thu Apr  8 12:45:27 EDT 2010  CSN: CSN-awb-372
+                  Thu Apr  8 16:45:27 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          371 
+
+Added function to collect file types in a source matrix.  
