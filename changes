@@ -7002,3 +7002,13 @@ Directory libperl/Asim/lib/Asim
  Module.pm                 Locally Modified          371 
 
 Added function to collect file types in a source matrix.  
+
+----------
+kfleming    Date: Fri Apr  9 19:14:08 EDT 2010  CSN: CSN-awb-373
+                  Fri Apr  9 23:14:08 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          372 
+
+Added gatherer for source types. This is analogous to the generated gatherer.

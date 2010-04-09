@@ -1052,7 +1052,7 @@ sub generated
 
 ################################################################
 
-=item $module-E<gt>generatedKeys($t, [$list])
+=item $module-E<gt>generatedtypes($t, [$list])
 
 Return all categories of generated files available.
 
@@ -1066,6 +1066,25 @@ sub generatedtypes
     my $self = shift;
 
     return $self->getfiletypes($self->{generatedmatrix});
+}
+
+
+################################################################
+
+=item $module-E<gt>sourcetypes($t, [$list])
+
+Return all categories of generated files available.
+
+=cut
+
+################################################################
+
+sub sourcetypes
+{
+    # capture params
+    my $self = shift;
+
+    return $self->getfiletypes($self->{sourcematrix});
 }
 
 
