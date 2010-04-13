@@ -1311,22 +1311,23 @@ sub addfilematrix
     foreach my $f (@infiles)
     {
         my $type = decipher_type_from_extension($f);
-        if ($specType ne '')
-        {
-            # A type was specified by the user
-            $type = $specType if ($type eq '');
-            if (($type ne '') && ($specType ne $type)) {
-                # Type mismatch
-                if ((($specType eq 'BDPI_C') && ($type eq 'CPP')) ||
-                    (($specType eq 'BDPI_H') && ($type eq 'H'))) {
-                    # Accept BDPI override for C sources
-                    $type = $specType;
-                }
-                else {
-                    $self->ierror("For file $f specified type ($specType) does not match implicit type ($type)\n");
-                }
-            }
-        }
+        $type = $specType if ($specType ne '');
+#         if ($specType ne '')
+#         {
+#             # A type was specified by the user
+#             $type = $specType if ($type eq '');
+#             if (($type ne '') && ($specType ne $type)) {
+#                 # Type mismatch
+#                 if ((($specType eq 'BDPI_C') && ($type eq 'CPP')) ||
+#                     (($specType eq 'BDPI_H') && ($type eq 'H'))) {
+#                     # Accept BDPI override for C sources
+#                     $type = $specType;
+#                 }
+#                 else {
+#                     $self->ierror("For file $f specified type ($specType) does not match implicit type ($type)\n");
+#                 }
+#             }
+#         }
 
         if ($requireType && ($type eq '')) {
             $self->ierror("Type of file $f not specified\n");
