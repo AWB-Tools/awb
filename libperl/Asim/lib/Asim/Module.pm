@@ -1311,7 +1311,24 @@ sub addfilematrix
     foreach my $f (@infiles)
     {
         my $type = decipher_type_from_extension($f);
-        $type = $specType if ($specType ne '');
+#        $type = $specType if ($specType ne '');
+        if (is_known_type($specType)) { # if the specType is one of the type that can be decipher, they better agree with each other
+            if ($specType ne $type) {
+                # Type mismatch
+                if ((($specType eq 'BDPI_C') && ($type eq 'CPP')) ||
+                    (($specType eq 'BDPI_H') && ($type eq 'H'))) {
+                    # Accept BDPI override for C sources
+                    $type = $specType;
+                }
+                else {
+                    $self->ierror("For file $f specified type ($specType) does not match implicit type ($type)\n");
+                }
+            }
+        } 
+        elsif ($specType ne '') {
+            $type = $specType;
+        } 
+
 #         if ($specType ne '')
 #         {
 #             # A type was specified by the user
@@ -1379,6 +1396,71 @@ sub addfilematrix
     }
 }
 
+
+################################################################
+#
+# If the $specType is known type, should agree with the decipher type
+# 
+#       
+#
+################################################################
+
+sub is_known_type
+{
+    # capture params
+    my $specType = shift;
+
+    if ($specType eq "BDPI_C") {
+        return 1;  
+    }        # Bluespec imported C  
+    elsif ($specType eq "BDPI_H") {
+        return 1;  
+    }        # Bluespec imported C
+    elsif ($specType eq "BSV") {
+        return 1;  
+    }           # Bluespec
+    elsif ($specType eq "BSH") {
+        return 1;  
+    }           # Bluespec include
+    elsif ($specType eq "CPP") {
+        return 1;  
+    }           # C++
+    elsif ($specType eq "DICT") {
+        return 1;  
+    }          # HAsim dictionary
+    elsif ($specType eq "H") {
+        return 1;  
+    }             # C++
+    elsif ($specType eq "NGC") {
+        return 1;  
+    }           # Xilinx netlist
+    elsif ($specType eq "PACK") {
+        return 1;  
+    }          # Asim package file
+    elsif ($specType eq "PRJ") {
+        return 1;  
+    }           # Xilinx project
+    elsif ($specType eq "RRR") {
+        return 1;  
+    }           # HAsim request-response
+    elsif ($specType eq "UCF") {
+        return 1;  
+    }           # Xilinx constraint file
+    elsif ($specType eq "UT") {
+        return 1;  
+    }            # Xilinx script
+    elsif ($specType eq "VERILOG") {
+        return 1;  
+    }       # Verilog
+    elsif ($specType eq "VHD") {
+        return 1;  
+    }           # VHDL
+    elsif ($specType eq "XST") {
+        return 1;  
+    }           # Xilinx script
+    
+    return undef;
+}
 
 ################################################################
 #
