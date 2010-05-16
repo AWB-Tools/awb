@@ -1,0 +1,17 @@
+Source: awb
+Section: Development
+Priority: Universe
+Maintainer: Joel Emer <emer@csail.mit.edu>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: awb
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Executables for the Architect's Workbench (awb)
+ Core executables for Architect's Workbench (awb) modular plug-n-play build system.
+
+Package: awb-doc
+Architecture: all
+Description: Documentation for the Architect's Workbench (awb)
+ Documenation for for Architect's Workbench (awb) modular plug-n-play build system.

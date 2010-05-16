@@ -7012,3 +7012,50 @@ Directory libperl/Asim/lib/Asim
  Module.pm                 Locally Modified          372 
 
 Added gatherer for source types. This is analogous to the generated gatherer.
+
+----------
+emer        Date: Sun May 16 14:46:13 EDT 2010  CSN: CSN-awb-376
+                  Sun May 16 18:46:13 UTC 2010
+
+
+Directory debian
+ control                   Locally Added               0 
+ awb-doc.install           Locally Added               0 
+ dirs                      Locally Added               0 
+ awb-doc.docs              Locally Added               0 
+ compat                    Locally Added               0 
+ postinst                  Locally Added               0 
+ postrm                    Locally Added               0 
+ preinst                   Locally Added               0 
+ prerm                     Locally Added               0 
+ changelog                 Locally Added               0 
+ copyright                 Locally Added               0 
+ docs                      Locally Added               0 
+ rules                     Locally Added               0 
+ README.Debian             Locally Added               0 
+
+Directory .
+ debian/                   Locally Added               0 
+
+Directory tools/awb
+ awb2/                     Locally Modified          375 
+
+Directory .
+ ./                        Locally Modified          375 
+
+Initial support for building debian packages for awb.
+
+To directly build the source and then the binary package
+type the following:
+
+     % cd <root-of-awb-package>
+     % debuild -rsudo -S
+     % debuild -rsudo
+
+Some things that still need to be done are complete 
+dependency specifications and proper placement of 
+configuration files into /etc. I'm sure that's not all.
+
+Building with pbuilder has not been tested.
+
+Joel
