@@ -77,11 +77,11 @@ our $bindir      = "@bindir@";
 our $mandir      = "@mandir@";
 our $libdir      = "@libdir@";
 our $includedir  = "@includedir@";
+our $datadir     = "@datadir@";
 
 our $sysconfdir  = "@sysconfdir@";
 our $configdir   = "@configdir@";
 
-our $datadir     = "@datadir@";
 our $packagedir  = "@packagedir@";
 our $codedir     = "@codedir@";
 our $rcfile = "";
@@ -204,7 +204,7 @@ Include Headers directory (default: $prefix/include)
 
 =item $Asim::sysconfdir
 
-Configuration directory (default: $prefix/etc)
+Configuration directory (default: /etc or $prefix/etc)
 
 =item $Asim::configdir
 
@@ -242,6 +242,13 @@ Initial Asim and create a default workspace.
 
 sub init {
   my $workspace = shift;
+
+#
+# Optional override location of configuration data
+#
+  if ( -e "/etc/asim" ) {
+     $sysconfdir = "/etc";
+  }
 
 #
 # Miscelaneous initializations

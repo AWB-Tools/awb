@@ -7059,3 +7059,126 @@ configuration files into /etc. I'm sure that's not all.
 Building with pbuilder has not been tested.
 
 Joel
+
+----------
+joel        Date: Mon May 17 21:13:30 EDT 2010  CSN: CSN-awb-377
+                  Tue May 18 01:13:30 UTC 2010
+
+
+Directory m4
+ ltsugar.m4                Locally Modified          376 
+ ltversion.m4              Locally Modified          376 
+
+Directory .
+ configure                 Locally Modified          376 
+
+Directory debian
+ control                   Locally Modified          376 
+ compat                    Locally Modified          376 
+ postinst                  Locally Removed           376 
+ postrm                    Locally Removed           376 
+ preinst                   Locally Removed           376 
+ prerm                     Locally Removed           376 
+ awb.examples              Locally Added               0 
+ changelog                 Locally Modified          376 
+ docs                      Locally Removed           376 
+ rules                     Locally Modified          376 
+ awb.postinst              Locally Added               - 
+ awb.preinst               Locally Added               - 
+ awb.postrm                Locally Added               - 
+ awb.prerm                 Locally Added               - 
+ awb.docs                  Locally Added               - 
+ dirs                      Locally Removed           376 
+ awb.dirs                  Locally Added               - 
+
+Directory .
+ Makefile.in               Locally Modified          376 
+
+Directory include
+ config.h.in               Locally Modified          376 
+
+Directory .
+ configure.in              Locally Modified          376 
+
+Directory scripts
+ ltmain.sh                 Locally Modified          376 
+
+Directory libperl
+ Makefile.in               Locally Modified          376 
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          376 
+
+Directory tools
+ Makefile.in               Locally Modified          376 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          376 
+ asimstarter.in            Locally Modified          376 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          376 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          376 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          376 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          376 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          376 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          376 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          376 
+
+Directory share
+ awb.config.template.in    Locally Added               - 
+
+Directory .
+ share/                    Locally Added               0 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          376 
+
+Directory lib
+ Makefile.in               Locally Modified          376 
+
+Directory .
+ Makefile.am               Locally Modified          376 
+
+Directory etc
+ asimrc.template           Locally Removed           376 
+ awb.config.template.in    Locally Removed           376 
+ asimrc                    Locally Added               - 
+
+Directory .
+ aclocal.m4                Locally Modified          376 
+
+More .deb support. 
+
+When installing using a .deb file, the conffiles, i.e., the
+files in etc/asim, are now put into /etc/asim instead of
+PREFIX/etc/asim. Both asimstarter and Asim.pm now check in
+/etc/asim first before using the default, PREFIX/etc/asim.
+
+Note: if we eventually make our nomenclature consistent and
+use 'awb' instead of 'asim' those files will need to change. Or
+maybe configure.in should handle this...
+
+The name of the system-wide asimrc file in the repository
+was changed from asimrc.template to asimrc to make things
+easier for the .deb install procedure. It is still just called
+asimrc in etc/.
+
+Moved the simple template workspace from etc/asim/ws to 
+share/asim/ws, since it is not really a configuration file
+and it was complicating the debinan installs. That change
+reguired changes in configure.in, and various Makefiles, so
+autoconf made lots of gratuituous changes.
+

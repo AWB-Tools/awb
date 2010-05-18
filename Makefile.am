@@ -22,9 +22,9 @@ SUBDIRS = lib libperl tools
 #
 # we have non-standard install sub-targets
 #
-.phony: install-exec-hook install-release install-etc install-bin install-config install-src
+.phony: install-exec-hook install-release install-config install-etc install-src
 
-install-exec-hook: install-bin install-release
+install-exec-hook: install-release install-etc
 	@echo ""
 	@echo "*******************************************************"
 	@echo ""
@@ -38,19 +38,25 @@ install-exec-hook: install-bin install-release
 	@echo ""
 	@echo "Done."
 
+#
+# Invoke this if createing a .deb file
+#
 install-release: all install-config
 	@echo "Done."
-
-install-bin: install-config install-etc
 
 
 #
 # This creates a simple default workspace for this version of asim
 #
 install-config:
-	$(INSTALL) -D -m 644 etc/awb.config.template  $(DESTDIR)$(configdir)/awb.config
+	$(INSTALL) -D -m 644 share/awb.config.template  $(DESTDIR)$(configdir)/awb.config
+	$(mkinstalldirs)  $(DESTDIR)$(configdir)/src/awb
 
 
+#
+# This installs the /etc files
+#   Note: don't do this if creating a .deb file
+#
 INSTALL_RC = $(top_srcdir)/scripts/install-rcfile
 
 install-etc:
@@ -60,7 +66,7 @@ install-etc:
 	    $(INSTALL) -D -m 644 $$i $(DESTDIR)$(sysconfdir)/asim/repositories.d/$$i; \
 	done
 	export PERL5LIB=$(top_srcdir)/libperl/Asim/lib; \
-	$(INSTALL_RC) -D -m 644 $(srcdir)/etc/asimrc.template $(DESTDIR)$(sysconfdir)/asim/asimrc
+	$(INSTALL_RC) -D -m 644 $(srcdir)/etc/asimrc $(DESTDIR)$(sysconfdir)/asim/asimrc
 
 #
 # This horrible sequence copies the source to $(codedir) and

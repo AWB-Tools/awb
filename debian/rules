@@ -20,53 +20,53 @@ export DH_OPTIONS
 # from having to guess our platform (since we know it already)
 DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-
-
-CFLAGS = -Wall -g
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+CROSS= --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
 else
-	CFLAGS += -O2
+CROSS= --build $(DEB_BUILD_GNU_TYPE)
 endif
+
+
+
+
 
 config.status: configure
 	dh_testdir
 	# Add here commands to configure the package.
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
-
-
-#Architecture 
-build: build-arch build-indep
-
-build-arch: build-arch-stamp
-build-arch-stamp:  config.status
-
-	# Add here commands to compile the arch part of the package.
-	#$(MAKE) 
-	touch $@
-
-build-indep: build-indep-stamp
-build-indep-stamp:  config.status
-
-	# Add here commands to compile the indep part of the package.
-	#$(MAKE) doc
-	touch $@
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
-
-	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
 ifneq "$(wildcard /usr/share/misc/config.sub)" ""
 	cp -f /usr/share/misc/config.sub config.sub
 endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
+	./configure $(CROSS) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
+
+#Architecture
+build: build-arch build-indep
+
+build-arch: build-arch-stamp
+build-arch-stamp:  config.status 
+
+	# Add here commands to compile the arch part of the package.
+	#$(MAKE)
+	touch $@
+
+build-indep: build-indep-stamp
+build-indep-stamp:  config.status 
+
+	# Add here commands to compile the indep part of the package.
+	#$(MAKE) doc
+	touch $@
+
+clean: 
+	dh_testdir
+	dh_testroot
+	rm -f build-arch-stamp build-indep-stamp 
+
+	# Add here commands to clean up after the build process.
+	[ ! -f Makefile ] || $(MAKE) distclean
+	rm -f config.sub config.guess
 
 	dh_clean 
 
@@ -74,7 +74,7 @@ install: install-indep install-arch
 install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -i 
+	dh_prep -i 
 	dh_installdirs -i
 
 	# Add here commands to install the indep part of the package into
@@ -86,12 +86,15 @@ install-indep:
 install-arch:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -s 
+	dh_prep -s 
 	dh_installdirs -s
 
-	# Add here commands to install the arch part of the package into 
+	# Add here commands to install the arch part of the package into
 	# debian/tmp.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/awb install
+	mv $(CURDIR)/debian/awb/usr/etc/asim  $(CURDIR)/debian/awb/etc
+	rmdir $(CURDIR)/debian/awb/usr/etc
+
 #	$(MAKE) DESTDIR=$(CURDIR)/debian/awb install-src
 
 	dh_install -s
@@ -105,8 +108,8 @@ binary-common:
 	dh_installdocs
 	dh_installexamples
 #	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate	
+#	dh_installdebconf
+#	dh_installlogrotate
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
@@ -117,7 +120,7 @@ binary-common:
 	dh_installman
 	dh_link
 	dh_strip
-	dh_compress 
+	dh_compress
 	dh_fixperms
 #	dh_perl
 	dh_makeshlibs

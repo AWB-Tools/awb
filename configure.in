@@ -460,8 +460,9 @@ AC_SUBST(release)
 release=`grep '^Tag=' ./admin/packages/$package | sed 's/Tag=//'`
 
 
-# This is the directory for configuration data
-configdir='${sysconfdir}/asim/ws/${release}'
+# This is the directory for default workspace
+#    Note: name is a misnomer that needs to be changed everywhere
+configdir='${datadir}/asim/ws/${release}'
 AC_SUBST(configdir)
 
 
@@ -694,7 +695,7 @@ AC_CHECK_FUNCS(getcwd mkdir regcomp rmdir strdup strerror strtol strtoul)
 AC_CONFIG_FILES(Makefile)
 
 # etc
-AC_CONFIG_FILES(etc/awb.config.template)
+AC_CONFIG_FILES(share/awb.config.template)
 
 # lib top level
 AC_CONFIG_FILES(lib/Makefile)

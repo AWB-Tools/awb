@@ -1,11 +1,9 @@
+etc/asim
 usr/bin
-usr/etc
-usr/etc/asim
 usr/lib
+usr/lib/perl
 usr/libexec
 usr/libexec/asim
-usr/lib/perl
-usr/lib/perl/5.8.8
 usr/man
 usr/man/man3
 usr/sbin
@@ -15,7 +13,3 @@ usr/share/asim/awb
 usr/share/asim/awb/HEAD
 usr/share/benchmarks
 usr/share/perl
-usr/share/perl/5.8.8
-usr/share/perl/5.8.8/Asim
-usr/share/perl/5.8.8/Benchmarks
-usr/share/perl/5.8.8/PlotShell

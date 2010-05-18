@@ -47,13 +47,18 @@ $bindir="@bindir@";
 $libdir="@libdir@";
 $libexecdir="@libexecdir@";
 $mandir="@mandir@";
-
-$sysconfdir="@sysconfdir@";
-$configdir="@configdir@";
-
 $datadir="@datadir@";
+
+if ( -d "/etc/asim" ) {
+   $sysconfdir = "/etc";
+} else {
+   $sysconfdir="@sysconfdir@";
+}
+
 $packagedir="@packagedir@";
 $codedir="@codedir@";
+
+$configdir="@configdir@";
 
 $tooldir="@tooldir@";
 
