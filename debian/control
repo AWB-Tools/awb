@@ -1,13 +1,13 @@
 Source: awb
 Section: Development
-Priority: extra
+Priority: main
 Maintainer: Joel Emer <emer@csail.mit.edu>
-Build-Depends: debhelper (>= 7), autotools-dev
+Build-Depends: debhelper (>= 7), autotools-dev, libqt-perl, libqt3-mt-dev, libpopt-dev
 Standards-Version: 3.7.2
 
 Package: awb
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqt-perl, libqt3-mt, libpopt0
 Description: Executables for the Architect's Workbench (awb)
  Core executables for Architect's Workbench (awb) modular plug-n-play build system.
 

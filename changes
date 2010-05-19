@@ -7182,3 +7182,20 @@ and it was complicating the debinan installs. That change
 reguired changes in configure.in, and various Makefiles, so
 autoconf made lots of gratuituous changes.
 
+
+----------
+joel        Date: Wed May 19 15:21:32 EDT 2010  CSN: CSN-awb-378
+                  Wed May 19 19:21:32 UTC 2010
+
+
+Directory debian
+ control                   Locally Modified          377 
+ changelog                 Locally Modified          377 
+
+Improvements to debian build mechanism.
+
+Added distribution name to version and moved to 'main'. 
+Also added some dependencies to control.
+
+Builds seem to work for karmic and lucid, although there 
+are still lots of complaints from lintian.
