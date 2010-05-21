@@ -1,6 +1,6 @@
-awb (0.5.3+lucid) unstable; urgency=low
+awb (0.5.5+lucid) unstable; urgency=low
 
-  * Added distribution name to version and moved to 'main'. Also added some depends to control.
+  * Install base/ and modules/
 
  -- Asim/Awb Software Releases <releases@asim.csail.mit.edu>  Sun, 16 May 2010 14:27:00 -0400
 

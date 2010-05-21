@@ -7199,3 +7199,28 @@ Also added some dependencies to control.
 
 Builds seem to work for karmic and lucid, although there 
 are still lots of complaints from lintian.
+
+----------
+joel        Date: Thu May 20 23:27:40 EDT 2010  CSN: CSN-awb-379
+                  Fri May 21 03:27:40 UTC 2010
+
+
+Directory .
+ Makefile.in               Locally Modified          378 
+
+Directory debian
+ control                   Locally Modified          378 
+ changelog                 Locally Modified          378 
+ rules                     Locally Modified          378 
+
+Directory .
+ Makefile.am               Locally Modified          378 
+
+Added a make target of install-package, which installs
+the module pool (and base/) in $codedir, which is 
+currently PREFIX/share/asim/<package>/<version>. The
+debian install does that install so that one can
+have the awb module pool even without checking out
+the package.
+
+Make a few other improvements for .deb creation.

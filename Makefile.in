@@ -792,7 +792,7 @@ uninstall-am:
 #
 # we have non-standard install sub-targets
 #
-.phony: install-exec-hook install-release install-config install-etc install-src
+.phony: install-exec-hook install-release install-config install-etc install-package install-src
 
 install-exec-hook: install-release install-etc
 	@echo ""
@@ -829,6 +829,18 @@ install-etc:
 	done
 	export PERL5LIB=$(top_srcdir)/libperl/Asim/lib; \
 	$(INSTALL_RC) -D -m 644 $(srcdir)/etc/asimrc $(DESTDIR)$(sysconfdir)/asim/asimrc
+
+#
+# This horrible sequence copies just the modules and other files needed to build 
+# models to $(codedir)
+# It also removes the .svn subdirectories in the installed tree.
+#
+install-package:
+	@rm -rf  $(DESTDIR)$(codedir)
+	$(mkinstalldirs)  $(DESTDIR)$(codedir)
+	rsync -av --exclude .svn admin   $(DESTDIR)$(codedir)
+	rsync -av --exclude .svn base    $(DESTDIR)$(codedir)
+	rsync -av --exclude .svn modules $(DESTDIR)$(codedir)
 
 #
 # This horrible sequence copies the source to $(codedir) and
