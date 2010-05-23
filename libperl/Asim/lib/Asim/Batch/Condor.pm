@@ -165,11 +165,6 @@ sub submit {
 
   close OUTFILE;
 
-  #system("condor_submit $batch_log.job"); 
-
-  #system("echo Submitted ${batch_log}.job");
-
-
   return 0;
 }
 
@@ -308,8 +303,8 @@ sub submission_complete {
 
   close DAGFILE;
 
-  
-  system("condor_submit_dag $resdir/regression.dag"); 
+  #must submit from the correct directory, or the scripts will be unhappy
+  system("cd $resdir; condor_submit_dag $resdir/regression.dag"); 
 
   system("echo Submitted $resdir/regression.dag");
 

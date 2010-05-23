@@ -7234,3 +7234,14 @@ Directory debian
  control                   Locally Modified          379 
 
 Added dependency on scons for debian package.
+
+----------
+kfleming    Date: Sun May 23 18:44:46 EDT 2010  CSN: CSN-awb-381
+                  Sun May 23 22:44:46 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Condor.pm                 Locally Modified          380 
+
+
+Condor DAG was being submitted from the wrong directory.  
