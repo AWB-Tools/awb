@@ -7224,3 +7224,13 @@ have the awb module pool even without checking out
 the package.
 
 Make a few other improvements for .deb creation.
+
+----------
+joel        Date: Sun May 23 15:44:21 EDT 2010  CSN: CSN-awb-380
+                  Sun May 23 19:44:21 UTC 2010
+
+
+Directory debian
+ control                   Locally Modified          379 
+
+Added dependency on scons for debian package.
