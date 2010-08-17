@@ -82,6 +82,31 @@ sub set_type {
   # if there is a "CVS" subdirectory, this is a CVS checkout:
   if (-e "$location/CVS") {
     bless $self;
+
+    #
+    # The following checks only need to occur if we are really using CVS
+    #
+
+    #
+    # CVS_SERVER messes us up...
+    #
+
+    if (defined($ENV{CVS_SERVER})) {
+      Asim::Package::iwarn("Unsetting CVS_SERVER environment variable - it messes up our CVS commands\n");
+      delete $ENV{CVS_SERVER};
+    }
+
+
+    #
+    # CVS_RSH probably needs to be set
+    #
+    if (! defined($ENV{CVS_RSH})) {
+      iwarn("Environment variable CVS_RSH not set.\n" .
+	    "I've set it to \"ssh\", which should be what you want.\n");
+
+      $ENV{CVS_RSH} = "ssh";
+    }
+
     return 1;
   }
   return 0;
@@ -112,21 +137,6 @@ Global init of CVS module.
 ################################################################
 
 sub init {
-  #
-  # CVS_SERVER messes us up...
-  #
-  if (defined($ENV{CVS_SERVER})) {
-    Asim::Package::iwarn("Unsetting CVS_SERVER environment variable - it messes up our CVS commands\n");
-    delete $ENV{CVS_SERVER};
-  }
-
-  #
-  # CVS_RSH probably needs to be set
-  #
-  if (! defined($ENV{CVS_RSH})) {
-    Asim::Package::iwarn("Environment variable CVS_RSH not set - this is probably a problem\n");
-  }
-
   #
   # Check CVS version
   #

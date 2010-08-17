@@ -55,7 +55,7 @@ HOSTOSRELEASE_SUBST=`echo $HOSTOSRELEASE | tr ".)(-" "____"`
 # Needed in FIND_PERLGUI.
 # Export it so asimstarter knows which is the good version of perl.
 #
-PERLVERSION=`perl --version | grep 'This is perl' | sed -e 's/.*, v//' -e 's/ built.*//'`
+PERLVERSION=`perl --version | grep 'This is perl' | sed -e 's/.*, v//' -e 's/ .*built.*//'`
 config_perl_version=$PERLVERSION
 AC_SUBST(config_perl_version)
 

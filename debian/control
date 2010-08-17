@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: awb
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs
 Recommends: libterm-readline-gnu-perl
 Description: Executables for the Architect's Workbench (awb)
  Core executables for Architect's Workbench (awb) modular plug-n-play build system.

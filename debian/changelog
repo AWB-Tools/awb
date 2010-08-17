@@ -1,6 +1,6 @@
-awb (0.5.5+lucid) unstable; urgency=low
+awb (0.6.0~svn20100817r382+lucid) unstable; urgency=low
 
-  * Install base/ and modules/
+  * Fix launch of awb, various minor build updates and other papercuts.
 
- -- Asim/Awb Software Releases <releases@asim.csail.mit.edu>  Sun, 16 May 2010 14:27:00 -0400
+ -- Asim/Awb Software Releases <releases@asim.csail.mit.edu>  Tues, 17 Aug 2010 16:45:00 -0400
 

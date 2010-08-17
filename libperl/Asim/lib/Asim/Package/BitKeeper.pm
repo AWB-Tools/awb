@@ -117,20 +117,7 @@ Global init of BitKeeper module.
 
 
 sub init {
-  #
-  # CVS_SERVER messes us up...
-  #
-  if (defined($ENV{CVS_SERVER})) {
-    Asim::Package::iwarn("Unsetting CVS_SERVER environment variable - it messes up our CVS commands\n");
-    delete $ENV{CVS_SERVER};
-  }
 
-  #
-  # CVS_RSH probably needs to be set
-  #
-  if (! defined($ENV{CVS_RSH})) {
-    Asim::Package::iwarn("Environment variable CVS_RSH not set - this is probably a problem\n");
-  }
 }
 
 ################################################################

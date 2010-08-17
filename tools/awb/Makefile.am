@@ -18,3 +18,8 @@
 #
 
 SUBDIRS=amc awb-resolver @NO_GUI@ @NO_PERLGUI@ awb2 apm-edit apm-find-replace awb-wizard
+
+# create soft links from old tool names
+install-data-hook:
+	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb2 awb)
+

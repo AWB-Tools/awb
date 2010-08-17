@@ -139,11 +139,11 @@ sub checkout {
     if ($method eq "cvs") {
       $access =~ s/:pserver:anonymous/$user/;
 
-      if (! $ENV{CVS_RSH} ) {
-        ierror("Warning: Environment variable CVS_RSH not set.\n",
-               "Warning: I've set it to \"ssh2\", which should be what you want.\n");
+      if (! defined($ENV{CVS_RSH}) ) {
+        ierror("Environment variable CVS_RSH not set.\n" .
+               "I've set it to \"ssh\", which should be what you want.\n");
 
-        $ENV{CVS_RSH} = "ssh2";
+        $ENV{CVS_RSH} = "ssh";
       }
     }
     elsif ($method eq "pserver") {  

@@ -7245,3 +7245,95 @@ Directory libperl/Asim/lib/Asim/Batch
 
 
 Condor DAG was being submitted from the wrong directory.  
+
+----------
+jsemer      Date: Tue Aug 17 15:39:12 EDT 2010  CSN: CSN-awb-382
+                  Tue Aug 17 19:39:12 UTC 2010
+
+
+Directory m4
+ libtool.m4                Locally Modified          381 
+ ltversion.m4              Locally Modified          381 
+ ltoptions.m4              Locally Modified          381 
+
+Directory .
+ configure                 Locally Modified          381 
+ Makefile.in               Locally Modified          381 
+
+Directory debian
+ control                   Locally Modified          381 
+ changelog                 Locally Modified          381 
+
+Directory scripts
+ mkinstalldirs             Locally Modified          381 
+ depcomp                   Locally Modified          381 
+ missing                   Locally Modified          381 
+ config.guess              Locally Modified          381 
+ config.sub                Locally Modified          381 
+ ltmain.sh                 Locally Modified          381 
+ install-sh                Locally Modified          381 
+
+Directory libperl
+ Makefile.in               Locally Modified          381 
+
+Directory libperl/Asim/lib/Asim/Package
+ BitKeeper.pm              Locally Modified          381 
+ Cvs.pm                    Locally Modified          381 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Cvs.pm                    Locally Modified          381 
+
+Directory tools
+ Makefile.in               Locally Modified          381 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          381 
+
+Directory tools/awb
+ Makefile.am               Locally Modified          381 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          381 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          381 
+
+Directory lib
+ Makefile.in               Locally Modified          381 
+
+Directory .
+ README.debian             Locally Added               0 
+ configure.in              Locally Modified          381 
+ aclocal.m4                Locally Modified          381 
+
+Added symlink from awb to awb2 in libexec, so awb launches 
+properly when using the centrally installed version.
+
+Fixed perl version check in asimstarter.
+
+Added cvs to list of required packages for the .deb package
+
+Moved check for the environment variable CSH_RSH into the 
+usage of CVS to avoid the annoying messages about it when 
+one isn't using CVS.
+
+Did an autoreconf to upgrade to a new version of autotools.
+
