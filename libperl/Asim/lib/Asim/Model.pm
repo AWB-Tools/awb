@@ -1528,8 +1528,11 @@ sub clean {
       return _process_warning("No Makefile for clean\n",%args);
   }
 
-  # determine correct command (Asim v. Hasim)
+  # determine correct command (Asim v. Leap v. Hasim)
   my $cmd = "cd $builddir; make clean";
+  if ($self->type() eq "Leap") {
+      $cmd = "cd $builddir; make clean";
+  }
   if ($self->type() eq "HAsim") {
       $cmd = "cd $builddir; make clean";
   }
@@ -1564,8 +1567,11 @@ sub nuke {
       return _process_warning("Cannot nuke since model does not appear to be configured\n", %args);
   }
 
-  # determine correct command (Asim v. Hasim)
+  # determine correct command (Asim v. Leap v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" nuke";
+  if ($self->type() eq "Leap") {
+      $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" -nuke";
+  }
   if ($self->type() eq "HAsim") {
       $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -nuke";
   }
@@ -1597,13 +1603,16 @@ sub configure {
 
   print "Asim::Model - configure model\n" if $debug;
 
-  # determine correct command (Asim v. Hasim)
+  # determine correct command (Asim v. Leap v. Hasim)
   my $cmd;
   if (defined $persist && $persist) {
       $cmd = "amc --persist --model=$filename --builddir=\"$builddir\" configure";
   }
   else {
       $cmd = "amc --model=$filename --builddir=\"$builddir\" configure";
+  }
+  if ($self->type() eq "Leap") {
+      $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" -configure";
   }
   if ($self->type() eq "HAsim") {
       $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -configure";
@@ -1642,8 +1651,11 @@ sub build {
       return _process_error("Model does not appear to be configured\n", %args);
   }
 
-  # determine correct command (Asim v. Hasim)
+  # determine correct command (Asim v. Leap  v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" build";
+  if ($self->type() eq "Leap") {
+      $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" -build";
+  }
   if ($self->type() eq "HAsim") {
       $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" -build";
   }
@@ -1679,7 +1691,7 @@ sub build_options {
   }
 
 
-  if ($model_type eq "HAsim") {
+  if ($model_type eq "HAsim" || $model_type eq "Leap") {
     $options{"vexe"} = "Verilog simulation executable <T>";
     $options{"exe"} = "C simulation executable <T>";
     $options{"bit"} = "FPGA bitfile <T>";
@@ -1719,9 +1731,13 @@ sub setup {
       return _process_error("Model does not appear to be configured\n", %args);
   }
 
-  # determine correct command (Asim v. Hasim)
+  # determine correct command (Asim v. Leap v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" " .
       "--benchmark=$benchmark --rundir=\"$rundir\" setup";
+  if ($self->type() eq "Leap") {
+    $cmd = "leap-configure  --model=$filename --builddir=\"$builddir\" " .
+           "--benchmark=$benchmark --rundir=\"$rundir\" -setup";
+  }
   if ($self->type() eq "HAsim") {
     $cmd = "hasim-configure  --model=$filename --builddir=\"$builddir\" " .
            "--benchmark=$benchmark --rundir=\"$rundir\" -setup";
@@ -1761,9 +1777,13 @@ sub run {
       return _process_error("Model does not appear to be configured\n", %args);
   }
 
-  # determine correct command (Asim v. Hasim)
+  # determine correct command (Asim v. Leap  v. Hasim)
   my $cmd = "amc --model=$filename --builddir=\"$builddir\" " . 
       "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" run";
+  if ($self->type() eq "Leap") {
+    $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" " . 
+      "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" -run";
+  }
   if ($self->type() eq "HAsim") {
     $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" " . 
       "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" -run";

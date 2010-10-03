@@ -169,7 +169,17 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "apm-link"            => "tools/scripts/apm-link",
   "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
 #
-# HAsim commands
+# Leap commands
+#
+  "leap-bsc-mkdepend"   => "tools/scripts/leap-bsc-mkdepend",
+  "leap-configure"      => "tools/scripts/leap-configure",
+  "leap-connect"        => "tools/scripts/leap-connect",
+  "leap-dict"           => "tools/scripts/leap-dict",
+  "leap-gen-black-box"  => "tools/scripts/leap-gen-black-box",
+  "leap-rrr-stubgen"    => "tools/scripts/leap-rrr-stubgen",
+  "leap-front-panel"    => "tools/leap/leap-front-panel/leap-front-panel",
+#
+# HAsim commands (deprecated in favor of leap versions asim)
 #
   "hasim-bsc-mkdepend"  => "tools/scripts/hasim-bsc-mkdepend",
   "hasim-configure"     => "tools/scripts/hasim-configure",
@@ -333,7 +343,7 @@ if ($? == 0) {
   foreach $dir (split ' ', $path) {
 
     # Check new location for perl library
-    foreach $lib ("Asim", "AsimShell", "Benchmarks", "PinPoints", "PlotShell", "HAsim") {
+    foreach $lib ("Asim", "AsimShell", "Benchmarks", "PinPoints", "PlotShell", "Leap", "HAsim") {
       $libperl = "$dir/libperl/$lib/lib";
       if (-e $libperl) {
         push @asim_inc, $libperl;

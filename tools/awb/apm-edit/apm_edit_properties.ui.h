@@ -24,6 +24,7 @@ void apm_edit_properties::init()
 
     type_asim = 0;
     type_hasim = 1;
+    type_leap = 2;
 
     my $type = $model->type();
 
@@ -31,8 +32,10 @@ void apm_edit_properties::init()
         typeComboBox->setCurrentItem(type_asim);
     } elsif ($type eq "HAsim") {
         typeComboBox->setCurrentItem(type_hasim);
+    } elsif ($type eq "Leap") {
+        typeComboBox->setCurrentItem(type_leap);
     } else {
-        typeComboBox->setCurrentItem(type_hasim);
+        typeComboBox->setCurrentItem(type_leap);
     }
         
     Description->setText($model->description());

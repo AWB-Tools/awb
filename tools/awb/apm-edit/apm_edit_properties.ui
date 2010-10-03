@@ -66,6 +66,11 @@
                             <string>HAsim</string>
                         </property>
                     </item>
+                    <item>
+                        <property name="text">
+                            <string>Leap</string>
+                        </property>
+                    </item>
                     <property name="name">
                         <cstring>typeComboBox</cstring>
                     </property>
@@ -79,7 +84,7 @@
                         <string>Sekect a type of model here</string>
                     </property>
                     <property name="whatsThis" stdset="0">
-                        <string>Select a type of model here. The current choices are Asim and HAsim, where the main difference is that Asim implies the use of 'amc' for configuring, building and running models and HAsim uses 'hasim-configure'.</string>
+                        <string>Select a type of model here. The current choices are Asim, Leap and HAsim, where the main difference is that Asim implies the use of 'amc' for configuring, building and running models and Leap uses 'leap-configure' and HAsim uses 'hasim-configure'.</string>
                     </property>
                 </widget>
             </hbox>
@@ -416,6 +421,7 @@
 </includes>
 <variables>
     <variable access="private">int type_hasim;</variable>
+    <variable access="private">int type_leap;</variable>
     <variable access="private">int type_asim;</variable>
 </variables>
 <slots>

@@ -7337,3 +7337,42 @@ one isn't using CVS.
 
 Did an autoreconf to upgrade to a new version of autotools.
 
+
+----------
+jsemer      Date: Sun Oct  3 09:47:06 EDT 2010  CSN: CSN-awb-383
+                  Sun Oct  3 13:47:06 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          382 
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          382 
+
+Directory tools/awb/apm-edit
+ apm_edit_properties.ui.h  Locally Modified          382 
+ apm_edit_properties.ui    Locally Modified          382 
+
+Directory etc/repositories.d
+ hasim.pack                Locally Modified          382 
+ leap.pack                 Locally Added               0 
+
+Added the Leap (Logic-based Environment for Application
+Programming) .pack file, which defines the new Leap 
+repository and the associated Leap platform repository.
+The HAsim .pack file now defines only modeling-related 
+repositories.
+
+Added support for a awb model type of 'Leap', which use
+a set of leap-* commands, such as leap-configure, in 
+place of the misnamed hasim-* commands.
+
+Updated asimstarter to understand the leap-* commands,
+which means that a new install of awb will be required
+before one can use the commands from the (soon to be 
+populated) Leap package.
+
+Note that .apm files with model type 'HAsim' will currently
+continue to use the hasim-* commands in the HAsim package. 
+Eventually, however, a checkout of the Leap package will
+be required to build.
