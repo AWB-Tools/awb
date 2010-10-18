@@ -7376,3 +7376,14 @@ Note that .apm files with model type 'HAsim' will currently
 continue to use the hasim-* commands in the HAsim package. 
 Eventually, however, a checkout of the Leap package will
 be required to build.
+
+----------
+emer        Date: Mon Oct 18 17:05:16 EDT 2010  CSN: CSN-awb-384
+                  Mon Oct 18 21:05:16 UTC 2010
+
+
+Directory etc/repositories.d
+ bdn-powerpc.pack          Locally Added               0 
+
+Add repository description (.pack) file for the PowerPC model
+based on the LI-BDN approach.

@@ -1,0 +1,17 @@
+###### OFDM trunk
+
+[bdn-powerpc]
+Description=BDN-based PowerPC
+Method=svn
+Access=https://asim.csail.mit.edu/svn/bdn-powerpc
+Module=undefined
+Tag=HEAD
+Target=bdn-powerpc
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=bdn-powerpc
+
+[bdn-powerpc/HEAD]
+Description=BDN-based PowerPC
+Access=https://asim.csail.mit.edu/svn/bdn-powerpc
+Tag=HEAD
+
