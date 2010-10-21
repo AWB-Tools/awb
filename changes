@@ -7387,3 +7387,21 @@ Directory etc/repositories.d
 
 Add repository description (.pack) file for the PowerPC model
 based on the LI-BDN approach.
+
+----------
+jsemer      Date: Thu Oct 21 17:27:21 EDT 2010  CSN: CSN-awb-385
+                  Thu Oct 21 21:27:21 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          384 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          384 
+ apm_edit.ui               Locally Modified          384 
+
+Enhanced apm-edit so that one can open a file browser or a
+shell in the directory containing a module. These actions
+are invoked with the property (right click) menu of a module
+(or submodel) either in the main model tree or in the 
+alternatives pane.

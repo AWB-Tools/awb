@@ -801,15 +801,50 @@ void apm_edit::moduleEditAction_activated()
 
     # Handle submodels...
 
+    my $module;
+
     if ($filename =~ /\.apm$/) {
-        $filename = $Asim::default_workspace->resolve($filename);
-        system("apm-edit $filename &");
-        return;
+        $module = Asim::Model->new($filename)   || return;
+    } else {
+        $module = Asim::Module->new($filename)  || return;
     }
 
-    my $module = Asim::Module->new($filename)          || return;
-
     moduleEditFiles($module);
+}
+
+#
+# Open a file browser at the directory containing the module
+#
+
+
+void apm_edit::moduleOpening_containing_folderAction_activated()
+{
+    my $current_item = Model->selectedItem()
+                       || return;
+
+    my $filename = $current_item->text(module_file_col)
+                   || return;
+
+
+    moduleOpenContainer($filename);
+}
+
+
+#
+# Open a shell at the directory containing the module
+#
+
+
+void apm_edit::moduleShell_at_containing_folderAction_activated()
+{
+    my $current_item = Model->selectedItem()
+                       || return;
+
+    my $filename = $current_item->text(module_file_col)
+                   || return;
+
+
+    moduleShellContainer($filename);
 }
 
 #
@@ -1090,6 +1125,24 @@ void apm_edit::alternativesEditAction_activated()
     moduleEditFiles($module, "*");
 }
 
+
+
+void apm_edit::alternativesOpen_containing_folderAction_activated()
+{
+    my $item   = Alternatives->selectedItem() || return;
+    my $module = alternativesModule($item)    || return;
+
+    moduleOpenContainer($module->filename());
+}
+
+
+void apm_edit::alternativesShell_at_containing_folderAction_activated()
+{
+    my $item   = Alternatives->selectedItem() || return;
+    my $module = alternativesModule($item)    || return;
+
+    moduleShellContainer($module->filename());
+}
 	        
 
 # Help menu
@@ -2011,6 +2064,29 @@ void apm_edit::moduleEditFiles()
 
     Asim::invoke_editor("--background", @files);
 }
+
+void apm_edit::moduleOpenContainer()
+{
+    my $filename = shift;
+
+    use File::Basename;
+
+    my $dirname = dirname(Asim::resolve($filename));
+
+    system("xdg-open $dirname");
+}
+
+void apm_edit::moduleShellContainer()
+{
+    my $filename = shift;
+
+    use File::Basename;
+
+    my $dirname = dirname(Asim::resolve($filename));
+
+    system("gnome-terminal --working-directory $dirname");
+}
+
 
 
 void apm_edit::alternativesModule()

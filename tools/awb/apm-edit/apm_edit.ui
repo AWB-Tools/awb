@@ -482,6 +482,8 @@
         <action name="moduleNewAction"/>
         <separator/>
         <action name="moduleEditAction"/>
+        <action name="moduleOpening_containing_folderAction"/>
+        <action name="moduleShell_at_containing_folderAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
         <action name="InsertActionGroup"/>
@@ -490,6 +492,9 @@
     <item text="&amp;Alternatives" name="alternativesMenu">
         <action name="alternativesInsertAction"/>
         <action name="alternativesEditAction"/>
+        <action name="alternativesOpen_containing_folderAction"/>
+        <action name="alternativesShell_at_containing_folderAction"/>
+        <separator/>
         <action name="modelRefresh"/>
     </item>
     <item text="&amp;Help" name="helpMenu">
@@ -528,7 +533,7 @@
             <rect>
                 <x>127</x>
                 <y>0</y>
-                <width>259</width>
+                <width>261</width>
                 <height>29</height>
             </rect>
         </property>
@@ -1186,6 +1191,50 @@
             <string>Edit the source files for the selected alternative</string>
         </property>
     </action>
+    <action>
+        <property name="name">
+            <cstring>moduleOpening_containing_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Open containing folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Open containing folder</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>moduleShell_at_containing_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Shell at containing folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Shell at containing folder</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>alternativesOpen_containing_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Open containing folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Open containing folder</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>alternativesShell_at_containing_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Shell at containing folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Shell at containing folder</string>
+        </property>
+    </action>
 </actions>
 <connections>
     <connection>
@@ -1518,6 +1567,30 @@
         <receiver>apm_edit</receiver>
         <slot>Files_doubleClicked(QListBoxItem*)</slot>
     </connection>
+    <connection>
+        <sender>moduleOpening_containing_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleOpening_containing_folderAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>moduleShell_at_containing_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>moduleShell_at_containing_folderAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>alternativesOpen_containing_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>alternativesOpen_containing_folderAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>alternativesShell_at_containing_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>alternativesShell_at_containing_folderAction_activated()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Model</tabstop>
@@ -1580,6 +1653,8 @@
     <slot>modelPropertiesAction_activated()</slot>
     <slot>moduleNewAction_activated()</slot>
     <slot>moduleEditAction_activated()</slot>
+    <slot>moduleOpening_containing_folderAction_activated()</slot>
+    <slot>moduleShell_at_containing_folderAction_activated()</slot>
     <slot>moduleNotesAction_activated()</slot>
     <slot>moduleViewAwbAction_activated()</slot>
     <slot>moduleViewSourceAction_activated()</slot>
@@ -1608,23 +1683,27 @@
     <slot>Alternatives_returnPressed_onModule( QListViewItem * )</slot>
     <slot>Alternatives_returnPressed_onSubmodel( QListViewItem * )</slot>
     <slot>alternativesEdit_clicked()</slot>
+    <slot>Files_doubleClicked( QListBoxItem * )</slot>
     <slot>Parameters_selectionChanged( QListBoxItem * )</slot>
     <slot>ParamValue_returnPressed()</slot>
     <slot>ParamChange_clicked()</slot>
     <slot returnType="int">Model_find()</slot>
     <slot returnType="int *">Model_walk()</slot>
-    <slot>Files_doubleClicked( QListBoxItem * )</slot>
+    <slot>alternativesOpen_containing_folderAction_activated()</slot>
+    <slot>alternativesShell_at_containing_folderAction_activated()</slot>
 </slots>
 <functions>
     <function access="private">modelShow()</function>
     <function access="private">modelOperation()</function>
     <function access="private">modulePaint()</function>
+    <function access="private">moduleFlags()</function>
     <function access="private">moduleInsertParams()</function>
     <function access="private">moduleCheckParams()</function>
     <function access="private">moduleDefaultParams()</function>
     <function access="private">moduleEditFiles()</function>
+    <function access="private">moduleOpenContainer()</function>
+    <function access="private">moduleShellContainer()</function>
     <function access="private">alternativesModule()</function>
-    <function access="private">moduleFlags()</function>
 </functions>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>
