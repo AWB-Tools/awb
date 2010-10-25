@@ -1,17 +1,17 @@
 
 Build for debian
 
-  1) Update debian/chasngelog
+  1) Update debian/changelog (using dch can help)
 
      a) Update name to <release>.<major>.<minor>~svn<date>r<version>+<release>
-        For example 0.6.0~svn20100724r382+lucid
+        For example, 0.6.0~svn20100724r382+lucid
 
      b) Change date at bottom of changelog
 
 
   2) Build it
 
-     a) debuild -r sudo
+     a) debuild -r sudo -us -uc
 
 
   3) Copy files created in ../ to system containing repository
@@ -27,5 +27,7 @@ Install into repository for distribution
   2) Install <package>.deb (copied above) into repository
 
      a) cd <repository-directory>
-     b) reprepro installdeb <release> <package>.deb
+        For example, /home/asim/reprepro/ubuntu
+
+     b) reprepro includedeb <release> <package>.deb
 

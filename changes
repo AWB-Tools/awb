@@ -7405,3 +7405,16 @@ shell in the directory containing a module. These actions
 are invoked with the property (right click) menu of a module
 (or submodel) either in the main model tree or in the 
 alternatives pane.
+
+----------
+jsemer      Date: Mon Oct 25 08:15:17 EDT 2010  CSN: CSN-awb-386
+                  Mon Oct 25 12:15:17 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          385 
+
+Directory .
+ README.debian             Locally Modified          385 
+
+Minor changes to instructions for debian installs
