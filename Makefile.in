@@ -281,12 +281,6 @@ SUBDIRS = lib libperl tools
 #   Note: don't do this if creating a .deb file
 #
 INSTALL_RC = $(top_srcdir)/scripts/install-rcfile
-
-#
-# we also need to fix up the distribution to contain the whole source tree
-# minus the .svn directories
-#
-EXTRA_DIST = admin config etc include lib libperl tools base pm feeders util Makefile changes $(INSTALL_RC)
 all: all-recursive
 
 .SUFFIXES:
@@ -550,9 +544,6 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-	$(MAKE) $(AM_MAKEFLAGS) \
-	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
-	  dist-hook
 	-test -n "$(am__skip_mode_fix)" \
 	|| find "$(distdir)" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -775,8 +766,8 @@ uninstall-am:
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
 	clean-libtool ctags ctags-recursive dist dist-all dist-bzip2 \
-	dist-gzip dist-hook dist-lzma dist-shar dist-tarZ dist-xz \
-	dist-zip distcheck distclean distclean-generic distclean-hdr \
+	dist-gzip dist-lzma dist-shar dist-tarZ dist-xz dist-zip \
+	distcheck distclean distclean-generic distclean-hdr \
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
@@ -791,11 +782,35 @@ uninstall-am:
 
 
 #
-# we have non-standard install sub-targets
+# we have non-standard sub-targets
 #
-.phony: install-exec-hook install-release install-config install-etc install-package install-src
+.phony:  install-indep install-arch install-exec-hook install-config install-etc install-package install-src
 
-install-exec-hook: install-release install-etc
+#
+# Targets used when making a .deb file
+#    WARNING: These targets assume that the $(DESTDIR) starts empty!!!
+#
+
+install-indep:
+
+#
+# Do install and install of package, and
+#   - install application menu stuff
+#   - clean up perl junk
+#
+install-arch: install install-package
+	$(INSTALL) -D -m 644 share/awb.desktop       $(DESTDIR)$(datadir)/applications/awb.desktop
+	$(INSTALL) -D -m 644 share/awb.svg           $(DESTDIR)$(datadir)/icons/awb.svg
+	$(INSTALL) -D -m 644 share/apm-edit.desktop  $(DESTDIR)$(datadir)/applications/apm-edit.desktop
+	$(INSTALL) -D -m 644 share/apm-edit.svg      $(DESTDIR)$(datadir)/icons/apm-edit.svg
+	rm  $(DESTDIR)$(libdir)/perl/*/perllocal.pod
+	rm  -rf $(DESTDIR)$(libdir)/perl/*/auto/*
+
+#
+# Target for install
+#
+
+install-exec-hook: install-config install-etc
 	@echo ""
 	@echo "*******************************************************"
 	@echo ""
@@ -807,12 +822,6 @@ install-exec-hook: install-release install-etc
 	@echo ""
 	@echo "*******************************************************"
 	@echo ""
-	@echo "Done."
-
-#
-# Invoke this if createing a .deb file
-#
-install-release: all install-config
 	@echo "Done."
 
 #
@@ -863,10 +872,6 @@ install-src:
 install-src-public: install-src
 	chmod -R o+r $(DESTDIR)$(codedir)
 	find         $(DESTDIR)$(codedir) -type d -exec chmod o+x {} \;
-
-dist-hook:
-	make -C $(distdir) distclean
-	find $(distdir) -name .svn -depth -exec rm -rf {} \;
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

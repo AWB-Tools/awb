@@ -1,6 +1,5 @@
-#:
-eval 'exec perl -w "$0" ${1+"$@"}'
-       if 0;
+#!/usr/bin/env perl
+# -*- perl -*-
 
 # add this to the command line to debug: -MQt::debug=calls,gc,ambiguous,verbose
 

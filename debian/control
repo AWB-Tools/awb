@@ -3,16 +3,18 @@ Section: devel
 Priority: optional
 Maintainer: Joel Emer <emer@csail.mit.edu>
 Build-Depends: debhelper (>= 7), autotools-dev, libqt-perl, libqt3-mt-dev, libpopt-dev
-Standards-Version: 3.7.2
+Standards-Version: 3.8.4
 
 Package: awb
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs
 Recommends: libterm-readline-gnu-perl
-Description: Executables for the Architect's Workbench (awb)
- Core executables for Architect's Workbench (awb) modular plug-n-play build system.
+Description: Executables for the Architect's Workbench
+ Core executables for Architect's Workbench (awb) plug-n-play build system.
+Section: devel
 
 Package: awb-doc
 Architecture: all
-Description: Documentation for the Architect's Workbench (awb)
- Documenation for for Architect's Workbench (awb) modular plug-n-play build system.
+Description: Documentation for the Architect's Workbench
+ Documenation for Architect's Workbench (awb) plug-n-play build system.
+Section: doc

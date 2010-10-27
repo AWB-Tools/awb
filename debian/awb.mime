@@ -1,0 +1,1 @@
+application/x-apm; apm-edit %s; description="AWB model file editor"; test=test -n "$DISPLAY"

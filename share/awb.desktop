@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Architect's Workbench
+Comment=Explore, configure, build and run awb-based models/designs
+TryExec=awb
+Exec=awb
+Icon=awb
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Development;Qt

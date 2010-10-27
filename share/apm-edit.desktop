@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Architect's Workbench Model/Design Editor
+Comment=Edit awb-based models/designs
+MimeType=application/x-apm;
+TryExec=apm-edit
+Exec=apm-edit
+Icon=apm-edit
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Development;Qt
+

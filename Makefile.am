@@ -20,11 +20,36 @@
 SUBDIRS = lib libperl tools
 
 #
-# we have non-standard install sub-targets
+# we have non-standard sub-targets
 #
-.phony: install-exec-hook install-release install-config install-etc install-package install-src
+.phony:  install-indep install-arch install-exec-hook install-config install-etc install-package install-src
 
-install-exec-hook: install-release install-etc
+#
+# Targets used when making a .deb file
+#    WARNING: These targets assume that the $(DESTDIR) starts empty!!!
+#
+
+install-indep:
+
+#
+# Do install and install of package, and
+#   - install application menu stuff
+#   - clean up perl junk
+#
+install-arch: install install-package
+	$(INSTALL) -D -m 644 share/awb.desktop       $(DESTDIR)$(datadir)/applications/awb.desktop
+	$(INSTALL) -D -m 644 share/awb.svg           $(DESTDIR)$(datadir)/icons/awb.svg
+	$(INSTALL) -D -m 644 share/apm-edit.desktop  $(DESTDIR)$(datadir)/applications/apm-edit.desktop
+	$(INSTALL) -D -m 644 share/apm-edit.svg      $(DESTDIR)$(datadir)/icons/apm-edit.svg
+	rm  $(DESTDIR)$(libdir)/perl/*/perllocal.pod
+	rm  -rf $(DESTDIR)$(libdir)/perl/*/auto/*
+
+
+#
+# Target for install
+#
+
+install-exec-hook: install-config install-etc
 	@echo ""
 	@echo "*******************************************************"
 	@echo ""
@@ -37,13 +62,6 @@ install-exec-hook: install-release install-etc
 	@echo "*******************************************************"
 	@echo ""
 	@echo "Done."
-
-#
-# Invoke this if createing a .deb file
-#
-install-release: all install-config
-	@echo "Done."
-
 
 #
 # This creates a simple default workspace for this version of asim
@@ -101,14 +119,4 @@ install-src-public: install-src
 	chmod -R o+r $(DESTDIR)$(codedir)
 	find         $(DESTDIR)$(codedir) -type d -exec chmod o+x {} \;
 
-
-#
-# we also need to fix up the distribution to contain the whole source tree
-# minus the .svn directories
-#
-EXTRA_DIST = admin config etc include lib libperl tools base pm feeders util Makefile changes $(INSTALL_RC)
-
-dist-hook:
-	make -C $(distdir) distclean
-	find $(distdir) -name .svn -depth -exec rm -rf {} \;
 

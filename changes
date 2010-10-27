@@ -7418,3 +7418,46 @@ Directory .
  README.debian             Locally Modified          385 
 
 Minor changes to instructions for debian installs
+
+----------
+jsemer      Date: Wed Oct 27 10:39:36 EDT 2010  CSN: CSN-awb-387
+                  Wed Oct 27 14:39:36 UTC 2010
+
+
+Directory debian
+ control                   Locally Modified          386 
+ awb.examples              Locally Modified          386 
+ changelog                 Locally Modified          386 
+ rules                     Locally Modified          386 
+ awb.mime                  Locally Added               0 
+ awb.sharedmimeinfo        Locally Added               0 
+
+Directory .
+ Makefile.in               Locally Modified          386 
+
+Directory libperl/PlotShell/lib
+ PlotShell.pm              Locally Modified          386 
+
+Directory tools/awb/apm-edit
+ apm_edit_head.pl          Locally Modified          386 
+
+Directory share
+ awb.desktop               Locally Added               0 
+ awb.svg                   Locally Added               0 
+ apm-edit.desktop          Locally Added               0 
+ apm-edit.svg              Locally Added               0 
+
+Directory modules/model/test_model/test_board
+ test_board.cpp            Locally Modified          386 
+ test_board.h              Locally Modified          386 
+ test_board.awb            Locally Modified          386 
+
+Directory modules/controller/workbench/simple
+ makewb.pl                 Locally Modified          386 
+
+Directory .
+ Makefile.am               Locally Modified          386 
+
+Updated debian install to include awb and apm-edit in the
+application menu, and fixed a smattering of lintian
+errors - many still remain.
