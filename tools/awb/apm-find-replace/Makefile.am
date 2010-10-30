@@ -26,6 +26,7 @@ POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
 POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
 
 install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
 	$(POD2MAN) apm-find-replace $(DESTDIR)$(MAN1DIR)/apm-find-replace.$(MAN1EXT)
 
 

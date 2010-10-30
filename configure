@@ -906,6 +906,7 @@ with_qt_uic
 with_qt_includes
 with_qt_libs
 with_stlport_dir
+enable_perl_vendor_install
 enable_warning
 enable_optimize
 enable_distcc
@@ -1560,6 +1561,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
+  --enable-perl-vendor-install
+                          Do a perl vendor install
   --enable-warning=ARG    warning level [[ARG=no|warn|error]] (default=error)
   --enable-optimize=ARG   optimizations [[ARG=no|yes|high]] (default=yes)
   --enable-distcc=ARG     use distcc compiler [[ARG=no|yes]] (default=no)
@@ -3275,6 +3278,17 @@ fi
 # Check whether --with-stlport-dir was given.
 if test "${with_stlport_dir+set}" = set; then :
   withval=$with_stlport_dir;
+fi
+
+
+#
+# Control perl install
+#
+# Check whether --enable-perl-vendor-install was given.
+if test "${enable_perl_vendor_install+set}" = set; then :
+  enableval=$enable_perl_vendor_install; perlinstalldirs=vendor
+else
+  perlinstalldirs=site
 fi
 
 
@@ -5379,13 +5393,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5382: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5396: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5385: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5399: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5388: output\"" >&5)
+  (eval echo "\"\$as_me:5402: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6580,7 +6594,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6583 "configure"' > conftest.$ac_ext
+  echo '#line 6597 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8633,11 +8647,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8636: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8650: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8640: \$? = $ac_status" >&5
+   echo "$as_me:8654: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8972,11 +8986,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8975: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8989: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8979: \$? = $ac_status" >&5
+   echo "$as_me:8993: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9077,11 +9091,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9080: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9094: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9084: \$? = $ac_status" >&5
+   echo "$as_me:9098: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9132,11 +9146,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9135: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9149: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9139: \$? = $ac_status" >&5
+   echo "$as_me:9153: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11516,7 +11530,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11519 "configure"
+#line 11533 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11612,7 +11626,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11615 "configure"
+#line 11629 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13568,11 +13582,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13571: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13585: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13575: \$? = $ac_status" >&5
+   echo "$as_me:13589: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13667,11 +13681,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13670: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13684: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13674: \$? = $ac_status" >&5
+   echo "$as_me:13688: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13719,11 +13733,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13722: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13736: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13726: \$? = $ac_status" >&5
+   echo "$as_me:13740: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16656,6 +16670,7 @@ ac_config_files="$ac_config_files libperl/Makefile"
 
 ac_config_files="$ac_config_files libperl/Asim/lib/Asim.pm"
 
+
 # run perl MakeMaker at configure time, not make time,
 # to create the makefiles in the libperl tree:
 ac_config_commands="$ac_config_commands libperl/Asim/Makefile                                        "
@@ -17766,11 +17781,11 @@ fi
 
 
 
-prefix=$prefix
-prefix=$prefix
-prefix=$prefix
-prefix=$prefix
-prefix=$prefix
+prefix=$prefix; perlinstalldirs=$perlinstalldirs
+prefix=$prefix; perlinstalldirs=$perlinstalldirs
+prefix=$prefix; perlinstalldirs=$perlinstalldirs
+prefix=$prefix; perlinstalldirs=$perlinstalldirs
+prefix=$prefix; perlinstalldirs=$perlinstalldirs
 
 _ACEOF
 
@@ -19286,11 +19301,11 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
-    "libperl/Asim/Makefile":C) cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix INSTALLDIRS=vendor; cd ../.. ;;
-    "libperl/AsimShell/Makefile":C) cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix INSTALLDIRS=vendor; cd ../.. ;;
-    "libperl/Benchmarks/Makefile":C) cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../.. ;;
-    "libperl/PinPoints/Makefile":C) cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../.. ;;
-    "libperl/PlotShell/Makefile":C) cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../.. ;;
+    "libperl/Asim/Makefile":C) cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/AsimShell/Makefile":C) cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/Benchmarks/Makefile":C) cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/PinPoints/Makefile":C) cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/PlotShell/Makefile":C) cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
     "tools/scripts/asimstarter":F) chmod +x tools/scripts/asimstarter ;;
     "tools/scripts/awb-pkg-config":F) chmod +x tools/scripts/awb-pkg-config ;;
 

@@ -46,6 +46,7 @@ install-data-hook: install-man
 	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-shell     asim-shell)
 
 install-man:
+	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
 	for i in $(pod2man_list); do \
 	    $(POD2MAN) $$i $(DESTDIR)$(MAN1DIR)/$$i.$(MAN1EXT); \
 	done

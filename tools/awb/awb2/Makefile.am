@@ -53,6 +53,7 @@ POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
 # put in link between old name (awb) and new name (awb2)
 install-data-hook:
 	(cd $(DESTDIR)$(tooldir); rm -f awb; ln -s awb2 awb)
+	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
 	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb2.$(MAN1EXT)
 	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb.$(MAN1EXT)
 
