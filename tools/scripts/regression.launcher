@@ -23,12 +23,12 @@
 ##################################################################################
 # Author: Srilatha (Bobbie) Manne
 # Date: Mar, 2002
-# Purpose: To run regressions using asim-run.  
+# Purpose: To run regressions using awb-run.  
 #
 #  This is a simple regression script that everyone should run
 #  before checking in modifications to the ipf, core, feeder,
 #  or network packages. This script simply runs an instance of
-#  asim-run with some appropriate parameters. See asim-run
+#  awb-run with some appropriate parameters. See awb-run
 #  for more details about what's going on.
 #
 
@@ -57,7 +57,7 @@ $Term::ANSIColor::AUTORESET = 1;
 # Global, hard coded information
 $RESOLVER="awb-resolver";
 $AWBLOCAL = $ENV{AWBLOCAL};
-$ASIM_RUN = "asim-run";
+$ASIM_RUN = "awb-run";
 $MODEL_COVERAGE = "model-coverage";
 
 # Global information
@@ -68,7 +68,7 @@ $MODEL_COVERAGE = "model-coverage";
 # 
 my @packages = ();
 my @package_exps = ();
-my @default_packages = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGES", "network ipf"));
+my @default_packages = split(/\s*[ ,]\s*/, Asim::Util::get_asimrc_val("regression.launcher", "PACKAGES", "leap"));
 my $runtype = Asim::Util::get_asimrc_val("regression.launcher", "RUNTYPE", "regression");
 my $runstyle = Asim::Util::get_asimrc_val("regression.launcher", "RUNSTYLE", "list");
 my $runcmds = Asim::Util::get_asimrc_val("regression.launcher", "ASIMRUN_COMMANDS", undef);
@@ -567,35 +567,7 @@ sub Cleanup {
 }
 
 sub Usage {
-  print "Usage: regression.launcher\n";
-  print "\t\t [--package=ipf|arana|...]\n";
-  print "\t\t [--runtype=regression|nightly] \n";
-  print "\t\t [--runstyle=pruned|list] \n";
-  print "\t\t [--runcmds=<asim-run commands>]\n";
-  print "\t\t [--compress=none|gzip|bzip2]\n";
-  print "\t\t [--queue=<netbatch queue>]\n";
-  print "\t\t [--pool=<netbatch pool>]\n";
-  print "\t\t [--class=<netbatch class>]\n";
-  print "\t\t [--regdir=<directory to place regression results>]\n";
-  print "\n";
-  print "\t\t [--[no]remote]\n";
-  print "\t\t [--remoteroot=<remote root directory to place regression results>]\n";
-  print "\t\t [--remoteregdir=<where to run regressions on remote host>]\n";
-  print "\n";
-  print "\t\t [--rerun]\n";
-  print "\t\t [--[no]dryrun]\n";
-  print "\n";
-  print "\t\t [--help]\n";
-  print "\t\t [--options]\n";
-  print "\n";
-  print "\t\tDefault packages are: " . join(" ", @default_packages) . "\n";
-  print "\t\tDefault runtype is: regression\n";
-  print "\t\tDefault runstyle is: list\n";
-  print "\t\tDefault compression is gzip.\n";
-  print "\t\tDefault regdir is: <workspace>/run/regtest/YYYY-MM-DD-HH-MM-SS\n";
-  print "\n";
-  print "Multiple packages can be provided at the same time as a space separated list.  \n";
-  print "\n";
+  system "perldoc $0";
 
   Options();
 }
@@ -603,3 +575,181 @@ sub Usage {
 sub Options {
   $Asim::default_workspace->dump_options();
 }
+
+
+__END__
+
+=head1 NAME
+
+Regression.launcher - Program to launch multiple awb-based batch runs as a regression
+
+=head1 SYNOPSIS
+
+regression.launcher
+          [--package=leap|hasim|ipf|arana|...]
+          [--runtype=regression|nightly] 
+          [--runstyle=pruned|list] 
+
+          [--regdir=<directory for regression results>]
+          [--compress=none|gzip|bzip2]
+
+          [--queue=<netbatch queue>]
+          [--pool=<netbatch pool>]
+          [--class=<netbatch class>]
+
+          [--[no]remote]
+          [--remoteroot=<remote root directory for regression results>]
+          [--remoteregdir=<where to run regressions on remote host>]
+
+          [--runcmds=<awb-run commands>]
+
+          [--rerun]
+          [--[no]dryrun]
+
+          [--help]
+          [--options]
+
+
+=head1 DESCRIPTION
+
+This is a program that launches a set of awb-run batch runs to serve
+as a regression for an awb package. This command is used in
+conjunction with the regression.verifier and regression.cleanup
+commands.
+
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --package=<packagename>...
+
+Default: leap
+
+A space separated list of packages on which to run regressions.
+
+=item --runtype=<runtype>
+
+Default: regression
+
+This parameter along with the package parameter determines the 
+locations of the awb-run  experiment and benchmark files. They 
+are determined as follows:
+
+experiments/<packagename>/<runtype>/<runtype>.models
+experiments/<packagename>/<runtype>/<runtype>.benchmarks
+
+All packages are searched using the standard uniondir
+mechanism.
+
+=item --runstyle=list|pruned
+
+Default: list
+
+Either run all models (list) or only those that depend
+on files that have been modified.
+
+=item --regdir=<directory for regression results>
+
+Default: <workspace>/run/regtest/YYYY-MM-DD-HH-MM-SS
+
+Directory name for regression results
+
+=item --compress=none|gzip|bzip2
+
+Default: gzip
+
+Type of compression to use on results of runs
+
+=item --queue=<netbatch queue>
+
+=item --pool=<netbatch pool>
+
+=item --class=<netbatch class>
+
+=item --[no]remote
+
+=item --remoteroot=<remote root directory for regression results>
+
+=item --remoteregdir=<where to run regressions on remote host>
+
+Shorthand for parameters that are passed through to awb-run. Defaults
+are determined from awb-run
+
+=item --runcmds=<awb-run commands>
+
+Default: <none>
+
+Command switches that are passed directly through to awb-run
+
+=item --rerun
+
+Rerun regression without a rebuild
+
+=item --[no]dryrun
+
+Show steps by do not actually run anything
+
+=item --help
+
+Show this help
+
+=item --options
+
+While the above switches have the highest priority
+for setting program options, this switch will show 
+the options that can be set in the [regresion.launcher]
+section of the following prioritized (from highest to
+lowest) list of files:
+
+    <workspace>/awb.config
+    ~/.asim/asimrc
+    <INSTALLDIR>/etc/asim/asimrc
+
+The program's internal defaults are the lowest priority.
+
+=back
+
+
+=head1 EXAMPLES
+
+    % regression.launcher
+
+
+=head1 ENVIRONMENT VARIABLES
+
+AWBLOCAL - this variable defines the root directory of your workspace
+and is needed for this program to function. It is normally set
+automatically by asimstarter. Setting it explicitly is discouraged.
+
+=head1 FILES
+
+<workspace>/awb.config          - workspace configuration file
+
+~/.asim/asimrc                  - user-specific configuration file
+
+<INSTALLDIR>/etc/asim/asimrc    - system-wide configuration file
+
+=head1 BUGS
+
+TBD
+
+=head1 AUTHORS
+
+Srilatha (Bobbie) Manne
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Compaq, Intel 2001-2010              *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut
+

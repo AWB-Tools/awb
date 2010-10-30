@@ -159,7 +159,7 @@ An Asim::Module is a class that represents the basic building block,
 i.e., a module, of an Asim::Model. You can create and edit
 Asim::Modules. 
 
-=back 4
+=back
 
 More information can be found in the respective documentation for each
 object class.
@@ -218,6 +218,8 @@ Shared data directory (default: $prefix/share)
 
 Asim code directory (default: $datadir/$package/$release)
 
+=back
+
 =head1 METHODS
 
 The following methods are supported:
@@ -259,7 +261,7 @@ sub init {
 # Create rcfile object
 #
   $Asim::rcfile = Asim::Rcfile->new("$ENV{HOME}/.asim/asimrc",
-                                    "$prefix/etc/asim/asimrc");
+                                    "$sysconfdir/asim/asimrc");
 
 #
 # Find the location of a workspace - in priority order:
@@ -730,7 +732,7 @@ sub cleanup_and_exit {
 __END__
 
 
-=back 4
+=back
 
 =head1 BUGS
 

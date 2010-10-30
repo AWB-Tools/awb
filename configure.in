@@ -709,19 +709,19 @@ AC_CONFIG_FILES(libperl/Asim/lib/Asim.pm)
 # run perl MakeMaker at configure time, not make time,
 # to create the makefiles in the libperl tree:
 AC_CONFIG_COMMANDS( libperl/Asim/Makefile                                        ,
-		[cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix; cd ../..], 
+		[cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix INSTALLDIRS=vendor; cd ../..], 
 		                        		       [prefix=$prefix  ])
 AC_CONFIG_COMMANDS( libperl/AsimShell/Makefile                                   ,
-		[cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		[cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix INSTALLDIRS=vendor; cd ../..],
 		                        		       [prefix=$prefix  ])
 AC_CONFIG_COMMANDS( libperl/Benchmarks/Makefile                                  ,
-		[cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		[cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../..],
 		                        		       [prefix=$prefix  ])
 AC_CONFIG_COMMANDS( libperl/PinPoints/Makefile                                   ,
-		[cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		[cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../..],
 		                        		       [prefix=$prefix  ])
 AC_CONFIG_COMMANDS( libperl/PlotShell/Makefile                                   ,
-		[cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix; cd ../..],
+		[cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../..],
 		                        		       [prefix=$prefix  ])
 
 # tools top level
@@ -730,7 +730,7 @@ AC_CONFIG_FILES(tools/Makefile)
 # tools/scripts
 AC_CONFIG_FILES(tools/scripts/Makefile)
 AC_CONFIG_FILES(tools/scripts/asimstarter, [chmod +x tools/scripts/asimstarter])
-AC_CONFIG_FILES(tools/scripts/asim-pkg-config, [chmod +x tools/scripts/asim-pkg-config])
+AC_CONFIG_FILES(tools/scripts/awb-pkg-config, [chmod +x tools/scripts/awb-pkg-config])
 
 # tools/awb
 AC_CONFIG_FILES(tools/awb/Makefile)

@@ -4,12 +4,13 @@ usr/lib
 usr/lib/perl
 usr/libexec
 usr/libexec/asim
-usr/man
-usr/man/man3
 usr/sbin
 usr/share
 usr/share/asim
 usr/share/asim/awb
 usr/share/asim/awb/HEAD
 usr/share/benchmarks
+usr/share/man
+usr/share/man/man1
+usr/share/man/man3
 usr/share/perl

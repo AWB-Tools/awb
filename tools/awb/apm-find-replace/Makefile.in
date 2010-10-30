@@ -215,6 +215,16 @@ apm_find_replace_SOURCES = apm_find_replace_head.pl                  \
                            apm_find_replace.ui apm_find_replace.ui.h \
                            apm_find_replace_main.pl
 
+
+#
+# Convert perl documentation to man page and install
+#
+PERLRUN = perl
+MAN1EXT = 1
+MANPERM = 644
+MAN1DIR = $(mandir)/man1
+POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
 CLEANFILES = *.ui.pm
 all: all-am
 
@@ -443,7 +453,8 @@ info: info-am
 info-am:
 
 install-data-am: install-toolPROGRAMS
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 install-dvi: install-dvi-am
 
 install-dvi-am:
@@ -489,18 +500,18 @@ ps-am:
 
 uninstall-am: uninstall-toolPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: install-am install-data-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libtool clean-toolPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip install-toolPROGRAMS installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install install-am install-data install-data-am \
+	install-data-hook install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip install-toolPROGRAMS \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-toolPROGRAMS
@@ -514,6 +525,9 @@ apm_find_replace.ui.pm: apm_find_replace.ui apm_find_replace.ui.h
 
 %.ui.pm: %.ui
 	puic -o $@ $<
+
+install-data-hook:
+	$(POD2MAN) apm-find-replace $(DESTDIR)$(MAN1DIR)/apm-find-replace.$(MAN1EXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

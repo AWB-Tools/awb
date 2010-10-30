@@ -205,7 +205,7 @@ $shellalias{"regtest"} = "$shellenv{AWBLOCAL}/run/regtest";
 # awbset helpers - now this is if you are REALLY lazy ;)
 $shellalias{"awbset"} = "$0 __ARGV__";
 $shellalias{"ar"} = "$resolver __ARGV__";
-$shellalias{"as"} = "asim-shell __ARGV__";
+$shellalias{"as"} = "awb-shell __ARGV__";
 $shellalias{"aw"} = "eval `awbset setworkspace __ARGV__`";
 $shellalias{"am"} = "eval `awbset setmodel global __ARGV__`";
 $shellalias{"aml"} = "eval `awbset setmodel local __ARGV__`";

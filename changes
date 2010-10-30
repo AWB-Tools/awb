@@ -7461,3 +7461,126 @@ Directory .
 Updated debian install to include awb and apm-edit in the
 application menu, and fixed a smattering of lintian
 errors - many still remain.
+
+----------
+jsemer      Date: Fri Oct 29 20:28:08 EDT 2010  CSN: CSN-awb-388
+                  Sat Oct 30 00:28:08 UTC 2010
+
+
+Directory .
+ configure                 Locally Modified          387 
+ Makefile.in               Locally Modified          387 
+
+Directory debian
+ changelog                 Locally Modified          387 
+ awb.dirs                  Locally Modified          387 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          387 
+
+Directory libperl/PinPoints
+ MANIFEST                  Locally Modified          387 
+
+Directory libperl/PlotShell/lib
+ PlotShell.pm              Locally Modified          387 
+
+Directory libperl/PlotShell
+ MANIFEST                  Locally Modified          387 
+
+Directory libperl/Asim/lib/Asim
+ Rcfile.pm                 Locally Modified          387 
+
+Directory libperl/Asim/lib/Asim/GenCFG
+ Auto.pm                   Locally Modified          387 
+
+Directory libperl/Asim/lib/Asim/Package
+ Git.pm                    Locally Modified          387 
+
+Directory libperl/Asim/lib/Asim
+ GenCFG.pm                 Locally Modified          387 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Svn.pm                    Locally Modified          387 
+ BitKeeper.pm              Locally Modified          387 
+ Copy.pm                   Locally Modified          387 
+ Cvs.pm                    Locally Modified          387 
+ Git.pm                    Locally Modified          387 
+
+Directory libperl/Asim/lib/Asim
+ Workspace.pm              Locally Modified          387 
+
+Directory libperl/Asim/lib
+ Asim.pm.in                Locally Modified          387 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          387 
+
+Directory libperl/Benchmarks
+ MANIFEST                  Locally Modified          387 
+
+Directory tools
+ scripts/                  Locally Modified          387 
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          387 
+ asim-pkg-config.in        Locally Removed           387 
+ Makefile.in               Locally Modified          387 
+ plot-shell                Locally Modified          387 
+ awbset                    Locally Modified          387 
+ regression.verifier       Locally Modified          387 
+ asim-shell                Locally Added               0 
+ asimstarter.in            Locally Modified          387 
+ regression.cleanup        Locally Modified          387 
+ awb-run                   Locally Added               - 
+ awb-batch                 Locally Added               - 
+ awb-pkg-config.in         Locally Added               - 
+ awb-benchmark             Locally Added               - 
+ Makefile.am               Locally Modified          387 
+ awb-shell                 Locally Modified          387 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          387 
+ Makefile.am               Locally Modified          387 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          387 
+ Makefile.am               Locally Modified          387 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          387 
+ Makefile.am               Locally Modified          387 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          387 
+ Makefile.am               Locally Modified          387 
+
+Directory .
+ configure.in              Locally Modified          387 
+ Makefile.am               Locally Modified          387 
+
+Directory etc
+ asimrc                    Locally Modified          387 
+
+A variety of improvements to documentation and to distinguish 
+awb from asim.
+
+Changed name of various asim-<name> programs to be called 
+awb-<name>.  Maintaining backwards compatibility via symbolic 
+links and having the programs look for rc options first in group 
+[awb-<name>] and then in [asim-<name>]. After all your workspaces 
+are updated to this version of the awb pacakge you should change 
+the asim- groups to be awb- in ~/.asim/asimrc.
+
+Added creation of man files from the perl documentation for
+a number of programs. In the process, fixed a number of perlpod 
+syntax errors.
+
+Converted perl builds to type 'vendor', which puts files (in
+particular man page) where we want them, and doesn't generate 
+the superflous podlocal files, which now don't need to be deleted 
+during install. In the process, fixed a bunch of perl MANIFEST 
+files.
+
+Bug fix on locating <INSTALLDIR>/etc/asim/asimrc, when awb is 
+installed using the .deb file.
+

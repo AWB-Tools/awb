@@ -46,7 +46,7 @@ $^W = 1;
 # Global information
 $SUMMARY_FILE = "run.summary";
 $ASIM_RUN_SF_VERSION = "1.0";
-$SUMMARY_FILE_GENERATOR = "asim-run";
+$SUMMARY_FILE_GENERATOR = "awb-run";
 $SUMMARY_FILE_HEADER = "# $SUMMARY_FILE_GENERATOR $ASIM_RUN_SF_VERSION";
 $BM_ENTRY = ".. ";
 $BAD_BM_ENTRY = "<UNKNOWN>";
@@ -436,7 +436,7 @@ sub show_errorlog
     return;
   }
 
-  # Show host where job was run (parses expected output of asim-batch)
+  # Show host where job was run (parses expected output of awb-batch)
 
   $line = `grep 'rlogin to machine' $file | tail --lines=1`;
   chomp $line;
@@ -484,19 +484,7 @@ sub show_errorlog
 
 
 sub Usage {
-  print "Usage: regression.verifier\n";
-  print "                 [--regdir=<root directory for regression results>]\n";
-  print "                 [--rundir=<regression.launcher time-stamped run directory>]\n";
-  print "                 [--[no]errorlog]\n";
-  print "                 [--[no]modelcheck]\n";
-  print "                 [--[no]quiet]\n";
-  print "\n";
-  print "                 [--help]\n";
-  print "                 [--options]\n";
-  print "\n";
-  print "              Default regdir is: <workspace>/run/regtest\n";
-  print "              Default rundir is most recent directory in regdir\n";
-  print "\n";
+  system "perldoc $0";
 
   Options()
 }
@@ -504,3 +492,117 @@ sub Usage {
 sub Options {
   $Asim::default_workspace->dump_options();
 }
+
+
+
+__END__
+
+=head1 NAME
+
+Regression.verifier - Program to check the results from regression.launcher
+
+=head1 SYNOPSIS
+
+regression.verifier
+          [--regdir=<directory for regression results>]
+          [--rundir=<regression.launcher time-stamped run directory>]
+
+          [--[no]errorlog]
+          [--[no]modelcheck]
+          [--[no]quiet]
+
+          [--help]
+          [--options]
+
+=head1 DESCRIPTION
+
+This is a program that checks on the resuts of a set of regressions
+launched with regression.launcher.
+
+
+=head1 SWITCHES
+
+The following command line switches are currently supported:
+
+=over 4 
+
+=item --regdir=<directory for regression results>
+
+Default: <workspace>/run/regtest
+
+Directory name for regression results
+
+=item --rundir=<directory containing run>
+
+Default: recent directory in <regdir>
+
+Directory containing regression run.
+
+=item --[no]errorlog
+
+=item --[no]modelcheck
+
+=item --[no]quiet
+
+=item --help
+
+Show this help
+
+=item --options
+
+While the above switches have the highest priority
+for setting program options, this switch will show 
+the options that can be set in the [regresion.launcher]
+section of the following prioritized (from highest to
+lowest) list of files:
+
+    <workspace>/awb.config
+    ~/.asim/asimrc
+    <INSTALLDIR>/etc/asim/asimrc
+
+The program's internal defaults are the lowest priority.
+
+=back
+
+
+=head1 EXAMPLES
+
+    % regression.launcher
+      <wait>
+    % regression.verifier
+    % regression.cleanup
+
+=head1 ENVIRONMENT VARIABLES
+
+AWBLOCAL - this variable defines the root directory of your workspace
+and is needed for this program to function. It is normally set
+automatically by asimstarter. Setting it explicitly is discouraged.
+
+=head1 FILES
+
+<workspace>/awb.config          - workspace configuration file
+
+~/.asim/asimrc                  - user-specific configuration file
+
+<INSTALLDIR>/etc/asim/asimrc    - system-wide configuration file
+
+=head1 BUGS
+
+TBD
+
+=head1 AUTHORS
+
+Srilatha (Bobbie) Manne
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Compaq, Intel 2001-2010              *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=cut

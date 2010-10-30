@@ -72,4 +72,21 @@ apm_edit_images.pm: apm-edit.pro ${IMAGES}
 	sed -i 's/version=\"3\..\"/version="3.0"/' $<
 	puic -o $@ $<
 
+#
+# Convert perl documentation to man page and install
+#
+
+PERLRUN = perl
+MAN1EXT = 1
+MANPERM = 644
+MAN1DIR=$(mandir)/man1
+POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
+
+install-data-hook:
+	$(POD2MAN) apm-edit $(DESTDIR)$(MAN1DIR)/apm-edit.$(MAN1EXT)
+
+
 CLEANFILES = *.ui.pm apm_edit_images.pm
+
+

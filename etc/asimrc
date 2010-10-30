@@ -27,7 +27,7 @@ Workspace=
 TMP_DIR=
 
 #***********************************************************************
-# Regression launcher is layered on top of asim-run.  It uses asim-run 
+# Regression launcher is layered on top of awb-run.  It uses awb-run 
 # to submit a number of models & benchmarks to the batch system.  The 
 # input PACKAGES defines the packages to evaluate, and the input RUNTYPE
 # defines the type of run to perform.  For example, regression.launcher
@@ -70,7 +70,7 @@ RUNSTYLE=
 
 # 
 # Purpose: Defines the type of stats compress to perform.  This 
-#          overrides the default used within asim-run. 
+#          overrides the default used within awb-run. 
 # Type: String of type none|gzip|bzip2
 # 
 # Default: gzip
@@ -79,8 +79,8 @@ COMPRESS=
 
 # 
 # Purpose: Defines the queue slot to use for launching regressions. 
-#          This overrides the default used within asim-run.  If no 
-#          queue slot is specified, then the asim-run default queue
+#          This overrides the default used within awb-run.  If no 
+#          queue slot is specified, then the awb-run default queue
 #          slot is used.  
 # Type: String
 #
@@ -89,9 +89,9 @@ COMPRESS=
 QSLOT=
 
 # 
-# Purpose: Space separated list of run commands to pass onto asim-run.  
-#          This is used to override some of the defaults in asim-run 
-#          when running regression.  For example, to tell asim-run to 
+# Purpose: Space separated list of run commands to pass onto awb-run.  
+#          This is used to override some of the defaults in awb-run 
+#          when running regression.  For example, to tell awb-run to 
 #          NOT build the model, specify:
 #          EX: ASIMRUN_COMMANDS=-nobuild
 #          
@@ -104,16 +104,16 @@ QSLOT=
 ASIMRUN_COMMANDS=
 
 #***********************************************************************
-# asim-run is the script used for submitting a large number of ASIM
+# awb-run is the script used for submitting a large number of ASIM/AWB
 # experiments.  It uses the netbatch queue system to batch submissions.  
-# The following variables are used by asim-run to setup the default 
-# run configuration.  asim-run also has a built in scheduler to enable 
+# The following variables are used by awb-run to setup the default 
+# run configuration.  awb-run also has a built in scheduler to enable 
 # it to get around some of the shortcomings of netbatch.  This scheduler
 # can be easily disabled by leaving some of the variables blank.  
 # Documentation is provided below on how this is accomplished.  
 #***********************************************************************
 #
-[asim-run]
+[awb-run]
 #
 #***********************************************************************
 # Bounds and defaults for the nice level used when submitting ASIM jobs
@@ -181,7 +181,7 @@ LEGAL_QSLOTS_BUILD=
 #          WARNING: If you don't specify a default qslot, and the NBQSLOT
 #                   environment variable is not set, it is difficult to 
 #                   figure out which queue netbatch is using for job 
-#                   submission.  Therefore, the asim-run scheduler will
+#                   submission.  Therefore, the awb-run scheduler will
 #                   not restrict jobs.  
 #          
 # Type: String
@@ -253,8 +253,8 @@ BUILD_NETBATCH=
 #          If true, then the the model will be built using OPT=1, DEBUG=0
 #          and TRACE=1.  Note that the same model file might be used for
 #          multiple experiments (by changing some of the dynamic parameters). 
-#          If so, asim-run will only build the model once.  If the value 
-#          is false, then asim-run assumes that there is an executable 
+#          If so, awb-run will only build the model once.  If the value 
+#          is false, then awb-run assumes that there is an executable 
 #          already with that model name.  For example, if the model configuration
 #          file is called foo.apm, then the executable will be called foo, and
 #          will be located under the directory $AWBLOCAL/build/foo
@@ -290,7 +290,7 @@ EXTRA_NBQ_FLAGS=
 #          will be rerun, regardless of whether there are existing stats for the 
 #          benchmark or not.  If false, any benchmarks with existing stats files 
 #          will NOT be rerun.  In general, REPLACE should be 0.  This allows the user
-#          to run asim-run multiple times in the same results area so that asim-run
+#          to run awb-run multiple times in the same results area so that awb-run
 #          can fill in the missing stats files.  In our experience, about 5-10% of 
 #          all netbatch submitted jobs die, and this allows a clean way to ensure 
 #          that all jobs finish. 
@@ -302,10 +302,10 @@ EXTRA_NBQ_FLAGS=
 REPLACE=
 
 #***********************************************************************
-# asim-run has a built in scheduler to work around some issues with netbatch. 
+# awb-run has a built in scheduler to work around some issues with netbatch. 
 # Certain pools (RESTRICTED_POOLS) and certain queues (RESTRICTED_QSLOTS) 
 # are restricted, which means additional ASIM scheduling restrictions apply.  
-# The scheduler forces asim-run to go to sleep for a random sleep period and 
+# The scheduler forces awb-run to go to sleep for a random sleep period and 
 # try again afterwards if any of the following conditions are true: 
 # 
 # 1.) The number of running ASIM jobs (from all ASIM users) exceeds 
@@ -317,14 +317,14 @@ REPLACE=
 # The sleep period is randomized to be a value between MIN_SAMPLE_PERIOD and
 # MIN_SAMPLE_PERIOD + 1200 seconds.  
 #
-# If you don't want the asim-run scheduler to engage, then leave RESTRICTED_POOLS 
+# If you don't want the awb-run scheduler to engage, then leave RESTRICTED_POOLS 
 # and/or RESTRICTED_QSLOTS blank. Note that by default, the asim scheduler is
 # disabled. 
 # 
 #***********************************************************************
 
 #
-# Purpose: Defines the netbatch pools which the asim-run internal scheduler 
+# Purpose: Defines the netbatch pools which the awb-run internal scheduler 
 #          cares about.  Leave this item blank if you don't care to have any
 #          restricted pools.  This will automatically disable the ASIM 
 #          scheduler restrictions. 
@@ -338,7 +338,7 @@ RESTRICTED_POOLS=
 
 #
 # Purpose: Defines the netbatch queue slots that are restricted by the 
-#          asim-run internal scheduler.  Leave this blank if you don't 
+#          awb-run internal scheduler.  Leave this blank if you don't 
 #          care to have any restricted queue slots.  This will automatically
 #          disable the ASIM scheduler. 
 # Type: String of queue slots separated by spaces
@@ -351,7 +351,7 @@ RESTRICTED_QSLOTS=
 
 #
 # Purpose: Defines a list of users whose jobs WILL NOT be restricted by the 
-#          asim-run scheduler.  For example, the user (ASIM1) who runs nightly
+#          awb-run scheduler.  For example, the user (ASIM1) who runs nightly
 #          regression jobs is unrestricted in their use of the netbatch queue. 
 #          Leave this value blank if restrictions apply to all ASIM users. 
 # Type: String of user names separated by spaces
@@ -383,7 +383,7 @@ MAX_ASIM_JOBS=
 #          restrictions apply. 
 # Type: Integer value
 #
-# asim-run Default: 175
+# awb-run Default: 175
 # MAX_RUNNING_JOBS=175
 MAX_RUNNING_JOBS=
 
@@ -398,7 +398,7 @@ MAX_RUNNING_JOBS=
 MAX_JOBS_PER_PERIOD=
 
 #
-# Purpose: The minimum amount of a time the asim-run scheduler sleeps before trying again 
+# Purpose: The minimum amount of a time the awb-run scheduler sleeps before trying again 
 #          to submit jobs.  The actual amount of sleep time is randomized to be between
 #          the minimum and minimum + 1200 seconds.  
 # Type: Integer value
@@ -408,7 +408,7 @@ MAX_JOBS_PER_PERIOD=
 MIN_SAMPLE_PERIOD=
 
 #***********************************************************************
-# asim-run arranges for netbatch to run a script on each machine before
+# awb-run arranges for netbatch to run a script on each machine before
 # submitting the actual simulation command, to make sure that enough
 # local disk space is available.  The minimum disk space to check for
 # can be controlled by a parameter here, and this check can also be disabled.
@@ -468,13 +468,13 @@ NETBATCH_MT_SLOTS_PER_CORE=4
 NETBATCH_MT_RESERVE_ALL_CORES=0
 
 #***********************************************************************#
-# asim-batch is invoked by asim-run to submit one asim job, i.e., run
-# one benchmark for one model file.  The number of times asim-batch is 
+# awb-batch is invoked by awb-run to submit one asim job, i.e., run
+# one benchmark for one model file.  The number of times awb-batch is 
 # called is equal to the the number of experiments/benchmarks combinations 
-# asim-run is given.  For example, if asim-run is given two experiments and 
-# 20 benchmarks, then asim-batch is invoked 20 times.  
+# awb-run is given.  For example, if awb-run is given two experiments and 
+# 20 benchmarks, then awb-batch is invoked 20 times.  
 #
-# asim-batch does 4 primary tasks:
+# awb-batch does 4 primary tasks:
 # 1.) sets up a clean, repeateable environment for running jobs so that 
 #     on a failure, the failures can be repeated. 
 # 2.) Keeps track of which jobs ran cleanly and which jobs failed in the
@@ -485,9 +485,9 @@ NETBATCH_MT_RESERVE_ALL_CORES=0
 #
 #***********************************************************************
 #
-[asim-batch]
+[awb-batch]
 #
-# Purpose: asim-run wipes out the user environment and sets up a default environment
+# Purpose: awb-run wipes out the user environment and sets up a default environment
 #          which is the same for all ASIM users.  The SAVED_ENV_VARS value is
 #          used to tell ASIM run which additional environment variables to save from
 #          the user's current environment so that ASIM will run correctly. 
@@ -500,8 +500,8 @@ SAVED_ENV_VARS=
 
 #
 # Purpose: Defines the type of compression to be used on the resulting stats
-#          files.  If asim-batch is called through asim-run, then the COMPRESS
-#          value provided to asim-run overrides the default given here.  
+#          files.  If awb-batch is called through awb-run, then the COMPRESS
+#          value provided to awb-run overrides the default given here.  
 # Type: String
 # Legal Values: none|no|gzip|gz|bzip2|bz2
 #
@@ -534,7 +534,7 @@ KEEP_STATS_FILE=
 
 #***********************************************************************#
 # fetch-trace is invoked by benchmark .cfg files or .cfx scripts used by
-# asim-run and awb when setting up benchmarks.  It fetches trace files into
+# awb-run and awb when setting up benchmarks.  It fetches trace files into
 # a local disk cache, and allows portability to remote sites that do not
 # have the main trace disk mounted locally.
 #
@@ -575,7 +575,7 @@ ASIM_MAX_EVICTS=
 
 #***********************************************************************
 # awb-shell is the command line shell for interacting with Architect's
-# Workbench objects (formerly known as asim-shell).
+# Workbench objects (formerly known as awb-shell).
 #  
 #***********************************************************************
 #

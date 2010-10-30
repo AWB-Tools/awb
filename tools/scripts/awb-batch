@@ -1,0 +1,567 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+##################################################################################
+# 
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+##################################################################################
+
+# Author: Srilatha (Bobbie) Manne
+# Date: Mar, 2002
+# Purpose:
+#       A wrapper script called by net-batch to run a bunch of awb-shell commands
+#       This script executes one benchmark on one performance model, collects 
+#       the pertinent information about the results, and stores the results in the
+#       appropriate run directory.  
+# 
+#       ASSUMPTIONS:  Performance model is already built
+#                     Results directory (under $workspace/run/regtest) exists
+#       
+
+use File::Basename;
+use Getopt::Long;
+use Asim;
+
+Asim::init();
+
+use Asim::Util;
+
+#`touch ~/awb-batch.ran`;
+print "awb-batch called\n";
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
+#
+# Hard coded defaults.  In other words, defautls that cannot be changed using
+# the asimrc file. 
+#
+$execscript="./run";
+
+# Some global information
+
+$optlist = "awb-batch,asim-batch";
+
+$tmpdir = Asim::Util::get_asimrc_val("Global", "TMP_DIR", "/tmp");
+$ASIM_LOG = Asim::Util::get_asimrc_val($optlist, "ASIM_LOG", undef);
+$env = Asim::Util::get_asimrc_val($optlist, "SAVED_ENV_VARS", "LD_LIBRARY_PATH");
+$compress = Asim::Util::get_asimrc_val($optlist, "COMPRESS", "gzip");
+$keeprunoutput = Asim::Util::get_asimrc_val($optlist, "KEEP_RUN_OUTPUT", 0);
+$keepstatsfile = Asim::Util::get_asimrc_val($optlist, "KEEP_STATS_FILE", 0);
+$rsynchost = "";
+$rsyncresdir = "";
+
+
+#
+# No defaults for the following....
+#
+$benchmark="";
+$resdir="";
+$exp="";
+
+#
+# This is the "nice" level that the actual ASIM command runs with.
+# Note that the syntax that needs to be used is one that is legal for
+# the shell /bin/sh.  Syntax legal in other shells won't work. 
+#
+$nicelevel="";
+
+# Some help options
+$help=0;
+$options=0;
+
+# Some status flags used to determine what I need to clean up. 
+$runflset=0;
+$rmrundir=0;
+
+$status = GetOptions(   "benchmark=s"   => \$benchmark,
+                        "resdir=s"      => \$resdir,
+                        "env=s"         => \$env,
+                        "exp=s"         => \$exp,
+                        "compress=s"    => \$compress,
+                        "execscript=s"  => \$execscript,
+                        "nicelevel=i"   => \$nicelevel,
+                        "rsynchost=s"   => \$rsynchost,
+                        "rsyncresdir=s" => \$rsyncresdir,
+                        "tmpdir=s"      => \$tmpdir,
+                        "help"          => \$help,
+                        "options"       => \$options,
+                    );
+
+
+if ($help) {
+  Usage();
+  exit 0;
+}
+
+if ($options) {
+  Options();
+  exit 0;
+}
+
+if (! $status || ! $benchmark || ! $resdir || ! $exp) {
+  Usage();
+  exit 1;
+}
+
+if ($rsynchost eq "") {
+  if ($rsyncresdir eq "") {
+    # local run
+    $rsyncrestarg = "";
+  }
+  else {
+    # remote run
+    $remote = 1;
+    $rsyncrestarg = $rsyncresdir;
+    $execscript="./remote_run";
+  }
+}
+else {
+  if ($rsyncresdir eq "") {
+    # remote run, but use same directory structure
+    $remote = 1;
+    $rsyncresdir = $resdir;
+    $rsyncrestarg = "$rsynchost:$rsyncresdir";
+    $execscript="./remote_run";
+  }
+  else {
+    # remote run
+    $remote = 1;
+    $rsyncrestarg = "$rsynchost:$rsyncresdir";
+    $execscript="./remote_run";
+  }
+}
+
+
+# 
+# Come up with the execution command
+#
+my $exec_command;
+
+if (!($nicelevel eq "")) {
+  print STDERR "using nice\n";
+  $exec_command = "nice -n $nicelevel $execscript";
+}
+else {
+  $exec_command = "$execscript";
+}
+
+# 
+# Set up some clean way to deal with kills.
+#
+$SIG{INT} = \&kill_cleanup;
+$SIG{KILL} = \&kill_cleanup;
+
+$params=join " ", @ARGV;
+#($bm = basename($benchmark)) =~ s/\.[a-z][a-z]*\s*$//s;
+#($bm = basename($benchmark)) =~ s/\.[a-z][a-z]*//s;
+($bm = basename($benchmark)) =~ s/\.cfg//s;
+
+
+# Check that results directory exists
+( -d $resdir ) || die "Directory $resdir does not exist.";
+
+# Indicate that we're currently running the given benchmark
+if ( -f "$resdir/$bm.RUNNING" ) {
+  &runerror("Benchmark is already being run as indicated by $resdir/$bm.RUNNING file.\n");
+}
+
+my $res2run_postfix = "/RUN/" . $bm;
+$rundir = $resdir.$res2run_postfix;
+$rsyncruntarg = $rsyncrestarg.$res2run_postfix; 
+if ( ! -d $rundir ) {
+  &runerror("Directory $rundir does not exist.\n");
+}    
+
+system ("rm $resdir/$bm.ERROR > /dev/null 2>&1");
+
+if ($rsyncrestarg eq "") {
+  # nothing to rsync
+  system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+}
+else
+{
+  # make sure the SUBMITTED file is here, then move it to a RUNNING,
+  # then rsync it back to the submitter
+  my $subtimeout = 8;
+  my $done = 1;
+  do {
+    if (-e "$resdir/$bm.SUBMITTED") {
+      system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+      system ("rsync $resdir/$bm.RUNNING $rsyncrestarg/");
+      if ($rsynchost eq "") {
+        system ("rm $rsyncresdir/$bm.SUBMITTED ");
+      }
+      else {
+        system ("ssh $rsynchost rm $rsyncresdir/$bm.SUBMITTED ");
+      }
+      $done = 1;
+    }
+    elsif ($subtimeout == 0) {
+      # error!
+      print "never got $bm.SUBMITTED\n";
+    }
+    else {
+      # sleep for 3 seconds and try again
+      print "sleep... waiting for $bm.SUBMITTED\n";
+      $subtimeout--;
+      sleep (3);
+    }
+  } while (!($done));
+}
+
+$runflset = 1;
+
+if (! chdir $rundir) {
+  &runerror("Unable to cd into $rundir.\n");
+}
+
+# Run benchmark
+my $start_time = `date +%s`;
+my $timeval = $start_time;
+chomp($timeval);
+my $runuser = $ENV{"USER"} ? $ENV{"USER"} : "asim1";
+chomp($runuser);
+my $runlogfl = "$tmpdir/log\.$runuser\.$timeval\.$$";
+system ("touch $runlogfl; chmod 777 $runlogfl");
+
+# Determine list of environment variables to use, and clear out the
+# rest of the environment and setup default values.
+my @env = split (/\s*[ ,]\s*/, $env);
+&setup_def_env();
+
+# Dump run info
+&setup_rerun_script("info");
+
+#if (system ("env -i $envstr $execscript $params > $runlogfl 2>&1")) {
+if (system ("$exec_command $params >> $runlogfl 2>&1")) {
+  # We have an error in the run somewhere. 
+  &setup_rerun_script("error.$$");
+  open (ERROR_FL, ">$resdir/$bm.ERROR") || die "Unable to create error file $resdir/$bm.ERROR.\n";
+  my $hostname = `hostname`;
+  chomp $hostname;
+  &print_error_info($hostname);
+  close ERROR_FL;
+  system ("cat $runlogfl >> $resdir/$bm.ERROR");
+  if ($remote) {
+    # rsync ERROR file
+    system ("rsync $resdir/$bm.ERROR $rsyncrestarg/");
+    if ($rsynchost eq "") {
+      system ("rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+    else {
+      system ("ssh $rsynchost rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+  }
+  
+}
+else {
+
+  if ($keeprunoutput) {
+    system ("cp $runlogfl $rundir/$bm.out");
+  }
+  # Copy over the stats file and clean up the status of other files in directory. 
+
+#  do not remove the RUN directory; the cleanup script removes it.
+#  $rmrundir=1;
+    
+#  if (system ("cp $rundir/$bm.stats $resdir/.")) {
+  if (system ("cp $rundir/*.stats $resdir/.")) {
+    &runerror("Unable to copy $rundir/$bm.stats file in $resdir.");
+  }
+  else {
+      # remove the copied over stats files
+      system ("rm $rundir/*.stats > /dev/null 2>&1") unless ($keepstatsfile == 1);
+  }
+  if ($compress =~ m/^(none|no)$/) {
+    # nothing to be done
+  } elsif ($compress =~ m/^(bzip2|bz2)$/) {
+    if (system ("bzip2 --force -9 $resdir/$bm.stats")) {
+      &runerror("Unable to bzip2 $resdir/$bm.stats.");
+    }
+  } else {
+    # default to gzip
+    if (system ("gzip --force --best $resdir/$bm.stats")) {
+      &runerror("Unable to gzip $resdir/$bm.stats.");
+    }
+  }
+  system ("cat $runlogfl");
+}
+
+&rsync_results();
+
+my $end_time = `date +%s`;
+
+# Note the amount of time spent running program. 
+&log_run($start_time, $end_time, $exp, $bm); 
+  
+&Cleanup();
+
+
+#############################################################################
+#SUBROUTINES
+#############################################################################
+
+sub runerror {
+  local($errstr) = @_;
+  open (ERRORFL, ">$resdir/$bm.ERROR") || die "Unable to open file $resdir/$bm.ERROR.";
+  print ERRORFL $errstr;
+  close ERRORFL;
+  
+  #
+  # Cat any information we have from the log file. 
+  #
+  system ("cat $runlogfl >> $resdir/$bm.ERROR");
+
+  if ($remote) {
+    # rsync ERROR file
+    system ("rsync $resdir/$bm.ERROR $rsyncrestarg/");
+    if ($rsynchost eq "") {
+      system ("rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+    else {
+      system ("ssh $rsynchost rm $rsyncresdir/$bm.SUBMITTED ");
+    }
+  }
+
+  &Cleanup();
+}
+
+sub Cleanup {
+  # Unlock directory.
+  if ($runflset == 1) {
+    system ("rm $resdir/$bm.RUNNING > /dev/null 2>&1");
+    if (!($rsyncrestarg eq "")) {
+      if ($rsynchost eq "") {
+        system ("rm $rsyncresdir/$bm.RUNNING ");
+      }
+      else {
+        system ("ssh $rsynchost rm $rsyncresdir/$bm.RUNNING ");
+      }
+    }
+
+    system ("rm $runlogfl > /dev/null 2>&1");
+  }
+  if ($rmrundir == 1) {
+    system ("rm -rf $rundir > /dev/null 2>&1");
+  }
+
+  exit;
+}
+
+sub log_run {
+  my $start = shift;
+  my $end = shift;
+  my $exp = shift;
+  my $bm = shift;
+
+  my $today = `date "+%4Y %2m %2d %2H %2M %2S"`;
+  chomp $today;
+  my $runtime = $end - $start;
+  if (defined $ASIM_LOG) {
+    system ("echo \"$today $exp $bm $runtime\" >> $ASIM_LOG")
+  }
+}
+
+sub kill_cleanup {
+  # Put command into error file. 
+  $rmrundir = 1;
+  &runerror ("Interrupt or kill command received by process.  Exiting run.\n");
+}
+
+sub get_env_names {
+  my $env = shift;
+  my @env = split (/\s*[ ,]\s*/, $env);
+  my $envstr = "";
+    
+  foreach my $var (@env) {
+    if ( ! defined $ENV{$var} ) {
+      $rmrundir = 1;
+      &runerror ("Unable to find environment variable $var. Exiting....\n");
+    }
+    else {
+      $envstr = $envstr . "$var=$ENV{$var} ";
+    }
+  }
+  
+  return $envstr;
+}
+    
+sub setup_def_env {
+  print( "Nuking environment\n" );
+
+  #
+  # Delete all but specified keys
+  #
+  foreach $key (keys %ENV) {
+    # Save certain environment variables
+    if ( !(grep /^$key$/, @env) ) {
+      delete $ENV{$key};
+    }
+    else 
+    {
+      print "Retaining: $key=$ENV{$key}\n";
+    }
+  }
+
+  #
+  # Find missing keys
+  #
+  foreach $key (@env) {
+    if (! defined($ENV{$key})) {
+      print "Not defined: $key\n";
+    }
+  }
+
+  #
+  # Set some environment variables to default or existing shell value, 
+  # depending on if the shell value is avialable. 
+  #
+  PutEnv("PATH",     ".:/usr/local/bin:/usr/bin:/bin");
+  PutEnv("USER",     "asim1");
+  PutEnv("SHELL",    "/bin/sh");
+  PutEnv("HOME",     "/tmp");
+  PutEnv("LOGDIR",   "/tmp");
+  PutEnv("TTY",      "/dev/tty");
+  PutEnv("TERM",     "dumb");
+  PutEnv("HOSTNAME", "dummyhost");
+  PutEnv("MACHTYPE", "i386-redhat-linux-gnu");
+  PutEnv("SHLVL",    2);
+  PutEnv("OSTYPE",   "linux-gnu");
+}
+
+
+# 
+# Subroutine changes some environment values. 
+# If the value is already defined, then use the define value.  
+# Otherwise, use the value provided. 
+#
+sub PutEnv {
+  local($name, $value) = @_;
+  $ENV{$name} = $ENV{$name} ? $ENV{$name} : $value;
+} 
+
+#
+# Subroutine sets up a run error script so that we can duplicate the results of an error. 
+#
+sub setup_rerun_script {
+    my $tag = shift;
+
+    my $run_script = $rundir . "/run\.$tag";
+    open(SCRIPT, ">$run_script") ||
+      die "ERROR: Unable to open file $run_script.\n\n";
+    print( "Dumping environment\n" );
+    print SCRIPT "#!/bin/sh\n";
+    foreach $key (keys %ENV) {
+        print SCRIPT "$key=\"$ENV{$key}\"\n";
+        print SCRIPT "export $key\n";
+    } 
+    print SCRIPT "$execscript $params > $runlogfl 2>&1\n";
+    close SCRIPT;
+    system ("chmod 777 $run_script");
+}
+
+#
+# Prints info about how to repeat error. 
+#
+sub print_error_info {
+  my $host = shift;
+  print ERROR_FL "***********************************************\n";
+  print ERROR_FL "* To repeat error, do the following. \n";
+  print ERROR_FL "* Step 0: rlogin to machine $host\n";
+  print ERROR_FL "* Step 1: cd $rundir\n";
+  print ERROR_FL "* Step 2: type 'env -i run.error.$$\n";
+  print ERROR_FL "* Step 3: Examine log file located in $runlogfl\n\n";
+  print ERROR_FL "***********************************************\n\n";
+}
+
+
+sub rsync_results
+{
+    if ($remote) {
+
+        # user specified that we rsync the results.  let's do that.
+        my $rsync_log_file = "$rundir/awb-batch-rsync.log";
+        my @rsync_cmds;
+        
+        push (@rsync_cmds, "rsync --verbose $rundir/* $rsyncruntarg/");
+        push (@rsync_cmds, "rsync --verbose $resdir/$bm.* $rsyncrestarg/");
+        push (@rsync_cmds, "rsync --verbose $rsync_log_file $rsyncruntarg/");
+
+        # create an rsync log file for help in debugging rsync issues
+        system ("echo \"RSYNC LOG FILE\" > $rsync_log_file");
+        
+        foreach my $cmd (@rsync_cmds) {
+
+            my $exit_code = 1;
+
+            for (my $try_cnt = 0; (($exit_code != 0) && ($try_cnt < 10)); $try_cnt++) {
+                
+                # create an rsync log file for help in debugging rsync issues
+                system ("echo \"command=$cmd\n\" >> $rsync_log_file");      
+                
+                # actually rsync directory back (will ignore symlinks, which is good)
+                $exit_code = system ("$cmd >> $rsync_log_file");    
+                
+                print ("exit_code=$exit_code\n");
+
+                # create an rsync log file for help in debugging rsync issues
+                system ("echo \"exit_code=$exit_code\n\" >> $rsync_log_file");
+
+                # sleep before retrying
+                if ($exit_code != 0) {
+                    sleep(10);
+                }
+            }
+        }
+    }
+}
+
+
+sub Usage {
+  my $prog = basename($0);
+  print STDERR "\n";
+  print STDERR "Usage: $prog\n"; 
+  print STDERR "\n";
+  print STDERR "Switches are:\n";
+  print STDERR "    --exp=<Name of experiment configuration file> (REQUIRED)\n";
+  print STDERR "    --benchmark=<name of benchmark, e.g., gzip_00> (REQUIRED)\n";
+  print STDERR "    --resdir=<full path to results directory> (REQUIRED)\n";
+  print STDERR "\n";
+  print STDERR "    --env=<list of environment variables to use from your environment>\n";
+  print STDERR "    --compress=none|no|gzip|gz|bzip2|bz2 (default:gzip)\n";
+  print STDERR "    --rsynchost=<optional host for results to be rsyncd to>\n";
+  print STDERR "    --rsyncresdir=<optional dir for results to be rsyncd to>\n";
+  print STDERR "    --tmpdir=<for temporary awb-batch outputs>\n";
+  print STDERR "\n";
+  print STDERR "    --help\n";
+  print STDERR "    --options\n";
+  print STDERR "    -- <list of params to model>\n";
+  print STDERR "\n";
+
+  Options();
+}
+
+sub Options {
+  $Asim::default_workspace->dump_options();
+}
+
+

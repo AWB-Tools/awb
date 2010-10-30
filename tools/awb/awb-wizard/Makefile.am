@@ -1,4 +1,4 @@
-#
+
 # Copyright (C) 2002-2006 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
@@ -58,5 +58,20 @@ awb_wizard_images.pm: awb-wizard.pro ${IMAGES}
 
 %.ui.pm: %.ui
 	puic -o $@ $<
+
+#
+# Convert perl documentation to man page and install
+#
+
+PERLRUN = perl
+MAN1EXT = 1
+MANPERM = 644
+MAN1DIR=$(mandir)/man1
+POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
+
+install-data-hook:
+	$(POD2MAN) awb-wizard $(DESTDIR)$(MAN1DIR)/awb-wizard.$(MAN1EXT)
+
 
 CLEANFILES = *.ui.pm awb_wizard_images.pm

@@ -253,9 +253,10 @@ sub version     { return $_[0]->_accessor("Global","Version",$_[1]); }
 
 ################################################################
 
-=item $rcfile-E<gt>get($group, $item)
+=item $rcfile-E<gt>get($grouplist, $item)
 
-Return value from [$group] for $item. Check first in local
+Return value from [$group] where $group is a member of the
+comma separated list $grouplist for $item. Check first in local
 rcfile and then in global rcfile.
 
 =cut
@@ -264,30 +265,39 @@ rcfile and then in global rcfile.
 
 sub get {
   my $self = shift;
-  my $group = shift;
+  my $grouplist = shift;
   my $item = shift;
+
+  my @groups = split(",", $grouplist);
 
   my $newval;
 
-  $newval = $self->{inifile}->get($group,$item);
+  foreach my $group (@groups) {
+    $newval = $self->{inifile}->get($group,$item);
+    last if (defined($newval));
+  }
 
   if (!defined($newval)) {
     if (!defined($self->{inifile2})) {
-      print STDERR "Option [$group] $item = undef (not in user inifile/no global inifile)\n" if ($DEBUG);
+      print STDERR "Option [$grouplist] $item = undef (not in user inifile/no global inifile)\n" if ($DEBUG);
       return undef;
     }
 
-    $newval = $self->{inifile2}->get($group,$item);
+    foreach my $group (@groups) {
+      $newval = $self->{inifile2}->get($group,$item);
+      last if (defined($newval));
+    }
+
     if (! defined($newval)) {
-      print STDERR "Option [$group] $item = undef (neither user or global inifile)\n" if ($DEBUG);
+      print STDERR "Option [$grouplist] $item = undef (neither user or global inifile)\n" if ($DEBUG);
       return undef;
     }
 
-    print STDERR "Option [$group] $item = $newval (Global inifile)\n" if ($DEBUG);
+    print STDERR "Option [$grouplist] $item = $newval (Global inifile)\n" if ($DEBUG);
     return $newval;
   }
 
-  print STDERR "Option [$group] $item = $newval (User inifile)\n" if ($DEBUG);
+  print STDERR "Option [$grouplist] $item = $newval (User inifile)\n" if ($DEBUG);
   return $newval;
 }
 

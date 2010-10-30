@@ -34,15 +34,12 @@ install-indep:
 #
 # Do install and install of package, and
 #   - install application menu stuff
-#   - clean up perl junk
 #
 install-arch: install install-package
 	$(INSTALL) -D -m 644 share/awb.desktop       $(DESTDIR)$(datadir)/applications/awb.desktop
 	$(INSTALL) -D -m 644 share/awb.svg           $(DESTDIR)$(datadir)/icons/awb.svg
 	$(INSTALL) -D -m 644 share/apm-edit.desktop  $(DESTDIR)$(datadir)/applications/apm-edit.desktop
 	$(INSTALL) -D -m 644 share/apm-edit.svg      $(DESTDIR)$(datadir)/icons/apm-edit.svg
-	rm  $(DESTDIR)$(libdir)/perl/*/perllocal.pod
-	rm  -rf $(DESTDIR)$(libdir)/perl/*/auto/*
 
 
 #

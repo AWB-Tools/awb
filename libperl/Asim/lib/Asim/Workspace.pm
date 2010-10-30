@@ -992,11 +992,21 @@ sub file2package {
 
 ################################################################
 
-=item $workspace-E<gt>get_option($group, $item)
+=item $workspace-E<gt>get_option($grouplist, $item)
 
-Return value from [$group] for $item in awb.config file as
-a program option. Remember the set of options requested, so
-they can be returned with list_options()
+Return value from [$group] where $group is a member of $grouplist
+for $item in one of several places. In priority order (from highest 
+to lowest):
+
+     <workspace>/awb.config
+     $(HOME)/.asim/asimrc
+     <INSTALLDIR>/etc/asim/asimrc
+
+Note that $grouplist is a comma (,) separated list of groups
+to look in sequentially.
+
+Remember the set of options requested, so they can be returned with
+list_options()
 
 =cut
 
@@ -1004,11 +1014,18 @@ they can be returned with list_options()
 
 sub get_option {
   my $self = shift;
-  my $group = shift;
+  my $grouplist = shift;
   my $item = shift;
   my $def = shift;
 
-  my $val = $self->get($group, $item);
+  my @groups = split(",",$grouplist);
+
+  my $val;
+
+  foreach my $group (@groups) {
+    $val = $self->get($group, $item);
+    last if (defined($val));
+  }
 
   if (defined($val)) {
     # Strip leading and trailing spaces and double quotes from around string
@@ -1018,9 +1035,9 @@ sub get_option {
     # Is this value not just an empty string
     
     if ($val ne "") {
-      print STDERR "Option [$group] $item = \'$val\' (in awb.config)\n" if $DEBUG_OPTIONS;
+      print STDERR "Option [$grouplist] $item = \'$val\' (in awb.config)\n" if $DEBUG_OPTIONS;
 
-      $self->{options}->{$group}->{$item} = $val;
+      $self->{options}->{$groups[0]}->{$item} = $val;
       return $val;
     }  
   }
@@ -1031,19 +1048,19 @@ sub get_option {
   if (!(defined($Asim::rcfile)))
   {
       if (! defined($def)) {
-        print STDERR "Option [$group] $item = undef (no rcfile/no default)\n" if $DEBUG_OPTIONS;
+        print STDERR "Option [$grouplist] $item = undef (no rcfile/no default)\n" if $DEBUG_OPTIONS;
 
-	$self->{options}->{$group}->{$item} = "undef";
+	$self->{options}->{$groups[0]}->{$item} = "undef";
         return undef;
       }
 
-      print STDERR "Option [$group] $item = \'$def\' (no rcfile/default)\n" if $DEBUG_OPTIONS;
+      print STDERR "Option [$grouplist] $item = \'$def\' (no rcfile/default)\n" if $DEBUG_OPTIONS;
 
-      $self->{options}->{$group}->{$item} = $def;
+      $self->{options}->{$groups[0]}->{$item} = $def;
       return $def;
   }
 
-  $val = $Asim::rcfile->get($group, $item);
+  $val = $Asim::rcfile->get($grouplist, $item);
   
   if (defined($val)) {
     # Strip leading and trailing spaces and double quotes from around string
@@ -1054,9 +1071,9 @@ sub get_option {
     # Is this value just an empty string
 
     if ($val ne "") {
-      print STDERR "Option [$group] $item = \'$val\' (user or global rcfile)\n" if $DEBUG_OPTIONS;
+      print STDERR "Option [$grouplist] $item = \'$val\' (user or global rcfile)\n" if $DEBUG_OPTIONS;
 
-      $self->{options}->{$group}->{$item} = $val;
+      $self->{options}->{$groups[0]}->{$item} = $val;
       return $val;
     }
   }
@@ -1064,15 +1081,15 @@ sub get_option {
   # It wasn't in any files - so return default value, if any.
   
   if (! defined($def)) {
-    print STDERR "Option [$group] $item = undef (no default)\n" if $DEBUG_OPTIONS;
+    print STDERR "Option [$grouplist] $item = undef (no default)\n" if $DEBUG_OPTIONS;
 
-    $self->{options}->{$group}->{$item} = "undef";
+    $self->{options}->{$groups[0]}->{$item} = "undef";
     return undef;
   }
 
-  print STDERR "Option [$group] $item = \'$def\' (default)\n" if $DEBUG_OPTIONS;
+  print STDERR "Option [$grouplist] $item = \'$def\' (default)\n" if $DEBUG_OPTIONS;
 
-  $self->{options}->{$group}->{$item} = $def;
+  $self->{options}->{$groups[0]}->{$item} = $def;
   return $def;
 }
 

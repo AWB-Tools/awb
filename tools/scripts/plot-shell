@@ -50,7 +50,7 @@ my $batch = 0;
 my $batchfile = "";
 
 # Determines whether the user is pointing to a batch run stats location 
-# (generated using asim-run and derivatives) or to a local run stats 
+# (generated using awb-run and derivatives) or to a local run stats 
 # Batch run stats are located in $basedir/$experiment/$benchmark.stats while
 # local run stats are located in $basedir/$experiment/bm/$benchmark/$benchmark.stats
 my $localrun = 0;
@@ -253,39 +253,14 @@ Get this help information.
     % plot-shell help quickstart
 
     % plot-shell
-#    asim> set model pm/Arana/arana_aint_dev.apm
-#    asim> clean model
-#    asim> configure model
-#    asim> build model
-#    asim> run model bm/Micro/maxipc.cfg
-#    asim> quit
-#
-#
-#    % asim-shell --package=arana commit package
-#
-#
-#    % asim-shell help
-#
-#    % asim-shell help code
 
 
 =head1 BUGS
 
-The asim perl libraries must be in your perl path or the 'use AsimShell'
+The asim/awb perl libraries must be in your perl path or the 'use AsimShell'
 statement won\'t work. The easiest way to make this true is to invoke
-asim-shell through asimstarter....you can also set the environment
+plot-shell through asimstarter....you can also set the environment
 variable PERL5LIB.
-
-Maybe the command line format should allow one to specify commands
-with a '-e' switch and a bare word is a file to read commands from.
-
-Maybe asim-shell should also parse an environment variable and/or
-.rc file for switches.
-
-Asim-shell depends on the 'etc' directory being at $AWBSYSTEM/etc, 
-while ./configure could have put it somewhere else. We need to have
-a way of communicating where all the pieces of asim are not just
-the root.
 
 =head1 AUTHORS
 

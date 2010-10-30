@@ -16678,7 +16678,7 @@ ac_config_files="$ac_config_files tools/scripts/Makefile"
 
 ac_config_files="$ac_config_files tools/scripts/asimstarter"
 
-ac_config_files="$ac_config_files tools/scripts/asim-pkg-config"
+ac_config_files="$ac_config_files tools/scripts/awb-pkg-config"
 
 
 # tools/awb
@@ -17797,7 +17797,7 @@ do
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/scripts/Makefile") CONFIG_FILES="$CONFIG_FILES tools/scripts/Makefile" ;;
     "tools/scripts/asimstarter") CONFIG_FILES="$CONFIG_FILES tools/scripts/asimstarter" ;;
-    "tools/scripts/asim-pkg-config") CONFIG_FILES="$CONFIG_FILES tools/scripts/asim-pkg-config" ;;
+    "tools/scripts/awb-pkg-config") CONFIG_FILES="$CONFIG_FILES tools/scripts/awb-pkg-config" ;;
     "tools/awb/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/Makefile" ;;
     "tools/awb/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/amc/Makefile" ;;
     "tools/awb/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb-resolver/Makefile" ;;
@@ -19286,13 +19286,13 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
-    "libperl/Asim/Makefile":C) cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
-    "libperl/AsimShell/Makefile":C) cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
-    "libperl/Benchmarks/Makefile":C) cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
-    "libperl/PinPoints/Makefile":C) cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
-    "libperl/PlotShell/Makefile":C) cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix; cd ../.. ;;
+    "libperl/Asim/Makefile":C) cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix INSTALLDIRS=vendor; cd ../.. ;;
+    "libperl/AsimShell/Makefile":C) cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix INSTALLDIRS=vendor; cd ../.. ;;
+    "libperl/Benchmarks/Makefile":C) cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../.. ;;
+    "libperl/PinPoints/Makefile":C) cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../.. ;;
+    "libperl/PlotShell/Makefile":C) cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=vendor; cd ../.. ;;
     "tools/scripts/asimstarter":F) chmod +x tools/scripts/asimstarter ;;
-    "tools/scripts/asim-pkg-config":F) chmod +x tools/scripts/asim-pkg-config ;;
+    "tools/scripts/awb-pkg-config":F) chmod +x tools/scripts/awb-pkg-config ;;
 
   esac
 done # for ac_tag

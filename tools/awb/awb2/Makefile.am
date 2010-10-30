@@ -39,10 +39,23 @@ awb_runlog.ui.pm: awb_runlog.ui awb_runlog.ui.h
 %.ui.pm: %.ui
 	puic -o $@ $<
 
-CLEANFILES = *.ui.pm
+#
+# Convert perl documentation to man page and install
+#
 
+PERLRUN = perl
+MAN1EXT = 1
+MANPERM = 644
+MAN1DIR=$(mandir)/man1
+POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
 
 # put in link between old name (awb) and new name (awb2)
 install-data-hook:
-	(cd $(tooldir); rm -f awb; ln -s awb2 awb)
+	(cd $(DESTDIR)$(tooldir); rm -f awb; ln -s awb2 awb)
+	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb2.$(MAN1EXT)
+	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb.$(MAN1EXT)
+
+
+CLEANFILES = *.ui.pm
 

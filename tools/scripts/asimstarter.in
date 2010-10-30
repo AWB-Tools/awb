@@ -157,9 +157,9 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "awb"                 => "tools/awb/awb2/awb2",
   "awb2"                => "tools/awb/awb2/awb2",
   "awb-shell"           => "tools/scripts/awb-shell",
-  "awb-run"             => "tools/scripts/asim-run",
-  "awb-batch"           => "tools/scripts/asim-batch",
-  "awb-benchmark"       => "tools/scripts/asim-benchmark",
+  "awb-run"             => "tools/scripts/awb-run",
+  "awb-batch"           => "tools/scripts/awb-batch",
+  "awb-benchmark"       => "tools/scripts/awb-benchmark",
   "amc"                 => "tools/awb/amc/amc",
 #
 # Model/Module commands
@@ -207,7 +207,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
 # Miscelaneous commands
 #
-  "awb-pkg-config"      => "tools/scripts/asim-pkg-config",
+  "awb-pkg-config"      => "tools/scripts/awb-pkg-config",
   "model-coverage"      => "tools/scripts/model-coverage",
   "test-xpath-function" => "tools/scripts/test-xpath-function",
   "install-rcfile"      => "scripts/install-rcfile",
@@ -221,11 +221,11 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 # old names for AWB tools
 #
   "asim-shell"          => "tools/scripts/awb-shell",
-  "asim-benchmark"      => "tools/scripts/asim-benchmark",
-  "asim-run"            => "tools/scripts/asim-run",
-  "asim-batch"          => "tools/scripts/asim-batch",
+  "asim-benchmark"      => "tools/scripts/awb-benchmark",
+  "asim-run"            => "tools/scripts/awb-run",
+  "asim-batch"          => "tools/scripts/awb-batch",
+  "asim-pkg-config"     => "tools/scripts/awb-pkg-config",
   "asim-compare-stats"  => "tools/scripts/asim-compare-stats",
-  "asim-pkg-config"     => "tools/scripts/asim-pkg-config",
 #
 # Obsoleted tools - 
 #
@@ -559,6 +559,8 @@ Get this help information.
 
 =head1 FILES/ENVIRONMENT
 
+=over
+
 =item $AWBLOCAL
 
 root of local asim files (set to a default value if undefined)
@@ -566,6 +568,8 @@ root of local asim files (set to a default value if undefined)
 =item $LIB5PERL
 
 set to .../tools/libperl in packages in AWB search path
+
+=back
 
 =head1 BUGS
 

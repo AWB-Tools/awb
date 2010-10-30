@@ -440,9 +440,8 @@ sub shell_error {
   return 1;
 }  
 
-
-
 =back
+
 =head1 More Information
 
 Additional information on the commands can be found in Help.pm.

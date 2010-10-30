@@ -511,6 +511,8 @@ sub get_current_branch {
   return undef;
 }
 
+=back
+
 =head1 AUTHORS
 
 Mohit Gambhir based on Svn.pm

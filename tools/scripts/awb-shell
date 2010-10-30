@@ -366,8 +366,8 @@ front of the command is not optional.
 =head1 ENVIRONMENT VARIABLES
 
 AWBLOCAL - this variable defines the root directory of your workspace
-and is needed for awb-shell to function. It is normally set
-automatically by asimstarter.Setting it explicitly is discouraged.
+and is needed for this program to function. It is normally set
+automatically by asimstarter. Setting it explicitly is discouraged.
 
 ASIMSHELLOPT - contains additional command line switches.
 

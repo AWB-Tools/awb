@@ -417,8 +417,8 @@ sub shell_error {
 }  
 
 
-
 =back
+
 =head1 More Information
 
 Additional information on the commands can be found in Help.pm.

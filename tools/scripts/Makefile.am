@@ -18,16 +18,37 @@
 #
 
 # tool programs for libexec
-tool_SCRIPTS = awb-shell plot-shell sum-simpoints sum-unweighted summarize-stats model-coverage
+tool_SCRIPTS = awb-batch awb-benchmark awb-run awb-shell plot-shell regression.launcher regression.verifier regression.cleanup sum-simpoints sum-unweighted summarize-stats model-coverage
+
+# pod2man_scripts
+pod2man_list = $(tool_SCRIPTS) asimstarter
 
 # install asimstarter in bindir
 nodist_bin_SCRIPTS = asimstarter
 
 # asimstarter needs post-install processing
 # create soft links to old tool names
-install-data-hook:
+# create man files
+
+PERLRUN = perl
+MAN1EXT = 1
+MANPERM = 644
+MAN1DIR=$(mandir)/man1
+POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
+
+
+install-data-hook: install-man
 	@(cd $(DESTDIR)$(bindir); ./asimstarter -install)
-	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-shell asim-shell)
+	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-batch     asim-batch)
+	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-benchmark asim-benchmark)
+	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-run       asim-run)
+	@(cd $(DESTDIR)$(tooldir); $(LN_S) -f awb-shell     asim-shell)
+
+install-man:
+	for i in $(pod2man_list); do \
+	    $(POD2MAN) $$i $(DESTDIR)$(MAN1DIR)/$$i.$(MAN1EXT); \
+	done
 
 # cores should get cleaned
 MOSTLYCLEANFILES = core *.core

@@ -136,9 +136,9 @@ Run for the specified number of cycles, emit statistics and exit.
 
 An array of commands for the controller.
 
-=back 4
+=back
 
-=back 4
+=back
 
 =cut
 
@@ -249,7 +249,7 @@ Emit a CFG file.
 
 The full path to a workload.
 
-=back 4
+=back
 
 =cut
 
@@ -316,7 +316,7 @@ The root of the path to search.
 
 Print the genflags field if nonzero.
 
-=back 4
+=back
 
 =cut
 
@@ -353,7 +353,7 @@ List level immediately below path.
 
 The root of the path to search.
 
-=back 4
+=back
 
 =cut
 
@@ -412,7 +412,7 @@ List all CFG files below root and the genflags field for the CFG file.
 
 List level below root.
 
-=back 4
+=back
 
 =cut
 

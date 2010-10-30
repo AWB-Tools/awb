@@ -42,13 +42,15 @@ This is a subclass of Asim::Repository.  After creating an instance of
 Asim::Repository, you can call the set_type() method here to check whether the package type in asim.pack is SVN and set it to this subclass if so.  Set_type will return 
 1 if it is a SVN package.  If it returns 0, you should keep checking other repository types.
 
+=cut
+
 =head1 METHODS
 
 The following methods are supported:
 
-=over 4
-
 #################################################################################
+
+=over 4
 
 =item $svn = Asim::Repository::Svn::set_type( $package )
 

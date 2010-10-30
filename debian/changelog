@@ -1,4 +1,4 @@
-awb (0.6.0~svn20101027r387+lucid) lucid; urgency=low
+awb (0.6.0~svn20101029r388+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * Added leap support, added powerpc repository
@@ -6,5 +6,7 @@ awb (0.6.0~svn20101027r387+lucid) lucid; urgency=low
     at the directory containing a module
   * Some updates to debian instructions
   * Added application menu and MIME support
+  * Various man page fixes
+  * Convert several asim-* commands to awb-* commands
 
- -- Joel Emer <jsemer@intel.com>  Wed, 27 Oct 2010 08:53:29 -0400
+ -- Joel Emer <jsemer@intel.com>  Fri, 29 Oct 2010 19:37:50 -0400

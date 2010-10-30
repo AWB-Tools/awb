@@ -1,1 +1,4 @@
+Makefile.PL
+MANIFEST
+README
 lib/PinPoints.pm
