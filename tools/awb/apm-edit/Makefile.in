@@ -585,6 +585,7 @@ apm_edit_images.pm: apm-edit.pro ${IMAGES}
 	puic -o $@ $<
 
 install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
 	$(POD2MAN) apm-edit $(DESTDIR)$(MAN1DIR)/apm-edit.$(MAN1EXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

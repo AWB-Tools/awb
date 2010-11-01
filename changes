@@ -7618,3 +7618,24 @@ Provide option to configure on whether to do a perl site
 or vendor install.
 
 Properly create man1 directory as part of install.
+----------
+jsemer      Date: Mon Nov  1 16:43:15 EDT 2010  CSN: CSN-awb-390
+                  Mon Nov  1 20:43:15 UTC 2010
+
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          389 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          389 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          389 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          389 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          389 
+
+Run automake so that man directories are actually created.

@@ -568,6 +568,7 @@ awb_wizard_images.pm: awb-wizard.pro ${IMAGES}
 	puic -o $@ $<
 
 install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
 	$(POD2MAN) awb-wizard $(DESTDIR)$(MAN1DIR)/awb-wizard.$(MAN1EXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
