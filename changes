@@ -7639,3 +7639,13 @@ Directory tools/awb/awb2
  Makefile.in               Locally Modified          389 
 
 Run automake so that man directories are actually created.
+
+----------
+joel        Date: Tue Nov  2 08:48:57 EDT 2010  CSN: CSN-awb-391
+                  Tue Nov  2 12:48:57 UTC 2010
+
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          390 
+
+Added leap-debug and leap-examples packages.

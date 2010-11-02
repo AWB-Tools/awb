@@ -10,10 +10,47 @@ Target=leap
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP
 
-[hasim/HEAD]
+[leap/HEAD]
 Description=Leap environment
 Access=https://asim.csail.mit.edu/svn/leap
 Tag=HEAD
+
+###### Leap debug trunk
+
+[leap-debug]
+Description=Leap debugging environment
+Method=svn
+Access=https://asim.csail.mit.edu/svn/leap-debug
+Module=undefined
+Tag=HEAD
+Target=leap-debug
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-DEBUG
+
+[leap-debug/HEAD]
+Description=Leap debugging environment
+Access=https://asim.csail.mit.edu/svn/leap-debug
+Tag=HEAD
+
+
+###### Leap examples trunk
+
+[leap-examples]
+Description=Leap examples
+Method=svn
+Access=https://asim.csail.mit.edu/svn/leap-examples
+Module=undefined
+Tag=HEAD
+Target=leap-examples
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-EXAMPLES
+
+[leap-examples/HEAD]
+Description=Leap examples
+Access=https://asim.csail.mit.edu/svn/leap-examples
+Tag=HEAD
+
+
 
 ###### Leap platforms trunk
 
