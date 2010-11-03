@@ -2630,6 +2630,8 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
     <item text="&amp;Model" name="modelMenu">
         <action name="NewModel"/>
         <action name="EditModel"/>
+        <action name="OpenModel_Containing_Folder"/>
+        <action name="ShellModel_at_Containing_Folder"/>
         <separator/>
         <action name="CleanModel"/>
         <action name="ConfigureModel"/>
@@ -2817,6 +2819,9 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
             <property name="toolTip">
                 <string>Edit a model</string>
             </property>
+            <property name="accel">
+                <string>Ctrl+E</string>
+            </property>
         </action>
         <action>
             <property name="name">
@@ -2890,6 +2895,39 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
         </property>
         <property name="accel">
             <string>Ctrl+F</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>OpenModel_Containing_Folder</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Open containing folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Open containing folder</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>ShellModel_at_Containing_Folder</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Shell at containing folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Shell at containing folder</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>Action</cstring>
+        </property>
+        <property name="text">
+            <string>Unnamed</string>
+        </property>
+        <property name="menuText">
+            <string>Unnamed</string>
         </property>
     </action>
 </actions>
@@ -3380,6 +3418,18 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
         <receiver>awb_dialog</receiver>
         <slot>refreshReposPushButton_clicked()</slot>
     </connection>
+    <connection>
+        <sender>ShellModel_at_Containing_Folder</sender>
+        <signal>activated()</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>ShellModel_at_Containing_Folder_activated()</slot>
+    </connection>
+    <connection>
+        <sender>OpenModel_Containing_Folder</sender>
+        <signal>activated()</signal>
+        <receiver>awb_dialog</receiver>
+        <slot>OpenModel_Containing_Folder_activated()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Tabs_main</tabstop>
@@ -3434,6 +3484,8 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
     <slot>Refresh_activated()</slot>
     <slot>NewModel_activated()</slot>
     <slot>EditModel_activated()</slot>
+    <slot>OpenModel_Containing_Folder_activated()</slot>
+    <slot>ShellModel_at_Containing_Folder_activated()</slot>
     <slot>Button_nuke_clicked()</slot>
     <slot>Button_config_clicked()</slot>
     <slot>Button_clean_clicked()</slot>

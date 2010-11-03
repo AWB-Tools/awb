@@ -1,12 +1,12 @@
-awb (0.6.0~svn20101029r388+lucid) lucid; urgency=low
+awb (0.6.0~svn20101103r392+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * Added leap support, added powerpc repository
-  * Added ability to apm-edit to open file browser or shell 
+  * Added ability to awb and apm-edit to open file browser or shell 
     at the directory containing a module
   * Some updates to debian instructions
   * Added application menu and MIME support
   * Various man page fixes
   * Convert several asim-* commands to awb-* commands
 
- -- Joel Emer <jsemer@intel.com>  Fri, 29 Oct 2010 19:37:50 -0400
+ -- Joel Emer <jsemer@intel.com>  Wed, 03 Nov 2010 09:51:19 -0400

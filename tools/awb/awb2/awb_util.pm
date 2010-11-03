@@ -535,6 +535,10 @@ sub new_model {
   return ! system("$apm_editor &");
 }
 
+#
+# Actions to edit/open/shell at a model
+#     Note: maybe these should be refactored into Model.pm
+#
 
 sub edit_model {
   return undef if (! defined($model));
@@ -542,6 +546,23 @@ sub edit_model {
   my $command = "$apm_editor " . $model->filename();
 
   return ! system("$command &");
+}
+
+
+sub open_model_container {
+  return undef if (! defined($model));
+
+  my $dirname = dirname(Asim::resolve($model->filename));
+
+  return ! system("xdg-open $dirname &");
+}
+
+sub shell_model_container {
+  return undef if (! defined($model));
+
+  my $dirname = dirname(Asim::resolve($model->filename));
+
+  return ! system("gnome-terminal --working-directory $dirname &");
 }
 
 

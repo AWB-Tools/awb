@@ -570,6 +570,17 @@ void awb_dialog::EditModel_activated()
 }
 
 
+void awb_dialog::OpenModel_Containing_Folder_activated()
+{
+    awb_util::open_model_container();
+}
+
+
+void awb_dialog::ShellModel_at_Containing_Folder_activated()
+{
+    awb_util::shell_model_container();
+}
+
 
 
 void awb_dialog::Button_nuke_clicked()
@@ -1634,4 +1645,5 @@ void awb_dialog::packagesInit()
 #      Sometimes {model,bencmark}_tree_expanded not called!
 #
 #           
+
 

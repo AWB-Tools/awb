@@ -7649,3 +7649,20 @@ Directory etc/repositories.d
  leap.pack                 Locally Modified          390 
 
 Added leap-debug and leap-examples packages.
+
+----------
+jsemer      Date: Wed Nov  3 10:01:15 EDT 2010  CSN: CSN-awb-392
+                  Wed Nov  3 14:01:15 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          391 
+
+Directory tools/awb/awb2
+ awb_util.pm               Locally Modified          391 
+ awb_dialog.ui             Locally Modified          391 
+ awb_dialog.ui.h           Locally Modified          391 
+
+Added ability to open/shell at the containing folder of
+a model.
+
