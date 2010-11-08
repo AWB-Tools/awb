@@ -266,6 +266,7 @@ void awb_dialog::model_list_clicked( QListViewItem * )
 
             # Create description
 
+            model_description->insertItem("Package: " . Asim::file2package($model->filename()));
             model_description->insertItem("Name: " . $model->name());
             model_description->insertItem("Description: " . $model->description());
             model_description->insertItem("File: " . $model->filename());

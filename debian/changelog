@@ -1,12 +1,23 @@
-awb (0.6.0~svn20101103r392+lucid) lucid; urgency=low
+awb (0.6.0~svn20101108r393+lucid) lucid; urgency=low
 
   [ Joel Emer ]
-  * Added leap support, added powerpc repository
-  * Added ability to awb and apm-edit to open file browser or shell 
-    at the directory containing a module
-  * Some updates to debian instructions
-  * Added application menu and MIME support
-  * Various man page fixes
-  * Convert several asim-* commands to awb-* commands
+  * r383/r384/r391
+        Added leap support
+            Added various leap repositories
 
- -- Joel Emer <jsemer@intel.com>  Wed, 03 Nov 2010 09:51:19 -0400
+  * r385/r392
+        Enhancements to awb and apm-edit
+            Open file browser or shell at the directory containing a module
+
+  * r386/r387/r389/r390/
+        Various updates to debian build mechanism
+            Added application menu and MIME support
+            Various man page fixes
+
+  * r388
+        Convert several asim-* commands to awb-* commands
+
+  * r393
+        Show source package name in apm-edit/awb info box
+
+ -- Joel Emer <jsemer@intel.com>  Mon, 08 Nov 2010 14:44:24 -0500

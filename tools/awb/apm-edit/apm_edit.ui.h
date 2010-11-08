@@ -1482,19 +1482,60 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     #
     # Write out description of module
     #
-    Info->insertItem("Module:      " . $module->filename());
+    my @label = ();
+    my @info  = ();
+
+    my $filename = $module->filename;
+
+    #
+    # Populate the Info tab
+    #
+
+    Info->insertItem("Package:     " . Asim::file2package($filename));
+    Info->insertItem("Module:      " . basename($filename));
     Info->insertItem("Name:        " . $module->name());
     Info->insertItem("Description: " . $module->description());
     Info->insertItem("Attributes:  " . join(" ", $module->attributes()));
     Info->insertItem("Provides:    " . $module->provides());
     Info->insertItem("Requires:    " . join(" ", ($module->requires())));
 
-    Files->insertItem("Module:      " . basename($module->filename()));
-    Files->insertItem("Notes:       " . join(" ", ($module->notes())));
-    Files->insertItem("Makefiles:   " . join(" ", ($module->makefile())));
-    Files->insertItem("Scons:       " . join(" ", ($module->scons("*"))));
-    Files->insertItem("Public:      " . join(" ", ($module->public())));
-    Files->insertItem("Private:     " . join(" ", ($module->private())));
+    #
+    # Populate the Files tab
+    #
+
+    push(@label, "Package:     ");
+    push(@info,  Asim::file2package($filename));
+
+    push(@label, "Path:        ");
+    push(@info,  dirname($filename));
+
+    push(@label, "Module:      ");
+    push(@info,  basename($module->filename()));
+
+    push(@label, "Notes:       ");
+    push(@info,  join(" ", ($module->notes())));
+
+    push(@label, "Makefiles:   ");
+    push(@info,  join(" ", ($module->makefile())));
+
+    push(@label, "Scons:       ");
+    push(@info,  join(" ", ($module->scons("*"))));
+
+    push(@label, "Public:      ");
+    push(@info,  join(" ", ($module->public())));
+
+    push(@label, "Private:     ");
+    push(@info,  join(" ", ($module->private())));
+
+    foreach my $l (@label) {
+      my $i = shift(@info);
+      next if ($i eq "");
+      Files->insertItem($l . $i);
+    }
+
+    #
+    # Populate the Parameters tab
+    #
 
     Parameters->insertItem("Parameters: ");
 
@@ -1525,6 +1566,10 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     }
         
     #
+    # Populate the Notes tab
+    #
+
+    #
     # Get notes file and fill into Notes pane
     #
     my $notes;
@@ -1552,6 +1597,7 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     } else {
         alternativesTabWidget->changeTab(NotesPage, trUtf8("Notes"));
     }
+
 
     Info->setCurrentItem(0);
     Files->setCurrentItem(0);

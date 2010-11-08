@@ -7666,3 +7666,21 @@ Directory tools/awb/awb2
 Added ability to open/shell at the containing folder of
 a model.
 
+
+----------
+jsemer      Date: Mon Nov  8 15:11:07 EST 2010  CSN: CSN-awb-393
+                  Mon Nov  8 20:11:07 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          392 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          392 
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          392 
+ awb_dialog.ui.h           Locally Modified          392 
+
+Enhanced awb/apm-edit to show the package containing the
+selected model/module in the info pane.
