@@ -554,7 +554,7 @@ sub open_model_container {
 
   my $dirname = dirname(Asim::resolve($model->filename));
 
-  return ! system("xdg-open $dirname &");
+  return Asim::open_at($dirname);
 }
 
 sub shell_model_container {
@@ -562,7 +562,7 @@ sub shell_model_container {
 
   my $dirname = dirname(Asim::resolve($model->filename));
 
-  return ! system("gnome-terminal --working-directory $dirname &");
+  return Asim::shell_at($dirname);
 }
 
 

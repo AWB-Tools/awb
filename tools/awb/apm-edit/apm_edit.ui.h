@@ -497,6 +497,38 @@ void apm_edit::editFindMissing()
     #statusBar()->message("All requires satisfied...", 2000);
 }
 
+# View menu
+
+
+void apm_edit::viewOpen_build_folderAction_activated()
+{
+    our $model;
+
+    Asim::open_at($model->build_dir());
+}
+
+void apm_edit::viewShell_at_build_folderAction_activated()
+{
+    our $model;
+
+    Asim::shell_at($model->build_dir());
+}
+
+
+void apm_edit::viewOpen_run_folderAction_activated()
+{
+    our $model;
+
+    Asim::open_at($model->run_dir());
+}
+
+
+void apm_edit::viewShell_at_run_folderAction_activated()
+{
+    our $model;
+
+    Asim::shell_at($model->run_dir());
+}
 
 # Model menu
 
@@ -2119,7 +2151,7 @@ void apm_edit::moduleOpenContainer()
 
     my $dirname = dirname(Asim::resolve($filename));
 
-    system("xdg-open $dirname");
+    Asim::open_at($dirname);
 }
 
 void apm_edit::moduleShellContainer()
@@ -2130,7 +2162,7 @@ void apm_edit::moduleShellContainer()
 
     my $dirname = dirname(Asim::resolve($filename));
 
-    system("gnome-terminal --working-directory $dirname");
+    Asim::shell_at($dirname);
 }
 
 

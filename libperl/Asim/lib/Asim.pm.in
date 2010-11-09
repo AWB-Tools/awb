@@ -672,6 +672,51 @@ sub get_editor {
 
 ################################################################
 
+=item Asim::open_at($directory)
+
+Open a directory browser at $directory
+
+
+=cut
+
+################################################################
+
+sub open_at {
+
+  my $directory = shift;
+
+  if (! -d $directory) {
+    # Tried to open non-existent diretory: $directory
+    return 0;
+  }
+
+  return ! system("xdg-open $directory");
+}
+
+################################################################
+
+=item Asim::shell_at($directory)
+
+Open a shell at $directory
+
+=cut
+
+################################################################
+
+sub shell_at {
+
+  my $directory = shift;
+
+  if (! -d $directory) {
+    # Tried to shell at non-existent diretory: $directory
+    return 0;
+  }
+
+  return ! system("gnome-terminal --working-directory $directory");
+}
+
+################################################################
+
 =item Asim::get_tmpdir()
 
 Get a temporary directory specified in environment variables ASIMTMPDIR,

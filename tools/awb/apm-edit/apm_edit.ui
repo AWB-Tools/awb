@@ -466,6 +466,13 @@
         <action name="editFindAction"/>
         <action name="editFindMissingAction"/>
     </item>
+    <item text="&amp;View" name="View">
+        <action name="viewOpen_build_folderAction"/>
+        <action name="viewShell_at_build_folderAction"/>
+        <separator/>
+        <action name="viewOpen_run_folderAction"/>
+        <action name="viewShell_at_run_folderAction"/>
+    </item>
     <item text="&amp;Model" name="modelMenu">
         <action name="modelNukeAction"/>
         <action name="modelConfigureAction"/>
@@ -486,7 +493,12 @@
         <action name="moduleShell_at_containing_folderAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
-        <action name="InsertActionGroup"/>
+        <actiongroup name="InsertActionGroup"/>
+        <item text="&amp;Insert" name="popupMenu_38" accel="">
+            <action name="moduleInsertModuleAction"/>
+            <action name="moduleInsertSubmodelAction"/>
+            <action name="moduleInsertAsRootAction"/>
+        </item>
         <action name="moduleDeleteAction"/>
     </item>
     <item text="&amp;Alternatives" name="alternativesMenu">
@@ -1103,10 +1115,10 @@
             <cstring>modelSetupAction</cstring>
         </property>
         <property name="text">
-            <string>&amp;Setup</string>
+            <string>Set&amp;up</string>
         </property>
         <property name="menuText">
-            <string>&amp;Setup</string>
+            <string>Set&amp;up</string>
         </property>
         <property name="toolTip">
             <string>Set up the default benchmark for this model</string>
@@ -1188,7 +1200,7 @@
             <string>&amp;Edit</string>
         </property>
         <property name="toolTip">
-            <string>Edit the source files for the selected alternative</string>
+            <string>Edit the source files for the selected alternative module/submodel</string>
         </property>
     </action>
     <action>
@@ -1201,6 +1213,9 @@
         <property name="menuText">
             <string>&amp;Open containing folder</string>
         </property>
+        <property name="toolTip">
+            <string>Open a file browser at the directory containing the original source for the selected module/submodel</string>
+        </property>
     </action>
     <action>
         <property name="name">
@@ -1211,6 +1226,9 @@
         </property>
         <property name="menuText">
             <string>&amp;Shell at containing folder</string>
+        </property>
+        <property name="toolTip">
+            <string>Open a shell at the directory containing the original source for the selected module/submodel</string>
         </property>
     </action>
     <action>
@@ -1223,6 +1241,9 @@
         <property name="menuText">
             <string>&amp;Open containing folder</string>
         </property>
+        <property name="toolTip">
+            <string>Open a file browser at the directory containing the original source for the selected alternative module/submodel</string>
+        </property>
     </action>
     <action>
         <property name="name">
@@ -1233,6 +1254,65 @@
         </property>
         <property name="menuText">
             <string>&amp;Shell at containing folder</string>
+        </property>
+        <property name="toolTip">
+            <string>Open a shell at the directory containing the original source for the selected alternative module/submodel</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>viewOpen_build_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Open build folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Open build folder</string>
+        </property>
+        <property name="toolTip">
+            <string>Launch a file browser at the directory continaining the build tree</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>viewShell_at_build_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;Shell at build folder</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Shell at build folder</string>
+        </property>
+        <property name="toolTip">
+            <string>Launch a shell at the directory continaining the build tree</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>viewOpen_run_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>Open run folder</string>
+        </property>
+        <property name="menuText">
+            <string>Open run folder</string>
+        </property>
+        <property name="toolTip">
+            <string>Launch a file browser at the directory where one can run the model (only after setup)</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>viewShell_at_run_folderAction</cstring>
+        </property>
+        <property name="text">
+            <string>Shell at run folder</string>
+        </property>
+        <property name="menuText">
+            <string>Shell at run folder</string>
+        </property>
+        <property name="toolTip">
+            <string>Launch a shell at the directory where one can run the model (only after setup)</string>
         </property>
     </action>
 </actions>
@@ -1591,6 +1671,30 @@
         <receiver>apm_edit</receiver>
         <slot>alternativesShell_at_containing_folderAction_activated()</slot>
     </connection>
+    <connection>
+        <sender>viewShell_at_build_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>viewShell_at_build_folderAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>viewOpen_build_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>viewOpen_build_folderAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>viewOpen_run_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>viewOpen_run_folderAction_activated()</slot>
+    </connection>
+    <connection>
+        <sender>viewShell_at_run_folderAction</sender>
+        <signal>activated()</signal>
+        <receiver>apm_edit</receiver>
+        <slot>viewShell_at_run_folderAction_activated()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Model</tabstop>
@@ -1667,6 +1771,8 @@
     <slot>moduleDelete( QListViewItem * )</slot>
     <slot>alternativesInsertAction_activated()</slot>
     <slot>alternativesEditAction_activated()</slot>
+    <slot>alternativesOpen_containing_folderAction_activated()</slot>
+    <slot>alternativesShell_at_containing_folderAction_activated()</slot>
     <slot>helpIndex()</slot>
     <slot>helpContents()</slot>
     <slot>helpAbout()</slot>
@@ -1689,8 +1795,10 @@
     <slot>ParamChange_clicked()</slot>
     <slot returnType="int">Model_find()</slot>
     <slot returnType="int *">Model_walk()</slot>
-    <slot>alternativesOpen_containing_folderAction_activated()</slot>
-    <slot>alternativesShell_at_containing_folderAction_activated()</slot>
+    <slot>viewOpen_build_folderAction_activated()</slot>
+    <slot>viewShell_at_build_folderAction_activated()</slot>
+    <slot>viewOpen_run_folderAction_activated()</slot>
+    <slot>viewShell_at_run_folderAction_activated()</slot>
 </slots>
 <functions>
     <function access="private">modelShow()</function>

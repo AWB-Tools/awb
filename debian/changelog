@@ -1,4 +1,4 @@
-awb (0.6.0~svn20101108r393+lucid) lucid; urgency=low
+awb (0.6.0~svn20101109r394+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * r383/r384/r391
@@ -20,4 +20,8 @@ awb (0.6.0~svn20101108r393+lucid) lucid; urgency=low
   * r393
         Show source package name in apm-edit/awb info box
 
- -- Joel Emer <jsemer@intel.com>  Mon, 08 Nov 2010 14:44:24 -0500
+  * r394
+        In apm-edit added view menu to open build and run directories
+
+
+ -- Joel Emer <jsemer@intel.com>  Tue, 09 Nov 2010 17:01:15 -0500
