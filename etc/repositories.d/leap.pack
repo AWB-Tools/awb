@@ -57,15 +57,15 @@ Tag=HEAD
 [platforms]
 Description=FPGA Platforms
 Method=svn
-Access=https://asim.csail.mit.edu/svn/hasim-platforms
+Access=https://asim.csail.mit.edu/svn/platforms
 Module=undefined
 Tag=HEAD
 Target=platforms
 Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=HASIM-PLATFORMS
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=PLATFORMS
 
 [platforms/HEAD]
 Description=FPGA Platforms
-Access=https://asim.csail.mit.edu/svn/hasim-platforms
+Access=https://asim.csail.mit.edu/svn/platforms
 Tag=HEAD
 

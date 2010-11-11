@@ -6,17 +6,17 @@
 
 ###### Platform-ACP trunk
 
-[platform-acp]
+[platforms-acp]
 Description=Platform modules for ACP board
 Method=svn
-Access=svn+ssh://chiou.ece.utexas.edu/var/svn/repos/platform-acp
+Access=https://asim.csail.mit.edu/svn/platforms-acp
 Module=undef
 Tag=HEAD
-Target=platform-acp
+Target=platforms-acp
 Changes=changes
-BrowseURL=https://chiou.ece.utexas.edu/websvn/listing.php?repname=platform-acp
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=platform-acp
 
-[platform-acp/HEAD]
+[platforms-acp/HEAD]
 Description=Platform modules for ACP board (HEAD)
-Access=svn+ssh://chiou.ece.utexas.edu/var/svn/repos/platform-acp
+Access=https://asim.csail.mit.edu/svn/platforms-acp
 Tag=HEAD
