@@ -1,4 +1,4 @@
-awb (0.6.0~svn20101111r395+lucid) lucid; urgency=low
+awb (0.6.0~svn20101120r396+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * r383/r384/r391
@@ -26,4 +26,8 @@ awb (0.6.0~svn20101111r395+lucid) lucid; urgency=low
   * r395
         Migrated location of platforms-acp repository
 
- -- Joel Emer <jsemer@intel.com>  Thu, 11 Nov 2010 12:10:51 -0500
+  * r396
+        Internal changes for managing module/submodel attributes
+
+
+ -- Joel Emer <jsemer@intel.com>  Sat, 20 Nov 2010 19:54:21 -0500

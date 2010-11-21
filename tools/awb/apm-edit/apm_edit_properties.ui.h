@@ -39,7 +39,7 @@ void apm_edit_properties::init()
     }
         
     Description->setText($model->description());
-    Attributes->setText($model->default_attributes());
+    Attributes->setText($model->attributes2string());
 
     Autoselect->setState($model->autoselect());
 
@@ -56,7 +56,7 @@ void apm_edit_properties::propertiesOk_clicked()
     $model->type(typeComboBox->currentText());
 
     $model->description(Description->text());
-    $model->default_attributes(Attributes->text());
+    $model->set_attributes(Attributes->text());
 
     $model->autoselect(Autoselect->state());
 

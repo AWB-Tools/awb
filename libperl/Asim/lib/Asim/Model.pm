@@ -39,6 +39,8 @@ our %a =  ( version =>              [ "version",
                                       "SCALAR" ],
             dependencies =>         [ "dependencies",
                                       "ARRAY" ],
+            attributes =>           [ "attributes",
+                                      "ARRAY" ],
             default_attributes =>   [ "default_attributes",
                                       "SCALAR" ],
             provides =>             [ "provides",
@@ -771,19 +773,71 @@ sub autoselect {
 
 ################################################################
 
-=item $model-E<gt>default_attributes([$list])
+=item $model-E<gt>attributes()
 
-Set model "default attributs" to list $list if supplied.
-Always return current "default attributes".
+Return list of model's attributes
 
 =cut
 
 ################################################################
 
 sub attributes {
-  return $_[0]->default_attributes();
+  my $self = shift;
+  my $attr_list = $self->default_attributes();
+
+  my @attributes = ();
+
+  foreach my $a (split(' ', $attr_list)) {
+    push(@attributes, Asim::Module::Attribute->new($a));
+  }
+
+  return @attributes;
 }
 
+################################################################
+
+=item $model-E<gt>set_attributes($list...)
+
+Set model "attributes" to list $list. Each element of $list
+may be a white-space separated list of attributes.
+
+=cut
+
+################################################################
+
+sub set_attributes {
+  my $self = shift;
+  my @list = @_;
+  
+  $self->default_attributes(join(' ', @list));
+
+  return;
+}
+
+
+################################################################
+
+=item $model-E<gt>attributes2string()
+
+Return the attributes of the model as a white-space separated
+string.
+
+=cut
+
+################################################################
+
+
+sub attributes2string {
+  my $self = shift;
+
+  return $self->default_attributes();
+}
+
+#
+# Use of the following is deprecated outside the module,
+# but it is still used as a utility function inside this
+# module
+#
 sub default_attributes { return $_[0]->_accessor("Model","DefaultAttributes",$_[1]) || ""; }
 
 
@@ -1390,14 +1444,17 @@ sub is_default_module {
   my $first_attr_number = 0;
   my $score;
 
-  my @model_attr = split(' ', $self->default_attributes());
+  my @model_attr  = $self->attributes();
   my @module_attr = $module->attributes();
 
   foreach my $a (@model_attr) {
+    my $a_name = $a->name();
+
     $attr_number++;
 
     foreach my $aa (@module_attr) {
-      if ($a eq $aa) {
+      my $aa_name = $aa->name();
+      if ($a_name eq $aa_name) {
         $first_attr_number = $attr_number if ($first_attr_number == 0);
         $match_count++;
       }

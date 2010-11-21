@@ -25,6 +25,7 @@ use File::Basename;
 use Getopt::Long;
 
 use Asim::Base;
+use Asim::Module::Attribute;
 use Asim::Module::Param;
 use Asim::Util;
 use Asim::Module::SourceList;
@@ -262,7 +263,9 @@ sub open {
       #
       # Add attributes to list of attributes
       #
-      push(@{$self->{attributes}},  split($spaces,$1));
+      foreach my $a (split($spaces, $1)) {
+	push(@{$self->{attributes}}, Asim::Module::Attribute->new($a));
+      }
       next;
     }
 
@@ -526,7 +529,7 @@ sub save {
   print M " * %name " . $self->name() . "\n";
 
   foreach my $i ($self->attributes()) {
-    print M " * %attributes $i\n";
+    print M " * %attributes " . $i->fullname() . "\n";
   }
 
   print M " * %desc " . $self->description() . "\n";
@@ -1863,12 +1866,22 @@ sub attributes {
   my @value = (@_);
 
   if (@value) {
-    @{$self->{"attributes"}} = (@value);
+    @{$self->{"attributes"}} = map Asim::Module::Attribute->new, @value;
   }
 
   return @{$self->{"attributes"}};
 }
 
+sub attributes2string {
+  my $self = shift;
+  my @attributes = ();
+
+  foreach my $a ($self->attributes()) {
+    push(@attributes, $a->fullname());
+  }
+
+  return join(" ", @attributes);
+}
 
 ################################################################
 

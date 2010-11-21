@@ -1527,7 +1527,7 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     Info->insertItem("Module:      " . basename($filename));
     Info->insertItem("Name:        " . $module->name());
     Info->insertItem("Description: " . $module->description());
-    Info->insertItem("Attributes:  " . join(" ", $module->attributes()));
+    Info->insertItem("Attributes:  " . $module->attributes2string());
     Info->insertItem("Provides:    " . $module->provides());
     Info->insertItem("Requires:    " . join(" ", ($module->requires())));
 

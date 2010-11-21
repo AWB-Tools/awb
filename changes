@@ -7725,3 +7725,28 @@ consistency renamed it platforms-acp.
 NOTE: You will need to get a fresh install of awb so
 the .pack files are updated, delete any existing checkout
 of platform-acp in your workspace and checkout platforms-acp.
+
+----------
+jsemer      Date: Sat Nov 20 19:55:53 EST 2010  CSN: CSN-awb-396
+                  Sun Nov 21 00:55:53 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          395 
+
+Directory libperl/Asim/lib/Asim/Module
+ Attribute.pm              Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          395 
+ Model.pm                  Locally Modified          395 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          395 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          395 
+ apm_edit_properties.ui.h  Locally Modified          395 
+
+Internal refactoring for better management of attributes
+of modules/submodels. No external changes should be visible.

@@ -17,6 +17,7 @@ lib/Asim/Stats/ToText/LongNames.pm
 lib/Asim/Benchmark/DB.pm
 lib/Asim/Model/DB.pm
 lib/Asim/Model/Template.pm
+lib/Asim/Module/Attribute.pm
 lib/Asim/Module/Template.pm
 lib/Asim/Module/DB.pm
 lib/Asim/Module/Param.pm
