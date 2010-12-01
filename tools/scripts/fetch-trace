@@ -50,7 +50,7 @@ speed_debug();
 #	disks in Portland into a local trace cache, and returns the path to the
 #	local files.
 #	This is intended to be used in "setup" scripts invoked by benchmark .cfg
-#	or .cfx scripts used by AWB and asim-run to set up benchmark traces. 
+#	or .cfx scripts used by AWB and awb-run to set up benchmark traces. 
 #
 
 use File::Basename;

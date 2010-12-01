@@ -7750,3 +7750,27 @@ Directory tools/awb/apm-edit
 
 Internal refactoring for better management of attributes
 of modules/submodels. No external changes should be visible.
+
+----------
+jsemer      Date: Wed Dec  1 08:12:16 EST 2010  CSN: CSN-awb-397
+                  Wed Dec  1 13:12:16 UTC 2010
+
+
+Directory tools/scripts
+ fetch-trace               Locally Modified          396 
+
+Directory tools/scripts/bm/tracecache
+ single-check-param.cfx    Locally Modified          396 
+ single-check-stat-range.cfx Locally Modified          396 
+
+Directory tools/scripts
+ regression.cleanup        Locally Modified          396 
+ create-benchmark-file     Locally Modified          396 
+ netbatch-pre              Locally Modified          396 
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          396 
+
+Changed obsolete reference to asim-run to awb-run in 
+regression.cleanup. While I was at it, removed asim-run 
+references from various files - all were just comments.

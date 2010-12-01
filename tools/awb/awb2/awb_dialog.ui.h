@@ -1626,7 +1626,7 @@ void awb_dialog::packagesInit()
 #           Benchmark
 #           ADF file
 #
-#      Suport for multiple benchmarks, ala asim-run
+#      Suport for multiple benchmarks, ala awb-run
 #
 #      Show benchmark description
 #

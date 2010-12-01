@@ -14,7 +14,7 @@
 #
 # At least one -tempdir argument must be given, more than one can be given.
 #
-# Called by asim-run.
+# Called by awb-run.
 #
 # C. Beckmann, A. Klimkin		1/24/2006	(c) Intel
 #

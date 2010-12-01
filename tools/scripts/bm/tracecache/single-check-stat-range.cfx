@@ -34,7 +34,7 @@ use Asim::GenCFG::Auto;
 ## specifices a tolerance in X (i.e., 0.03 means a tolerance of plus or minus 3%) for stat variation
 ## in a passing run.
 ##
-## Example usages in an asim-run benchmarks file:
+## Example usages in an awb-run benchmarks file:
 ## 
 ## tools/scripts/bm/tracecache/single-check-stat-range.cfx/MacroIPC/1.06436000/0.03000000000000/p/asim/benchmarks/traces/LIT/regression/mytrace.cfg
 ##                                                        ^         ^          ^                ^                            ^

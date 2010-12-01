@@ -53,7 +53,7 @@ sub print_usage
     print "\n\tusage:\n\t$script_name -<param1>=<val1> ...\n";
 
     print "\n\tdescription:\n";
-    print "\tthis is just a simple script to create an asim-run benchmark file\n";
+    print "\tthis is just a simple script to create an awb-run benchmark file\n";
     print "\tusing a tlist, a tag, or the output of a previous trace_list command.\n";
     print "\tit will create a benchmarks file (to stdout or specified outfile)\n";
     print "\tusing single.cfx.\n";

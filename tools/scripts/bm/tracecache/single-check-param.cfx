@@ -33,7 +33,7 @@ use Asim::GenCFG::Auto;
 ## This is just like single.cfx, except that the first two "subdirectories"
 ## specify a parameter name and value to check after the simulator completes.
 ##
-## Example usages in an asim-run benchmarks file:
+## Example usages in an awb-run benchmarks file:
 ##
 ##	tools/scripts/bm/tracecache/single-check-param.cfx/fetched/1234/cpu2000_78_99228p_301.apsi_0017.P6_9909.cfg
 ##                                                        ^       ^     ^                                     ^
