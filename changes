@@ -7788,3 +7788,17 @@ Adding missing check for Leap model type to GUI. This was causing some junk to
 appear in the dynamic parameters dialog box.
 
 Michael P.
+
+----------
+mpellaue    Date: Fri Dec  3 17:05:56 EST 2010  CSN: CSN-awb-399
+                  Fri Dec  3 22:05:56 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          398 
+
+
+Updating debian changelog so that packaging gets a new name. This should be
+done with any significant checkin.
+
+Michael P.
