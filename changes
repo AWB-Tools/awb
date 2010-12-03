@@ -7774,3 +7774,17 @@ Directory tools/awb/awb2
 Changed obsolete reference to asim-run to awb-run in 
 regression.cleanup. While I was at it, removed asim-run 
 references from various files - all were just comments.
+
+----------
+mpellaue    Date: Fri Dec  3 16:55:35 EST 2010  CSN: CSN-awb-398
+                  Fri Dec  3 21:55:35 UTC 2010
+
+
+Directory tools/awb/awb2
+ awb_util.pm               Locally Modified          397 
+
+
+Adding missing check for Leap model type to GUI. This was causing some junk to 
+appear in the dynamic parameters dialog box.
+
+Michael P.

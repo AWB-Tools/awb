@@ -654,7 +654,14 @@ sub get_params_model()
     Qt::MessageBox::information(
             undef,
             "No support",
-            "HAsim does not yet support parameters\n");
+            "HAsim does not yet support setting parameters from the GUI.\n");
+    return ();
+  }
+  elsif ($model->type() eq "Leap") {
+    Qt::MessageBox::information(
+            undef,
+            "No support",
+            "Leap does not yet support setting parameters from the GUI.\n");
     return ();
   }
 
