@@ -2012,7 +2012,15 @@ void apm_edit::Parameters_selectionChanged( QListBoxItem * )
     my $item = shift;
     my $line = $item->text();
 
-    if ($line =~ "^ *([^=]+)=([^ ]+) ") {
+    my $p_string   = '\"[^"]*\"';
+    my $p_number   = '\d+';
+
+    if ($line =~ "^ *([^=]+)=($p_string) ") {
+        ParamName->setText($1);
+        ParamValue->setEnabled(1);
+        ParamValue->setText($2);
+        ParamChange->setEnabled(1);
+    } elsif($line =~ "^ *([^=]+)=($p_number) ") {
         ParamName->setText($1);
         ParamValue->setEnabled(1);
         ParamValue->setText($2);
@@ -2042,24 +2050,51 @@ void apm_edit::ParamChange_clicked()
     #
     # Parse out information on parameter
     #    Note: implicit dependence on format of line
+    # 
     #
-    $line =~ "^ *([^=]+)=([^ ]+) [[](.+)[]]";
 
-    my $name = $1;
-    if (!defined($name)) {
-        die("Illegally formatted parameter line");
-    }
+    # are we dealing with a string?
+    my $p_string   = '\"[^"]*\"';
+    my $p_number   = '\d+';
+    my $name;
+    my $value;
+    my $default;    
 
-    my $default = $3;
-    if (!defined($default)) {
-        print("Illegally formatted parameter line");
-        $default = $2;
-    }       
+    if($line =~ "^ *([^=]+)=($p_string) [[]($p_string)[]]") {
+        $name = $1;
+        if (!defined($name)) {
+            die("Illegally formatted parameter line");
+        }
 
-    my $value = ParamValue->text();
-    if ($value eq "") {
-        $value = $3;
-    }
+        $default = $3;
+        if (!defined($default)) {
+            print("Illegally formatted parameter line");
+            $default = $2;
+        }       
+
+        $value = ParamValue->text();
+        if ($value eq "") {
+            $value = $3;
+        }
+    } else {  # catch all
+        $line =~ "^ *([^=]+)=($p_number) [[]($p_number)[]]";
+
+        $name = $1;
+        if (!defined($name)) {
+            die("Illegally formatted parameter line");
+        }
+
+        $default = $3;
+        if (!defined($default)) {
+            print("Illegally formatted parameter line");
+            $default = $2;
+        }       
+
+        $value = ParamValue->text();
+        if ($value eq "") {
+            $value = $3;
+        }
+    } 
     
     #
     # Update information on parameter

@@ -7802,3 +7802,18 @@ Updating debian changelog so that packaging gets a new name. This should be
 done with any significant checkin.
 
 Michael P.
+
+----------
+kfleming    Date: Mon Dec  6 13:08:35 EST 2010  CSN: CSN-awb-400
+                  Mon Dec  6 18:08:35 UTC 2010
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          399 
+
+
+Fixed apm-edit support for string parameters.  These used to crash apm
+edit.  I don't think that this fix is complete, and I certainly
+haven't tried to test beyond some basic use cases.  However, strings
+are now editable from the gui,to the point that apms with strings can
+be configured and buit.
