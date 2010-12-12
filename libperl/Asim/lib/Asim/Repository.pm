@@ -106,85 +106,70 @@ Create a new package repository.
 ################################################################
 
 sub create {
-  print <<'EOF';
+  my $self = shift;
 
-Perform the following manual steps:
-
-1) Create a new package, maybe with something like:
-
-       % asim-shell new package <pkgname>
+  ierror("Internal error Asim::Repository:Create should have been implemented in subtype\n");
+  return undef;
+}
 
 
-2) If necessary, create a CVS repository probably with something like:
+################################################################
 
-       % cvs -d <name>@<node>:/cvsroot/<dir> init
+=item $repository-E<gt>create_packfile($name)
 
-   This might not be necessary if you use something like sourceforge which
-   will create a cvs repository for you.
+Create a new packfile named $name for this repository. 
 
+FIXME: This method knows too much about the internal structure
+       of the repository object and the structure of the packfile
 
-3) By default the CVS module name will be <dir> as specified above.
-   If you want this package to be be a module of the repository with another name
-   you may need to update CVSROOT/admin/modules to include package as a CVS module.
+=cut
 
-   See the CVS instructions for instructions...
+################################################################
 
+sub create_packfile {
+  my $self = shift;
+  my $name = shift;
 
-4) Add the package to the asim core package and re-install it.
+  my $packfile;
+  my $status;
 
-       a) Add package to <workspace>/src/asim-simcore/etc/asim.pack file.
+  $packfile = "$ENV{HOME}/.asim/repositories.d/$name.pack";
 
-       b) Check in changes to asim-simcore.
+  if (-e $packfile) {
+    print "Packfile $packfile already exists\n";
+    return undef;
+  }
+  
+  #
+  # Create packfile and fill in with values
+  #
 
-       c) Reinstall asim-simcore. Probably that means:
-               ./configure
-               make
-               make install
+  my $inifile = Asim::Inifile->new();
 
-          Check <workspace>/src/asim-simcore/INSTALL if you want to be sure.
+  #
+  # FIXME: Don't rely on knowing values from hash
+  # FIXME: Get a real description from somewhere
+  #
 
+  foreach my $i ("$name", "$name/HEAD") {
+    $inifile->put($i, "Description", "$name package");
+    $inifile->put($i, "Method",      $self->{method});
+    $inifile->put($i, "Access",      $self->{access});
+    $inifile->put($i, "Module",      $self->{module});
+    $inifile->put($i, "Tag",         $self->{tag});
+    $inifile->put($i, "Target",      $self->{target});
+    $inifile->put($i, "BrowseURL",   $self->{browseURL});
+    $inifile->put($i, "Changes",     $self->{changes});
+  }
 
-5) Import the package with something similar to:
+  $status = $inifile->save($packfile);
 
-       % cd <workspaceroot>/src/asim-<pkgname>
-       % cvs -d <name>@<node>:/cvsroot/<dir> import asim-<pkgname> <vendor> start
+  if (! defined($status)) {
+    print("Packfile ($packfile) save failed\n");
+    return undef;
+  }
 
-
-6) If you want anonymous access:
-
-       % # Check out CVSROOT
-       % cd <scratch-directory>
-       % cvs -d <name>@<node>:/cvsroot/<dir> checkout CVSROOT
-       % cd CVSROOT
-
-       % # Create the 'readers' file
-       % echo 'anonymous' >readers
-       % cvs add readers
-       % touch passwd
-
-       % # Create the 'writers' file
-       % touch writers
-       % cvs add writers
-
-       % # Create the 'passwd' file
-       % touch passwd
-       % cvs add passwd
-       % htpasswd -c passwd anonymous
-       Password: <secret-password>
-       % # make sure passwd file looks like "anonymous:sh32njsgjs"
-
-       % # Commit changes
-       % cvs commit
-
-7) To work on this package you need to delete it and check it out, e.g.:
-
-       % rm -rf <workspaceroot>/src/asim-<pkgname>
-       % asim-shell checkout package <pkgname>
-
-
-EOF
-
-return 1;
+  return 1;
 }
 
 ################################################################

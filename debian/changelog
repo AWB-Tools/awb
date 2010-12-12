@@ -1,8 +1,4 @@
-awb (0.6.0~svn20101203r399+lucid) lucid; urgency=low
-  [ Michael Pellauer ]
-  * r398
-        Added missing check for leap type in AWB gui.
-
+awb (0.6.0~svn20101212r401+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -32,5 +28,18 @@ awb (0.6.0~svn20101203r399+lucid) lucid; urgency=low
   * r396
         Internal changes for managing module/submodel attributes
 
+  [ Michael Pellauer ]
+  * r398
+        Added missing check for leap type in AWB gui.
 
- -- Joel Emer <jsemer@intel.com>  Sat, 20 Nov 2010 19:54:21 -0500
+  [ Elliott Fleming ]
+  * r400
+        Fixed apm-edit bug when editing string parameters
+
+  [ Joel Emer ]
+  * r401
+        Support for creating a new repository
+
+
+
+ -- Joel Emer <joel@emer.org>  Sun, 12 Dec 2010 14:08:42 -0500

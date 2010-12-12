@@ -17,6 +17,7 @@ use warnings;
 use strict;
 
 use File::Basename;
+use File::Temp qw/ tempfile tempdir /;
 
 our @ISA = qw(Asim::Repository);
 
@@ -102,6 +103,56 @@ sub init {
 
 #################################################################################
 
+=item $dir = $repository-E<gt>create()
+
+Create a repository from a package.
+
+=cut
+
+################################################################################
+
+sub create {
+  my $self    = shift;
+  my $package = shift || return undef;
+
+  my $type = $self->type();
+  my $url = $self->{access};
+
+  my $name = $package->name();
+  my $location = $package->location();
+
+  my $tmpdir;
+  my $status;
+
+  #
+  # Create a packfile for the new repository
+  #
+
+  $status = $self->create_packfile($name);
+  return undef if (! $status);
+
+  #
+  # Create skeleton repository contents and import them
+  #
+
+  $tmpdir = tempdir(CLEANUP => 1);
+
+  mkdir("$tmpdir/trunk");
+  mkdir("$tmpdir/tags");
+  mkdir("$tmpdir/branches");
+
+  $status = system("rsync -av --exclude .svn $location/ $tmpdir/trunk");
+  return undef if ($status);
+
+  $status = system("svn import -m 'Repository skeleton' $tmpdir $url");
+  return undef if ($status);
+
+  return 1;
+}
+
+
+#################################################################################
+
 =item $dir = $repository-E<gt>checkout([$user])
 
 Check out a svn repository. 
@@ -150,7 +201,7 @@ sub checkout {
   }
   
   ### get the URL
-  ### FIXME: modify svn method to check if there is any distributed repository                in the workspace
+  ### FIXME: modify svn method to check if there is any distributed repository in the workspace
 
   print("Checkout: branch=($tag_branch) csn=($tag_csn)\n") if ($DEBUG);
 

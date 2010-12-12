@@ -446,13 +446,51 @@ sub get_repositoryDB {
 #
 
 sub create_repository {
+
   new_repository(@_);
 }
 
 sub new_repository {
+  my $name = shift;
+  my $type; 
+  my $url;
+  my $browse_url;
+  my $status;
 
-  Asim::Repository->create();
+  my $package = get_package($name) || return ();
 
+  $type =       Asim::choose_name("Repository type:", "cvs", "svn")
+                || return undef;
+
+  $url  =       Asim::choose("Repository URL")
+                || return undef;
+
+  $browse_url = Asim::choose("Repository browse URL")
+                || return undef;
+         
+
+  #
+  # Create a repository object that can create the actual repository
+  #
+  my $repo = Asim::Repository->new(packagename => $name,
+                                   method      => $type,
+                                   access      => $url,
+                                   module      => "undefined",
+                                   tag         => "HEAD",
+                                   browseURL   => $browse_url,
+                                   target      => $name,
+                                   changes     => "changes");
+
+  #
+  # Create the repository and populate it with the package
+  #
+  $status = $repo->create($package);
+  return undef if (! $status);
+
+  #
+  # Rehash the world so we see the new repository
+  #
+  rehash();
 }
 
 sub show_repository {

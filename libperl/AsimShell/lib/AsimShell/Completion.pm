@@ -150,7 +150,7 @@ sub attempted_completion {
 
   } elsif ($prefix =~ /^checkout\s+package\s+$/ ||
            $prefix =~ /^use\s+package\s+$/      ||
-           $prefix =~ /^show\s+repository\s+$/  ) {
+           $prefix =~ /^show\s+repository\s+$/  ){
     #
     # Handle packages that can be checked out
     #
@@ -216,7 +216,10 @@ sub attempted_completion {
 
     return (max_common($text, @list), @list);
 
-  } elsif ($prefix =~ /package\s+$/) {
+  } elsif ($prefix =~ /package\s+$/               ||
+           $prefix =~ /^new\s+repository\s+$/     ||
+           $prefix =~ /^create\s+repository\s+$/  ){
+
     #
     # Handle commands that take a single package name
     #

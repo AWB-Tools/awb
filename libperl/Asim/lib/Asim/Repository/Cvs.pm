@@ -107,6 +107,101 @@ sub init {
 
 #################################################################################
 
+=item $dir = $repository-E<gt>create()
+
+Create a repository from a package.
+
+=cut
+
+################################################################################
+
+sub create {
+  my $self = shift;
+  my $type = $self->type();
+
+  print <<'EOF';
+
+Perform the following manual steps:
+
+1) Create a new package, maybe with something like:
+
+       % asim-shell new package <pkgname>
+
+
+2) If necessary, create a CVS repository probably with something like:
+
+       % cvs -d <name>@<node>:/cvsroot/<dir> init
+
+   This might not be necessary if you use something like sourceforge which
+   will create a cvs repository for you.
+
+
+3) By default the CVS module name will be <dir> as specified above.
+   If you want this package to be be a module of the repository with another name
+   you may need to update CVSROOT/admin/modules to include package as a CVS module.
+
+   See the CVS instructions for instructions...
+
+
+4) Add the package to the asim core package and re-install it.
+
+       a) Add package to <workspace>/src/asim-simcore/etc/asim.pack file.
+
+       b) Check in changes to asim-simcore.
+
+       c) Reinstall asim-simcore. Probably that means:
+               ./configure
+               make
+               make install
+
+          Check <workspace>/src/asim-simcore/INSTALL if you want to be sure.
+
+
+5) Import the package with something similar to:
+
+       % cd <workspaceroot>/src/asim-<pkgname>
+       % cvs -d <name>@<node>:/cvsroot/<dir> import asim-<pkgname> <vendor> start
+
+
+6) If you want anonymous access:
+
+       % # Check out CVSROOT
+       % cd <scratch-directory>
+       % cvs -d <name>@<node>:/cvsroot/<dir> checkout CVSROOT
+       % cd CVSROOT
+
+       % # Create the 'readers' file
+       % echo 'anonymous' >readers
+       % cvs add readers
+       % touch passwd
+
+       % # Create the 'writers' file
+       % touch writers
+       % cvs add writers
+
+       % # Create the 'passwd' file
+       % touch passwd
+       % cvs add passwd
+       % htpasswd -c passwd anonymous
+       Password: <secret-password>
+       % # make sure passwd file looks like "anonymous:sh32njsgjs"
+
+       % # Commit changes
+       % cvs commit
+
+7) To work on this package you need to delete it and check it out, e.g.:
+
+       % rm -rf <workspaceroot>/src/asim-<pkgname>
+       % asim-shell checkout package <pkgname>
+
+
+EOF
+
+return 1;
+}
+
+#################################################################################
+
 =item $dir = $repository-E<gt>checkout([$user])
 
 Check out a cvs repository. 

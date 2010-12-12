@@ -102,6 +102,24 @@ sub init {
 
 #################################################################################
 
+=item $dir = $repository-E<gt>create()
+
+Create a repository from a package.
+
+=cut
+
+################################################################################
+
+sub create {
+  my $self = shift;
+  my $type = $self->type();
+
+  print "Repository creation for type $type unavailable\n";
+  return undef;
+}
+
+#################################################################################
+
 =item $dir = $repository-E<gt>checkout([$user])
 
 Check out a git repository. 

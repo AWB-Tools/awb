@@ -7817,3 +7817,48 @@ edit.  I don't think that this fix is complete, and I certainly
 haven't tried to test beyond some basic use cases.  However, strings
 are now editable from the gui,to the point that apms with strings can
 be configured and buit.
+
+----------
+joel        Date: Sun Dec 12 14:33:10 EST 2010  CSN: CSN-awb-401
+                  Sun Dec 12 19:33:10 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          400 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Completion.pm             Locally Modified          400 
+ Commands.pm               Locally Modified          400 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Svn.pm                    Locally Modified          400 
+ BitKeeper.pm              Locally Modified          400 
+ Copy.pm                   Locally Modified          400 
+ Cvs.pm                    Locally Modified          400 
+ Git.pm                    Locally Modified          400 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          400 
+
+Added support for creating a new repository for a package.
+Currently only svn repositories are supported. 
+
+The procedure for creating a new repository is:
+
+1) Create an empty repository on your sever
+
+2) Run the following commands
+
+   % awb-shell create package <pkgname>
+   ...answer questions...
+   % awb-shell create repository <pkgname>
+   ...answer questions...
+   % awb-shell checkout package <pkgname>
+   ...answer questions...
+
+A .pack file is also created, which can be
+installed globally, e.g., by adding it to
+the awb package.  This .pack file is placed in:
+
+   ~/.asim/repositories.d/<pkgname>.pack
+
