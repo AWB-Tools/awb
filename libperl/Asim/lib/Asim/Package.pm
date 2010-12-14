@@ -1268,9 +1268,48 @@ as well.
 
 ################################################################
 
+=item $package-E<gt>revert
+
+Revert any changes in the working copy.
+
+=cut
+
+sub revert {
+  my $self = shift;
+  ierror("revert() not implemented for package type ".$self->type()."\n");
+  return undef;
+}
+
+################################################################
+
 =item $package-E<gt>release($version) <and friends...>
 
 Create a new release of this package as $version
+
+=cut
+
+################################################################
+
+# Implemnted in Asim::Package::Branch
+
+################################################################
+
+=item $package-E<gt>branch($name)
+
+Create a new branch named $name
+
+=cut
+
+################################################################
+
+# Implemnted in Asim::Package::Branch
+
+################################################################
+
+=item $package-E<gt>merge($version)
+
+Merge changes from the HEAD or from another branch
+into the working copy.
 
 =cut
 

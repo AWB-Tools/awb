@@ -194,8 +194,28 @@ if ( ! -d $rundir ) {
 system ("rm $resdir/$bm.ERROR > /dev/null 2>&1");
 
 if ($rsyncrestarg eq "") {
-  # nothing to rsync
-  system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+    # nothing to rsync, a local run.
+    # make sure the SUBMITTED file is here, then move it to RUNNING.
+    my $subtimeout = 4;
+    my $done = 0;
+    
+    do {
+	if (-e "$resdir/$bm.SUBMITTED") {
+	    system ("mv $resdir/$bm.SUBMITTED $resdir/$bm.RUNNING > /dev/null 2>&1");
+	    $done = 1;
+	}
+	elsif ($subtimeout == 0) {
+	    # error!
+	    $done = 1;	    
+	    &runerror("Never got the $resdir/$bm.SUBMITTED FILE.\n");
+	}
+	else {
+	    # sleep for 5 seconds and try again
+	    print "sleep 5... waiting for $bm.SUBMITTED\n";
+	    $subtimeout--;
+	    sleep (5);
+	}
+    } while (!($done));
 }
 else
 {
@@ -252,7 +272,8 @@ my @env = split (/\s*[ ,]\s*/, $env);
 &setup_rerun_script("info");
 
 #if (system ("env -i $envstr $execscript $params > $runlogfl 2>&1")) {
-if (system ("$exec_command $params >> $runlogfl 2>&1")) {
+# if (system ("$exec_command $params >> $runlogfl 2>&1")) {
+if (system ("$exec_command $params 2>&1 | tee $runlogfl")) {
   # We have an error in the run somewhere. 
   &setup_rerun_script("error.$$");
   open (ERROR_FL, ">$resdir/$bm.ERROR") || die "Unable to create error file $resdir/$bm.ERROR.\n";
@@ -303,7 +324,7 @@ else {
       &runerror("Unable to gzip $resdir/$bm.stats.");
     }
   }
-  system ("cat $runlogfl");
+  # system ("cat $runlogfl"); # tee to stdout and log file.
 }
 
 &rsync_results();

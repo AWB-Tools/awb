@@ -1085,7 +1085,11 @@ sub new_bundle {
   
   # append the bundle info to the file
   print "# writing bundle information to file $file\n"; # DEBUG
-  if (! -e $file) {system "touch $file"} # create empty file if it doesn't exist
+  unless (-e $file) {
+    my $dir = dirname($file);
+    system "mkdir -p $dir";
+    system "touch $file" # create empty file if it doesn't exist
+  }
   my $file_obj = Asim::Inifile->new($file) || return ();
   if ($type eq 'baseline') {
     if ($experiment) {$file_obj->put($tag, 'Type', $runtype)}
@@ -2446,6 +2450,38 @@ sub push_all_packages {
   return 1;
 }
 
+#
+# Revert one or more packages
+#
+sub revert_package {
+  my @package_names = _expand_package_names(@_);
+
+  foreach my $name (@package_names) {
+    _print_package_start("revert", $name);
+
+    my $package = get_package($name);
+
+    unless (defined($package)) {
+      _add_failure($name, "no such package");
+      _print_package_finish("revert", $name, "(No such package)");
+      next;
+    }
+
+    unless ($package->isprivate()) {
+      printf("Package %s is a shared package\n", $name );
+      _print_package_finish("revert", $name, "(Skipped)");
+      next;
+    }
+
+    $package->revert();
+
+    _print_package_finish("revert", $name);
+    if ( @_ ) { print "\n" }
+  }
+
+  return _report_failures();
+}
+
 
 sub tag_package {
   local @ARGV = @_;
@@ -2500,6 +2536,9 @@ sub merge_package {
   my $name = shift;
   my $package = get_package($name) || return ();
   my $csn = shift;
+
+  $package->isprivate()
+    || shell_error("Cannot merge a shared package\n") && return ();
 
   return $package->merge($csn);
 }

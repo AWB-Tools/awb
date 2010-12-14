@@ -158,6 +158,7 @@ Commands:
   release package [<package>] version    - create a new release of a package
   branch package [<package>] branch      - create a branch named "branch"
   merge package [<package>] [CSN]        - merge a branch with the main trunk (HEAD/CSN)
+  revert package [<package>]             - revert changes in the working copy of package
 
   lock package [<package>]               - lock a package
   unlock package [<package>]             - unlock a package

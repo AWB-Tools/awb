@@ -400,9 +400,9 @@ sub open {
     my $p_switches = '(%dynamic\s+|--dynamic\s+)?(%global\s+|--global\s+)?';
     my $p_name     = '\w+';
     my $p_string   = '\"[^"]*\"';
-    my $p_number   = '\d+';
+    my $p_number   = '(-?\d+(\.\d+)?|0x[0-9A-Fa-f]+)[Uu]?[Ll]?[Ll]?';
     my $p_default  = '\'?\w+';
-    my $p_desc     = '[^"]+';
+    my $p_desc     = '[^"]*';
 
     if (/^.*(${p_cmd})\s+${p_switches}\s*(${p_name})\s+(${p_string})\s+\"(${p_desc})\"/) {
       #
@@ -428,7 +428,7 @@ sub open {
                                             global => ((defined $3) ? 1 : 0),
                                             name => $4,
                                             default => "$5",
-                                            description => "$6");
+                                            description => "$8");
 
       push(@{$self->{params}}, $param);
       next;

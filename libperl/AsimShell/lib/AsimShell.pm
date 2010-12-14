@@ -111,6 +111,7 @@ our %COMPOUNDCOMMANDS =
     rehash    => [ qw(repositories locks packages models modules workspace) ],
     regtest   => [ qw(package) ],
     release   => [ qw(package) ],
+    revert    => [ qw(package) ],
     run       => [ qw(benchmark regression) ],
     setup     => [ qw(benchmark) ],
     set       => [ qw(repositoryDB workspace package lock model benchmark module) ],

@@ -1011,6 +1011,12 @@ sub label {
   $self->step('Label the repository');
   
   Asim::Xaction::start();
+  
+  # if we are moving an existing tag, we must remove the old one first
+  # or we'll just end up copying into a trunk/ subdirectory there!!
+  if ($existing && $found) {
+    $self->svn("rm $tag_url -m \"moving tag $labelname to new revision $rev\"");
+  }
 
   # if we are moving an existing tag, we must remove the old one first
   # or we'll just end up copying into a trunk/ subdirectory there!!
@@ -1038,6 +1044,41 @@ sub label {
   Asim::Xaction::commit();
   $self->release_lock();
   return 1;
+}
+
+=item $package-E<gt>revert()
+
+Revert any changes in the working copy.
+
+Returns 1 on success, 0 if the command failed.
+
+=cut
+
+sub revert {
+  my $this = shift;
+  return (0 == $this->svn("revert -R ."));
+}
+
+=item $package-E<gt>merge([$version])
+
+Merge changes from version $version into the working copy.
+
+$Version can be 'HEAD' for the main trunk, e.g. to merge changes from the trunk
+up to a branch, or the name of a branch, e.g. to merge changes on a branch
+down to the trunk or to another branch.  If omitted it defaults to 'HEAD'.
+
+Any merged changes are left uncommitted in the local copy,
+i.e. it is up to the user to commit the package later.
+
+=cut
+
+sub merge {
+  my $this = shift;
+  my $branchname = shift || 'HEAD';
+  my $branchurl = $this->get_version_url($branchname);
+  return
+      (0 == $this->svn("merge $branchurl . --accept postpone"))
+   && (0 == $this->svn("revert -R admin changes"));
 }
 
 =back

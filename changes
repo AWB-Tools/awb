@@ -7903,3 +7903,90 @@ Directory tools/awb/apm-edit
 Fixed loss of apm-edit insert popup menu.
 
 Joel
+
+----------
+mpellaue    Date: Tue Dec 14 18:11:19 EST 2010  CSN: CSN-awb-404
+                  Tue Dec 14 23:11:19 UTC 2010
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          403 
+ Completion.pm             Locally Modified          403 
+ Commands.pm               Locally Modified          403 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          403 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          403 
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          403 
+ Package.pm                Locally Modified          403 
+
+Directory tools/scripts
+ awb-batch                 Locally Modified          403 
+
+
+* Integration of changes from Intel revisions 2847-2981.
+
+CSN: CSN-awb-2851
+          
+
+- fixed a bug in the Package label() method when moving an existing tag.
+  The previous revision of the tag must be removed first.
+
+CSN: CSN-awb-2876
+          
+
+- a simple fix to batch script to help monitor the run progress.  Thanks to
+  Joel for the fix.
+
+
+CSN: CSN-awb-2877
+          
+
+- a possible fix to RUN/ areas incorrectly ending up with both .SUBMITTED
+  and .RUNNING file.  Before we generate a RUNNING file, spin-wait a few
+  seconds for SUBMITTED file to appear.  Similar to remote rsync
+  implementation.
+
+CSN: CSN-awb-2916
+          
+
+- implemented "merge package" command for SVN
+- added "revert package" command
+
+
+CSN: CSN-awb-2926
+          
+
+- fixed a bug in "new bundle" command, that was causing an error if the
+  destination directory for the bundle file does not exist yet.
+
+CSN: CSN-awb-2955
+          
+
+- fixed a bug in the recognition of integer parameters.
+  Now hex values of the form "0x..." and integers suffixed with
+  "L", "U", "ULL" etc. are recognized as integers by the Module class.
+
+
+CSN: CSN-awb-2956
+          
+
+- bug fix to numeric parameter parsing in Module class
+
+
+CSN: CSN-awb-2957
+          
+
+- fixed a few more bugs in parameter parsing:
+  + parameters with empty description strings
+  + numeric parameters with negative default values
+  
+CSN: CSN-awb-2978
+          
+
+- fixed an apparent typo in asim-batch
+
