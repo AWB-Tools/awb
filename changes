@@ -7887,3 +7887,19 @@ Directory tools/awb/apm-find-replace
   moved.
 
 Michael P.
+
+----------
+jsemer      Date: Tue Dec 14 17:05:51 EST 2010  CSN: CSN-awb-403
+                  Tue Dec 14 22:05:51 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          402 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.patch         Locally Modified          402 
+ apm_edit.ui               Locally Modified          402 
+
+Fixed loss of apm-edit insert popup menu.
+
+Joel

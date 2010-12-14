@@ -493,12 +493,7 @@
         <action name="moduleShell_at_containing_folderAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
-        <actiongroup name="InsertActionGroup"/>
-        <item text="&amp;Insert" name="popupMenu_38" accel="">
-            <action name="moduleInsertModuleAction"/>
-            <action name="moduleInsertSubmodelAction"/>
-            <action name="moduleInsertAsRootAction"/>
-        </item>
+        <action name="InsertActionGroup"/>
         <action name="moduleDeleteAction"/>
     </item>
     <item text="&amp;Alternatives" name="alternativesMenu">

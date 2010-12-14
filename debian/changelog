@@ -1,4 +1,4 @@
-awb (0.6.0~svn20101212r401+lucid) lucid; urgency=low
+awb (0.6.0~svn20101214r403+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -40,6 +40,14 @@ awb (0.6.0~svn20101212r401+lucid) lucid; urgency=low
   * r401
         Support for creating a new repository
 
+  [ Michael Pellauer ]
+  * r402
+        Support for moved modules
+
+  [ Joel Emer ]
+  * r401
+        Restore apm-edit insert functionality
 
 
- -- Joel Emer <joel@emer.org>  Sun, 12 Dec 2010 14:08:42 -0500
+
+ -- Joel Emer <joel@emer.org>  Tue, 14 Dec 2010 17:08:42 -0500

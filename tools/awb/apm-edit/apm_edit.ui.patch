@@ -1,12 +1,12 @@
-*** apm_edit.ui.orig	2009-08-09 08:37:24.000000000 -0400
---- apm_edit.ui	2009-08-09 08:37:42.000000000 -0400
+*** apm_edit.ui~	2010-12-14 16:56:30.000000000 -0500
+--- apm_edit.ui	2010-12-14 16:58:54.320355000 -0500
 ***************
-*** 467,478 ****
-          <action name="moduleEditAction"/>
+*** 493,504 ****
+          <action name="moduleShell_at_containing_folderAction"/>
           <action name="moduleNotesAction"/>
           <separator/>
 !         <actiongroup name="InsertActionGroup"/>
-!         <item text="&amp;Insert" name="popupMenu_33" accel="">
+!         <item text="&amp;Insert" name="popupMenu_38" accel="">
 !             <action name="moduleInsertModuleAction"/>
 !             <action name="moduleInsertSubmodelAction"/>
 !             <action name="moduleInsertAsRootAction"/>
@@ -14,8 +14,8 @@
           <action name="moduleDeleteAction"/>
       </item>
       <item text="&amp;Alternatives" name="alternativesMenu">
---- 467,473 ----
-          <action name="moduleEditAction"/>
+--- 493,499 ----
+          <action name="moduleShell_at_containing_folderAction"/>
           <action name="moduleNotesAction"/>
           <separator/>
 !         <action name="InsertActionGroup"/>
