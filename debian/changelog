@@ -37,7 +37,7 @@ awb (0.6.0~svn20101214r403+lucid) lucid; urgency=low
         Fixed apm-edit bug when editing string parameters
 
   [ Joel Emer ]
-  * r401
+  * r401,r405
         Support for creating a new repository
 
   [ Michael Pellauer ]
@@ -45,9 +45,11 @@ awb (0.6.0~svn20101214r403+lucid) lucid; urgency=low
         Support for moved modules
 
   [ Joel Emer ]
-  * r401
+  * r403
         Restore apm-edit insert functionality
 
-
-
- -- Joel Emer <joel@emer.org>  Tue, 14 Dec 2010 17:08:42 -0500
+  { Various ]
+  * r404
+        Backports of some bug fixes from Intel
+   
+ -- Joel Emer <jsemer@intel.com>  Tue, 14 Dec 2010 18:27:58 -0500

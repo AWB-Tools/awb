@@ -466,7 +466,7 @@ sub new_repository {
                 || return undef;
 
   $browse_url = Asim::choose("Repository browse URL")
-                || return undef;
+                || "undefined";
          
 
   #
@@ -484,6 +484,14 @@ sub new_repository {
   #
   # Create the repository and populate it with the package
   #
+  if (! Asim::choose_yes_or_no("Do you really want to import the pacakge",
+			       "response_required",
+			       "yes")) {
+    print "Package import aborted\n";
+    return undef;
+  }
+
+
   $status = $repo->create($package);
   return undef if (! $status);
 

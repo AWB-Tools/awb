@@ -7990,3 +7990,17 @@ CSN: CSN-awb-2978
 
 - fixed an apparent typo in asim-batch
 
+
+----------
+jsemer      Date: Tue Dec 14 18:28:31 EST 2010  CSN: CSN-awb-405
+                  Tue Dec 14 23:28:31 UTC 2010
+
+
+Directory debian
+ changelog                 Locally Modified          404 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          404 
+
+Allow empty browseURL when creating a new repository with
+awb-shell.
