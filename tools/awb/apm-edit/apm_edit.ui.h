@@ -194,7 +194,6 @@ void apm_edit::fileOpen()
     }
 
     $model = $m;
-    $model->modified(0);
 
 
     # Build root of model tree...
@@ -221,6 +220,24 @@ void apm_edit::fileOpen()
             this, 
             "apm-edit open",
             $error);
+    }
+
+    # Display warning popup if needed
+
+    my $moved_count = $model->moved_module_count();
+
+    if ($moved_count > 0) {
+    
+        # Warn the user.
+        my $popup;
+
+        $popup  = "Model has $moved_count files that seem to have moved on disk.\n"; 
+        $popup .= "It is recommended that you save your model to update these locations.";
+
+        Qt::MessageBox::information(
+            this, 
+            "apm-edit open",
+            $popup);
     }
 
     statusBar()->message("Model loaded...", 5000);

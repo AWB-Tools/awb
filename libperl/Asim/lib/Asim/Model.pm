@@ -133,6 +133,7 @@ sub _initialize {
   $self->{params}    = [];
 
   $self->{missing} = 0;
+  $self->{moved} = 0;
   $self->{missing_packages} = {};
 
   $self->{inifile} = Asim::Inifile->new();
@@ -184,10 +185,10 @@ sub open {
 
   if ($version == "1.0") {
     my $workbench = $inifile->get("Model","workbench");
-    $self->{workbench} = $self->_get_module($workbench);
+    $self->{workbench} = $self->_get_module_or_submodel($workbench, "workbench");
 
     my $system = $inifile->get("Model","system");
-    $self->{system} = $self->_get_module($system);
+    $self->{system} = $self->_get_module_or_submodel($system, "system");
 
   } elsif ($version >= 2.0 && $version < 3.0) {
     #
@@ -195,7 +196,7 @@ sub open {
     # should be able to read versions up to 3.0
     #
     my $model =  $inifile->get("Model","model");
-    $self->modelroot($self->_get_module($model));
+    $self->modelroot($self->_get_module_or_submodel($model, "model"));
 
   } else {
     _process_error("Illegal model version - $version\n");
@@ -217,15 +218,16 @@ sub open {
   #
   $self->{packfile} = ($self->_get_packfile());
 
-
-  $self->modified(0);
+  # If any of our modules moved, we are modified. Otherwise, we are pristine.
+  $self->modified($self->{moved} > 0);
   return 1;
 }
 
 
-sub _get_module {
+sub _get_module_or_submodel {
   my $self = shift;
   my $modname = shift;
+  my $modtype = shift;
   my $inifile = $self->{inifile};
 
   my $awbfile = $inifile->get($modname, "File");
@@ -237,19 +239,51 @@ sub _get_module {
     return undef;
   }
 
+  my $is_submodel = 0;
+  my $module_or_submodel;
+
   if ($awbfile =~ /\.apm$/) {
-    # It is a sub-model!!!
-    return $self->_get_submodel($modname, $awbfile);
+    # It is currently a submodel. Try to open it.
+    $module_or_submodel = Asim::Model->new($awbfile);
+    $is_submodel = 1;
+  }
+  else {
+  
+    # It is currently a module. Try to open it.
+    $module_or_submodel = Asim::Module->new($awbfile);
   }
 
-  my $module = Asim::Module->new($awbfile);
+  #
+  # If $awbfile is invalid it is often because the user moved 
+  # the file on disk. If a module or submodel of the same 
+  # $modname is found in the workspace in a different 
+  # location then it is used instead, and a warning is emitted. 
+  #
 
-  if (! defined($module)) {
-    _process_warning("Model needed module with non-existant awb file ($awbfile)\n");
-    $self->_check_module($modname, $awbfile);
-
-    $self->{missing}++;
-    return undef;
+  if (! defined($module_or_submodel)) {
+    $module_or_submodel = Asim::Module->find_new_module_location($modname, $modtype);
+    if (defined($module_or_submodel)) {
+      _process_warning("Module \"$modname\" seems to have moved on disk.\n");
+      _process_warning("It is recommended that you use apm-edit to save this change.\n");
+      $self->{moved}++;
+      $is_submodel = 0;
+    } else {
+      # See if there's a submodel for this.
+      $module_or_submodel = $self->_find_new_submodel_location($modname, $modtype);
+      if (defined($module_or_submodel)) {
+        _process_warning("Module \"$modname\" seems to have moved on disk.\n");
+        _process_warning("It is recommended that you use apm-edit to save this change.\n");
+        $self->{moved}++;
+        $is_submodel = 1;
+      }
+      else {
+        _process_warning("Model needed module or submodel with non-existant file ($awbfile).\n");
+        _process_warning("It is possible that you need to refresh your module database.\n");
+        $self->_check_module($modname, $awbfile);
+        $self->{missing}++;
+        return undef;
+      }
+    }
   }
 
   #
@@ -258,13 +292,39 @@ sub _get_module {
   my @overrides = $inifile->get_itemlist("$modname/Params");
   foreach my $o (@overrides) {
       my $v = $inifile->get("$modname/Params", $o);
-      $module->setparameter($o, $v) 
+      $module_or_submodel->setparameter($o, $v) 
         || _process_warning("Attempt to set undefined parameter ($o)\n");
   }
 
+  # 
+  # Submodels are not recursed into.
   #
-  # Recursively get the submodules
+
+  if ($is_submodel) {
+    #
+    # Collect information about missing modules and
+    # potential missing packages from submodel
+    #
+    $self->{missing} += $module_or_submodel->missing_module_count();
+
+    foreach my $p ($module_or_submodel->missing_packages()) {
+      $self->{missing_packages}->{$p} = 1;
+    }
+
+    #
+    # A submodel is represented simply as a module in the tree, but
+    # because it has the property isroot() and its owner() will not be
+    # the top-level model, one can check if it is a submodel. The method
+    # 'is_submodel' does this check...
+    #
+
+    return $module_or_submodel->modelroot();
+  }
+
   #
+  # It's a module. Recursively get the %required modules
+  #
+  my $module = $module_or_submodel;
   my @requires = $module->requires();
   my $submodname;
   my $submod;
@@ -278,59 +338,12 @@ sub _get_module {
         next;
       }
 
-      $submod = $self->_get_module($submodname) || next;
+      $submod = $self->_get_module_or_submodel($submodname, $r) || next;
       $module->add_submodule($submod);
   }
 
 #  print ".";
   return $module;
-}
-
-sub _get_submodel {
-  my $self = shift;
-  my $modname = shift;
-  my $apmfile = shift;
-
-  my $inifile = $self->{inifile};
-
-  my $submodel = Asim::Model->new($apmfile);
-
-  if (!defined($submodel)) {
-    _process_warning("Somethng wrong with submodel $apmfile\n");
-    $self->{missing}++;
-    return undef;
-  }
-
-  #
-  # Override parameters (copy of code in _get_module)
-  #
-  my @overrides = $inifile->get_itemlist("$modname/Params");
-
-  foreach my $o (@overrides) {
-      my $v = $inifile->get("$modname/Params", $o);
-      $submodel->setparameter($o, $v) 
-        || _process_warning("Attempt to set undefined parameter ($o)\n");
-  }
-
-
-  #
-  # Collect information about missing modules and
-  # potential missing packages from submodel
-  #
-  $self->{missing} += $submodel->missing_module_count();
-
-  foreach my $p ($submodel->missing_packages()) {
-    $self->{missing_packages}->{$p} = 1;
-  }
-
-  #
-  # A submodel is represented simply as a module in the tree, but
-  # because it has the property isroot() and its owner() will not be
-  # the top-level model, one can check if it is a submodel. The method
-  # 'is_submodel' does this check...
-  #
-
-  return $submodel->modelroot();
 }
 
 sub _get_packfile {
@@ -1394,6 +1407,32 @@ sub find_module_providing {
   return $root->find_module_providing($provides);
 }
 
+
+################################################################
+# 
+# Search the module database looking for a module
+# named $modname of type $modtype.
+# 
+################################################################
+
+sub _find_new_submodel_location {
+  my $self = shift;
+  my $modname = shift;
+  my $modtype = shift;
+
+  my $modelDB = Asim::Model::DB->new(".");
+
+  my @candidates = $modelDB->find($modtype);
+  
+  foreach my $candidate (@candidates) {
+    if ($candidate->{name} eq $modname) {
+        return $candidate;
+    }
+  }
+  
+  return undef;
+}
+
 ################################################################
 
 =item $model-E<gt>find_module_requiring($requires)
@@ -1485,6 +1524,23 @@ sub missing_module_count {
   return $self->{missing};
 }
 
+################################################################
+
+=item $model-E<gt>moved_module_count()
+
+Returns the number of modules that have moved on the filesystem.
+
+Note: Only valid right after model is read in.
+
+=cut
+
+################################################################
+
+sub moved_module_count {
+  my $self = shift;
+
+  return $self->{moved};
+}
 ################################################################
 
 =item $model-E<gt>embed_submodels()
@@ -1630,7 +1686,7 @@ sub nuke {
       $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" -nuke";
   }
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -nuke";
+      $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" -nuke";
   }
 
   return _process_command($cmd,%args);
@@ -1672,7 +1728,7 @@ sub configure {
       $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" -configure";
   }
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" -configure";
+      $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" -configure";
   }
 
   return _process_command($cmd,%args);
@@ -1714,7 +1770,7 @@ sub build {
       $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" -build";
   }
   if ($self->type() eq "HAsim") {
-      $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" -build";
+      $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" --buildopt=\"$buildopt\" -build";
   }
 
   return _process_command($cmd,%args);
@@ -1796,7 +1852,7 @@ sub setup {
            "--benchmark=$benchmark --rundir=\"$rundir\" -setup";
   }
   if ($self->type() eq "HAsim") {
-    $cmd = "hasim-configure  --model=$filename --builddir=\"$builddir\" " .
+    $cmd = "leap-configure  --model=$filename --builddir=\"$builddir\" " .
            "--benchmark=$benchmark --rundir=\"$rundir\" -setup";
   }
 
@@ -1842,7 +1898,7 @@ sub run {
       "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" -run";
   }
   if ($self->type() eq "HAsim") {
-    $cmd = "hasim-configure --model=$filename --builddir=\"$builddir\" " . 
+    $cmd = "leap-configure --model=$filename --builddir=\"$builddir\" " . 
       "--benchmark=$benchmark --rundir=\"$rundir\" --runopt=\"$runopt\" -run";
   }
 

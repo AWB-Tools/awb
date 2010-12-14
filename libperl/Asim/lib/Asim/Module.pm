@@ -125,7 +125,7 @@ sub new {
   my $class = ref($this) || $this;
   my $self = _initialize();
 
-  bless	$self, $class;
+  bless       $self, $class;
 
   #
   # Parse file if given
@@ -136,7 +136,6 @@ sub new {
 
   return $self;
 }
-
 
 sub _initialize {
 
@@ -2086,6 +2085,31 @@ sub find_module_requiring {
   return undef;
 }
 
+
+################################################################
+# 
+# Search the module database looking for a module
+# named $modname of type $modtype.
+# 
+################################################################
+
+sub find_new_module_location {
+  my $self = shift;
+  my $modname = shift;
+  my $modtype = shift;
+
+  my $moduleDB = Asim::Module::DB->new(".");
+
+  my @candidates = $moduleDB->find($modtype);
+  
+  foreach my $candidate (@candidates) {
+    if ($candidate->{name} eq $modname) {
+        return $candidate;
+    }
+  }
+  
+  return undef;
+}
 
 
 ################################################################

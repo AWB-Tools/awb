@@ -7862,3 +7862,28 @@ the awb package.  This .pack file is placed in:
 
    ~/.asim/repositories.d/<pkgname>.pack
 
+
+----------
+pellauer    Date: Tue Dec 14 16:14:36 EST 2010  CSN: CSN-awb-402
+                  Tue Dec 14 21:14:36 UTC 2010
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          401 
+ Model.pm                  Locally Modified          401 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          401 
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.ui       Locally Modified          401 
+ apm_find_replace.ui.h     Locally Modified          401 
+
+
+* Add support for finding modules when their files are moved on disk.
+* Add GUI support for this feature by popping up a message informing
+  the user to save their module.
+* Add button in apm-find-replace to filter for modules whose files have
+  moved.
+
+Michael P.

@@ -449,7 +449,7 @@
                                                 <rect>
                                                     <x>34</x>
                                                     <y>23</y>
-                                                    <width>70</width>
+                                                    <width>100</width>
                                                     <height>24</height>
                                                 </rect>
                                             </property>
@@ -461,6 +461,28 @@
                                             </property>
                                             <property name="toolTip" stdset="0">
                                                 <string>Select broken models</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QPushButton">
+                                            <property name="name">
+                                                <cstring>movedPushButton</cstring>
+                                            </property>
+                                            <property name="geometry">
+                                                <rect>
+                                                    <x>34</x>
+                                                    <y>60</y>
+                                                    <width>100</width>
+                                                    <height>24</height>
+                                                </rect>
+                                            </property>
+                                            <property name="text">
+                                                <string>Modules Moved</string>
+                                            </property>
+                                            <property name="accel">
+                                                <string></string>
+                                            </property>
+                                            <property name="toolTip" stdset="0">
+                                                <string>Select all models with modules that have been moved on disk</string>
                                             </property>
                                         </widget>
                                     </widget>
@@ -1346,6 +1368,12 @@
         <receiver>apmFindReplace</receiver>
         <slot>invertPushButton_clicked()</slot>
     </connection>
+    <connection>
+        <sender>movedPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>apmFindReplace</receiver>
+        <slot>movedPushButton_clicked()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>rootdirLineEdit</tabstop>
@@ -1436,6 +1464,7 @@
     <slot>modelEditAction_activated()</slot>
     <slot>clearPushButton_clicked()</slot>
     <slot>logListBox_doubleClicked( QListBoxItem * )</slot>
+    <slot>movedPushButton_clicked()</slot>
 </slots>
 <functions>
     <function>init()</function>

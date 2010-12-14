@@ -584,6 +584,30 @@ void apmFindReplace::brokenPushButton_clicked()
 }
 
 
+void apmFindReplace::movedPushButton_clicked()
+{
+  #
+  # Check (and select) models that are broken
+  #
+
+  my $modelhash = models();
+  my $count = 0;
+
+  foreach my $i (reverse sort keys %{$modelhash}) {
+    my $model = $modelhash->{$i};
+    my $match;
+    
+    $match = $model->moved_module_count() > 0;
+    $count++ if $match;
+
+    updateModelSelection($match, $i);
+  }
+
+  statusTextBox->setText("$count matches found");
+
+}
+
+
 #
 # Utility function to update the models selected
 #
