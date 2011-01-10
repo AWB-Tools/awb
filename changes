@@ -8027,3 +8027,17 @@ Directory libperl/Asim/lib/Asim
 * Fix get_module() to not go infinite when the root module of a submodel has 
   moved.
 
+
+----------
+pellauer    Date: Mon Jan 10 17:42:42 EST 2011  CSN: CSN-awb-407
+                  Mon Jan 10 22:42:42 UTC 2011
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          406 
+ awb_dialog.ui.h           Locally Modified          406 
+
+
+* Added Rehash menu item to AWB to rehash moduleDB and modelDB without going 
+  into apm-edit. This lives under the Edit menu.
+  

@@ -559,6 +559,37 @@ void awb_dialog::Refresh_activated()
 }
 
 
+
+void awb_dialog::Rehash_activated()
+{
+
+    my  $moduleDB = Asim::Module::DB->new(".");
+    my $modelDB = Asim::Model::DB->new();
+
+    # Rehash the module DB
+
+    statusBar()->message("Loading moduleDB...");
+    print "Loading moduleDB...";
+    STDOUT->flush();
+
+    $moduleDB->rehash();
+
+    statusBar()->message("Loading moduleDB...done", 5000);
+    print "...done.\n";
+
+    # Rehash the model DB
+
+    statusBar()->message("Loading modelDB...");
+    print "Loading modelDB...";
+    STDOUT->flush();
+
+    $modelDB->rehash();
+
+    statusBar()->message("Loading modelDB...done", 5000);
+    print "...done.\n";
+ 
+}
+
 void awb_dialog::NewModel_activated()
 {
     awb_util::new_model();
