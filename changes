@@ -8004,3 +8004,26 @@ Directory libperl/AsimShell/lib/AsimShell
 
 Allow empty browseURL when creating a new repository with
 awb-shell.
+
+----------
+pellauer    Date: Mon Jan 10 17:11:22 EST 2011  CSN: CSN-awb-406
+                  Mon Jan 10 22:11:22 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          405 
+
+
+* Add .apm file format 2.2. This format is backwards-compatible with v2.1, so 
+  old versions of AWB will be able to read the new files.
+  
+* In the new version, the Name and Provides of submodel roots is stored in the 
+  Globals section of the file. This facilitates finding the new location of the
+  file if it has moved on disk. 
+  
+* This will also facilitate moving LEAP models to have root type "project." So
+  far nothing has changed on this front yet.
+  
+* Fix get_module() to not go infinite when the root module of a submodel has 
+  moved.
+

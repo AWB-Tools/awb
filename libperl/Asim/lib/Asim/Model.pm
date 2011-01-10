@@ -185,18 +185,33 @@ sub open {
 
   if ($version == "1.0") {
     my $workbench = $inifile->get("Model","workbench");
-    $self->{workbench} = $self->_get_module_or_submodel($workbench, "workbench");
+    $self->{workbench} = $self->_get_module_or_submodel($workbench, "workbench", 1);
 
     my $system = $inifile->get("Model","system");
-    $self->{system} = $self->_get_module_or_submodel($system, "system");
+    $self->{system} = $self->_get_module_or_submodel($system, "system", 1);
 
-  } elsif ($version >= 2.0 && $version < 3.0) {
+  } elsif ($version >= 2.0 && $version < 2.2) {
     #
-    # Althought we are actually version 2.1, we
-    # should be able to read versions up to 3.0
+    # Small upwards-compatible file format change in version 2.2
     #
     my $model =  $inifile->get("Model","model");
-    $self->modelroot($self->_get_module_or_submodel($model, "model"));
+    $self->modelroot($self->_get_module_or_submodel($model, "model", 1));
+
+  } elsif ($version >= 2.2 && $version < 3.0) {
+    #
+    # Although we are actually version 2.2, we
+    # should be able to read versions up to 3.0
+    #
+    
+    #
+    # In this version the root name and type are stored in globals.
+    # Note that the old section still exists so AWB v2.1 can read v2.2 files.
+    # This version just makes things a lot nicer when files have moved on
+    # disk because with the name and the type we can usually find the new location.
+    #
+    my $rootname = $inifile->get("Global", "RootName");
+    my $rootprovides = $inifile->get("Global", "RootProvides");
+    $self->modelroot($self->_get_module_or_submodel($rootname, $rootprovides, 1));
 
   } else {
     _process_error("Illegal model version - $version\n");
@@ -228,6 +243,7 @@ sub _get_module_or_submodel {
   my $self = shift;
   my $modname = shift;
   my $modtype = shift;
+  my $at_root = shift || 0;
   my $inifile = $self->{inifile};
 
   my $awbfile = $inifile->get($modname, "File");
@@ -260,29 +276,39 @@ sub _get_module_or_submodel {
   # location then it is used instead, and a warning is emitted. 
   #
 
+
   if (! defined($module_or_submodel)) {
+    my $found_it = 0;
+
     $module_or_submodel = Asim::Module->find_new_module_location($modname, $modtype);
     if (defined($module_or_submodel)) {
       _process_warning("Module \"$modname\" seems to have moved on disk.\n");
       _process_warning("It is recommended that you use apm-edit to save this change.\n");
       $self->{moved}++;
       $is_submodel = 0;
-    } else {
-      # See if there's a submodel for this.
+      $found_it = 1;
+    } 
+    if (!$found_it && !$at_root) {
+      #
+      # See if there's a submodel for this. 
+      # Don't check at model roots because we can go infinite.
+      # Also there's an implicit invariant that the root of a submodel is not another submodel.
+      #
       $module_or_submodel = $self->_find_new_submodel_location($modname, $modtype);
       if (defined($module_or_submodel)) {
-        _process_warning("Module \"$modname\" seems to have moved on disk.\n");
+        _process_warning("Submodel \"$modname\" seems to have moved on disk.\n");
         _process_warning("It is recommended that you use apm-edit to save this change.\n");
         $self->{moved}++;
         $is_submodel = 1;
+        $found_it = 1;
       }
-      else {
-        _process_warning("Model needed module or submodel with non-existant file ($awbfile).\n");
-        _process_warning("It is possible that you need to refresh your module database.\n");
-        $self->_check_module($modname, $awbfile);
-        $self->{missing}++;
-        return undef;
-      }
+    }
+    if (!$found_it) {
+      _process_warning("Model needed module or submodel with non-existant file ($awbfile).\n");
+      _process_warning("It is possible that you need to refresh your module database.\n");
+      $self->_check_module($modname, $awbfile);
+      $self->{missing}++;
+      return undef;
     }
   }
 
@@ -431,12 +457,14 @@ sub save {
   #
   # Save [Global] section
   #
-  $new_inifile->put("Global", "Version", "2.1");
+  $new_inifile->put("Global", "Version", "2.2");
   $new_inifile->put("Global", "Class", "Asim::Model");
   #
   $new_inifile->put("Global", "Name", $self->name());
   $new_inifile->put("Global", "Description", $self->description());
   $new_inifile->put("Global", "Type", $self->type());
+  $new_inifile->put("Global", "RootName", $self->modelroot()->name());
+  $new_inifile->put("Global", "RootProvides", $self->provides());
   $new_inifile->put("Global", "SaveParameters", $self->saveparams());
   $new_inifile->put("Global", "DefaultBenchmark", $self->default_benchmark());
   $new_inifile->put("Global", "DefaultRunOpts", $self->default_runopts());
@@ -901,7 +929,7 @@ sub modelroot  {
     $value->owner($self);
 
     $self->{system} = $value;
-    $self->{provides} = $value->provides();
+    $self->provides($value->provides());
     $self->modified(1);
   }
 
@@ -1102,11 +1130,11 @@ sub add_submodule {
 }
 ################################################################
 
-=item $model-E<gt>provides()
+=item $model-E<gt>provides([$moduletype])
 
-Return the asim-type of the model. Actually this is just the asim-type
-of the root of the model tree as assigned when the model root is
-created.
+Return the awb-type of the model, which may be the default type,
+or something else if this model is a submodel. Optionally set
+the type to $moduletype.
 
 =cut
 
@@ -1114,10 +1142,13 @@ created.
 
 sub provides {
   my $self = shift;
+  my $moduletype = shift;
+
+  if (defined($moduletype)) {
+    $self->{provides} = $moduletype;
+  }
 
   return $self->{provides};
-
-  return 1;
 }
 
 ################################################################
