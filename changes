@@ -8041,3 +8041,14 @@ Directory tools/awb/awb2
 * Added Rehash menu item to AWB to rehash moduleDB and modelDB without going 
   into apm-edit. This lives under the Edit menu.
   
+
+----------
+pellauer    Date: Mon Jan 10 17:52:15 EST 2011  CSN: CSN-awb-408
+                  Mon Jan 10 22:52:15 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          407 
+
+
+* Update debian changelog for new .deb package.

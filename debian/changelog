@@ -1,4 +1,4 @@
-awb (0.6.0~svn20101214r403+lucid) lucid; urgency=low
+awb (0.6.0~svn20110110r407+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -48,8 +48,19 @@ awb (0.6.0~svn20101214r403+lucid) lucid; urgency=low
   * r403
         Restore apm-edit insert functionality
 
-  { Various ]
+  [ Various ]
   * r404
         Backports of some bug fixes from Intel
-   
+
+  [ Joel Emer ]
+  * r405
+        Allow empty browseURL when creating a new repository with awb-shell.
+
+  [ Michael Pellauer ]
+  * r406
+        .apm file format 2.2 to further support moved modules at submodel roots.
+
+  * r407
+        New GUI menu "Edit/Rehash" to rehash moduleDB without opening apm-edit.
+
  -- Joel Emer <jsemer@intel.com>  Tue, 14 Dec 2010 18:27:58 -0500
