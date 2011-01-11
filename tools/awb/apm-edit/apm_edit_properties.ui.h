@@ -11,6 +11,16 @@
 *****************************************************************************/
 
 
+const QString& apm_edit_properties::getDefaultProvides(const QString &)
+{
+    my $type = shift;
+    
+    if ($type eq "Leap") {
+        return "project";
+    } else {
+        return "model";
+    }
+}
 
 void apm_edit_properties::init()
 {
@@ -25,7 +35,7 @@ void apm_edit_properties::init()
     type_asim = 0;
     type_hasim = 1;
     type_leap = 2;
-
+  
     my $type = $model->type();
 
     if ($type eq "Asim") {
@@ -45,6 +55,8 @@ void apm_edit_properties::init()
 
     Benchmark->setText($model->default_benchmark());
     RunOpts->setText($model->default_runopts());
+    RootProvides->setText($model->provides());
+    current_root_provides = $model->provides();
 }
 
 
@@ -62,6 +74,8 @@ void apm_edit_properties::propertiesOk_clicked()
 
     $model->default_benchmark(Benchmark->text());
     $model->default_runopts(RunOpts->text());
+    
+    $model->provides(RootProvides->text());
 
     this->accept();
 }
@@ -70,4 +84,17 @@ void apm_edit_properties::propertiesHelp_clicked()
 {
     Qt::WhatsThis::enterWhatsThisMode();
 }
+
+void apm_edit_properties::typeComboBox_activated( const QString & )
+{
+    my $newval = shift;
+    my $old_default_provides = apm_edit_properties::getDefaultProvides(current_root_provides);
+  
+    if (RootProvides->text() eq $old_default_provides) {
+        my $new_default_provides = apm_edit_properties::getDefaultProvides($newval);
+        RootProvides->setText($new_default_provides);
+    }
+    current_root_provides = $newval;
+}
+
 

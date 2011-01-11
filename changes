@@ -8052,3 +8052,21 @@ Directory debian
 
 
 * Update debian changelog for new .deb package.
+
+----------
+pellauer    Date: Tue Jan 11 17:06:20 EST 2011  CSN: CSN-awb-409
+                  Tue Jan 11 22:06:20 UTC 2011
+
+
+Directory tools/awb/apm-edit
+ apm_edit_properties.ui.h  Locally Modified          408 
+ apm_edit_properties.ui    Locally Modified          408 
+
+
+* Add new line to APM Properties to allow user to set top-level provides.
+
+* The default provides is "model" for Asim and HAsim and "project" for Leap.
+
+* If the user writes something else then the default will not be applied.
+
+Michael P.

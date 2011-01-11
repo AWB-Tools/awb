@@ -188,6 +188,44 @@
                 </widget>
             </hbox>
         </widget>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout13</cstring>
+            </property>
+            <hbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <property name="margin">
+                    <number>0</number>
+                </property>
+                <property name="spacing">
+                    <number>6</number>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel1</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>100</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="text">
+                        <string>Root Provides:</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>RootProvides</cstring>
+                    </property>
+                    <property name="text">
+                        <string>model</string>
+                    </property>
+                </widget>
+            </hbox>
+        </widget>
         <spacer>
             <property name="name">
                 <cstring>spacer44</cstring>
@@ -201,7 +239,7 @@
             <property name="sizeHint">
                 <size>
                     <width>20</width>
-                    <height>21</height>
+                    <height>30</height>
                 </size>
             </property>
         </spacer>
@@ -271,7 +309,7 @@
                         </size>
                     </property>
                     <property name="text">
-                        <string>Run Options</string>
+                        <string>Run Options:</string>
                     </property>
                 </widget>
                 <widget class="QLineEdit">
@@ -300,7 +338,7 @@
             <property name="sizeHint">
                 <size>
                     <width>20</width>
-                    <height>21</height>
+                    <height>30</height>
                 </size>
             </property>
         </spacer>
@@ -403,6 +441,12 @@
         <receiver>apm_edit_properties</receiver>
         <slot>propertiesOk_clicked()</slot>
     </connection>
+    <connection>
+        <sender>typeComboBox</sender>
+        <signal>activated(const QString&amp;)</signal>
+        <receiver>apm_edit_properties</receiver>
+        <slot>typeComboBox_activated(const QString&amp;)</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>Name</tabstop>
@@ -420,14 +464,19 @@
     <include location="local" impldecl="in implementation">apm_edit_properties.ui.h</include>
 </includes>
 <variables>
-    <variable access="private">int type_hasim;</variable>
-    <variable access="private">int type_leap;</variable>
+    <variable access="private">QString&amp; current_root_provides;</variable>
     <variable access="private">int type_asim;</variable>
+    <variable access="private">int type_leap;</variable>
+    <variable access="private">int type_hasim;</variable>
 </variables>
 <slots>
     <slot>init()</slot>
     <slot>propertiesOk_clicked()</slot>
     <slot>propertiesHelp_clicked()</slot>
+    <slot>typeComboBox_activated( const QString &amp; )</slot>
 </slots>
+<functions>
+    <function access="private" returnType="const QString &amp;">getDefaultProvides( const QString &amp; )</function>
+</functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>
