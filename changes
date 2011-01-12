@@ -8070,3 +8070,17 @@ Directory tools/awb/apm-edit
 * If the user writes something else then the default will not be applied.
 
 Michael P.
+
+----------
+pellauer    Date: Wed Jan 12 16:51:56 EST 2011  CSN: CSN-awb-410
+                  Wed Jan 12 21:51:56 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          409 
+
+
+* Removing confusing error message from Module resolution that actually 
+  succeeds.
+  
+Michael P.

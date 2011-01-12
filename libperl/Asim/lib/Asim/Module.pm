@@ -192,7 +192,7 @@ sub open {
   # Cannonicalize file name and open
   #
   my $rfile = $Asim::default_workspace->resolve($file) 
-    || $self->ierror("Could not resolve module file ($file)\n") && return undef;
+    || return undef;
 
   CORE::open(M, "< $rfile") 
     || $self->ierror("Could not open module file ($file)\n") && return undef;
