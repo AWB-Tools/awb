@@ -1,4 +1,4 @@
-awb (0.6.0~svn20110110r407+lucid) lucid; urgency=low
+awb (0.6.0~svn20110113r411+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -60,7 +60,12 @@ awb (0.6.0~svn20110110r407+lucid) lucid; urgency=low
   * r406
         .apm file format 2.2 to further support moved modules at submodel roots.
 
-  * r407
+  * r407,r408
         New GUI menu "Edit/Rehash" to rehash moduleDB without opening apm-edit.
 
- -- Joel Emer <jsemer@intel.com>  Tue, 14 Dec 2010 18:27:58 -0500
+
+  * r409,r11
+        Allow user to use apm-edit to change root node tree
+
+
+ -- Joel Emer <joel@emer.org>  Thu, 13 Jan 2011 00:32:03 -0500
