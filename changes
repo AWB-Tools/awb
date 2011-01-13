@@ -8094,3 +8094,24 @@ Directory debian
  changelog                 Locally Modified          410 
 
 Updated debian changelog.
+
+----------
+mpellaue    Date: Thu Jan 13 11:13:36 EST 2011  CSN: CSN-awb-412
+                  Thu Jan 13 16:13:36 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          411 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          411 
+ Commands.pm               Locally Modified          411 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          411 
+
+
+* Add rehash of module/modelDB upon update package.
+* Add flag to ommit rehash in update package.
+* Update debian package information with changes.
+

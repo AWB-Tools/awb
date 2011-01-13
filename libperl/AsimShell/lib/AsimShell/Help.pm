@@ -143,6 +143,7 @@ Commands:
 
   update package [all|<package>...]      - update a package
     [--nobuild]                          - prevent ./configure and build of package
+    [--norehash]                         - prevent rehashing of module and model lists.
 
   commit package [all|<package>...]      - commit a package
     [--nodependent]                      - prevent commit of dependent packages

@@ -149,7 +149,7 @@ our %OPTIONS = (
     use_package        => [ "--build", "--nobuild", "--addpath", "--noaddpath" ],
     commit_package     => [ "--dependent", "--nodependent", "--commitlog" ],
     status_package     => [ "--verbose", "--noverbose" ],
-    update_package     => [ "--build", "--nobuild" ],
+    update_package     => [ "--build", "--nobuild", "--rehash", "--norehash" ],
     install_package    => [ "--source" ],
     tag_package        => [ "--existing" ],
 
