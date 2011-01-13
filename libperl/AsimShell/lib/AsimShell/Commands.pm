@@ -2147,20 +2147,24 @@ sub update_package {
     _print_package_finish("update", $name);
   }
 
-  # Rehash the model and module database.
-  # If we had a finer-grained rehash then we could do
-  # this on a per-package basis.
+  if ($rehash) {
 
-  my $moduleDB = get_moduleDB();
-  my $modelDB  = get_modelDB();
+    # Rehash the model and module database.
+    # If we had a finer-grained rehash then we could do
+    # this on a per-package basis.
 
-  print "Rehashing module database...\n";
-  $moduleDB->rehash();
-  print "Done.\n";
+    my $moduleDB = get_moduleDB();
+    my $modelDB  = get_modelDB();
 
-  print "Rehashing model database...\n";
-  $modelDB->rehash();
-  print "Done.\n";  
+    print "Rehashing module database...\n";
+    $moduleDB->rehash();
+    print "Done.\n";
+
+    print "Rehashing model database...\n";
+    $modelDB->rehash();
+    print "Done.\n";  
+
+  }
 
   # if updating more than one package, and building,
   # do the builds after you have checked everything out.

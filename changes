@@ -8115,3 +8115,17 @@ Directory libperl/AsimShell/lib
 * Add flag to ommit rehash in update package.
 * Update debian package information with changes.
 
+
+----------
+mpellaue    Date: Thu Jan 13 12:15:14 EST 2011  CSN: CSN-awb-413
+                  Thu Jan 13 17:15:14 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          412 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          412 
+
+
+* Correctly repsect the value of the --norehash flag.
