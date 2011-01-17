@@ -3407,6 +3407,27 @@ sub check_model_dependencies {
   return $model;
 }
 
+
+sub update_model {
+  my @files = @_;
+
+  if ($#files == -1) {
+    $files[0] =  Asim::choose_filename("Select model configuration file")
+      || shell_error("Failed to open model file\n") && return ();
+  }
+  
+  my $status = 1;
+
+  foreach my $file (@files) {
+    if (!Asim::Model::Update::update($file)) {
+      $status = undef;
+    }
+  }
+  
+  return $status;
+}
+
+
 ################################################################
 #
 # Benchmark functions

@@ -28,6 +28,8 @@ use Asim::Base;
 use Asim::Inifile;
 use Asim::Packfile;
 use Asim::Util;
+use Asim::Model::Update;
+
 
 our @ISA = qw(Asim::Base Asim::Inifile);
 
@@ -700,8 +702,20 @@ Always return configuration file "version".
 
 ################################################################
 
-sub version     { return $_[0]->_accessor("Global","Version",$_[1]) || "2.0"; }
+sub version     { return $_[0]->_accessor("Global","Version",$_[1]) || latest_version(); }
 
+
+################################################################
+
+=item $model-E<gt>latest_version()
+
+Return version of latest .apm file format.
+
+=cut
+
+################################################################
+
+sub latest_version     { return "2.2"; }
 
 
 ################################################################
@@ -1454,9 +1468,9 @@ sub _find_new_submodel_location {
   my $modelDB = Asim::Model::DB->new(".");
 
   my @candidates = $modelDB->find($modtype);
-  
+
   foreach my $candidate (@candidates) {
-    if ($candidate->{name} eq $modname) {
+    if ($candidate->name() eq $modname) {
         return $candidate;
     }
   }

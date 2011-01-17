@@ -243,6 +243,8 @@ Commands:
 
   cd model [<model>]                     - cd to build directory of model
 
+  update model [<model>...]              - update a model file
+
   set benchmark <benchmark>              - set default benchmark
 
   setup benchmark [<benchmark>]          - setup benchmark on a model

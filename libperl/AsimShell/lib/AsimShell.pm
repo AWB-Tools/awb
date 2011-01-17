@@ -121,7 +121,7 @@ our %COMPOUNDCOMMANDS =
     tag       => [ qw(package) ],
     unlock    => [ qw(package lock) ],
     unset     => [ qw(package lock model module) ],
-    update    => [ qw(bundle package) ],
+    update    => [ qw(bundle package model) ],
     use       => [ qw(bundle package) ],
     verify    => [ qw(regression configuration) ],
     svn       => [ qw(package) ],
@@ -363,8 +363,17 @@ sub run_command {
   #
   # Check if next argument combines to form a compound command
   #
-  if ( defined($line[0]) && defined(&{$command . "_" . $line[0]})) {
-    $command = $command . "_" . shift @line;
+  if (defined($COMPOUNDCOMMANDS{$command})) {
+  
+    if ( defined($line[0]) && defined(&{$command . "_" . $line[0]})) {
+      $command = $command . "_" . shift @line;
+    } else {
+
+      shell_error("Illegal subcommand to $command.\n");
+      return 0;
+
+    }
+    
   }
 
   #

@@ -8129,3 +8129,33 @@ Directory libperl/AsimShell/lib/AsimShell
 
 
 * Correctly repsect the value of the --norehash flag.
+
+----------
+pellauer    Date: Mon Jan 17 18:41:50 EST 2011  CSN: CSN-awb-414
+                  Mon Jan 17 23:41:50 UTC 2011
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          413 
+ Commands.pm               Locally Modified          413 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          413 
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          413 
+
+Directory libperl/Asim/lib/Asim/Model
+ Update.pm                 Locally Added               0 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          413 
+
+
+* Adding command "update model" to awb-shell. This command updates a .apm file
+  to the latest format and also updates the location of any moved modules.
+  
+* Improving error message for compound command failure.
+
+* Fixing bug in finding of new submodel locations.
+
