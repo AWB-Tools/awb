@@ -8159,3 +8159,16 @@ Directory libperl/Asim
 
 * Fixing bug in finding of new submodel locations.
 
+
+----------
+pellauer    Date: Mon Jan 17 19:12:22 EST 2011  CSN: CSN-awb-415
+                  Tue Jan 18 00:12:22 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          414 
+
+
+* Updating .deb changelog.
+
+Michael
