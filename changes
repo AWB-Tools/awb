@@ -8322,3 +8322,20 @@ Directory .
  aclocal.m4                Locally Modified          416 
 
 Redo automake with more recent version.
+
+----------
+mpellaue    Date: Fri Feb 11 17:33:43 EST 2011  CSN: CSN-awb-418
+                  Fri Feb 11 22:33:43 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          417 
+
+Directory tools/awb/awb2
+ awb_dialog.ui             Locally Modified          417 
+
+
+* Edit AWB gui to restore resizing behavior.
+* Increase size of model list relative to model tree.
+
+Michael P.

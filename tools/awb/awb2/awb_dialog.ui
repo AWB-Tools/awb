@@ -8,9 +8,23 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>661</width>
+            <width>662</width>
             <height>709</height>
         </rect>
+    </property>
+    <property name="sizePolicy">
+        <sizepolicy>
+            <hsizetype>7</hsizetype>
+            <vsizetype>7</vsizetype>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+    </property>
+    <property name="minimumSize">
+        <size>
+            <width>470</width>
+            <height>709</height>
+        </size>
     </property>
     <property name="caption">
         <string>awb</string>
@@ -30,227 +44,212 @@
                 <attribute name="title">
                     <string>Models</string>
                 </attribute>
-                <widget class="QLayoutWidget">
+                <vbox>
                     <property name="name">
-                        <cstring>Layout9</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>11</x>
-                            <y>523</y>
-                            <width>613</width>
-                            <height>30</height>
-                        </rect>
-                    </property>
-                    <hbox>
-                        <property name="name">
-                            <cstring>unnamed</cstring>
-                        </property>
-                        <property name="margin">
-                            <number>0</number>
-                        </property>
-                        <property name="spacing">
-                            <number>6</number>
-                        </property>
-                        <widget class="QPushButton">
-                            <property name="name">
-                                <cstring>Button_nuke</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Nuke</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Nuke the model</string>
-                            </property>
-                        </widget>
-                        <widget class="QPushButton">
-                            <property name="name">
-                                <cstring>Button_config</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Configure</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Configure the model</string>
-                            </property>
-                        </widget>
-                        <spacer>
-                            <property name="name">
-                                <cstring>Spacer1</cstring>
-                            </property>
-                            <property name="orientation">
-                                <enum>Horizontal</enum>
-                            </property>
-                            <property name="sizeType">
-                                <enum>Expanding</enum>
-                            </property>
-                            <property name="sizeHint">
-                                <size>
-                                    <width>20</width>
-                                    <height>20</height>
-                                </size>
-                            </property>
-                        </spacer>
-                        <widget class="QPushButton">
-                            <property name="name">
-                                <cstring>nextStep_models</cstring>
-                            </property>
-                            <property name="text">
-                                <string>Next &gt;</string>
-                            </property>
-                            <property name="toolTip" stdset="0">
-                                <string>Go to next tab page</string>
-                            </property>
-                        </widget>
-                    </hbox>
-                </widget>
-                <widget class="QSplitter">
-                    <property name="name">
-                        <cstring>splitter8</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>10</x>
-                            <y>10</y>
-                            <width>610</width>
-                            <height>500</height>
-                        </rect>
-                    </property>
-                    <property name="orientation">
-                        <enum>Vertical</enum>
+                        <cstring>unnamed</cstring>
                     </property>
                     <widget class="QSplitter">
                         <property name="name">
                             <cstring>splitter7</cstring>
                         </property>
-                        <property name="minimumSize">
-                            <size>
-                                <width>488</width>
-                                <height>106</height>
-                            </size>
-                        </property>
                         <property name="orientation">
-                            <enum>Horizontal</enum>
+                            <enum>Vertical</enum>
                         </property>
-                        <widget class="QListView">
-                            <column>
-                                <property name="text">
-                                    <string>Model Directories</string>
-                                </property>
-                                <property name="clickable">
-                                    <bool>true</bool>
-                                </property>
-                                <property name="resizable">
-                                    <bool>true</bool>
-                                </property>
-                            </column>
+                        <widget class="QSplitter">
                             <property name="name">
-                                <cstring>model_tree</cstring>
+                                <cstring>splitter7</cstring>
                             </property>
                             <property name="sizePolicy">
                                 <sizepolicy>
-                                    <hsizetype>5</hsizetype>
+                                    <hsizetype>7</hsizetype>
                                     <vsizetype>7</vsizetype>
                                     <horstretch>0</horstretch>
                                     <verstretch>0</verstretch>
                                 </sizepolicy>
                             </property>
+                            <property name="orientation">
+                                <enum>Horizontal</enum>
+                            </property>
+                            <widget class="QListView">
+                                <column>
+                                    <property name="text">
+                                        <string>Model Directories</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>model_tree</cstring>
+                                </property>
+                                <property name="sizePolicy">
+                                    <sizepolicy>
+                                        <hsizetype>5</hsizetype>
+                                        <vsizetype>7</vsizetype>
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="rootIsDecorated">
+                                    <bool>true</bool>
+                                </property>
+                                <property name="whatsThis" stdset="0">
+                                    <string>This tab page allows one to configure a model. Select a model directory in the upper left panel and then select a model in the upper right panel. Clicking the 'configure' button will configure that model. Click 'next' to move to the next step.</string>
+                                </property>
+                            </widget>
+                            <widget class="QLayoutWidget">
+                                <property name="name">
+                                    <cstring>layout23</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <property name="margin">
+                                        <number>0</number>
+                                    </property>
+                                    <widget class="QListView">
+                                        <column>
+                                            <property name="text">
+                                                <string>Models</string>
+                                            </property>
+                                            <property name="clickable">
+                                                <bool>true</bool>
+                                            </property>
+                                            <property name="resizable">
+                                                <bool>true</bool>
+                                            </property>
+                                        </column>
+                                        <property name="name">
+                                            <cstring>model_list</cstring>
+                                        </property>
+                                        <property name="sizePolicy">
+                                            <sizepolicy>
+                                                <hsizetype>5</hsizetype>
+                                                <vsizetype>7</vsizetype>
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>76</width>
+                                                <height>0</height>
+                                            </size>
+                                        </property>
+                                    </widget>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>highlightProblemsCheckBox</cstring>
+                                        </property>
+                                        <property name="sizePolicy">
+                                            <sizepolicy>
+                                                <hsizetype>5</hsizetype>
+                                                <vsizetype>0</vsizetype>
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="minimumSize">
+                                            <size>
+                                                <width>76</width>
+                                                <height>0</height>
+                                            </size>
+                                        </property>
+                                        <property name="text">
+                                            <string>Highlight Problems</string>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                        </widget>
+                        <widget class="QListBox">
+                            <item>
+                                <property name="text">
+                                    <string>Model Description</string>
+                                </property>
+                            </item>
+                            <property name="name">
+                                <cstring>model_description</cstring>
+                            </property>
                             <property name="minimumSize">
                                 <size>
-                                    <width>400</width>
-                                    <height>0</height>
+                                    <width>0</width>
+                                    <height>150</height>
                                 </size>
                             </property>
-                            <property name="rootIsDecorated">
-                                <bool>true</bool>
-                            </property>
-                            <property name="whatsThis" stdset="0">
-                                <string>This tab page allows one to configure a model. Select a model directory in the upper left panel and then select a model in the upper right panel. Clicking the 'configure' button will configure that model. Click 'next' to move to the next step.</string>
-                            </property>
-                        </widget>
-                        <widget class="QLayoutWidget">
-                            <property name="name">
-                                <cstring>layout23</cstring>
-                            </property>
-                            <vbox>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <property name="margin">
-                                    <number>0</number>
-                                </property>
-                                <widget class="QListView">
-                                    <column>
-                                        <property name="text">
-                                            <string>Models</string>
-                                        </property>
-                                        <property name="clickable">
-                                            <bool>true</bool>
-                                        </property>
-                                        <property name="resizable">
-                                            <bool>true</bool>
-                                        </property>
-                                    </column>
-                                    <property name="name">
-                                        <cstring>model_list</cstring>
-                                    </property>
-                                    <property name="sizePolicy">
-                                        <sizepolicy>
-                                            <hsizetype>5</hsizetype>
-                                            <vsizetype>7</vsizetype>
-                                            <horstretch>0</horstretch>
-                                            <verstretch>0</verstretch>
-                                        </sizepolicy>
-                                    </property>
-                                    <property name="minimumSize">
-                                        <size>
-                                            <width>76</width>
-                                            <height>0</height>
-                                        </size>
-                                    </property>
-                                </widget>
-                                <widget class="QCheckBox">
-                                    <property name="name">
-                                        <cstring>highlightProblemsCheckBox</cstring>
-                                    </property>
-                                    <property name="sizePolicy">
-                                        <sizepolicy>
-                                            <hsizetype>5</hsizetype>
-                                            <vsizetype>0</vsizetype>
-                                            <horstretch>0</horstretch>
-                                            <verstretch>0</verstretch>
-                                        </sizepolicy>
-                                    </property>
-                                    <property name="minimumSize">
-                                        <size>
-                                            <width>76</width>
-                                            <height>0</height>
-                                        </size>
-                                    </property>
-                                    <property name="text">
-                                        <string>Highlight Problems</string>
-                                    </property>
-                                </widget>
-                            </vbox>
                         </widget>
                     </widget>
-                    <widget class="QListBox">
-                        <item>
-                            <property name="text">
-                                <string>Model Description</string>
-                            </property>
-                        </item>
+                    <widget class="QLayoutWidget">
                         <property name="name">
-                            <cstring>model_description</cstring>
+                            <cstring>Layout9</cstring>
                         </property>
-                        <property name="minimumSize">
-                            <size>
-                                <width>0</width>
-                                <height>150</height>
-                            </size>
-                        </property>
+                        <hbox>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <property name="margin">
+                                <number>0</number>
+                            </property>
+                            <property name="spacing">
+                                <number>6</number>
+                            </property>
+                            <widget class="QPushButton">
+                                <property name="name">
+                                    <cstring>Button_nuke</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Nuke</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Nuke the model</string>
+                                </property>
+                            </widget>
+                            <widget class="QPushButton">
+                                <property name="name">
+                                    <cstring>Button_config</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Configure</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Configure the model</string>
+                                </property>
+                            </widget>
+                            <spacer>
+                                <property name="name">
+                                    <cstring>Spacer1</cstring>
+                                </property>
+                                <property name="orientation">
+                                    <enum>Horizontal</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property name="sizeHint">
+                                    <size>
+                                        <width>20</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                            <widget class="QPushButton">
+                                <property name="name">
+                                    <cstring>nextStep_models</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Next &gt;</string>
+                                </property>
+                                <property name="toolTip" stdset="0">
+                                    <string>Go to next tab page</string>
+                                </property>
+                            </widget>
+                        </hbox>
                     </widget>
-                </widget>
+                </vbox>
             </widget>
             <widget class="QWidget">
                 <property name="name">
@@ -3570,6 +3569,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
     <slot>benchmark_list_clicked( QListViewItem * )</slot>
     <slot>benchmark_list_contextMenuRequested( QListViewItem *, const QPoint &amp;, int )</slot>
     <slot>model_list_doubleClicked( QListViewItem * )</slot>
+    <slot>highlightProblemsCheckBox_stateChanged( int )</slot>
     <slot>nextStep_models_clicked()</slot>
     <slot>nextStep_buildopts_clicked()</slot>
     <slot>nextStep_benchmarks_clicked()</slot>
@@ -3629,7 +3629,6 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
     <slot>updateAllCheckBox_toggled( bool )</slot>
     <slot>refreshPushButton_clicked()</slot>
     <slot>updatePushButton_clicked()</slot>
-    <slot>highlightProblemsCheckBox_stateChanged( int )</slot>
     <slot>pushBusyCursor()</slot>
     <slot>popBusyCursor()</slot>
 </slots>

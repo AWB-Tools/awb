@@ -1,4 +1,4 @@
-awb (0.6.0~svn20110211r417+lucid) lucid; urgency=low
+awb (0.6.0~svn20110211r418+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
