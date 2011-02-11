@@ -1,4 +1,4 @@
-awb (0.6.0~svn20110117r414+lucid) lucid; urgency=low
+awb (0.6.0~svn20110211r417+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -70,9 +70,13 @@ awb (0.6.0~svn20110117r414+lucid) lucid; urgency=low
   * r412,413
         Add module rehashing upon update package.
 
-  * r414
+  * r414,415
         Add "update model" command. 
         Bugfix on submodel find. 
         Improve error messages when command not found.
 
- -- Joel Emer <joel@emer.org>  Thu, 13 Jan 2011 00:32:03 -0500
+  * r416,417
+        Add support for dealing with stale .apm files.
+
+
+ -- Joel Emer <jsemer@intel.com>  Fri, 11 Feb 2011 11:33:45 -0500

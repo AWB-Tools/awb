@@ -8264,3 +8264,61 @@ Directory .
 
 Michael P.
 
+
+----------
+jsemer      Date: Fri Feb 11 11:41:31 EST 2011  CSN: CSN-awb-417
+                  Fri Feb 11 16:41:31 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          416 
+
+Directory debian
+ changelog                 Locally Modified          416 
+
+Directory .
+ Makefile.in               Locally Modified          416 
+
+Directory include
+ config.h.in               Locally Modified          416 
+
+Directory libperl
+ Makefile.in               Locally Modified          416 
+
+Directory tools
+ Makefile.in               Locally Modified          416 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          416 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          416 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          416 
+
+Directory lib
+ Makefile.in               Locally Modified          416 
+
+Directory .
+ aclocal.m4                Locally Modified          416 
+
+Redo automake with more recent version.
