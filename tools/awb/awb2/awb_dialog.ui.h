@@ -200,8 +200,13 @@ void awb_dialog::model_tree_onItem( QListViewItem * )
 
 void awb_dialog::model_tree_clicked( QListViewItem * )
 {
+
+    use ColoredListViewItem;
+
     my $item = shift || return;
     my $name = $item->text(1);
+    
+    this->pushBusyCursor();
 
     print "awb_dialog::model_tree_clicked - Item = $name\n" if $::debug;
 
@@ -215,7 +220,13 @@ void awb_dialog::model_tree_clicked( QListViewItem * )
     model_list->clear();
 
     for my $i (awb_util::glob_apm($name)) {
-        my $citem = Qt::ListViewItem(model_list, undef);
+        my @color = (255, 255, 255);
+        if (highlightProblemsCheckBox->isChecked()) {
+            my $mod = Asim::Model->new($i);
+            @color = (230, 165, 40) if ($mod->is_stale());
+            @color = (200, 0, 0) if ($mod->is_broken());
+        }
+        my $citem = ColoredListViewItem(model_list, undef, undef, @color);
         $citem->setExpandable(1);
 
         # Column 0 = model name
@@ -224,8 +235,9 @@ void awb_dialog::model_tree_clicked( QListViewItem * )
         # Column 1 = model file path
         $citem->setText(1, trUtf8($i));
     }
+    
+    this->popBusyCursor();
 
-	    
 }
 
 #
@@ -245,6 +257,8 @@ void awb_dialog::model_list_clicked( QListViewItem * )
     my $model = undef;
     my $model_enable;
     my $model_options;
+
+    this->pushBusyCursor();
 
     # Clear old model info
 
@@ -315,6 +329,8 @@ void awb_dialog::model_list_clicked( QListViewItem * )
 
     # Clear parameters
     paramList->clear();
+
+    this->popBusyCursor();
 
 }
 
@@ -397,6 +413,8 @@ void awb_dialog::benchmark_tree_clicked( QListViewItem * )
 
     print "awb_dialog::benchmark_tree_clicked - Item = $name\n" if $::debug;
 
+    this->pushBusyCursor();
+
     # Force benchmark tree expansion
     if (!$item->isOpen()) {
         benchmark_tree_expanded($item);
@@ -412,6 +430,8 @@ void awb_dialog::benchmark_tree_clicked( QListViewItem * )
         $citem->setText(0, trUtf8(basename($i,".apm")));
         $citem->setText(1, trUtf8($i));
     }
+
+    this->popBusyCursor();
 
 }
 
@@ -433,6 +453,8 @@ void awb_dialog::benchmark_list_clicked( QListViewItem * )
     my $benchmark_enable;
 
     # Clear out old benchmark
+
+    this->pushBusyCursor();
 
     benchmark_name->setText("");
     benchmark_description->clear();
@@ -467,6 +489,9 @@ void awb_dialog::benchmark_list_clicked( QListViewItem * )
     #   Does not work before benchmark is set up
 
     # paramRefresh_clicked();    
+
+    this->popBusyCursor();
+
 }
 
 
@@ -489,6 +514,15 @@ void awb_dialog::benchmark_list_contextMenuRequested( QListViewItem *, const QPo
 void awb_dialog::model_list_doubleClicked( QListViewItem * )
 {
     awb_util::edit_model(this);
+}
+
+
+
+void awb_dialog::highlightProblemsCheckBox_stateChanged( int )
+{
+    if (my $item = model_tree->selectedItem()) {
+        model_tree_clicked($item);
+    }
 }
 
 
@@ -549,6 +583,8 @@ void awb_dialog::Refresh_activated()
 {
     my $item;
 
+    this->pushBusyCursor();
+
     if ($item = model_tree->selectedItem()) {
         model_tree_clicked($item);
     }
@@ -556,6 +592,9 @@ void awb_dialog::Refresh_activated()
     if ($item = benchmark_tree->selectedItem()) {
         benchmark_tree_clicked($item);
     }
+
+    this->popBusyCursor();
+
 }
 
 
@@ -565,6 +604,8 @@ void awb_dialog::Rehash_activated()
 
     my  $moduleDB = Asim::Module::DB->new(".");
     my $modelDB = Asim::Model::DB->new();
+
+    this->pushBusyCursor();
 
     # Rehash the module DB
 
@@ -587,6 +628,8 @@ void awb_dialog::Rehash_activated()
 
     statusBar()->message("Loading modelDB...done", 5000);
     print "...done.\n";
+
+    this->popBusyCursor();
  
 }
 
@@ -617,21 +660,31 @@ void awb_dialog::ShellModel_at_Containing_Folder_activated()
 
 void awb_dialog::Button_nuke_clicked()
 {
+    this->pushBusyCursor();
+
     awb_util::nuke_model()
         ||  Qt::MessageBox::information(
             this, 
             "nuke_model",
             "Model nuke failed\n");
+
+    this->popBusyCursor();
+
 }
 
 void awb_dialog::Button_config_clicked()
 {
     my $status;
 
+    this->pushBusyCursor();
+
     # BUG - This does not work after subwindow creation!!!!
     nextStep_models->setEnabled(1);
 
     $status = awb_util::config_model();
+
+    this->popBusyCursor();
+
     if (!defined($status)) {
         Qt::MessageBox::information(
             this, 
@@ -645,17 +698,25 @@ void awb_dialog::Button_config_clicked()
 
 void awb_dialog::Button_clean_clicked()
 {
+
+    this->pushBusyCursor();
+
     awb_util::clean_model()
         ||  Qt::MessageBox::information(
             this, 
             "clean_model",
             "Model clean failed\n");
+
+    this->popBusyCursor();
+
 }
 
 
 void awb_dialog::Button_build_clicked()
 {
     my $status;
+
+    this->pushBusyCursor();
 
     # BUG - This does not work after subwindow creation!!!!
     nextStep_buildopts->setEnabled(1);
@@ -665,6 +726,9 @@ void awb_dialog::Button_build_clicked()
     extraBuildSwitches_textChanged();
 
     $status = awb_util::build_model();
+
+    this->popBusyCursor();
+
     if (! defined($status)) {
         Qt::MessageBox::information(
             this, 
@@ -696,11 +760,16 @@ void awb_dialog::Button_setup_clicked()
 {
     my $status;
 
+    this->pushBusyCursor();
+
     # BUG - This does not work after subwindow creation!!!!
     nextStep_benchmarks->setEnabled(1);
     nextStep_parameters->setEnabled(1);
 
     $status = awb_util::setup_benchmark();
+        
+    this->popBusyCursor();
+
     if (!defined($status)) {
         Qt::MessageBox::information(
             this, 
@@ -715,6 +784,8 @@ void awb_dialog::Button_run_clicked()
 {
     my $status;
 
+    this->pushBusyCursor();
+
     # BUG - This does not work after subwindow creation!!!!
     nextStep_runopts->setEnabled(1);
     nextStep_analysis->setEnabled(1);
@@ -724,6 +795,9 @@ void awb_dialog::Button_run_clicked()
     extraRunSwitches_textChanged();
     
     $status = awb_util::run_model();
+
+    this->popBusyCursor();
+
     if (!defined($status)) {
         Qt::MessageBox::information(
             this, 
@@ -1644,6 +1718,16 @@ void awb_dialog::packagesInit()
 }
 
 
+void awb_dialog::pushBusyCursor()
+{
+  Qt::Application::setOverrideCursor(Qt::waitCursor());
+}
+
+void awb_dialog::popBusyCursor()
+{
+  Qt::Application::restoreOverrideCursor();
+}
+
 #
 # Todo:
 #
@@ -1677,5 +1761,3 @@ void awb_dialog::packagesInit()
 #      Sometimes {model,bencmark}_tree_expanded not called!
 #
 #           
-
-

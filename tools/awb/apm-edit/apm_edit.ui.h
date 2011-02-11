@@ -175,16 +175,22 @@ void apm_edit::fileOpen()
         chomp($cwd = `pwd`);
     }
 
-    my $s = shift ||
+    my $filename = shift ||
         Qt::FileDialog::getOpenFileName(
             $cwd,
             "Asim Models (*.apm)",
             this,
             "open asim model dialog",
             "Choose a model to edit" ) ||
-        return;;
+        return;
+    
+    my $check_health = shift;
+    # Can't use shift || 1 for GetOpt boolean
+    $check_health = 1 if (!defined($check_health));
 
-    my $m = Asim::Model->new($s);
+    this->pushBusyCursor();
+    my $m = Asim::Model->new($filename);
+    this->popBusyCursor();
     if (! defined $m) {
         Qt::MessageBox::information(
             this, 
@@ -195,21 +201,134 @@ void apm_edit::fileOpen()
 
     $model = $m;
 
-
     # Build root of model tree...
 
     modelShow();
+    
+    statusBar()->message("Model loaded...", 5000);
+    
+    return if (!$check_health);
 
-    # Display error popup if needed
+    #
+    # Perform a comprehensive check of the health of the model
+    # and its submodels, alerting the user to any problems.
+    # This can be disabled with the --nocheck-health option.
+    #
 
-    my $count = $model->missing_module_count();
+    #
+    # Open erroneous submodels if needed
+    # This returns models recursively in a "depth-first" manner,
+    # which ensures that problems are reported at most once.
+    #
 
-    if ($count > 0) {
+    my @broken_submodels = $model->get_broken_submodels();    
+    my $open_broken = 0;
+
+    if ($#broken_submodels > -1) {
+    
+      my $status = Qt::MessageBox::warning ( 
+          this, 
+          "apm-edit open", 
+          "The current model uses submodels that appear to be broken.\nDo you wish to open these submodels?",
+          "&Yes",
+          "&No",
+          "",
+          0,
+          1);
+
+       if ($status == 0) {
+
+         this->pushBusyCursor();
+
+         foreach my $s (@broken_submodels) {
+
+            # invoke APM edit without checking model health.
+            my $command = "apm-edit --nocheck-health " . $s->filename();
+            if (system("$command &")) {
+                Qt::MessageBox::information(
+                    this, 
+                    "apm-edit open", 
+                    "File open failed");
+                return;
+            }
+         }
+
+         this->popBusyCursor();
+
+       }
+
+    }
+
+    # Re-open the current model in case anything has changed.
+    $m = Asim::Model->new($filename);
+    if (! defined $m) {
+        Qt::MessageBox::information(
+            this, 
+            "apm-edit open", 
+            "File open failed");
+        return;
+    }
+
+    $model = $m;
+
+    my @stale_submodels = $model->get_stale_submodels();
+    my $open_stale = 0;
+
+    if ($#stale_submodels > -1) {
+    
+      my $status = Qt::MessageBox::warning ( 
+          this, 
+          "apm-edit open", 
+          "The current model uses submodels that contain stale information.\nDo you wish to open these submodels?",
+          "&Yes",
+          "&No",
+          "",
+          0,
+          1);
+
+       if ($status == 0) {
+       
+         this->pushBusyCursor();
+         
+         foreach my $s (@stale_submodels) {
+            # invoke APM edit without checking model health.
+            my $command = "apm-edit --nocheck-health " . $s->filename();
+
+            if (system("$command &")) {
+                Qt::MessageBox::information(
+                    this, 
+                    "apm-edit open", 
+                    "File open failed");
+                return;
+            }
+         }
+         
+         this->popBusyCursor();
+
+       }
+
+    }
+
+    # Re-open the current model in case anything has changed.
+    $m = Asim::Model->new($filename);
+    if (! defined $m) {
+        Qt::MessageBox::information(
+            this, 
+            "apm-edit open", 
+            "File open failed");
+        return;
+    }
+
+    # Display error popup for this model if needed
+    # Purposely ignore submodels as they are handled above
+
+    if ($model->is_broken(0)) {
         my $error;
         my @missing;
 
-        $error  = "Model has $count unsatisfied requirements\n";
-        $error .= "(possibly in a submodel)\n"; 
+        my $count = $model->missing_module_count();
+
+        $error  = "Model has $count unsatisfied requirements or missing modules\n";
         @missing = $model->missing_packages();
 
         if (@missing) {
@@ -221,18 +340,18 @@ void apm_edit::fileOpen()
             "apm-edit open",
             $error);
     }
+    elsif ($model->is_stale(0)) {
 
-    # Display warning popup if needed
+    # Display stale warning popup if needed and not broken
+    # Purposely ignore submodels as they are handled above
 
-    my $moved_count = $model->moved_module_count();
-
-    if ($moved_count > 0) {
-    
+        my $moved_count = $model->moved_module_count();    
         # Warn the user.
         my $popup;
 
-        $popup  = "Model has $moved_count files that seem to have moved on disk.\n"; 
-        $popup .= "It is recommended that you save your model to update these locations.";
+        $popup = "Model contains stale information that seems to be out of date.\n";
+        $popup .= "This includes $moved_count files that seem to have moved on disk.\n" if ($moved_count > 0);
+        $popup .= "It is recommended that you save your model to update this information.";
 
         Qt::MessageBox::information(
             this, 
@@ -240,7 +359,8 @@ void apm_edit::fileOpen()
             $popup);
     }
 
-    statusBar()->message("Model loaded...", 5000);
+    statusBar()->message("Model health check complete...", 5000);
+    
 }
 
 
@@ -249,6 +369,8 @@ void apm_edit::fileOpen()
 void apm_edit::modelShow()
 {
     our $model;
+
+    this->pushBusyCursor();
 
     # Set model name
     
@@ -291,6 +413,8 @@ void apm_edit::modelShow()
 
     my $filename = basename($model->filename() || "Unnamed");
     setCaption("$filename - apm-edit");
+    
+    this->popBusyCursor();
 
 }
 
@@ -746,6 +870,8 @@ void apm_edit::modelRefresh_activated()
 
     # Rehash the module DB
 
+    this->pushBusyCursor();
+
     statusBar()->message("Loading moduleDB...");
     print "Loading moduleDB...";
     STDOUT->flush();
@@ -774,7 +900,10 @@ void apm_edit::modelRefresh_activated()
     # Force refresh of alternatives pane
     #
     my $item=Model->selectedItem() || return;
-    Model_selectionChanged($item)
+    Model_selectionChanged($item);
+
+    this->popBusyCursor();
+
 }
 
 
@@ -2294,3 +2423,13 @@ int * apm_edit::Model_walk()
 }
 
 
+
+void apm_edit::pushBusyCursor()
+{
+  Qt::Application::setOverrideCursor(Qt::waitCursor());
+}
+
+void apm_edit::popBusyCursor()
+{
+  Qt::Application::restoreOverrideCursor();
+}

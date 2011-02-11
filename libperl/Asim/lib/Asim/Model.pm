@@ -134,9 +134,39 @@ sub _initialize {
 
   $self->{params}    = [];
 
-  $self->{missing} = 0;
-  $self->{moved} = 0;
-  $self->{missing_packages} = {};
+  #
+  # This list contains pointers to submodels for fast reference.
+  # Note that these submodels may themselves have submodels.
+  #
+  $self->{submodels} = [];
+
+  #
+  # Model health information. 
+  # Note: Explicitly does not include information about submodels as that is handled
+  # separately. However accessors allow the outside world to retreive it.
+  #
+  
+  $self->{health} = {};
+  
+  # List of missing AWB/APM files
+  $self->{health}{"missing_files"} = [];
+  # List of moved AWB/APM files
+  $self->{health}{"moved_files"} = [];
+  # Missing packages (IE need checkout). This is stored as a "set" where any package can
+  # be present at most once.
+  $self->{health}{"missing_packages"} = {};
+  # A module is "stale" if it has updated one of the following pieces of info:
+  #   A) %name
+  #   B) %requires (added or removed)
+  #   C) Union Dir location (handled by moved_files/missing_files above)
+  #   D) Package Hint (IE the .awb file changed packages but UnionDir location is the same.)
+  # Stale info in the model isn't really a big problem, but the user should be
+  # prompted to save the model with the updated info. Otherwise stale information can
+  # linger for years, until things get out of date enough that it DOES become a problem.
+  # The "update model" command can help users quickly freshen .apm files with stale info.
+  # Note that submodels are not considered stale as their health is handled differently.
+  $self->{health}{"stale_modules"} = [];
+  $self->{health}{"stale_submodels"} = [];
 
   $self->{inifile} = Asim::Inifile->new();
 
@@ -185,7 +215,7 @@ sub open {
   #
   my $version = $inifile->get("Global", "Version");
 
-  if ($version == "1.0") {
+  if ($version eq "1.0") {
     my $workbench = $inifile->get("Model","workbench");
     $self->{workbench} = $self->_get_module_or_submodel($workbench, "workbench", 1);
 
@@ -235,8 +265,10 @@ sub open {
   #
   $self->{packfile} = ($self->_get_packfile());
 
-  # If any of our modules moved, we are modified. Otherwise, we are pristine.
-  $self->modified($self->{moved} > 0);
+  # Perform a general check of module health, including outputing warnings and updating
+  # "modified" state.
+  $self->_health_check();
+  
   return 1;
 }
 
@@ -253,7 +285,7 @@ sub _get_module_or_submodel {
   if (! defined($awbfile)) {
     _process_warning("Module ($modname) has no file in .apm file\n");
 
-    $self->{missing}++;
+    push(@{$self->{health}{"missing_files"}}, $modname);
     return undef;
   }
 
@@ -278,15 +310,13 @@ sub _get_module_or_submodel {
   # location then it is used instead, and a warning is emitted. 
   #
 
-
   if (! defined($module_or_submodel)) {
     my $found_it = 0;
 
     $module_or_submodel = Asim::Module->find_new_module_location($modname, $modtype);
     if (defined($module_or_submodel)) {
-      _process_warning("Module \"$modname\" seems to have moved on disk.\n");
-      _process_warning("It is recommended that you use apm-edit to save this change.\n");
-      $self->{moved}++;
+      _process_warning("Module \"$modname\" seems to have moved on disk.\n") if ($debug);
+      push(@{$self->{health}{"moved_files"}}, $modname);
       $is_submodel = 0;
       $found_it = 1;
     } 
@@ -298,9 +328,8 @@ sub _get_module_or_submodel {
       #
       $module_or_submodel = $self->_find_new_submodel_location($modname, $modtype);
       if (defined($module_or_submodel)) {
-        _process_warning("Submodel \"$modname\" seems to have moved on disk.\n");
-        _process_warning("It is recommended that you use apm-edit to save this change.\n");
-        $self->{moved}++;
+        _process_warning("Submodel \"$modname\" seems to have moved on disk.\n") if ($debug);
+        push(@{$self->{health}{"moved_files"}}, $modname);
         $is_submodel = 1;
         $found_it = 1;
       }
@@ -309,7 +338,7 @@ sub _get_module_or_submodel {
       _process_warning("Model needed module or submodel with non-existant file ($awbfile).\n");
       _process_warning("It is possible that you need to refresh your module database.\n");
       $self->_check_module($modname, $awbfile);
-      $self->{missing}++;
+      push(@{$self->{health}{"missing_files"}}, $modname);
       return undef;
     }
   }
@@ -329,15 +358,6 @@ sub _get_module_or_submodel {
   #
 
   if ($is_submodel) {
-    #
-    # Collect information about missing modules and
-    # potential missing packages from submodel
-    #
-    $self->{missing} += $module_or_submodel->missing_module_count();
-
-    foreach my $p ($module_or_submodel->missing_packages()) {
-      $self->{missing_packages}->{$p} = 1;
-    }
 
     #
     # A submodel is represented simply as a module in the tree, but
@@ -345,14 +365,97 @@ sub _get_module_or_submodel {
     # the top-level model, one can check if it is a submodel. The method
     # 'is_submodel' does this check...
     #
-
+    push(@{$self->{submodels}}, $module_or_submodel);
+    
+    #
+    # See if the info in the .apm file is stale. For submodels we only check if
+    # the name has changed.
+    #
+    
+    my $name_is_stale = not ($module_or_submodel->name() eq $modname);
+    push(@{$self->{health}{"stale_submodels"}}, $module_or_submodel) if ($name_is_stale);
+    
     return $module_or_submodel->modelroot();
   }
 
   #
-  # It's a module. Recursively get the %required modules
+  # It's a module. 
   #
   my $module = $module_or_submodel;
+  
+  #
+  # See if the info in the .apm file is stale.
+  # A) Check if %name has changed.
+  #
+  
+  my $name_is_stale = not ($module->name() eq $modname);
+  
+  #
+  # B) Check if %requires list matches that in the .apm file.
+  #
+  
+  print "Beginning check on " . $modname . "\n" if ($debug);
+  # We need two copies of these, one to index the for-loops and one
+  # to manipulate. If we manipulate during the for-loop it gets too confusing.
+  my @awb_requires = $module->requires();
+  my @awb_requires_idx = $module->requires();
+  my @apm_requires = $inifile->get_itemlist("$modname/Requires");
+  my @apm_requires_idx = $inifile->get_itemlist("$modname/Requires");
+  
+  foreach my $r (@awb_requires_idx) {
+    print "  Searching for " . $r ."\n" if ($debug);
+    for my $n (0..$#apm_requires_idx) {
+      print "    Checking " . $apm_requires_idx[$n] ."... " if ($debug);
+      if ($r eq $apm_requires_idx[$n]) {
+        print "Match!" if ($debug);
+        # The info in the files for this entry is consistent. 
+        # Remove this element from both lists.
+        delete($apm_requires[$n]);
+        shift(@awb_requires); 
+      
+      }
+      print "\n" if ($debug);
+    }
+  }
+  print "Done\n" if ($debug);
+  
+  # If either list has elements left then the .apm file is stale.
+  my $requires_is_stale = ($#awb_requires > 0 || $#apm_requires > 0);
+  
+  # C) Possibly moved_files above should be combined with stale_modules here.
+  
+  # D) Check if packagehint has changed (IE it's changed packages but not UnionDir location.)
+
+  # XXX Write this
+  my $packagehint_is_stale = 0;
+  
+  #
+  # Combine it all together for overall staleness.
+  #
+  my $mod_is_stale = $name_is_stale || $requires_is_stale || $packagehint_is_stale;
+  if ($mod_is_stale) {
+    if ($debug) {
+      print "Detected stale module $modname. ";
+      print "(NAME: old: $modname, new: ". $module->name() .") " if ($name_is_stale);
+      if ($requires_is_stale) {
+        print "(REQ: old:";
+        my @old_req = $inifile->get_itemlist("$modname/Requires");
+        foreach my $r (@old_req) {
+          print " $r";
+        }
+        print " new:";
+        foreach my $r ($module->requires()) {
+          print " $r";
+        }
+        print ")\n";
+      }
+    }
+    push(@{$self->{health}{"stale_modules"}}, $modname);
+  }
+
+  #
+  # Recursively get the %required modules
+  #
   my @requires = $module->requires();
   my $submodname;
   my $submod;
@@ -362,7 +465,7 @@ sub _get_module_or_submodel {
 
       if (! defined($submodname)) {
         _process_warning("Model missing \"$r\" in [$modname/Requires] in .apm file\n");
-        $self->{missing}++;
+        push(@{$self->{health}{"missing_files"}}, $modname);
         next;
       }
 
@@ -421,8 +524,9 @@ sub _check_module {
   my $package = $inifile->get($modname, "Packagehint");
 
   if ($package) {
-    $self->{missing_packages}->{$package} = 1;
+    $self->{health}{"missing_packages"}{$package} = 1;
     _process_warning("Awbfile \"$awbfile\" was expected to be in package \"$package\"\n");
+    _process_warning("Perhaps you need to check out \"$package\"\n");
   }
 
   return;
@@ -512,17 +616,14 @@ sub _put_module {
   my $filename;
   my $packagename;
 
-  if ($module->isroot() && $self != $module->owner()) {
-    #
-    # This is a submodel - put reference to submodel
-    # (but we call it module for operations below)
-    #
-    $module = $module->owner();
-    $filename = $Asim::default_workspace->unresolve($module->filename());
-  } else {
-    $filename = $module->filename();
-  }
-
+  #
+  # Unresolve to relative filename. In order to guarantee this doesn't fail, we first resolve to absolute filename.
+  # Slightly hackish.
+  #
+  $filename = $module->filename();
+  $filename = $Asim::default_workspace->resolve($filename);
+  $filename = $Asim::default_workspace->unresolve($filename);
+  
   #
   # Save filename and packagehint
   #
@@ -548,6 +649,13 @@ sub _put_module {
     if (!defined($s)) {
       print "Missing submodule of $modname\n";
       next;
+    }
+
+    if ($s->isroot()) {
+      #
+      # This is a submodel - put reference to submodel rather than module.
+      #
+      $s = $s->owner();
     }
 
     $inifile->put("$modname/Requires", $s->provides(), $s->name());
@@ -1565,8 +1673,10 @@ Note: Only valid right after model is read in.
 
 sub missing_module_count {
   my $self = shift;
+  my @missing = @{$self->{health}{"missing_files"}};
 
-  return $self->{missing};
+  return $#missing + 1;
+
 }
 
 ################################################################
@@ -1583,9 +1693,12 @@ Note: Only valid right after model is read in.
 
 sub moved_module_count {
   my $self = shift;
+  my @moved = @{$self->{health}{"moved_files"}};
 
-  return $self->{moved};
+  return $#moved + 1;
+
 }
+
 ################################################################
 
 =item $model-E<gt>embed_submodels()
@@ -1620,9 +1733,127 @@ was being read, and includes the 'Packagehint's for any missing modules.
 
 sub missing_packages {
   my $self = shift;
-  my @missing = keys %{$self->{missing_packages}};
+  my @missing = keys %{$self->{health}{"missing_packages"}};
 
   return (@missing)
+}
+
+sub is_broken {
+  my $self = shift;
+  my $include_submodels = shift || 0;
+  
+  # A model is broken if it has any missing files.
+  my @missing = @{$self->{health}{"missing_files"}};
+  my $result = $#missing > -1;
+  
+  if ($include_submodels) {
+    $result = $result || $self->_has_broken_submodels();
+  }
+  
+  return $result;
+
+}
+
+sub _has_broken_submodels {
+  my $self = shift;
+  my $result = 0;
+
+  foreach my $s (@{$self->{submodels}}) {
+    $result = $result || $s->is_broken(1);
+  }
+  
+  return $result;
+
+}
+
+sub is_stale {
+  my $self = shift;
+  my $include_submodels = shift || 0;
+  
+  # A model is stale if it has stale module information or
+  # any moved files.
+  my @stale1 = @{$self->{health}{"stale_modules"}};
+  my @stale2 = @{$self->{health}{"stale_submodels"}};
+  my @moved = @{$self->{health}{"moved_files"}};
+  
+  my $result = ($#stale1 > -1) || ($#stale2 > -1) || ($#moved > -1);
+  
+  if ($include_submodels) {
+    $result = $result || $self->_has_stale_submodels();
+  }
+
+  return $result;
+
+}
+
+sub _has_stale_submodels {
+  my $self = shift;
+  my $result = 0;
+  
+  # Recurse into submodels.
+  foreach my $s (@{$self->{submodels}}) {
+    $result = $result || $s->is_stale(1);
+  }
+  
+  return $result;
+
+}
+
+sub get_broken_submodels {
+  my $self = shift;
+  my @result = ();
+
+  foreach my $s (@{$self->{submodels}}) {
+    #
+    # Recurse first so that we present "leaf" models to the user first. Since we know any
+    # given submodel can't appear more than once, "depth-first" is sufficient.
+    #
+
+    push(@result, $s->get_broken_submodels());
+
+    if ($s->is_broken(0)) { # purposely don't include submdel info here.
+      push(@result, $s);
+    }
+  
+  }
+  
+  return @result;
+
+}
+
+sub get_stale_submodels {
+  my $self = shift;
+  my @result = ();
+
+  foreach my $s (@{$self->{submodels}}) {
+
+    #
+    # Recurse first so that we present "leaf" models to the user first. Since we know any
+    # given submodel can't appear more than once, "depth-first" is sufficient.
+    #
+
+    push(@result, $s->get_stale_submodels());
+
+    if ($s->is_stale(0)) { # purposely don't include submdel info here.
+      push(@result, $s);
+    }
+  
+  }
+  
+  return @result;
+
+}
+
+sub _health_check {
+  my $self = shift;
+
+  if ($self->is_broken(0)) {
+     _process_warning("Model file " . $self->filename() . " seems to be broken.\n");
+  }
+  elsif ($self->is_stale(0)) {
+     _process_warning("Model file " . $self->filename() . " contains stale data and should be updated.\n");
+  }
+
 }
 
 ################################################################

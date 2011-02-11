@@ -16,14 +16,15 @@ my $debug = 0;
 my $workspace;
 my $help;
 my $status;
+my $check_health = 1;
 
 #
 # Parse and process command line switches
 #
 $status = GetOptions( "workspace=s"    => \$workspace,
+                      "check-health!"  => \$check_health,
                       "help"           => \$help
                     );
-
 
 if (!$status) {
   my $prog = basename($0);
@@ -60,7 +61,9 @@ $app->setMainWidget($w);
 $w->show();
 
 if (defined $ARGV[0]) {
-  $w->fileOpen($ARGV[0]);
+
+  $w->fileOpen($ARGV[0], $check_health);
+
 }
 
 exit $app->exec();

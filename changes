@@ -8172,3 +8172,95 @@ Directory debian
 * Updating .deb changelog.
 
 Michael
+
+----------
+mpellaue    Date: Fri Feb 11 10:54:06 EST 2011  CSN: CSN-awb-416
+                  Fri Feb 11 15:54:06 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          415 
+ Makefile.in               Locally Modified          415 
+
+Directory include
+ config.h.in               Locally Modified          415 
+
+Directory libperl
+ Makefile.in               Locally Modified          415 
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          415 
+
+Directory tools
+ Makefile.in               Locally Modified          415 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          415 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          415 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          415 
+ apm_edit.ui.h             Locally Modified          415 
+ apm_edit.ui               Locally Modified          415 
+ apm_edit_main.pl          Locally Modified          415 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          415 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          415 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          415 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          415 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          415 
+ awb_dialog.ui             Locally Modified          415 
+ colored_list_view_item.pm Locally Added               0 
+ Makefile.am               Locally Modified          415 
+ awb_dialog.ui.h           Locally Modified          415 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          415 
+
+Directory lib
+ Makefile.in               Locally Modified          415 
+
+Directory .
+ aclocal.m4                Locally Modified          415 
+
+
+* Improve detection of "stale" information in a .apm file, which means that the
+  .apm file contains information taken from .awb files which have subsequently
+  been updated. This subsumes the previous detection of files moving on disk
+  and currently includes:
+  
+  * %name has changed
+  * %requires have been added or removed
+  * File location has changed in UnionDir
+  * Package has changed
+
+* Additionally staleness/brokeness of submodels has now been distinguished from
+  that of main models. The user should no longer receive messages that say 
+  "possibly in a submodel" but instead will be asked if they want to open the
+  problem submodel(s) directly.
+  
+* Additionally, a checkbox is added to the GUI that allows highlighting of 
+  models with problems. Stale models are shown in orange, broken models in red.
+  The checkbox is off by default since scanning them models is currently a bit
+  slow. (We have some future performance improvements in mind.)
+
+* To highlight slow operations awb and apm-edit can now change the cursor to
+  the standard "hourglass" to show intense background work. Currently this is
+  only enabled for the most obvious intense tasks (scanning modules, rehashing
+  databases). It would be easy to use this in more places if it proves useful.
+  
+* Makefiles updated because of addition of a file for color highlighting.
+
+Michael P.
+

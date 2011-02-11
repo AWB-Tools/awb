@@ -20,14 +20,15 @@
 tool_PROGRAMS= awb2
 
 awb2_SOURCES = awb_head.pl \
+               colored_list_view_item.pm \
                awb_util.pm \
                awb_main.pl \
                awb_dialog.ui awb_dialog.ui.h \
                awb_about.ui \
                awb_runlog.ui awb_runlog.ui.h
 
-awb2$(EXEEXT): awb_head.pl awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl
-	cat awb_head.pl awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl >awb2
+awb2$(EXEEXT): awb_head.pl colored_list_view_item.pm awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl
+	cat awb_head.pl colored_list_view_item.pm awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl >awb2
 	chmod +x awb2
 
 awb_dialog.ui.pm: awb_dialog.ui awb_dialog.ui.h
