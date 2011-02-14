@@ -631,6 +631,10 @@ void awb_dialog::Rehash_activated()
 
     this->popBusyCursor();
  
+    # Refresh the highlighting list, if appropriate
+    if (my $item = model_tree->selectedItem()) {
+        model_tree_clicked($item);
+    }
 }
 
 void awb_dialog::NewModel_activated()

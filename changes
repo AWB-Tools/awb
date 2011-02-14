@@ -8339,3 +8339,23 @@ Directory tools/awb/awb2
 * Increase size of model list relative to model tree.
 
 Michael P.
+
+----------
+pellauer    Date: Mon Feb 14 14:33:05 MST 2011  CSN: CSN-awb-419
+                  Mon Feb 14 21:33:05 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          418 
+
+Directory libperl/Asim/lib/Asim/Model
+ Update.pm                 Locally Modified          418 
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          418 
+
+
+* Allow "model update" to work on all stale models, not just those with moved
+  files.
+
+* GUI highlighting now automatically refreshes if DB is rehashed.

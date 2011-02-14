@@ -59,30 +59,37 @@ sub update {
   
   my $model = Asim::Model->new($filename) || return undef;
   
-  my $is_broken = $model->missing_module_count() > 0;
-  my $has_moved = $model->moved_module_count() > 0;
+  my $is_broken = $model->is_broken();
+  my $is_stale = $model->is_stale();
   my $is_old_version = $model->version() < Asim::Model::latest_version();
   
   my $modelname = $model->name();
   
   if ($is_broken) {
     
-    print ("Unable to update broken model: $filename\n");
+    print("Unable to update broken model: $filename\n");
     return 0;
     
-  } elsif ($has_moved || $is_old_version) {
+  } elsif ($is_stale || $is_old_version) {
   
-    print ("Updating model $modelname.");
+    print("Updating model $modelname.");
 
-    if ($has_moved) {
-      print (" (has moved modules)");
+    if ($is_stale) {
+      print(" (has stale information");
+      
+      if ($model->moved_module_count() > 0) {
+	print(", including moved files");
+      }
+      
+      print(")");
+
     }
-    
+
     if ($is_old_version) {
-      print (" (old file format)");
+      print(" (old file format)");
     }
     
-    print ("\n");
+    print("\n");
     
     # This is actually all we have to do to update it.
     return ($model->save());
