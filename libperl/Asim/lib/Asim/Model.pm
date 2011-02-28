@@ -1849,9 +1849,15 @@ sub _health_check {
 
   if ($self->is_broken(0)) {
      _process_warning("Model file " . $self->filename() . " seems to be broken.\n");
+     $self->modified(0);
   }
   elsif ($self->is_stale(0)) {
      _process_warning("Model file " . $self->filename() . " contains stale data and should be updated.\n");
+     $self->modified(1);
+     
+  }
+  else {
+     $self->modified(0);
   }
 
 }

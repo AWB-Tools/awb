@@ -8359,3 +8359,16 @@ Directory tools/awb/awb2
   files.
 
 * GUI highlighting now automatically refreshes if DB is rehashed.
+
+----------
+pellauer    Date: Mon Feb 28 15:44:18 EST 2011  CSN: CSN-awb-420
+                  Mon Feb 28 20:44:18 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          419 
+
+
+* Fixing bug that was causing .apm files to always report themselves as 
+  modified. This was a test erroneously removed in the last check-in.
+
