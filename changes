@@ -8372,3 +8372,28 @@ Directory libperl/Asim/lib/Asim
 * Fixing bug that was causing .apm files to always report themselves as 
   modified. This was a test erroneously removed in the last check-in.
 
+
+----------
+jsemer      Date: Mon Mar  7 14:00:30 EST 2011  CSN: CSN-awb-421
+                  Mon Mar  7 19:00:30 UTC 2011
+
+
+Directory .
+ Makefile.in               Locally Modified          420 
+
+Directory debian
+ changelog                 Locally Modified          420 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          420 
+ apm_edit.ui.h             Locally Modified          420 
+ apm_edit.ui.patch         Locally Modified          420 
+ apm_edit.ui               Locally Modified          420 
+ colored_list_view_item.pm Locally Added               0 
+ Makefile.am               Locally Modified          420 
+
+Used Michael's colored list element class to highlight
+module in current module in the alternatives pane. Fixed
+regex bug when determining if a module is from an .awb or 
+.apm file (yes Elliot regular expresssions are evil), and 
+fixed regressions introduced by qt designer.

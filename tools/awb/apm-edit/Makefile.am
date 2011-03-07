@@ -21,6 +21,7 @@ tool_PROGRAMS= apm-edit
 
 apm_edit_SOURCES = apm-edit.pro \
                    apm_edit_head.pl \
+                   colored_list_view_item.pm \
                    apm_edit_pixmap.pl \
                    apm_edit.ui \
                    apm_edit.ui.h \
@@ -53,8 +54,8 @@ IMAGES= images/editcopy.png     \
         images/submodel.png
 
 
-apm-edit$(EXEEXT): apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl
-	cat apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl >apm-edit
+apm-edit$(EXEEXT): apm_edit_head.pl colored_list_view_item.pm apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm  apm_edit_main.pl
+	cat apm_edit_head.pl colored_list_view_item.pm apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl >apm-edit
 	chmod +x apm-edit
 
 apm_edit.ui.pm: apm_edit.ui apm_edit.ui.h

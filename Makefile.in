@@ -58,9 +58,9 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/include/config.h.in \
 	$(top_srcdir)/libperl/Asim/lib/Asim.pm.in \
 	$(top_srcdir)/share/awb.config.template.in COPYING INSTALL \
-	scripts/compile scripts/config.guess scripts/config.sub \
-	scripts/depcomp scripts/install-sh scripts/ltmain.sh \
-	scripts/missing scripts/mkinstalldirs
+	config.guess config.sub scripts/compile scripts/config.guess \
+	scripts/config.sub scripts/depcomp scripts/install-sh \
+	scripts/ltmain.sh scripts/missing scripts/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \

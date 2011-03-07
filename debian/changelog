@@ -1,4 +1,4 @@
-awb (0.6.0~svn20110211r419+lucid) lucid; urgency=low
+awb (0.6.0~svn20110307r421+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -79,4 +79,8 @@ awb (0.6.0~svn20110211r419+lucid) lucid; urgency=low
         Add support for dealing with stale .apm files.
 
 
- -- Joel Emer <jsemer@intel.com>  Fri, 11 Feb 2011 11:33:45 -0500
+  [ Joel Emer ]
+  * r421
+        Colorize default module in apm-edit
+
+ -- Joel Emer <jsemer@intel.com>  Mon, 07 Mar 2011 13:58:51 -0500

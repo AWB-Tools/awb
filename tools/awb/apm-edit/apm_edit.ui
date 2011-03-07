@@ -493,12 +493,7 @@
         <action name="moduleShell_at_containing_folderAction"/>
         <action name="moduleNotesAction"/>
         <separator/>
-        <actiongroup name="InsertActionGroup"/>
-        <item text="&amp;Insert" name="popupMenu_40" accel="">
-            <action name="moduleInsertModuleAction"/>
-            <action name="moduleInsertSubmodelAction"/>
-            <action name="moduleInsertAsRootAction"/>
-        </item>
+        <action name="InsertActionGroup"/>
         <action name="moduleDeleteAction"/>
     </item>
     <item text="&amp;Alternatives" name="alternativesMenu">
@@ -532,6 +527,10 @@
         <property name="label">
             <string>Toolbar_2</string>
         </property>
+        <action name="fileNewAction"/>
+        <action name="fileOpenAction"/>
+        <action name="fileSaveAction"/>
+        <action name="filePrintAction"/>
         <widget class="QLabel">
             <property name="name">
                 <cstring>TextLabel1_4</cstring>
@@ -568,7 +567,7 @@
             <cstring>fileNewAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>filenew.png</iconset>
         </property>
         <property name="text">
             <string>New</string>
@@ -585,7 +584,7 @@
             <cstring>fileOpenAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>fileopen.png</iconset>
         </property>
         <property name="text">
             <string>Open</string>
@@ -602,7 +601,7 @@
             <cstring>fileSaveAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>filesave.png</iconset>
         </property>
         <property name="text">
             <string>Save</string>
@@ -633,7 +632,7 @@
             <cstring>filePrintAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>print.png</iconset>
         </property>
         <property name="text">
             <string>Print</string>
@@ -664,7 +663,7 @@
             <cstring>editUndoAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>undo.png</iconset>
         </property>
         <property name="text">
             <string>Undo</string>
@@ -681,7 +680,7 @@
             <cstring>editRedoAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>redo.png</iconset>
         </property>
         <property name="text">
             <string>Redo</string>
@@ -698,7 +697,7 @@
             <cstring>editCutAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>editcut.png</iconset>
         </property>
         <property name="text">
             <string>Cut</string>
@@ -715,7 +714,7 @@
             <cstring>editCopyAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>editcopy.png</iconset>
         </property>
         <property name="text">
             <string>Copy</string>
@@ -732,7 +731,7 @@
             <cstring>editPasteAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>editpaste.png</iconset>
         </property>
         <property name="text">
             <string>Paste</string>
@@ -749,7 +748,7 @@
             <cstring>editFindAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>searchfind.png</iconset>
         </property>
         <property name="text">
             <string>Find</string>
@@ -909,7 +908,7 @@
             <cstring>helpWhatsThisAction</cstring>
         </property>
         <property name="iconSet">
-            <iconset></iconset>
+            <iconset>whatsthis.png</iconset>
         </property>
         <property name="text">
             <string>What's this</string>

@@ -1086,6 +1086,7 @@ void apm_edit::moduleViewAwbAction_activated()
 
     my $module_filename = $current_module->text(module_file_col)
                           || return;
+
     my $module = Asim::Module->new($module_filename)
                  || return;
 
@@ -1497,7 +1498,15 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
     # Display all the other modules
     #
     foreach my $m (@models, @modules) {
-        my $next_root = Qt::ListViewItem(Alternatives, undef);
+        use ColoredListViewItem;
+
+        my @color = (255,255,255);
+
+        if ($module_name eq $m->name()) {
+            @color = (230, 165, 40);
+        }
+
+        my $next_root = ColoredListViewItem(Alternatives, undef, undef, @color);
 
         $next_root->setText(alt_implementation_col, trUtf8($m->name()));
         $next_root->setText(alt_file_col, trUtf8($m->filename()));
@@ -1510,8 +1519,8 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
             # This is module in current model
             #   Note: ">> ... <<" form is parsed elsewhere...
             #
-            $next_root->setText(alt_implementation_col, 
-                                trUtf8(">> " . $m->name() . " <<"));
+            #$next_root->setText(alt_implementation_col, 
+            #                    trUtf8(">> " . $m->name() . " <<"));
 
 	    $selected = $next_root;
         }
@@ -1622,13 +1631,23 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     my $module = undef;
     my $delimiter;   # Used to distinquish if part of real model
 
-    $module = alternativesModule($item) || return;
+    $module = alternativesModule($item);
 
+    if (! defined($module)) {
+	print "Internal error: failed to open file for selected alternative module\n";
+        return;
+    }
+ 
     #
     # Determine if this item is part of real model
+    #    Note: alternativesModule just did this!!!
     #
 
-    if ($item->text(alt_implementation_col) =~ ">> .+ <<") {
+    my $model_item = Model->selectedItem();
+    my $model_item_file = defined($model_item)?$model_item->text(module_file_col):"";
+    my $alt_item_file =  $item->text(alt_file_col);
+
+    if ($model_item_file eq $alt_item_file) {
         $delimiter = "=";
     } else {
         $delimiter = "~";
@@ -1811,7 +1830,6 @@ void apm_edit::Alternatives_doubleClicked( QListViewItem * )
     # or root of model if nothing more to do
     #
     my $model_item = Model->selectedItem();
-
 
     while (defined($model_item)) {
         if ($model_item->text(module_implementation_col) eq "") {
@@ -2361,13 +2379,18 @@ void apm_edit::alternativesModule()
     #    Note: implicit dependence on single provides
     #
     my $module;
-    my $name = $item->text(alt_implementation_col);
 
-    if ($name =~ ">> .+ <<") {
+    #
+    # Determine if module is in current model
+    #
+    my $model_item = Model->selectedItem();
+    my $model_item_file = defined($model_item)?$model_item->text(module_file_col):"";
+    my $alt_item_file = $item->text(alt_file_col);
+
+    if ($model_item_file eq $alt_item_file) {
         # From current model
 
-        my $module_item = Model->selectedItem() || return;
-        my $provides = $module_item->text(module_type_col);
+        my $provides = $model_item->text(module_type_col);
 
         $module = $model->find_module_providing($provides);
         if ($model->is_submodel($module)) {
@@ -2378,11 +2401,11 @@ void apm_edit::alternativesModule()
     } else {
         # From .apm/.awb file
 
-        my $filename = $item->text(alt_file_col);
+        my $filename = $alt_item_file;
 
-        if ($filename =~ /.awb/) {
+        if ($filename =~ /.awb$/) {
             $module = Asim::Module->new($filename);
-        } elsif ($filename =~ /.apm/) {
+        } elsif ($filename =~ /.apm$/) {
             $module = Asim::Model->new($filename);
         }
     }
