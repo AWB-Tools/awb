@@ -8407,3 +8407,61 @@ Directory etc/repositories.d
  leap.pack                 Locally Modified          421 
 
 Add leap-papers repository.
+
+----------
+jsemer      Date: Thu Mar 10 17:53:16 EST 2011  CSN: CSN-awb-423
+                  Thu Mar 10 22:53:16 UTC 2011
+
+
+Directory .
+ Makefile.in               Locally Modified          422 
+
+Directory debian
+ awb-bin.dirs              Locally Added               0 
+ control                   Locally Modified          422 
+ awb.examples              Locally Removed           422 
+ changelog                 Locally Modified          422 
+ rules                     Locally Modified          422 
+ awb.postinst              Locally Removed           422 
+ awb-version.dirs          Locally Added               - 
+ awb-bin.examples          Locally Added               - 
+ awb.postrm                Locally Removed           422 
+ awb.preinst               Locally Removed           422 
+ awb.prerm                 Locally Removed           422 
+ awb.mime                  Locally Removed           422 
+ awb.docs                  Locally Removed           422 
+ awb-bin.postinst          Locally Added               - 
+ awb.sharedmimeinfo        Locally Removed           422 
+ awb-bin.postrm            Locally Added               - 
+ awb-bin.preinst           Locally Added               - 
+ awb-bin.prerm             Locally Added               - 
+ awb-bin.mime              Locally Added               - 
+ awb-bin.docs              Locally Added               - 
+ awb-bin.sharedmimeinfo    Locally Added               - 
+ awb.dirs                  Locally Removed           422 
+ README.Debian             Locally Modified          422 
+
+Directory .
+ debian/                   Locally Modified          422 
+ Makefile.am               Locally Modified          422 
+
+Split package into multiple .deb files:
+
+     awb           - a dependency package for awb-<version>
+     awb-<version> - the shared package files
+     awb-bin       - the executable/library/conf files
+
+
+Now one can install the latest version of the package 
+and binaries, e.g.,
+
+     # apt-get install awb 
+
+but one can explictly install multiple versions of the 
+shared package subset of the files, e.g,
+
+     # apt-get install awb-0.6
+
+The files still are put into directories named HEAD. That
+still needs to be fixed.
+

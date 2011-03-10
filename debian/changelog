@@ -1,4 +1,4 @@
-awb (0.6.0~svn20110307r421+lucid) lucid; urgency=low
+awb (0.6.2~svn20110310r424+lucid) lucid; urgency=low
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -83,4 +83,8 @@ awb (0.6.0~svn20110307r421+lucid) lucid; urgency=low
   * r421
         Colorize default module in apm-edit
 
- -- Joel Emer <jsemer@intel.com>  Mon, 07 Mar 2011 13:58:51 -0500
+  * r422
+        Split debian packages into awb and awb-bin
+
+
+ -- Joel Emer <jsemer@intel.com>  Thu, 10 Mar 2011 17:52:19 -0500

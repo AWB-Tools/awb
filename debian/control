@@ -6,9 +6,25 @@ Build-Depends: debhelper (>= 7), autotools-dev, libqt-perl, libqt3-mt-dev, libpo
 Standards-Version: 3.8.4
 
 Package: awb
+Architecture: all
+Depends: awb-0.6
+Description: Dependency package for the Architect's Workbench
+ Depenendency package for the Architect's Workbench package (awb)
+Section: devel
+
+Package: awb-0.6
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, awb-bin
+Description: Sharable package for the Architect's Workbench
+ Sharable files making up the Architect's Workbench package
+Section: devel
+
+Package: awb-bin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs
 Recommends: libterm-readline-gnu-perl
+Replaces: awb (<= 0.6.0)
+Breaks: awb (<= 0.6.0)
 Description: Executables for the Architect's Workbench
  Core executables for Architect's Workbench (awb) plug-n-play build system.
 Section: devel

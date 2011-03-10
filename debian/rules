@@ -91,7 +91,9 @@ install-arch:
 
 	# Add here commands to install the arch part of the package into
 	# debian/tmp.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/awb install-arch
+	$(MAKE) DESTDIR=$(CURDIR)/debian/awb-bin install-arch
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/awb-0.6 install-package
 
 	dh_install -s
 # Must not depend on anything. This is to be called by

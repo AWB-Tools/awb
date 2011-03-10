@@ -6,9 +6,6 @@ usr/libexec
 usr/libexec/asim
 usr/sbin
 usr/share
-usr/share/asim
-usr/share/asim/awb
-usr/share/asim/awb/HEAD
 usr/share/benchmarks
 usr/share/man
 usr/share/man/man1

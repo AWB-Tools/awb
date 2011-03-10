@@ -794,10 +794,10 @@ uninstall-am:
 install-indep:
 
 #
-# Do install and install of package, and
+# Do install and
 #   - install application menu stuff
 #
-install-arch: install install-package
+install-arch: install
 	$(INSTALL) -D -m 644 share/awb.desktop       $(DESTDIR)$(datadir)/applications/awb.desktop
 	$(INSTALL) -D -m 644 share/awb.svg           $(DESTDIR)$(datadir)/icons/awb.svg
 	$(INSTALL) -D -m 644 share/apm-edit.desktop  $(DESTDIR)$(datadir)/applications/apm-edit.desktop
