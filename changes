@@ -8397,3 +8397,13 @@ module in current module in the alternatives pane. Fixed
 regex bug when determining if a module is from an .awb or 
 .apm file (yes Elliot regular expresssions are evil), and 
 fixed regressions introduced by qt designer.
+
+----------
+mcadler     Date: Thu Mar 10 09:17:49 EST 2011  CSN: CSN-awb-422
+                  Thu Mar 10 14:17:49 UTC 2011
+
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          421 
+
+Add leap-papers repository.

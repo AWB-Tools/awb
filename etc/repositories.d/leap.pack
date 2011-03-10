@@ -52,6 +52,25 @@ Tag=HEAD
 
 
 
+###### Leap papers trunk
+
+[leap-papers]
+Description=Leap papers
+Method=svn
+Access=https://asim.csail.mit.edu/svn/leap-papers
+Module=undefined
+Tag=HEAD
+Target=leap-papers
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-PAPERS
+
+[leap-papers/HEAD]
+Description=Leap papers
+Access=https://asim.csail.mit.edu/svn/leap-papers
+Tag=HEAD
+
+
+
 ###### Leap platforms trunk
 
 [platforms]
