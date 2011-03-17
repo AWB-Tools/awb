@@ -128,12 +128,16 @@ sub create {
   # Create a packfile for the new repository
   #
 
+  print "Creating packfile\n";
+
   $status = $self->create_packfile($name);
   return undef if (! $status);
 
   #
   # Create skeleton repository contents and import them
   #
+
+  print "Creating skeleton of repository\n";
 
   $tmpdir = tempdir(CLEANUP => 1);
 
@@ -143,6 +147,8 @@ sub create {
 
   $status = system("rsync -av --exclude .svn $location/ $tmpdir/trunk");
   return undef if ($status);
+
+  print "Importing skeleton into repository\n";
 
   $status = system("svn import -m 'Repository skeleton' $tmpdir $url");
   return undef if ($status);

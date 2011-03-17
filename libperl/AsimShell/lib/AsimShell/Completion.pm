@@ -321,7 +321,7 @@ sub build_command {
 #
 sub is_multi_package_command {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(delete)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(pull)|(push)|(revert))$/ );
+  return ( $cmd =~ m/^((status)|(delete)|(show)|(upgrade)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(pull)|(push)|(revert))$/ );
 }
 
 #
@@ -329,7 +329,7 @@ sub is_multi_package_command {
 #
 sub package_command_takes_all_arg {
   my $cmd = shift;
-  return ( $cmd =~ m/^((status)|(show)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(run)|(pull)|(push)|(revert))$/ );
+  return ( $cmd =~ m/^((status)|(show)|(upgrade)|(update)|(commit)|(configure)|(build)|(make)|(clean)|(run)|(pull)|(push)|(revert))$/ );
 }
 
 

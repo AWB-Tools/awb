@@ -162,7 +162,9 @@ sub checkout {
   #   Remember to exclude all repository administration files (CVS/, .svn/, SCCS/)
   #   This must match the method Asim::Package::Copy::update()
 
-  $status =  system("rsync -av --exclude=CVS/ --exclude=.svn/ --exclude=.git/ --exclude=SCCS/ $access $package_dir");
+  print("Rsync from $access/ to $package_dir\n");
+
+  $status =  system("rsync -av --exclude=CVS/ --exclude=.svn/ --exclude=.git/ --exclude=SCCS/ $access/ $package_dir");
   $status |= system("echo $access >$package_dir/COPY");
 
   if ($status) {

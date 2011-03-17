@@ -27,6 +27,7 @@ use Asim::Repository::Cvs;
 use Asim::Repository::BitKeeper;
 use Asim::Repository::Copy;
 use Asim::Repository::Git;
+use Asim::Repository::Public;
 
 our $DEBUG =  0
            || defined($ENV{ASIM_DEBUG})
@@ -90,7 +91,8 @@ sub new {
   Asim::Repository::Cvs::set_type      ( $self ) ||
   Asim::Repository::BitKeeper::set_type( $self ) ||
   Asim::Repository::Svn::set_type      ( $self ) ||
-  Asim::Repository::Git::set_type      ( $self );
+  Asim::Repository::Git::set_type      ( $self ) ||
+  Asim::Repository::Public::set_type   ( $self ) ;
 
   return $self;
 }
@@ -299,6 +301,25 @@ sub packagename {
   $packagename = $self->{packagename} || return undef;
 
   return $packagename;
+}
+
+################################################################
+
+=item $tag = $repository-E<gt>tag()
+
+Returns the tag of the package stored in this repository
+
+=cut
+
+################################################################
+
+sub tag {
+  my $self = shift;
+  my $tag;
+
+  $tag = $self->{tag} || return undef;
+
+  return $tag;
 }
 
 ################################################################

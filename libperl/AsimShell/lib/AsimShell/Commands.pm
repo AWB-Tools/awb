@@ -705,6 +705,7 @@ sub checkout_bundle {
 sub use_bundle {
   my $addpath = 1;
   my $build = 1;
+  my $copy = 0;
   my $golden = 0;
   my $status;
   my $bundlename;
@@ -716,6 +717,7 @@ sub use_bundle {
 
   $status = GetOptions( "build!"   => \$build,
 		        "addpath!" => \$addpath,
+			"copy!"    => \$copy,
 			"golden"   => \$golden,
 			);
   return 0 if (!$status);
@@ -732,7 +734,7 @@ sub use_bundle {
   #	
   @packages = bundle_packages_( $bundlename, $golden );
   
-  print "Copying out: " . join(" ", @packages) . "\n";
+  print "Using: " . join(" ", @packages) . "\n";
 
   #
   # Regenerate the arguments for checkout_package
@@ -745,6 +747,10 @@ sub use_bundle {
     push(@args, ("--" . ($addpath?"":"no") . "addpath"));
   }
 
+  if (defined($copy)) {
+    push(@args, ("--" . ($copy?"":"no") . "copy"));
+  }
+
   # Do not build since we do all the builds later...
   push(@args, "--nobuild");
 
@@ -752,7 +758,10 @@ sub use_bundle {
   my @plist;
 
   foreach my $b (@packages) {
+    _print_package_start("use", $b);
+
     print "--- use package $b " . join(" ",@args) . "\n";
+
     $pkg = use_package($b, @args);
 
     if (! defined($pkg)) {
@@ -761,6 +770,8 @@ sub use_bundle {
     }
 
     push(@plist, $pkg);
+
+    _print_package_finish("use", $b);
   }
 
   if ($build) {
@@ -1283,6 +1294,12 @@ sub checkout_package {
   # Check if targetdir already exists
   #
   if (-e $targetdir && $repository->{type} ne 'distributed') {
+    #
+    # Package already exists in workspace
+    #
+
+    ### TBD: Check if the version is the same as the one being checked out...
+
     print "A package already exists in $targetdir and may have modified files in it!\n";
 
     if (! Asim::choose_yes_or_no("Do you want to overwrite package at $targetdir", "no", "yes")) {
@@ -1471,12 +1488,15 @@ my $user = undef;
 
 #
 # Add a publically installed package to your workspace
+# either via a copy or just a searchpath reference
 #
 #   Code is too redunant with checkout_package...
 #
 sub use_package {
   my $build = 1;
+  my $copy = 0;
   my $addpath = 1;
+  my $targetdir;
   my $status;
   local @ARGV = @_;
 
@@ -1484,8 +1504,14 @@ sub use_package {
   # Parse options
   #
   $status = GetOptions( "build!"   => \$build,
+                        "copy!"    => \$copy,
 		        "addpath!" => \$addpath);
   return undef if (!$status);
+
+  #
+  # Can only build if we are making a copy
+  #
+  $build &= $copy;
 
   #
   # Repository name is remaining argument
@@ -1499,28 +1525,91 @@ sub use_package {
   # Get repository object, and determine checkout directory
   #
   my $repository;
+  my $target_packagename;
+  my $local_checkoutdir;
+  my $existing_package;
 
-  $repository = $default_repositoryDB->get_public_repository($repositoryname)
-    || shell_error("Repository ($repositoryname) was missing or malformed in packfile\n") && return undef;
+  $repository = $default_repositoryDB->get_public_repository($repositoryname, $copy)
+    || shell_error("Repository ($repositoryname) not available on system\n") && return undef;
 
-  my $targetdir = $repository->checkoutdir()
+
+  $target_packagename = $repository->packagename();
+
+
+  $local_checkoutdir = $repository->checkoutdir()
     || shell_error("Could not determine target for checkout\n") && return undef;
 
-  #
-  # Check if targetdir already exists
-  #
-  if (-e $targetdir) {
-    print "A package already exists in $targetdir and may have modified files in it!\n";
 
-    if (! Asim::choose_yes_or_no("Do you want to overwrite package at $targetdir", "no", "yes")) {
-      return $default_packageDB->get_package_by_dirname($targetdir);
+  $existing_package = get_package($target_packagename);
+
+  #
+  # Check if we already have the right version available
+  #
+  if (defined($existing_package) && ($existing_package->tag() eq $repository->tag())) {
+    print "Desired version already exists in workspace\n";
+    return $existing_package;
+  }
+
+  #
+  # Clean up existing local copies of package in workspace and searchpath references
+  #
+  # Scenarios:
+  #
+  #         Old       New      Action
+  #         ----      ----     -------
+  #         Checkout  Copy     delete package and leave searchpath alone
+  #         Checkout  Public   delete package and leave searchpath alone!
+  #         Copy      Copy     delete package and leave searchpath alone
+  #         Copy      Public   delete package and leave searchpath alone!
+  #         Public    Copy     delete searchpath reference to package
+  #         Public    Public   delete searchpath reference to package
+  #
+
+  #
+  # Check if workspace local checkout directory already exists
+  #
+  if (-e $local_checkoutdir) {
+    my $package = $default_packageDB->get_package_by_dirname($local_checkoutdir);
+
+    if (! defined($package)) {
+      print "A non-package exists at $local_checkoutdir\n";
+      print "Please delete manually and retry this command\n";
+      return undef;
+    }
+
+    if (! Asim::choose_yes_or_no("Do you want to delete package at $local_checkoutdir", "no", "yes")) {
+      print "Operation aborted!!\n";
+      return $package;
+    }
+      
+    $package->destroy();
+  }
+
+
+  #
+  # Check if package of this type already exists in searchpath
+  #
+  #    Note: A reference to a workspace local copy in the searchpath isn't removed because
+  #             1) if we are doing a copy it will be reused and
+  #             2) if we are going to reference a global copy it won't hurt
+  #
+
+  if (defined($default_packageDB->get_package($target_packagename)) ) {
+    print "A package of this name ($target_packagename) already exists in your searchpath!\n";
+    my $q = "Do you want to remove the current reference to this package from the searchpath";
+
+    if (Asim::choose_yes_or_no($q, "yes", "yes")) {
+      my $workspace = $Asim::default_workspace;
+
+      $workspace->remove_path_by_packagename($target_packagename);
+      $workspace->save();
     }
   }
 
   #
   # Do the checkout and get package object for checked out package
   #
-  $repository->checkout()
+  $targetdir = $repository->checkout()
     || shell_error("Could not add package ($repositoryname)\n") && return undef;
 
   my $package = $default_packageDB->get_package_by_dirname("${targetdir}")
@@ -1529,7 +1618,7 @@ sub use_package {
   #
   # Optionally build the package
   #
-  if (defined($build) && $build ) {
+  if ($build ) {
     $package->configure();
     $package->build();
     maybe_check_package_configurations();
@@ -2089,6 +2178,110 @@ sub show_package {
 }
 
 #
+# upgrade one or more packages, returning 1 if all succeeded.
+#
+sub upgrade_package {
+  my $build = 1;
+  my $rehash = 1;
+  my $report = 1;
+
+  my @build_list = ();
+  local @ARGV = @_;
+
+  # Parse options
+
+  my $status = GetOptions( "build!"  => \$build,
+                           "rehash!" => \$rehash,
+                           "report!" => \$report);
+  return undef if (!$status);
+
+  # get the list of packages
+  my @package_names = _expand_package_names(@ARGV);
+
+  while ( my $pkgspec = shift @package_names) {
+    # each package in the list could be a simple name,
+    # or a name and version or branch identifier, like this:
+    #   <pkgname>
+    #   <pkgname>/HEAD
+    #   <pkgname>/CSN-<pkgname>-<number>
+    #   <pkgname>/<branchname>
+
+    my $name;
+    my $version;
+    ($name,$version) = split('/',$pkgspec);
+
+    my $package = get_package($name);
+
+    if (! defined($package)) {
+      _add_failure($name, "no such package");
+      next;
+    }
+
+    my $tag = $package->tag();
+
+    #
+    # Hack to figure out if this is an old package that should be upgraded
+    #
+    my $legacy_package = !$package->isprivate() && 
+                         grep(!/^\/.*\/asim\/packages\//, $package->location());
+
+
+    _print_package_start("upgrade", "$name/$tag", "(" . $package->type() . " repository)");
+
+    if (! ($tag =~ /v[0-9][0-9].*/) && ! $legacy_package) {
+      #
+      # The current package isn't a release...
+      #
+      print "Skipping upgrade - current package is not a well-defined release ($tag)\n";
+      _add_failure($name,"version in workspace not a standard release");
+
+    } elsif ($package->isprivate()) {
+      #
+      # Handle a checked out package in workspace
+      #
+      checkout_package("$name/STABLE") || _add_failure($name,"checkout failed");
+
+
+      if ($build) {
+	# if we are also building, add the package to the list of ones to build
+	push @build_list, $package;    
+      }
+    } else {
+      #
+      # Handle a shared public repository
+      #
+      use_package("$name/STABLE") || _add_failure($name,"use operation failed");
+    }
+
+    _print_package_finish("update", "$name/$tag");
+  }
+
+  if ($rehash) {
+
+    # Rehash the model and module database.
+    # If we had a finer-grained rehash then we could do
+    # this on a per-package basis.
+
+    rehash_modules();
+    rehash_models();
+  }
+
+  # if updating more than one package, and building,
+  # do the builds after you have checked everything out.
+
+  configure_and_build_packages(@build_list);
+
+
+  if ($report) {
+    $status = _report_failures();
+  } else {
+    $status = ($#failures < 0) || undef;
+  }
+
+  return $status;
+}
+
+#
 # update one or more packages, returning 1 if all succeeded.
 #
 sub update_package {
@@ -2153,17 +2346,8 @@ sub update_package {
     # If we had a finer-grained rehash then we could do
     # this on a per-package basis.
 
-    my $moduleDB = get_moduleDB();
-    my $modelDB  = get_modelDB();
-
-    print "Rehashing module database...\n";
-    $moduleDB->rehash();
-    print "Done.\n";
-
-    print "Rehashing model database...\n";
-    $modelDB->rehash();
-    print "Done.\n";  
-
+    rehash_modules();
+    rehash_models();
   }
 
   # if updating more than one package, and building,

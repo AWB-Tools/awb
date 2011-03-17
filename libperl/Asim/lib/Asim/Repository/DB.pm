@@ -324,6 +324,17 @@ sub directory {
     }
   }
 
+  #
+  # Add a 'STABLE' tag to each raw repository
+  #
+  for my $i (@list) {
+    if ($i =~ /.*\/HEAD/) {
+      my $s = $i;
+      $s =~ s/HEAD/STABLE/;
+      push(@list, $s);
+    }
+  }
+
   return (@list);
 }
 
@@ -340,7 +351,7 @@ List public packages
 sub public_directory {
   my $self = shift;
 
-  my $dir = Asim::Packagedir(). "/";
+  my $dir = Asim::Packagedir(). "/packages/";
   my @dirs = glob("${dir}*/*");
   my @names; 
 
@@ -382,6 +393,10 @@ sub get_repository {
   my $repository;
 
   ($name, $tag) = (split("/",$fullname), "HEAD");
+
+  if ($tag eq "STABLE") {
+    $tag = $self->_get_stable_tag($name);
+  }
 
   $desc    = $self->_get_item($fullname, "Description");
   $method  = $self->_get_item($fullname, "Method");
@@ -482,6 +497,7 @@ Return a public repository object with the given name.
 sub get_public_repository {
   my $self = shift;
   my $fullname = shift;
+  my $copy = shift || 0;
 
   my $name;
   my $tag;
@@ -490,6 +506,7 @@ sub get_public_repository {
   my $desc;
   my $method;
   my $access;
+  my $old_access_location;
   my $module;
   my $target;
   my $changes;
@@ -499,21 +516,60 @@ sub get_public_repository {
 
   ($name, $tag) = (split("/",$fullname), "HEAD");
 
+  if ($tag eq "STABLE") {
+    $tag = $self->_get_stable_tag($name);
+  }
+
   # Make CVS happy by converting  .'s to _'s in tag
 
-  $method = "copy";
-  $access = Asim::Packagedir() . "/" . $name . "/" . $tag;
+  $method = $copy?"copy":"public";
+
+  $access = Asim::Packagedir() . "/packages/" . $name . "/" . $tag;
+
+  #
+  # Check if package is in old location
+  #
+  $old_access_location = Asim::Packagedir() . "/" . $name . "/" . $tag;
+
+  if ( ! -d $access && -d $old_access_location) {
+    $access = $old_access_location;
+  }
+
+  if ( ! -d $access) {
+    return undef;
+  }
+
   $desc   = "Unknown";
 
   $repository = Asim::Repository->new(packagename => $name,
-                                      method      => "copy",
+                                      method      => $method,
                                       access      => $access,
-                                      module      => "asim-$name",
+                                      module      => $name,
                                       tag         => $tag,
-                                      target      => "asim-$name",
+                                      target      => $name,
                                       changes     => "changes");
 
   return $repository;
+}
+
+################################################################
+#
+#  Utility function to determine the stable tag from a pack file
+#
+################################################################
+
+sub _get_stable_tag {
+  my $self = shift;
+  my $name = shift;
+  my @list;
+  my $tag;
+
+  @list = grep(!/^Global$/, $self->{inifile}->get_grouplist());
+  @list = sort(grep(/^$name\/v/,@list));
+
+  ($name, $tag) = (split("/",$list[$#list]), "HEAD");
+
+  return $tag;
 }
 
 ################################################################

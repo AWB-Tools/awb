@@ -145,6 +145,8 @@ Commands:
     [--nobuild]                          - prevent ./configure and build of package
     [--norehash]                         - prevent rehashing of module and model lists.
 
+  upgrade package [all|<package>...]     - upgrade a package to the latest stable release
+
   commit package [all|<package>...]      - commit a package
     [--nodependent]                      - prevent commit of dependent packages
     [--commitlog=<commit comments file>] - Use in batch mode to supply commit comments

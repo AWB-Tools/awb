@@ -8465,3 +8465,50 @@ shared package subset of the files, e.g,
 The files still are put into directories named HEAD. That
 still needs to be fixed.
 
+
+----------
+jsemer      Date: Thu Mar 17 18:52:37 EDT 2011  CSN: CSN-awb-424
+                  Thu Mar 17 22:52:37 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          423 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          423 
+ Completion.pm             Locally Modified          423 
+ Commands.pm               Locally Modified          423 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          423 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          423 
+ Svn.pm                    Locally Modified          423 
+ Copy.pm                   Locally Modified          423 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          423 
+
+Added specific support for using 'public' installed copies of
+packages as well as a 'copy' of a package.
+
+Convert awb-shell 'use package' command to 'use' a publically
+installed package by adding it into your searchpath. Such packages
+live at $PREFIX/share/asim/packages/<PACKAGE>/<VERSION>. An optional
+switch (--copy) will copy the package into your workspace. Optional
+deletion is provided for existing references to the package in your
+SEARCHPATH and of exisiting copies of the package in your workspace.
+
+Added notion of a 'stable' version of a package as indicated by the
+'STABLE' tag for, e.g., awb/STABLE, which refers to the latest 
+released version of a package. A released version of package is
+indicated by a stylized tag of the form v[0-9]+[._][0-9]+, e.g., 
+v10.03.
+
+Added an 'upgrade package' command to awb-shell that will upgrade a
+package (or all packages) to the latest stable release.
+
+All of this is in prepartion for a test release of the awb package,
+along with a mechanism for allowing a using of a release to easily
+upgrade to the release.
