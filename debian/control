@@ -2,17 +2,17 @@ Source: awb
 Section: devel
 Priority: optional
 Maintainer: Joel Emer <emer@csail.mit.edu>
-Build-Depends: debhelper (>= 7), autotools-dev, libqt-perl, libqt3-mt-dev, libpopt-dev
+Build-Depends: debhelper (>= 7), gcc, g++, autotools-dev, libqt-perl, libqt3-mt-dev, libpopt-dev
 Standards-Version: 3.8.4
 
 Package: awb
 Architecture: all
-Depends: awb-0.6
+Depends: awb-11.03
 Description: Dependency package for the Architect's Workbench
- Depenendency package for the Architect's Workbench package (awb)
+ Dependency package for the Architect's Workbench package (awb)
 Section: devel
 
-Package: awb-0.6
+Package: awb-11.03
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, awb-bin
 Description: Sharable package for the Architect's Workbench
@@ -21,7 +21,7 @@ Section: devel
 
 Package: awb-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs
+Depends: ${shlibs:Depends}, ${misc:Depends}, gcc, g++, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs
 Recommends: libterm-readline-gnu-perl
 Replaces: awb (<= 0.6.0)
 Breaks: awb (<= 0.6.0)

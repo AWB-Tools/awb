@@ -93,7 +93,7 @@ install-arch:
 	# debian/tmp.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/awb-bin install-arch
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/awb-0.6 install-package
+	$(MAKE) DESTDIR=$(CURDIR)/debian/awb-11.03 install-package
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
