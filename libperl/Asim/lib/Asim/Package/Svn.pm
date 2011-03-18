@@ -918,8 +918,8 @@ sub label {
   $self->step('Sanity checks', 0);
   
   # check the syntax of the tag
-  $labelname =~ m/^[a-z0-9_]+$/i ||
-    Asim::Package::ierror("Label: tag must contain only alphanumeric and underscore characters\n") && return 0;
+  $labelname =~ m/^[a-z0-9_.]+$/i ||
+    Asim::Package::ierror("Label: tag must contain only alphanumeric and underscore and dot characters\n") && return 0;
 
   # check the commit environment, since we need to commit a copy to the repository
   $self->sanity_stage();

@@ -8554,3 +8554,16 @@ Directory libperl/Asim/lib/Asim/Repository
 
 Gracefully handle upgrade requests in cases where there 
 are no released versions.
+
+----------
+jsemer      Date: Fri Mar 18 16:24:33 EDT 2011  CSN: CSN-awb-428
+                  Fri Mar 18 20:24:33 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          427 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          427 
+
+Allow dot (.) in subversion tags.
