@@ -2239,7 +2239,8 @@ sub upgrade_package {
       #
       # Handle a checked out package in workspace
       #
-      checkout_package("$name/STABLE") || _add_failure($name,"checkout failed");
+      checkout_package("$name/STABLE") 
+	|| _add_failure($name,"checkout failed");
 
 
       if ($build) {
@@ -2250,7 +2251,8 @@ sub upgrade_package {
       #
       # Handle a shared public repository
       #
-      use_package("$name/STABLE") || _add_failure($name,"use operation failed");
+      use_package("$name/STABLE") 
+	|| _add_failure($name,"attempt to use shared public package failed");
     }
 
     _print_package_finish("update", "$name/$tag");

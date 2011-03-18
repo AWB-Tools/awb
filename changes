@@ -8537,3 +8537,20 @@ Directory .
  debian/                   Locally Modified          425 
 
 Changes to deb build files for release 11.03.
+
+----------
+jsemer      Date: Fri Mar 18 15:36:45 EDT 2011  CSN: CSN-awb-427
+                  Fri Mar 18 19:36:45 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          426 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          426 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          426 
+
+Gracefully handle upgrade requests in cases where there 
+are no released versions.

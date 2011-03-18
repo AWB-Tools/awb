@@ -395,7 +395,7 @@ sub get_repository {
   ($name, $tag) = (split("/",$fullname), "HEAD");
 
   if ($tag eq "STABLE") {
-    $tag = $self->_get_stable_tag($name);
+    $tag = $self->_get_stable_tag($name) || return undef;
   }
 
   $desc    = $self->_get_item($fullname, "Description");
@@ -517,7 +517,7 @@ sub get_public_repository {
   ($name, $tag) = (split("/",$fullname), "HEAD");
 
   if ($tag eq "STABLE") {
-    $tag = $self->_get_stable_tag($name);
+    $tag = $self->_get_stable_tag($name) || return undef;
   }
 
   # Make CVS happy by converting  .'s to _'s in tag
@@ -566,6 +566,10 @@ sub _get_stable_tag {
 
   @list = grep(!/^Global$/, $self->{inifile}->get_grouplist());
   @list = sort(grep(/^$name\/v/,@list));
+
+  if ($#list < 0) {
+    return undef;
+  }
 
   ($name, $tag) = (split("/",$list[$#list]), "HEAD");
 
