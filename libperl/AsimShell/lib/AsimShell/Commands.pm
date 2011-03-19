@@ -1540,7 +1540,7 @@ sub use_package {
     || shell_error("Could not determine target for checkout\n") && return undef;
 
 
-  $existing_package = get_package($target_packagename);
+  $existing_package = $default_packageDB->get_package($target_packagename);
 
   #
   # Check if we already have the right version available
