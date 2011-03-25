@@ -11,9 +11,14 @@ Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP
 
 [leap/HEAD]
-Description=Leap environment
+Description=Leap environment HEAD
 Access=https://asim.csail.mit.edu/svn/leap
 Tag=HEAD
+
+[leap/v11.03]
+Description=Leap environment HEAD
+Access=https://asim.csail.mit.edu/svn/leap
+Tag=v11.03
 
 ###### Leap debug trunk
 
@@ -84,7 +89,11 @@ Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=PLATFORMS
 
 [platforms/HEAD]
-Description=FPGA Platforms
+Description=FPGA Platforms HEAD
 Access=https://asim.csail.mit.edu/svn/platforms
 Tag=HEAD
 
+[platforms/v11.03]
+Description=FPGA Platforms v11.03
+Access=https://asim.csail.mit.edu/svn/platforms
+Tag=v11.03

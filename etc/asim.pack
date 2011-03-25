@@ -51,6 +51,11 @@ Description=AWB HEAD
 Access=https://asim.csail.mit.edu/svn/awb
 Tag=HEAD
 
+[awb/v11.03]
+Description=AWB v11.03
+Access=https://asim.csail.mit.edu/svn/awb
+Tag=v11.03
+
 ###### Asim trunk
 
 [asimcore]
@@ -64,14 +69,14 @@ Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=ASIMCORE
 
 [asimcore/HEAD]
-Description=Asim Core
-Method=svn
+Description=Asim Core HEAD
 Access=https://asim.csail.mit.edu/svn/asimcore
-Module=undefined
 Tag=HEAD
-Target=asimcore
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=ASIMCORE
+
+[asimcore/v11.03]
+Description=Asim Core v11.03
+Access=https://asim.csail.mit.edu/svn/asimcore
+Tag=v11.03
 
 
 ###### Feeder
