@@ -8595,3 +8595,14 @@ Directory etc/repositories.d
 
 Add tags in the .pack files for release v11.03 for awb,
 asimcore, leap and platforms.
+
+----------
+jsemer      Date: Fri Mar 25 15:41:04 EDT 2011  CSN: CSN-awb-434
+                  Fri Mar 25 19:41:04 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          433 
+
+Update debian package name to reflect start of work on
+v11.04 release.
