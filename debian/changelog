@@ -1,4 +1,5 @@
-awb (11.03~svn20110319r429+lucid) lucid; urgency=low
+awb (11.03+fixes~svn20110325r433+lucid) lucid; urgency=low
+
   [ Joel Emer ]
   * r383/r384/r391
         Added leap support
@@ -89,4 +90,4 @@ awb (11.03~svn20110319r429+lucid) lucid; urgency=low
   * r425, r426, r427
         Support for notion of a stable release and upgrade operation.
 
- -- Joel Emer <joel@emer.org>  Sat, 19 Mar 2011 10:59:45 -0400
+ -- Joel Emer <jsemer@intel.com>  Fri, 25 Mar 2011 15:19:51 -0400
