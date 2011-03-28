@@ -8606,3 +8606,16 @@ Directory debian
 
 Update debian package name to reflect start of work on
 v11.04 release.
+
+----------
+pellauer    Date: Mon Mar 28 16:02:21 EDT 2011  CSN: CSN-awb-435
+                  Mon Mar 28 20:02:21 UTC 2011
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          434 
+
+
+Bugfix in regression.launcher's invocation of "awb-run" and "model-coverage"
+that was causing it to die in globally installed debian installations.
+

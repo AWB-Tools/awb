@@ -133,14 +133,6 @@ if (defined $runstyle && $runstyle eq "pruned") {
     @packages = @default_packages;
 }
 
-my $asimrun_path = `$RESOLVER tools/scripts/$ASIM_RUN`;
-chomp $asimrun_path;
-
-if ( $? ne 0 ) {
-  print "ERROR: Unable to resolve tools/scripts/$ASIM_RUN directory.\n";
-  exit 1;
-}
-
 my %exp_fl;
 my %bm_fl;
 
@@ -226,13 +218,6 @@ if ( !$dryrun && !$rerun && system ("mkdir $resdir") ) {
 
 # construct experiments and benchmarks for pruned run if everything else succeeded
 if (defined $runstyle && $runstyle eq "pruned") {
-    my $model_coverage_path = `$RESOLVER tools/scripts/$MODEL_COVERAGE`;
-    chomp $model_coverage_path;
-
-    if ($? ne 0) {
-	print "ERROR: Unable to resolve tools/scripts/$MODEL_COVERAGE directory.\n";
-	exit 1;
-    }
     
     my @changeset = ();
     my @empty_changeset = ();
@@ -283,7 +268,7 @@ if (defined $runstyle && $runstyle eq "pruned") {
 
     # collect models dependent on this change set
     print "\n** Collecting changed models ...";
-    my $cmd = "$model_coverage_path --changed=" . join(',', @changeset) . " --print=apmchanged"; # --package=$package
+    my $cmd = "$MODEL_COVERAGE --changed=" . join(',', @changeset) . " --print=apmchanged"; # --package=$package
 
     # collect packages containing affected models
     open(MODELCOV, "$cmd |");
@@ -513,7 +498,7 @@ sub run_regression {
 
   foreach my $package ( @packages ) {
     print "\n\n****************  PACKAGE: $package  *****************\n\n";
-    my $cmd = "$asimrun_path ";
+    my $cmd = "$ASIM_RUN ";
     if ($rerun) {
 	$cmd = $cmd . " -nobuild ";
     }
