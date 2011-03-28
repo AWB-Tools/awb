@@ -8621,3 +8621,19 @@ Directory tools/scripts
 Backport of bugfix in r435 to regression.launcher's invocation of "awb-run" 
 and "model-coverage" that was causing it to die in globally installed debian
 installations.
+
+----------
+jsemer      Date: Mon Mar 28 17:03:09 EDT 2011  CSN: CSN-awb-438
+                  Mon Mar 28 21:03:09 UTC 2011
+
+
+Directory tools/scripts
+ awb-run                   Locally Modified          437 
+
+Directory debian
+ changelog                 Locally Modified          436 
+
+Backport of bugfix from r437 for path invocation of awb-batch that can 
+fail on globally installed Ubuntu systems. This should be tested on job
+submission systems like condor and netbatch to make sure asimstarter is
+invoked correctly.

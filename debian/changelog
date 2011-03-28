@@ -1,7 +1,8 @@
-awb (11.03+fixes~svn20110328r436+lucid) lucid; urgency=low
+awb (11.03+fixes~svn20110328r438+lucid) lucid; urgency=low
 
   [ Joel Emer ]
-  * r436
-        Backport of fixes to regression.launcher
+  * r436,r438
+        Backport of fixes to regression.launcher, awb-run
 
- -- Joel Emer <jsemer@intel.com>  Mon, 28 Mar 2011 16:23:57 -0400
+
+ -- Joel Emer <jsemer@intel.com>  Mon, 28 Mar 2011 17:02:19 -0400

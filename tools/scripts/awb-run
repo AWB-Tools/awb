@@ -78,7 +78,7 @@ my $exit_code = 0;
 # Hard coded global values.  These are not controlled by the asimrc file. 
 #
 my $debug = 0;
-my $BATCH_SCR_NM = "tools/scripts/awb-batch";
+my $BATCH_SCR_NM = "awb-batch"; # NOTE: This name is invoked directly in order for asimstarter to find the correct libraries. This should be tested on job submission systems like condor and netbatch.
 
 my $AWB_RESOLVER = "awb-resolver";
 my $ASIM_EXEC_SCRIPT = "./run";
@@ -503,22 +503,6 @@ $resdir = $Asim::default_workspace->build_dir() unless (defined $resdir);
 ( -d $resdir ) || die ("Unable to find results directory $resdir.\n");
 chomp ($resdir);
 $resdir = realpath($resdir);
-
-###########################################################
-# Get the path of the awb-batch scripts using resolver.
-##########################################################
- 
-$batch_scr = `$AWB_RESOLVER $BATCH_SCR_NM`;
-if ($? != 0) {
-  die "Batch script $BATCH_SCR_NM does not exist.\n";
-}
-
-# Generate a real path for batch script (no links)
-chomp ($batch_scr);
-$filename = basename($batch_scr);
-$batch_scr = realpath(dirname($batch_scr)) . "/$filename";
-( -f $batch_scr ) || die "Batch script $batch_scr does not exist.\n";
-
 
 ##########################################################
 # Add auto-requeue to netbatch if specified.
@@ -1626,7 +1610,7 @@ sub run_one_benchmark
         my $submit_cmd;
         if ($remote)
         {
-            $submit_cmd = "awb-batch ".       # FIXME:
+            $submit_cmd = "$BATCH_SCR_NM ".
                 "-benchmark=$bm ".
                 "-resdir=$remoteresdir/$name ".
                 "-exp=$model ".
@@ -1681,7 +1665,7 @@ sub run_one_benchmark
         }
         else
         {
-            $submit_cmd = "$batch_scr ".
+            $submit_cmd = "$BATCH_SCR_NM ".
                 "-benchmark=$bm ".
                 "-resdir=$resdir/$name ".
                 "-exp=$model ".
@@ -1773,7 +1757,7 @@ sub run_one_benchmark
                     return;
                 }
 
-                my $submit_cmd = "$batch_scr -benchmark=$trace_name -resdir=$resdir/$name ".
+                my $submit_cmd = "$BATCH_SCR_NM -benchmark=$trace_name -resdir=$resdir/$name ".
                     "-exp=$model -compress=$compress $batch_scr_inputs ".
                     "-execscript=\"$execscript\" -- $input"; 
 
