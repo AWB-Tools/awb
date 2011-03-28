@@ -8606,3 +8606,18 @@ Directory debian
 
 Change debian package name to properly reflect v11.03 release 
 and start of v11.03+fixes branch.
+
+----------
+jsemer      Date: Mon Mar 28 16:25:41 EDT 2011  CSN: CSN-awb-436
+                  Mon Mar 28 20:25:41 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          435 
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          435 
+
+Backport of bugfix in r435 to regression.launcher's invocation of "awb-run" 
+and "model-coverage" that was causing it to die in globally installed debian
+installations.
