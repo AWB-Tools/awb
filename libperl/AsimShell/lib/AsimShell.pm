@@ -369,10 +369,12 @@ sub run_command {
     if ( defined($line[0]) && defined(&{$command . "_" . $line[0]})) {
       $command = $command . "_" . shift @line;
     } else {
-
-      shell_error("Illegal subcommand to $command.\n");
-      return 0;
-
+      # Error unless a non-compound version of the command exists
+      if ($line[0] ne '' || ! defined(&$command)) {
+        shell_error("Illegal subcommand to $command.\n");
+        shell_error("Expected one of: " . join(', ', @{$COMPOUNDCOMMANDS{$command}}) . "\n");
+        return 0;
+      }
     }
     
   }

@@ -8648,3 +8648,21 @@ Sync of Intel repository r3011.
 
 cjbeckma    Date: Thu Feb  3 15:47:44 EST 2011  CSN: CSN-awb-3012
 - fix to the MAX_WAITING_JOBS parameter in awb-run
+
+----------
+mpellaue    Date: Fri Apr  1 11:48:55 EDT 2011  CSN: CSN-awb-440
+                  Fri Apr  1 15:48:55 UTC 2011
+
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          439 
+
+
+Sync of Intel repository r3025.
+
+
+      mcadler     Date: Mon Mar 14 16:26:30 EDT 2011  CSN: CSN-awb-3025
+
+      Help without options was broken because a new compound command version of
+      help was added.  Changed the parser to accept the same command as either
+      compound or not.
