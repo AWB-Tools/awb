@@ -8666,3 +8666,21 @@ Sync of Intel repository r3025.
       Help without options was broken because a new compound command version of
       help was added.  Changed the parser to accept the same command as either
       compound or not.
+
+----------
+mpellaue    Date: Fri Apr  1 11:50:57 EDT 2011  CSN: CSN-awb-441
+                  Fri Apr  1 15:50:57 UTC 2011
+
+
+Directory tools/scripts
+ awb-run                   Locally Modified          440 
+
+
+Sync of Intel repository r3027.
+
+     cjbeckma    Date: Fri Mar 18 08:57:05 EDT 2011  CSN: CSN-awb-3028
+
+     - fixed a problem in awb-run's --rerun option, wherein models were getting
+       rebuilt which were still running.  Now, the model configure and build 
+       steps are skipped if there are any .RUNNING or .SUBMITTED files for 
+       experiments using that model.

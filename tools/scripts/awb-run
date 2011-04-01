@@ -1016,6 +1016,9 @@ sub do_experiment
 
     my $model_buildarea = "";
 
+    # avoid rebuilding a model currently in use:
+    my $ok_to_build = ok_to_build_model($name, $model_name);
+
     if ($build == 1) {
         
         if (defined $buildarea && $buildarea ne "") {
@@ -1035,7 +1038,7 @@ sub do_experiment
         }
 
         if ( -d "$model_buildarea") {
-            if ($nuke) {
+            if ($nuke && $ok_to_build) {
                 # Clean model
                 print_info("........ Nuking model $model_name\n");
                 #
@@ -1084,7 +1087,7 @@ sub do_experiment
         # Configure model 
         print_info("........ Configuring model $model_name\n");
 
-        if (! ($thismodel->configure("--logfile", "$asim_runlogfl", "--persist", "$persist"))) {
+        if ($ok_to_build && ! ($thismodel->configure("--logfile", "$asim_runlogfl", "--persist", "$persist"))) {
             print_error("Unable to configure model $model_name.\n",
                        "Not running benchmarks on model $model_name.\n");
             system ("cat $asim_runlogfl");	  
@@ -1101,11 +1104,11 @@ sub do_experiment
         else {
             print_info("........ Submitting benchmarks for $name\n");
         }
-        batch_build_run($model, $name, $build, $model_name, $model_buildarea);
+        batch_build_run($model, $name, ($build && $ok_to_build), $model_name, $model_buildarea);
     }
     else {
         # local build the model for this experiment and run the benchmarks
-        local_build_run($model, $name, $build, $model_name, $model_buildarea, $thismodel);
+        local_build_run($model, $name, ($build && $ok_to_build), $model_name, $model_buildarea, $thismodel);
     }
 
     return;
@@ -1138,6 +1141,43 @@ sub check_current_workspace_against_modelpath
     
 
 # -----------------------------------------------------------------------------
+#
+# Is it necessary AND safe to (re)build a model?
+# This checks to make sure that some expected benchmark stats files are missing
+# (it's necessary), and that no benchmarks are currently running or submitted (it's safe).
+#
+sub ok_to_build_model
+{
+    my ($name, $model_name) = @_;
+    my $rebuild_needed = 0;
+
+    foreach $bm (@{$bms->{$name}}) 
+    {
+        # is it safe to rebuild now?
+        my $bm_name = get_bm_name($bm);
+        if ( -f "$resdir/$name/$bm_name.SUBMITTED" ||
+             -f "$resdir/$name/$bm_name.RUNNING"
+        ) {
+            print_warning("Unable to rebuild model $model_name for experiment $name",
+                          " because benchmark $bm_name is still running.\n");
+            return 0;
+        }
+
+        # is it necessary to build?
+        if (( -f "$resdir/$name/$bm_name.stats" ) ||
+            ( -f "$resdir/$name/$bm_name.stats.gz") ||
+            ( -f "$resdir/$name/$bm_name.stats.bz2")
+        ) {
+            next;
+        } else {
+            $rebuild_needed = 1;
+        }
+    }
+
+    print_warning("Rebuild of model $model_name is unnecessary because no benchmarks.\n")
+        unless $rebuild_needed;
+    return $rebuild_needed;
+}
 
 
 # -----------------------------------------------------------------------------
@@ -1282,11 +1322,8 @@ sub batch_build_run
     unless (controlled_fork($name, "batch_build_run.$name", $forkbatch, $forkbatch)) {
 
         my $build_success = 1;
-
-	if ($build) 
+        if ($build)
 	{
-#	    put_env("AWB_MODEL", "$model");
-#	    print_info(".... AWB_MODEL : $model\n");
 	    print_info(".... Submitting model build\n");
 	    
 	    # Build model (optimized)
@@ -2831,6 +2868,10 @@ successfully, since experiments that already have stats files will not
 be run. Note that when --replace is specified, existing stats files
 are removed prior to submission of the new job. Default is NOT to
 replace any existing stats files.
+
+When resubmitting jobs to an existing run area, existing models will NOT be
+rebuilt if any benchmarks have .RUNNING or .SUBMITTED files for them
+indicating they are still in progress.
 
 =item --compress none|no|gzip|gz|bzip2|bz2 
 
