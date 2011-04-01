@@ -464,7 +464,7 @@ NEWFILE:
 
   CORE::close($tmp_fh);
 
-  if (defined($oldfile)) {
+  if (defined($oldfile) && defined(fileno(OLDINI))) {
 
       # Re-save an exisiting file
 

@@ -8703,3 +8703,21 @@ Sync of Intel repository r3029.
        batch system).
      - Start regressions after 10 seconds if no response received.  The old code
        tried to do this but failed.
+
+----------
+mpellaue    Date: Fri Apr  1 11:57:40 EDT 2011  CSN: CSN-awb-443
+                  Fri Apr  1 15:57:40 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Inifile.pm                Locally Modified          442 
+
+
+Sync of Intel repository r3032.
+
+
+         mcadler     Date: Mon Mar 21 19:23:42 EDT 2011  CSN: CSN-awb-3032
+
+         Clean up another error message seen when running nightly regressions.
+         There was a path through which reads of a file were attempted when
+         the file wasn't open or didn't exist.
