@@ -8633,3 +8633,18 @@ Bugfix for path invocation of awb-batch that can fail on globally installed
 Ubuntu systems. This should be tested on job submission systems like condor
 and netbatch to make sure asimstarter is invoked correctly.
 
+
+----------
+mpellaue    Date: Fri Apr  1 11:46:09 EDT 2011  CSN: CSN-awb-439
+                  Fri Apr  1 15:46:09 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim/Batch
+ Netbatch.pm               Locally Modified          438 
+
+
+Sync of Intel repository r3011.
+
+
+cjbeckma    Date: Thu Feb  3 15:47:44 EST 2011  CSN: CSN-awb-3012
+- fix to the MAX_WAITING_JOBS parameter in awb-run

@@ -410,23 +410,15 @@ sub scheduler {
     #
     my $num_waiting = 0;
 
-    # nbqstat will report jobs with either the hierarchical name (using the -n argument)
-    # or the numerical slot name.  Depending on which format your asimrc file uses,
-    # we need to check BOTH formats to make sure we really know how many waiting
-    # jobs you have.
-
-    system("$BATCH_STATUS_COMMAND -P$pool  -w -n slot=$queue >$TMP_DIR/wait.$$");
-    system("$BATCH_STATUS_COMMAND -P$pool  -w slot=$queue    >>$TMP_DIR/wait.$$");
-
-    open (WAIT_JOBS, "<$TMP_DIR/wait.$$");
+    # get the number of jobs in the wait state for this user in this queue slot
+    my $nbqcmd = "$BATCH_STATUS_COMMAND -P$pool -w slot=$queue user=$user";
+    open(WAIT_JOBS, "$nbqcmd |") || die "Cannot query Netbatch using: $nbqcmd";
     while (<WAIT_JOBS>) {
-      chomp;
-      if ( /\s+$queue\s+$user\s+/ ) {
-	$num_waiting++;
-      }
+        if (/Number\s+of\s+jobs\s+in\s+WAITING\s+queue:\s+([0-9]+)/i) {
+            $num_waiting = $1;
+        }
     }
     close (WAIT_JOBS);
-    system("rm $TMP_DIR/wait.$$");
 
     #
     # Check for running jobs submitted by user.
@@ -434,8 +426,8 @@ sub scheduler {
     my $num_user_running = 0;
     my $num_total_running = 0;
 
-    system("$BATCH_STATUS_COMMAND -P$pool  -r -j -f  slot=$queue> $TMP_DIR/run.$$");
-    open (RUN_JOBS, "<$TMP_DIR/run.$$");
+    open (RUN_JOBS, "$BATCH_STATUS_COMMAND -P$pool  -r -j -f  slot=$queue user=$user |")
+        || die 'Problems querying Netbatch';
     while (<RUN_JOBS>) {
       chomp;
       if (/^User: $user(.*)/) {
@@ -450,7 +442,6 @@ sub scheduler {
       }
     }
     close (RUN_JOBS);
-    system("rm $TMP_DIR/run.$$");
 
     #
     # Given all the above information we decide whether to sleep
