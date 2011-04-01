@@ -8684,3 +8684,22 @@ Sync of Intel repository r3027.
        rebuilt which were still running.  Now, the model configure and build 
        steps are skipped if there are any .RUNNING or .SUBMITTED files for 
        experiments using that model.
+
+----------
+mpellaue    Date: Fri Apr  1 11:54:05 EDT 2011  CSN: CSN-awb-442
+                  Fri Apr  1 15:54:05 UTC 2011
+
+
+Directory tools/scripts
+ regression.launcher       Locally Modified          441 
+
+
+Sync of Intel repository r3029.
+
+   mcadler     Date: Fri Mar 18 15:02:46 EDT 2011  CSN: CSN-awb-3029
+
+   Clean up the code that checks for regressions already running:
+     - Start regressions immediately if not connected to STDIN (e.g. running in
+       batch system).
+     - Start regressions after 10 seconds if no response received.  The old code
+       tried to do this but failed.

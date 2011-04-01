@@ -417,7 +417,6 @@ sub check_regression {
   # Tell program to run function if signal triggers. 
   #
   alarm (0);
-  $SIG{ALRM} = \&run_regression;
   $SIG{INT} = \&Cleanup;
   $SIG{KILL} = \&Cleanup;
 
@@ -430,6 +429,9 @@ sub check_regression {
   my $found = 0;
   my $state = 0;
   my @users;
+
+  ## Don't bother asking if STDIN is unavailable
+  return if (! -t STDIN);
 
   if ( ! system ("$NBQ > $file 2>&1") ) {
     if ( open(NBQFL, "<$file") ) {
@@ -466,22 +468,26 @@ sub check_regression {
     print "         Not checking for existing regression runs.\n";
   }
   
-  if ($found == 1) {
-    my $answer='y';
-    my $user = join (", ", @users);
-    print "\n\nUser(s) $user is/are currently running regression jobs.\n";
-    print "\t\t Do you want to submit regression?  You have 10 seconds to decide.\n";
-    print "\t\t Default is 'y': (y, n): ";
-    alarm (10);
-    $answer = <STDIN>;
-    alarm (0);
-    chomp $answer;
-    $answer =~ tr/[A-Z]/[a-z]/;
-    if ( $answer eq "n" ) {
-      print "NOT SUBMITTING JOB.\n";
-      &Cleanup();
+  eval {
+    local $SIG{ALRM} = sub { print "\nTime out:  Running regressions...\n"; die 0; };
+
+    if ($found == 1) {
+      my $answer='y';
+      my $user = join (", ", @users);
+      print "\n\nUser(s) $user is/are currently running regression jobs.\n";
+      print "\t\t Do you want to submit regression?  You have 10 seconds to decide.\n";
+      print "\t\t Default is 'y': (y, n): ";
+      alarm (10);
+      $answer = <STDIN>;
+      alarm (0);
+      chomp $answer;
+      $answer =~ tr/[A-Z]/[a-z]/;
+      if ( $answer eq "n" ) {
+        print "NOT SUBMITTING JOB.\n";
+        &Cleanup();
+      }
     }
-  }
+  };
 }
 
 #****************
