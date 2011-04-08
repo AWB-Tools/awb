@@ -8721,3 +8721,13 @@ Sync of Intel repository r3032.
          Clean up another error message seen when running nightly regressions.
          There was a path through which reads of a file were attempted when
          the file wasn't open or didn't exist.
+
+----------
+kfleming    Date: Fri Apr  8 11:01:17 EDT 2011  CSN: CSN-awb-444
+                  Fri Apr  8 15:01:17 UTC 2011
+
+
+Directory etc/repositories.d
+ ofdm.pack                 Locally Modified          443 
+
+Changed the contents of ofdm.pack to rename ofdm package airblue.
