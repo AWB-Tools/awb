@@ -1,0 +1,16 @@
+###### Airblue trunk
+
+[airblue]
+Description=Airblue OFDM Project
+Method=svn
+Access=https://asim.csail.mit.edu/svn/airblue
+Module=undefined
+Tag=HEAD
+Target=airblue
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=AIRBLUE
+
+[airblue/HEAD]
+Description=Airblue OFDM design
+Access=https://asim.csail.mit.edu/svn/airblue
+Tag=HEAD

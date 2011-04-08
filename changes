@@ -8731,3 +8731,15 @@ Directory etc/repositories.d
  ofdm.pack                 Locally Modified          443 
 
 Changed the contents of ofdm.pack to rename ofdm package airblue.
+
+----------
+joel        Date: Fri Apr  8 19:56:04 EDT 2011  CSN: CSN-awb-445
+                  Fri Apr  8 23:56:04 UTC 2011
+
+
+Directory etc/repositories.d
+ airblue.pack              Locally Added               0 
+ ofdm.pack                 Locally Modified          444 
+
+Renamed pack file for airblue and updated it to access the
+airblue repository as airblue rather than ofdm.

@@ -1,16 +1,5 @@
-###### Airblue trunk
 
-[airblue]
-Description=Airblue OFDM Project
-Method=svn
-Access=https://asim.csail.mit.edu/svn/ofdm
-Module=undefined
-Tag=HEAD
-Target=airblue
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OFDM
+# A empty file to wipe out the old contents of ofdm.pack
 
-[airblue/HEAD]
-Description=Airblue OFDM design
-Access=https://asim.csail.mit.edu/svn/ofdm
-Tag=HEAD
+# This file can be removed from the repository when we are sure
+# that nobody has the old ofdm.pack file around any more
