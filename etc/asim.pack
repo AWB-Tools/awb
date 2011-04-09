@@ -56,7 +56,7 @@ Description=AWB v11.03
 Access=https://asim.csail.mit.edu/svn/awb
 Tag=v11.03
 
-[awb/x11.04]
+[awb/v11.04]
 Description=AWB v11.04
 Access=https://asim.csail.mit.edu/svn/awb
 Tag=v11.04
@@ -82,6 +82,12 @@ Tag=HEAD
 Description=Asim Core v11.03
 Access=https://asim.csail.mit.edu/svn/asimcore
 Tag=v11.03
+
+
+[asimcore/v11.04]
+Description=Asim Core v11.04
+Access=https://asim.csail.mit.edu/svn/asimcore
+Tag=v11.04
 
 
 ###### Feeder

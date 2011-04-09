@@ -8834,3 +8834,31 @@ Directory etc
  asim.pack                 Locally Modified          447 
 
 Fixed bug in location of globally shared packages.
+
+----------
+joel        Date: Sat Apr  9 13:35:02 EDT 2011  CSN: CSN-awb-449
+                  Sat Apr  9 17:35:02 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          448 
+ changelog                 Locally Modified          448 
+ rules                     Locally Modified          448 
+ awb.preinst               Locally Removed           448 
+
+Directory etc
+ asim.pack                 Locally Modified          448 
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          448 
+
+Add repository information for release v11.04 of awb,
+asim-core, leap and platforms packages.
+
+Make debian package depend on both the current and the
+previous release of package. Thus, an upgrade will not
+automatically wipe out previous version of the package 
+in /usr/share/asim/awb/. It would be better if a new
+install just left previous versions alone, but I couldn't
+get that to work.
+
