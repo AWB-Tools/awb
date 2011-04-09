@@ -8802,3 +8802,13 @@ Refined support for installation of multiple releases. In specific,
    % awb-shell use asimcore/v11.04 (if installed)
 
 
+
+----------
+jsemer      Date: Fri Apr  8 20:22:21 EDT 2011  CSN: CSN-awb-447
+                  Sat Apr  9 00:22:21 UTC 2011
+
+
+Directory debian
+ rules                     Locally Modified          446 
+
+Remove extraneous 'v' from version number.

@@ -26,7 +26,7 @@ else
 CROSS= --build $(DEB_BUILD_GNU_TYPE)
 endif
 
-RELEASE = $(shell $(MAKE) print-release-name)
+RELEASE = $(shell $(MAKE) print-release-name | sed 's/v//' )
 
 
 
