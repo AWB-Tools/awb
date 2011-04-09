@@ -18,8 +18,9 @@
 #
 [Global]
 Description=Architects Workbench
-CSN=CSN-awb-447
+CSN=CSN-awb-448
 Name=awb
 Tag=HEAD
+#Tag=v11.04
 Lock=asim-asimcore
 Buildorder=1

@@ -8812,3 +8812,25 @@ Directory debian
  rules                     Locally Modified          446 
 
 Remove extraneous 'v' from version number.
+
+----------
+joel        Date: Fri Apr  8 22:33:46 EDT 2011  CSN: CSN-awb-448
+                  Sat Apr  9 02:33:46 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          447 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          447 
+
+Directory .
+ README.debian             Locally Modified          447 
+
+Directory admin/packages
+ awb                       Locally Modified          447 
+
+Directory etc
+ asim.pack                 Locally Modified          447 
+
+Fixed bug in location of globally shared packages.

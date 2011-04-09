@@ -1,18 +1,25 @@
 Changes to do a release and upgrade release number 
 
+   0) Make sure that there is a pack file for the new release.
+      This change needs to be in awb/HEAD and awb/STABLE and
+      is a little convoluted when releasing awb...
+
    1) Create a new branch for release
 
      a) awb-shell branch package
 
    2) In the release branch, change the following file:
 
-     a) admin/packages/<packagename>
+     a) sed -i 's/TAG=HEAD/TAG=v<YY>.<MM>/' admin/packages/<packagename>
+
 
    3) In trunk, increment the release number for HEAD in:
 
      a) debian/changelog
 
      b) debian/control
+
+   4) Now do a debian build in the branch for releases and in trunk for testing
 
 
 Build for debian

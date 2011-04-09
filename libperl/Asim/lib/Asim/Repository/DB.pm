@@ -524,7 +524,7 @@ sub get_public_repository {
 
   $method = $copy?"copy":"public";
 
-  $access = Asim::Packagedir() . $name . "/" . $tag;
+  $access = Asim::Packagedir() . "/" . $name . "/" . $tag;
 
   #
   # Check if package is in old location
