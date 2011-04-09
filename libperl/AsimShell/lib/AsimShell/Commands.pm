@@ -1613,7 +1613,7 @@ sub use_package {
     || shell_error("Could not add package ($repositoryname)\n") && return undef;
 
   my $package = $default_packageDB->get_package_by_dirname("${targetdir}")
-    || shell_error("No legal package at ${targetdir}/HEAD\n") && return undef;
+    || shell_error("No legal package at ${targetdir}\n") && return undef;
 
   #
   # Optionally build the package

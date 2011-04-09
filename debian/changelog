@@ -1,7 +1,8 @@
-awb (11.03~svn20110319r434+lucid) lucid; urgency=low
+awb (11.04~svn20110408r446+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * r434
         Beginning of work on release v11.04.
 
- -- Joel Emer <jsemer@intel.com>  Fri, 25 Mar 2011 15:38:37 -0400
+
+ -- Joel Emer <jsemer@intel.com>  Fri, 08 Apr 2011 19:59:36 -0400

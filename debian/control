@@ -7,12 +7,12 @@ Standards-Version: 3.8.4
 
 Package: awb
 Architecture: all
-Depends: awb-11.03
+Depends: awb-11.04
 Description: Dependency package for the Architect's Workbench
  Dependency package for the Architect's Workbench package (awb)
 Section: devel
 
-Package: awb-11.03
+Package: awb-11.04
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, awb-bin
 Description: Sharable package for the Architect's Workbench

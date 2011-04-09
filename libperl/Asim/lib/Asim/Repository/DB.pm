@@ -351,7 +351,7 @@ List public packages
 sub public_directory {
   my $self = shift;
 
-  my $dir = Asim::Packagedir(). "/packages/";
+  my $dir = Asim::Packagedir();
   my @dirs = glob("${dir}*/*");
   my @names; 
 
@@ -524,12 +524,12 @@ sub get_public_repository {
 
   $method = $copy?"copy":"public";
 
-  $access = Asim::Packagedir() . "/packages/" . $name . "/" . $tag;
+  $access = Asim::Packagedir() . $name . "/" . $tag;
 
   #
   # Check if package is in old location
   #
-  $old_access_location = Asim::Packagedir() . "/" . $name . "/" . $tag;
+  $old_access_location = Asim::Packagedir() . "/../" . $name . "/" . $tag;
 
   if ( ! -d $access && -d $old_access_location) {
     $access = $old_access_location;

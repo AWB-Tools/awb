@@ -8743,3 +8743,62 @@ Directory etc/repositories.d
 
 Renamed pack file for airblue and updated it to access the
 airblue repository as airblue rather than ofdm.
+
+----------
+jsemer      Date: Fri Apr  8 20:05:45 EDT 2011  CSN: CSN-awb-446
+                  Sat Apr  9 00:05:45 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          445 
+
+Directory debian
+ control                   Locally Modified          445 
+ changelog                 Locally Modified          445 
+ rules                     Locally Modified          445 
+ awb.preinst               Locally Added               0 
+ awb-version.dirs          Locally Modified          445 
+
+Directory .
+ Makefile.in               Locally Modified          445 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          445 
+
+Directory libperl/Asim/lib/Asim/Workspace
+ Template.pm               Locally Modified          445 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          445 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          445 
+
+Directory .
+ README.debian             Locally Modified          445 
+ configure.in              Locally Modified          445 
+ Makefile.am               Locally Modified          445 
+
+Refined support for installation of multiple releases. In specific,
+
+1) Globally installed packages now placed in:
+
+    $PREFIX/share/asim/packages/<package>/<version>
+
+2) Applications always install at same place until we need multiple
+   copies of applications:
+
+   $PREFIX/libexec/asim/<package>/HEAD
+
+3) New workspaces no longer get asimcore by default because we
+   don't necessarily want to use head and can't be sure what
+   the current version is. Maybe eventually we can get the /STABLE
+   version but for now one should do an explict 'use', e.g.,
+ 
+   % awb-shell use asimcore/HEAD
+
+   or
+
+   % awb-shell use asimcore/v11.04 (if installed)
+
+

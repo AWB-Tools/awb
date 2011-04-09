@@ -22,7 +22,7 @@ SUBDIRS = lib libperl tools
 #
 # we have non-standard sub-targets
 #
-.phony:  install-indep install-arch install-exec-hook install-config install-etc install-package install-src
+.phony:  install-indep install-arch install-exec-hook install-config install-etc install-package install-src print-release-name
 
 #
 # Targets used when making a .deb file
@@ -117,3 +117,8 @@ install-src-public: install-src
 	find         $(DESTDIR)$(codedir) -type d -exec chmod o+x {} \;
 
 
+#
+# Utility target to print the release being built
+#
+print-release-name:
+	@echo ${release}

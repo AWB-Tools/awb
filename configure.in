@@ -476,7 +476,7 @@ AC_SUBST(configdir)
 
 
 # This is where architecture independent info is placed
-packagedir='${datadir}/asim'
+packagedir='${datadir}/asim/packages'
 AC_SUBST(packagedir)
 
 # This is where a copy of the package is placed
@@ -485,7 +485,9 @@ AC_SUBST(codedir)
 
 
 # This is where architecture dependent info is placed
-tooldir='${libexecdir}/asim/${release}'
+#tooldir='${libexecdir}/asim/${release}'
+# For now we always treat the release for tools as HEAD
+tooldir='${libexecdir}/asim/HEAD'
 AC_SUBST(tooldir)
 
 

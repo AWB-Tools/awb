@@ -1,3 +1,19 @@
+Changes to do a release and upgrade release number 
+
+   1) Create a new branch for release
+
+     a) awb-shell branch package
+
+   2) In the release branch, change the following file:
+
+     a) admin/packages/<packagename>
+
+   3) In trunk, increment the release number for HEAD in:
+
+     a) debian/changelog
+
+     b) debian/control
+
 
 Build for debian
 
@@ -30,4 +46,5 @@ Install into repository for distribution
         For example, /home/asim/reprepro/ubuntu
 
      b) reprepro includedeb <release> <package>.deb
+
 

@@ -845,6 +845,9 @@ Return the name of the branch that this repository was checked
 out of.  If it was checked out of the main trunk, return the
 value 'HEAD'.
 
+This function is generally overridden by repository type 
+specific methods.
+
 =cut
 
 ################################################################
