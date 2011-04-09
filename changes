@@ -8862,3 +8862,14 @@ in /usr/share/asim/awb/. It would be better if a new
 install just left previous versions alone, but I couldn't
 get that to work.
 
+
+----------
+jsemer      Date: Sat Apr  9 14:26:40 EDT 2011  CSN: CSN-awb-450
+                  Sat Apr  9 18:26:40 UTC 2011
+
+
+Directory admin/packages
+ awb                       Locally Modified          449 
+
+Clean up an extraneous comment line in the package admin
+file.
