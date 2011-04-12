@@ -58,16 +58,18 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/include/config.h.in \
 	$(top_srcdir)/libperl/Asim/lib/Asim.pm.in \
 	$(top_srcdir)/share/awb.config.template.in COPYING INSTALL \
-	config.guess config.sub scripts/compile scripts/config.guess \
-	scripts/config.sub scripts/depcomp scripts/install-sh \
-	scripts/ltmain.sh scripts/missing scripts/mkinstalldirs
+	aux-scripts/compile aux-scripts/config.guess \
+	aux-scripts/config.sub aux-scripts/depcomp \
+	aux-scripts/install-sh aux-scripts/ltmain.sh \
+	aux-scripts/missing aux-scripts/mkinstalldirs config.guess \
+	config.sub
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
-mkinstalldirs = $(SHELL) $(top_srcdir)/scripts/mkinstalldirs
+mkinstalldirs = $(SHELL) $(top_srcdir)/aux-scripts/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/include/config.h
 CONFIG_CLEAN_FILES = share/awb.config.template \
 	libperl/Asim/lib/Asim.pm
@@ -848,6 +850,7 @@ install-package:
 	rsync -av --exclude .svn admin   $(DESTDIR)$(codedir)
 	rsync -av --exclude .svn base    $(DESTDIR)$(codedir)
 	rsync -av --exclude .svn modules $(DESTDIR)$(codedir)
+	rsync -av --exclude .svn scripts $(DESTDIR)$(codedir)
 
 #
 # This horrible sequence copies the source to $(codedir) and

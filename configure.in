@@ -28,7 +28,7 @@ AC_CONFIG_SRCDIR([admin/packages/awb])
 # AC_PREFIX_DEFAULT(/usr/local)
 AC_PREFIX_PROGRAM(asimstarter)
 
-AC_CONFIG_AUX_DIR(scripts)
+AC_CONFIG_AUX_DIR(aux-scripts)
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.8.3 foreign subdir-objects]) dnl automake version + options

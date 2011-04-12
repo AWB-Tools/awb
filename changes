@@ -8873,3 +8873,80 @@ Directory admin/packages
 
 Clean up an extraneous comment line in the package admin
 file.
+
+----------
+jsemer      Date: Tue Apr 12 17:50:24 EDT 2011  CSN: CSN-awb-451
+                  Tue Apr 12 21:50:24 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          450 
+ Makefile.in               Locally Modified          450 
+
+Directory debian
+ changelog                 Locally Modified          450 
+
+Directory aux-scripts
+ mkinstalldirs             Locally Added               - 
+ depcomp                   Locally Added               - 
+ compile                   Locally Added               - 
+ missing                   Locally Added               - 
+ config.guess              Locally Added               - 
+ config.sub                Locally Added               - 
+ ltmain.sh                 Locally Added               - 
+ install-sh                Locally Added               - 
+
+Directory .
+ aux-scripts/              Locally Added               0 
+
+Directory scripts
+ mkinstalldirs             Locally Removed           450 
+ depcomp                   Locally Removed           450 
+ compile                   Locally Removed           450 
+ missing                   Locally Removed           450 
+ config.guess              Locally Removed           450 
+ config.sub                Locally Removed           450 
+ ltmain.sh                 Locally Removed           450 
+ install-sh                Locally Removed           450 
+
+Directory libperl
+ Makefile.in               Locally Modified          450 
+
+Directory tools
+ Makefile.in               Locally Modified          450 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb/awb-wizard
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          450 
+
+Directory tools/awb/awb2
+ Makefile.in               Locally Modified          450 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          450 
+
+Directory lib
+ Makefile.in               Locally Modified          450 
+
+Directory .
+ configure.in              Locally Modified          450 
+ Makefile.am               Locally Modified          450 
+
+Move autoconf scripts to aux-scripts/.

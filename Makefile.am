@@ -94,6 +94,7 @@ install-package:
 	rsync -av --exclude .svn admin   $(DESTDIR)$(codedir)
 	rsync -av --exclude .svn base    $(DESTDIR)$(codedir)
 	rsync -av --exclude .svn modules $(DESTDIR)$(codedir)
+	rsync -av --exclude .svn scripts $(DESTDIR)$(codedir)
 
 #
 # This horrible sequence copies the source to $(codedir) and
