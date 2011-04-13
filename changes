@@ -8950,3 +8950,14 @@ Directory .
  Makefile.am               Locally Modified          450 
 
 Move autoconf scripts to aux-scripts/.
+
+----------
+joel        Date: Wed Apr 13 08:14:47 EDT 2011  CSN: CSN-awb-452
+                  Wed Apr 13 12:14:47 UTC 2011
+
+
+Directory scripts
+ install-rcfile            Locally Modified          451 
+
+Restore execute permission to file accidentally lost in
+previous checkin.
