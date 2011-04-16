@@ -11,6 +11,7 @@ lib/Asim/Repository/BitKeeper.pm
 lib/Asim/Repository/Copy.pm
 lib/Asim/Repository/Cvs.pm
 lib/Asim/Repository/Git.pm
+lib/Asim/Repository/Public.pm
 lib/Asim/Repository/Svn.pm
 lib/Asim/Stats/ToText.pm
 lib/Asim/Stats/ToText/LongNames.pm
@@ -41,11 +42,8 @@ lib/Asim/Batch/Local.pm
 lib/Asim/Batch/Netbatch.pm
 lib/Asim/Batch/NetbatchRemote.pm
 lib/Asim/Benchmark.pm
-lib/Asim/Package/BitKeeper.pm
-lib/Asim/Package/Svn.pm
 lib/Asim/Bundle.pm
 lib/Asim/BuildTree.pm
-lib/Asim/Package/Cvs.pm
 lib/Asim/Edit.pm
 lib/Asim/Edit/Interactive.pm
 lib/Asim/Edit/Noninteractive.pm

@@ -8987,3 +8987,20 @@ targetdirectory.
 Symbolic links from old names to new names were placed
 on the svn server so that old checkouts will continue
 to work.
+
+----------
+joel        Date: Sat Apr 16 16:54:52 EDT 2011  CSN: CSN-awb-454
+                  Sat Apr 16 20:54:52 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          453 
+
+Directory libperl/Asim/lib/Asim/GenCFG
+ Auto.pm                   Locally Modified          453 
+
+Directory libperl/Asim
+ MANIFEST                  Locally Modified          453 
+
+Removed crud that had accidentally accumulated in Auto.pm
+and updated perl MANIFEST.
