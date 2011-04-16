@@ -6,17 +6,17 @@
 
 ###### Platform-ACP trunk
 
-[platforms-acp]
-Description=Platform modules for ACP board
+[leap-platforms-acp]
+Description=Leap Platform modules for ACP board
 Method=svn
-Access=https://asim.csail.mit.edu/svn/platforms-acp
+Access=https://asim.csail.mit.edu/svn/leap-platforms-acp
 Module=undef
 Tag=HEAD
-Target=platforms-acp
+Target=leap-platforms-acp
 Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=platform-acp
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platform-acp
 
 [platforms-acp/HEAD]
-Description=Platform modules for ACP board (HEAD)
-Access=https://asim.csail.mit.edu/svn/platforms-acp
+Description=Leap Platform modules for ACP board (HEAD)
+Access=https://asim.csail.mit.edu/svn/leap-platforms-acp
 Tag=HEAD

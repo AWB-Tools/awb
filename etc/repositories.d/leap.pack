@@ -83,27 +83,27 @@ Tag=HEAD
 
 ###### Leap platforms trunk
 
-[platforms]
-Description=FPGA Platforms
+[leap-platforms]
+Description=Leap FPGA Platforms
 Method=svn
-Access=https://asim.csail.mit.edu/svn/platforms
+Access=https://asim.csail.mit.edu/svn/leap-platforms
 Module=undefined
 Tag=HEAD
-Target=platforms
+Target=leap-platforms
 Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=PLATFORMS
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-PLATFORMS
 
-[platforms/HEAD]
-Description=FPGA Platforms HEAD
-Access=https://asim.csail.mit.edu/svn/platforms
+[leap-platforms/HEAD]
+Description=Leap FPGA Platforms HEAD
+Access=https://asim.csail.mit.edu/svn/leap-platforms
 Tag=HEAD
 
 [platforms/v11.03]
-Description=FPGA Platforms v11.03
-Access=https://asim.csail.mit.edu/svn/platforms
+Description=Leap FPGA Platforms v11.03
+Access=https://asim.csail.mit.edu/svn/leap-platforms
 Tag=v11.03
 
-[platforms/v11.04]
-Description=FPGA Platforms v11.04
-Access=https://asim.csail.mit.edu/svn/platforms
+[leap-platforms/v11.04]
+Description=Leap FPGA Platforms v11.04
+Access=https://asim.csail.mit.edu/svn/leap-platforms
 Tag=v11.04

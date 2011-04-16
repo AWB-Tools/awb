@@ -8961,3 +8961,29 @@ Directory scripts
 
 Restore execute permission to file accidentally lost in
 previous checkin.
+
+----------
+joel        Date: Fri Apr 15 20:31:39 EDT 2011  CSN: CSN-awb-453
+                  Sat Apr 16 00:31:39 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          452 
+
+Directory etc/repositories.d
+ platform-acp.pack         Locally Modified          452 
+ leap.pack                 Locally Modified          452 
+
+Updated pack files for following package name changes:
+
+           platforms     -> leap-platforms
+           platforms-acp -> leap-platforms-acp
+
+
+The repostory  names were changed as well as the locations
+of the repositories on the svn server and the checkout 
+targetdirectory.
+
+Symbolic links from old names to new names were placed
+on the svn server so that old checkouts will continue
+to work.
