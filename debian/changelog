@@ -1,6 +1,9 @@
-awb (11.04~svn20110416r454+lucid) lucid; urgency=low
+awb (11.04+fixes~svn20110503r456+lucid) lucid; urgency=low
 
   [ Joel Emer ]
   * Work on release v11.04.
 
- -- Joel Emer <joel@emer.org>  Sat, 16 Apr 2011 16:54:22 -0400
+  [ Michael Pellauer ]
+  * Release v11.04.
+
+ -- Michael Pellauer <pellauer@simulacrum>  Tue, 03 May 2011 12:17:50 -0400
