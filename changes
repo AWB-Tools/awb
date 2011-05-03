@@ -9004,3 +9004,20 @@ Directory libperl/Asim
 
 Removed crud that had accidentally accumulated in Auto.pm
 and updated perl MANIFEST.
+
+----------
+pellauer    Date: Tue May  3 12:39:15 EDT 2011  CSN: CSN-awb-457
+                  Tue May  3 16:39:15 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          456 
+ changelog                 Locally Modified          456 
+ rules                     Locally Modified          456 
+
+Directory .
+ README.debian             Locally Modified          456 
+
+
+* Update to begin work on 11.08 release.
+

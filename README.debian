@@ -10,24 +10,18 @@ Changes to do a release and upgrade release number
 
    2) In the release branch, change the following file:
 
-     a) sed -i 's/TAG=HEAD/TAG=v<YY>.<MM>/' admin/packages/<packagename>
+     a) sed -i 's/Tag=HEAD/Tag=v<YY>.<MM>/' admin/packages/<packagename>
 
 
-   3) In trunk, increment the release number for HEAD in:
-
-     a) debian/changelog
-
-     b) debian/control
-
-   4) Now do a debian build in the branch for releases and in trunk for testing
+   3) Now do a debian build in the branch for releases and in trunk for testing
 
 
 Build for debian
 
   1) Update debian/changelog (using dch can help)
 
-     a) Update name to <release>.<major>.<minor>~svn<date>r<version>+<release>
-        For example, 0.6.0~svn20100724r382+lucid
+     a) Update name to <release>.<major>.<minor>+fixes~svn<date>r<version>+<release>
+        For example, 11.04+fixes~svn20100724r382+lucid
 
      b) Change date at bottom of changelog
 
@@ -37,7 +31,7 @@ Build for debian
      a) debuild -r sudo -us -uc
 
 
-  3) Copy files created in ../ to system containing repository
+  3) Copy .deb files created in ../ to system containing repository
 
 
 Install into repository for distribution
@@ -50,8 +44,18 @@ Install into repository for distribution
   2) Install <package>.deb (copied above) into repository
 
      a) cd <repository-directory>
-        For example, /home/asim/reprepro/ubuntu
+        For example, /home/asim/reprepro/releases/ubuntu
 
      b) reprepro includedeb <release> <package>.deb
 
 
+Fix the trunk to prepare for the next future release
+
+  1) In a workspace with trunk, increment the release 
+     number for HEAD in:
+
+     a) debian/changelog
+
+     b) debian/control
+     
+     c) debian/rules
