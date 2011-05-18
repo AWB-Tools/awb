@@ -95,7 +95,7 @@ our %COMPOUNDCOMMANDS =
     commit    => [ qw(package) ],
     configure => [ qw(model package) ],
     clean     => [ qw(model package regression) ],
-    create    => [ qw(repository workspace package model module lock) ],
+    create    => [ qw(repository workspace package model module lock submodel) ],
     cvs       => [ qw(package) ],
     delete    => [ qw(lock package regression) ],
     edit      => [ qw(workspace package model module) ],
@@ -111,6 +111,7 @@ our %COMPOUNDCOMMANDS =
     rehash    => [ qw(repositories locks packages models modules workspace) ],
     regtest   => [ qw(package) ],
     release   => [ qw(package) ],
+    replace   => [ qw(module) ],
     revert    => [ qw(package) ],
     run       => [ qw(benchmark regression) ],
     setup     => [ qw(benchmark) ],
@@ -132,7 +133,7 @@ our %COMPOUNDCOMMANDS =
 
 
 our @COMMANDS= ( keys %COMPOUNDCOMMANDS, 
-                 qw(pwd ls awb help exit quit)
+                 qw(pwd ls awb help exit quit cp)
                );
 
 #
@@ -351,7 +352,7 @@ See AsimShell::help() to see list of available commands.
 
 sub run_command {
   my $command = shift;
-  my @line = @_;
+  my @line = @_; 
   my $status;
 
   #
@@ -393,6 +394,7 @@ sub run_command {
   no strict 'refs';
 
   eval { $status = &${command}(@line) };
+
   if ($@) {
     print "asim-shell: command trapped - $@";
     $status = 0;

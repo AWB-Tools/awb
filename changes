@@ -9021,3 +9021,30 @@ Directory .
 
 * Update to begin work on 11.08 release.
 
+
+----------
+kfleming    Date: Wed May 18 12:45:06 EDT 2011  CSN: CSN-awb-458
+                  Wed May 18 16:45:06 UTC 2011
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          457 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          457 
+
+
+Added three commands to asim-shell with the intention of making
+command line apm manipulation a bit simpler. I only added those
+commands which appear to be necessary for multifpga at this time.
+Others may be needed later, including a function to manipulate
+parameters.
+
+cp - copies a file with respect to the union dir hierarchy 
+
+create submodel - give a model, awb type, and a path, creates a submodel from
+the hierarchy rooted at awb type in the given model
+
+replace module - given a model and a submodel, inserts the submodel
+into the model hierarchy
+

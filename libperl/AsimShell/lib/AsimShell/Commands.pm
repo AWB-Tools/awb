@@ -150,7 +150,18 @@ sub cd {
 
 sub pwd {
 
-  system "pwd";
+    system "pwd";
+    return 1;
+}
+
+sub cp {
+  my $file1 = shift;
+  my $file2 = shift;
+  $file1 = $Asim::default_workspace->resolve($file1);
+  # file2 requires only the directory to be resolved
+  (my $file2volume, my $file2dir , my $file2file) = File::Spec->splitpath( $file2 );
+  my $file2path = $Asim::default_workspace->resolve($file2dir);
+  system "cp $file1 $file2path/$file2file";
   return 1;
 }
 
@@ -3890,6 +3901,42 @@ sub get_module {
   return $module
     || $default_module
     || shell_error("No module or default module defined\n") && return ();
+}
+
+sub replace_module {
+  my $modelfile = shift;
+  my $submodelfile = shift;
+
+  my $model = get_model($modelfile);
+  my $submodel = get_model($submodelfile);
+  $model->smart_add_submodule($submodel);
+  $model->save();
+}
+
+################################################################
+#
+# Submodel functions
+#
+################################################################
+sub create_submodel {
+  my $modelfile = shift;
+  my $module = shift;
+  my $submodelfile = shift;
+
+  # we need to awb resolve the paths in case absolute paths are not given
+  # submodle may not exist yet, so it needs extra handling
+  (my $subvolume, my $subdir , my $subfile) = File::Spec->splitpath( $submodelfile );
+  my $sub_resolved_path = $Asim::default_workspace->resolve($subdir);
+
+  my $model_resolved_path = $Asim::default_workspace->resolve($modelfile);
+
+  my $submodel = Asim::Model->new();
+
+  my $model = get_model($model_resolved_path);
+  my $submodule = $model->find_module_providing($module);
+  $submodel->modelroot($submodule);
+
+  $submodel->save("$sub_resolved_path/$subfile")
 }
 
 ################################################################
