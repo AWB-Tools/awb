@@ -1,3 +1,4 @@
+
 #
 # Copyright (C) 2003-2006 Intel Corporation
 # 
@@ -3829,6 +3830,20 @@ sub set_module {
   $default_module = get_module($file);
 
   return $default_module;
+}
+
+# only works for global params - for now. 
+sub set_parameter {
+  my $modelfile = shift;
+  my $parameter_name = shift;
+  my $parameter_value = shift;
+
+  my $model_resolved_path = $Asim::default_workspace->resolve($modelfile);
+  my $model = get_model($model_resolved_path);
+
+  $model->setparameter($parameter_name, $parameter_value);
+  $model->save();
+
 }
 
 sub unset_module {

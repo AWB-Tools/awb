@@ -9048,3 +9048,20 @@ the hierarchy rooted at awb type in the given model
 replace module - given a model and a submodel, inserts the submodel
 into the model hierarchy
 
+
+----------
+kfleming    Date: Fri May 20 13:53:53 EDT 2011  CSN: CSN-awb-459
+                  Fri May 20 17:53:53 UTC 2011
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          458 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          458 
+
+
+Added a new command for changing model parameters from command line.
+This is useful in communicating setting during the multifpga build.
+An option would be to use shell variables, but this seems less robust.
+
