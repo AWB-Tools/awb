@@ -111,6 +111,7 @@ our %COMPOUNDCOMMANDS =
     rehash    => [ qw(repositories locks packages models modules workspace) ],
     regtest   => [ qw(package) ],
     release   => [ qw(package) ],
+    rename    => [ qw(submodel) ],
     replace   => [ qw(module) ],
     revert    => [ qw(package) ],
     run       => [ qw(benchmark regression) ],

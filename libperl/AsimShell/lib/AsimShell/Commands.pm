@@ -3933,26 +3933,42 @@ sub replace_module {
 # Submodel functions
 #
 ################################################################
-sub create_submodel {
+sub rename_submodel {
   my $modelfile = shift;
-  my $module = shift;
-  my $submodelfile = shift;
-
-  # we need to awb resolve the paths in case absolute paths are not given
-  # submodle may not exist yet, so it needs extra handling
-  (my $subvolume, my $subdir , my $subfile) = File::Spec->splitpath( $submodelfile );
-  my $sub_resolved_path = $Asim::default_workspace->resolve($subdir);
+  my $new_name = shift;
 
   my $model_resolved_path = $Asim::default_workspace->resolve($modelfile);
 
-  my $submodel = Asim::Model->new();
-
   my $model = get_model($model_resolved_path);
-  my $submodule = $model->find_module_providing($module);
-  $submodel->modelroot($submodule);
+  $model->name($new_name);
+
+
+  $model->save();
+}
+
+################################################################                                                                                  
+sub create_submodel {
+    my $modelfile = shift;
+    my $module = shift;
+    my $submodelfile = shift;
+
+  # we need to awb resolve the paths in case absolute paths are not given                                                                         
+  # submodle may not exist yet, so it needs extra handling                                                                                        
+    (my $subvolume, my $subdir , my $subfile) = File::Spec->splitpath( $submodelfile );
+    my $sub_resolved_path = $Asim::default_workspace->resolve($subdir);
+
+    my $model_resolved_path = $Asim::default_workspace->resolve($modelfile);
+
+    my $submodel = Asim::Model->new();
+
+    my $model = get_model($model_resolved_path);
+    my $submodule = $model->find_module_providing($module);
+    $submodel->modelroot($submodule);
+
 
   $submodel->save("$sub_resolved_path/$subfile")
 }
+
 
 ################################################################
 #

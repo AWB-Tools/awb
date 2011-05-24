@@ -9065,3 +9065,17 @@ Added a new command for changing model parameters from command line.
 This is useful in communicating setting during the multifpga build.
 An option would be to use shell variables, but this seems less robust.
 
+
+----------
+kfleming    Date: Tue May 24 14:57:36 EDT 2011  CSN: CSN-awb-460
+                  Tue May 24 18:57:36 UTC 2011
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          459 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          459 
+
+
+Added a command line function for renaming apm, yet another needed function on the road to multiple FGPAs. 
