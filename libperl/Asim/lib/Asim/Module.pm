@@ -298,6 +298,32 @@ sub open {
       next;
     }
 
+    # %scons [%CLASS] FILENAME...
+    # scons is more specific than %private, and so should go first
+
+    if (/^.*%scons\s*(%[^ \t]*)?\s+($word)/) {
+      #
+      # Add scons config file to specified category.
+      #
+      my $class = $1;
+      my $fName = $2;
+
+      if (! defined($class)) {
+        $class = 'top';
+      } 
+      # this is getting ugly probably we want to refactor soon
+      elsif ($class =~ /^%(iface|hw|sw|top|library|private)$/) {
+        $class =~ s/^%//;
+      }
+      else {
+        $self->ierror("Illegal category for %scons: $class\n");
+        return undef;
+      }
+
+      push(@{$self->{scons}->{$class}}, split($spaces, $fName));
+      next;
+    }
+
     # %public FILENAME... backward compatibility
 
     if (/^.*%public$spaces($words)/) {
@@ -365,30 +391,6 @@ sub open {
       # Add files to list of makefiles
       #
       push(@{$self->{makefile}}, split($spaces, $1));
-      next;
-    }
-
-    # %scons [%CLASS] FILENAME...
-
-    if (/^.*%scons\s*(%[^ \t]*)?\s+($word)/) {
-      #
-      # Add scons config file to specified category.
-      #
-      my $class = $1;
-      my $fName = $2;
-
-      if (! defined($class)) {
-        $class = 'top';
-      }
-      elsif ($class =~ /^%(iface|hw|sw|top|library)$/) {
-        $class =~ s/^%//;
-      }
-      else {
-        $self->ierror("Illegal category for %scons: $class\n");
-        return undef;
-      }
-
-      push(@{$self->{scons}->{$class}}, split($spaces, $fName));
       next;
     }
 

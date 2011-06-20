@@ -9079,3 +9079,14 @@ Directory libperl/AsimShell/lib
 
 
 Added a command line function for renaming apm, yet another needed function on the road to multiple FGPAs. 
+
+----------
+kfleming    Date: Mon Jun 20 17:09:41 EDT 2011  CSN: CSN-awb-461
+                  Mon Jun 20 21:09:41 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          460 
+
+
+Changed priority of %scons so that %scons %private would take precedent over %private.  This is starting to seem like a hack.  Perhaps someone has an opinion?
