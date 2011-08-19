@@ -1884,6 +1884,90 @@ sub attributes2string {
   return join(" ", @attributes);
 }
 
+
+################################################################
+
+=item $module-E<gt>find_modules_with_attribute($attribute [$exclude_submodels])
+
+Recursively search the module list looking modules that have 
+attribute $attribute. Return the list of such modules.
+
+=cut
+
+################################################################
+
+sub find_modules_with_attribute {
+  my $self = shift;
+  my $attribute = shift;
+  my $exclude_submodels = shift || 0;
+
+  my @found = ();
+
+  if ($self->has_attribute($attribute)) {
+    push(@found, $self);
+  }
+
+  # Scan through submodules
+
+  foreach my $submodule ($self->submodules()) {
+    next unless defined($submodule);
+
+    if ($submodule->isroot()) {
+      my $submodel = $submodule->owner();
+      if (!$exclude_submodels && $submodel->has_attribute($attribute)) {
+	push(@found, $submodule);
+      }
+      next;
+    }
+
+    push(@found, $submodule->find_modules_with_attribute($attribute));
+
+  }
+
+  return (@found);
+}
+
+
+################################################################
+
+=item $module-E<gt>is_obsolete()
+
+Return 1 if module is obsolete
+
+=cut
+
+################################################################
+
+sub is_obsolete {
+  my $self = shift;
+
+  return $self->has_attribute("obsolete");
+}
+
+
+################################################################
+
+=item $module-E<gt>has_attribute($attribute)
+
+Return 1 if module has attribute $attribute
+
+=cut
+
+################################################################
+
+sub has_attribute {
+  my $self = shift;
+  my $attribute = shift;
+
+  foreach my $i ($self->attributes()) {
+    if ($i->name() eq $attribute) {
+      return 1;
+    }
+  }
+
+  return undef;
+}
+
 ################################################################
 
 =item $module-E<gt>default_attributes()
@@ -1999,7 +2083,8 @@ that provides $provides
 
 Maybe this should return the list of modules that provide $provides.
 
-Note: this method does not recurse into submodels
+Note: this method does not recurse into submodels, and
+      $stop_at_submodel is not a public argument!
 
 =cut
 
@@ -2014,7 +2099,7 @@ sub find_module_providing {
 
   return $self if ($self->provides() eq $modtype);
 
-  # Do not look at child of a submouule root;
+  # Do not look at child of a submodule root;
   return undef if  $stop_at_submodel && $self->isroot();
 
   foreach my $submodule ($self->submodules()) {
@@ -2061,7 +2146,9 @@ sub embed_submodels {
 Recursively search the module list looking for the first module
 that requires $requires
 
-Note: this method does not recurse into submodels
+Note: this method does not recurse into submodels, and
+      $stop_at_submodel is not a public argument!
+
 
 =cut
 

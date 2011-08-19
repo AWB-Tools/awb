@@ -257,19 +257,20 @@ void apm_edit::fileOpen()
 
        }
 
-    }
+       # Re-open the current model in case anything has changed.
 
-    # Re-open the current model in case anything has changed.
-    $m = Asim::Model->new($filename);
-    if (! defined $m) {
-        Qt::MessageBox::information(
-            this, 
-            "apm-edit open", 
-            "File open failed");
-        return;
-    }
+       $m = Asim::Model->new($filename);
 
-    $model = $m;
+       if (! defined $m) {
+           Qt::MessageBox::information(
+               this, 
+               "apm-edit open", 
+               "File open failed");
+           return;
+       }
+
+       $model = $m;
+    }
 
     my @stale_submodels = $model->get_stale_submodels();
     my $open_stale = 0;
@@ -287,11 +288,63 @@ void apm_edit::fileOpen()
           1);
 
        if ($status == 0) {
+
+         this->pushBusyCursor();
+
+         foreach my $s (@stale_submodels) {
+
+            # invoke APM edit without checking model health.
+            my $command = "apm-edit --nocheck-health " . $s->filename();
+            if (system("$command &")) {
+                Qt::MessageBox::information(
+                    this, 
+                    "apm-edit open", 
+                    "File open failed");
+                return;
+            }
+         }
+
+         this->popBusyCursor();
+
+       }
+
+       # Re-open the current model in case anything has changed.
+
+       $m = Asim::Model->new($filename);
+
+       if (! defined $m) {
+           Qt::MessageBox::information(
+               this, 
+               "apm-edit open", 
+               "File open failed");
+           return;
+       }
+
+       $model = $m;
+    }
+
+      
+    my @obsolete_submodels = $model->get_obsolete_submodels();
+    my $open_obsolete = 0;
+
+    if ($#obsolete_submodels > -1) {
+    
+      my $status = Qt::MessageBox::warning ( 
+          this, 
+          "apm-edit open", 
+          "The current model uses obsolete submodels\nDo you wish to open these submodels?",
+          "&Yes",
+          "&No",
+          "",
+          0,
+          1);
+
+       if ($status == 0) {
        
          this->pushBusyCursor();
          
-         foreach my $s (@stale_submodels) {
-            # invoke APM edit without checking model health.
+         foreach my $s (@obsolete_submodels) {
+            # invoke APM edit - but unlike the above cases do check model health.
             my $command = "apm-edit --nocheck-health " . $s->filename();
 
             if (system("$command &")) {
@@ -307,20 +360,28 @@ void apm_edit::fileOpen()
 
        }
 
+       # Re-open the current model in case anything has changed.
+
+       $m = Asim::Model->new($filename);
+
+       if (! defined $m) {
+           Qt::MessageBox::information(
+               this, 
+               "apm-edit open", 
+               "File open failed");
+           return;
+       }
+
+       $model = $m;
     }
 
-    # Re-open the current model in case anything has changed.
-    $m = Asim::Model->new($filename);
-    if (! defined $m) {
-        Qt::MessageBox::information(
-            this, 
-            "apm-edit open", 
-            "File open failed");
-        return;
-    }
 
-    # Display error popup for this model if needed
+    #
+    # Finished with check of submodels, now
+    # display error popup for THIS model if needed.
+    #
     # Purposely ignore submodels as they are handled above
+    #
 
     if ($model->is_broken(0)) {
         my $error;
@@ -357,6 +418,26 @@ void apm_edit::fileOpen()
             this, 
             "apm-edit open",
             $popup);
+    }
+
+    # Display error popup for this model if needed
+    # Purposely ignore submodels as they are handled above
+
+
+
+    my @obsolete = $model->get_obsolete_modules(1);
+
+    if (@obsolete) {
+      my $error;
+
+      $error  = "Model contains obsolete modules!\n";
+      $error .= "Obsolete modules:\n\n" . 
+                 join("\n\t", map {$_->provides() . ": " . $_->name()} @obsolete );
+
+      Qt::MessageBox::information(
+          this, 
+          "apm-edit open",
+          $error);
     }
 
     statusBar()->message("Model health check complete...", 5000);
@@ -1053,7 +1134,7 @@ void apm_edit::moduleNotesAction_activated()
     my @files = ();
 
     foreach my $f ($module->notes()) {
-      if (!($f =~ /\.txt$/)) {
+      if (!($f =~ /\.txt$/) && ($f ne "README")) {
         Qt::MessageBox::information(
 	    this, 
             "apm-edit Notes", 
@@ -1158,6 +1239,21 @@ void apm_edit::moduleInsertSubmodelAction_activated()
     ###
     ### TBD: Do not duplicate code from Alternatives_returnPressed_onSubmodel
     ###
+
+    if ($submodel->is_obsolete()) {
+        my $status = Qt::MessageBox::warning ( 
+            this, 
+            "apm-edit new", 
+            "The submodel about to be inserted is obsolete. Are you sure you want to insert it?",
+            "&Yes",
+            "&No",
+            "",
+            1,
+            2);
+
+        return  if ($status == 1);
+        return  if ($status == 2);
+    }
 
     #
     # Replace the module in the model
@@ -1502,7 +1598,13 @@ void apm_edit::Model_selectionChanged( QListViewItem * )
 
         my @color = (255,255,255);
 
+        if ($m->is_obsolete()) {
+            # Make obsolete modules yellow
+            @color = (255, 255, 128);
+        }
+
         if ($module_name eq $m->name()) {
+            # Make current module orange
             @color = (230, 165, 40);
         }
 
@@ -1688,6 +1790,12 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     # Populate the Info tab
     #
 
+
+    if ($module->is_obsolete()) {
+      Info->insertItem(" **** WARNING OBSOLETE MODULE **** ");
+      Info->insertItem("");
+    }
+
     Info->insertItem("Package:     " . Asim::file2package($filename));
     Info->insertItem("Module:      " . basename($filename));
     Info->insertItem("Name:        " . $module->name());
@@ -1773,7 +1881,7 @@ void apm_edit::Alternatives_selectionChanged( QListViewItem * )
     my $dir;
 
     foreach my $n ($module->notes()) {
-      if ($n =~ /\.txt$/) {
+      if (($n =~ /\.txt$/) || ($n =~ /README/)) {
         $dir = $module->base_dir();
 	$notes = Asim::resolve("$dir/$n");
       }
@@ -1900,6 +2008,21 @@ void apm_edit::Alternatives_returnPressed_onModule( QListViewItem * )
 	return;
     }
 
+    if ($module->is_obsolete()) {
+        my $status = Qt::MessageBox::warning ( 
+            this, 
+            "apm-edit new", 
+            "The module about to be inserted is obsolete. Are you sure you want to insert it?",
+            "&Yes",
+            "&No",
+            "",
+            1,
+            2);
+
+        return  if ($status == 1);
+        return  if ($status == 2);
+    }
+
     #
     # Add the new child module into the tree
     #
@@ -1960,6 +2083,21 @@ void apm_edit::Alternatives_returnPressed_onSubmodel( QListViewItem * )
     ###
     ### TBD: Do not duplicate code from moduleInsertSubmodelAction_activated
     ###
+
+    if ($submodel->is_obsolete()) {
+        my $status = Qt::MessageBox::warning ( 
+            this, 
+            "apm-edit new", 
+            "The submodel about to be inserted is obsolete. Are you sure you want to insert it?",
+            "&Yes",
+            "&No",
+            "",
+            1,
+            2);
+
+        return  if ($status == 1);
+        return  if ($status == 2);
+    }
 
     #
     # Replace the module in the model
@@ -2041,6 +2179,7 @@ void apm_edit::moduleFlags()
 
     $flags .= moduleCheckParams($module, 0)?"p":" ";
     $flags .= ($module->notes())?"n":" ";
+    $flags .= ($module->is_obsolete())?"o":" ";
 
     $flags .= "  ";
 

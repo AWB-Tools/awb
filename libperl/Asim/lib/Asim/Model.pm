@@ -996,6 +996,71 @@ sub attributes2string {
   return $self->default_attributes();
 }
 
+
+################################################################
+
+=item $model-E<gt>is_obsolete()
+
+Returns a boolean indicating if a model is marked as obsolete
+directly via an attribute or contains an obsolete module.
+
+Note: this test is expensive since it recurses into submodels.
+
+=cut
+
+################################################################
+
+sub is_obsolete {
+  my $self = shift;
+
+  # purposely don't recurse into submodels here...
+
+  return $self->_has_attribute("obsolete") || $self->contains_obsolete_modules();
+}
+
+################################################################
+
+=item $model-E<gt>has_attribute($attribute)
+
+Return 1 if model has attribute $attribute. So of these attributes
+may be special and need to be checked by customized checks, otherwise
+we just look at the list of attribute names.
+
+=cut
+
+################################################################
+
+sub has_attribute {
+  my $self = shift;
+  my $attribute = shift;
+
+  # This is a set of hacks because some attributes
+  # need to be checked by explict checks not just
+  # via the 'attribute' list
+
+  if ($attribute eq "obsolete") {
+    return $self->is_obsolete();
+  }
+
+
+  # Otherwise, we just check the attribute list
+
+  return $self->_has_attribute($attribute);
+}
+
+sub _has_attribute {
+  my $self = shift;
+  my $attribute = shift;
+
+  foreach my $i ($self->attributes()) {
+    if ($i->name() eq $attribute) {
+      return 1;
+    }
+  }
+
+  return undef;
+}
+
 #
 # Use of the following is deprecated outside the module,
 # but it is still used as a utility function inside this
@@ -1721,6 +1786,39 @@ sub embed_submodels {
 }
 
 ################################################################
+#
+# The following utility function is called when a model is created
+# and checks the health of the model using the various health-related
+# functions that follow
+#
+################################################################
+
+sub _health_check {
+  my $self = shift;
+
+  if ($self->is_broken(0)) {
+     _process_warning("Model file " . $self->filename() . " seems to be broken.\n");
+     $self->modified(0);
+  }
+  elsif ($self->is_stale(0)) {
+     _process_warning("Model file " . $self->filename() . " contains stale data and should be updated.\n");
+     $self->modified(1);
+     
+  }
+  else {
+     $self->modified(0);
+  }
+
+
+  # Check (non-recursively) if any module in the model is obsolete
+
+  if ($self->is_obsolete()) {
+    _process_warning("Model file " . $self->filename() . " contains obsolete modules.\n");
+  }
+
+}
+
+################################################################
 
 =item $model-E<gt>missing_packages()
 
@@ -1738,11 +1836,57 @@ sub missing_packages {
   return (@missing)
 }
 
+
+
+################################################################
+
+=item $model-E<gt>get_broken_submodels()
+
+Returns a list of broken submodels.
+
+=cut
+
+################################################################
+
+sub get_broken_submodels {
+  my $self = shift;
+  my @result = ();
+
+  foreach my $s (@{$self->{submodels}}) {
+    #
+    # Recurse first so that we present "leaf" models to the user first. Since we know any
+    # given submodel can't appear more than once, "depth-first" is sufficient.
+    #
+
+    push(@result, $s->get_broken_submodels());
+
+    if ($s->is_broken(0)) { # purposely don't include submodel info here.
+      push(@result, $s);
+    }
+  
+  }
+  
+  return @result;
+
+}
+
+################################################################
+
+=item $model-E<gt>is_broken([$include_submodels])
+
+Returns a boolean indicating if a model has any missing files. If
+$include_submodels is true recurse the check into any submodels.
+
+=cut
+
+################################################################
+
 sub is_broken {
   my $self = shift;
   my $include_submodels = shift || 0;
   
   # A model is broken if it has any missing files.
+
   my @missing = @{$self->{health}{"missing_files"}};
   my $result = $#missing > -1;
   
@@ -1765,6 +1909,51 @@ sub _has_broken_submodels {
   return $result;
 
 }
+
+################################################################
+
+=item $model-E<gt>get_stale_submodels()
+
+Returns a list of stale submodels.
+
+=cut
+
+################################################################
+
+sub get_stale_submodels {
+  my $self = shift;
+  my @result = ();
+
+  foreach my $s (@{$self->{submodels}}) {
+
+    #
+    # Recurse first so that we present "leaf" models to the user first. Since we know any
+    # given submodel can't appear more than once, "depth-first" is sufficient.
+    #
+
+    push(@result, $s->get_stale_submodels());
+
+    if ($s->is_stale(0)) { # purposely don't include submdel info here.
+      push(@result, $s);
+    }
+  
+  }
+  
+  return @result;
+
+}
+
+################################################################
+
+=item $model-E<gt>is_stale([$include_submodels])
+
+Returns a boolean indicating if a model has any stale module
+information or any moved files. If $include_submodels is true 
+recurse the check into any submodels.
+
+=cut
+
+################################################################
 
 sub is_stale {
   my $self = shift;
@@ -1799,7 +1988,18 @@ sub _has_stale_submodels {
 
 }
 
-sub get_broken_submodels {
+
+################################################################
+
+=item $model-E<gt>get_obsolete_submodels()
+
+Returns a list of obsolete submodels.
+
+=cut
+
+################################################################
+
+sub get_obsolete_submodels {
   my $self = shift;
   my @result = ();
 
@@ -1809,9 +2009,9 @@ sub get_broken_submodels {
     # given submodel can't appear more than once, "depth-first" is sufficient.
     #
 
-    push(@result, $s->get_broken_submodels());
+    push(@result, $s->get_obsolete_submodels());
 
-    if ($s->is_broken(0)) { # purposely don't include submdel info here.
+    if ($s->is_obsolete()) {
       push(@result, $s);
     }
   
@@ -1821,46 +2021,48 @@ sub get_broken_submodels {
 
 }
 
-sub get_stale_submodels {
-  my $self = shift;
-  my @result = ();
+################################################################
 
-  foreach my $s (@{$self->{submodels}}) {
+=item $model-E<gt>contains_obsolete_modules()
 
-    #
-    # Recurse first so that we present "leaf" models to the user first. Since we know any
-    # given submodel can't appear more than once, "depth-first" is sufficient.
-    #
+Returns a boolean indicating if a model has any obsolete modules
 
-    push(@result, $s->get_stale_submodels());
+=cut
 
-    if ($s->is_stale(0)) { # purposely don't include submdel info here.
-      push(@result, $s);
-    }
-  
-  }
-  
-  return @result;
+################################################################
 
-}
-
-sub _health_check {
+sub contains_obsolete_modules {
   my $self = shift;
 
-  if ($self->is_broken(0)) {
-     _process_warning("Model file " . $self->filename() . " seems to be broken.\n");
-     $self->modified(0);
-  }
-  elsif ($self->is_stale(0)) {
-     _process_warning("Model file " . $self->filename() . " contains stale data and should be updated.\n");
-     $self->modified(1);
-     
-  }
-  else {
-     $self->modified(0);
-  }
+  my @result = $self->get_obsolete_modules();
 
+  return ($#result != -1);
 }
+
+################################################################
+
+=item $model-E<gt>get_obsolete_modules([$exclude_submodels])
+
+Returns a list of obsolete modules in the model.
+
+=cut
+
+################################################################
+
+sub get_obsolete_modules {
+  my $self = shift;
+  my $exclude_submodels = shift || 0;
+
+  # A model is obsolete if it has a module with a module
+  # with the 'obsolete' attribute'
+
+  my $module = $self->modelroot();
+  my @result = $module->find_modules_with_attribute("obsolete", $exclude_submodels);
+
+  return (@result);
+}
+
+
 
 ################################################################
 

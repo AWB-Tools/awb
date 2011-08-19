@@ -79,12 +79,15 @@ sub new {
   my $class = ref($this) || $this;
   my $self = _initialize();
 
+  bless	$self, $class;
+
   if (! defined($fullname)) {
     print "Attribute name not defined\n";
     return undef;
   }
 
   $self->{fullname} = $fullname;
+  $self->{name}     = $fullname;
 
   if ($fullname =~ /^\+(.*)/) {
     $self->{is_manditory} = 1;
@@ -95,8 +98,6 @@ sub new {
     $self->{is_conflicting} = 1;
     $self->{name} = $1;
   }
-
-  bless	$self, $class;
 
   return $self;
 }

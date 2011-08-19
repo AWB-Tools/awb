@@ -9090,3 +9090,52 @@ Directory libperl/Asim/lib/Asim
 
 
 Changed priority of %scons so that %scons %private would take precedent over %private.  This is starting to seem like a hack.  Perhaps someone has an opinion?
+
+----------
+jsemer      Date: Fri Aug 19 14:36:12 EDT 2011  CSN: CSN-awb-462
+                  Fri Aug 19 18:36:12 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim/Module
+ Attribute.pm              Locally Modified          461 
+
+Directory libperl/Asim/lib/Asim
+ Module.pm                 Locally Modified          461 
+ Model.pm                  Locally Modified          461 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.h             Locally Modified          461 
+
+Added support for 'obsolete' modules (and submodels).  In specific,
+
+1) A module with the %attribute 'obsolete' will be treated as obsolete,
+   as will a model that has that attribute or contains a module (or
+   submodel) with that attribute.
+
+2) On opening a model in apm-edit, a popup will announce that obsolete
+   models contain something obsolete and offer to open obsolete
+   submodels.
+
+3) Once a model is opened in apm-edit, obsolete modules will be flagged
+   with an 'o' in the tree view and a warning will appear in the information
+   pane for the module.
+
+4) An attempt to insert an obsolete module (or submodel) will be challenged
+   with a query as to whether the user really wants to insert an obsolete
+   module.
+
+Some bug fixes:
+
+1) On opening a model some gratuitous re-opens of the model following
+   the 'health check' were eliminated.
+
+2) A file named README is now a legal %notes file (along with any file
+   named *.txt.
+
+
+Added utility functions:
+
+1) Added a module level method to recursively traverse a module tree
+   looking for modules with a specified attribute.
+
+
