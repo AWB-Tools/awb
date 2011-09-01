@@ -9139,3 +9139,13 @@ Added utility functions:
    looking for modules with a specified attribute.
 
 
+
+----------
+mcadler     Date: Thu Sep  1 16:47:01 EDT 2011  CSN: CSN-awb-463
+                  Thu Sep  1 20:47:01 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          462 
+
+Get rid of a warning for an undefined variable.

@@ -598,7 +598,7 @@ sub save {
   #
   $self->{inifile} = $new_inifile;
 
-  if ($self->{filename} ne $file) {
+  if (!defined($self->{filename}) || $self->{filename} ne $file) {
       $self->{filename} = $file;
       $self->{build_dir} = undef;
       $self->{run_dir} = undef;
