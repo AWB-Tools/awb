@@ -9149,3 +9149,13 @@ Directory libperl/Asim/lib/Asim
  Model.pm                  Locally Modified          462 
 
 Get rid of a warning for an undefined variable.
+
+----------
+mcadler     Date: Thu Sep  1 22:52:03 EDT 2011  CSN: CSN-awb-464
+                  Fri Sep  2 02:52:03 UTC 2011
+
+
+Directory tools/awb/awb2
+ awb_dialog.ui.h           Locally Modified          463 
+
+Check for package not in DB.
