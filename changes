@@ -9159,3 +9159,17 @@ Directory tools/awb/awb2
  awb_dialog.ui.h           Locally Modified          463 
 
 Check for package not in DB.
+
+----------
+pellauer    Date: Mon Sep 19 15:47:38 MDT 2011  CSN: CSN-awb-466
+                  Mon Sep 19 21:47:38 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          465 
+
+Directory admin/packages
+ awb                       Locally Modified          465 
+
+
+* Update branch admin info.
