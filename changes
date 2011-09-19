@@ -9173,3 +9173,16 @@ Directory admin/packages
 
 
 * Update branch admin info.
+
+----------
+pellauer    Date: Mon Sep 19 15:59:14 MDT 2011  CSN: CSN-awb-467
+                  Mon Sep 19 21:59:14 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          466 
+ changelog                 Locally Modified          466 
+
+
+* Update debian rules.
+* This time remember +fixes.
