@@ -9159,3 +9159,18 @@ Directory tools/awb/awb2
  awb_dialog.ui.h           Locally Modified          463 
 
 Check for package not in DB.
+
+----------
+emer        Date: Wed Sep 21 17:36:37 EDT 2011  CSN: CSN-awb-470
+                  Wed Sep 21 21:36:37 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          469 
+ changelog                 Locally Modified          469 
+ rules                     Locally Modified          469 
+
+Directory .
+ README.debian             Locally Modified          469 
+
+Start development of v11.12 release.
