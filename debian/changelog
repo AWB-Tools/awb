@@ -1,4 +1,4 @@
-awb (11.09+fixes~svn20110921r468+lucid) lucid; urgency=low
+awb (11.09+fixes~svn20110921r469+lucid) lucid; urgency=low
 
   [ Michael Pellauer ]
   * Branch for v11.09
@@ -6,4 +6,4 @@ awb (11.09+fixes~svn20110921r468+lucid) lucid; urgency=low
   [ Joel Emer ]
   * Begin work on release v11.08.
 
- -- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 11:55:03 -0400
+ -- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 15:43:48 -0400

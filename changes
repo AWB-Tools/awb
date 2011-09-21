@@ -9200,3 +9200,22 @@ Directory .
  README.debian             Locally Modified          467 
 
 Updates to reflect v11.09 release.
+
+----------
+emer        Date: Wed Sep 21 15:44:17 EDT 2011  CSN: CSN-awb-469
+                  Wed Sep 21 19:44:17 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          468 
+
+Directory etc
+ asim.pack                 Locally Modified          468 
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          468 
+
+Update .pack files for v11.09 release. This change and
+most of the other recent changes to upgrade to a new
+version are described in the release procedure in the
+file README.debian in the awb package.
