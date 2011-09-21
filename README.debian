@@ -4,16 +4,28 @@ Changes to do a release and upgrade release number
       This change needs to be in awb/HEAD and awb/STABLE and
       is a little convoluted when releasing awb...
 
-   1) Create a new branch for release
+   1) Make sure that the following files had been updated to the correct version
 
-     a) awb-shell branch package
+     a) debian/changelog
 
-   2) In the release branch, change the following file:
+     b) debian/control
+     
+     c) debian/rules
 
-     a) sed -i 's/Tag=HEAD/Tag=v<YY>.<MM>/' admin/packages/<packagename>
+     d) Commit these changes with 'awb-shell commit' if necessary.
 
+   2) Create a new branch for release
 
-   3) Now do a debian build in the branch for releases and in trunk for testing
+     a) % awb-shell branch package
+
+   3) In the release branch, change the following file:
+
+     a) % sed -i 's/Tag=HEAD/Tag=v<YY>.<MM>/' admin/packages/<packagename>
+
+     b) Commit these changes with 'awb-shell commit'. 
+        Or wait until after the changes in 'Build for debian' below.
+
+   4) Now do a debian build in the branch for releases and in trunk for testing
 
 
 Build for debian
@@ -25,10 +37,12 @@ Build for debian
 
      b) Change date at bottom of changelog
 
+     c) Commit these changes with 'awb-shell commit'.
+
 
   2) Build it
 
-     a) debuild -r sudo -us -uc
+     a) % debuild -r sudo -us -uc
 
 
   3) Copy .deb files created in ../ to system containing repository
@@ -38,15 +52,17 @@ Install into repository for distribution
 
   1) Make sure you are running as user with the gpg key
 
-     a) sudo bash; su
+     a) % sudo bash; su 
+             or
+        % sudo -H -i
 
 
   2) Install <package>.deb (copied above) into repository
 
-     a) cd <repository-directory>
+     a) % cd <repository-directory>
         For example, /home/asim/reprepro/releases/ubuntu
 
-     b) reprepro includedeb <release> <package>.deb
+     b) % reprepro includedeb <release> <package>.deb
 
 
 Fix the trunk to prepare for the next future release

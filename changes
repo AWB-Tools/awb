@@ -9186,3 +9186,17 @@ Directory debian
 
 * Update debian rules.
 * This time remember +fixes.
+
+----------
+emer        Date: Wed Sep 21 12:11:14 EDT 2011  CSN: CSN-awb-468
+                  Wed Sep 21 16:11:14 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          467 
+ rules                     Locally Modified          467 
+
+Directory .
+ README.debian             Locally Modified          467 
+
+Updates to reflect v11.09 release.
