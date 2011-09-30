@@ -9190,3 +9190,20 @@ Directory etc/repositories.d
 
 Updated pack files to reflect 11.09 release and added pack
 file for usrp platform.
+
+----------
+emer        Date: Thu Sep 29 20:56:26 EDT 2011  CSN: CSN-awb-472
+                  Fri Sep 30 00:56:26 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          471 
+ changelog                 Locally Modified          471 
+
+Directory .
+ README.debian             Locally Modified          471 
+
+Make debian package depend on:
+         subversion
+         git-core
+         libterm-readline-gnu-perl
