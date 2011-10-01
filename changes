@@ -9207,3 +9207,20 @@ Make debian package depend on:
          subversion
          git-core
          libterm-readline-gnu-perl
+
+----------
+emer        Date: Sat Oct  1 15:29:44 EDT 2011  CSN: CSN-awb-473
+                  Sat Oct  1 19:29:44 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          472 
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          472 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          472 
+
+Added a --long option to the awb-shell list packages
+command.

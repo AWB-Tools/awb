@@ -156,6 +156,8 @@ our %OPTIONS = (
     install_package    => [ "--source" ],
     tag_package        => [ "--existing" ],
 
+    list_packages      => [ "--long" ],
+
     clean_model        => [ "--builddir" ],
     nuke_model         => [ "--builddir" ],
     ncfg_model         => [ "--builddir" ],

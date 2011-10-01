@@ -1187,8 +1187,48 @@ sub rehash_packages {
 }
 
 sub list_packages {
+  my $long = 0;
+  my $status;
+  local @ARGV = @_;
 
-  $default_packageDB->dump();
+  #
+  # Parse options
+  #
+  $status = GetOptions( "long!"    => \$long);
+  return undef if (!$status);
+
+  for my $pname ($default_packageDB->directory()) {
+
+    if (!$long) {
+      # Normally just print package name
+
+      print $pname;
+
+    } else {
+      # For --long option print more information
+
+      my $p = $default_packageDB->get_package($pname);
+
+      if (! defined($p)) {
+	printf("%-20s --- broken package", $pname);
+	next;
+      }
+
+      printf("%-20s", $p->name());
+
+      printf(" %-10s ", $p->tag());
+
+      if ($p->isprivate()) {
+	printf(" %-10s ", $p->type());
+      } else {
+	printf(" %-10s ", "shared");
+      }
+
+      print $p->csn();
+    }
+
+    print "\n";
+  }
 
   return 1;
 }
