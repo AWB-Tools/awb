@@ -9242,3 +9242,21 @@ CSN: CSN-awb-471
           
 Updated pack files to reflect 11.09 release and added pack
 file for usrp platform.
+
+----------
+kfleming    Date: Sun Oct  2 16:38:52 EDT 2011  CSN: CSN-awb-475
+                  Sun Oct  2 20:38:52 UTC 2011
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          474 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          474 
+
+Backport 
+
+CSN: CSN-awb-473
+          
+Added a --long option to the awb-shell list packages
+command.
