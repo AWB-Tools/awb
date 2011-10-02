@@ -9219,3 +9219,26 @@ Update .pack files for v11.09 release. This change and
 most of the other recent changes to upgrade to a new
 version are described in the release procedure in the
 file README.debian in the awb package.
+
+----------
+kfleming    Date: Sun Oct  2 16:36:22 EDT 2011  CSN: CSN-awb-474
+                  Sun Oct  2 20:36:22 UTC 2011
+
+
+Directory debian
+ control                   Locally Modified          473 
+
+Directory .
+ README.debian             Locally Modified          473 
+
+Directory etc/repositories.d
+ platform-acp.pack         Locally Modified          473 
+ platform-usrp.pack        Locally Added               0 
+
+
+Backport 
+
+CSN: CSN-awb-471
+          
+Updated pack files to reflect 11.09 release and added pack
+file for usrp platform.

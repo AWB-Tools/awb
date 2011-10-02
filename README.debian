@@ -42,8 +42,9 @@ Build for debian
 
   2) Build it
 
-     a) % debuild -r sudo -us -uc
-
+     a) % debuild -r fakeroot -us -uc
+        or
+        % debuild -r sudo -us -uc
 
   3) Copy .deb files created in ../ to system containing repository
 

@@ -21,8 +21,7 @@ Section: devel
 
 Package: awb-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, gcc, g++, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs
-Recommends: libterm-readline-gnu-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, gcc, g++, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs, subversion, git-core, libterm-readline-gnu-perl
 Replaces: awb (<= 0.6.0)
 Breaks: awb (<= 0.6.0)
 Description: Executables for the Architect's Workbench
