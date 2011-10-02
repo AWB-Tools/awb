@@ -9260,3 +9260,13 @@ CSN: CSN-awb-473
           
 Added a --long option to the awb-shell list packages
 command.
+
+----------
+kfleming    Date: Sun Oct  2 16:41:03 EDT 2011  CSN: CSN-awb-476
+                  Sun Oct  2 20:41:03 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          475 
+
+Updated deb log

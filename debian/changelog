@@ -6,4 +6,7 @@ awb (11.09+fixes~svn20110921r469+lucid) lucid; urgency=low
   [ Joel Emer ]
   * Begin work on release v11.08.
 
- -- Joel Emer <emer@csail.mit.edu>  Wed, 21 Sep 2011 15:43:48 -0400
+  [ kfleming ]
+  * Ported in changes up to r473
+
+ -- kfleming <kfleming@thunderchief>  Sun, 02 Oct 2011 16:40:34 -0400
