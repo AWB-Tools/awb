@@ -105,7 +105,7 @@ sub new {
   my $class = ref($this) || $this;
   my $self = {};
 
-  bless	$self, $class;
+  bless        $self, $class;
 
   $self->_initialize();
 
@@ -250,11 +250,12 @@ sub open {
     return ();
   }
 
+  my $modelroot = $self->modelroot();
+
   #
   # Collect globally export parameters from modules
   # and add them as parameters of the model itself
   #
-  my $modelroot = $self->modelroot();
 
   if (defined($modelroot)) {
     @{$self->{params}} = $modelroot->find_global_parameters();
@@ -343,6 +344,42 @@ sub _get_module_or_submodel {
     }
   }
 
+
+  #
+  # Handle submodel parameters
+  #
+
+  if ($is_submodel) {
+
+    my $submodel = $module_or_submodel;
+    my $modelroot = $submodel->modelroot();
+
+    if (defined($modelroot)) {
+
+      #
+      # Coerce all global submodel parameter values to look like 
+      # they are the default values
+      #
+
+      my @params = $submodel->parameters();
+
+      foreach my $p (@params) {
+      
+        # If the value of the parameter as specified by the submodel has
+        # overridden the default value of the parameter as specified in
+        # the module's .awb file, then coerce the default value 
+        # of the parameter to be value specified in the submodel.
+        #
+        # Note that this change in the parameter object is okay because we
+        # never save a submodel.
+
+        if ($p->value() ne $p->default()) {
+          $p->default($p->value());
+        }
+      }
+    }
+  }
+
   #
   # Override parameters
   #
@@ -359,23 +396,25 @@ sub _get_module_or_submodel {
 
   if ($is_submodel) {
 
+    my $submodel = $module_or_submodel;
+
     #
     # A submodel is represented simply as a module in the tree, but
     # because it has the property isroot() and its owner() will not be
     # the top-level model, one can check if it is a submodel. The method
     # 'is_submodel' does this check...
     #
-    push(@{$self->{submodels}}, $module_or_submodel);
+    push(@{$self->{submodels}}, $submodel);
     
     #
     # See if the info in the .apm file is stale. For submodels we only check if
     # the name has changed.
     #
     
-    my $name_is_stale = not ($module_or_submodel->name() eq $modname);
-    push(@{$self->{health}{"stale_submodels"}}, $module_or_submodel) if ($name_is_stale);
+    my $name_is_stale = not ($submodel->name() eq $modname);
+    push(@{$self->{health}{"stale_submodels"}}, $submodel) if ($name_is_stale);
     
-    return $module_or_submodel->modelroot();
+    return $submodel->modelroot();
   }
 
   #
@@ -634,6 +673,8 @@ sub _put_module {
 
   #
   # Save overriden parameters
+  #    Note: global module parameters overridden in a submodel
+  #          will show up looking like the default value here.
   #
   foreach my $p ($module->parameters()) {
     if ($self->saveparams() || ($p->value() ne $p->default())) {
@@ -927,7 +968,7 @@ sub autoselect {
     my $value = shift;
 
     if (defined($value)) {
-	$self->{autoselect} = $value;
+        $self->{autoselect} = $value;
     }
 
     return $self->{autoselect};
@@ -1541,7 +1582,7 @@ sub getparameter {
   my @params = $self->parameters();
   foreach my $p (@params) {
       if ($p->name() eq $pname) {
-	  return $p;
+          return $p;
       }
   }
 
@@ -2103,7 +2144,7 @@ sub edit {
 ################################################################
 
 =item $model-E<gt>clean([--builddir => <builddir>]
-			[--getcommand => {0,1}])
+                        [--getcommand => {0,1}])
 
 Clean the build area for the specified model.
 
@@ -2140,7 +2181,7 @@ sub clean {
 ################################################################
 
 =item $model-E<gt>nuke([--builddir => <builddir>]
-		       [--getcommand => {0,1}])
+                       [--getcommand => {0,1}])
 
 Nukes (completely cleans) the build area for the specified model.
 
@@ -2179,7 +2220,7 @@ sub nuke {
 ################################################################
 
 =item $model-E<gt>configure([--builddir => <builddir>]
-			    [--getcommand => {0,1}])
+                            [--getcommand => {0,1}])
 
 Configure the build area for the specified model.
 
@@ -2223,7 +2264,7 @@ sub configure {
 
 =item $model-E<gt>build([--builddir => <builddir>]
                         [--buildopt => <options>]
-			[--getcommand => {0,1}])
+                        [--getcommand => {0,1}])
 
 Build the specified model with make options $options.
 
@@ -2303,7 +2344,7 @@ sub build_options {
 =item $model-E<gt>setup($benchmark
                         [--builddir   => <builddir>]
                         [--rundir     => <rundir>]
-			[--getcommand => {0,1}])
+                        [--getcommand => {0,1}])
 
 Setup the specified benchmark for model.
 
@@ -2348,7 +2389,7 @@ sub setup {
 =item $model-E<gt>run([--builddir => <builddir>]
                       [--rundir => <rundir>]
                       [--runopt => <options>]
-		      [--getcommand => {0,1}])
+                      [--getcommand => {0,1}])
 )
 
 Run the specified model.
@@ -2496,11 +2537,11 @@ sub _process_command {
     my $getcommand = $args{"--getcommand"} || undef;
 
     if (defined($logfile)) {
-	$cmd .= " > $logfile 2>&1";
+        $cmd .= " > $logfile 2>&1";
     }
     
     if (defined($getcommand)) {
-	return $cmd;
+        return $cmd;
     }
 
     my $status = system($cmd);

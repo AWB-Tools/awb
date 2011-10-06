@@ -9224,3 +9224,21 @@ Directory libperl/AsimShell/lib
 
 Added a --long option to the awb-shell list packages
 command.
+
+----------
+jsemer      Date: Thu Oct  6 00:13:49 EDT 2011  CSN: CSN-awb-477
+                  Thu Oct  6 04:13:49 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          476 
+
+Improved behavior of parameters of submodels. New behavior is
+related to the default value of a submodel parameter as seen by
+the parent model, i.e., the value of 'global' parameter in the 
+submodel. Previously, that value was taken only from the module's 
+.awb file. Now that default value may be taken from an override of 
+the parameter value in the submodel. This saves a lot of writing 
+of parameter values in the parent model's .apm file, and allows 
+the value of a submodel parameter to be changed in all model's 
+that use the submodel simply by changing the value in the submodel.
