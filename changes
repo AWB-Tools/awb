@@ -9270,3 +9270,19 @@ Directory debian
  changelog                 Locally Modified          475 
 
 Updated deb log
+
+----------
+kfleming    Date: Fri Oct 14 15:59:02 EDT 2011  CSN: CSN-awb-479
+                  Fri Oct 14 19:59:02 UTC 2011
+
+
+Directory debian
+ changelog                 Locally Modified          478 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          478 
+
+Backport of r477.
+
+Remove check for the word abort that was some legacy behvaior 
+from CVS that almost certainly irrelevant to SVN.

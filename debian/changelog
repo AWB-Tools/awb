@@ -1,4 +1,4 @@
-awb (11.09+fixes~svn20110921r469+lucid) lucid; urgency=low
+awb (11.09+fixes~svn20111014r479+lucid) lucid; urgency=low
 
   [ Michael Pellauer ]
   * Branch for v11.09
@@ -8,5 +8,6 @@ awb (11.09+fixes~svn20110921r469+lucid) lucid; urgency=low
 
   [ kfleming ]
   * Ported in changes up to r473
+  * Ported in charge from r478
 
- -- kfleming <kfleming@thunderchief>  Sun, 02 Oct 2011 16:40:34 -0400
+ -- kfleming <kfleming@thunderchief>  Fri, 14 Oct 2011 15:57:36 -0400

@@ -225,13 +225,6 @@ sub status {
     if ( /password:/) {
       print "$_\n";
     }
-    #
-    # Bobbie seems to always get a CVS status 'abort' :-) So we better take care of it
-    #
-    if ( /abort/ ) {
-      Asim::Package::ierror("status: 'svn status' failed on $location!\nSorry, commiting is not possible\n");
-      return undef;
-    }
 
     # Example status is of this format. We are interested in the ones shown 
     # by arrows
