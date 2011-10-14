@@ -9242,3 +9242,14 @@ the parameter value in the submodel. This saves a lot of writing
 of parameter values in the parent model's .apm file, and allows 
 the value of a submodel parameter to be changed in all model's 
 that use the submodel simply by changing the value in the submodel.
+
+----------
+kfleming    Date: Fri Oct 14 15:53:26 EDT 2011  CSN: CSN-awb-478
+                  Fri Oct 14 19:53:26 UTC 2011
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          477 
+
+Remove check for the word abort that was some legacy behvaior 
+from CVS that almost certainly irrelevant to SVN.
