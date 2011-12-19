@@ -367,7 +367,6 @@ ModelBuilder::CreateMakefiles (void)
 bool ///< returns true for success, false otherwise
 ModelBuilder::CreateConscripts (void)
 {
-    bool success;
     
     const ModuleInstance * rootModuleInstance = model.GetRootModule();
     const Module & rootModule = rootModuleInstance->GetModule();

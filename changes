@@ -9253,3 +9253,25 @@ Directory libperl/Asim/lib/Asim/Package
 
 Remove check for the word abort that was some legacy behvaior 
 from CVS that almost certainly irrelevant to SVN.
+
+----------
+mgambhir    Date: Mon Dec 19 07:44:26 EST 2011  CSN: CSN-awb-480
+                  Mon Dec 19 12:44:26 UTC 2011
+
+
+Directory .
+ configure                 Locally Modified          479 
+ Makefile.in               Locally Modified          479 
+ configure.in              Locally Modified          479 
+
+Directory lib/libawb
+ model.h                   Locally Modified          479 
+ modparam.h                Locally Modified          479 
+ model_builder.cpp         Locally Modified          479 
+ util.h                    Locally Modified          479 
+
+Directory base
+ param.h                   Locally Modified          479 
+
+- fixed few gcc 4.x warnings
+- removed -Winline flag to get rid of rest

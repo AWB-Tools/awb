@@ -361,7 +361,7 @@ if test $asim_cv_enable_warning = no; then
     WARNFLAGS="-Wformat"
 fi
 if test $asim_cv_enable_warning = warn -o $asim_cv_enable_warning = error; then
-    WARNFLAGS="-Wall -W -Wshadow -Wcast-align -Wcast-qual -Winline -Wold-style-cast -Wredundant-decls -Wnon-virtual-dtor -ansi"
+    WARNFLAGS="-Wall -W -Wshadow -Wcast-align -Wcast-qual -Wold-style-cast -Wredundant-decls -Wnon-virtual-dtor -ansi"
 fi
 if test $asim_cv_enable_warning = error; then
     WARNFLAGS="${WARNFLAGS} -Werror"

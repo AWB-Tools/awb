@@ -247,7 +247,6 @@ class SplitString {
       : str(s),
         separators(sep)
     { /* nada */ }
-
 //    friend class iterator;
     friend class SplitStringIterator;
     /// The begin iterator (refereces first element)

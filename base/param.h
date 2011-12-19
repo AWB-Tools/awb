@@ -25,6 +25,9 @@
 #ifndef _PARAM_
 #define _PARAM_ 1
 
+//generic C
+#include <string.h>
+
 // generic C++
 #include <string>
 

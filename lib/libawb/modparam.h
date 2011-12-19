@@ -175,7 +175,7 @@ class ModParamInstance {
     /// Get abstract module parameter for this concrete module parameter.
     const ModParam & GetModParam (void) const { return param; }
     /// Get source, ie. where this param instance value was defined.
-    const Location GetSource (void) const { return source; }
+    Location GetSource (void) const { return source; }
     /// Get current value of this param instance.
     const string & GetValue (void) const { return value; }
     /// Set the value and source of this parameter instance.

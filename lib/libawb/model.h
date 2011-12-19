@@ -89,7 +89,7 @@ class Model {
         { defaultAttributeList.push_back (theDefaultAttribute); }
     //
     /// Should we save all parameters in model config ?
-    const bool IsSaveAllParams (void) const { return saveAllParams; }
+    bool IsSaveAllParams (void) const { return saveAllParams; }
     /// Save all parameters in model config (vs. only non-default ones)
     void SetSaveAllParams (const bool theSaveAllParams = true)
         { saveAllParams = theSaveAllParams; }

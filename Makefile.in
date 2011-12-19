@@ -61,8 +61,7 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	aux-scripts/compile aux-scripts/config.guess \
 	aux-scripts/config.sub aux-scripts/depcomp \
 	aux-scripts/install-sh aux-scripts/ltmain.sh \
-	aux-scripts/missing aux-scripts/mkinstalldirs config.guess \
-	config.sub
+	aux-scripts/missing aux-scripts/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
