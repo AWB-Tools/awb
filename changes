@@ -9275,3 +9275,14 @@ Directory base
 
 - fixed few gcc 4.x warnings
 - removed -Winline flag to get rid of rest
+
+----------
+
+emer        Date: Wed Dec 21 16:35:00 EST 2011  CSN: CSN-awb-481
+                  Wed Dec 21 21:35:00 UTC 2011
+
+
+Directory etc/repositories.d
+ mit-6.s078.pack           Locally Added               0 
+
+Added pack file for mit-6.s078 class.
