@@ -9296,3 +9296,15 @@ Directory etc/repositories.d
  openx86.pack              Locally Added               0 
 
 - Added pack for openx86 package
+
+----------
+emer        Date: Tue Jan 24 18:42:10 EST 2012  CSN: CSN-awb-483
+                  Tue Jan 24 23:42:10 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          482 
+ changelog                 Locally Modified          482 
+ rules                     Locally Modified          482 
+
+Move to version v12.01.  Note v11.12 was never released.

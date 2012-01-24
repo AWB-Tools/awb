@@ -1,7 +1,6 @@
-awb (11.12~svn20111001r473+lucid) lucid; urgency=low
+awb (12.01~svn20120124r483+lucid) lucid; urgency=low
 
   [ Joel Emer ]
-  * Begin work on release v11.12.
+  * Move to version v12.01 - v11.12 was never released
 
-
- -- Joel Emer <emer@csail.mit.edu>  Sat, 01 Oct 2011 15:29:17 -0400
+ -- Joel Emer <emer@csail.mit.edu>  Tue, 24 Jan 2012 18:39:26 -0500
