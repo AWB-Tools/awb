@@ -9320,3 +9320,35 @@ Directory debian
 For apt installs, 'recommend' previous shared package release rather
 than 'require' it.
 
+
+----------
+emer        Date: Wed Jan 25 14:51:12 EST 2012  CSN: CSN-awb-485
+                  Wed Jan 25 19:51:12 UTC 2012
+
+
+Directory debian
+ changelog                 Locally Modified          484 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          484 
+
+Directory .
+ README.debian             Locally Modified          484 
+
+Directory admin/packages
+ awb                       Locally Modified          484 
+
+To alleviate debian package file conflicts, put shared copy of
+repository in a version named directory rather than in HEAD. For
+example:
+
+/usr/share/asim/packages/awb/v12.01
+
+rather than
+
+/usr/share/asim/packages/awb/HEAD
+
+Update 'use package' command to default to the latest version of
+a package in the shared area rather than HEAD.
+
+Updated version update instructions.

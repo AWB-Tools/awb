@@ -1,38 +1,74 @@
 Changes to do a release and upgrade release number 
 
-   0) Make sure that there is a pack file for the new release.
-      This change needs to be in awb/HEAD and awb/STABLE and
-      is a little convoluted when releasing awb...
+ (0) Make sure that there is a pack file for the new release.
+     This change needs to be in awb/HEAD and awb/STABLE and
+     is a little convoluted when releasing awb...
 
-   1) Make sure that the following files had been updated to the correct version
+ (1) Prepare HEAD for a release
 
-     a) debian/changelog
+     a) Make sure that the following files had been updated to the correct version.
+        Note: These numbers DO NOT include a 'v' in them, e.g., 12.01.
 
-     b) debian/control
+          i)   debian/changelog
+
+          ii)  debian/control
      
-     c) debian/rules
+          iii) debian/rules
 
-     d) Commit these changes with 'awb-shell commit' if necessary.
+     b) Make sure that the following file has been updated to the correct version.
+        Note: These numbers DO include a 'v' in them, e.g., v12.01.         
+ 
+         i)   admin/packages/<packagename>  (see Tag= line)
 
-   2) Create a new branch for release
+     c) (Optional) Try a debian build and repository update (see instructions below)
 
-     a) % awb-shell branch package
+     d) Make sure the buildbots are looking for this as the testing release
 
-   3) In the release branch, change the following file:
+     e) Commit these changes with 'awb-shell commit' if changes were necessary.
 
-     a) % sed -i 's/Tag=HEAD/Tag=v<YY>.<MM>/' admin/packages/<packagename>
 
-     b) Commit these changes with 'awb-shell commit'. 
-        Or wait until after the changes in 'Build for debian' below.
+ (2) Create a new branch for release
 
-   4) Now do a debian build in the branch for releases and in trunk for testing
+     a) Update buildbots to look for this version as the new release
+
+     b) Create a branch with:
+
+            % awb-shell branch package <packagename>
+              Enter name for branch: v12.01
+              Put branch in tags/ instead of branches [no]: no
+
+     c) Change release name to '+fixes' in debian/changelog.
+        For example, 11.04+fixes~svn20100724r382+lucid
+
+     d) Commit these changes with 'awb-shell commit'.
+
+     e) (Optional) Try a debian build and repository update (see instructions below)
+
+
+
+ (3) Fix the trunk to prepare for the next future release
+
+     a) Change the buildbots to look for the new testing version
+
+     b) Checkout HEAD - BEWARE step (2) changed you to the branch
+
+     c) Update to the next version number as described in step (1) above
+
+     c) Commit these changes with 'awb-shell commit'.
+
+
+
+-----------------------------
 
 
 Build for debian
 
   1) Update debian/changelog (using dch can help)
 
-     a) Update name to <release>.<major>.<minor>+fixes~svn<date>r<version>+<release>
+     a) For HEAD, name should be <release>.<major>.<minor>~svn<date>r<version>+<release>
+        For example, 11.04~svn20100724r382+lucid
+
+        For a release, name should be <release>.<major>.<minor>+fixes~svn<date>r<version>+<release>
         For example, 11.04+fixes~svn20100724r382+lucid
 
      b) Change date at bottom of changelog
@@ -42,7 +78,7 @@ Build for debian
 
   2) Build it
 
-     a) % debuild -r fakeroot -us -uc
+     a) % debuild -us -uc
         or
         % debuild -r sudo -us -uc
 
@@ -57,6 +93,10 @@ Install into repository for distribution
              or
         % sudo -H -i
 
+     b) Using gpg-agent is useful
+
+        % eval $(gpg-agent --daemon)
+
 
   2) Install <package>.deb (copied above) into repository
 
@@ -66,13 +106,3 @@ Install into repository for distribution
      b) % reprepro includedeb <release> <package>.deb
 
 
-Fix the trunk to prepare for the next future release
-
-  1) In a workspace with trunk, increment the release 
-     number for HEAD in:
-
-     a) debian/changelog
-
-     b) debian/control
-     
-     c) debian/rules

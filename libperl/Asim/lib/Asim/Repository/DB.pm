@@ -514,10 +514,10 @@ sub get_public_repository {
   my $repository;
 
 
-  ($name, $tag) = (split("/",$fullname), "HEAD");
+  ($name, $tag) = (split("/",$fullname), "STABLE");
 
   if ($tag eq "STABLE") {
-    $tag = $self->_get_stable_tag($name) || return undef;
+    $tag = $self->_get_public_stable_tag($name) || return undef;
   }
 
   # Make CVS happy by converting  .'s to _'s in tag
@@ -564,6 +564,10 @@ sub _get_stable_tag {
   my @list;
   my $tag;
 
+  #
+  #  Get a sorted list of package versions of the desired package
+  #  from the .pack files
+  #
   @list = grep(!/^Global$/, $self->{inifile}->get_grouplist());
   @list = sort(grep(/^$name\/v/,@list));
 
@@ -571,6 +575,42 @@ sub _get_stable_tag {
     return undef;
   }
 
+  #
+  # The last one is the one we want
+  #
+  ($name, $tag) = (split("/",$list[$#list]), "HEAD");
+
+  return $tag;
+}
+
+################################################################
+#
+#  Utility function to determine the stable tag for shared packages
+#
+################################################################
+
+sub _get_public_stable_tag {
+  my $self = shift;
+  my $name = shift;
+
+  my @list;
+  my $tag;
+
+  #
+  #  Get a sorted list of package versions of the desired package
+  #  that are installed in the public shared directory area
+  #
+  my $pkgdir = Asim::Packagedir() . "/$name/";
+
+  @list = sort(map {s/$pkgdir//; $_; } glob("$pkgdir/*"));
+
+  if ($#list < 0) {
+    return undef;
+  }
+
+  #
+  # The last one is the one we want
+  #
   ($name, $tag) = (split("/",$list[$#list]), "HEAD");
 
   return $tag;
