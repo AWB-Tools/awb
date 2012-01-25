@@ -9308,3 +9308,15 @@ Directory debian
  rules                     Locally Modified          482 
 
 Move to version v12.01.  Note v11.12 was never released.
+
+----------
+emer        Date: Wed Jan 25 08:12:09 EST 2012  CSN: CSN-awb-484
+                  Wed Jan 25 13:12:09 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          483 
+
+For apt installs, 'recommend' previous shared package release rather
+than 'require' it.
+

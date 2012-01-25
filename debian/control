@@ -7,21 +7,22 @@ Standards-Version: 3.8.4
 
 Package: awb
 Architecture: all
-Depends: awb-12.01, awb-11.09
+Depends: awb-12.01
+Recommends: awb-11.09
 Description: Dependency package for the Architect's Workbench
  Dependency package for the Architect's Workbench package (awb)
 Section: devel
 
 Package: awb-12.01
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, awb-bin
+Depends: awb-bin, ${misc:Depends}
 Description: Sharable package for the Architect's Workbench
  Sharable files making up the Architect's Workbench package
 Section: devel
 
 Package: awb-bin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, gcc, g++, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs, subversion, git-core, libterm-readline-gnu-perl
+Depends: gcc, g++, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs, subversion, git-core, libterm-readline-gnu-perl, ${misc:Depends}
 Replaces: awb (<= 0.6.0)
 Breaks: awb (<= 0.6.0)
 Description: Executables for the Architect's Workbench
