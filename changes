@@ -9352,3 +9352,25 @@ Update 'use package' command to default to the latest version of
 a package in the shared area rather than HEAD.
 
 Updated version update instructions.
+
+----------
+emer        Date: Thu Jan 26 13:46:57 EST 2012  CSN: CSN-awb-486
+                  Thu Jan 26 18:46:57 UTC 2012
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          485 
+
+Directory libperl/Asim/lib/Asim/Package
+ Template.pm               Locally Modified          485 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          485 
+
+Directory .
+ README.debian             Locally Modified          485 
+
+Directory admin/packages
+ awb                       Locally Modified          485 
+
+Added 'prerelease' property to a package.

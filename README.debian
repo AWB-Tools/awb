@@ -37,8 +37,14 @@ Changes to do a release and upgrade release number
               Enter name for branch: v12.01
               Put branch in tags/ instead of branches [no]: no
 
-     c) Change release name to '+fixes' in debian/changelog.
+     c) Change the release name to '+fixes' in the followwing file:
         For example, 11.04+fixes~svn20100724r382+lucid
+
+           i) debian/changelog
+
+     d) Change the 'Prerelease' flag to 0 in:
+
+           i) admin/packages/<packagename>
 
      d) Commit these changes with 'awb-shell commit'.
 

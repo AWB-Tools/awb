@@ -1216,13 +1216,13 @@ sub list_packages {
 
       printf("%-20s", $p->name());
 
-      printf(" %-10s ", $p->tag());
-
       if ($p->isprivate()) {
 	printf(" %-10s ", $p->type());
       } else {
 	printf(" %-10s ", "shared");
       }
+
+      printf(" %-20s ", $p->tag() . ($p->prerelease()?"(prerelease)":""));
 
       print $p->csn();
     }

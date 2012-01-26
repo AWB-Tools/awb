@@ -133,6 +133,7 @@ sub create {
   $self->csn(0);
   $self->lockname("asim-$package");
   $self->tag("HEAD");
+  $self->prerelease(1);
   $self->buildorder(1000);
   $self->save();
 

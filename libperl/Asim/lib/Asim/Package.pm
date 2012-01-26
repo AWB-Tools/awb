@@ -62,6 +62,8 @@ our %a =  ( name          =>   [ "name",
                                  "SCALAR"],
             tag           =>   [ "tag",
                                  "SCALAR"],
+            prerelease    =>   [ "prerelease",
+                                 "SCALAR"],
             lockname      =>   [ "lockname",
                                  "SCALAR"],
             buildorder    =>   [ "buildorder",
@@ -142,7 +144,8 @@ The package configuration file contains the following:
 
   [Global]
   Name=test
-  Tag=HEAD
+  Tag=v12.01
+  Prerelease=0
   Description=Test package
   CSN=CSN-core-468
   Version=1.0
@@ -197,6 +200,11 @@ By convention, branch names are ALL UPPER CASE, with underscores, and
 optional dates in YYYYMMDD format, e.g.:
 
   FEATURE_XYZ_BRANCH_20070723
+
+=head2 Prerelesase
+
+This flag indicates that the package is in a prerelease status. Thus the
+tag for a checkout should actually be HEAD rather than the Tag.
 
 =cut
 
@@ -485,7 +493,7 @@ Return a list of accessor functions for this object
 sub accessors {
     my $self = shift;
 
-    return qw(name description location dependencies csn tag lockname buildorder maketarget type);
+    return qw(name description location dependencies csn tag prerelease lockname buildorder maketarget type);
 }
 
 
@@ -857,6 +865,20 @@ sub branch_name
   my $self = shift;
   return 'HEAD';
 }
+
+################################################################
+
+=item $package-E<gt>prerelease([$isprerelase])
+
+Optionally update string indicating if this is a pre-release
+of the package.
+Return the boolean indicating if this is a pre-release
+
+=cut
+
+################################################################
+
+sub prerelease { return $_[0]->_accessor("Global","Prerelease",$_[1]) || 0; }
 
 ################################################################
 
