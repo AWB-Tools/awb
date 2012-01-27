@@ -1222,7 +1222,7 @@ sub list_packages {
 	printf(" %-10s ", "shared");
       }
 
-      printf(" %-20s ", $p->tag() . ($p->prerelease()?"(prerelease)":""));
+      printf(" %-20s ", $p->tag() . ($p->prerelease()?" (prerelease)":""));
 
       print $p->csn();
     }

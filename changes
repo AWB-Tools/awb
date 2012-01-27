@@ -9374,3 +9374,17 @@ Directory admin/packages
  awb                       Locally Modified          485 
 
 Added 'prerelease' property to a package.
+
+----------
+emer        Date: Thu Jan 26 21:26:26 EST 2012  CSN: CSN-awb-487
+                  Fri Jan 27 02:26:26 UTC 2012
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          486 
+
+Directory etc/repositories.d
+ smips.pack                Locally Added               0 
+
+Added .pack file for smips package.
+
