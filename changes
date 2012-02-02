@@ -9388,3 +9388,15 @@ Directory etc/repositories.d
 
 Added .pack file for smips package.
 
+
+----------
+emer        Date: Thu Feb  2 15:52:09 EST 2012  CSN: CSN-awb-488
+                  Thu Feb  2 20:52:09 UTC 2012
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          487 
+
+When awb-shell automatically remembers a default model
+also remember a default benchmark if the model defines
+a default benchmark.

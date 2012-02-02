@@ -234,8 +234,7 @@ sub set_workspace {
 
   $default_package = undef;
 
-  $default_model = undef;
-  $default_benchmark = undef;
+  unset_default_model();
 
   $default_module = undef;
 
@@ -3399,14 +3398,15 @@ sub set_model {
   my $file = shift;
 
   $default_model = undef;
-  $default_model = get_model($file);
 
-  return $default_model;
+  # Note: default_model get set as part of get_model call
+
+  return get_model($file,1);
 }
 
 
 sub unset_model {
-  $default_model = undef;
+  unset_default_model();
 }
 
 sub create_model {
@@ -3420,7 +3420,7 @@ sub new_model {
   $model->edit();
   $model->dump();
 
-  $default_model = $model;
+  set_default_model($model);
 
   return 1;
 }
@@ -3521,11 +3521,7 @@ sub configure_model {
   # Model is remaining argument
 
   $file = shift @ARGV;
-  $model = get_model($file) || return ();
-
-  # Remember this model
-
-  $default_model = $model;
+  $model = get_model($file, 1) || return ();
 
   # Configure the model
 
@@ -3552,11 +3548,7 @@ sub build_model {
   # Model is remaining option
 
   $file = shift @ARGV;
-  $model = get_model($file) || return ();
-
-  # Remember this model
-
-  $default_model = $model;
+  $model = get_model($file,1) || return ();
 
   # Build it...
 
@@ -3607,6 +3599,8 @@ sub show_model {
 
 sub get_model {
   my $file = shift;
+  my $set_default = shift || 0;
+
   my $model;
 
   if (!defined($file) && !defined($default_model)) {
@@ -3620,6 +3614,12 @@ sub get_model {
 
     $model = check_model_dependencies($model)
       || shell_error("Failed to satisfy model dependencies\n") && return ();
+
+    # If requested, set default_model
+
+    if ($set_default) {
+      set_default_model($model);
+    }
   }
 
   return $model
@@ -3627,7 +3627,6 @@ sub get_model {
     || shell_error("No model or default model defined\n") && return ();
 
 }
-
 
 sub check_model_dependencies {
   my $model = shift;
@@ -3643,6 +3642,27 @@ sub check_model_dependencies {
   }
 
   return $model;
+}
+
+sub set_default_model {
+  my $model = shift;
+
+  print "Resetting default model: " . $model->filename() . "\n";
+  $default_model = $model;
+
+  if (defined($model)) {
+    my $benchmark = $model->default_benchmark();
+
+    if (defined($benchmark)) {
+       print "Resetting default benchmark: $benchmark\n";
+       $default_benchmark = get_benchmark($benchmark);
+    }
+  }
+}
+
+sub unset_default_model {
+  $default_model = undef;
+  $default_benchmark = undef;
 }
 
 
