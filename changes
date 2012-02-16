@@ -9400,3 +9400,13 @@ Directory libperl/AsimShell/lib/AsimShell
 When awb-shell automatically remembers a default model
 also remember a default benchmark if the model defines
 a default benchmark.
+
+----------
+emer        Date: Wed Feb 15 18:58:46 EST 2012  CSN: CSN-awb-489
+                  Wed Feb 15 23:58:46 UTC 2012
+
+
+Directory etc/repositories.d
+ mit-6.s078.pack           Locally Modified          488 
+
+Added staff repository (mit-6.s078-staff) for 6.s078 class.
