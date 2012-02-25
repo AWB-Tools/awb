@@ -9410,3 +9410,21 @@ Directory etc/repositories.d
  mit-6.s078.pack           Locally Modified          488 
 
 Added staff repository (mit-6.s078-staff) for 6.s078 class.
+
+----------
+jsemer      Date: Sat Feb 25 09:22:05 EST 2012  CSN: CSN-awb-490
+                  Sat Feb 25 14:22:05 UTC 2012
+
+
+Directory libperl/Asim/lib/Asim/Module
+ Param.pm                  Locally Modified          489 
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          489 
+
+Fixed regression in behavior of parameters introduced in 476.
+Now the defaults of global parameters of a submodel are not 
+modified when overridden by a parent model, so that saves 
+of the submodel properly save the overwridden values. In
+addition, only parameters whose values differ from the
+submodels default are saved in the .apm file.

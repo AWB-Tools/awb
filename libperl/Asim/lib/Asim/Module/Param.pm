@@ -303,6 +303,13 @@ sub isInt {
 Set object default value to $value if supplied. 
 Always return current (updated) default value.
 
+Note: A semantic choice was made with respect to
+setting a new default that if the current 'value'
+of a paramter  is the 'default' value then after
+setting a new default the 'value' will still be
+the 'default' value rather than the old 'default'
+value.
+
 =cut
 
 ################################################################
@@ -317,7 +324,7 @@ sub default {
       # Preserve invariant that default values
       # are left undefined.
       #
-      if ($self->{value} eq $self->{default}) {
+      if (defined($self->{value}) && ($self->{value} eq $self->{default})) {
 	  $self->{value} = undef;
       }  
   }
@@ -331,6 +338,11 @@ sub default {
 
 Set parameter's value to $value if supplied. 
 Always return current (update) parameter value.
+
+WARNING: if this parameter has been duplicated to appear
+in the list of global parameters of a model then changing
+a value here will not be reflected at the model level. Such
+parameters must be updated from the top down...
 
 =cut
 

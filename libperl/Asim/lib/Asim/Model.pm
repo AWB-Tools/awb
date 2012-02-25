@@ -137,13 +137,18 @@ sub _initialize {
   #
   # This list contains pointers to submodels for fast reference.
   # Note that these submodels may themselves have submodels.
+  # It is used only by the health-related methods and is useful
+  # only at initial read time since it is not updated on module
+  # insertion or replacedment
   #
   $self->{submodels} = [];
 
   #
   # Model health information. 
-  # Note: Explicitly does not include information about submodels as that is handled
-  # separately. However accessors allow the outside world to retreive it.
+  #
+  # NOTE: Explicitly does not include information about submodels as 
+  # that is handled separately. However accessors allow the outside world 
+  # to retreive it.
   #
   
   $self->{health} = {};
@@ -243,6 +248,10 @@ sub open {
     #
     my $rootname = $inifile->get("Global", "RootName");
     my $rootprovides = $inifile->get("Global", "RootProvides");
+
+    #
+    # Create the model tree from the inifile
+    #
     $self->modelroot($self->_get_module_or_submodel($rootname, $rootprovides, 1));
 
   } else {
@@ -253,12 +262,36 @@ sub open {
   my $modelroot = $self->modelroot();
 
   #
-  # Collect globally export parameters from modules
+  # Collect globally exported parameters from modules
   # and add them as parameters of the model itself
   #
 
   if (defined($modelroot)) {
-    @{$self->{params}} = $modelroot->find_global_parameters();
+
+    #
+    # We make a copy of the global parameters so that when they are
+    # changed we don't destroy the ability to recognize default values
+    # This is needed for proper saving of a model's submodels.
+    #
+    # For each global parameter, its 'default' is the current 'value'
+    # of the original parameter. Its 'value' is that same current
+    # 'value', but that value can be overwritten when the model is
+    # included as a submodel of another model.
+    #
+    # NOTE: find_global_parameters gets the duplicated parameters of
+    # modules that are submodels not the parameter objects 
+    # owned by the modules of the submodel. Thus, there can
+    # be chains of links to the original parameter.
+    #
+
+    foreach my $p ($modelroot->find_global_parameters()) {
+      my $new_p = $p->dup();
+
+      $new_p->default($p->value());
+      $new_p->{original_parameter} = $p;
+
+      push(@{$self->{params}}, $new_p);     
+    }
   }
 
   #
@@ -266,8 +299,10 @@ sub open {
   #
   $self->{packfile} = ($self->_get_packfile());
 
-  # Perform a general check of module health, including outputing warnings and updating
-  # "modified" state.
+  #
+  # Perform a general check of module health, including outputing warnings
+  # and updating "modified" state.
+  #
   $self->_health_check();
   
   return 1;
@@ -290,17 +325,22 @@ sub _get_module_or_submodel {
     return undef;
   }
 
-  my $is_submodel = 0;
   my $module_or_submodel;
 
-  if ($awbfile =~ /\.apm$/) {
-    # It is currently a submodel. Try to open it.
+  #
+  # Determine if we're working on a submodel by looking at
+  # the extension of the file
+  #
+  my $is_submodel = ($awbfile =~ /\.apm$/);
+
+  if ($is_submodel) {
+    # We're working on a submodel. Try to open it.
+
     $module_or_submodel = Asim::Model->new($awbfile);
-    $is_submodel = 1;
   }
   else {
-  
-    # It is currently a module. Try to open it.
+    # We're working on a module. Try to open it.
+
     $module_or_submodel = Asim::Module->new($awbfile);
   }
 
@@ -315,12 +355,14 @@ sub _get_module_or_submodel {
     my $found_it = 0;
 
     $module_or_submodel = Asim::Module->find_new_module_location($modname, $modtype);
+
     if (defined($module_or_submodel)) {
       _process_warning("Module \"$modname\" seems to have moved on disk.\n") if ($debug);
       push(@{$self->{health}{"moved_files"}}, $modname);
       $is_submodel = 0;
       $found_it = 1;
     } 
+
     if (!$found_it && !$at_root) {
       #
       # See if there's a submodel for this. 
@@ -335,6 +377,7 @@ sub _get_module_or_submodel {
         $found_it = 1;
       }
     }
+
     if (!$found_it) {
       _process_warning("Model needed module or submodel with non-existant file ($awbfile).\n");
       _process_warning("It is possible that you need to refresh your module database.\n");
@@ -344,48 +387,14 @@ sub _get_module_or_submodel {
     }
   }
 
-
-  #
-  # Handle submodel parameters
-  #
-
-  if ($is_submodel) {
-
-    my $submodel = $module_or_submodel;
-    my $modelroot = $submodel->modelroot();
-
-    if (defined($modelroot)) {
-
-      #
-      # Coerce all global submodel parameter values to look like 
-      # they are the default values
-      #
-
-      my @params = $submodel->parameters();
-
-      foreach my $p (@params) {
-      
-        # If the value of the parameter as specified by the submodel has
-        # overridden the default value of the parameter as specified in
-        # the module's .awb file, then coerce the default value 
-        # of the parameter to be value specified in the submodel.
-        #
-        # Note that this change in the parameter object is okay because we
-        # never save a submodel.
-
-        if ($p->value() ne $p->default()) {
-          $p->default($p->value());
-        }
-      }
-    }
-  }
-
   #
   # Override parameters
   #
   my @overrides = $inifile->get_itemlist("$modname/Params");
+
   foreach my $o (@overrides) {
       my $v = $inifile->get("$modname/Params", $o);
+
       $module_or_submodel->setparameter($o, $v) 
         || _process_warning("Attempt to set undefined parameter ($o)\n");
   }
@@ -404,6 +413,7 @@ sub _get_module_or_submodel {
     # the top-level model, one can check if it is a submodel. The method
     # 'is_submodel' does this check...
     #
+
     push(@{$self->{submodels}}, $submodel);
     
     #
@@ -423,7 +433,11 @@ sub _get_module_or_submodel {
   my $module = $module_or_submodel;
   
   #
-  # See if the info in the .apm file is stale.
+  # Start of health checks to see if the info in the .apm file is stale.
+  #      TBD: move this into a subroutine...
+  #
+
+  #
   # A) Check if %name has changed.
   #
   
@@ -434,8 +448,11 @@ sub _get_module_or_submodel {
   #
   
   print "Beginning check on " . $modname . "\n" if ($debug);
+
+  #
   # We need two copies of these, one to index the for-loops and one
   # to manipulate. If we manipulate during the for-loop it gets too confusing.
+  #
   my @awb_requires = $module->requires();
   my @awb_requires_idx = $module->requires();
   my @apm_requires = $inifile->get_itemlist("$modname/Requires");
@@ -493,6 +510,10 @@ sub _get_module_or_submodel {
   }
 
   #
+  # End of health checks to see if the info in the .apm file is stale.
+  #
+
+  #
   # Recursively get the %required modules
   #
   my @requires = $module->requires();
@@ -515,6 +536,12 @@ sub _get_module_or_submodel {
 #  print ".";
   return $module;
 }
+
+#
+# Early versions of Asim::Model always contained a module that specified
+# a file  called a 'packfile' that listed the packages used by the model.
+# This is not used any more.
+#
 
 sub _get_packfile {
   my $self = shift;
@@ -592,8 +619,9 @@ sub save {
 
   #
   # Create a new empty configuration files
-  #    Note: we create the new one out of the old one,
-  #          so that the format will be saved on a save
+  #
+  # NOTE: we create the new one out of the old one,
+  # so that the format will be preserved on a save
   #
 
   my $new_inifile = Asim::Inifile->new($self->filename()) || return undef;
@@ -673,8 +701,9 @@ sub _put_module {
 
   #
   # Save overriden parameters
-  #    Note: global module parameters overridden in a submodel
-  #          will show up looking like the default value here.
+  #
+  # NOTE: global module parameters overridden in a submodel
+  # will show up looking like the default value here.
   #
   foreach my $p ($module->parameters()) {
     if ($self->saveparams() || ($p->value() ne $p->default())) {
@@ -684,7 +713,7 @@ sub _put_module {
 
   #
   # Recursively put the submodules
-  #    Note: submodels will have no submodules
+  #    NOTE: submodels will have no submodules
   #
   foreach my $s  ($module->submodules()) {
     if (!defined($s)) {
@@ -958,7 +987,7 @@ sub saveparams  { return $_[0]->_accessor("Global","SaveParameters",$_[1]) || 0;
 Set model "autoselect" to $value if supplied. 
 Always return "autoselect".
 
-Note: this value is not saved in the .apm file
+NOTE: this value is not saved in the .apm file
 =cut
 
 ################################################################
@@ -1045,7 +1074,7 @@ sub attributes2string {
 Returns a boolean indicating if a model is marked as obsolete
 directly via an attribute or contains an obsolete module.
 
-Note: this test is expensive since it recurses into submodels.
+NOTE: this test is expensive since it recurses into submodels.
 
 =cut
 
@@ -1255,7 +1284,7 @@ sub smart_add_submodule {
     # Find the parent module by looking for the module that
     # requires a module of the chosen type.... 
     #
-    #    Note: implicit dependence on single provides
+    #    NOTE: implicit dependence on single provides
     #
     $parent_module = $self->find_module_requiring($provides);
     if (! defined($parent_module)) {
@@ -1349,7 +1378,8 @@ sub add_submodule {
     return 1;
   }
 
-  # Note: this isn't recursive since $parent is a Asim::Module
+  # NOTE: this isn't recursive since we are in a method of
+  # Asim::Model and $parent is an Asim::Module
 
   $parent->add_submodule($child);
   $self->modified(1);
@@ -1508,7 +1538,7 @@ sub scons {
 Return the parameters. Which are all the global parameters
 of the submodel.
 
-Exact copy of code from Asim::Module::paramters
+Exact copy of code from Asim::Module::parameters
 
 =cut
 
@@ -1519,6 +1549,11 @@ sub parameters {
   my @value = (@_);
 
   if (@value) {
+
+    # TBD: There should be a check that the list contains
+    #      a functionally proper set of parameters, i.e., 
+    #      that contain 'original_parameter' pointers
+
     @{$self->{params}} = (@value);
   }
 
@@ -1533,10 +1568,11 @@ sub parameters {
 Set parameter of this (sub)model with name $name to $value.
 Returns undef if there is no such parameter.
 
-Exact copy of code from Asim::Module::setparameter
-
-WARNING: This changes the value of the paramters in the submodel
-         so don't ever save the submodel...
+WARNING: Because submodels keep copies of their parameters
+separate from the module tree we follow the link in the
+parameter to the orignal parameter... This changes the value
+of the parameters in the submodel so a submodel save sees
+the values as set by the parent model.
 
 =cut
 
@@ -1553,6 +1589,16 @@ sub setparameter {
   foreach my $p (@params) {
     if ($p->name() eq $pname) {
       $p->value($pvalue);
+
+      # Possibly recurse to change parameters in submodels
+
+      my $subparam = $p->{original_parameter};
+
+      while (defined($subparam)) {
+	$subparam->value($pvalue);
+        $subparam = $subparam->{original_parameter};
+      }
+
       return 1;
     }
   }
@@ -1627,7 +1673,7 @@ sub remove_submodule {
 Recursively search the module list looking a stop in the
 model that needs a module of type $provides
 
-Note: this method does not recurse into submodels
+NOTE: this method does not recurse into submodels
 
 =cut
 
@@ -1652,7 +1698,7 @@ that provides $provides
 
 Maybe this should return the list of modules that provide $provides.
 
-Note: this method does not recurse into submodels
+NOTE: this method does not recurse into submodels
 
 =cut
 
@@ -1701,7 +1747,7 @@ that requires $requires.
 
 Maybe this should return the list of modules that requires $requires.
 
-Note: this method does not recurse into submodels
+NOTE: this method does not recurse into submodels
 
 =cut
 
@@ -1771,7 +1817,7 @@ sub is_default_module {
 
 Returns the number of modules missing from the model.
 
-Note: Only valid right after model is read in.
+NOTE: Only valid right after model is read in.
 
 =cut
 
@@ -1791,7 +1837,7 @@ sub missing_module_count {
 
 Returns the number of modules that have moved on the filesystem.
 
-Note: Only valid right after model is read in.
+NOTE: Only valid right after model is read in.
 
 =cut
 
@@ -2479,7 +2525,7 @@ sub issetup {
 
 Return a boolean indicating whether the file has been modified.
 
-Note: this method is only meaningful if used under some file lock.
+NOTE: this method is only meaningful if used under some file lock.
 
 =cut
 
