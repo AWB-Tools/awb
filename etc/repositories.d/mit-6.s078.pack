@@ -39,3 +39,24 @@ Changes=changes
 Description=mit-6.s078-staff package
 Tag=HEAD
 Access=https://asim.csail.mit.edu/svn/mit-6.s078-staff
+
+
+[mit-6.s078-student]
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=mit-6.s078-student
+Target=mit-6.s078-student
+Method=svn
+Module=undefined
+Changes=changes
+Description=mit-6.s078-student package
+Tag=HEAD
+Access=https://asim.csail.mit.edu/svn/mit-6.s078-student
+
+[mit-6.s078-student/HEAD]
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=mit-6.s078-student
+Target=mit-6.s078-student
+Method=svn
+Module=undefined
+Changes=changes
+Description=mit-6.s078-student package
+Tag=HEAD
+Access=https://asim.csail.mit.edu/svn/mit-6.s078-student

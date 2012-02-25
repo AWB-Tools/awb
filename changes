@@ -9428,3 +9428,14 @@ modified when overridden by a parent model, so that saves
 of the submodel properly save the overwridden values. In
 addition, only parameters whose values differ from the
 submodels default are saved in the .apm file.
+
+----------
+jsemer      Date: Sat Feb 25 09:28:36 EST 2012  CSN: CSN-awb-491
+                  Sat Feb 25 14:28:36 UTC 2012
+
+
+Directory etc/repositories.d
+ mit-6.s078.pack           Locally Modified          490 
+
+Added package containing template for student packages
+for 6.s078 class.
