@@ -15,7 +15,7 @@
 
 # Set the release name for the <package>-<release> .deb file
 #RELEASE = $(shell $(MAKE) print-release-name | sed 's/v//' )
-RELEASE = 12.01
+RELEASE = 12.02
 
 # This has to be exported to make some magic below work.
 export DH_OPTIONS

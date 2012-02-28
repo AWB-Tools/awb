@@ -9439,3 +9439,24 @@ Directory etc/repositories.d
 
 Added package containing template for student packages
 for 6.s078 class.
+
+----------
+emer        Date: Tue Feb 28 18:02:08 EST 2012  CSN: CSN-awb-492
+                  Tue Feb 28 23:02:08 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          491 
+ changelog                 Locally Modified          491 
+ rules                     Locally Modified          491 
+
+Directory admin/packages
+ awb                       Locally Modified          491 
+
+Directory etc
+ asim.pack                 Locally Modified          491 
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          491 
+
+Move to version 12.02. Note 12.01 was never released.

@@ -66,6 +66,12 @@ Description=AWB v11.09
 Access=https://asim.csail.mit.edu/svn/awb
 Tag=v11.09
 
+
+[awb/v12.02]
+Description=AWB v12.02
+Access=https://asim.csail.mit.edu/svn/awb
+Tag=v12.02
+
 ###### Asim trunk
 
 [asimcore]
@@ -97,6 +103,16 @@ Tag=v11.04
 Description=Asim Core v11.09
 Access=https://asim.csail.mit.edu/svn/asimcore
 Tag=v11.09
+
+[asimcore/v12.01]
+Description=Asim Core v12.01
+Access=https://asim.csail.mit.edu/svn/asimcore
+Tag=v12.01
+
+[asimcore/v12.02]
+Description=Asim Core v12.02
+Access=https://asim.csail.mit.edu/svn/asimcore
+Tag=v12.02
 
 
 ###### Feeder
