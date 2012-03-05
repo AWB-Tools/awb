@@ -74,12 +74,8 @@ Asim::enable_signal();
 # Terminal input
 #
 our $term;
-#$attribs = $term->Attribs;
-#$attribs->{attempted_completion_function} = \&attempted_completion;
-
-
-# our $OUT = $term->OUT || STDOUT;
-
+our $history_file = "$ENV{HOME}/.asim/awb_history";
+our $history_length = $ENV{AWB_HISTORY} || 100;
 
 #
 # Parsing
@@ -315,6 +311,9 @@ SHELLCOMMAND:
     # Parse exit commands
     #
     if (/^(?:q(?:uit)?|bye|exit)$/i) {
+
+      _finish_interactive();
+
       last SHELLCOMMAND;
     }
 
@@ -425,16 +424,81 @@ sub mode_batch {
 
 sub mode_interactive {
 
-  if (!defined($term) ) {
-    $term = Term::ReadLine->new('AsimShell');;
-    ##FIXME 11/12/03 Mark Charney:  disabled, was not ssh2/ssh-agent2 friendly
-    ## check_ssh_agent();
-  }
+  _start_interactive();
+
+  ##FIXME 11/12/03 Mark Charney:  disabled, was not ssh2/ssh-agent2 friendly
+  ## check_ssh_agent();
 
   Asim::mode("Interactive");
 
   return 1;
 }
+
+#
+# Internal functions to start/finish interactive command line processing
+#
+
+sub _start_interactive {
+  if (!defined($term) ) {
+    $term = Term::ReadLine->new('AsimShell');;
+
+    # Limit history
+
+    if ($term->ReadLine eq 'Term::ReadLine::Gnu') {
+      $term->stifle_history($history_length);
+    }
+
+    if ($term->ReadLine eq 'Term::ReadLine::Perl') {
+      $term->Attribs->{MaxHistorySize} = $history_length;
+    }
+
+    # Restore history
+
+    if ( -f $history_file) {
+
+      if ($term->ReadLine eq 'Term::ReadLine::Gnu') {
+        $term->ReadHistory($history_file);
+      }
+
+      if ($term->ReadLine eq 'Term::ReadLine::Perl') {
+        open HIST, $history_file;
+
+        while (my $line = <HIST>) {
+          chomp $line;
+          $term->addhistory($line);
+        }
+
+        close HIST;
+      } 
+
+    # Do not save one letter commands
+    $term->MinLine(2);
+
+    # Enable history expansion (for Term::ReadLine::Gnu)
+    $term->Attribs->{do_expand}=1;  # for 
+
+    }
+  }
+}
+
+sub _finish_interactive {
+
+  # Save history
+
+  if ($term->ReadLine eq 'Term::ReadLine::Gnu') {
+    $term->WriteHistory($history_file);
+  }
+
+  if ($term->ReadLine eq 'Term::ReadLine::Perl') {
+    my @lines = $term->GetHistory() if $term->can('GetHistory');
+
+    if( open HIST, ">$history_file" ) {
+      print HIST join("\n",@lines);
+      close HIST;
+    }
+  }
+}
+
 
 sub check_ssh_agent {
   if (Asim::is_ssh_agent_running() != 0) {

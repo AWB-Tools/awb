@@ -9460,3 +9460,21 @@ Directory etc/repositories.d
  leap.pack                 Locally Modified          491 
 
 Move to version 12.02. Note 12.01 was never released.
+
+----------
+emer        Date: Mon Mar  5 14:22:47 EST 2012  CSN: CSN-awb-494
+                  Mon Mar  5 19:22:47 UTC 2012
+
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          493 
+
+Directory tools/scripts
+ awb-shell                 Locally Modified          493 
+
+Enhanced awb-shell command line processing by saving/restoring
+command line history (in ~/.asim/awb_history) and enabling
+command expansion for Term:ReadLine:GNU. This allows command
+re-exection with commands like !!.
+
+This time in HEAD where it belongs.
