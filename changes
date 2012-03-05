@@ -9286,3 +9286,19 @@ Backport of r477.
 
 Remove check for the word abort that was some legacy behvaior 
 from CVS that almost certainly irrelevant to SVN.
+
+----------
+emer        Date: Mon Mar  5 11:50:18 EST 2012  CSN: CSN-awb-493
+                  Mon Mar  5 16:50:18 UTC 2012
+
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          492 
+
+Directory tools/scripts
+ awb-shell                 Locally Modified          492 
+
+Enhanced awb-shell command line processing by saving/restoring
+command line history (in ~/.asim/awb_history) and enabling
+command expansion for Term:ReadLine:GNU. This allows command
+re-exection with commands like !!.

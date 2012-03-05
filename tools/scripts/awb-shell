@@ -250,8 +250,9 @@ values for various objects that can be manipulated. The "set" command can
 be used to set or reset these values. Use the command
 "help" to list the individual commands.
 
-If Text::ReadLine::Gnu is installed then command line completion will
-be available inside the shell.
+If Text::ReadLine::Gnu is installed then command line completion, command
+line events and command history (saved across session) and will be available
+inside the shell.
 
 =head1 SWITCHES
 
@@ -371,6 +372,8 @@ automatically by asimstarter. Setting it explicitly is discouraged.
 
 ASIMSHELLOPT - contains additional command line switches.
 
+AWB_HISTORY - number of lines to keep in command line history file
+
 =head1 FILES
 
 ~/.asim/asimrc - user-specific configuration file
@@ -381,6 +384,8 @@ INSTALLPREFIX/etc/asim/asimrc - global configuration file
 
 INSTALLPREFIX/etc/asim/asim.pack - global description of repositories, which 
 is used if ~/.asim/asim.pack does not exist.
+
+~/.asim/awb_history - command line history
 
 
 =head1 ASIMRC CONFIGURATION SETTINGS
