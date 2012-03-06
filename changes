@@ -9478,3 +9478,14 @@ command expansion for Term:ReadLine:GNU. This allows command
 re-exection with commands like !!.
 
 This time in HEAD where it belongs.
+
+----------
+emer        Date: Tue Mar  6 16:54:01 EST 2012  CSN: CSN-awb-495
+                  Tue Mar  6 21:54:01 UTC 2012
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          494 
+
+The edit method for models runs the editing as a background
+task by default.

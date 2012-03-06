@@ -2176,9 +2176,10 @@ Edit the model
 
 sub edit {
   my $self = shift;
+  my $wait = shift || 0;
 
   if (defined($ENV{DISPLAY})) {
-    system("apm-edit " . $self->filename());
+    system("apm-edit " . $self->filename() . ($wait?"":" & "));
   } else {
     $self->Asim::Base::edit();
 
