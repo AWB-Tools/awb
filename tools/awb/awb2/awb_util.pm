@@ -810,7 +810,7 @@ sub view_cycledisplay {
     $adf_switch = "-adf $adf";
   }
 
-  system("cd $dir; 2Dreams $adf_switch $file &");
+  system("cd $dir; dreams $adf_switch $file &");
 }
 
 #

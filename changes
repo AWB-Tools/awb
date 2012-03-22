@@ -9489,3 +9489,213 @@ Directory libperl/Asim/lib/Asim
 
 The edit method for models runs the editing as a background
 task by default.
+
+----------
+mgambhir    Date: Thu Mar 22 00:36:22 EDT 2012  CSN: CSN-awb-496
+                  Thu Mar 22 04:36:22 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          495 
+
+Directory scripts
+ install-rcfile            Locally Modified          495 
+
+Directory libperl/Asim/lib/Asim/GenCFG
+ Auto.pm                   Locally Modified          495 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          495 
+ Git.pm                    Locally Modified          495 
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          495 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Git.pm                    Locally Modified          495 
+
+Directory libperl/Asim/lib/Asim/Batch
+ Condor.pm                 Locally Modified          495 
+ Base.pm                   Locally Modified          495 
+ List.pm                   Locally Added               0 
+
+Directory libperl/Asim/lib/Asim
+ Batch.pm                  Locally Modified          495 
+
+Directory tools/scripts
+ awb-run                   Locally Modified          495 
+ awb-batch                 Locally Modified          495 
+
+Directory tools/awb/awb2
+ awb_util.pm               Locally Modified          495 
+
+Directory lib/libawb
+ model_builder.cpp         Locally Modified          495 
+
+Directory .
+ configure.in              Locally Modified          495 
+
+
+Sync of Intel repository r3051 - r3087
+
+r3051
+Author:	cjbeckma
+Last modification:	Rev 3051 - 2011-04-08 04:11:02
+Log message:	CSN: CSN-awb-3051
+
+
+- Added an option to awb-run that lets you run simulations on an explicit
+list of hosts via ssh, rather than using Netbatch or Condor. To use it,
+use the command line argument --hostlist or the asimrc parameter
+USE_HOST_LIST and set the -pool command line argument or POOL asimrc param
+to a comma-separated list of hostnames. Jobs will be run via ssh.
+- also fixed a few lines in the multithreading core reseration for netbatch
+that had somehow gotten deleted from a previous commit.
+
+r3054
+Author:	mgambhir
+Last modification:	Rev 3054 - 2011-04-19 16:08:49
+Log message:	CSN: CSN-awb-3054
+
+- fixed a bug in install-rc script
+- If a value in /p/asim/$systoken/etc/asim/asimrc was set to 0 then the
+install script ignored this and overwrote the value from asimrc.template
+
+r3064
+Author:	mgambhir
+Last modification:	Rev 3064 - 2011-06-30 21:59:26
+Log message:	CSN: CSN-awb-3064
+
+- system command in perl returns output of tee command instead of the
+regression command if the output is piped into tee.
+
+r3066
+Author:	cjbeckma
+Last modification:	Rev 3066 - 2011-08-10 14:20:16
+Log message:	CSN: CSN-awb-3066
+
+
+- tweak to default QT3 header file search path, to make package configuration
+on non-Intel distros like vanilla Ubuntu just a little bit easier
+
+r3068
+Author:	mcadler
+Last modification:	Rev 3068 - 2011-09-01 20:00:46
+Log message:	CSN: CSN-awb-3068
+
+Better handling of null substitution.
+ 	(Hide changed files)
+
+r3071
+Author:	mcadler
+Last modification:	Rev 3071 - 2011-09-02 11:45:37
+Log message:	CSN: CSN-awb-3071
+
+Fix initialization of path so it only happens once
+
+r3072
+Author:	mgambhir
+Last modification:	Rev 3072 - 2011-09-29 17:52:26
+Log message:	CSN: CSN-awb-3072
+
+- Moved the Xaction::commit() which is basically a checkpoint that the
+commit has been successfully done, to after svn commit is executed.
+This enables aborting out of the commit in case svn pre commit hook
+fails
+
+r3073
+Author:	cjbeckma
+Last modification:	Rev 3073 - 2011-10-28 03:46:04
+Log message:	CSN: CSN-awb-3073
+
+
+- fixed a problem with getting the perl version, for perl versions >= 5.12
+- removed a potentially obsolete use of $host variable in configure,
+in place of more portable $HOSTMACHINE
+
+r3074
+Author:	cjbeckma
+Last modification:	Rev 3074 - 2011-11-30 13:44:03
+Log message:	CSN: CSN-awb-3074
+
+
+- added an option to the host-list batch scheduler ("awb-run --use-host-list")
+to specify the number of jobs slots per host, either on the command line
+(--slots-per-host) or as an asimrc setting (SLOTS_PER_HOST=).
+
+r3075
+Author:	mcadler
+Last modification:	Rev 3075 - 2011-12-01 12:34:54
+Log message:	CSN: CSN-awb-3075
+
+Print warning message to STDERR to avoid interfering with scripts.
+ 	(Hide changed files)
+
+r3076
+Author:	mgambhir
+Last modification:	Rev 3076 - 2011-12-07 17:12:28
+Log message:	CSN: CSN-awb-3076
+
+- Making awb git wrapper simpler. No need to do "remote update" when doing
+a pull/update on a package. We only care about the master branch and
+just one remote which is the public installation of the package.
+
+r3081
+Author:	cjbeckma
+Last modification:	Rev 3081 - 2012-01-24 14:34:25
+Log message:	CSN: CSN-awb-3081
+
+
+- added a python package containing handy functions for creating configure
+scripts.
+
+r3082
+Author:	mgambhir
+Last modification:	Rev 3082 - 2012-01-25 21:37:16
+Log message:	CSN: CSN-awb-3082
+
+- "awb-shell baseline packages" now works for git repositories. It returns
+the md5hash corresponding to the HEAD version in the local repository.
+The command used to retrieve the hash is "git rev-parse HEAD". 
+- Branch/tag/Md5hash can be added to the clone/checkout commands for git
+repositories
+Example: "awb-shell clone package testgit/testbranch"
+or "awb-shell clone package testgit/e8b9f07fb13b20c7b7b4b606a54f3fecbdceccb8"
+The hash tag is ugly but it uniquely identifies the snapshot of the 
+repository across all references (branches/tags). 
+- Specifying only the first few characters in the hash should be
+sufficient in most cases.
+
+r3085 
+Author:	mgambhir
+Last modification:	Rev 3085 - 2012-02-29 16:07:54
+Log message:	CSN: CSN-awb-3085
+
+Fix to the Git wrapper in Awb. Following is the expected behavior now. 
+If a specific revision of keiko is cloned/checked out using a commit tag 
+$awb-shell clone package keiko/<commit-tag>
+It will be checked out as a local asim-release branch. (this is imposed by the way git checks out a particular revision)
+
+On that package if a pull/update is done then an error is thrown
+awb-shell pull package keiko OR awb-shell update package keiko 
+Package: Error - Branch asim-release does not exist in the remote repository.
+You probably checked out a specific commit tag
+Consider checking out master branch and then pull
+awb-shell checkout package <name>/master
+awb-shell pull package name
+If you have local changes then consider merging with master
+
+Also if a pull/update of master is done while asim-release is checked
+out 
+$awb-shell pull package keiko/master
+Then just like native git, changes from remote master will be merged
+into the asim-release branch. But asim-release will still be checked
+out.
+
+r3087
+Author:	mgambhir
+Last modification:	Rev 3087 - 2012-03-15 03:26:10
+Log message:	CSN: CSN-awb-3087
+
+- Changing the "View Cycle Display" analysis tool in AWB from 2Dreams to dreams till I
+get 2Dreams to work

@@ -185,6 +185,8 @@ my $buildbatch  = Asim::Util::get_asimrc_val($optlist, "BUILD_NETBATCH", "0"   )
 my $builddistcc = Asim::Util::get_asimrc_val($optlist, "BUILD_DISTCC",   "0"   );
 my $runnetbatch = Asim::Util::get_asimrc_val($optlist, "USE_NETBATCH",   "1"   );
 my $runcondor   = Asim::Util::get_asimrc_val($optlist, "USE_CONDOR",     "0"   );
+my $runhostlist = Asim::Util::get_asimrc_val($optlist, "USE_HOST_LIST",  "0"   );
+my $slotsperhost= Asim::Util::get_asimrc_val($optlist, "SLOTS_PER_HOST", "1"   );
 my $remote      = Asim::Util::get_asimrc_val($optlist, "REMOTE",         "0"   );
 my $remotehost  = Asim::Util::get_asimrc_val($optlist, "REMOTE_HOST",    ""    );
 my $remotenbqopt= Asim::Util::get_asimrc_val($optlist, "REMOTE_NBQOPT",  "");
@@ -202,7 +204,7 @@ my $printtimes  = Asim::Util::get_asimrc_val($optlist, "PRINT_TIMES",    1);
 my $forklocal   = Asim::Util::get_asimrc_val($optlist, "FORK_LOCAL",    0);
 my $forkbatch   = Asim::Util::get_asimrc_val($optlist, "FORK_BATCH",   32);
 my $distccjlevel= Asim::Util::get_asimrc_val($optlist, "DISTCC_JLEVEL",    "");
-my $run_time_dir = Asim::Util::get_asimrc_val($optlist, "RUN_TIME_DIR",    undef);
+my $run_time_dir= Asim::Util::get_asimrc_val($optlist, "RUN_TIME_DIR",    undef);
 
 my $netbatch_taskname = "";
 
@@ -297,13 +299,14 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "replace!"       => \$replace,
 			"compress=s"     => \$compress,
                         "execscript=s"   => \$execscript,
-                        "buildall!"       => \$buildall,
+                        "buildall!"      => \$buildall,
                         "buildbatch!"    => \$buildbatch,
                         "buildopt=s"     => \$buildopt,
                         "builddistcc!"   => \$builddistcc,
 			"persist!"       => \$persist,
                         "netbatch!"      => \$runnetbatch,
                         "condor!"        => \$runcondor,
+                        "hostlist!"      => \$runhostlist,
 			"pool=s"         => \$pool,
                         "queue=s"        => \$queue,
                         "class=s"        => \$class,
@@ -334,7 +337,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "forkbatch=s"    => \$forkbatch,
                         "distccjlevel=s" => \$distccjlevel,
                         "nbtask=s"       => \$netbatch_taskname,
-                        "completioncmd=s"=> \$completion_command,
+                        "completioncmd=s"=> \$completion_command
                     );
 
 if ($debugoutfile ne "") {
@@ -380,10 +383,14 @@ if (defined $buildbatch && $buildbatch) {
     $runnetbatch = "1";
 }
 
-if ($runnetbatch || $runcondor) {
-    $runbatch = "1";
+# if there is a host list, use that instead of netbatch
+if (defined $runhostlist && $runhostlist) {
+    $runnetbatch = $runcondor = 0;
 }
 
+if ($runnetbatch || $runcondor || $runhostlist) {
+    $runbatch = "1";
+}
 
 # make sure this is defined
 if (!defined $builddistcc) {
@@ -640,8 +647,6 @@ if ($runnetbatch) {
 			       );
   }
 } elsif($runcondor) {
-    
-
     $run_sys = Asim::Batch->new("CONDOR",				
                                 temp  =>  $TMP_DIR,
                                 quiet =>  $quiet,
@@ -653,17 +658,19 @@ if ($runnetbatch) {
                                            "AWBLOCAL"    => $remoteawblcl
 				}
 	);
-
+} elsif($runhostlist) {
+    $run_sys = Asim::Batch->new("HOST_LIST",
+				pool  =>  $pool,
+                                slots_per_host => $slotsperhost
+			       );
 } else {
-
-
-  $run_sys = Asim::Batch->new("LOCAL",
-			      temp  =>  $TMP_DIR,
-			      quiet =>  $quiet
-			     );
+    $run_sys = Asim::Batch->new("LOCAL",
+			        temp  =>  $TMP_DIR,
+			        quiet =>  $quiet
+			       );
 }
 
-if ($buildbatch) {
+if ($buildbatch && $runnetbatch) {
   $build_sys = Asim::Batch->new("NETBATCH",
 				pool  =>  $pool_build,
 				queue =>  $queue_build,
@@ -671,6 +678,10 @@ if ($buildbatch) {
 				flags =>  $batch_flags_build,
 				temp  =>  $TMP_DIR,
 				quiet =>  $quiet
+			       );
+} elsif($buildbatch && $runhostlist) {
+  $build_sys = Asim::Batch->new("HOST_LIST",
+				pool  =>  $pool_build
 			       );
 } else {
   $build_sys = Asim::Batch->new("LOCAL",
@@ -2328,8 +2339,10 @@ sub submit_job
 	# threaded model runs have to be scheduled on multi-cores.
         if (defined $mt_run && $mt_run > 0) {
             $run_sys->check_threads($NETBATCH_MT_SLOTS_PER_CORE);
+            $run_sys->reserve_all_threads($NETBATCH_MT_RESERVE_ALL_CORES);
 	} else {
 	    $run_sys->check_threads(1);
+            $run_sys->reserve_all_threads(0);
 	}
 
         if ($remote) {
@@ -2343,9 +2356,9 @@ sub submit_job
 	$log = "$resdir/$name/$bm_name.SUBMITTED";
 
         # submit run job to netbatch
-        $runerror = $run_sys->submit($submit_cmd, $dashj, ">$log 2>&1");
+        $run_error = $run_sys->submit($submit_cmd, $dashj, ">$log 2>&1");
 
-        if ($runerror) {
+        if ($run_error) {
             # There was an error in the submission.
             print_error( "Netbatch returned error ($run_error).Submission to run_sys not finished\n",
                          "Submitted command: $submit_cmd\n",
@@ -2770,6 +2783,10 @@ awb-run - Program to run a set of asim experiments
           [--[no]dryrun]
           [--[no]quiet]
           [--[no]verbose]
+          
+          [--netbatch]
+          [--condor]
+          [--hostlist]
 
           [--help]
           [--options]
@@ -2927,6 +2944,30 @@ sense of the command. Default is NOT to be quiet.
 
 Specified that extra information should be printed. The [no] prefix
 reverses the sense of the command. Default is NOT to be verbose.
+
+
+=item --netbatch
+
+Use Netbatch as the underlying batch scheduling system.
+Same as asimrc parameter USE_NETBATCH (default=1).
+
+=item --condor
+
+Use Condor as the underlying batch scheduling system.
+Same as asimrc parameter USE_CONDOR (default=0).
+
+=item --hostlist
+
+Instead of either Netbatch or Condor, use the --pool argument or
+POOL asimrc parameter to specify a list of hosts to execute
+the simulations on, which are run on those hosts directly via ssh.
+Same as asimrc parameter USE_HOST_LIST (default=0).
+
+=item --slots_per_host
+
+With the --hostlist or USE_HOST_LIST option,
+this specifies how many jobs can run on each host concurrently.
+Same as asimrc parameter SLOTS_PER_HOST (default=1).
 
 
 =item --help

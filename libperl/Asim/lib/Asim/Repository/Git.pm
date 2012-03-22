@@ -144,27 +144,13 @@ sub checkout {
 
   my $status;
  
-
-  print "$tag\n";
   # parse the tag into a branch name and csn
   my $ref_obj = '';
-  
-  if ($tag =~ m/^CSN-(.+)-([0-9\.]+)$/) {
-    $ref_obj = $tag;
-  } elsif ( $tag =~ m/^(.+):([0-9\.]+)$/ ){
-    #branch:rev  => csn_tag = CSN-branch-rev
-    $ref_obj = "CSN-$1-$2";
-  } elsif ($tag =~ m/^([0-9\.]+)$/ ) {
-    #rev  => csn_tag = CSN-packagename-rev
-    $ref_obj = "CSN-$pkg_name-$1";
-  } else {
-    $ref_obj = $tag;
-  }
-  
+  $ref_obj = $tag;
+
   if ( ! -e "$package_dir/.git" ) {
     print "Local git repository $target does not exist!\n";
     my $q = "Do you want to clone it using URL $access?\n";
-
     if (Asim::choose_yes_or_no($q, "yes", "yes")) {
       return $self->clone();
     }
@@ -198,18 +184,21 @@ sub checkout {
       $cmd .= "-b $ref_obj $2 ";
       $found = 1;
       last;
-    } elsif ( m/^(.+)(refs\/remotes\/origin\/$tag)$/ ) {
+    } elsif ( m/^(.+)(refs\/remotes\/origin\/$ref_obj)$/ ) {
       $cmd .= "-b $ref_obj $2 --track ";
       $found = 1;
       last;
-    }   
+    }
   }
 
   if (! $found ) {
-      ierror("Cannot find specified reference object $ref_obj\n");
-      return undef;
+    # if the reference object is not found using git show-refs then it must be a commit
+    # hash tag that does not refer to the latest commit in the master branch. 
+    # Send the commit tag in the git checkout command and home that git will handle it 
+    # appropriately
+    $cmd .= "-b asim-release $ref_obj ";
   }
-
+  
   close LIST;
   $cmd .= ")";
   

@@ -136,6 +136,9 @@ BEGIN {
   ## where "name" is "benchmark" and "path" is "/path/to/this/benchmark"
   ##
 
+  $SUBST_PATH = '';
+  $SUBST_NAME = '';
+
   if ( $ARGV[1] ) {
     # get absolute path of the trace, which follows the --emit arg:
     ($SUBST_PATH = $ARGV[1]) =~ s/\.cfg$//;

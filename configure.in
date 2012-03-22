@@ -55,7 +55,7 @@ HOSTOSRELEASE_SUBST=`echo $HOSTOSRELEASE | tr ".)(-" "____"`
 # Needed in FIND_PERLGUI.
 # Export it so asimstarter knows which is the good version of perl.
 #
-PERLVERSION=`perl --version | grep 'This is perl' | sed -e 's/.*, v//' -e 's/ .*built.*//'`
+PERLVERSION=`perl --version | perl -e 'while (<>) {if (m/This is perl.*v(\d+\.\d+\.\d+)/) {print $1}}'`
 config_perl_version=$PERLVERSION
 AC_SUBST(config_perl_version)
 
@@ -216,7 +216,8 @@ AC_DEFUN([FIND_QT], [
     dnl find qt headers
     dnl
 
-    FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib ${prefix} /usr/local/lib /usr/local /usr/lib /usr /usr/X11R6/lib /usr/X11R6)
+    FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt3 /usr/local/include /usr/X11R6/include/qt3)
+
     if test "X$QTINCDIR" = "X"
     then
         echo ""
@@ -252,7 +253,7 @@ AC_DEFUN([FIND_GUI], [
 
         dnl Configuring AGT defines
 
-        case $host in
+        case $HOSTMACHINE in
         alpha*) 
        	    X_EXTRA_LIBS="-lXext -lX11" ;;
         i?86*)
@@ -655,7 +656,7 @@ else
   else
     AC_DEFINE(HOST_LINUX, 1, [system is Linux])
     AC_DEFINE(HASH_NAMESPACE, __gnu_cxx, [Hash namespace in GNU CXX is __gnu_cxx])
-    case $host in
+    case $HOSTMACHINE in
       i?86*) 
         ASIMCOREFLAGS="-DHOST_LINUX_X86 -DLINUX_$HOSTOSRELEASE_SUBST -D__STDC_LIMIT_MACROS -DHASH_NAMESPACE=__gnu_cxx -DQT_CLEAN_NAMESPACE -DQT_NO_STL -DQ_STRICT_INLINING_RULES" ;
         ASIMCORELIBS="-L/usr/X11R6/lib -lX11 -ldl -lm"

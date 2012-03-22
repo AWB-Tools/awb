@@ -272,8 +272,8 @@ my @env = split (/\s*[ ,]\s*/, $env);
 &setup_rerun_script("info");
 
 #if (system ("env -i $envstr $execscript $params > $runlogfl 2>&1")) {
-# if (system ("$exec_command $params >> $runlogfl 2>&1")) {
-if (system ("$exec_command $params 2>&1 | tee $runlogfl")) {
+if (system ("$exec_command $params >> $runlogfl 2>&1")) {
+#if (system ("$exec_command $params 2>&1 | tee $runlogfl")) {
   # We have an error in the run somewhere. 
   &setup_rerun_script("error.$$");
   open (ERROR_FL, ">$resdir/$bm.ERROR") || die "Unable to create error file $resdir/$bm.ERROR.\n";
@@ -324,7 +324,7 @@ else {
       &runerror("Unable to gzip $resdir/$bm.stats.");
     }
   }
-  # system ("cat $runlogfl"); # tee to stdout and log file.
+  system ("cat $runlogfl"); 
 }
 
 &rsync_results();

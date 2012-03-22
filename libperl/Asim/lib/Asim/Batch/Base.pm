@@ -246,6 +246,44 @@ sub _get_timepid_str
   return $timestr.$pidstr;
 }
 
+################################################################
+
+=item $repository-E<gt>check_threads($nthreads)
+
+Derived classes can implement this if they want the batch system
+to check to ensure that the batch host has enough cores to run
+the given number of worker threads.
+
+The argument is the number of worker threads used by the simulation.
+Returns 1 on success.
+
+=cut
+
+################################################################
+
+sub check_threads {
+  return 1;
+}
+
+################################################################
+
+=item $batch-E<gt>reserve_all_threads($reserve)
+
+Derived classes can implement this if they want the batch system
+to reserve all of the cores on the batch host machine for the
+simulation to use exclusively.
+
+The argument is a boolean, indicating whether or not to
+reserve all cores.  Returns 1 on success.
+
+=cut
+
+################################################################
+
+sub reserve_all_threads {
+  return 1;
+}
+
 
 ################################################################
 #

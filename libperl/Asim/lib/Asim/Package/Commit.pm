@@ -111,6 +111,7 @@ sub commit {
   my $commitlog_file = shift || undef;
 
   my $stop_commit = 0;
+  my $success = 0;
 
   my @all;
   print "Commit: Starting a commit of package: " . $self->name() . "\n";
@@ -196,14 +197,20 @@ sub commit {
     return 0;
   }
 
-  Asim::Xaction::commit();
-
   Asim::disable_signal();
 
   foreach my $p (@all) {
     $p->banner();
-    $p->commit_stage();
+    $success = $p->commit_stage();
+    if (! ($success)) {
+        unlockall(@all);
+        Asim::Xaction::abort();
+        Asim::enable_signal();
+        return 0;
+    }
   }
+  
+  Asim::Xaction::commit();
 
 #########      ###########      ###########      ###########      ###########
 
@@ -1348,7 +1355,8 @@ sub push_package {
   my $only_self = shift || 0;
 
   my $stop_commit = 0;
-  
+  my $success = 0;
+
   if (! defined ($self->{url})) {
     ierror("Push: No url defined. Dont know where to push!") && return 0;
   }
@@ -1445,14 +1453,20 @@ sub push_package {
     return 0;
   }
 
-  Asim::Xaction::commit();
-
   Asim::disable_signal();
 
   foreach my $p (@all) {
     $p->banner();
-    $p->commit_stage();
+    $success = $p->commit_stage();
+    if (! ($success)) {
+        unlockall(@all);
+        Asim::Xaction::abort();
+        Asim::enable_signal();
+        return 0;
+    }
   }
+
+  Asim::Xaction::commit();
 
 #########      ###########      ###########      ###########      ###########
 

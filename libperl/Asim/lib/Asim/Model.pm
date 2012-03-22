@@ -2606,7 +2606,7 @@ sub _process_warning {
       return "echo \"$warning\"";
   }
 
-  print "$warning";
+  print STDERR "$warning";
   return 1;
 }
 

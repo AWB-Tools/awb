@@ -96,35 +96,45 @@ sub init {
 
 Fetch form or merge with another repository or local branch.
 
-If an optional version string is specified,
-update the package to that version.
-The version specifier can be 'HEAD', the name of a branch or the name of a tag.
+If an optional branch string is specified,
+update the package to that branch.
+The version specifier can be the name of a branch or the name of a tag.
 
 =cut
 
 sub pull {
   my $self = shift;
-  my $version = shift || $self->get_current_branch();
+  my $branch = shift || $self->get_current_branch();
 
-  my $location = $self->location();
   my $url = $self->{url} || "origin";
-  my $command = "pull $url $version";
+  my $location = $self->location();
+  my $found = 0;
+  # check if the branch exists in the remote repository
+  open LIST, "cd $location; git ls-remote --heads $url |";
+  while (<LIST>) {
+    if ( m/^(.+)(refs\/heads\/$branch)$/ ) {
+      $found = 1;
+      last;
+    }
+  }
+  if (! $found ) {
+    # branch does not exist in the remote repository
+    Asim::Package::ierror ("Branch $branch does not exist in the remote repository. \
+    You probably checked out a specific commit tag\
+    Consider checking out master branch and then pull\
+    awb-shell checkout package <name>/master\
+    awb-shell pull package name\
+    If you have local changes then consider merging with master\n")  ;
+    return undef;
+  } 
 
+  my $command = "pull $url $branch";
   my $status = $self->git($command);
 
   if ($status) {
       return undef;
   }
-
-  # Also do a git-remote update to fetch all newly created branches
-  
-  $command = "remote update -p";
-
-  $status = $self->git($command);
-  if ($status) {
-   iwarn("Could not update new branch information.\n" .
-         "There may be new branches in remote repository that were not fetched\n");
-  }
+ 
   return 1;
 }
 
@@ -333,7 +343,7 @@ sub status {
 
     print "git status returned: $_" if ( $VERBOSE );
     #
-    # Hack in case thremotes/origin/mastere ssh command asks for a password
+    # Hack in case the remotes/origin/master ssh command asks for a password
     #
     if ( /password:/) {
       print "$_\n";
@@ -510,6 +520,50 @@ sub get_current_branch {
   close LIST;
   return undef;
 }
+
+=item $svn->get_working_hash()
+
+Return the git commit hash that the working copy was checked out with.
+
+This returns a 40 character hex hash to identify the commit
+
+=cut
+
+sub get_working_hash {
+  my $self = shift;
+  my $location = $self->location();
+  my $md5hash = `cd $location; git rev-parse HEAD`;
+  chomp $md5hash;
+  $md5hash;
+}
+
+
+=item $package-E<gt>baseline_tag([<use_csn>])
+
+Return a tag that can be used later
+to retrieve exactly the version of the package that is currently
+checked out in the working copy (minus any uncommitted changes).
+
+In git repositories (unlike in CVS/SVN) we do not need branch name
+and tag to get to a particular state in the rpeository. Instead we can 
+use the hash tag that gets generated for every commit . The hash is
+unique for each commit across all branches as long as the contents of
+the two states are different.
+
+=cut
+
+sub baseline_tag
+{
+  my $self = shift;
+  my $use_csn = shift;
+  my $md5hash  = $self->get_working_hash();
+  if ( $use_csn ) {
+    return $self->csn();
+  } else {
+    return $md5hash;
+  }
+}
+
 
 =back
 

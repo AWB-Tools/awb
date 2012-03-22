@@ -124,7 +124,8 @@ for my $g ($sourceini->get_grouplist()) {
 
   for my $i ($sourceini->get_itemlist($g)) {
     print "  Item = $i..." if $debug;
-    if (my $val = $targetini->get($g, $i)) {
+    $val = $targetini->get($g, $i);
+    if ($val ne '') {
       print "updated\n" if $debug;
       $sourceini->put($g, $i, $val);
     } else {

@@ -1700,17 +1700,17 @@ ModelBuilder::CreateDynamicParams (void)
             const string & paramValue = paramInstance.GetValue();
            
             paramFile << "    cout << \"    " << paramName
-                      << "\" << \" = \" << \"";
+                      << "\" << \" = \" << ";
             if (param.IsString()) {
-                // string param values are printed double-quoted
-                paramFile << "\\\"";
+                 //string param values are printed double-quoted
+                paramFile << "\"\\\"\" << ";
             }
-            paramFile << paramValue;
+            paramFile << paramName;
             if (param.IsString()) {
-                // string param values are printed double-quoted
-                paramFile << "\\\"";
+                 //string param values are printed double-quoted
+                paramFile << " << \"\\\"\" ";
             }
-            paramFile << "\" << endl;" << endl;
+            paramFile << " << endl;" << endl;
         }
     }
     paramFile << "}" << endl;

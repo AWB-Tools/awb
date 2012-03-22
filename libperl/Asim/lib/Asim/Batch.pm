@@ -34,6 +34,7 @@ use Asim::Batch::Local;
 use Asim::Batch::Condor;
 use Asim::Batch::Netbatch;
 use Asim::Batch::NetbatchRemote;
+use Asim::Batch::List;
 
 our $DEBUG =  0
            || defined($ENV{ASIM_DEBUG})
@@ -126,6 +127,8 @@ sub new {
     return Asim::Batch::Condor->new(@_);
   } elsif ( $type eq "NETBATCH_REMOTE") {
     return Asim::Batch::NetbatchRemote->new(@_);
+  } elsif ( $type eq "HOST_LIST") {
+    return Asim::Batch::List->new(@_);
   } else {
     return undef;
   }
