@@ -3647,7 +3647,8 @@ sub check_model_dependencies {
 sub set_default_model {
   my $model = shift;
 
-  print "Resetting default model: " . $model->filename() . "\n";
+  # Maybe this should be unresolved to a uniondir relative path...
+
   $default_model = $model;
 
   if (defined($model)) {

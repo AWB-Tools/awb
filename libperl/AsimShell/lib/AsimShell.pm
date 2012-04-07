@@ -130,7 +130,7 @@ our %COMPOUNDCOMMANDS =
 
 
 our @COMMANDS= ( keys %COMPOUNDCOMMANDS, 
-                 qw(pwd ls awb help exit quit cp)
+                 qw(pwd ls awb help exit quit cp source .)
                );
 
 #
@@ -262,6 +262,8 @@ sub init {
   return 1;
 }
 
+
+
 ################################################################
 
 =item AsimShell::shell();
@@ -317,6 +319,15 @@ SHELLCOMMAND:
       last SHELLCOMMAND;
     }
 
+    # 
+    # Parse source command
+    #
+    if (/^(source|\.)/) {
+      s/^(source|\.) *//;
+      batchshell($_);
+      next SHELLCOMMAND;
+    }                 
+
     #
     # Parse shell escape
     #
@@ -334,6 +345,55 @@ SHELLCOMMAND:
     my @line = shellwords($_);
     run_command(@line);
 
+  }
+
+  return 1;
+}
+
+################################################################
+
+=item AsimShell::batchshell();
+
+Run an batch shell to perform Asim-related activites.
+
+=cut
+
+################################################################
+
+sub batchshell {
+  my $batchfile = shift;
+  my $fh;
+  my $status;
+
+  if ($batchfile eq "-") {
+    $fh = *STDIN;
+  } else {
+
+    $batchfile = Asim::resolve($batchfile) || 
+                 Asim::Util::expand_tilda($batchfile);
+
+    $status = open($fh, "< $batchfile");
+
+    if (! $status) {
+      print "File open of $batchfile failed\n";
+      return 0;
+    }
+  }
+
+  while (<$fh>) {
+    chop;
+
+    # Skip blank lines and comments
+
+    if (/^\s*$/ || /^\s*#/) {
+        print "$_\n";
+        next;
+    }
+
+    # Process commands
+
+    print "awb-shell> $_\n";
+    $status = AsimShell::run_command(shellwords($_)) || return $status;
   }
 
   return 1;
@@ -373,7 +433,7 @@ sub run_command {
       $command = $command . "_" . shift @line;
     } else {
       # Error unless a non-compound version of the command exists
-      if ($line[0] ne '' || ! defined(&$command)) {
+      if ((defined($line[0]) && ($line[0] ne '')) || ! defined(&$command)) {
         shell_error("Illegal subcommand to $command.\n");
         shell_error("Expected one of: " . join(', ', @{$COMPOUNDCOMMANDS{$command}}) . "\n");
         return 0;

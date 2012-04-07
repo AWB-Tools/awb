@@ -9699,3 +9699,25 @@ Log message:	CSN: CSN-awb-3087
 
 - Changing the "View Cycle Display" analysis tool in AWB from 2Dreams to dreams till I
 get 2Dreams to work
+
+----------
+emer        Date: Sat Apr  7 14:23:04 EDT 2012  CSN: CSN-awb-497
+                  Sat Apr  7 18:23:04 UTC 2012
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          496 
+ Completion.pm             Locally Modified          496 
+ Commands.pm               Locally Modified          496 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          496 
+
+Directory tools/scripts
+ awb-shell                 Locally Modified          496 
+
+Added a 'source <file>' command to awb-shell that executes
+each of the awb-shell commands in <file>.
+
+Fixed display of alternatives when doing command completion
+on a uniondir-based file.

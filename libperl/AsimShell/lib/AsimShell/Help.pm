@@ -278,6 +278,8 @@ Commands:
   cd <dir>                               - cd to directory
   pwd                                    - print current directory     
 
+  source <file>                          - execute awb-shell commands in <file>
+
   help                                   - display this message
   help abstractions                      - display info on the asim
                                            abstractions

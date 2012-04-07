@@ -37,6 +37,7 @@ use Asim;
 
 use File::Spec;
 use File::Glob;
+use File::Basename;
 use Term::ReadLine;
 
 #
@@ -104,14 +105,22 @@ sub attempted_completion {
     # Handle second symbol of command (if first is a legal keyword)
     #
 
-    if ( ! defined($COMPOUNDCOMMANDS{$1})) {
-      # Not a comound command - default to filename completion
-      return ();
+    if ( defined($COMPOUNDCOMMANDS{$1})) {
+      my @subcommands = @{$COMPOUNDCOMMANDS{$1}};
+      @list = grep /^$text/, @subcommands;
+      return (max_common($text, @list), @list);
     }
 
-    my @subcommands = @{$COMPOUNDCOMMANDS{$1}};
-    @list = grep /^$text/, @subcommands;
-    return (max_common($text, @list), @list);
+    # Not a compound command, check if want uniondir completion
+
+    if ($prefix =~ /^source\s+$/               ||
+	$prefix =~ /^\.\s+$/                   ){
+      # do uniondir completion
+      return uniondir_file($text);
+    }
+
+    # Default to filename completion for single word commands
+    return ();
 
   } elsif ($prefix =~ /^new\s+bundle\s+$/      ||
            $prefix =~ /^checkout\s+bundle\s+$/ ||
@@ -240,18 +249,7 @@ sub attempted_completion {
     #
     # Handle Asim search path filename completion
     #
-    foreach my $f (Asim::glob($text . "*")) {
-      if (-d Asim::resolve($f) && !($f =~ /\/$/)) {
-        # Its a directory so add a /
-        push(@list, "$f/");
-        # Assume the match does't end here...
-        $term->Attribs->{completion_append_character} = "";
-      } else {
-        push(@list, "$f");
-      }
-    }
-
-    return (max_common($text, @list), @list);
+    return uniondir_file($text);
 
   } elsif ($prefix =~ /lock\s+$/) {
     #
@@ -333,6 +331,56 @@ sub package_command_takes_all_arg {
 }
 
 
+##############################################################
+#
+# Generate completion return for a uniondir filename
+#
+#    Note: Maybe this should be in Asim::Edit::Interactive
+#
+##############################################################
+
+sub uniondir_file {
+  my $text = shift;
+  my @list = ();
+  my @choice_list = ();
+
+# system("echo Expanding uniondir: $text >>/tmp/debug.log");
+
+  # Use standard completion for global filenames
+
+  if ($text =~ /^(\~|\/)/) {
+    return ();
+  }
+
+  # Create option lists
+  #     @list contains full path name of file
+  #     @choice_list contains just last name in path
+
+  foreach my $f (Asim::glob($text . "*")) {
+
+    if (-d Asim::resolve($f) && !($f =~ /\/$/)) {
+      # Its a directory so add a /
+      push(@choice_list, basename($f) . "/");
+      push(@list, "$f/");
+
+      # Assume the match does't end here...
+      $term->Attribs->{completion_append_character} = "";
+    } else {
+      push(@choice_list, basename($f));
+      push(@list, $f);
+    }
+  }
+
+#  system("echo " . join(" ", @list) . ">>/tmp/debug.log");
+#  system("echo " . join(" ", @choice_list) . ">>/tmp/debug.log");
+
+  if ($#choice_list == 0) {
+      @choice_list = @list;
+  }
+
+  return (max_common($text, @list), @choice_list);
+}
+
 ###############################################################
 #
 # Find the maximum common extension of $start in @list, i.e.,
@@ -346,7 +394,9 @@ sub package_command_takes_all_arg {
 ###############################################################
 
 sub max_common {
-  return Asim::max_common(@_);
+  my $mc = Asim::Edit::Interactive::max_common(@_);
+# system("echo Expanded as: $mc >>/tmp/debug.log");
+  return $mc;
  }
 
 # make perl happy

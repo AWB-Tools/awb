@@ -161,33 +161,13 @@ if ($module) {
 }
 
 #
-# Either run the command specified on the command line, or
-# drop into interactive shell mode
+# Either:
+#     1) run the commands in the batchfile, or
+#     2) run the command specified on the command line, or
+#     3) drop into interactive shell mode
 #
 if ($batchfile) {
-  my $fh;
-
-  if ($batchfile eq "-") {
-    $fh = *STDIN;
-  } else {
-    open($fh, "< $batchfile") || die("Couldn't open $batchfile");
-  }
-
-  while (<$fh>) {
-    chop;
-
-    # Skip blank lines and comments
-
-    if (/^\s*$/ || /^\s*#/) {
-        print "$_\n";
-        next;
-    }
-
-    # Process commands
-
-    print "$prog> $_\n";
-    $status = AsimShell::run_command(shellwords($_)) || exit ! $status;
-  }
+  $status = AsimShell::batchshell($batchfile);
 
 } elsif (@ARGV) {
   $status = AsimShell::run_command(@ARGV);
