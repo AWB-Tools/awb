@@ -1,6 +1,6 @@
-awb (12.02~svn20120228r492+lucid) lucid; urgency=low
+awb (12.04~svn20120412r497+lucid) lucid; urgency=low
 
   [ Joel Emer ]
-  * Move to version v12.02 - v12.01 was never released
+  * Move to version v12.04 - v12.02 was never released
 
- -- Joel Emer <emer@csail.mit.edu>  Tue, 28 Feb 2012 17:54:18 -0500
+ -- Joel Emer <emer@csail.mit.edu>  Thu, 12 Apr 2012 12:02:24 -0400

@@ -67,10 +67,10 @@ Access=https://asim.csail.mit.edu/svn/awb
 Tag=v11.09
 
 
-[awb/v12.02]
-Description=AWB v12.02
+[awb/v12.04]
+Description=AWB v12.04
 Access=https://asim.csail.mit.edu/svn/awb
-Tag=v12.02
+Tag=v12.04
 
 ###### Asim trunk
 
@@ -104,15 +104,10 @@ Description=Asim Core v11.09
 Access=https://asim.csail.mit.edu/svn/asimcore
 Tag=v11.09
 
-[asimcore/v12.01]
-Description=Asim Core v12.01
+[asimcore/v12.04]
+Description=Asim Core v12.04
 Access=https://asim.csail.mit.edu/svn/asimcore
-Tag=v12.01
-
-[asimcore/v12.02]
-Description=Asim Core v12.02
-Access=https://asim.csail.mit.edu/svn/asimcore
-Tag=v12.02
+Tag=v12.04
 
 
 ###### Feeder
@@ -157,3 +152,8 @@ Module=undefined
 Target=dreams
 Changes=changes
 BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=DREAMS
+
+[dreams/v12.04]
+Description=Dreams Visualization Tools - v12.04
+Access=https://asim.csail.mit.edu/svn/dreams
+Tag=v12.04

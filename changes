@@ -9732,3 +9732,24 @@ Directory libperl/AsimShell/lib
 
 Allow rescursive awb-shell source commands. Note, that shell
 escape commands cannot be used in a sourced file.
+
+----------
+emer        Date: Thu Apr 12 13:39:53 EDT 2012  CSN: CSN-awb-499
+                  Thu Apr 12 17:39:53 UTC 2012
+
+
+Directory debian
+ control                   Locally Modified          498 
+ changelog                 Locally Modified          498 
+ rules                     Locally Modified          498 
+
+Directory admin/packages
+ awb                       Locally Modified          498 
+
+Directory etc
+ asim.pack                 Locally Modified          498 
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          498 
+
+Prepare for v12.04 release.

@@ -30,15 +30,10 @@ Description=Leap environment v11.09
 Access=https://asim.csail.mit.edu/svn/leap
 Tag=v11.09
 
-[leap/v12.01]
-Description=Leap environment v12.01
+[leap/v12.04]
+Description=Leap environment v12.04
 Access=https://asim.csail.mit.edu/svn/leap
-Tag=v12.01
-
-[leap/v12.02]
-Description=Leap environment v12.02
-Access=https://asim.csail.mit.edu/svn/leap
-Tag=v12.02
+Tag=v12.04
 
 
 ###### Leap debug trunk
@@ -129,12 +124,7 @@ Description=Leap FPGA Platforms v11.09
 Access=https://asim.csail.mit.edu/svn/leap-platforms
 Tag=v11.09
 
-[leap-platforms/v12.01]
-Description=Leap FPGA Platforms v12.01
+[leap-platforms/v12.04]
+Description=Leap FPGA Platforms v12.04
 Access=https://asim.csail.mit.edu/svn/leap-platforms
-Tag=v12.01
-
-[leap-platforms/v12.02]
-Description=Leap FPGA Platforms v12.02
-Access=https://asim.csail.mit.edu/svn/leap-platforms
-Tag=v12.02
+Tag=v12.04
