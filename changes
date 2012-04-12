@@ -9721,3 +9721,14 @@ each of the awb-shell commands in <file>.
 
 Fixed display of alternatives when doing command completion
 on a uniondir-based file.
+
+----------
+emer        Date: Thu Apr 12 08:05:37 EDT 2012  CSN: CSN-awb-498
+                  Thu Apr 12 12:05:37 UTC 2012
+
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          497 
+
+Allow rescursive awb-shell source commands. Note, that shell
+escape commands cannot be used in a sourced file.

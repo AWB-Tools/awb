@@ -319,15 +319,6 @@ SHELLCOMMAND:
       last SHELLCOMMAND;
     }
 
-    # 
-    # Parse source command
-    #
-    if (/^(source|\.)/) {
-      s/^(source|\.) *//;
-      batchshell($_);
-      next SHELLCOMMAND;
-    }                 
-
     #
     # Parse shell escape
     #
@@ -423,6 +414,13 @@ sub run_command {
   if (! defined($command) || ($command =~ /^\s*$/)) {
     return 1;
   }
+
+  # 
+  # Parse source command
+  #
+  if ($command eq "source") {
+    return batchshell(@line);
+  }                 
 
   #
   # Check if next argument combines to form a compound command
