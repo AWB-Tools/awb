@@ -9753,3 +9753,16 @@ Directory etc/repositories.d
  leap.pack                 Locally Modified          498 
 
 Prepare for v12.04 release.
+
+----------
+emer        Date: Mon Apr 16 11:32:38 EDT 2012  CSN: CSN-awb-501
+                  Mon Apr 16 15:32:38 UTC 2012
+
+
+Directory debian
+ changelog                 Locally Modified          500 
+
+Directory admin/packages
+ awb                       Locally Modified          500 
+
+Release v12.04.
