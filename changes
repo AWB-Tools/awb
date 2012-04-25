@@ -9766,3 +9766,28 @@ Directory admin/packages
  awb                       Locally Modified          500 
 
 Release v12.04.
+
+----------
+emer        Date: Wed Apr 25 11:13:55 EDT 2012  CSN: CSN-awb-503
+                  Wed Apr 25 15:13:55 UTC 2012
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Completion.pm             Locally Modified          501 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          501 
+
+
+Backport of changes in CSN-awb-502 by emer
+          
+Tab completion in awb-shell now works for .cfx files.
+
+The awb-shell 'source' command now looks to see if
+the input file is executable and if it is invokes
+that file (passing in the additional arguments on the
+command line) and executes the series of commands 
+printed to STDOUT by that executable. Note the arguments
+are not treated specially so fancy quoting or substitutions
+will probably not work.
+

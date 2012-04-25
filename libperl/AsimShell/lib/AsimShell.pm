@@ -353,6 +353,7 @@ Run an batch shell to perform Asim-related activites.
 
 sub batchshell {
   my $batchfile = shift;
+  my @arguments = @_;
   my $fh;
   my $status;
 
@@ -363,7 +364,17 @@ sub batchshell {
     $batchfile = Asim::resolve($batchfile) || 
                  Asim::Util::expand_tilda($batchfile);
 
-    $status = open($fh, "< $batchfile");
+
+    #
+    # If file is executable then execute it,
+    # otherwise just read its contents
+    #
+
+    if (-x $batchfile) {
+      $status = open($fh, "$batchfile " . join(" ", @arguments) ." |");
+    } else {
+      $status = open($fh, "< $batchfile");
+    }
 
     if (! $status) {
       print "File open of $batchfile failed\n";

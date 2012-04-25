@@ -333,9 +333,8 @@ sub package_command_takes_all_arg {
 
 ##############################################################
 #
-# Generate completion return for a uniondir filename
-#
-#    Note: Maybe this should be in Asim::Edit::Interactive
+# Generate completion return for a uniondir filename,
+# including .cfx files
 #
 ##############################################################
 
@@ -350,6 +349,12 @@ sub uniondir_file {
 
   if ($text =~ /^(\~|\/)/) {
     return ();
+  }
+
+  # Check if this is a cfx file
+
+  if (($text =~ /^(.*\.cfx)(\/.*)?$/) && Asim::resolve($1)) {
+    return cfx_file($text);
   }
 
   # Create option lists
@@ -373,6 +378,98 @@ sub uniondir_file {
 
 #  system("echo " . join(" ", @list) . ">>/tmp/debug.log");
 #  system("echo " . join(" ", @choice_list) . ">>/tmp/debug.log");
+
+  # Check if there is only one choice and handle specially...
+
+  if ($#choice_list == 0) {
+
+      # Check if the one choice is a .cfx file, and handle properly...
+
+      if ($list[0] =~ /\.cfx$/) { 
+        return cfx_file(max_common($text, @list));
+      }
+
+      @choice_list = @list;
+  }
+
+  return (max_common($text, @list), @choice_list);
+}
+
+##############################################################
+#
+# Generate completion return for .cfx files.
+#
+##############################################################
+
+sub cfx_file {
+  my $text = shift;
+  my @cfxglob = ();
+  my @list = ();
+  my @choice_list = ();
+
+#  system("echo Expanding cfx: $text >>/tmp/debug.log");
+
+  my $cfx = $text;
+  $cfx =~ s!\.cfx.*!.cfx!;
+
+  my $script = Asim::resolve($cfx);
+  if (! -x $script) {
+    return ();
+  }
+
+#  system("echo Cfx script: $script  >>/tmp/debug.log");
+
+  my $path = $text;
+  $path =~ s!.*\.cfx/?!!;
+  
+#  system("echo Cfx path: $path  >>/tmp/debug.log");
+
+  # Check if we just need to add a / to the .cfx file name
+
+  if ($path eq "" && !($text =~ /\/$/)) {
+    # Assume the match does't end here...
+    $term->Attribs->{completion_append_character} = "";
+
+    return (max_common($text, "$text/"), "$text/");
+  }
+
+  # Generate a list of expansions of the path after
+  # the .cfx/ file
+
+  open(CFX, "$script --list |");
+
+  while (my $f = <CFX>) {
+    chomp $f;
+
+    next if ($path ne substr($f,0,length($path)));
+
+    my $expansion = substr($f, length($path)); 
+    $expansion =~ s/\/.*/\//;
+
+   push(@cfxglob, "$cfx/$path$expansion");
+  }
+
+  close CFX;
+
+#  system("echo glob:" . join(" ", @cfxglob) . ">>/tmp/debug.log");
+  
+  # Create option lists
+  #     @list contains full path name of file
+  #     @choice_list contains just last name in path
+
+  foreach my $f (@cfxglob) {
+    push(@choice_list, basename($f));
+    push(@list, $f);
+
+    # Don't end on a "/"
+
+    if ($f =~ /\/$/) {
+     $term->Attribs->{completion_append_character} = "";
+    }
+  }
+
+#  system("echo list:" . join(" ", @list) . ">>/tmp/debug.log");
+#  system("echo choice_list:" . join(" ", @choice_list) . ">>/tmp/debug.log");
 
   if ($#choice_list == 0) {
       @choice_list = @list;
