@@ -9775,3 +9775,13 @@ printed to STDOUT by that executable. Note the arguments
 are not treated specially so fancy quoting or substitutions
 will probably not work.
 
+
+----------
+mgambhir    Date: Tue Jul 24 15:36:19 EDT 2012  CSN: CSN-awb-504
+                  Tue Jul 24 19:36:19 UTC 2012
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          503 
+
+- Fixed a bug in the obsolete module discovery code that was causing awb & apmFindReplace to crash if a module was not present in the workspace and awb was trying to check if the module is obsolete. Added an additional check to avoid the crash. 

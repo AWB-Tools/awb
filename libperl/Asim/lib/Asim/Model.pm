@@ -2144,7 +2144,12 @@ sub get_obsolete_modules {
   # with the 'obsolete' attribute'
 
   my $module = $self->modelroot();
-  my @result = $module->find_modules_with_attribute("obsolete", $exclude_submodels);
+
+  my @result = ();
+  
+  if (defined($module)) {
+    @result = $module->find_modules_with_attribute("obsolete", $exclude_submodels);
+  }
 
   return (@result);
 }
