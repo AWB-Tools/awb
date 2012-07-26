@@ -15,24 +15,6 @@
 
 @SET_MAKE@
 
-# Copyright (C) 2002-2006 Intel Corporation
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-# 
-#
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -52,8 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-tool_PROGRAMS = awb-wizard$(EXEEXT)
-subdir = tools/awb/awb-wizard
+tool_PROGRAMS = apm-find-replace$(EXEEXT)
+subdir = tools/awb_qt3/apm-find-replace
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -65,10 +47,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(tooldir)"
 PROGRAMS = $(tool_PROGRAMS)
-am__objects_1 =
-am_awb_wizard_OBJECTS = $(am__objects_1)
-awb_wizard_OBJECTS = $(am_awb_wizard_OBJECTS)
-awb_wizard_LDADD = $(LDADD)
+am_apm_find_replace_OBJECTS =
+apm_find_replace_OBJECTS = $(am_apm_find_replace_OBJECTS)
+apm_find_replace_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -76,8 +57,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-SOURCES = $(awb_wizard_SOURCES)
-DIST_SOURCES = $(awb_wizard_SOURCES)
+SOURCES = $(apm_find_replace_SOURCES)
+DIST_SOURCES = $(apm_find_replace_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -230,21 +211,9 @@ tooldir = @tooldir@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-awb_wizard_SOURCES = awb-wizard.pro       \
-                     awb_wizard_head.pl   \
-                     awb_wizard.ui        \
-                     awb_wizard.ui.h      \
-                     awb_wizard_about.ui  \
-                     awb_wizard_write.pl  \
-                     awb_wizard_images.pm \
-                     awb_wizard_main.pl   \
-                     ${IMAGES}
-
-IMAGES = images/filenew.png      \
-        images/fileopen.png     \
-        images/filesave.png     \
-        images/filebuild.png    \
-        images/whatsthis.png
+apm_find_replace_SOURCES = apm_find_replace_head.pl                  \
+                           apm_find_replace.ui apm_find_replace.ui.h \
+                           apm_find_replace_main.pl
 
 
 #
@@ -256,7 +225,7 @@ MANPERM = 644
 MAN1DIR = $(mandir)/man1
 POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
 POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
-CLEANFILES = *.ui.pm awb_wizard_images.pm
+CLEANFILES = *.ui.pm
 all: all-am
 
 .SUFFIXES:
@@ -269,9 +238,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb/awb-wizard/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb_qt3/apm-find-replace/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign tools/awb/awb-wizard/Makefile
+	  $(AUTOMAKE) --foreign tools/awb_qt3/apm-find-replace/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -548,28 +517,18 @@ uninstall-am: uninstall-toolPROGRAMS
 	tags uninstall uninstall-am uninstall-toolPROGRAMS
 
 
-awb-wizard$(EXEEXT): awb_wizard_head.pl   \
-                     awb_wizard_about.ui.pm  \
-                     awb_wizard.ui.pm        \
-                     awb_wizard_write.pl  \
-                     awb_wizard_images.pm \
-                     awb_wizard_main.pl
-	cat awb_wizard_head.pl awb_wizard_about.ui.pm awb_wizard.ui.pm awb_wizard_write.pl awb_wizard_images.pm awb_wizard_main.pl >awb-wizard
-	chmod +x awb-wizard
+apm-find-replace$(EXEEXT): apm_find_replace_head.pl apm_find_replace.ui.pm apm_find_replace_main.pl
+	cat apm_find_replace_head.pl apm_find_replace.ui.pm apm_find_replace_main.pl >$@
+	chmod +x $@
 
-awb_wizard.ui.pm: awb_wizard.ui awb_wizard.ui.h
-
-awb_wizard_about.ui.pm: awb_wizard_about.ui
-
-awb_wizard_images.pm: awb-wizard.pro ${IMAGES}
-	puic -o awb_wizard_images.pm -embed awb-wizard.pro ${IMAGES}
+apm_find_replace.ui.pm: apm_find_replace.ui apm_find_replace.ui.h
 
 %.ui.pm: %.ui
 	puic -o $@ $<
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
-	$(POD2MAN) awb-wizard $(DESTDIR)$(MAN1DIR)/awb-wizard.$(MAN1EXT)
+	$(POD2MAN) apm-find-replace $(DESTDIR)$(MAN1DIR)/apm-find-replace.$(MAN1EXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

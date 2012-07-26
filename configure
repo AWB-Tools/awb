@@ -5856,11 +5856,11 @@ irix5* | irix6* | nonstopux*)
   ;;
 
 # This must be Linux ELF.
-linux* | k*bsd*-gnu)
+linux* | k*bsd*-gnu | kopensolaris*-gnu)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
-netbsd*)
+netbsd* | netbsdelf*-gnu)
   if echo __ELF__ | $CC -E - | $GREP __ELF__ > /dev/null; then
     lt_cv_deplibs_check_method='match_pattern /lib[^/]+(\.so\.[0-9]+\.[0-9]+|_pic\.a)$'
   else
@@ -8818,7 +8818,7 @@ $as_echo_n "checking for $compiler option to produce PIC... " >&6; }
       lt_prog_compiler_static='-non_shared'
       ;;
 
-    linux* | k*bsd*-gnu)
+    linux* | k*bsd*-gnu | kopensolaris*-gnu)
       case $cc_basename in
       # old Intel for x86_64 which still supported -KPIC.
       ecc*)
@@ -9267,6 +9267,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd*)
     with_gnu_ld=no
     ;;
+  linux* | k*bsd*-gnu)
+    link_all_deplibs=no
+    ;;
   esac
 
   ld_shlibs=yes
@@ -9288,6 +9291,7 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
     fi
     supports_anon_versioning=no
     case `$LD -v 2>&1` in
+      *GNU\ gold*) supports_anon_versioning=yes ;;
       *\ [01].* | *\ 2.[0-9].* | *\ 2.10.*) ;; # catch versions < 2.11
       *\ 2.11.93.0.2\ *) supports_anon_versioning=yes ;; # RH7.3 ...
       *\ 2.11.92.0.12\ *) supports_anon_versioning=yes ;; # Mandrake 8.2 ...
@@ -9379,7 +9383,7 @@ _LT_EOF
       archive_expsym_cmds='sed "s,^,_," $export_symbols >$output_objdir/$soname.expsym~$CC -shared $pic_flag $libobjs $deplibs $compiler_flags ${wl}-h,$soname ${wl}--retain-symbols-file,$output_objdir/$soname.expsym ${wl}--image-base,`expr ${RANDOM-$$} % 4096 / 2 \* 262144 + 1342177280` -o $lib'
       ;;
 
-    gnu* | linux* | tpf* | k*bsd*-gnu)
+    gnu* | linux* | tpf* | k*bsd*-gnu | kopensolaris*-gnu)
       tmp_diet=no
       if test "$host_os" = linux-dietlibc; then
 	case $cc_basename in
@@ -9449,7 +9453,7 @@ _LT_EOF
       fi
       ;;
 
-    netbsd*)
+    netbsd* | netbsdelf*-gnu)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable $libobjs $deplibs $linker_flags -o $lib'
 	wlarc=
@@ -9624,6 +9628,7 @@ _LT_EOF
 	if test "$aix_use_runtimelinking" = yes; then
 	  shared_flag="$shared_flag "'${wl}-G'
 	fi
+	link_all_deplibs=no
       else
 	# not using gcc
 	if test "$host_cpu" = ia64; then
@@ -9950,7 +9955,7 @@ rm -f core conftest.err conftest.$ac_objext \
       link_all_deplibs=yes
       ;;
 
-    netbsd*)
+    netbsd* | netbsdelf*-gnu)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'  # a.out
       else
@@ -10840,7 +10845,7 @@ linux*oldld* | linux*aout* | linux*coff*)
   ;;
 
 # This must be Linux ELF.
-linux* | k*bsd*-gnu)
+linux* | k*bsd*-gnu | kopensolaris*-gnu)
   version_type=linux
   need_lib_prefix=no
   need_version=no
@@ -10893,6 +10898,18 @@ rm -f core conftest.err conftest.$ac_objext \
   # people can always --disable-shared, the test was removed, and we
   # assume the GNU/Linux dynamic linker is in use.
   dynamic_linker='GNU/Linux ld.so'
+  ;;
+
+netbsdelf*-gnu)
+  version_type=linux
+  need_lib_prefix=no
+  need_version=no
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
+  shlibpath_var=LD_LIBRARY_PATH
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  dynamic_linker='NetBSD ld.elf_so'
   ;;
 
 netbsd*)
@@ -11515,7 +11532,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11518 "configure"
+#line 11535 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11611,7 +11628,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11614 "configure"
+#line 11631 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12551,7 +12568,7 @@ if test -z "$aix_libpath"; then aix_libpath="/usr/lib:/lib"; fi
         inherit_rpath_CXX=yes
         ;;
 
-      linux* | k*bsd*-gnu)
+      linux* | k*bsd*-gnu | kopensolaris*-gnu)
         case $cc_basename in
           KCC*)
 	    # Kuck and Associates, Inc. (KAI) C++ Compiler
@@ -13379,7 +13396,7 @@ $as_echo_n "checking for $compiler option to produce PIC... " >&6; }
 	    ;;
 	esac
 	;;
-      linux* | k*bsd*-gnu)
+      linux* | k*bsd*-gnu | kopensolaris*-gnu)
 	case $cc_basename in
 	  KCC*)
 	    # KAI C++ Compiler
@@ -13443,7 +13460,7 @@ $as_echo_n "checking for $compiler option to produce PIC... " >&6; }
 	    ;;
 	esac
 	;;
-      netbsd*)
+      netbsd* | netbsdelf*-gnu)
 	;;
       *qnx* | *nto*)
         # QNX uses GNU C++, but need to define -shared option too, otherwise
@@ -13567,11 +13584,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13570: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13587: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13574: \$? = $ac_status" >&5
+   echo "$as_me:13591: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13666,11 +13683,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13669: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13686: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13673: \$? = $ac_status" >&5
+   echo "$as_me:13690: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13718,11 +13735,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13721: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13738: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13725: \$? = $ac_status" >&5
+   echo "$as_me:13742: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13793,6 +13810,9 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   ;;
   cygwin* | mingw* | cegcc*)
     export_symbols_cmds_CXX='$NM $libobjs $convenience | $global_symbol_pipe | $SED -e '\''/^[BCDGRS][ ]/s/.*[ ]\([^ ]*\)/\1 DATA/;/^.*[ ]__nm__/s/^.*[ ]__nm__\([^ ]*\)[ ][^ ]*/\1 DATA/;/^I[ ]/d;/^[AITW][ ]/s/.* //'\'' | sort | uniq > $export_symbols'
+  ;;
+  linux* | k*bsd*-gnu)
+    link_all_deplibs_CXX=no
   ;;
   *)
     export_symbols_cmds_CXX='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
@@ -14293,7 +14313,7 @@ linux*oldld* | linux*aout* | linux*coff*)
   ;;
 
 # This must be Linux ELF.
-linux* | k*bsd*-gnu)
+linux* | k*bsd*-gnu | kopensolaris*-gnu)
   version_type=linux
   need_lib_prefix=no
   need_version=no
@@ -14346,6 +14366,18 @@ rm -f core conftest.err conftest.$ac_objext \
   # people can always --disable-shared, the test was removed, and we
   # assume the GNU/Linux dynamic linker is in use.
   dynamic_linker='GNU/Linux ld.so'
+  ;;
+
+netbsdelf*-gnu)
+  version_type=linux
+  need_lib_prefix=no
+  need_version=no
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
+  shlibpath_var=LD_LIBRARY_PATH
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  dynamic_linker='NetBSD ld.elf_so'
   ;;
 
 netbsd*)
@@ -16668,19 +16700,21 @@ ac_config_files="$ac_config_files tools/scripts/awb-pkg-config"
 
 
 # tools/awb
-ac_config_files="$ac_config_files tools/awb/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/Makefile"
 
-ac_config_files="$ac_config_files tools/awb/amc/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/amc/Makefile"
 
-ac_config_files="$ac_config_files tools/awb/awb-resolver/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/awb-resolver/Makefile"
 
-ac_config_files="$ac_config_files tools/awb/awb2/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/awb2/Makefile"
 
-ac_config_files="$ac_config_files tools/awb/apm-edit/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/apm-edit/Makefile"
 
-ac_config_files="$ac_config_files tools/awb/apm-find-replace/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/apm-find-replace/Makefile"
 
-ac_config_files="$ac_config_files tools/awb/awb-wizard/Makefile"
+ac_config_files="$ac_config_files tools/awb_qt3/awb-wizard/Makefile"
+
+
 
 
 # now generate all files
@@ -17784,13 +17818,13 @@ do
     "tools/scripts/Makefile") CONFIG_FILES="$CONFIG_FILES tools/scripts/Makefile" ;;
     "tools/scripts/asimstarter") CONFIG_FILES="$CONFIG_FILES tools/scripts/asimstarter" ;;
     "tools/scripts/awb-pkg-config") CONFIG_FILES="$CONFIG_FILES tools/scripts/awb-pkg-config" ;;
-    "tools/awb/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/Makefile" ;;
-    "tools/awb/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/amc/Makefile" ;;
-    "tools/awb/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb-resolver/Makefile" ;;
-    "tools/awb/awb2/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb2/Makefile" ;;
-    "tools/awb/apm-edit/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/apm-edit/Makefile" ;;
-    "tools/awb/apm-find-replace/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/apm-find-replace/Makefile" ;;
-    "tools/awb/awb-wizard/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb-wizard/Makefile" ;;
+    "tools/awb_qt3/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/Makefile" ;;
+    "tools/awb_qt3/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/amc/Makefile" ;;
+    "tools/awb_qt3/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/awb-resolver/Makefile" ;;
+    "tools/awb_qt3/awb2/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/awb2/Makefile" ;;
+    "tools/awb_qt3/apm-edit/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/apm-edit/Makefile" ;;
+    "tools/awb_qt3/apm-find-replace/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/apm-find-replace/Makefile" ;;
+    "tools/awb_qt3/awb-wizard/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/awb-wizard/Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

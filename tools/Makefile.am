@@ -17,4 +17,4 @@
 # 
 #
 
-SUBDIRS=scripts awb
+SUBDIRS=scripts awb_qt3

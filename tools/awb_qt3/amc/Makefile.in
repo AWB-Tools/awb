@@ -53,8 +53,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-tool_PROGRAMS = awb2$(EXEEXT)
-subdir = tools/awb/awb2
+tool_PROGRAMS = amc$(EXEEXT)
+subdir = tools/awb_qt3/amc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -66,18 +66,25 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(tooldir)"
 PROGRAMS = $(tool_PROGRAMS)
-am_awb2_OBJECTS =
-awb2_OBJECTS = $(am_awb2_OBJECTS)
-awb2_LDADD = $(LDADD)
+am_amc_OBJECTS = amc.$(OBJEXT)
+amc_OBJECTS = $(am_amc_OBJECTS)
+@X86_64_LIBTOOL_HACK_FALSE@amc_DEPENDENCIES = $(top_builddir)/lib/libawb/libawb.la
+@X86_64_LIBTOOL_HACK_TRUE@amc_DEPENDENCIES = $(top_builddir)/lib/libawb/.libs/libawb.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-SOURCES = $(awb2_SOURCES)
-DIST_SOURCES = $(awb2_SOURCES)
+depcomp = $(SHELL) $(top_srcdir)/aux-scripts/depcomp
+am__depfiles_maybe = depfiles
+am__mv = mv -f
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(amc_SOURCES)
+DIST_SOURCES = $(amc_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -230,28 +237,15 @@ tooldir = @tooldir@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-awb2_SOURCES = awb_head.pl \
-               colored_list_view_item.pm \
-               awb_util.pm \
-               awb_main.pl \
-               awb_dialog.ui awb_dialog.ui.h \
-               awb_about.ui \
-               awb_runlog.ui awb_runlog.ui.h
-
-
-#
-# Convert perl documentation to man page and install
-#
-PERLRUN = perl
-MAN1EXT = 1
-MANPERM = 644
-MAN1DIR = $(mandir)/man1
-POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
-POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
-CLEANFILES = *.ui.pm
+amc_SOURCES = amc.cpp
+AM_CPPFLAGS = -I$(top_srcdir)/lib
+@X86_64_LIBTOOL_HACK_FALSE@amc_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
+@X86_64_LIBTOOL_HACK_TRUE@amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -lpopt
+EXTRA_DIST = doxygen.config
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -261,9 +255,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb/awb2/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb_qt3/amc/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign tools/awb/awb2/Makefile
+	  $(AUTOMAKE) --foreign tools/awb_qt3/amc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -325,12 +319,41 @@ clean-toolPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+@X86_64_LIBTOOL_HACK_FALSE@amc$(EXEEXT): $(amc_OBJECTS) $(amc_DEPENDENCIES) 
+@X86_64_LIBTOOL_HACK_FALSE@	@rm -f amc$(EXEEXT)
+@X86_64_LIBTOOL_HACK_FALSE@	$(CXXLINK) $(amc_OBJECTS) $(amc_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amc.Po@am__quote@
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -444,7 +467,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -455,10 +477,11 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-toolPROGRAMS \
+clean-am: clean-generic clean-libtool clean-local clean-toolPROGRAMS \
 	mostlyclean-am
 
 distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -476,8 +499,7 @@ info: info-am
 info-am:
 
 install-data-am: install-toolPROGRAMS
-	@$(NORMAL_INSTALL)
-	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
+
 install-dvi: install-dvi-am
 
 install-dvi-am:
@@ -505,6 +527,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -523,42 +546,36 @@ ps-am:
 
 uninstall-am: uninstall-toolPROGRAMS
 
-.MAKE: install-am install-data-am install-strip
+.MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-toolPROGRAMS ctags distclean \
+	clean-libtool clean-local clean-toolPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-data-hook install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip install-toolPROGRAMS \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip install-toolPROGRAMS installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-toolPROGRAMS
 
+#-----------------------------------------------------------------------------
+# Generate documentation with Doxygen
+#-----------------------------------------------------------------------------
+.PHONY: dox
+dox: doxygen.config
+	doxygen doxygen.config
+	@echo "Doxygen output is at `pwd`/dox/html/index.html"
 
-awb2$(EXEEXT): awb_head.pl colored_list_view_item.pm awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl
-	cat awb_head.pl colored_list_view_item.pm awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl >awb2
-	chmod +x awb2
+clean-local:
+	@rm -rf dox
 
-awb_dialog.ui.pm: awb_dialog.ui awb_dialog.ui.h
-
-awb_about.ui.pm: awb_about.ui
-
-awb_runlog.ui.pm: awb_runlog.ui awb_runlog.ui.h
-
-%.ui.pm: %.ui
-	puic -o $@ $<
-
-# put in link between old name (awb) and new name (awb2)
-install-data-hook:
-	(cd $(DESTDIR)$(tooldir); rm -f awb; ln -s awb2 awb)
-	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
-	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb2.$(MAN1EXT)
-	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb.$(MAN1EXT)
+# maybe explicitly link this, avoiding use of broken libtool:
+@X86_64_LIBTOOL_HACK_TRUE@amc: $(amc_OBJECTS)
+@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o amc $(ARCHFLAGS) $(amc_OBJECTS) $(amc_LDADD)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

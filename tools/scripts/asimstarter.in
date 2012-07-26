@@ -154,20 +154,20 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
 # Awb commands
 #
-  "awb"                 => "tools/awb/awb2/awb2",
-  "awb2"                => "tools/awb/awb2/awb2",
+  "awb"                 => "tools/awb_qt3/awb2/awb2",
+  "awb2"                => "tools/awb_qt3/awb2/awb2",
   "awb-shell"           => "tools/scripts/awb-shell",
   "awb-run"             => "tools/scripts/awb-run",
   "awb-batch"           => "tools/scripts/awb-batch",
   "awb-benchmark"       => "tools/scripts/awb-benchmark",
-  "amc"                 => "tools/awb/amc/amc",
+  "amc"                 => "tools/awb_qt3/amc/amc",
 #
 # Model/Module commands
 #
-  "apm-edit"            => "tools/awb/apm-edit/apm-edit",
-  "apm-find-replace"    => "tools/awb/apm-find-replace/apm-find-replace",
+  "apm-edit"            => "tools/awb_qt3/apm-edit/apm-edit",
+  "apm-find-replace"    => "tools/awb_qt3/apm-find-replace/apm-find-replace",
   "apm-link"            => "tools/scripts/apm-link",
-  "awb-wizard"          => "tools/awb/awb-wizard/awb-wizard",
+  "awb-wizard"          => "tools/awb_qt3/awb-wizard/awb-wizard",
 #
 # Leap commands
 #

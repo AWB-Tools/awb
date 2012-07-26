@@ -254,7 +254,7 @@ tooldir = @tooldir@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = scripts awb
+SUBDIRS = scripts awb_qt3
 all: all-recursive
 
 .SUFFIXES:

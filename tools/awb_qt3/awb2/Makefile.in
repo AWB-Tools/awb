@@ -53,8 +53,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-tool_PROGRAMS = apm-edit$(EXEEXT)
-subdir = tools/awb/apm-edit
+tool_PROGRAMS = awb2$(EXEEXT)
+subdir = tools/awb_qt3/awb2
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -66,10 +66,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(tooldir)"
 PROGRAMS = $(tool_PROGRAMS)
-am__objects_1 =
-am_apm_edit_OBJECTS = $(am__objects_1)
-apm_edit_OBJECTS = $(am_apm_edit_OBJECTS)
-apm_edit_LDADD = $(LDADD)
+am_awb2_OBJECTS =
+awb2_OBJECTS = $(am_awb2_OBJECTS)
+awb2_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -77,8 +76,8 @@ LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-SOURCES = $(apm_edit_SOURCES)
-DIST_SOURCES = $(apm_edit_SOURCES)
+SOURCES = $(awb2_SOURCES)
+DIST_SOURCES = $(awb2_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -231,38 +230,13 @@ tooldir = @tooldir@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-apm_edit_SOURCES = apm-edit.pro \
-                   apm_edit_head.pl \
-                   colored_list_view_item.pm \
-                   apm_edit_pixmap.pl \
-                   apm_edit.ui \
-                   apm_edit.ui.h \
-                   apm_edit_about.ui \
-                   apm_edit_properties.ui \
-                   apm_edit_properties.ui.h \
-                   runlog.ui \
-                   runlog.ui.h \
-                   apm_edit_images.pm \
-                   apm_edit_main.pl \
-                   ${IMAGES}
-
-IMAGES = images/editcopy.png     \
-        images/editcut.png      \
-        images/editpaste.png    \
-        images/filenew.png      \
-        images/fileopen.png     \
-        images/filesave.png     \
-        images/print.png        \
-        images/redo.png         \
-        images/searchfind.png   \
-        images/undo.png         \
-        images/whatsthis.png    \
-	images/check.png            \
-	images/module.png           \
-	images/module_current.png   \
-	images/module_default.png   \
-	images/module_missing.png   \
-        images/submodel.png
+awb2_SOURCES = awb_head.pl \
+               colored_list_view_item.pm \
+               awb_util.pm \
+               awb_main.pl \
+               awb_dialog.ui awb_dialog.ui.h \
+               awb_about.ui \
+               awb_runlog.ui awb_runlog.ui.h
 
 
 #
@@ -274,7 +248,7 @@ MANPERM = 644
 MAN1DIR = $(mandir)/man1
 POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
 POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
-CLEANFILES = *.ui.pm apm_edit_images.pm
+CLEANFILES = *.ui.pm
 all: all-am
 
 .SUFFIXES:
@@ -287,9 +261,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb/apm-edit/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb_qt3/awb2/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign tools/awb/apm-edit/Makefile
+	  $(AUTOMAKE) --foreign tools/awb_qt3/awb2/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -566,28 +540,25 @@ uninstall-am: uninstall-toolPROGRAMS
 	tags uninstall uninstall-am uninstall-toolPROGRAMS
 
 
-apm-edit$(EXEEXT): apm_edit_head.pl colored_list_view_item.pm apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm  apm_edit_main.pl
-	cat apm_edit_head.pl colored_list_view_item.pm apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_images.pm apm_edit_main.pl >apm-edit
-	chmod +x apm-edit
+awb2$(EXEEXT): awb_head.pl colored_list_view_item.pm awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl
+	cat awb_head.pl colored_list_view_item.pm awb_about.ui.pm awb_runlog.ui.pm awb_util.pm awb_dialog.ui.pm awb_main.pl >awb2
+	chmod +x awb2
 
-apm_edit.ui.pm: apm_edit.ui apm_edit.ui.h
+awb_dialog.ui.pm: awb_dialog.ui awb_dialog.ui.h
 
-apm_edit_properties.ui.pm: apm_edit_properties.ui.h
+awb_about.ui.pm: awb_about.ui
 
-runlog.ui.pm: runlog.ui runlog.ui.h
-
-apm_edit_about.ui.pm: apm_edit_about.ui
-
-apm_edit_images.pm: apm-edit.pro ${IMAGES}
-	puic -o apm_edit_images.pm -embed apm-edit.pro ${IMAGES}
+awb_runlog.ui.pm: awb_runlog.ui awb_runlog.ui.h
 
 %.ui.pm: %.ui
-	sed -i 's/version=\"3\..\"/version="3.0"/' $<
 	puic -o $@ $<
 
+# put in link between old name (awb) and new name (awb2)
 install-data-hook:
+	(cd $(DESTDIR)$(tooldir); rm -f awb; ln -s awb2 awb)
 	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
-	$(POD2MAN) apm-edit $(DESTDIR)$(MAN1DIR)/apm-edit.$(MAN1EXT)
+	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb2.$(MAN1EXT)
+	$(POD2MAN) awb2 $(DESTDIR)$(MAN1DIR)/awb.$(MAN1EXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

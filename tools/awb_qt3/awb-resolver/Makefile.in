@@ -16,7 +16,7 @@
 @SET_MAKE@
 
 #
-# Copyright (C) 2002-2006 Intel Corporation
+# Copyright (C) 2003-2006 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -53,8 +53,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-tool_PROGRAMS = amc$(EXEEXT)
-subdir = tools/awb/amc
+bin_PROGRAMS = awb-resolver$(EXEEXT)
+subdir = tools/awb_qt3/awb-resolver
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -64,12 +64,12 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/aux-scripts/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/include/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(tooldir)"
-PROGRAMS = $(tool_PROGRAMS)
-am_amc_OBJECTS = amc.$(OBJEXT)
-amc_OBJECTS = $(am_amc_OBJECTS)
-@X86_64_LIBTOOL_HACK_FALSE@amc_DEPENDENCIES = $(top_builddir)/lib/libawb/libawb.la
-@X86_64_LIBTOOL_HACK_TRUE@amc_DEPENDENCIES = $(top_builddir)/lib/libawb/.libs/libawb.a
+am__installdirs = "$(DESTDIR)$(bindir)"
+PROGRAMS = $(bin_PROGRAMS)
+am_awb_resolver_OBJECTS = awb-resolver.$(OBJEXT)
+awb_resolver_OBJECTS = $(am_awb_resolver_OBJECTS)
+@X86_64_LIBTOOL_HACK_FALSE@awb_resolver_DEPENDENCIES = $(top_builddir)/lib/libawb/libawb.la
+@X86_64_LIBTOOL_HACK_TRUE@awb_resolver_DEPENDENCIES = $(top_builddir)/lib/libawb/.libs/libawb.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
 depcomp = $(SHELL) $(top_srcdir)/aux-scripts/depcomp
 am__depfiles_maybe = depfiles
@@ -83,8 +83,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(amc_SOURCES)
-DIST_SOURCES = $(amc_SOURCES)
+SOURCES = $(awb_resolver_SOURCES)
+DIST_SOURCES = $(awb_resolver_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -237,10 +237,10 @@ tooldir = @tooldir@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-amc_SOURCES = amc.cpp
+awb_resolver_SOURCES = awb-resolver.cpp
 AM_CPPFLAGS = -I$(top_srcdir)/lib
-@X86_64_LIBTOOL_HACK_FALSE@amc_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
-@X86_64_LIBTOOL_HACK_TRUE@amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -lpopt
+@X86_64_LIBTOOL_HACK_FALSE@awb_resolver_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
+@X86_64_LIBTOOL_HACK_TRUE@awb_resolver_LDADD = -lgcc_s -lpopt $(top_builddir)/lib/libawb/.libs/libawb.a
 EXTRA_DIST = doxygen.config
 all: all-am
 
@@ -255,9 +255,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb/amc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/awb_qt3/awb-resolver/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign tools/awb/amc/Makefile
+	  $(AUTOMAKE) --foreign tools/awb_qt3/awb-resolver/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -276,10 +276,10 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-toolPROGRAMS: $(tool_PROGRAMS)
+install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	test -z "$(tooldir)" || $(MKDIR_P) "$(DESTDIR)$(tooldir)"
-	@list='$(tool_PROGRAMS)'; test -n "$(tooldir)" || list=; \
+	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
 	for p in $$list; do echo "$$p $$p"; done | \
 	sed 's/$(EXEEXT)$$//' | \
 	while read p p1; do if test -f $$p || test -f $$p1; \
@@ -296,32 +296,32 @@ install-toolPROGRAMS: $(tool_PROGRAMS)
 	while read type dir files; do \
 	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
 	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(tooldir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(tooldir)$$dir" || exit $$?; \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
 	    } \
 	; done
 
-uninstall-toolPROGRAMS:
+uninstall-binPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(tool_PROGRAMS)'; test -n "$(tooldir)" || list=; \
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
 	files=`for p in $$list; do echo "$$p"; done | \
 	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
 	      -e 's/$$/$(EXEEXT)/' `; \
 	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(tooldir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(tooldir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(bindir)" && rm -f $$files
 
-clean-toolPROGRAMS:
-	@list='$(tool_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-binPROGRAMS:
+	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-@X86_64_LIBTOOL_HACK_FALSE@amc$(EXEEXT): $(amc_OBJECTS) $(amc_DEPENDENCIES) 
-@X86_64_LIBTOOL_HACK_FALSE@	@rm -f amc$(EXEEXT)
-@X86_64_LIBTOOL_HACK_FALSE@	$(CXXLINK) $(amc_OBJECTS) $(amc_LDADD) $(LIBS)
+@X86_64_LIBTOOL_HACK_FALSE@awb-resolver$(EXEEXT): $(awb_resolver_OBJECTS) $(awb_resolver_DEPENDENCIES) 
+@X86_64_LIBTOOL_HACK_FALSE@	@rm -f awb-resolver$(EXEEXT)
+@X86_64_LIBTOOL_HACK_FALSE@	$(CXXLINK) $(awb_resolver_OBJECTS) $(awb_resolver_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -329,7 +329,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/amc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/awb-resolver.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -447,7 +447,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
-	for dir in "$(DESTDIR)$(tooldir)"; do \
+	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -477,7 +477,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-local clean-toolPROGRAMS \
+clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -498,13 +498,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-toolPROGRAMS
+install-data-am:
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-binPROGRAMS
 
 install-html: install-html-am
 
@@ -544,23 +544,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-toolPROGRAMS
+uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-local clean-toolPROGRAMS ctags distclean \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
+	clean-generic clean-libtool clean-local ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip install-toolPROGRAMS installcheck \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-toolPROGRAMS
+	tags uninstall uninstall-am uninstall-binPROGRAMS
 
 #-----------------------------------------------------------------------------
 # Generate documentation with Doxygen
@@ -574,8 +574,8 @@ clean-local:
 	@rm -rf dox
 
 # maybe explicitly link this, avoiding use of broken libtool:
-@X86_64_LIBTOOL_HACK_TRUE@amc: $(amc_OBJECTS)
-@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o amc $(ARCHFLAGS) $(amc_OBJECTS) $(amc_LDADD)
+@X86_64_LIBTOOL_HACK_TRUE@awb-resolver: $(awb_resolver_OBJECTS)
+@X86_64_LIBTOOL_HACK_TRUE@	$(CXXLD) -o awb-resolver $(ARCHFLAGS) $(awb_resolver_OBJECTS) $(awb_resolver_LDADD)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

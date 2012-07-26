@@ -9785,3 +9785,149 @@ Directory libperl/Asim/lib/Asim
  Model.pm                  Locally Modified          503 
 
 - Fixed a bug in the obsolete module discovery code that was causing awb & apmFindReplace to crash if a module was not present in the workspace and awb was trying to check if the module is obsolete. Added an additional check to avoid the crash. 
+
+----------
+mgambhir    Date: Thu Jul 26 17:16:58 EDT 2012  CSN: CSN-awb-505
+                  Thu Jul 26 21:16:58 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          504 
+ configure.in              Locally Modified          504 
+
+Directory tools
+ Makefile.in               Locally Modified          504 
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          504 
+
+Directory tools
+ awb/                      Locally Removed           504 
+
+Directory tools/awb
+ amc/                      Locally Removed           504 
+
+Directory tools/awb/amc
+ amc.cpp                   Locally Removed           504 
+ doxygen.config            Locally Removed           504 
+ Makefile.in               Locally Removed           504 
+ amc.h                     Locally Removed           504 
+ Makefile.am               Locally Removed           504 
+ .gdbinit                  Locally Removed           504 
+
+Directory tools/awb
+ apm-edit/                 Locally Removed           504 
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Removed           504 
+ runlog.ui                 Locally Removed           504 
+ apm_edit.ui.h             Locally Removed           504 
+ apm_edit_about.ui         Locally Removed           504 
+ apm_edit.ui.patch         Locally Removed           504 
+ apm_edit.ui               Locally Removed           504 
+ apm-edit.pro              Locally Removed           504 
+ apm_edit_main.pl          Locally Removed           504 
+ apm_edit_properties.ui.h  Locally Removed           504 
+ fix-ui                    Locally Removed           504 
+ images/                   Locally Removed           504 
+
+Directory tools/awb/apm-edit/images
+ print.png                 Locally Removed           504 
+ filesave.png              Locally Removed           504 
+ editcut.png               Locally Removed           504 
+ fileopen.png              Locally Removed           504 
+ submodel_red.png          Locally Removed           504 
+ undo.png                  Locally Removed           504 
+ submodel_yellow.png       Locally Removed           504 
+ searchfind.png            Locally Removed           504 
+ submodel.png              Locally Removed           504 
+ check.png                 Locally Removed           504 
+ whatsthis.png             Locally Removed           504 
+ module_missing.png        Locally Removed           504 
+ editcopy.png              Locally Removed           504 
+ submodel_blue.png         Locally Removed           504 
+ editpaste.png             Locally Removed           504 
+ module.png                Locally Removed           504 
+ module_current.png        Locally Removed           504 
+ redo.png                  Locally Removed           504 
+ module_default.png        Locally Removed           504 
+ filenew.png               Locally Removed           504 
+
+Directory tools/awb/apm-edit
+ colored_list_view_item.pm Locally Removed           504 
+ runlog.ui.h               Locally Removed           504 
+ Makefile.am               Locally Removed           504 
+ apm_edit_pixmap.pl        Locally Removed           504 
+ apm_edit_properties.ui    Locally Removed           504 
+ apm_edit_head.pl          Locally Removed           504 
+
+Directory tools/awb
+ Makefile.in               Locally Removed           504 
+ apm-find-replace/         Locally Removed           504 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Removed           504 
+ apm_find_replace_head.pl  Locally Removed           504 
+ apm_find_replace.ui       Locally Removed           504 
+ apm_find_replace_main.pl  Locally Removed           504 
+ Makefile.am               Locally Removed           504 
+ apm_find_replace.ui.h     Locally Removed           504 
+
+Directory tools/awb
+ awb-wizard/               Locally Removed           504 
+
+Directory tools/awb/awb-wizard
+ awb_wizard_about.ui       Locally Removed           504 
+ Makefile.in               Locally Removed           504 
+ awb_wizard_head.pl        Locally Removed           504 
+ images/                   Locally Removed           504 
+
+Directory tools/awb/awb-wizard/images
+ filesave.png              Locally Removed           504 
+ whatsthis.png             Locally Removed           504 
+ filebuild.png             Locally Removed           504 
+ fileopen.png              Locally Removed           504 
+ filenew.png               Locally Removed           504 
+
+Directory tools/awb/awb-wizard
+ awb_wizard.ui             Locally Removed           504 
+ awb-wizard.pro            Locally Removed           504 
+ awb_wizard_main.pl        Locally Removed           504 
+ Makefile.am               Locally Removed           504 
+ awb-wizard.db             Locally Removed           504 
+ awb_wizard.ui.h           Locally Removed           504 
+ awb_wizard_write.pl       Locally Removed           504 
+
+Directory tools/awb
+ awb-resolver/             Locally Removed           504 
+
+Directory tools/awb/awb-resolver
+ doxygen.config            Locally Removed           504 
+ Makefile.in               Locally Removed           504 
+ Makefile.am               Locally Removed           504 
+ awb-resolver.cpp          Locally Removed           504 
+ awb-resolver.h            Locally Removed           504 
+
+Directory tools/awb
+ Makefile.am               Locally Removed           504 
+ awb2/                     Locally Removed           504 
+
+Directory tools/awb/awb2
+ awb_about.ui              Locally Removed           504 
+ awb_runlog.ui.h           Locally Removed           504 
+ awb_util.pm               Locally Removed           504 
+ Makefile.in               Locally Removed           504 
+ awb_dialog.ui             Locally Removed           504 
+ awb_head.pl               Locally Removed           504 
+ colored_list_view_item.pm Locally Removed           504 
+ awb_main.pl               Locally Removed           504 
+ awb.pro                   Locally Removed           504 
+ Makefile.am               Locally Removed           504 
+ awb_dialog.ui.h           Locally Removed           504 
+ awb_runlog.ui             Locally Removed           504 
+
+Directory tools
+ Makefile.am               Locally Modified          504 
+
+- Moved tools/awb to tools/awb_qt3 in preparation of pushing PerlQt4 based GUI tools into the repository
+- Also modified asimstarter to point to these qt3 (legacy) tools
