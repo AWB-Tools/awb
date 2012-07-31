@@ -76,6 +76,9 @@ $my_perl_v2 = int($2);
 $my_perl_v3 = int($3);
 $my_perl_version = "$my_perl_v1.$my_perl_v2.$my_perl_v3";
 
+# awb tools dir suffix to distinguish between QT3 and QT4 based tools
+$awb_tools_dir="tools/awb@awb_tools_dir_suffix@";
+
 if ($debug) {
   print "Asimstarter: $0\n";
 
@@ -154,20 +157,20 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
 # Awb commands
 #
-  "awb"                 => "tools/awb_qt3/awb2/awb2",
-  "awb2"                => "tools/awb_qt3/awb2/awb2",
+  "awb"                 => "$awb_tools_dir/awb2/awb2",
+  "awb2"                => "$awb_tools_dir/awb2/awb2",
   "awb-shell"           => "tools/scripts/awb-shell",
   "awb-run"             => "tools/scripts/awb-run",
   "awb-batch"           => "tools/scripts/awb-batch",
   "awb-benchmark"       => "tools/scripts/awb-benchmark",
-  "amc"                 => "tools/awb_qt3/amc/amc",
+  "amc"                 => "$awb_tools_dir/amc/amc",
 #
 # Model/Module commands
 #
-  "apm-edit"            => "tools/awb_qt3/apm-edit/apm-edit",
-  "apm-find-replace"    => "tools/awb_qt3/apm-find-replace/apm-find-replace",
+  "apm-edit"            => "$awb_tools_dir/apm-edit/apm-edit",
+  "apm-find-replace"    => "$awb_tools_dir/apm-find-replace/apm-find-replace",
   "apm-link"            => "tools/scripts/apm-link",
-  "awb-wizard"          => "tools/awb_qt3/awb-wizard/awb-wizard",
+  "awb-wizard"          => "$awb_tools_dir/awb-wizard/awb-wizard",
 #
 # Leap commands
 #

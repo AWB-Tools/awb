@@ -830,6 +830,7 @@ STLPORTINC
 ARCHFLAGS
 OPTFLAGS
 WARNFLAGS
+awb_tools_dir_suffix
 config_perl_version
 MAINT
 MAINTAINER_MODE_FALSE
@@ -900,6 +901,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
+enable_qt4
 with_qt_dir
 with_qt_moc
 with_qt_uic
@@ -1561,6 +1563,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
+  --enable-qt4=ARG        use qt4 [[ARG=no|yes]] (default=yes)
   --enable-perl-vendor-install
                           Do a perl vendor install
   --enable-warning=ARG    warning level [[ARG=no|warn|error]] (default=error)
@@ -3213,6 +3216,25 @@ HOSTOSRELEASE_SUBST=`echo $HOSTOSRELEASE | tr ".)(-" "____"`
 #
 PERLVERSION=`perl --version | perl -e 'while (<>) {if (m/This is perl.*v(\d+\.\d+\.\d+)/) {print $1}}'`
 config_perl_version=$PERLVERSION
+
+
+#
+# --enable-qt4
+#
+# Check whether --enable-qt4 was given.
+if test "${enable_qt4+set}" = set; then :
+  enableval=$enable_qt4; asim_cv_enable_qt4=$enableval
+else
+  asim_cv_enable_qt4=no
+fi
+
+
+if test "$asim_cv_enable_qt4" = "yes"
+then
+    awb_tools_dir_suffix=""
+else
+    awb_tools_dir_suffix="_qt3"
+fi
 
 
 #
@@ -5395,13 +5417,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5398: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5420: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5401: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5423: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5404: output\"" >&5)
+  (eval echo "\"\$as_me:5426: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6596,7 +6618,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6599 "configure"' > conftest.$ac_ext
+  echo '#line 6621 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8649,11 +8671,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8652: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8674: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8656: \$? = $ac_status" >&5
+   echo "$as_me:8678: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8988,11 +9010,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8991: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9013: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8995: \$? = $ac_status" >&5
+   echo "$as_me:9017: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9093,11 +9115,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9096: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9118: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9100: \$? = $ac_status" >&5
+   echo "$as_me:9122: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9148,11 +9170,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9151: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9173: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9155: \$? = $ac_status" >&5
+   echo "$as_me:9177: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11532,7 +11554,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11535 "configure"
+#line 11557 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11628,7 +11650,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11631 "configure"
+#line 11653 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13584,11 +13606,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13587: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13609: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13591: \$? = $ac_status" >&5
+   echo "$as_me:13613: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13683,11 +13705,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13686: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13708: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13690: \$? = $ac_status" >&5
+   echo "$as_me:13712: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13735,11 +13757,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13738: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13760: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13742: \$? = $ac_status" >&5
+   echo "$as_me:13764: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15455,13 +15477,15 @@ fi
 
 
 
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt moc\"" >&5
 $as_echo_n "checking \"for Qt moc\"... " >&6; }
 
     for dir in $with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
+        for try in $dir/bin $dir/qt/bin $dir/qt $dir $dir/qt3/bin $dir/qt3
 	do
           if test -f $try/moc
           then
@@ -15473,6 +15497,28 @@ $as_echo "\"found in $QTMOCDIR\"" >&6; }
 	done
 
     done
+
+    else
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt moc\"" >&5
+$as_echo_n "checking \"for Qt moc\"... " >&6; }
+
+    for dir in $with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib/qt3 /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6
+    do
+        for try in $dir/bin $dir/qt/bin $dir/qt $dir $dir/qt3/bin $dir/qt3
+	do
+          if test -f $try/moc
+          then
+              QTMOCDIR=$try
+              { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
+$as_echo "\"found in $QTMOCDIR\"" >&6; }
+              break 2
+	  fi
+	done
+
+    done
+
+    fi
 
     if test "X$QTMOCDIR" = "X"; then
         echo ""
@@ -15490,13 +15536,15 @@ $as_echo "\"found in $QTMOCDIR\"" >&6; }
     fi
 
 
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt uic\"" >&5
 $as_echo_n "checking \"for Qt uic\"... " >&6; }
 
     for dir in $with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
+        for try in $dir/qt/bin $dir/bin $dir/qt $dir $dir/qt3/bin $dir/qt3
 	do
           if test -f $try/uic
           then
@@ -15510,6 +15558,28 @@ $as_echo "\"found in $QTUICDIR\"" >&6; }
     done
 
 
+    else
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt uic\"" >&5
+$as_echo_n "checking \"for Qt uic\"... " >&6; }
+
+    for dir in $with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib/qt3 /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6
+    do
+        for try in $dir/qt/bin $dir/bin $dir/qt $dir $dir/qt3/bin $dir/qt3
+	do
+          if test -f $try/uic
+          then
+              QTUICDIR=$try
+              { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTUICDIR\"" >&5
+$as_echo "\"found in $QTUICDIR\"" >&6; }
+              break 2
+	  fi
+	done
+
+    done
+
+
+    fi
     if test "X$QTUICDIR" = "X"; then
         echo ""
         echo "Qt's uic not found! If you have installed Qt in an"
@@ -15526,15 +15596,24 @@ $as_echo "\"found in $QTUICDIR\"" >&6; }
     fi
 
 
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 3.x.x libraries\"" >&5
+
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 4.x.x libraries\"" >&5
+$as_echo_n "checking \"for Qt 4.x.x libraries\"... " >&6; }
+        QTLIBS="QtCore QtGui"
+
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 3.x.x libraries\"" >&5
 $as_echo_n "checking \"for Qt 3.x.x libraries\"... " >&6; }
-
-    QTLIBS="qt-mt qt"
-
-    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64
+        QTLIBS="qt-mt qt"
+    fi
+    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/
     do
-        for try in $dir/qt3/lib $dir/qt/lib $dir/lib/qt3 $dir/lib/qt $dir/lib $dir/qt3 $dir/qt $dir
+        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
 	do
 
           for i in $QTLIBS
@@ -15555,6 +15634,44 @@ $as_echo "\"found lib$i in $QTLIBDIR\"" >&6; }
     done
 
 
+    else
+
+
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 4.x.x libraries\"" >&5
+$as_echo_n "checking \"for Qt 4.x.x libraries\"... " >&6; }
+        QTLIBS="QtCore QtGui"
+
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 3.x.x libraries\"" >&5
+$as_echo_n "checking \"for Qt 3.x.x libraries\"... " >&6; }
+        QTLIBS="qt-mt qt"
+    fi
+    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/
+    do
+        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
+	do
+
+          for i in $QTLIBS
+          do
+
+              if test -f $try/lib$i.a -o -f $try/lib$i.so -o -f $try/lib$i.so.3
+              then
+                  QTLIBDIR=$try
+                  QT=$i
+                  { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found lib$i in $QTLIBDIR\"" >&5
+$as_echo "\"found lib$i in $QTLIBDIR\"" >&6; }
+                  break 3
+              fi
+
+	  done
+	done
+
+    done
+
+
+    fi
     if test "X$QTLIBDIR" = "X"
     then
         echo ""
@@ -15575,26 +15692,58 @@ $as_echo "\"found lib$i in $QTLIBDIR\"" >&6; }
     fi
 
 
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 3.x.x include files\"" >&5
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 4.x.x include files\"" >&5
+$as_echo_n "checking \"for Qt 4.x.x include files\"... " >&6; }
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 3.x.x include files\"" >&5
 $as_echo_n "checking \"for Qt 3.x.x include files\"... " >&6; }
-
-    for dir in $with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt3 /usr/local/include /usr/X11R6/include/qt3
+    fi
+    for dir in $with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt4 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt4 /usr/local/include /usr/X11R6/include/qt4
     do
-        for try in $dir/qt3/include $dir/qt/include $dir/include/qt3 $dir/include/qt $dir/include $dir/qt3 $dir/qt $dir
-	do
+        for try in $dir/qt/include $dir/include/qt $dir/include $dir/qt $dir $dir/qt3/include $dir/include/qt3 $dir/qt3 $dir/Qt
+	    do
           if test -f $try/qwidget.h
           then
               QTINCDIR=$try
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTINCDIR\"" >&5
 $as_echo "\"found in $QTINCDIR\"" >&6; }
               break 2
-	  fi
-	done
-
+	      fi
+	    done
     done
 
 
+    else
+
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 4.x.x include files\"" >&5
+$as_echo_n "checking \"for Qt 4.x.x include files\"... " >&6; }
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for Qt 3.x.x include files\"" >&5
+$as_echo_n "checking \"for Qt 3.x.x include files\"... " >&6; }
+    fi
+    for dir in $with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt3 /usr/local/include /usr/X11R6/include/qt3
+    do
+        for try in $dir/qt/include $dir/include/qt $dir/include $dir/qt $dir $dir/qt3/include $dir/include/qt3 $dir/qt3 $dir/Qt
+	    do
+          if test -f $try/qwidget.h
+          then
+              QTINCDIR=$try
+              { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTINCDIR\"" >&5
+$as_echo "\"found in $QTINCDIR\"" >&6; }
+              break 2
+	      fi
+	    done
+    done
+
+
+    fi
 
     if test "X$QTINCDIR" = "X"
     then
@@ -16165,20 +16314,28 @@ $as_echo_n "checking for PerlQt... " >&6; }
   perlprefixes="$prefix /usr"
     perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
     perlarch="/ i386-linux-thread-multi i686-linux"
-
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        PERLQTMODULES="QtCore4 QtGui4"
+    else
+        PERLQTMODULES="Qt"
+    fi
     for p in $perlprefixes
     do
         for d in $perllibs
         do
             for a in $perlarch
             do
-                if test -f $p/$d/$a/Qt.pm
-                then
-                    { $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $p/$d" >&5
+                for i in $PERLQTMODULES
+                do
+                    if test -f $p/$d/$a/$i.pm
+                    then
+                        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $p/$d" >&5
 $as_echo "found in $p/$d" >&6; }
-                    perlqt_search_path=$p/$d
-                    break 2
-                fi
+                        perlqt_search_path=$p/$d
+                        break 2
+                    fi
+                done
             done
         done
     done
@@ -19350,4 +19507,5 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: unrecognized options: $ac_unrecognized_opts" >&5
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
+
 

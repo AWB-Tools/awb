@@ -60,6 +60,23 @@ config_perl_version=$PERLVERSION
 AC_SUBST(config_perl_version)
 
 #
+# --enable-qt4
+#
+AC_ARG_ENABLE([qt4],
+      AC_HELP_STRING([--enable-qt4=ARG],
+                     [use qt4 [[ARG=no|yes]] (default=yes)]),
+      asim_cv_enable_qt4=$enableval,
+      asim_cv_enable_qt4=no)
+
+if test "$asim_cv_enable_qt4" = "yes"
+then
+    awb_tools_dir_suffix=""
+else 
+    awb_tools_dir_suffix="_qt3"
+fi
+AC_SUBST(awb_tools_dir_suffix)
+
+#
 # FIND_QT(<dirs>)
 #
 
@@ -68,7 +85,7 @@ AC_DEFUN([FIND_MOC],[
 
     for dir in $1
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
+        for try in $dir/bin $dir/qt/bin $dir/qt $dir $dir/qt3/bin $dir/qt3 
 	do
           if test -f $try/moc
           then
@@ -86,7 +103,7 @@ AC_DEFUN([FIND_UIC],[
 
     for dir in $1
     do
-        for try in $dir/qt3/bin $dir/qt/bin $dir/bin $dir/qt3 $dir/qt $dir
+        for try in $dir/qt/bin $dir/bin $dir/qt $dir $dir/qt3/bin $dir/qt3 
 	do
           if test -f $try/uic
           then
@@ -101,13 +118,19 @@ AC_DEFUN([FIND_UIC],[
 ])
 
 AC_DEFUN([FIND_QT_LIBS],[
-    AC_MSG_CHECKING("for Qt 3.x.x libraries")
 
-    QTLIBS="qt-mt qt"
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        AC_MSG_CHECKING("for Qt 4.x.x libraries")
+        QTLIBS="QtCore QtGui"
 
+    else
+        AC_MSG_CHECKING("for Qt 3.x.x libraries")
+        QTLIBS="qt-mt qt"
+    fi
     for dir in $1
     do
-        for try in $dir/qt3/lib $dir/qt/lib $dir/lib/qt3 $dir/lib/qt $dir/lib $dir/qt3 $dir/qt $dir
+        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3 
 	do
 
           for i in $QTLIBS
@@ -129,20 +152,23 @@ AC_DEFUN([FIND_QT_LIBS],[
 ])
 
 AC_DEFUN([FIND_QT_INCLUDES],[
-    AC_MSG_CHECKING("for Qt 3.x.x include files")
-
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        AC_MSG_CHECKING("for Qt 4.x.x include files")
+    else
+        AC_MSG_CHECKING("for Qt 3.x.x include files")
+    fi
     for dir in $1
     do
-        for try in $dir/qt3/include $dir/qt/include $dir/include/qt3 $dir/include/qt $dir/include $dir/qt3 $dir/qt $dir
-	do
+        for try in $dir/qt/include $dir/include/qt $dir/include $dir/qt $dir $dir/qt3/include $dir/include/qt3 $dir/qt3 $dir/Qt
+	    do
           if test -f $try/qwidget.h
           then
               QTINCDIR=$try
               AC_MSG_RESULT("found in $QTINCDIR")
               break 2
-	  fi
-	done
-	
+	      fi
+	    done
     done
     
 ])
@@ -152,7 +178,13 @@ AC_DEFUN([FIND_QT], [
 
     AC_SUBST(QT)
 
-    FIND_MOC($with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        FIND_MOC($with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    else 
+        FIND_MOC($with_qt_moc $with_qt_dir $QTDIR ${prefix}/lib/qt3 /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    fi
+
     if test "X$QTMOCDIR" = "X"; then
         echo ""
         echo "Qt's moc not found! If you have installed Qt in an"
@@ -172,7 +204,12 @@ AC_DEFUN([FIND_QT], [
     dnl find uic
     dnl
 
-    FIND_UIC($with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        FIND_UIC($with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    else
+        FIND_UIC($with_qt_uic $with_qt_dir $QTDIR ${prefix}/lib/qt3 /usr/local/lib /usr/local /usr/lib /usr / /usr/X11R6)
+    fi
     if test "X$QTUICDIR" = "X"; then
         echo ""
         echo "Qt's uic not found! If you have installed Qt in an"
@@ -192,7 +229,12 @@ AC_DEFUN([FIND_QT], [
     dnl find qt libraries
     dnl
 
-    FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64)
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/)
+    else 
+        FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/)
+    fi
     if test "X$QTLIBDIR" = "X"
     then
         echo ""
@@ -216,7 +258,12 @@ AC_DEFUN([FIND_QT], [
     dnl find qt headers
     dnl
 
-    FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt3 /usr/local/include /usr/X11R6/include/qt3)
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt4 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt4 /usr/local/include /usr/X11R6/include/qt4)
+    else
+        FIND_QT_INCLUDES($with_qt_includes $with_qt_dir $QTDIR ${prefix}/lib/qt /usr/lib/qt3 /usr/local/qt /usr/lib/qt /usr/include /usr/include/qt /usr/include/qt3 /usr/local/include /usr/X11R6/include/qt3)
+    fi
 
     if test "X$QTINCDIR" = "X"
     then
@@ -287,19 +334,27 @@ AC_DEFUN([FIND_PERLGUI], [
   perlprefixes="$prefix /usr"
     perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
     perlarch="/ i386-linux-thread-multi i686-linux"
-
+    if test "$asim_cv_enable_qt4" = "yes"
+    then
+        PERLQTMODULES="QtCore4 QtGui4"
+    else
+        PERLQTMODULES="Qt"
+    fi
     for p in $perlprefixes
     do
         for d in $perllibs
         do
             for a in $perlarch
             do
-                if test -f $p/$d/$a/Qt.pm
-                then
-                    AC_MSG_RESULT(found in $p/$d)
-                    perlqt_search_path=$p/$d
-                    break 2
-                fi
+                for i in $PERLQTMODULES
+                do
+                    if test -f $p/$d/$a/$i.pm
+                    then
+                        AC_MSG_RESULT(found in $p/$d)
+                        perlqt_search_path=$p/$d
+                        break 2
+                    fi
+                done
             done
         done
     done
@@ -758,3 +813,4 @@ AC_CONFIG_FILES(tools/awb_qt3/awb-wizard/Makefile)
 
 # now generate all files
 AC_OUTPUT
+

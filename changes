@@ -9931,3 +9931,54 @@ Directory tools
 
 - Moved tools/awb to tools/awb_qt3 in preparation of pushing PerlQt4 based GUI tools into the repository
 - Also modified asimstarter to point to these qt3 (legacy) tools
+
+----------
+mgambhir    Date: Tue Jul 31 18:32:35 EDT 2012  CSN: CSN-awb-506
+                  Tue Jul 31 22:32:35 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          505 
+ Makefile.in               Locally Modified          505 
+ configure.in              Locally Modified          505 
+
+Directory libperl
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3/amc
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3/apm-edit
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3/apm-find-replace
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3/awb-wizard
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3/awb-resolver
+ Makefile.in               Locally Modified          505 
+
+Directory tools/awb_qt3/awb2
+ Makefile.in               Locally Modified          505 
+
+Directory tools
+ Makefile.in               Locally Modified          505 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          505 
+ asimstarter.in            Locally Modified          505 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          505 
+
+Directory lib
+ Makefile.in               Locally Modified          505 
+
+- Added a switch in the configure script to enable/disable qt4 build. --enable-qt4=yes/no
+  - If this switch is not present then the package is configured to use qt3 - this will change once qt4 gui tools are checked in and fully functional
+- Modified asimstarter.in such that awb tools directory is configured by the configure script based on whether qt4 is enabled or disabled
