@@ -17567,6 +17567,8 @@ then
 
     ac_config_files="$ac_config_files tools/awb/awb-resolver/Makefile"
 
+    ac_config_files="$ac_config_files tools/awb/amc/Makefile"
+
 else
     ac_config_files="$ac_config_files tools/awb_qt3/Makefile"
 
@@ -18733,6 +18735,7 @@ do
     "tools/awb/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/Makefile" ;;
     "tools/awb/awb/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb/Makefile" ;;
     "tools/awb/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb-resolver/Makefile" ;;
+    "tools/awb/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/amc/Makefile" ;;
     "tools/awb_qt3/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/Makefile" ;;
     "tools/awb_qt3/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/amc/Makefile" ;;
     "tools/awb_qt3/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/awb-resolver/Makefile" ;;

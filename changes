@@ -10215,3 +10215,30 @@ Directory .
 - Added awb-resolver to Qt4 tools directory. No major change to the tool itself. 
 - Modified aux-scripts to fix libtools issue that was causing the build to fail.
 - Removed Makefile from  tools and tools/awb directories.
+
+----------
+mgambhir    Date: Thu Aug  2 09:44:23 EDT 2012  CSN: CSN-awb-510
+                  Thu Aug  2 13:44:23 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          509 
+
+Directory tools/awb
+ Makefile.am               Locally Modified          509 
+ amc/                      Locally Added               0 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Added               0 
+ amc.h                     Locally Added               0 
+ Makefile.am               Locally Added               0 
+ amc.cpp                   Locally Added               0 
+ doxygen.config            Locally Added               0 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          509 
+
+Directory .
+ configure.in              Locally Modified          509 
+
+- Added amc to the Qt4 ported tools directory

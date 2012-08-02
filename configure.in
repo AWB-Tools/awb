@@ -808,6 +808,7 @@ then
     AC_CONFIG_FILES(tools/awb/Makefile)
     AC_CONFIG_FILES(tools/awb/awb/Makefile)
     AC_CONFIG_FILES(tools/awb/awb-resolver/Makefile)
+    AC_CONFIG_FILES(tools/awb/amc/Makefile)
 else
     AC_CONFIG_FILES(tools/awb_qt3/Makefile)
     AC_CONFIG_FILES(tools/awb_qt3/amc/Makefile)

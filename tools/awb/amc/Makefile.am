@@ -17,4 +17,29 @@
 # 
 #
 
-SUBDIRS= @NO_GUI@ @NO_PERLGUI@ awb awb-resolver amc
+tool_PROGRAMS = amc
+amc_SOURCES = amc.cpp
+AM_CPPFLAGS = -I$(top_srcdir)/lib
+if X86_64_LIBTOOL_HACK
+amc_LDADD = $(top_builddir)/lib/libawb/.libs/libawb.a -lpopt
+else
+amc_LDADD = $(top_builddir)/lib/libawb/libawb.la -lpopt
+endif
+
+EXTRA_DIST = doxygen.config
+#-----------------------------------------------------------------------------
+# Generate documentation with Doxygen
+#-----------------------------------------------------------------------------
+.PHONY: dox
+dox: doxygen.config
+	doxygen doxygen.config
+	@echo "Doxygen output is at `pwd`/dox/html/index.html"
+
+clean-local:
+	@rm -rf dox
+
+# maybe explicitly link this, avoiding use of broken libtool:
+if X86_64_LIBTOOL_HACK
+amc: $(amc_OBJECTS)
+	$(CXXLD) -o amc $(ARCHFLAGS) $(amc_OBJECTS) $(amc_LDADD)
+endif
