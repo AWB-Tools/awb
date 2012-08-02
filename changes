@@ -10074,3 +10074,59 @@ amc
 apm-edit
 apm-find-replace
 awb-wizard
+
+----------
+mgambhir    Date: Thu Aug  2 00:36:55 EDT 2012  CSN: CSN-awb-508
+                  Thu Aug  2 04:36:55 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          507 
+ Makefile.in               Locally Modified          507 
+
+Directory libperl
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3/amc
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3/apm-edit
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3/apm-find-replace
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3/awb-wizard
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3/awb-resolver
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb_qt3/awb2
+ Makefile.in               Locally Modified          507 
+
+Directory tools
+ Makefile.in               Locally Modified          507 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          507 
+
+Directory tools/awb/awb
+ Makefile.in               Locally Modified          507 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          507 
+
+Directory lib
+ Makefile.in               Locally Modified          507 
+
+Directory .
+ aclocal.m4                Locally Modified          507 
+
+- Previous commit broke qt3 build on Lucid. It required a reconf_all to fix it
