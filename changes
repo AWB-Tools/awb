@@ -10242,3 +10242,74 @@ Directory .
  configure.in              Locally Modified          509 
 
 - Added amc to the Qt4 ported tools directory
+
+----------
+mgambhir    Date: Thu Aug  2 16:25:11 EDT 2012  CSN: CSN-awb-511
+                  Thu Aug  2 20:25:11 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          510 
+
+Directory aux-scripts
+ ltmain.sh                 Locally Modified          510 
+
+Directory .
+ Makefile.in               Locally Modified          510 
+ configure.in              Locally Modified          510 
+
+Directory libperl
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3/amc
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3/apm-edit
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3/apm-find-replace
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3/awb-wizard
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3/awb-resolver
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb_qt3/awb2
+ Makefile.in               Locally Modified          510 
+
+Directory tools
+ Makefile.in               Locally Modified          510 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          510 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          510 
+ awb-resolver              Locally Removed           510 
+
+Directory tools/awb/awb
+ Makefile.in               Locally Modified          510 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          510 
+
+Directory lib
+ Makefile.in               Locally Modified          510 
+
+Directory .
+ aclocal.m4                Locally Modified          510 
+
+
+- configure now creates Makefiles for both tools/awb and tools/awb_qt3 so that distclean can run without error
+- did a "autoreconf -i" to regenerate ltmain.sh. libtool version installed on ubuntu 10 was older than that installed on ubuntu 11. Previous ltmain was generated on ubuntu 11 and did not work here. 
