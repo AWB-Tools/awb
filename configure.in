@@ -807,6 +807,7 @@ if test $asim_cv_enable_qt4 = "yes"
 then
     AC_CONFIG_FILES(tools/awb/Makefile)
     AC_CONFIG_FILES(tools/awb/awb/Makefile)
+    AC_CONFIG_FILES(tools/awb/awb-resolver/Makefile)
 else
     AC_CONFIG_FILES(tools/awb_qt3/Makefile)
     AC_CONFIG_FILES(tools/awb_qt3/amc/Makefile)

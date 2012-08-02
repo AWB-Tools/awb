@@ -17,4 +17,4 @@
 # 
 #
 
-SUBDIRS= @NO_GUI@ @NO_PERLGUI@ awb
+SUBDIRS= @NO_GUI@ @NO_PERLGUI@ awb awb-resolver

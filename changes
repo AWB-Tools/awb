@@ -10130,3 +10130,88 @@ Directory .
  aclocal.m4                Locally Modified          507 
 
 - Previous commit broke qt3 build on Lucid. It required a reconf_all to fix it
+
+----------
+mgambhir    Date: Thu Aug  2 09:17:54 EDT 2012  CSN: CSN-awb-509
+                  Thu Aug  2 13:17:54 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          508 
+
+Directory aux-scripts
+ config.sub                Locally Modified          508 
+ ltmain.sh                 Locally Modified          508 
+ install-sh                Locally Modified          508 
+ depcomp                   Locally Modified          508 
+ missing                   Locally Modified          508 
+ config.guess              Locally Modified          508 
+
+Directory .
+ Makefile.in               Locally Modified          508 
+ configure.in              Locally Modified          508 
+
+Directory libperl
+ Makefile.in               Locally Modified          508 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb
+ awb-resolver/             Locally Added               0 
+
+Directory tools/awb/awb-resolver
+ Makefile.am               Locally Added               0 
+ awb-resolver.cpp          Locally Added               0 
+ awb-resolver.h            Locally Added               0 
+ doxygen.config            Locally Added               0 
+ Makefile.in               Locally Added               0 
+ awb-resolver              Locally Added               0 
+
+Directory tools/awb
+ Makefile.am               Locally Modified          508 
+
+Directory tools/awb/awb
+ Makefile                  Locally Removed           508 
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb
+ Makefile                  Locally Removed           508 
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3/apm-find-replace
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3/awb-wizard
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3/awb-resolver
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3/awb2
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3/amc
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3/apm-edit
+ Makefile.in               Locally Modified          508 
+
+Directory tools/awb_qt3
+ Makefile.in               Locally Modified          508 
+
+Directory tools
+ Makefile.in               Locally Modified          508 
+
+Directory lib
+ Makefile.in               Locally Modified          508 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          508 
+
+Directory .
+ aclocal.m4                Locally Modified          508 
+
+- Added awb-resolver to Qt4 tools directory. No major change to the tool itself. 
+- Modified aux-scripts to fix libtools issue that was causing the build to fail.
+- Removed Makefile from  tools and tools/awb directories.
