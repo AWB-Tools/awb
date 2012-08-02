@@ -800,14 +800,22 @@ AC_CONFIG_FILES(tools/scripts/Makefile)
 AC_CONFIG_FILES(tools/scripts/asimstarter, [chmod +x tools/scripts/asimstarter])
 AC_CONFIG_FILES(tools/scripts/awb-pkg-config, [chmod +x tools/scripts/awb-pkg-config])
 
+AM_CONDITIONAL([QT4_BUILD], [test "$asim_cv_enable_qt4" = yes])
+
 # tools/awb
-AC_CONFIG_FILES(tools/awb_qt3/Makefile)
-AC_CONFIG_FILES(tools/awb_qt3/amc/Makefile)
-AC_CONFIG_FILES(tools/awb_qt3/awb-resolver/Makefile)
-AC_CONFIG_FILES(tools/awb_qt3/awb2/Makefile)
-AC_CONFIG_FILES(tools/awb_qt3/apm-edit/Makefile)
-AC_CONFIG_FILES(tools/awb_qt3/apm-find-replace/Makefile)
-AC_CONFIG_FILES(tools/awb_qt3/awb-wizard/Makefile)
+if test $asim_cv_enable_qt4 = "yes"
+then
+    AC_CONFIG_FILES(tools/awb/Makefile)
+    AC_CONFIG_FILES(tools/awb/awb/Makefile)
+else
+    AC_CONFIG_FILES(tools/awb_qt3/Makefile)
+    AC_CONFIG_FILES(tools/awb_qt3/amc/Makefile)
+    AC_CONFIG_FILES(tools/awb_qt3/awb-resolver/Makefile)
+    AC_CONFIG_FILES(tools/awb_qt3/awb2/Makefile)
+    AC_CONFIG_FILES(tools/awb_qt3/apm-edit/Makefile)
+    AC_CONFIG_FILES(tools/awb_qt3/apm-find-replace/Makefile)
+    AC_CONFIG_FILES(tools/awb_qt3/awb-wizard/Makefile)
+fi
 
 
 

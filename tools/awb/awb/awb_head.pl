@@ -1,5 +1,9 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+##################################################################################
 #
-# Copyright (C) 2001-2006 Intel Corporation
+# Copyright (C) 2002-2012 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,11 +20,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 #
-[Global]
-Description=Architects Workbench
-CSN=CSN-awb-507
-Name=awb
-Tag=v12.04
-Prerelease=1
-Lock=asim-asimcore
-Buildorder=1
+##################################################################################
+
+# Author: Joel Emer
+# Date: October 2002
+# Purpose:
+#       A GUI interface to find, build and run models
+# 
+# Author: Mohit Gambhir
+# Date: July 2012
+# Modification:
+#        Port to PerlQt4
+
+#
+# Turn on warnings
+#
+$^W = 1;
+
+

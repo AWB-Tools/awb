@@ -17,4 +17,9 @@
 # 
 #
 
-SUBDIRS=scripts awb_qt3
+if QT4_BUILD
+    AWB_DIR = awb
+else
+    AWB_DIR = awb_qt3
+endif
+SUBDIRS=scripts $(AWB_DIR)

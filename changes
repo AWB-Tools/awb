@@ -9982,3 +9982,95 @@ Directory lib
 - Added a switch in the configure script to enable/disable qt4 build. --enable-qt4=yes/no
   - If this switch is not present then the package is configured to use qt3 - this will change once qt4 gui tools are checked in and fully functional
 - Modified asimstarter.in such that awb tools directory is configured by the configure script based on whether qt4 is enabled or disabled
+
+----------
+mgambhir    Date: Thu Aug  2 00:15:06 EDT 2012  CSN: CSN-awb-507
+                  Thu Aug  2 04:15:06 UTC 2012
+
+
+Directory .
+ aclocal.m4                Locally Modified          506 
+ configure                 Locally Modified          506 
+ Makefile.in               Locally Modified          506 
+ configure.in              Locally Modified          506 
+
+Directory libperl
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3/awb-resolver
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3/awb2
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3/amc
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3/apm-edit
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3/apm-find-replace
+ Makefile.in               Locally Modified          506 
+
+Directory tools/awb_qt3/awb-wizard
+ Makefile.in               Locally Modified          506 
+
+Directory tools
+ Makefile.in               Locally Modified          506 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          506 
+
+Directory tools
+ Makefile.am               Locally Modified          506 
+ awb/                      Locally Added               0 
+
+Directory tools/awb
+ Makefile                  Locally Added               0 
+ Makefile.in               Locally Added               0 
+ Makefile.am               Locally Added               0 
+ awb/                      Locally Added               0 
+
+Directory tools/awb/awb
+ Makefile.am               Locally Added               0 
+ awb_runlog.pm             Locally Added               0 
+ awb_runlog.ui             Locally Added               0 
+ Makefile                  Locally Added               0 
+ awb_about.pm              Locally Added               0 
+ awb_about.ui              Locally Added               0 
+ awb_util.pm               Locally Added               0 
+ Makefile.in               Locally Added               0 
+ awb_dialog.pm             Locally Added               0 
+ awb_head.pl               Locally Added               0 
+ awb_dialog.ui             Locally Added               0 
+ awb_main.pl               Locally Added               0 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          506 
+
+Directory lib
+ Makefile.in               Locally Modified          506 
+
+- Initial port of AWB gui to PerlQT4
+    - Modified configure.in to conditionally build tools/awb or tools/awb_qt3 depending on whether --enable-qt4 is set
+    - Renamed awb2 to awb
+Known bugs:
+- Menu shortcuts not created yet
+- "WhatsThis" on widgets currently does not work
+- Right click context menu pops up on upper left corener of the GUI and not at the point of clicking
+- Layout for the following four line edit widgets has to be fixed
+  - Build Path
+  - Extra Build Switches
+  - Run Path
+  - Extra Run switches
+- Highlight Problems check box currently does not work. Need to port ColorListViewItem class to QT4. ListViewItem is replased by TreeWidgetItem. Also Coloring API has changed. 
+
+Upcoming Tools in the next few commits
+awb-resolver
+amc
+apm-edit
+apm-find-replace
+awb-wizard
