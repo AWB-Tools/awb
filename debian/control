@@ -2,7 +2,7 @@ Source: awb
 Section: devel
 Priority: optional
 Maintainer: Joel Emer <emer@csail.mit.edu>
-Build-Depends: debhelper (>= 7), gcc, g++, autotools-dev, libqt-perl, libqt3-mt-dev, libpopt-dev
+Build-Depends: debhelper (>= 7), gcc, g++, autotools-dev, libqt3-mt-dev, libpopt-dev
 Standards-Version: 3.8.4
 
 Package: awb
@@ -22,7 +22,7 @@ Section: devel
 
 Package: awb-bin
 Architecture: any
-Depends: gcc, g++, libqt-perl, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs, subversion, git-core, libterm-readline-gnu-perl, ${misc:Depends}
+Depends: gcc, g++, ${perlqt:Depends}, libenum-perl, libqt3-mt-dev, libpopt-dev, scons, cvs, subversion, git-core, libterm-readline-gnu-perl, ${misc:Depends}
 Replaces: awb (<= 0.6.0)
 Breaks: awb (<= 0.6.0)
 Description: Executables for the Architect's Workbench

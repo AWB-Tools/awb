@@ -10313,3 +10313,27 @@ Directory .
 
 - configure now creates Makefiles for both tools/awb and tools/awb_qt3 so that distclean can run without error
 - did a "autoreconf -i" to regenerate ltmain.sh. libtool version installed on ubuntu 10 was older than that installed on ubuntu 11. Previous ltmain was generated on ubuntu 11 and did not work here. 
+
+----------
+emer        Date: Thu Aug  2 20:53:15 EDT 2012  CSN: CSN-awb-512
+                  Fri Aug  3 00:53:15 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          511 
+
+Directory debian
+ control                   Locally Modified          511 
+ rules                     Locally Modified          511 
+
+Directory .
+ configure.in              Locally Modified          511 
+
+Made ./configure automatically select qt4 build of perl tools
+for Ubuntu Oneiric (11.10) and later. Debian package builds
+also automatically select dependency on perl qt4 for Oneirc
+and later as well.
+
+Note, that the debian BuildDependencies cannot be automatically 
+configured so a manual install of the proper version of perl qt
+is needed before doing a package build.

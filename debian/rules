@@ -17,6 +17,12 @@
 #RELEASE = $(shell $(MAKE) print-release-name | sed 's/v//' )
 RELEASE = 12.04
 
+ifeq ($(shell [ -x /usr/bin/lsb_release -a `lsb_release -s -i` = "Ubuntu" -a `lsb_release -s -r | sed 's/\.//'` -ge 1110 ] && echo yes),yes)
+	SUBSTVARS = -Vperlqt:Depends="perlqt-dev"
+else
+	SUBSTVARS = -Vperlqt:Depends="libqt-perl"
+endif
+
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
@@ -125,9 +131,10 @@ binary-common:
 	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
-	dh_gencontrol
+	dh_gencontrol -- ${SUBSTVARS}
 	dh_md5sums
 	dh_builddeb
+
 # Build architecture independant packages using the common target.
 binary-indep: build-indep install-indep
 	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
