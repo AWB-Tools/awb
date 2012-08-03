@@ -10337,3 +10337,16 @@ and later as well.
 Note, that the debian BuildDependencies cannot be automatically 
 configured so a manual install of the proper version of perl qt
 is needed before doing a package build.
+
+----------
+mcadler     Date: Fri Aug  3 16:14:51 EDT 2012  CSN: CSN-awb-513
+                  Fri Aug  3 20:14:51 UTC 2012
+
+
+Directory libperl/Asim/lib/Asim
+ Model.pm                  Locally Modified          512 
+
+Sync of Intel r3091:
+
+Handle a module APM file that is an absolute path outside the workspace's
+default union directory.

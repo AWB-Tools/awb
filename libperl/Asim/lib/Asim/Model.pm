@@ -23,6 +23,7 @@ use warnings;
 use strict;
 
 use File::Basename;
+use File::Spec;
 
 use Asim::Base;
 use Asim::Inifile;
@@ -689,8 +690,12 @@ sub _put_module {
   #
   $filename = $module->filename();
   $filename = $Asim::default_workspace->resolve($filename);
-  $filename = $Asim::default_workspace->unresolve($filename);
-  
+  my $filename_unres = $Asim::default_workspace->unresolve($filename);
+  if (defined($filename_unres)) {
+    # Normal path -- file was found in the default workspace
+    $filename = $filename_unres;
+  }
+
   #
   # Save filename and packagehint
   #
