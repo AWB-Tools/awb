@@ -78,8 +78,14 @@
             <layout class="QVBoxLayout" name="verticalLayout">
              <item>
               <widget class="QTreeWidget" name="model_list">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
                <property name="contextMenuPolicy">
-                <enum>Qt::CustomContextMenu</enum>
+                <enum>Qt::ActionsContextMenu</enum>
+               </property>
+               <property name="allColumnsShowFocus">
+                <bool>false</bool>
                </property>
                <column>
                 <property name="text">
@@ -525,7 +531,7 @@
            </widget>
            <widget class="QTreeWidget" name="benchmark_list">
             <property name="contextMenuPolicy">
-             <enum>Qt::CustomContextMenu</enum>
+             <enum>Qt::ActionsContextMenu</enum>
             </property>
             <column>
              <property name="text">

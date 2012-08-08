@@ -71,8 +71,6 @@ AC_ARG_ENABLE([qt4],
 if test $asim_cv_enable_qt4 = "no" -a -x /usr/bin/lsb_release -a $(lsb_release -s -i) = "Ubuntu" -a $(lsb_release -s -r | sed 's/\.//') -ge 1110
 then
     asim_cv_enable_qt4="yes"
-else
-    asim_cv_enable_qt4="no"
 fi
 
 if test "$asim_cv_enable_qt4" = "yes"
@@ -814,6 +812,7 @@ AC_CONFIG_FILES(tools/awb/Makefile)
 AC_CONFIG_FILES(tools/awb/awb/Makefile)
 AC_CONFIG_FILES(tools/awb/awb-resolver/Makefile)
 AC_CONFIG_FILES(tools/awb/amc/Makefile)
+AC_CONFIG_FILES(tools/awb/apm-edit/Makefile)
 AC_CONFIG_FILES(tools/awb_qt3/Makefile)
 AC_CONFIG_FILES(tools/awb_qt3/amc/Makefile)
 AC_CONFIG_FILES(tools/awb_qt3/awb-resolver/Makefile)

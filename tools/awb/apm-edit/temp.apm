@@ -1,0 +1,41 @@
+
+[Global]
+SaveParameters=0
+DefaultBenchmark=
+Version=2.2
+Type=Asim
+RootName=HW-only Bare Pipeline Build
+RootProvides=model
+File=temp
+Class=Asim::Model
+DefaultRunOpts=
+Name=Unamed project
+Description=
+
+[Model]
+DefaultAttributes=
+model=HW-only Bare Pipeline Build
+
+
+[Traffic Light System with Soft Connections]
+File=modules/leap/examples/traffic-light/traffic-light-system.awb
+Packagehint=leap
+
+[Bare FPGA Environment]
+File=config/pm/leap/submodels/fpgaenv/fpgaenv-bare.apm
+Packagehint=leap
+
+[HW-only Bare Pipeline Build]
+File=modules/leap/build-support/project/project-pipeline-bare-hw.awb
+Packagehint=leap
+
+[HW-only Bare Pipeline Build/Requires]
+hardware_system=Traffic Light System with Soft Connections
+fpgaenv_bare=Bare FPGA Environment
+
+[Traffic light function w. synthesis boundary]
+File=modules/leap/examples/traffic-light/traffic-light-function/traffic-light-function-smart-synth-boundary.awb
+Packagehint=leap
+
+[Traffic Light System with Soft Connections/Requires]
+traffic_light_function=Traffic light function w. synthesis boundary

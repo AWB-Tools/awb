@@ -1,5 +1,12 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+# add this to the command line to debug: -MQt::debug=calls,gc,ambiguous,verbose
+
+
+##################################################################################
 #
-# Copyright (C) 2002-2006 Intel Corporation
+# Copyright (C) 2002-2012 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,5 +23,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 #
+##################################################################################
 
-SUBDIRS= @NO_GUI@ @NO_PERLGUI@ awb awb-resolver amc apm-edit
+# Author: Joel Emer
+# Date: October 2002
+# Purpose:
+#       A GUI interface to find, build and run models
+# 
+# Author: Mohit Gambhir
+# Date: August 2012
+# Modification: 
+#       Port to PerQt4

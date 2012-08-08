@@ -20,7 +20,6 @@ use QtCore4::slots
     model_tree_clicked => ['QTreeWidgetItem*'],
     model_list_selectionChanged =>[],
     model_list_clicked => ['QTreeWidgetItem*'],
-    model_list_contextMenuRequested => ['const QPoint&'],
     benchmark_tree_expanded => ['QTreeWidgetItem*'],
     benchmark_tree_collapsed => ['QTreeWidgetItem*'],
     benchmark_tree_selectionChanged => [],
@@ -29,7 +28,6 @@ use QtCore4::slots
     benchmark_tree_clicked => ['QTreeWidgetItem*'],
     benchmark_list_selectionChanged => [],
     benchmark_list_clicked => ['QTreeWidgetItem*'],
-    benchmark_list_contextMenuRequested => ['const QPoint&'],
     model_list_doubleClicked => ['QTreeWidgetItem*'],
     highlightProblemsCheckBox_stateChanged => ['int'],
     nextStep_models_clicked => [],
@@ -195,6 +193,21 @@ sub init
 
     setupInit();
 
+    # Create context menus
+    createContextMenus();
+
+}
+
+sub createContextMenus 
+{
+    my $ui = this->{ui};
+
+    # model_list context menu
+    $ui->model_list()->addActions($ui->modelMenu()->actions());
+
+    # benchmark list context menu
+    $ui->benchmark_list()->addActions($ui->benchmarkMenu()->actions());
+    
 }
 
 #
@@ -412,15 +425,6 @@ sub model_list_clicked
 
 }
 
-sub model_list_contextMenuRequested
-{
-    my $point = shift;
-    my $ui = this->{ui};
-
-    $ui->modelMenu()->popup($point);
-    $ui->modelMenu()->exec($point);
-}
-
 #
 # Benchmark selection
 #
@@ -566,16 +570,6 @@ sub benchmark_list_clicked
     # paramRefresh_clicked();    
 
     this->popBusyCursor();
-
-}
-
-sub benchmark_list_contextMenuRequested
-{
-    my $point = shift;
-    my $ui = this->{ui};
-
-    $ui->benchmarkMenu()->popup($point);
-    $ui->benchmarkMenu()->exec();
 
 }
 

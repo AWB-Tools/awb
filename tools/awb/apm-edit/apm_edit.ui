@@ -1,0 +1,1492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>apm_edit</class>
+ <widget class="QMainWindow" name="apm_edit">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>738</width>
+    <height>559</height>
+   </rect>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>apm-edit</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="contextMenuPolicy">
+       <enum>Qt::PreventContextMenu</enum>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="textLabel1_4">
+         <property name="text">
+          <string>Search</string>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="search">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::PreventContextMenu</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="_2">
+        <item>
+         <widget class="QLabel" name="name">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::PreventContextMenu</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <property name="text">
+           <string>Name:</string>
+          </property>
+          <property name="wordWrap">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="change">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::PreventContextMenu</enum>
+          </property>
+          <property name="text">
+           <string>Change</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QSplitter" name="splitter_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <widget class="QTreeWidget" name="model">
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::ActionsContextMenu</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="allColumnsShowFocus">
+          <bool>false</bool>
+         </property>
+         <column>
+          <property name="text">
+           <string>Type</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Flag</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Implementation</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+         <item>
+          <property name="text">
+           <string>model</string>
+          </property>
+         </item>
+        </widget>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QTreeWidget" name="alternatives">
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <column>
+           <property name="text">
+            <string>Alternative Modules</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QTabWidget" name="alternativesTabWidget">
+          <property name="contextMenuPolicy">
+           <enum>Qt::PreventContextMenu</enum>
+          </property>
+          <property name="currentIndex">
+           <number>3</number>
+          </property>
+          <widget class="QWidget" name="summaryPage">
+           <attribute name="title">
+            <string>Summary</string>
+           </attribute>
+           <layout class="QGridLayout" name="_3">
+            <item row="0" column="0">
+             <widget class="QListWidget" name="info"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="filesPage">
+           <attribute name="title">
+            <string>Files</string>
+           </attribute>
+           <layout class="QGridLayout" name="_4">
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="_5">
+              <item>
+               <spacer name="spacer1">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Expanding</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>441</width>
+                  <height>21</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="alternativesEdit">
+                <property name="toolTip">
+                 <string>Edit all the source files for this module</string>
+                </property>
+                <property name="whatsThis">
+                 <string>Open in your editor all the source files for the module selected in the Alternative Modules pane.</string>
+                </property>
+                <property name="text">
+                 <string>&amp;Open</string>
+                </property>
+                <property name="shortcut">
+                 <string>Alt+O</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="0">
+             <widget class="QListWidget" name="files"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="notesPage">
+           <attribute name="title">
+            <string>Notes</string>
+           </attribute>
+           <layout class="QGridLayout" name="_8">
+            <item row="0" column="0">
+             <widget class="QListWidget" name="notes"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="parametersPage">
+           <attribute name="title">
+            <string>Parameters</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="_6">
+            <item>
+             <widget class="QListWidget" name="parameters"/>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="_7">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="paramName">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Parameter</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="paramValue">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>New value for this parameter</string>
+                </property>
+                <property name="whatsThis">
+                 <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="paramChange">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Change value for this parameter</string>
+                </property>
+                <property name="text">
+                 <string>Change</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>738</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="fileNewAction"/>
+    <addaction name="fileOpenAction"/>
+    <addaction name="fileSaveAction"/>
+    <addaction name="fileSaveAsAction"/>
+    <addaction name="separator"/>
+    <addaction name="filePrintAction"/>
+    <addaction name="separator"/>
+    <addaction name="fileExitAction"/>
+   </widget>
+   <widget class="QMenu" name="editMenu">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="editUndoAction"/>
+    <addaction name="editRedoAction"/>
+    <addaction name="separator"/>
+    <addaction name="editCutAction"/>
+    <addaction name="editCopyAction"/>
+    <addaction name="editPasteAction"/>
+    <addaction name="separator"/>
+    <addaction name="editFindAction"/>
+    <addaction name="editFindMissingAction"/>
+   </widget>
+   <widget class="QMenu" name="viewMenu">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="viewOpen_build_folderAction"/>
+    <addaction name="viewShell_at_build_folderAction"/>
+    <addaction name="separator"/>
+    <addaction name="viewOpen_run_folderAction"/>
+    <addaction name="viewShell_at_run_folderAction"/>
+   </widget>
+   <widget class="QMenu" name="moduleMenu">
+    <property name="contextMenuPolicy">
+     <enum>Qt::CustomContextMenu</enum>
+    </property>
+    <property name="title">
+     <string>Mod&amp;ule</string>
+    </property>
+    <widget class="QMenu" name="menuInsert">
+     <property name="title">
+      <string>&amp;Insert</string>
+     </property>
+     <addaction name="moduleInsertSubmodelAction"/>
+     <addaction name="moduleInsertModuleAction"/>
+     <addaction name="moduleInsertAsRootAction"/>
+    </widget>
+    <addaction name="moduleNewAction"/>
+    <addaction name="separator"/>
+    <addaction name="moduleEditAction"/>
+    <addaction name="moduleOpen_containing_folderAction"/>
+    <addaction name="moduleShell_at_containing_folderAction"/>
+    <addaction name="moduleNotesAction"/>
+    <addaction name="separator"/>
+    <addaction name="menuInsert"/>
+    <addaction name="moduleDeleteAction"/>
+   </widget>
+   <widget class="QMenu" name="alternativesMenu">
+    <property name="title">
+     <string>&amp;Alternatives</string>
+    </property>
+    <addaction name="alternativesInsertAction"/>
+    <addaction name="alternativesEditAction"/>
+    <addaction name="alternativesOpen_containing_folderAction"/>
+    <addaction name="alternativesShell_at_containing_folderAction"/>
+    <addaction name="separator"/>
+    <addaction name="alternativesRefreshAction"/>
+   </widget>
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="helpContentsAction"/>
+    <addaction name="helpIndexAction"/>
+    <addaction name="separator"/>
+    <addaction name="helpAboutAction"/>
+   </widget>
+   <widget class="QMenu" name="menuModel">
+    <property name="title">
+     <string>&amp;Model</string>
+    </property>
+    <addaction name="modelNukeAction"/>
+    <addaction name="modelConfigureAction"/>
+    <addaction name="modelCleanAction"/>
+    <addaction name="modelBuildAction"/>
+    <addaction name="separator"/>
+    <addaction name="modelSetupAction"/>
+    <addaction name="modelRunAction"/>
+    <addaction name="separator"/>
+    <addaction name="modelPropertiesAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+   <addaction name="viewMenu"/>
+   <addaction name="menuModel"/>
+   <addaction name="moduleMenu"/>
+   <addaction name="alternativesMenu"/>
+   <addaction name="helpMenu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="fileNewAction">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="fileOpenAction">
+   <property name="text">
+    <string>&amp;Open...</string>
+   </property>
+  </action>
+  <action name="fileSaveAction">
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+  </action>
+  <action name="fileSaveAsAction">
+   <property name="text">
+    <string>Save &amp;As...</string>
+   </property>
+  </action>
+  <action name="filePrintAction">
+   <property name="text">
+    <string>&amp;Print...</string>
+   </property>
+  </action>
+  <action name="fileExitAction">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="editUndoAction">
+   <property name="text">
+    <string>&amp;Undo</string>
+   </property>
+  </action>
+  <action name="editRedoAction">
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+  </action>
+  <action name="editCutAction">
+   <property name="text">
+    <string>&amp;Cut</string>
+   </property>
+  </action>
+  <action name="editCopyAction">
+   <property name="text">
+    <string>C&amp;opy</string>
+   </property>
+  </action>
+  <action name="editPasteAction">
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+  </action>
+  <action name="editFindAction">
+   <property name="text">
+    <string>&amp;Find...</string>
+   </property>
+  </action>
+  <action name="editFindMissingAction">
+   <property name="text">
+    <string>Find Missing</string>
+   </property>
+  </action>
+  <action name="viewOpen_build_folderAction">
+   <property name="text">
+    <string>&amp;Open build folder</string>
+   </property>
+  </action>
+  <action name="viewShell_at_build_folderAction">
+   <property name="text">
+    <string>&amp;Shell at build folder</string>
+   </property>
+  </action>
+  <action name="viewOpen_run_folderAction">
+   <property name="text">
+    <string>Open run folder</string>
+   </property>
+  </action>
+  <action name="viewShell_at_run_folderAction">
+   <property name="text">
+    <string>Shell at run folder</string>
+   </property>
+  </action>
+  <action name="modelNukeAction">
+   <property name="text">
+    <string>&amp;Nuke</string>
+   </property>
+  </action>
+  <action name="modelConfigureAction">
+   <property name="text">
+    <string>&amp;Configure</string>
+   </property>
+  </action>
+  <action name="modelCleanAction">
+   <property name="text">
+    <string>C&amp;lean</string>
+   </property>
+  </action>
+  <action name="modelBuildAction">
+   <property name="text">
+    <string>&amp;Build</string>
+   </property>
+  </action>
+  <action name="modelSetupAction">
+   <property name="text">
+    <string>Set&amp;up</string>
+   </property>
+  </action>
+  <action name="modelRunAction">
+   <property name="text">
+    <string>&amp;Run</string>
+   </property>
+  </action>
+  <action name="modelPropertiesAction">
+   <property name="text">
+    <string>&amp;Properties</string>
+   </property>
+  </action>
+  <action name="modelAutobuildAction">
+   <property name="text">
+    <string>Autobuild</string>
+   </property>
+  </action>
+  <action name="moduleNewAction">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="moduleEditAction">
+   <property name="text">
+    <string>&amp;Edit</string>
+   </property>
+  </action>
+  <action name="moduleOpen_containing_folderAction">
+   <property name="text">
+    <string>&amp;Open containing folder</string>
+   </property>
+  </action>
+  <action name="moduleShell_at_containing_folderAction">
+   <property name="text">
+    <string>&amp;Shell at containing folder</string>
+   </property>
+  </action>
+  <action name="moduleNotesAction">
+   <property name="text">
+    <string>&amp;Notes</string>
+   </property>
+  </action>
+  <action name="moduleInsertModuleAction">
+   <property name="text">
+    <string>Module</string>
+   </property>
+  </action>
+  <action name="moduleInsertSubmodelAction">
+   <property name="text">
+    <string>Submodel</string>
+   </property>
+  </action>
+  <action name="moduleInsertAsRootAction">
+   <property name="text">
+    <string>As root</string>
+   </property>
+  </action>
+  <action name="moduleDeleteAction">
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+  </action>
+  <action name="alternativesInsertAction">
+   <property name="text">
+    <string>&amp;Insert</string>
+   </property>
+  </action>
+  <action name="alternativesEditAction">
+   <property name="text">
+    <string>&amp;Edit</string>
+   </property>
+  </action>
+  <action name="alternativesOpen_containing_folderAction">
+   <property name="text">
+    <string>&amp;Open containing folder</string>
+   </property>
+  </action>
+  <action name="alternativesShell_at_containing_folderAction">
+   <property name="text">
+    <string>&amp;Shell at containing folder</string>
+   </property>
+  </action>
+  <action name="alternativesRefreshAction">
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+  </action>
+  <action name="helpContentsAction">
+   <property name="text">
+    <string>&amp;Contents...</string>
+   </property>
+  </action>
+  <action name="helpIndexAction">
+   <property name="text">
+    <string>&amp;Index...</string>
+   </property>
+  </action>
+  <action name="helpAboutAction">
+   <property name="text">
+    <string>&amp;About...</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>fileNewAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>fileNew()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileOpenAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>fileOpen()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileSaveAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>fileSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileSaveAsAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>fileSaveAs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filePrintAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>filePrint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editUndoAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editUndo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editRedoAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editRedo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editCutAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editCut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editCopyAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editCopy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editPasteAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editPaste()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>helpIndexAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>helpIndex()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>helpContentsAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>helpContents()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>helpAboutAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>helpAbout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternatives</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Alternatives_doubleClicked(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>30</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternatives</sender>
+   <signal>itemActivated(QTreeWidgetItem*,int)</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Alternatives_returnPressed(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>30</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editFindMissingAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editFindMissing()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>search</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Search_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>76</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>search</sender>
+   <signal>returnPressed()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Search_returnPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>76</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleDeleteAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>moduleDeleteAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelConfigureAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelConfigure()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelBuildAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelBuild()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelNukeAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelNuke()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleNewAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>moduleNewAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>paramChange</sender>
+   <signal>clicked()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>ParamChange_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>642</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>parameters</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Parameters_selectionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>paramValue</sender>
+   <signal>returnPressed()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>ParamValue_returnPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>491</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileExitAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>fileExit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleEditAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>moduleEditAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleNotesAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>moduleNotesAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelRunAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelRunAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelSetupAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelSetupAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelCleanAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelCleanAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelPropertiesAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelPropertiesAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>change</sender>
+   <signal>clicked()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>modelProperties_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>660</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternativesEdit</sender>
+   <signal>clicked()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>alternativesEdit_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>642</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternativesInsertAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>alternativesInsertAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternativesEditAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>alternativesEditAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>files</sender>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Files_doubleClicked(QListWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>262</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleShell_at_containing_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>moduleShell_at_containing_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternativesOpen_containing_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>alternativesOpen_containing_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternativesShell_at_containing_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>alternativesShell_at_containing_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>viewShell_at_build_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>viewShell_at_build_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>viewOpen_build_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>viewOpen_build_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>viewOpen_run_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>viewOpen_run_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>viewShell_at_run_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>viewShell_at_run_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>model</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Model_selectionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>30</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>model</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Model_doubleClicked(QTreeWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>30</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editFindAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>editFind()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>279</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alternatives</sender>
+   <signal>itemSelectionChanged()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>Alternatives_selectionChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>412</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>279</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>fileNew()</slot>
+  <slot>fileOpen()</slot>
+  <slot>fileSave()</slot>
+  <slot>fileSaveAs()</slot>
+  <slot>filePrint()</slot>
+  <slot>editUndo()</slot>
+  <slot>editRedo()</slot>
+  <slot>editCut()</slot>
+  <slot>editCopy()</slot>
+  <slot>editPaste()</slot>
+  <slot>editFind()</slot>
+  <slot>helpIndex()</slot>
+  <slot>helpContents()</slot>
+  <slot>helpAbout()</slot>
+  <slot>Model_contextMenuRequested(QPoint)</slot>
+  <slot>moduleReplaceAction_activated()</slot>
+  <slot>moduleViewAwbAction_activated()</slot>
+  <slot>moduleViewSourceAction_activated()</slot>
+  <slot>Model_selectionChanged()</slot>
+  <slot>Alternatives_selectionChanged()</slot>
+  <slot>Alternatives_doubleClicked(QTreeWidgetItem*)</slot>
+  <slot>Alternatives_returnPressed(QTreeWidgetItem*)</slot>
+  <slot>modelAutoBuild_activated()</slot>
+  <slot>modelRefresh_activated()</slot>
+  <slot>editFindMissing()</slot>
+  <slot>Search_textChanged(QString)</slot>
+  <slot>whatsThis()</slot>
+  <slot>Search_returnPressed()</slot>
+  <slot>moduleDeleteAction_activated()</slot>
+  <slot>modelConfigure()</slot>
+  <slot>modelBuild()</slot>
+  <slot>modelNuke()</slot>
+  <slot>moduleNewAction_activated()</slot>
+  <slot>ParamChange_clicked()</slot>
+  <slot>Parameters_selectionChanged()</slot>
+  <slot>ParamValue_returnPressed()</slot>
+  <slot>fileExit()</slot>
+  <slot>Model_doubleClicked(QTreeWidgetItem*)</slot>
+  <slot>moduleEditAction_activated()</slot>
+  <slot>moduleAddSubmodelAction_activated()</slot>
+  <slot>moduleInsertModuleAction_activated()</slot>
+  <slot>moduleInsertSubmodelAction_activated()</slot>
+  <slot>moduleInsertAsRootAction_activated()</slot>
+  <slot>moduleNotesAction_activated()</slot>
+  <slot>modelRunAction_activated()</slot>
+  <slot>modelSetupAction_activated()</slot>
+  <slot>modelCleanAction_activated()</slot>
+  <slot>modelPropertiesAction_activated()</slot>
+  <slot>modelProperties_clicked()</slot>
+  <slot>alternativesEdit_clicked()</slot>
+  <slot>alternativesInsertAction_activated()</slot>
+  <slot>alternativesEditAction_activated()</slot>
+  <slot>Alternatives_contextMenuRequested(QPoint)</slot>
+  <slot>Files_doubleClicked(QListWidgetItem*)</slot>
+  <slot>moduleOpening_containing_folderAction_activated()</slot>
+  <slot>moduleShell_at_containing_folderAction_activated()</slot>
+  <slot>alternativesOpen_containing_folderAction_activated()</slot>
+  <slot>alternativesShell_at_containing_folderAction_activated()</slot>
+  <slot>viewShell_at_build_folderAction_activated()</slot>
+  <slot>viewOpen_build_folderAction_activated()</slot>
+  <slot>viewOpen_run_folderAction_activated()</slot>
+  <slot>viewShell_at_run_folderAction_activated()</slot>
+ </slots>
+</ui>

@@ -10350,3 +10350,77 @@ Sync of Intel r3091:
 
 Handle a module APM file that is an absolute path outside the workspace's
 default union directory.
+
+----------
+mgambhir    Date: Wed Aug  8 19:24:36 EDT 2012  CSN: CSN-awb-514
+                  Wed Aug  8 23:24:36 UTC 2012
+
+
+Directory .
+ configure.in              Locally Modified          513 
+
+Directory tools/awb
+ apm-edit/                 Locally Added               0 
+
+Directory tools/awb/apm-edit
+ apm_edit.ui.patch         Locally Added               0 
+ apm_edit.pm               Locally Added               0 
+ apm_edit.ui               Locally Added               0 
+ apm-edit.pro              Locally Added               0 
+ apm_edit_main.pl          Locally Added               0 
+ images/                   Locally Added               0 
+
+Directory tools/awb/apm-edit/images
+ editcopy.png              Locally Added               0 
+ submodel_blue.png         Locally Added               0 
+ editpaste.png             Locally Added               0 
+ module.png                Locally Added               0 
+ module_current.png        Locally Added               0 
+ module_default.png        Locally Added               0 
+ redo.png                  Locally Added               0 
+ filenew.png               Locally Added               0 
+ print.png                 Locally Added               0 
+ filesave.png              Locally Added               0 
+ fileopen.png              Locally Added               0 
+ editcut.png               Locally Added               0 
+ submodel_red.png          Locally Added               0 
+ submodel_yellow.png       Locally Added               0 
+ undo.png                  Locally Added               0 
+ searchfind.png            Locally Added               0 
+ submodel.png              Locally Added               0 
+ check.png                 Locally Added               0 
+ whatsthis.png             Locally Added               0 
+ module_missing.png        Locally Added               0 
+
+Directory tools/awb/apm-edit
+ apm_edit.qrc              Locally Added               0 
+ Makefile.am               Locally Added               0 
+ apm_edit_properties.pm    Locally Added               0 
+ apm_edit_properties.ui    Locally Added               0 
+ apm_edit_pixmap.pl        Locally Added               0 
+ Makefile                  Locally Added               0 
+ apm_edit_head.pl          Locally Added               0 
+ temp.apm                  Locally Added               0 
+ runlog.pm                 Locally Added               0 
+ Makefile.in               Locally Added               0 
+ runlog.ui                 Locally Added               0 
+ apm_edit_about.pm         Locally Added               0 
+ apm_edit_about.ui         Locally Added               0 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          513 
+ Makefile.am               Locally Modified          513 
+
+Directory tools/awb/awb
+ awb_dialog.pm             Locally Modified          513 
+ awb_dialog.ui             Locally Modified          513 
+
+Directory .
+ configure                 Locally Modified          513 
+
+- Fixed a bug in configure script that was overriding enable-qt4 to "no" when it was being set to "yes"
+- Intermediate commit of apm-edit port to PerlQt4
+  - basic  functionality (creating, opening, modifying, saving .apm files) is working and tested
+  - not all signals and slots are ported yet
+  - images are not included yet
+- fixed the context menu location in awb and apm-edit. context menu does not pop up through a signal/slot anymore. ContextMenuPolicy property for widgets is now set to ActionsContextMenu and actions are added to those widgets in init()

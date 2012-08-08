@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2006 Intel Corporation
+# Copyright (C) 2003-2012 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,4 +17,23 @@
 # 
 #
 
-SUBDIRS= @NO_GUI@ @NO_PERLGUI@ awb awb-resolver amc apm-edit
+
+package apm_edit;
+
+sub apm_edit_load_pixmap
+{
+    my $pix = Qt::Pixmap();
+    #FIXME
+    #my $m = Qt::MimeSourceFactory::defaultFactory()->data(shift);
+
+    if($m)
+    {
+        #FIXME
+        #Qt::ImageDrag::decode($m, $pix);
+    }
+
+    return $pix;
+}
+
+
+
