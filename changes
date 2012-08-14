@@ -10424,3 +10424,20 @@ Directory .
   - not all signals and slots are ported yet
   - images are not included yet
 - fixed the context menu location in awb and apm-edit. context menu does not pop up through a signal/slot anymore. ContextMenuPolicy property for widgets is now set to ActionsContextMenu and actions are added to those widgets in init()
+
+----------
+mgambhir    Date: Tue Aug 14 13:38:28 EDT 2012  CSN: CSN-awb-515
+                  Tue Aug 14 17:38:28 UTC 2012
+
+
+Directory tools/awb/apm-edit
+ apm_edit.pm               Locally Modified          514 
+ apm_edit.ui               Locally Modified          514 
+ apm_edit_properties.pm    Locally Modified          514 
+ temp.apm                  Locally Modified          514 
+
+- All apm-edit slots are now working
+Known Bugs
+- moduleNewAction does not work because there is no awb-wizard
+TODO
+- import images

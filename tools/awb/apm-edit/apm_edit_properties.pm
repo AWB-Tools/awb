@@ -9,7 +9,8 @@ use QtCore4::isa qw( Qt::Dialog );
 use QtCore4::slots
     init => [],
     propertiesOk_clicked => [],
-    propertiesHelp_clicked => [];
+    propertiesHelp_clicked => [],
+    typeComboBox_activated => ['QString'];
 
 use constant {type_asim => 0, type_hasim => 1, type_leap => 2};
 

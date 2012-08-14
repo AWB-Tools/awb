@@ -64,9 +64,9 @@ use QtCore4::slots
     Search_textChanged => ['const QString&'],
     Search_returnPressed => [],
     Name_textChanged => ['const QString&'],
-    Model_selectionChanged => [],
+    Model_selectionChanged => ['QTreeWidgetItem*'],
     Model_doubleClicked => ['QTreeWidgetItem*'],
-    Alternatives_selectionChanged => [],
+    Alternatives_selectionChanged => ['QTreeWidgetItem*'],
     Alternatives_doubleClicked => ['QTreeWidgetItem*'],
     Alternatives_returnPressed => ['QTreeWidgetItem*'],
     Alternatives_returnPressed_onModule => ['QTreeWIdgetItem*'],
@@ -211,8 +211,6 @@ sub fileNew
 
     modelPropertiesAction_activated();
 
-    # Create model tree
-
     modelShow();
 }
 
@@ -247,11 +245,10 @@ sub fileOpen
 
     my $filename = shift ||
         Qt::FileDialog::getOpenFileName(
-            $cwd,
-            "Asim Models (*.apm)",
             this,
-            "open asim model dialog",
-            "Choose a model to edit" ) ||
+            "Choose a model to edit",
+            $cwd,
+            "Asim Models (*.apm)") ||
         return;
     
     my $check_health = shift;
@@ -955,7 +952,7 @@ sub modelOperation
       return               if ($status == 2);
     }
 
-    $w = runlog(0, 0, 1);
+    $w = runlog();
 
     $w->run($cmd);
 }
@@ -1595,7 +1592,7 @@ sub Model_selectionChanged
     our $moduleDB;
     our $modelDB;
 
-    my $item = ui()->model()->currentItem();
+    my $item = shift || return;
 
     my $provides = $item->text(module_type_col);
 
@@ -1780,7 +1777,7 @@ sub Alternatives_selectionChanged
 {
     our $model;
 
-    my $item = ui()->alternatives()->currentItem();
+    my $item = shift || return;
 
     my $module = undef;
     my $delimiter;   # Used to distinquish if part of real model
@@ -2382,8 +2379,8 @@ sub ParamChange_clicked
 {
     our $model;
 
-    my $itemno = ui()->parameters->currentItem();
-    my $line = ui()->parameters->text($itemno);
+    my $item = ui()->parameters->currentItem();
+    my $line = $item->text();
 
     #
     # Parse out information on parameter
@@ -2410,7 +2407,7 @@ sub ParamChange_clicked
             $default = $2;
         }       
 
-        $value = ParamValue->text();
+        $value = ui()->paramValue->text();
         if ($value eq "") {
             $value = $3;
         }
@@ -2428,7 +2425,7 @@ sub ParamChange_clicked
             $default = $2;
         }       
 
-        $value = ParamValue->text();
+        $value = ui()->paramValue->text();
         if ($value eq "") {
             $value = $3;
         }
@@ -2438,7 +2435,7 @@ sub ParamChange_clicked
     # Update information on parameter
     #    Note: implicit dependence on format of line
     #
-    ui()->Parameters->changeItem("       $name=$value [$default]", $itemno);
+    $item->setText("       $name=$value [$default]");
 
 
     #
@@ -2562,8 +2559,9 @@ sub alternativesModule
         # From current model
 
         my $provides = $model_item->text(module_type_col);
-
+        
         $module = $model->find_module_providing($provides);
+        
         if ($model->is_submodel($module)) {
             # This is a submodel...
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>738</width>
-    <height>559</height>
+    <width>741</width>
+    <height>529</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -54,103 +54,108 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QHBoxLayout" name="_2">
       <item>
-       <layout class="QHBoxLayout" name="_2">
-        <item>
-         <widget class="QLabel" name="name">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::PreventContextMenu</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="text">
-           <string>Name:</string>
-          </property>
-          <property name="wordWrap">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="change">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::PreventContextMenu</enum>
-          </property>
-          <property name="text">
-           <string>Change</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="name">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::PreventContextMenu</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>Name:</string>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QSplitter" name="splitter_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QPushButton" name="change">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <widget class="QTreeWidget" name="model">
-         <property name="focusPolicy">
-          <enum>Qt::StrongFocus</enum>
-         </property>
-         <property name="contextMenuPolicy">
-          <enum>Qt::ActionsContextMenu</enum>
-         </property>
-         <property name="sortingEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="allColumnsShowFocus">
-          <bool>false</bool>
-         </property>
-         <column>
-          <property name="text">
-           <string>Type</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Flag</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Implementation</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string/>
-          </property>
-         </column>
-         <item>
-          <property name="text">
-           <string>model</string>
-          </property>
-         </item>
-        </widget>
-        <widget class="QSplitter" name="splitter">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::PreventContextMenu</enum>
+        </property>
+        <property name="text">
+         <string>Change</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="model">
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::ActionsContextMenu</enum>
+      </property>
+      <property name="lineWidth">
+       <number>2</number>
+      </property>
+      <property name="textElideMode">
+       <enum>Qt::ElideRight</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="allColumnsShowFocus">
+       <bool>false</bool>
+      </property>
+      <attribute name="headerCascadingSectionResizes">
+       <bool>true</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Flag</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Implementation</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string/>
+       </property>
+      </column>
+      <item>
+       <property name="text">
+        <string>model</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
          <widget class="QTreeWidget" name="alternatives">
           <property name="focusPolicy">
            <enum>Qt::StrongFocus</enum>
@@ -164,29 +169,45 @@
            </property>
           </column>
          </widget>
-         <widget class="QTabWidget" name="alternativesTabWidget">
-          <property name="contextMenuPolicy">
-           <enum>Qt::PreventContextMenu</enum>
+        </item>
+        <item>
+         <widget class="QPushButton" name="cacheRefresh">
+          <property name="text">
+           <string>Refresh</string>
           </property>
-          <property name="currentIndex">
-           <number>3</number>
-          </property>
-          <widget class="QWidget" name="summaryPage">
-           <attribute name="title">
-            <string>Summary</string>
-           </attribute>
-           <layout class="QGridLayout" name="_3">
-            <item row="0" column="0">
-             <widget class="QListWidget" name="info"/>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="alternativesTabWidget">
+        <property name="contextMenuPolicy">
+         <enum>Qt::PreventContextMenu</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="summaryPage">
+         <attribute name="title">
+          <string>Summary</string>
+         </attribute>
+         <layout class="QGridLayout" name="_3">
+          <item row="0" column="0">
+           <widget class="QListWidget" name="info"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="filesPage">
+         <attribute name="title">
+          <string>Files</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QListWidget" name="files"/>
             </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="filesPage">
-           <attribute name="title">
-            <string>Files</string>
-           </attribute>
-           <layout class="QGridLayout" name="_4">
-            <item row="1" column="0">
+            <item>
              <layout class="QHBoxLayout" name="_5">
               <item>
                <spacer name="spacer1">
@@ -222,90 +243,87 @@
               </item>
              </layout>
             </item>
-            <item row="0" column="0">
-             <widget class="QListWidget" name="files"/>
-            </item>
            </layout>
-          </widget>
-          <widget class="QWidget" name="notesPage">
-           <attribute name="title">
-            <string>Notes</string>
-           </attribute>
-           <layout class="QGridLayout" name="_8">
-            <item row="0" column="0">
-             <widget class="QListWidget" name="notes"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="parametersPage">
-           <attribute name="title">
-            <string>Parameters</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="_6">
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="notesPage">
+         <attribute name="title">
+          <string>Notes</string>
+         </attribute>
+         <layout class="QGridLayout" name="_8">
+          <item row="0" column="0">
+           <widget class="QListWidget" name="notes"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="parametersPage">
+         <attribute name="title">
+          <string>Parameters</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="_6">
+          <item>
+           <widget class="QListWidget" name="parameters"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="_7">
+            <property name="spacing">
+             <number>6</number>
+            </property>
+            <property name="margin">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QListWidget" name="parameters"/>
+             <widget class="QLabel" name="paramName">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Parameter</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+             </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="_7">
-              <property name="spacing">
-               <number>6</number>
+             <widget class="QLineEdit" name="paramValue">
+              <property name="enabled">
+               <bool>false</bool>
               </property>
-              <property name="margin">
-               <number>0</number>
+              <property name="toolTip">
+               <string>New value for this parameter</string>
               </property>
-              <item>
-               <widget class="QLabel" name="paramName">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>200</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Parameter</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-                <property name="wordWrap">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="paramValue">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="toolTip">
-                 <string>New value for this parameter</string>
-                </property>
-                <property name="whatsThis">
-                 <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="paramChange">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="toolTip">
-                 <string>Change value for this parameter</string>
-                </property>
-                <property name="text">
-                 <string>Change</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+              <property name="whatsThis">
+               <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="paramChange">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Change value for this parameter</string>
+              </property>
+              <property name="text">
+               <string>Change</string>
+              </property>
+             </widget>
             </item>
            </layout>
-          </widget>
-         </widget>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
@@ -318,7 +336,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>738</width>
+     <width>741</width>
      <height>22</height>
     </rect>
    </property>
@@ -1015,8 +1033,8 @@
    <slot>ParamChange_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>642</x>
-     <y>490</y>
+     <x>718</x>
+     <y>484</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1047,8 +1065,8 @@
    <slot>ParamValue_returnPressed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>469</x>
-     <y>491</y>
+     <x>627</x>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1191,8 +1209,8 @@
    <slot>alternativesEdit_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>642</x>
-     <y>490</y>
+     <x>717</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1362,9 +1380,9 @@
   </connection>
   <connection>
    <sender>model</sender>
-   <signal>itemSelectionChanged()</signal>
+   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
    <receiver>apm_edit</receiver>
-   <slot>Model_selectionChanged()</slot>
+   <slot>Model_selectionChanged(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>30</x>
@@ -1410,17 +1428,33 @@
   </connection>
   <connection>
    <sender>alternatives</sender>
-   <signal>itemSelectionChanged()</signal>
+   <signal>currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)</signal>
    <receiver>apm_edit</receiver>
-   <slot>Alternatives_selectionChanged()</slot>
+   <slot>Alternatives_selectionChanged(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>412</y>
+     <x>113</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
-     <x>368</x>
-     <y>279</y>
+     <x>370</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleOpen_containing_folderAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>moduleOpening_containing_folderAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>370</x>
+     <y>264</y>
     </hint>
    </hints>
   </connection>
@@ -1444,8 +1478,8 @@
   <slot>moduleReplaceAction_activated()</slot>
   <slot>moduleViewAwbAction_activated()</slot>
   <slot>moduleViewSourceAction_activated()</slot>
-  <slot>Model_selectionChanged()</slot>
-  <slot>Alternatives_selectionChanged()</slot>
+  <slot>Model_selectionChanged(QTreeWidgetItem*)</slot>
+  <slot>Alternatives_selectionChanged(QTreeWidgetItem*)</slot>
   <slot>Alternatives_doubleClicked(QTreeWidgetItem*)</slot>
   <slot>Alternatives_returnPressed(QTreeWidgetItem*)</slot>
   <slot>modelAutoBuild_activated()</slot>
