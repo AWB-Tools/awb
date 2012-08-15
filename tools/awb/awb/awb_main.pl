@@ -10,7 +10,7 @@ use awb_dialog;
 
 use Asim;
 
-#$debug = $ENV{AWB2_DEBUG} || 0;
+$debug = $ENV{AWB2_DEBUG} || 0;
 
 my $workspace;
 my $help;

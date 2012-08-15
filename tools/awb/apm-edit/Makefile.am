@@ -19,9 +19,8 @@
 
 tool_PROGRAMS= apm-edit
 
-apm_edit_SOURCES = apm-edit.pro \
+apm_edit_SOURCES = apm_edit.qrc \
                    apm_edit_head.pl \
-                   apm_edit_pixmap.pl \
                    apm_edit.ui \
                    apm_edit.pm \
                    apm_edit_about.ui \
@@ -32,28 +31,8 @@ apm_edit_SOURCES = apm-edit.pro \
                    runlog.pm \
                    apm_edit_main.pl 
 
-
-IMAGES= images/editcopy.png     \
-        images/editcut.png      \
-        images/editpaste.png    \
-        images/filenew.png      \
-        images/fileopen.png     \
-        images/filesave.png     \
-        images/print.png        \
-        images/redo.png         \
-        images/searchfind.png   \
-        images/undo.png         \
-        images/whatsthis.png    \
-	    images/check.png            \
-    	images/module.png           \
-    	images/module_current.png   \
-    	images/module_default.png   \
-	    images/module_missing.png   \
-        images/submodel.png
-
-
-apm-edit$(EXEEXT): apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_main.pl
-	cat apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm runlog.pm apm_edit_properties.ui.pm apm_edit_properties.pm apm_edit_about.ui.pm apm_edit_about.pm apm_edit.ui.pm apm_edit.pm apm_edit_main.pl >apm-edit
+apm-edit$(EXEEXT): apm_edit_head.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_main.pl apm_edit_images.pm
+	cat apm_edit_head.pl runlog.ui.pm runlog.pm apm_edit_properties.ui.pm apm_edit_properties.pm apm_edit_about.ui.pm apm_edit_about.pm apm_edit.ui.pm apm_edit_images.pm apm_edit.pm apm_edit_main.pl > apm-edit
 	chmod +x apm-edit
 
 apm_edit.ui.pm: apm_edit.ui
@@ -63,6 +42,9 @@ apm_edit_properties.ui.pm: apm_edit_properties.ui
 runlog.ui.pm: runlog.ui
 
 apm_edit_about.ui.pm: apm_edit_about.ui
+
+apm_edit_images.pm: apm_edit.qrc
+	prcc4_bin -o apm_edit_images.pm $<
 
 %.ui.pm: %.ui
 	sed -i 's/version=\"3\..\"/version="3.0"/' $<

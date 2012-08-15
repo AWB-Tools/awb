@@ -19,38 +19,32 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QLabel" name="searchLabel">
+      <property name="text">
+       <string>Search</string>
+      </property>
+      <property name="wordWrap">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="search">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="contextMenuPolicy">
        <enum>Qt::PreventContextMenu</enum>
       </property>
-      <property name="title">
-       <string/>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="textLabel1_4">
-         <property name="text">
-          <string>Search</string>
-         </property>
-         <property name="wordWrap">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="search">
-         <property name="minimumSize">
-          <size>
-           <width>200</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="contextMenuPolicy">
-          <enum>Qt::PreventContextMenu</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
     <item>
@@ -103,6 +97,24 @@
     </item>
     <item>
      <widget class="QTreeWidget" name="model">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>723</width>
+        <height>138</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="focusPolicy">
        <enum>Qt::WheelFocus</enum>
       </property>
@@ -112,17 +124,62 @@
       <property name="lineWidth">
        <number>2</number>
       </property>
+      <property name="autoScroll">
+       <bool>true</bool>
+      </property>
+      <property name="autoScrollMargin">
+       <number>16</number>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
       <property name="textElideMode">
        <enum>Qt::ElideRight</enum>
+      </property>
+      <property name="autoExpandDelay">
+       <number>1</number>
+      </property>
+      <property name="indentation">
+       <number>20</number>
+      </property>
+      <property name="uniformRowHeights">
+       <bool>true</bool>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
       </property>
+      <property name="animated">
+       <bool>false</bool>
+      </property>
       <property name="allColumnsShowFocus">
        <bool>false</bool>
       </property>
+      <property name="wordWrap">
+       <bool>false</bool>
+      </property>
+      <property name="headerHidden">
+       <bool>false</bool>
+      </property>
+      <property name="columnCount">
+       <number>3</number>
+      </property>
+      <attribute name="headerVisible">
+       <bool>true</bool>
+      </attribute>
       <attribute name="headerCascadingSectionResizes">
        <bool>true</bool>
+      </attribute>
+      <attribute name="headerHighlightSections">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="headerMinimumSectionSize">
+       <number>100</number>
+      </attribute>
+      <attribute name="headerShowSortIndicator" stdset="0">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="headerStretchLastSection">
+       <bool>false</bool>
       </attribute>
       <column>
        <property name="text">
@@ -139,14 +196,9 @@
         <string>Implementation</string>
        </property>
       </column>
-      <column>
-       <property name="text">
-        <string/>
-       </property>
-      </column>
       <item>
        <property name="text">
-        <string>model</string>
+        <string>model </string>
        </property>
       </item>
      </widget>
@@ -162,6 +214,9 @@
           </property>
           <property name="contextMenuPolicy">
            <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <property name="indentation">
+           <number>0</number>
           </property>
           <column>
            <property name="text">
@@ -445,17 +500,43 @@
    <addaction name="helpMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
   <action name="fileNewAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/filenew.png</normaloff>:/images/filenew.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="fileOpenAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open...</string>
    </property>
   </action>
   <action name="fileSaveAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -466,6 +547,10 @@
    </property>
   </action>
   <action name="filePrintAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/print.png</normaloff>:/images/print.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Print...</string>
    </property>
@@ -476,31 +561,55 @@
    </property>
   </action>
   <action name="editUndoAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/undo.png</normaloff>:/images/undo.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Undo</string>
    </property>
   </action>
   <action name="editRedoAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/redo.png</normaloff>:/images/redo.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Redo</string>
    </property>
   </action>
   <action name="editCutAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/editcut.png</normaloff>:/images/editcut.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Cut</string>
    </property>
   </action>
   <action name="editCopyAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/editcopy.png</normaloff>:/images/editcopy.png</iconset>
+   </property>
    <property name="text">
     <string>C&amp;opy</string>
    </property>
   </action>
   <action name="editPasteAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/editpaste.png</normaloff>:/images/editpaste.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Paste</string>
    </property>
   </action>
   <action name="editFindAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/searchfind.png</normaloff>:/images/searchfind.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Find...</string>
    </property>
@@ -656,7 +765,9 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="apm_edit.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>fileNewAction</sender>
@@ -1066,7 +1177,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>627</x>
-     <y>482</y>
+     <y>481</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>

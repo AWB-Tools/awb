@@ -10441,3 +10441,103 @@ Known Bugs
 - moduleNewAction does not work because there is no awb-wizard
 TODO
 - import images
+
+----------
+mgambhir    Date: Wed Aug 15 18:10:28 EDT 2012  CSN: CSN-awb-516
+                  Wed Aug 15 22:10:28 UTC 2012
+
+
+Directory libperl
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3/awb-wizard
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3/awb-resolver
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3/awb2
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3/amc
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3/apm-edit
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb_qt3/apm-find-replace
+ Makefile.in               Locally Modified          515 
+
+Directory tools
+ Makefile.in               Locally Modified          515 
+
+Directory tools/scripts
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb/amc
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb/apm-edit
+ apm_edit.pm               Locally Modified          515 
+ apm_edit.ui               Locally Modified          515 
+ apm-edit.pro              Locally Removed           515 
+ Makefile.am               Locally Modified          515 
+ apm_edit_pixmap.pl        Locally Removed           515 
+ Makefile                  Locally Modified          515 
+ temp.apm                  Locally Removed           515 
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb/awb-resolver
+ Makefile.in               Locally Modified          515 
+
+Directory tools/awb/awb
+ awb_main.pl               Locally Modified          515 
+ Makefile.in               Locally Modified          515 
+ awb_dialog.pm             Locally Modified          515 
+ awb_dialog.ui             Locally Modified          515 
+
+Directory lib/libawb
+ Makefile.in               Locally Modified          515 
+
+Directory lib
+ Makefile.in               Locally Modified          515 
+
+Directory .
+ aclocal.m4                Locally Modified          515 
+
+Directory m4
+ libtool.m4                Locally Modified          515 
+ ltversion.m4              Locally Modified          515 
+ lt~obsolete.m4            Locally Modified          515 
+ ltoptions.m4              Locally Modified          515 
+
+Directory .
+ configure                 Locally Modified          515 
+
+Directory aux-scripts
+ ltmain.sh                 Locally Modified          515 
+
+Directory .
+ Makefile.in               Locally Modified          515 
+
+- Added images and action buttons (new, open, print, save) with images in apm-edit
+- Bugs fixed
+  awb
+    -Debugging output disabled
+    - On admin page - tab starts from packages now and not bundles
+    - crash on clicking a 'bundle' fixed
+    - 'all' button is checked by default
+Known Bugs
+apm-edit
+  - The leftmost field (Type) is too narrow
+  - and the next one (Flags) is too wide
+  - "Whats this" content and tool bar button not there yet
+awb
+We need to do something about the lack of some separator line between
+the sections

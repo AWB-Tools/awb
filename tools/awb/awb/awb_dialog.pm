@@ -1369,10 +1369,10 @@ sub checkoutBundleListWidget_itemClicked
     my $bundle = $item->text();
 
     $ui->bundleVersionComboBox->clear();
-    $ui->bundleVersionComboBox->insertItem("<Optionally select alternate $ui->version>");
+    $ui->bundleVersionComboBox->addItem("<Optionally select alternate version>");
 
     for my $v (sort keys  %{this->{bundles}->{$bundle}}) {
-        $ui->bundleVersionComboBox->insertItem($v);
+        $ui->bundleVersionComboBox->addItem($v);
     }
 }
 
@@ -1474,8 +1474,7 @@ sub checkoutPushButton_clicked
     } else {
         # Get bundle name and $ui->version
 
-        my $i = $ui->checkoutBundleListWidget->currentItem();
-	    my $item = $ui->checkoutBundleListWidget->item($i);
+	    my $item = $ui->checkoutBundleListWidget->currentItem();
 	    return if (! defined($item));
 
 	    $package = $item->text();

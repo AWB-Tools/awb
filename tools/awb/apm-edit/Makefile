@@ -16,7 +16,7 @@
 
 
 #
-# Copyright (C) 2002-2006 Intel Corporation
+# Copyright (C) 2002-2012 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -80,7 +80,7 @@ SOURCES = $(apm_edit_SOURCES)
 DIST_SOURCES = $(apm_edit_SOURCES)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} /home/mgambhir/awb-dev/src/awb/aux-scripts/missing --run aclocal-1.11
-AMTAR = ${SHELL} /home/mgambhir/awb-dev/src/awb/aux-scripts/missing --run tar
+AMTAR = $${TAR-tar}
 AM_CXXFLAGS = $(WARNFLAGS) $(PTVFLAGS) $(OPTFLAGS) $(ARCHFLAGS) $(ASIMCOREFLAGS) $(ASIMCOREINCS)
 AM_LDFLAGS = $(ARCHFLAGS) $(ASIMCORELIBS)
 AR = ar
@@ -104,7 +104,7 @@ CXXFLAGS =
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
-DLLTOOL = @DLLTOOL@
+DLLTOOL = false
 DSYMUTIL = 
 DUMPBIN = 
 ECHO_C = 
@@ -130,7 +130,7 @@ LN_S = ln -s
 LTLIBOBJS = 
 MAINT = #
 MAKEINFO = ${SHELL} /home/mgambhir/awb-dev/src/awb/aux-scripts/missing --run makeinfo
-MANIFEST_TOOL = @MANIFEST_TOOL@
+MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
 NMEDIT = 
@@ -172,7 +172,7 @@ abs_builddir = /home/mgambhir/awb-dev/src/awb/tools/awb/apm-edit
 abs_srcdir = /home/mgambhir/awb-dev/src/awb/tools/awb/apm-edit
 abs_top_builddir = /home/mgambhir/awb-dev/src/awb
 abs_top_srcdir = /home/mgambhir/awb-dev/src/awb
-ac_ct_AR = @ac_ct_AR@
+ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
@@ -180,8 +180,8 @@ ac_prefix_program = /usr/local/bin/asimstarter
 am__include = include
 am__leading_dot = .
 am__quote = 
-am__tar = ${AMTAR} chof - "$$tardir"
-am__untar = ${AMTAR} xf -
+am__tar = $${TAR-tar} chof - "$$tardir"
+am__untar = $${TAR-tar} xf -
 awb_tools_dir_suffix = 
 bindir = ${exec_prefix}/bin
 build = x86_64-unknown-linux-gnu
@@ -231,9 +231,8 @@ tooldir = ${libexecdir}/asim/HEAD
 top_build_prefix = ../../../
 top_builddir = ../../..
 top_srcdir = ../../..
-apm_edit_SOURCES = apm-edit.pro \
+apm_edit_SOURCES = apm_edit.qrc \
                    apm_edit_head.pl \
-                   apm_edit_pixmap.pl \
                    apm_edit.ui \
                    apm_edit.pm \
                    apm_edit_about.ui \
@@ -243,24 +242,6 @@ apm_edit_SOURCES = apm-edit.pro \
                    runlog.ui \
                    runlog.pm \
                    apm_edit_main.pl 
-
-IMAGES = images/editcopy.png     \
-        images/editcut.png      \
-        images/editpaste.png    \
-        images/filenew.png      \
-        images/fileopen.png     \
-        images/filesave.png     \
-        images/print.png        \
-        images/redo.png         \
-        images/searchfind.png   \
-        images/undo.png         \
-        images/whatsthis.png    \
-	    images/check.png            \
-    	images/module.png           \
-    	images/module_current.png   \
-    	images/module_default.png   \
-	    images/module_missing.png   \
-        images/submodel.png
 
 
 #
@@ -522,8 +503,8 @@ uninstall-am: uninstall-toolPROGRAMS
 	uninstall-toolPROGRAMS
 
 
-apm-edit$(EXEEXT): apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_main.pl
-	cat apm_edit_head.pl apm_edit_pixmap.pl runlog.ui.pm runlog.pm apm_edit_properties.ui.pm apm_edit_properties.pm apm_edit_about.ui.pm apm_edit_about.pm apm_edit.ui.pm apm_edit.pm apm_edit_main.pl >apm-edit
+apm-edit$(EXEEXT): apm_edit_head.pl runlog.ui.pm apm_edit_properties.ui.pm apm_edit_about.ui.pm apm_edit.ui.pm apm_edit_main.pl apm_edit_images.pm
+	cat apm_edit_head.pl runlog.ui.pm runlog.pm apm_edit_properties.ui.pm apm_edit_properties.pm apm_edit_about.ui.pm apm_edit_about.pm apm_edit.ui.pm apm_edit_images.pm apm_edit.pm apm_edit_main.pl > apm-edit
 	chmod +x apm-edit
 
 apm_edit.ui.pm: apm_edit.ui
@@ -533,6 +514,9 @@ apm_edit_properties.ui.pm: apm_edit_properties.ui
 runlog.ui.pm: runlog.ui
 
 apm_edit_about.ui.pm: apm_edit_about.ui
+
+apm_edit_images.pm: apm_edit.qrc
+	prcc4_bin -o apm_edit_images.pm $<
 
 %.ui.pm: %.ui
 	sed -i 's/version=\"3\..\"/version="3.0"/' $<

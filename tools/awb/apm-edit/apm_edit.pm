@@ -123,17 +123,20 @@ sub NEW
     this->{ui} = Ui_Apm_edit->setupUi(this);
 }
 
-#
-#   Creation of window pane contents
-#
+sub apm_edit_load_pixmap
+{
+    my $pix = Qt::Pixmap(shift);
+    
+    return $pix;
+}
 
 sub initPixmaps
 {
-    this->{module_missing_pix} = apm_edit_load_pixmap("images/module_missing.png");
-    this->{module_pix} = apm_edit_load_pixmap("images/module.png");
-    this->{module_default_pix} = apm_edit_load_pixmap("images/module_default.png");
-    this->{module_current_pix} = apm_edit_load_pixmap("images/module_current.png");
-    this->{submodel_pix} = apm_edit_load_pixmap("images/submodel.png");
+    this->{module_missing_pix} = apm_edit_load_pixmap(":/images/module_missing.png");
+    this->{module_pix} = apm_edit_load_pixmap(":/images/module.png");
+    this->{module_default_pix} = apm_edit_load_pixmap(":/images/module_default.png");
+    this->{module_current_pix} = apm_edit_load_pixmap(":/images/module_current.png");
+    this->{submodel_pix} = apm_edit_load_pixmap(":/images/submodel.png");
 }
 
 sub init
@@ -166,8 +169,23 @@ sub init
     # create context menus
     
     createContextMenus();
+
+    # Create tool bars
+
+    createToolBars();
+
 }
 
+sub createToolBars 
+{
+    ui()->toolBar()->addAction(ui()->fileNewAction());
+    ui()->toolBar()->addAction(ui()->fileOpenAction());
+    ui()->toolBar()->addAction(ui()->fileSaveAction());
+    ui()->toolBar()->addAction(ui()->filePrintAction());
+    ui()->toolBar()->addWidget(ui()->searchLabel());
+    ui()->toolBar()->addWidget(ui()->search());
+    
+}
 sub createContextMenus
 {
     # Alternatives
@@ -1689,7 +1707,7 @@ sub Model_selectionChanged
             #$next_root->setText(alt_implementation_col, 
             #                    trUtf8(">> " . $m->name() . " <<"));
 
-	    $selected = $next_root;
+    	    $selected = $next_root;
         }
     
         # TBD: Score for submodels
@@ -1698,13 +1716,13 @@ sub Model_selectionChanged
         my $score = $model->is_default_module($m);
 
         if ($is_model) {
-            $next_root->background(alt_implementation_col)->setTexture(submodel_pix());
+            $next_root->setIcon(alt_implementation_col, Qt::Icon(submodel_pix()));
 
         } else {
             if ($score) {
-                $next_root->background(alt_implementation_col)->setTexture(module_default_pix());
+                $next_root->setIcon(alt_implementation_col, Qt::Icon(module_default_pix()));
             } else {
-                $next_root->background(alt_implementation_col)->setTexture(module_pix());
+                $next_root->setIcon(alt_implementation_col, Qt::Icon(module_pix()));
             }
         }
     
@@ -1722,7 +1740,7 @@ sub Model_selectionChanged
     }
 
     if (defined($module_default)) {
-        $module_default->background(alt_implementation_col)->setTexture(module_current_pix());
+        $module_default->setIcon(alt_implementation_col, Qt::Icon(module_current_pix()));
     }
 
     #
@@ -2174,7 +2192,7 @@ sub modulePaint
     my $module = shift;
 
     if (! defined($module)) {
-        $item->background(module_type_col)->setTexture(module_missing_pix());
+        $item->setIcon(module_type_col, Qt::Icon(module_missing_pix()));
         $item->setText(module_flags_col, trUtf8("     "));
         $item->setText(module_implementation_col, trUtf8(""));
         $item->setText(module_file_col, trUtf8(""));
@@ -2184,12 +2202,12 @@ sub modulePaint
     our $model;
 
     if (ref($module) eq "Asim::Model") {
-        $item->background(module_type_col)->setTexture(submodel_pix());
+        $item->setIcon(module_type_col, Qt::Icon(submodel_pix()));
     } else {
         if ($model->is_default_module($module)) {
-            $item->background(module_type_col)->setTexture(module_default_pix());
+            $item->setIcon(module_type_col, Qt::Icon(module_default_pix()));
         } else {
-            $item->background(module_type_col)->setTexture(module_pix());
+            $item->setIcon(module_type_col, Qt::Icon(module_pix()));
         }
     }
 

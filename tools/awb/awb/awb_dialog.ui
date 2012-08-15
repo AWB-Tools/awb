@@ -1414,7 +1414,7 @@
                 <string>This is a list of bundle, where each bundle represents a set of packages that are available to be checked out as a group. Select one;  optionally pick a version in the drop-down list below and click checkout to add all the packages in the bundle to your workspace.</string>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="tab">
                 <attribute name="title">
@@ -1626,7 +1626,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
                       <string>All</string>
                      </property>
                      <property name="checked">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -2614,22 +2614,6 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    </hints>
   </connection>
   <connection>
-   <sender>model_list</sender>
-   <signal>customContextMenuRequested(QPoint)</signal>
-   <receiver>awb_dialog</receiver>
-   <slot>model_list_contextMenuRequested(QPoint)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>479</x>
-     <y>294</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>351</x>
-     <y>368</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>model_tree</sender>
    <signal>itemActivated(QTreeWidgetItem*,int)</signal>
    <receiver>awb_dialog</receiver>
@@ -2778,22 +2762,6 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    <signal>itemSelectionChanged()</signal>
    <receiver>awb_dialog</receiver>
    <slot>benchmark_list_selectionChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>367</x>
-     <y>217</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>250</x>
-     <y>354</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>benchmark_list</sender>
-   <signal>customContextMenuRequested(QPoint)</signal>
-   <receiver>awb_dialog</receiver>
-   <slot>benchmark_list_contextMenuRequested(QPoint)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>367</x>
