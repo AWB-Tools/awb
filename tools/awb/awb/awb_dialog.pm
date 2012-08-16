@@ -89,6 +89,7 @@ use QtCore4::slots
     refreshPushButton_clicked => [],
     updatePushButton_clicked => [],
     pushBusyCursor => [],
+    helpWhatsThisAction_activated => [],
     popBusyCursor => [];
 
 sub repoType {
@@ -1811,6 +1812,11 @@ sub packagesInit
     }
 
 
+}
+
+sub helpWhatsThisAction_activated 
+{
+    Qt::WhatsThis::enterWhatsThisMode();
 }
 
 sub pushBusyCursor

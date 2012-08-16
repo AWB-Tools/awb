@@ -125,7 +125,7 @@
        <string>Double click an alternative module to replace the current module in the model</string>
       </property>
       <property name="whatsThis">
-       <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type &quot;model&quot;. Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the &quot;Alternative Modules&quot; pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type &amp;quot;model&amp;quot;. Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the &amp;quot;Alternative Modules&amp;quot; pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="lineWidth">
        <number>2</number>
@@ -225,7 +225,7 @@
            <string>Refresh the module database cache</string>
           </property>
           <property name="whatsThis">
-           <string>This pane shows the possible alternatives for the module selected in the &quot;Model&quot; pane. The currently selected module here is described in the &quot;Description&quot; pane to the right. Double clicking on a module will insert the selected module into the model.</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This pane shows the possible alternatives for the module selected in the &amp;quot;Model&amp;quot; pane. The currently selected module here is described in the &amp;quot;Description&amp;quot; pane to the right. Double clicking on a module will insert the selected module into the model.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="indentation">
            <number>0</number>
@@ -243,7 +243,7 @@
            <string>Refresh the module database cache</string>
           </property>
           <property name="whatsThis">
-           <string>The list of available modules is maintained in a cache. If a newly created module is not being offered as an alternative, click here to refresh the cache.</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;The list of available modules is maintained in a cache. If a newly created module is not being offered as an alternative, click here to refresh the cache.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Refresh</string>
@@ -258,7 +258,7 @@
          <enum>Qt::PreventContextMenu</enum>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="summaryPage">
          <attribute name="title">
@@ -271,7 +271,7 @@
              <string>Description of module selected in alternatives pane to the left.</string>
             </property>
             <property name="whatsThis">
-             <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This pane describes the module selected in the &amp;quot;Module Alternatives&amp;quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -290,7 +290,7 @@
                <string>Description of module selected in alternatives pane to the left.</string>
               </property>
               <property name="whatsThis">
-               <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This pane describes the module selected in the &amp;quot;Module Alternatives&amp;quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -318,7 +318,7 @@
                  <string>Edit all the source files for this module</string>
                 </property>
                 <property name="whatsThis">
-                 <string>Open in your editor all the source files for the module selected in the Alternative Modules pane.</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Open in your editor all the source files for the module selected in the Alternative Modules pane.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>&amp;Open</string>
@@ -345,7 +345,7 @@
              <string>Description of module selected in alternatives pane to the left&lt;</string>
             </property>
             <property name="whatsThis">
-             <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This pane describes the module selected in the &amp;quot;Module Alternatives&amp;quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -362,7 +362,7 @@
              <string>Description of module selected in alternatives pane to the left</string>
             </property>
             <property name="whatsThis">
-             <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This pane describes the module selected in the &amp;quot;Module Alternatives&amp;quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -405,7 +405,7 @@
                <string>New value for this parameter</string>
               </property>
               <property name="whatsThis">
-               <string>This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This box is enabled when a parameter is selected in the module information pane and that module is part of the current model . To enter a new value for this parameter enter the value here and hit return or the change button. Entering blank will restore the default value for this parameter.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -518,6 +518,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="helpWhatsThisAction"/>
     <addaction name="helpContentsAction"/>
     <addaction name="helpIndexAction"/>
     <addaction name="separator"/>
@@ -877,6 +878,18 @@
   <action name="actionAutobuild">
    <property name="text">
     <string>Autobuild</string>
+   </property>
+  </action>
+  <action name="helpWhatsThisAction">
+   <property name="icon">
+    <iconset resource="apm_edit.qrc">
+     <normaloff>:/images/whatsthis.png</normaloff>:/images/whatsthis.png</iconset>
+   </property>
+   <property name="text">
+    <string>What's This</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
    </property>
   </action>
  </widget>
@@ -1684,6 +1697,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>helpWhatsThisAction</sender>
+   <signal>activated()</signal>
+   <receiver>apm_edit</receiver>
+   <slot>helpWhatsThisAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>370</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>fileNew()</slot>
@@ -1748,5 +1777,6 @@
   <slot>viewOpen_build_folderAction_activated()</slot>
   <slot>viewOpen_run_folderAction_activated()</slot>
   <slot>viewShell_at_run_folderAction_activated()</slot>
+  <slot>helpWhatsThisAction_activated()</slot>
  </slots>
 </ui>

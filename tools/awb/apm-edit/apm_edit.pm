@@ -78,6 +78,7 @@ use QtCore4::slots
     ParamChange_clicked => [],
     Model_find => [],
     Model_walk => [],
+    helpWhatsThisAction_activated => [],
     pushBusyCursor => [],
     popBusyCursor => [];
  
@@ -185,6 +186,7 @@ sub createToolBars
     ui()->toolBar()->addAction(ui()->fileOpenAction());
     ui()->toolBar()->addAction(ui()->fileSaveAction());
     ui()->toolBar()->addAction(ui()->filePrintAction());
+    ui()->toolBar()->addAction(ui()->helpWhatsThisAction());
     ui()->toolBar()->addWidget(ui()->searchLabel());
     ui()->toolBar()->addWidget(ui()->search());
     
@@ -2641,7 +2643,10 @@ sub apm_edit::Model_walk
     
 }
 
-
+sub helpWhatsThisAction_activated
+{
+    Qt::WhatsThis::enterWhatsThisMode();
+}
 
 sub pushBusyCursor
 {

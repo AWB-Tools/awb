@@ -66,7 +66,7 @@
            </property>
            <widget class="QTreeWidget" name="model_tree">
             <property name="whatsThis">
-             <string>This tab page allows one to configure a model. Select a model directory in the upper left panel and then select a model in the upper right panel. Clicking the 'configure' button will configure that model. Click 'next' to move to the next step</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This tab page allows one to configure a model. Select a model directory in the upper left panel and then select a model in the upper right panel. Clicking the 'configure' button will configure that model. Click 'next' to move to the next step&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <column>
              <property name="text">
@@ -521,7 +521,7 @@
            </property>
            <widget class="QTreeWidget" name="benchmark_tree">
             <property name="whatsThis">
-             <string>This tab page allows one to set up a benchmark. Select a benchmark directory in the upper left panel and then select a benchmark in the the upper right panel. Then clicking the 'setup' button will set up the benchmark. Click 'next' to move to the next step.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This tab page allows one to set up a benchmark. Select a benchmark directory in the upper left panel and then select a benchmark in the the upper right panel. Then clicking the 'setup' button will set up the benchmark. Click 'next' to move to the next step.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <column>
              <property name="text">
@@ -607,7 +607,7 @@
           <item>
            <widget class="QListWidget" name="paramList">
             <property name="whatsThis">
-             <string>This tab allows one to set the dynamic parameters for a benchmark run. First click refresh to get the set of parameters. Then select a parameter and enter a new value in the lower right edit box. Click update to use the new value. Click 'next' to move to the next step.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This tab allows one to set the dynamic parameters for a benchmark run. First click refresh to get the set of parameters. Then select a parameter and enter a new value in the lower right edit box. Click update to use the new value. Click 'next' to move to the next step.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -1143,7 +1143,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_13">
             <property name="whatsThis">
-             <string>This tab page allows one to analyze the results of a benchmark run using some of the standard Asim tools</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This tab page allows one to analyze the results of a benchmark run using some of the standard Asim tools&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="title">
              <string>Analysis Tool</string>
@@ -1268,7 +1268,7 @@
         <item>
          <widget class="QSplitter" name="splitter_5">
           <property name="whatsThis">
-           <string>This group of controls allows one to create and switch workspaces. The top edit box contains a directory that contains (or will contain) workspace directories. The new workspace edit box contains the name for a new workspace, and the old workspace dropdown list contains the names of workspaces in the current directory. The create button creates a new workspace with the specified name and the switch button switches to the selected workspace</string>
+           <string/>
           </property>
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -1278,6 +1278,9 @@
             <enum>Qt::Vertical</enum>
            </property>
            <widget class="QGroupBox" name="groupBox_15">
+            <property name="whatsThis">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This group of controls allows one to create and switch workspaces. The top edit box contains a directory that contains (or will contain) workspace directories. The new workspace edit box contains the name for a new workspace, and the old workspace dropdown list contains the names of workspaces in the current directory. The create button creates a new workspace with the specified name and the switch button switches to the selected workspace&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="title">
              <string>Workspace</string>
             </property>
@@ -1294,7 +1297,7 @@
                 <string>Enter a directory containing workspaces</string>
                </property>
                <property name="whatsThis">
-                <string>This is the name of a directory that contains subdirectories, each of which is a workspace.</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This is the name of a directory that contains subdirectories, each of which is a workspace.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -1348,7 +1351,7 @@
                 <string>Enter a name for the new workspace</string>
                </property>
                <property name="whatsThis">
-                <string>This text box contains the name of a workspace to be created. Click the 'Create' button to the right to create it.</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This text box contains the name of a workspace to be created. Click the 'Create' button to the right to create it.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -1384,7 +1387,7 @@
                 <string>Select a workspace do switch to</string>
                </property>
                <property name="whatsThis">
-                <string>This drop-down box contains a list of workspaces in the directory shown two text boxes above. Use this drop-down box to select a different workspace and click the 'switch' button to the right to switch to that workspace.</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This drop-down box contains a list of workspaces in the directory shown two text boxes above. Use this drop-down box to select a different workspace and click the 'switch' button to the right to switch to that workspace.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -1402,7 +1405,7 @@
            </widget>
            <widget class="QGroupBox" name="groupBox_16">
             <property name="whatsThis">
-             <string>This group of controls are used to check out a package. Select a repository name in the listbox and optionally provide a username and password for the checkout. Then click 'checkout'. The 'build' checkbox controls whether the package will be built after the checkout.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This group of controls are used to check out a package. Select a repository name in the listbox and optionally provide a username and password for the checkout. Then click 'checkout'. The 'build' checkbox controls whether the package will be built after the checkout.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="title">
              <string>Repositories</string>
@@ -1411,7 +1414,7 @@
              <item row="0" column="0">
               <widget class="QTabWidget" name="repositoriesTabWidget">
                <property name="whatsThis">
-                <string>This is a list of bundle, where each bundle represents a set of packages that are available to be checked out as a group. Select one;  optionally pick a version in the drop-down list below and click checkout to add all the packages in the bundle to your workspace.</string>
+                <string/>
                </property>
                <property name="currentIndex">
                 <number>0</number>
@@ -1424,7 +1427,7 @@
                  <item>
                   <widget class="QListWidget" name="checkoutListWidget">
                    <property name="whatsThis">
-                    <string>This is a list of repositories containing packages that are available to be checked out. Select one;  optionally pick a version in the drop-down list below and click checkout to add the package to your workspace.</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This is a list of repositories containing packages that are available to be checked out. Select one;  optionally pick a version in the drop-down list below and click checkout to add the package to your workspace.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                   </widget>
                  </item>
@@ -1444,6 +1447,9 @@
                 <layout class="QVBoxLayout" name="_21">
                  <item>
                   <widget class="QListWidget" name="checkoutBundleListWidget">
+                   <property name="whatsThis">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This is a list of bundle, where each bundle represents a set of packages that are available to be checked out as a group. Select one;  optionally pick a version in the drop-down list below and click checkout to add all the packages in the bundle to your workspace.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::SingleSelection</enum>
                    </property>
@@ -1595,7 +1601,7 @@
             <item>
              <widget class="QGroupBox" name="groupBox_17">
               <property name="whatsThis">
-               <string>This group of controls allows one to update, commit or delete one or more packages in your workspace. Select one or more packages in the listbox (or check the 'all' checkbox). Select the desired action and click the button. The 'build' checkbox controls whether the package is built after an update.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This group of controls allows one to update, commit or delete one or more packages in your workspace. Select one or more packages in the listbox (or check the 'all' checkbox). Select the desired action and click the button. The 'build' checkbox controls whether the package is built after an update.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="title">
                <string>Packages</string>
@@ -1606,9 +1612,7 @@
                  <item>
                   <widget class="QListWidget" name="updatePackagesListWidget">
                    <property name="whatsThis">
-                    <string>This box contains a list of packages available in the current workspace. Select one or check the 'All' checkbox below; select an operation via a radio button to the right and then push the 'Execute' button.
-
-IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will determine if the packages will be re-built after they are updated.</string>
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This box contains a list of packages available in the current workspace. Select one or check the 'All' checkbox below; select an operation via a radio button to the right and then push the 'Execute' button.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will determine if the packages will be re-built after they are updated.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                    </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -1662,7 +1666,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
                </size>
               </property>
               <property name="whatsThis">
-               <string>This group of controls allows one to update, commit or delete one or more packages in your workspace. Select one or more packages in the listbox (or check the 'all' checkbox). Select the desired action and click the button. The 'build' checkbox controls whether the package is built after an update.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This group of controls allows one to update, commit or delete one or more packages in your workspace. Select one or more packages in the listbox (or check the 'all' checkbox). Select the desired action and click the button. The 'build' checkbox controls whether the package is built after an update.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="title">
                <string>Action</string>
@@ -1943,13 +1947,13 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    </property>
    <widget class="QMenu" name="fileMenu">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="exit"/>
    </widget>
    <widget class="QMenu" name="editMenu">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="refresh"/>
     <addaction name="rehash"/>
@@ -1959,7 +1963,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
      <enum>Qt::NoFocus</enum>
     </property>
     <property name="title">
-     <string>Model</string>
+     <string>&amp;Model</string>
     </property>
     <addaction name="newModel"/>
     <addaction name="editModel"/>
@@ -1971,7 +1975,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    </widget>
    <widget class="QMenu" name="benchmarkMenu">
     <property name="title">
-     <string>Benchmark</string>
+     <string>&amp;Benchmark</string>
     </property>
     <addaction name="newBenchmark"/>
     <addaction name="editBenchmark"/>
@@ -1980,7 +1984,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    </widget>
    <widget class="QMenu" name="Help">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="manual"/>
     <addaction name="about"/>
@@ -1988,7 +1992,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    </widget>
    <widget class="QMenu" name="Tools">
     <property name="title">
-     <string>Tools</string>
+     <string>&amp;Tools</string>
     </property>
     <addaction name="findReplace"/>
    </widget>
@@ -2037,7 +2041,7 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
     <string>Exit</string>
    </property>
    <property name="shortcut">
-    <string>Alt+F</string>
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="refresh">
@@ -2052,22 +2056,25 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
   </action>
   <action name="newModel">
    <property name="text">
-    <string>&amp;New</string>
+    <string>New</string>
    </property>
   </action>
   <action name="editModel">
    <property name="text">
     <string>&amp;Edit</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
   </action>
   <action name="openModel_Containing_Folder">
    <property name="text">
-    <string>&amp;Open Containing Folder</string>
+    <string>Open Containing Folder</string>
    </property>
   </action>
   <action name="shellModel_at_Containing_Folder">
    <property name="text">
-    <string>&amp;Shell at Containing Folder</string>
+    <string>Shell at Containing Folder</string>
    </property>
   </action>
   <action name="cleanModel">
@@ -2077,12 +2084,12 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
   </action>
   <action name="configureModel">
    <property name="text">
-    <string>&amp;Configure</string>
+    <string>Configure</string>
    </property>
   </action>
   <action name="buildModel">
    <property name="text">
-    <string>&amp;Build</string>
+    <string>Build</string>
    </property>
   </action>
   <action name="newBenchmark">
@@ -2124,10 +2131,16 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
    <property name="text">
     <string>What's This</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
+   </property>
   </action>
   <action name="findReplace">
    <property name="text">
-    <string>Find/Replace</string>
+    <string>&amp;Find/Replace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>
@@ -3429,6 +3442,22 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>helpWhatsThisAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_dialog</receiver>
+   <slot>helpWhatsThisAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>348</x>
+     <y>355</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>clicked(QTreeWidgetItem*)</signal>
@@ -3516,5 +3545,6 @@ IF the 'Update' operation is selected, then the package(s) 'Build' checkbox will
   <slot>popBusyCursor()</slot>
   <slot>extraBuildSwitches_textChanged(QString)</slot>
   <slot>extraRunSwitches_textChanged(QString)</slot>
+  <slot>helpWhatsThisAction_activated()</slot>
  </slots>
 </ui>
