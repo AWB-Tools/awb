@@ -10541,3 +10541,16 @@ apm-edit
 awb
 We need to do something about the lack of some separator line between
 the sections
+
+----------
+mgambhir    Date: Thu Aug 16 01:27:29 EDT 2012  CSN: CSN-awb-517
+                  Thu Aug 16 05:27:29 UTC 2012
+
+
+Directory tools/awb/apm-edit
+ apm_edit.pm               Locally Modified          516 
+ apm_edit.ui               Locally Modified          516 
+
+- Put shortcuts for menus in apm-edit
+- "Type" column in model TreeWidget should now resize based on content. 
+- Added WhatsThis and ToolTips data in apm-edit. 

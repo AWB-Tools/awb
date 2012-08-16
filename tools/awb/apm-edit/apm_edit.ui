@@ -121,6 +121,12 @@
       <property name="contextMenuPolicy">
        <enum>Qt::ActionsContextMenu</enum>
       </property>
+      <property name="toolTip">
+       <string>Double click an alternative module to replace the current module in the model</string>
+      </property>
+      <property name="whatsThis">
+       <string>This pane contains a tree representing the current model. The root of the tree is the module that provides a implementation of asim-type &quot;model&quot;. Hierarchically required modules are represented as the branches of the tree. The text to the left is the asim-type of the module. The text to the right is the name of the currently selected implementaiton of a module of this type. To chose or replace a module implementation, first select a row in this pane and then double-click on the desired module implementation in the &quot;Alternative Modules&quot; pane below. If 'autoselect' is enabled the 'best' module implementation based on the model attributes will be automatically selected.</string>
+      </property>
       <property name="lineWidth">
        <number>2</number>
       </property>
@@ -215,6 +221,12 @@
           <property name="contextMenuPolicy">
            <enum>Qt::ActionsContextMenu</enum>
           </property>
+          <property name="toolTip">
+           <string>Refresh the module database cache</string>
+          </property>
+          <property name="whatsThis">
+           <string>This pane shows the possible alternatives for the module selected in the &quot;Model&quot; pane. The currently selected module here is described in the &quot;Description&quot; pane to the right. Double clicking on a module will insert the selected module into the model.</string>
+          </property>
           <property name="indentation">
            <number>0</number>
           </property>
@@ -227,6 +239,12 @@
         </item>
         <item>
          <widget class="QPushButton" name="cacheRefresh">
+          <property name="toolTip">
+           <string>Refresh the module database cache</string>
+          </property>
+          <property name="whatsThis">
+           <string>The list of available modules is maintained in a cache. If a newly created module is not being offered as an alternative, click here to refresh the cache.</string>
+          </property>
           <property name="text">
            <string>Refresh</string>
           </property>
@@ -240,7 +258,7 @@
          <enum>Qt::PreventContextMenu</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="summaryPage">
          <attribute name="title">
@@ -248,7 +266,14 @@
          </attribute>
          <layout class="QGridLayout" name="_3">
           <item row="0" column="0">
-           <widget class="QListWidget" name="info"/>
+           <widget class="QListWidget" name="info">
+            <property name="toolTip">
+             <string>Description of module selected in alternatives pane to the left.</string>
+            </property>
+            <property name="whatsThis">
+             <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -260,7 +285,14 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
-             <widget class="QListWidget" name="files"/>
+             <widget class="QListWidget" name="files">
+              <property name="toolTip">
+               <string>Description of module selected in alternatives pane to the left.</string>
+              </property>
+              <property name="whatsThis">
+               <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.</string>
+              </property>
+             </widget>
             </item>
             <item>
              <layout class="QHBoxLayout" name="_5">
@@ -308,7 +340,14 @@
          </attribute>
          <layout class="QGridLayout" name="_8">
           <item row="0" column="0">
-           <widget class="QListWidget" name="notes"/>
+           <widget class="QListWidget" name="notes">
+            <property name="toolTip">
+             <string>Description of module selected in alternatives pane to the left&lt;</string>
+            </property>
+            <property name="whatsThis">
+             <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the Parameters tab.</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -318,7 +357,14 @@
          </attribute>
          <layout class="QVBoxLayout" name="_6">
           <item>
-           <widget class="QListWidget" name="parameters"/>
+           <widget class="QListWidget" name="parameters">
+            <property name="toolTip">
+             <string>Description of module selected in alternatives pane to the left</string>
+            </property>
+            <property name="whatsThis">
+             <string>This pane describes the module selected in the &quot;Module Alternatives&quot; pane to the left. If the module being displayed is part of the current model, the parameters of the module can be changed using the text box below.</string>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="_7">
@@ -441,7 +487,7 @@
     </property>
     <widget class="QMenu" name="menuInsert">
      <property name="title">
-      <string>&amp;Insert</string>
+      <string>Insert</string>
      </property>
      <addaction name="moduleInsertSubmodelAction"/>
      <addaction name="moduleInsertModuleAction"/>
@@ -490,6 +536,7 @@
     <addaction name="modelRunAction"/>
     <addaction name="separator"/>
     <addaction name="modelPropertiesAction"/>
+    <addaction name="actionAutobuild"/>
    </widget>
    <addaction name="fileMenu"/>
    <addaction name="editMenu"/>
@@ -519,6 +566,9 @@
    <property name="text">
     <string>&amp;New</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -531,6 +581,9 @@
    <property name="text">
     <string>&amp;Open...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="fileSaveAction">
    <property name="icon">
@@ -540,10 +593,13 @@
    <property name="text">
     <string>&amp;Save</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="fileSaveAsAction">
    <property name="text">
-    <string>Save &amp;As...</string>
+    <string>Save As...</string>
    </property>
   </action>
   <action name="filePrintAction">
@@ -554,10 +610,16 @@
    <property name="text">
     <string>&amp;Print...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
   <action name="fileExitAction">
    <property name="text">
-    <string>E&amp;xit</string>
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="editUndoAction">
@@ -566,7 +628,10 @@
      <normaloff>:/images/undo.png</normaloff>:/images/undo.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Undo</string>
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
    </property>
   </action>
   <action name="editRedoAction">
@@ -575,7 +640,10 @@
      <normaloff>:/images/redo.png</normaloff>:/images/redo.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Redo</string>
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
    </property>
   </action>
   <action name="editCutAction">
@@ -584,7 +652,10 @@
      <normaloff>:/images/editcut.png</normaloff>:/images/editcut.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Cut</string>
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
   <action name="editCopyAction">
@@ -593,7 +664,10 @@
      <normaloff>:/images/editcopy.png</normaloff>:/images/editcopy.png</iconset>
    </property>
    <property name="text">
-    <string>C&amp;opy</string>
+    <string>&amp;Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="editPasteAction">
@@ -602,7 +676,10 @@
      <normaloff>:/images/editpaste.png</normaloff>:/images/editpaste.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Paste</string>
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
   <action name="editFindAction">
@@ -613,20 +690,26 @@
    <property name="text">
     <string>&amp;Find...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
   </action>
   <action name="editFindMissingAction">
    <property name="text">
-    <string>Find Missing</string>
+    <string>Find &amp;Missing</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
   <action name="viewOpen_build_folderAction">
    <property name="text">
-    <string>&amp;Open build folder</string>
+    <string>Open build folder</string>
    </property>
   </action>
   <action name="viewShell_at_build_folderAction">
    <property name="text">
-    <string>&amp;Shell at build folder</string>
+    <string>Shell at build folder</string>
    </property>
   </action>
   <action name="viewOpen_run_folderAction">
@@ -641,37 +724,52 @@
   </action>
   <action name="modelNukeAction">
    <property name="text">
-    <string>&amp;Nuke</string>
+    <string>Nuke</string>
    </property>
   </action>
   <action name="modelConfigureAction">
    <property name="text">
-    <string>&amp;Configure</string>
+    <string>Configure</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
    </property>
   </action>
   <action name="modelCleanAction">
    <property name="text">
-    <string>C&amp;lean</string>
+    <string>Clean</string>
    </property>
   </action>
   <action name="modelBuildAction">
    <property name="text">
-    <string>&amp;Build</string>
+    <string>Build</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
    </property>
   </action>
   <action name="modelSetupAction">
    <property name="text">
-    <string>Set&amp;up</string>
+    <string>Setup</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
   <action name="modelRunAction">
    <property name="text">
-    <string>&amp;Run</string>
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
   </action>
   <action name="modelPropertiesAction">
    <property name="text">
-    <string>&amp;Properties</string>
+    <string>Properties</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Return</string>
    </property>
   </action>
   <action name="modelAutobuildAction">
@@ -681,27 +779,33 @@
   </action>
   <action name="moduleNewAction">
    <property name="text">
-    <string>&amp;New</string>
+    <string>New</string>
    </property>
   </action>
   <action name="moduleEditAction">
    <property name="text">
     <string>&amp;Edit</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
   </action>
   <action name="moduleOpen_containing_folderAction">
    <property name="text">
-    <string>&amp;Open containing folder</string>
+    <string>Open containing folder</string>
    </property>
   </action>
   <action name="moduleShell_at_containing_folderAction">
    <property name="text">
-    <string>&amp;Shell at containing folder</string>
+    <string>Shell at containing folder</string>
    </property>
   </action>
   <action name="moduleNotesAction">
    <property name="text">
     <string>&amp;Notes</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
   <action name="moduleInsertModuleAction">
@@ -723,45 +827,56 @@
    <property name="text">
     <string>&amp;Delete</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
   </action>
   <action name="alternativesInsertAction">
    <property name="text">
-    <string>&amp;Insert</string>
+    <string>Insert</string>
    </property>
   </action>
   <action name="alternativesEditAction">
    <property name="text">
-    <string>&amp;Edit</string>
+    <string>Edit</string>
    </property>
   </action>
   <action name="alternativesOpen_containing_folderAction">
    <property name="text">
-    <string>&amp;Open containing folder</string>
+    <string>Open containing folder</string>
    </property>
   </action>
   <action name="alternativesShell_at_containing_folderAction">
    <property name="text">
-    <string>&amp;Shell at containing folder</string>
+    <string>Shell at containing folder</string>
    </property>
   </action>
   <action name="alternativesRefreshAction">
    <property name="text">
     <string>&amp;Refresh</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="helpContentsAction">
    <property name="text">
-    <string>&amp;Contents...</string>
+    <string>Contents...</string>
    </property>
   </action>
   <action name="helpIndexAction">
    <property name="text">
-    <string>&amp;Index...</string>
+    <string>Index...</string>
    </property>
   </action>
   <action name="helpAboutAction">
    <property name="text">
-    <string>&amp;About...</string>
+    <string>About...</string>
+   </property>
+  </action>
+  <action name="actionAutobuild">
+   <property name="text">
+    <string>Autobuild</string>
    </property>
   </action>
  </widget>

@@ -174,6 +174,9 @@ sub init
 
     createToolBars();
 
+    # set model tree columns to resize bases on the contents
+    ui()->model()->header()->setResizeMode(Qt::HeaderView::ResizeToContents());
+
 }
 
 sub createToolBars 
