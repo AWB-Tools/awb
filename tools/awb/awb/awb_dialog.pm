@@ -96,6 +96,11 @@ sub repoType {
     return this->{repoType};
 }
 
+sub ui() 
+{
+    return this->{ui};
+}
+
 sub NEW 
 {
     my ( $class, $parent ) = @_;
@@ -117,7 +122,7 @@ sub init
     my $workspace;
     my $root;
     my $root_item;
-    my $ui = this->{ui};
+    my $ui = ui();
 
 #    our $stepno = 1;
     our @steps;
@@ -201,7 +206,7 @@ sub init
 
 sub createContextMenus 
 {
-    my $ui = this->{ui};
+    my $ui = ui();
 
     # model_list context menu
     $ui->model_list()->addActions($ui->modelMenu()->actions());
@@ -260,7 +265,7 @@ sub model_tree_collapsed
 
 sub model_tree_selectionChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     model_tree_clicked($ui->model_tree()->selectedItems()->[0]);
 }
 
@@ -273,7 +278,7 @@ sub model_tree_returnPressed
 sub model_tree_onItem
 {
     my $item = shift;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     # Force model tree expansion
     if (!$item->isExpanded()) {
@@ -284,7 +289,7 @@ sub model_tree_onItem
 sub model_tree_clicked
 {
 
-    my $ui = this->{ui};
+    my $ui = ui();
 
     my $item = shift || return;
     my $name = $item->text(1);
@@ -305,14 +310,14 @@ sub model_tree_clicked
     for my $i (awb_util::glob_apm($name)) {
         print "awb_dialog::model_tree_clicked - Populating model list = $i\n" if $debug;
 
-        #my @color = (255, 255, 255);
-        #if ($ui->highlightProblemsCheckBox->isChecked()) {
-        #    my $mod = Asim::Model->new($i);
-        #    @color = (230, 165, 40) if ($mod->is_stale());
-        #    @color = (200, 0, 0) if ($mod->is_broken());
-        #}
-        #my $citem = ColoredListViewItem->NEW($ui->model_list, undef, undef, @color);
+        my $color = Qt::transparent();
+        if ($ui->highlightProblemsCheckBox->isChecked()) {
+            my $mod = Asim::Model->new($i);
+            $color = Qt::yellow() if ($mod->is_stale());
+            $color = Qt::red() if ($mod->is_broken());
+        }
         my $citem = Qt::TreeWidgetItem($ui->model_list(), 0);
+        $citem->setBackground(0, Qt::Brush(($color)));
         $citem->setChildIndicatorPolicy(1); 
         #$citem->setExpandable(1);
 
@@ -332,7 +337,7 @@ sub model_tree_clicked
 #
 sub model_list_selectionChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     model_list_clicked($ui->model_list()->selectedItems()->[0]);
 }
 
@@ -345,7 +350,7 @@ sub model_list_clicked
     my $model = undef;
     my $model_enable;
     my $model_options;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -463,7 +468,7 @@ sub benchmark_tree_collapsed
 
 sub benchmark_tree_selectionChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     benchmark_tree_clicked($ui->benchmark_tree()->selectedItems()->[0]);
 }
 
@@ -488,7 +493,7 @@ sub benchmark_tree_clicked
 {
     my $item = shift || return;
     my $name = $item->text(1);
-    my $ui = this->{ui};
+    my $ui = ui();
 
     print "awb_dialog::benchmark_tree_clicked - Item = $name\n" if $debug;
 
@@ -516,7 +521,7 @@ sub benchmark_tree_clicked
 
 sub benchmark_list_selectionChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     benchmark_list_clicked($ui->benchmark_list()->selectedItems()->[0]);
 }
 
@@ -528,7 +533,7 @@ sub benchmark_list_clicked
     my $file;
     my $benchmark = undef;
     my $benchmark_enable;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     print "awb_dialog::benchmark_list_clicked \n" if $debug;
     
@@ -584,7 +589,7 @@ sub model_list_doubleClicked
 
 sub highlightProblemsCheckBox_stateChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     if (my $item = $ui->model_tree->selectedItems()->[0]) {
         model_tree_clicked($item);
     }
@@ -598,42 +603,42 @@ sub highlightProblemsCheckBox_stateChanged
 
 sub nextStep_models_clicked
 {
-   my $ui = this->{ui};
+   my $ui = ui();
    $ui->tabsMain->setCurrentWidget($ui->tabBuildOpts());
 }
 
 
 sub nextStep_buildopts_clicked
 {
-   my $ui = this->{ui};
+   my $ui = ui();
    $ui->tabsMain->setCurrentWidget($ui->tabBenchmarks());
 }
 
 
 sub nextStep_benchmarks_clicked
 {
-   my $ui = this->{ui};
+   my $ui = ui();
    $ui->tabsMain->setCurrentWidget($ui->tabParameters());
 }
 
 
 sub nextStep_parameters_clicked
 {
-   my $ui = this->{ui};
+   my $ui = ui();
    $ui->tabsMain->setCurrentWidget($ui->tabRunOpts());
 }
 
 
 sub nextStep_runopts_clicked
 {
-   my $ui = this->{ui};
+   my $ui = ui();
    $ui->tabsMain->setCurrentWidget($ui->tabAnalysis());
 }
 
 
 sub nextStep_analysis_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     model_list_clicked(undef);
     benchmark_list_clicked(undef);
 
@@ -653,7 +658,7 @@ sub nextStep_analysis_clicked
 sub Refresh_activated()
 {
     my $item;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -676,7 +681,7 @@ sub Rehash_activated()
 
     my  $moduleDB = Asim::Module::DB->new(".");
     my $modelDB = Asim::Model::DB->new();
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -752,7 +757,7 @@ sub Button_nuke_clicked()
 sub Button_config_clicked()
 {
     my $status;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -793,7 +798,7 @@ sub Button_clean_clicked()
 sub Button_build_clicked()
 {
     my $status;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -838,7 +843,7 @@ sub EditBenchmark_activated()
 sub Button_setup_clicked
 {
     my $status;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -863,7 +868,7 @@ sub Button_setup_clicked
 sub Button_run_clicked
 {
     my $status;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     this->pushBusyCursor();
 
@@ -943,7 +948,7 @@ sub buildType_clicked
 sub extraBuildSwitches_textChanged
 {
     my $options = "";
-    my $ui = this->{ui};
+    my $ui = ui();
 
     if ($ui->documentationYes->isChecked()) {
         $options .= "dox";
@@ -998,7 +1003,7 @@ sub extraBuildSwitches_textChanged
 
 sub paramRefresh_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     $ui->paramList->clear();
 
     for my $i (awb_util::get_params_model()) {
@@ -1012,7 +1017,7 @@ sub paramList_itemClicked
 {
     my $item = shift;
     my $line = $item->text();
-    my $ui = this->{ui};
+    my $ui = ui();
 
     if ($line =~ "^([^=]+) = ([^ ]+) ") {
         $ui->paramName->setText($1);
@@ -1030,7 +1035,7 @@ sub paramList_itemClicked
 
 sub paramValue_returnPressed
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     paramUpdate_clicked();
 }
 
@@ -1039,7 +1044,7 @@ sub paramUpdate_clicked
 {
     my $item; 
     my $line; 
-    my $ui = this->{ui};
+    my $ui = ui();
 
     #
     # Get parameter line out of dialog box
@@ -1090,7 +1095,7 @@ sub paramUpdate_clicked
 
 sub traceRun_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     extraRunSwitches_textChanged();
 }
 
@@ -1099,7 +1104,7 @@ sub extraRunSwitches_textChanged
 {
     my $options = "";
     my $data;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     if ($data = $ui->endCycle->text()) {
         $options .= " -c $data";
@@ -1173,7 +1178,7 @@ sub viewStripChart_clicked
 
 sub viewCycleDisplay_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $adf = $ui->adfPath->text();
 
     awb_util::view_cycledisplay($adf);
@@ -1183,7 +1188,7 @@ sub viewCycleDisplay_clicked
 sub browseAdfPath_clicked
 {
     my $cwd;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     chomp($cwd = `pwd`);
     my $s = shift ||
@@ -1211,7 +1216,7 @@ sub browseAdfPath_clicked
 
 sub workspaceDirLineEdit_textChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $dir = shift;
 
     if ( -d $dir) {
@@ -1233,7 +1238,7 @@ sub workspaceDirLineEdit_textChanged
 
 sub workspaceBrowsePushButton_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $dir = Qt::FileDialog::getExistingDirectory(
                     this,
                     "Get directory to hold workspace",
@@ -1250,13 +1255,13 @@ sub workspaceBrowsePushButton_clicked
 
 sub workspaceNameLineEdit_returnPressed
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     $ui->workspaceCreatePushButton_clicked();
 }
 
 sub workspaceCreatePushButton_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $dir = $ui->workspaceDirLineEdit->text();
     if (! -d $dir) {
         Qt::MessageBox::information(
@@ -1323,7 +1328,7 @@ sub workspaceComboBox_activated
 
 sub workspaceSwitchPushButton_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
 
     my $dir = $ui->workspaceDirLineEdit->text();
     my $workspace = "$dir/" . $ui->workspaceComboBox->currentText();
@@ -1341,7 +1346,7 @@ sub workspaceSwitchPushButton_clicked
 
 sub repositoriesTabWidget_currentChanged
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     # Remember if we working on repositories or bundles
     
     this->{repoType} = shift;
@@ -1351,7 +1356,7 @@ sub repositoriesTabWidget_currentChanged
 
 sub checkoutListWidget_itemClicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $item = shift;
     my $repo = $item->text();
 
@@ -1365,7 +1370,7 @@ sub checkoutListWidget_itemClicked
 
 sub checkoutBundleListWidget_itemClicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $item = shift;
     my $bundle = $item->text();
 
@@ -1382,7 +1387,7 @@ sub checkoutBundleListWidget_itemClicked
 
 sub repositoryBrowsePushButton_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     if (repoType() == 0) {
         # Prepare to browse a repository
 
@@ -1419,7 +1424,7 @@ sub checkoutBundleListWidget_doubleClicked
 {
     my $item = shift;
     my $bundlename = $item->text();
-    my $ui = this->{ui};
+    my $ui = ui();
 
     my $version = $ui->bundleVersionComboBox->currentText();
     if ($version =~ /<.*>/) {
@@ -1449,7 +1454,7 @@ sub refreshReposPushButton_clicked
 sub checkoutPushButton_clicked
 {
     my $command = "asim-shell --batch -- checkout ";
-    my $ui = this->{ui};
+    my $ui = ui();
 
     if (repoType() == 0) {
         $command .= "package";
@@ -1546,7 +1551,7 @@ sub checkoutPushButton_clicked
 
 sub updatePackagesListWidget_itemClicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     $ui->updateAllCheckBox->setChecked(0);
 }
 
@@ -1554,7 +1559,7 @@ sub updatePackagesListWidget_itemClicked
 
 sub packagesBrowsePushButton_clicked
 {
-    my $ui = this->{ui};
+    my $ui = ui();
     my $max = scalar @{$ui->updatePackagesListWidget()->selectedItems()};
 
     for (my $i=0; $i < $max; $i++) {
@@ -1580,7 +1585,7 @@ sub updatePackagesListWidget_doubleClicked
 sub updateAllCheckBox_toggled
 {
     my $checked = shift;
-    my $ui = this->{ui};
+    my $ui = ui();
 
     if ($checked) {
         my $max = $ui->updatePackagesListWidget->count();
@@ -1611,7 +1616,7 @@ sub refreshPushButton_clicked
 sub updatePushButton_clicked
 {
     my $command = "asim-shell --batch -- ";
-    my $ui = this->{ui};
+    my $ui = ui();
 
     my $update = $ui->packageUpdateRadioButton->isChecked();
     my $commit = $ui->packageCommitRadioButton->isChecked();
@@ -1717,7 +1722,7 @@ sub setupInit
     #
     my $workspacedir = Asim::rootdir();
     my $workspacebase = dirname($workspacedir);
-    my $ui = this->{ui};
+    my $ui = ui();
 
     if (! -w $workspacebase) {
         $workspacebase = $ENV{HOME};
@@ -1738,7 +1743,7 @@ sub reposInit
 {
 
     my $repoDB = Asim::Repository::DB->new();
-    my $ui = this->{ui};
+    my $ui = ui();
 
     #
     # Set up repository list
@@ -1803,7 +1808,7 @@ sub packagesInit
     #
     my $packageDB = Asim::Package::DB->new();
     my @packages = $packageDB->directory();
-    my $ui = this->{ui};
+    my $ui = ui();
 
     $ui->updatePackagesListWidget->clear();
 

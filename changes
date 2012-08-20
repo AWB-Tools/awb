@@ -10572,3 +10572,21 @@ Directory tools/awb/apm-edit
 - Added WhatsThis button in apm-edit tool bar.
 - Fixed whatsThis property text formatting and color to make it visible.
 - Added shortcuts for menu bar actions in awb
+
+----------
+mgambhir    Date: Mon Aug 20 12:58:46 EDT 2012  CSN: CSN-awb-519
+                  Mon Aug 20 16:58:46 UTC 2012
+
+
+Directory tools/awb/awb
+ awb_dialog.ui             Locally Modified          518 
+ awb_dialog.pm             Locally Modified          518 
+
+Directory tools/awb/apm-edit
+ apm_edit.pm               Locally Modified          518 
+ apm_edit.ui               Locally Modified          518 
+
+- Fixed HighlightProblem check box functionality
+  - Broken models are now shown with red background and stale models are shown in yello background
+- Also fixed coloring in apm-edit. Selected alternate module is shown in orange. 
+- Alternate module list and model tree are now sorted based on module type

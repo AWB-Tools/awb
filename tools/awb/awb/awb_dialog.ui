@@ -99,6 +99,9 @@
                <property name="text">
                 <string>Highlight Problems</string>
                </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
             </layout>

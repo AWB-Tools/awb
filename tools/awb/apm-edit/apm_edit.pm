@@ -1680,29 +1680,27 @@ sub Model_selectionChanged
     # Display all the other modules
     #
     foreach my $m (@models, @modules) {
-        #FIXME
-        #use ColoredListViewItem;
 
-        my @color = (255,255,255);
+        my $color = Qt::transparent();
 
         if ($m->is_obsolete()) {
             # Make obsolete modules yellow
-            @color = (255, 255, 128);
+            $color = Qt::yellow();
         }
 
         if ($module_name eq $m->name()) {
             # Make current module orange
-            @color = (230, 165, 40);
+            $color = Qt::Color(230, 165, 40);
         }
 
-        #my $next_root = ColoredListViewItem(Alternatives, undef, undef, @color);
         my $next_root = Qt::TreeWidgetItem(ui()->alternatives, 0);
+        $next_root->setBackground(alt_implementation_col, Qt::Brush($color));
     
         $next_root->setText(alt_implementation_col, trUtf8($m->name()));
         $next_root->setText(alt_file_col, trUtf8($m->filename()));
 
-	my $sortname = sprintf("%2d - %s", $m->template(), $m->name());
-	$next_root->setText(alt_sort_col, $sortname);
+	    my $sortname = sprintf("%2d - %s", $m->template(), $m->name());
+	    $next_root->setText(alt_sort_col, $sortname);
 
         if ($module_name eq $m->name()) {
             # 
@@ -1775,12 +1773,8 @@ sub Model_selectionChanged
       print $@ if $@;
     }
 
-#
-#   Try to sort alphabetically, but with templates at bottom
-#   TBD: Figure out why this doesn't work
-# 
-#    ui()->alternatives->setSorting(2);
-#    ui()->alternatives->sort();
+    ui()->alternatives->sortItems(alt_implementation_col, 0);
+    ui()->model->sortItems(module_type_col, 0);
 }
 
 
