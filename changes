@@ -10590,3 +10590,33 @@ Directory tools/awb/apm-edit
   - Broken models are now shown with red background and stale models are shown in yello background
 - Also fixed coloring in apm-edit. Selected alternate module is shown in orange. 
 - Alternate module list and model tree are now sorted based on module type
+
+----------
+mgambhir    Date: Tue Aug 21 11:13:13 EDT 2012  CSN: CSN-awb-520
+                  Tue Aug 21 15:13:13 UTC 2012
+
+
+Directory .
+ configure.in              Locally Modified          519 
+
+Directory tools/awb
+ apm-find-replace/         Locally Added               0 
+
+Directory tools/awb/apm-find-replace
+ Makefile.in               Locally Added               0 
+ apm_find_replace.pm       Locally Added               0 
+ apm_find_replace_head.pl  Locally Added               0 
+ apm_find_replace.ui       Locally Added               0 
+ apm_find_replace_main.pl  Locally Added               0 
+ Makefile.am               Locally Added               0 
+ apm_find_replace.ui.h     Locally Added               0 
+
+Directory tools/awb
+ Makefile.am               Locally Modified          519 
+ Makefile.in               Locally Modified          519 
+
+Directory .
+ configure                 Locally Modified          519 
+
+- Added PerlQt4 ported apm-find-replace gui. 
+- Slots/Signals need to be ported still and dont yet work. 

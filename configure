@@ -17574,6 +17574,8 @@ ac_config_files="$ac_config_files tools/awb/amc/Makefile"
 
 ac_config_files="$ac_config_files tools/awb/apm-edit/Makefile"
 
+ac_config_files="$ac_config_files tools/awb/apm-find-replace/Makefile"
+
 ac_config_files="$ac_config_files tools/awb_qt3/Makefile"
 
 ac_config_files="$ac_config_files tools/awb_qt3/amc/Makefile"
@@ -18739,6 +18741,7 @@ do
     "tools/awb/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/awb-resolver/Makefile" ;;
     "tools/awb/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/amc/Makefile" ;;
     "tools/awb/apm-edit/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/apm-edit/Makefile" ;;
+    "tools/awb/apm-find-replace/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb/apm-find-replace/Makefile" ;;
     "tools/awb_qt3/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/Makefile" ;;
     "tools/awb_qt3/amc/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/amc/Makefile" ;;
     "tools/awb_qt3/awb-resolver/Makefile") CONFIG_FILES="$CONFIG_FILES tools/awb_qt3/awb-resolver/Makefile" ;;

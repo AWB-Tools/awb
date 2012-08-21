@@ -1,0 +1,1574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>apmFindReplace</class>
+ <widget class="QMainWindow" name="apmFindReplace">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>566</width>
+    <height>702</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>apm-find-replace</string>
+  </property>
+  <widget class="QWidget" name="widget">
+   <layout class="QVBoxLayout">
+    <item>
+     <widget class="QSplitter" name="splitter4">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QTabWidget" name="operationTabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tabFind">
+        <attribute name="title">
+         <string>Find</string>
+        </attribute>
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QGroupBox" name="Find">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="title">
+            <string>Find</string>
+           </property>
+           <layout class="QGridLayout">
+            <item row="2" column="1">
+             <spacer name="spacer1">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>70</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLineEdit" name="rootdirLineEdit">
+              <property name="toolTip">
+               <string>Enter directory to start search from</string>
+              </property>
+              <property name="whatsThis">
+               <string>Enter into this text box the directory to start the recursive seac for models. The directory is relative to the root of the workspace, and will typically be something in config/pm. Searches use the Asim search path, so like named directories in all packages will be searched.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QComboBox" name="findModuleTypeComboBox">
+              <property name="toolTip">
+               <string>Select a module type to search modles for</string>
+              </property>
+              <property name="whatsThis">
+               <string>Pick a type of module from this list to search for.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="rootCheckBox">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>Only check type of root module of model</string>
+              </property>
+              <property name="whatsThis">
+               <string>If this box is checked, then modify the search to only examine the root node of each model to see if the module type matches.</string>
+              </property>
+              <property name="text">
+               <string>Only match root module</string>
+              </property>
+              <property name="shortcut">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QCheckBox" name="invertCheckBox">
+              <property name="toolTip">
+               <string>Only select models NOT containing the given module type</string>
+              </property>
+              <property name="whatsThis">
+               <string>If this box is checked, then modify the sense of the search so that models that meet the search criteria are NOT selected, but all that do not ARE selected.</string>
+              </property>
+              <property name="text">
+               <string>Not containing</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="newPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Start a new search</string>
+              </property>
+              <property name="whatsThis">
+               <string>Clicking this button will start a new search, clearlng out the existing search.</string>
+              </property>
+              <property name="text">
+               <string>&amp;New</string>
+              </property>
+              <property name="shortcut">
+               <string>Alt+N</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="findPushButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Find models matching search criteria</string>
+              </property>
+              <property name="whatsThis">
+               <string>Clicking this button starts a recursive search starting from the directory specified in the directory text box for all models that contain a module of the selected type. The search uses the Asim search path, so models from all packages in the search path are examined. The resulting models are listed in the 'models' box below.</string>
+              </property>
+              <property name="text">
+               <string>&amp;Find</string>
+              </property>
+              <property name="shortcut">
+               <string>Alt+F</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabFilter">
+        <attribute name="title">
+         <string>Filter</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QGroupBox" name="groupBox4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>Filter</string>
+           </property>
+           <layout class="QGridLayout">
+            <item row="0" column="0">
+             <widget class="QGroupBox" name="groupBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="title">
+               <string>Action</string>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+              <widget class="QRadioButton" name="selectRadioButton">
+               <property name="geometry">
+                <rect>
+                 <x>17</x>
+                 <y>25</y>
+                 <width>63</width>
+                 <height>21</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Select</string>
+               </property>
+              </widget>
+              <widget class="QRadioButton" name="addRadioButton">
+               <property name="geometry">
+                <rect>
+                 <x>17</x>
+                 <y>52</y>
+                 <width>52</width>
+                 <height>21</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+              <widget class="QRadioButton" name="removeRadioButton">
+               <property name="geometry">
+                <rect>
+                 <x>17</x>
+                 <y>79</y>
+                 <width>72</width>
+                 <height>21</height>
+                </rect>
+               </property>
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="0" column="1" rowspan="4">
+             <widget class="QTabWidget" name="tabWidget3">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="tabBasic">
+               <attribute name="title">
+                <string>Basic</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0">
+                 <widget class="QLineEdit" name="filterLineEdit">
+                  <property name="toolTip">
+                   <string>Enter a regex to filter model selection</string>
+                  </property>
+                  <property name="whatsThis">
+                   <string>Enter a perl regex here, and when the 'name' button is pressed all models whose name matches the regex will satisfy the the match critieria.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QPushButton" name="filterPushButton">
+                  <property name="toolTip">
+                   <string>Filter selection to just models that match this regex</string>
+                  </property>
+                  <property name="text">
+                   <string>Name</string>
+                  </property>
+                  <property name="shortcut">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLineEdit" name="attrLineEdit">
+                  <property name="toolTip">
+                   <string>Enter a regex to filter model selection</string>
+                  </property>
+                  <property name="whatsThis">
+                   <string>Enter a string here, and when the 'attribute' button is pressed all models with an attribute equal to that string will satisfy the the match critieria.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QPushButton" name="attrPushButton">
+                  <property name="toolTip">
+                   <string>Filter selection to just models that have this attribute</string>
+                  </property>
+                  <property name="text">
+                   <string>Attribute</string>
+                  </property>
+                  <property name="shortcut">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QComboBox" name="filterModuleTypeComboBox">
+                  <property name="toolTip">
+                   <string>Select a module type to search modles for</string>
+                  </property>
+                  <property name="whatsThis">
+                   <string>Select a module type here, and when the 'type' button is pressed all models containging a module of the selected type will satisfy the the match critieria.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QPushButton" name="typePushButton">
+                  <property name="toolTip">
+                   <string>Filter selection to just models that contain a module of this type</string>
+                  </property>
+                  <property name="text">
+                   <string>Type</string>
+                  </property>
+                  <property name="shortcut">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QComboBox" name="filterModuleComboBox">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>Restrict serach to just model containing this module</string>
+                  </property>
+                  <property name="whatsThis">
+                   <string>Select a specific module implementation here, and when the 'module' button is pressed all models containing the selected  module will satisfy the the match critieria.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QPushButton" name="modulePushButton">
+                  <property name="toolTip">
+                   <string>Filter selection to just models that use this module</string>
+                  </property>
+                  <property name="text">
+                   <string>Module</string>
+                  </property>
+                  <property name="shortcut">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="tabMore">
+               <attribute name="title">
+                <string>More</string>
+               </attribute>
+               <widget class="QPushButton" name="brokenPushButton">
+                <property name="geometry">
+                 <rect>
+                  <x>34</x>
+                  <y>23</y>
+                  <width>100</width>
+                  <height>24</height>
+                 </rect>
+                </property>
+                <property name="toolTip">
+                 <string>Select broken models</string>
+                </property>
+                <property name="text">
+                 <string>Broken</string>
+                </property>
+                <property name="shortcut">
+                 <string/>
+                </property>
+               </widget>
+               <widget class="QPushButton" name="movedPushButton">
+                <property name="geometry">
+                 <rect>
+                  <x>34</x>
+                  <y>60</y>
+                  <width>100</width>
+                  <height>24</height>
+                 </rect>
+                </property>
+                <property name="toolTip">
+                 <string>Select all models with modules that have been moved on disk</string>
+                </property>
+                <property name="text">
+                 <string>Modules Moved</string>
+                </property>
+                <property name="shortcut">
+                 <string/>
+                </property>
+               </widget>
+              </widget>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="filterInvertCheckBox">
+              <property name="toolTip">
+               <string>Invert the sense of the filter</string>
+              </property>
+              <property name="whatsThis">
+               <string>For each filtering operation treat as a match those models that do NOT satisfy the filter criteria and not  those that do.</string>
+              </property>
+              <property name="text">
+               <string>Invert</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabRename">
+        <attribute name="title">
+         <string>Rename</string>
+        </attribute>
+        <layout class="QGridLayout">
+         <item row="1" column="0">
+          <widget class="QLabel" name="textLabel2_3">
+           <property name="text">
+            <string>&lt;p align=&quot;right&quot;&gt;Output substitution pattern:&lt;/p&gt;</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="renamePushButton">
+           <property name="toolTip">
+            <string>Rename models according to in/out patterns</string>
+           </property>
+           <property name="text">
+            <string>Rename</string>
+           </property>
+           <property name="shortcut">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="save2PushButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Save renamed models</string>
+           </property>
+           <property name="text">
+            <string>&amp;Save</string>
+           </property>
+           <property name="shortcut">
+            <string>Alt+S</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="inPatternLineEdit">
+           <property name="toolTip">
+            <string>Enter regex to match against model names</string>
+           </property>
+           <property name="whatsThis">
+            <string>Enter a perl regex to match a model's name.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="outPatternLineEdit">
+           <property name="toolTip">
+            <string>Enter regex to substitute for model name</string>
+           </property>
+           <property name="whatsThis">
+            <string>Enter a perl replacement expression to substitute for the input match string.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="textLabel2">
+           <property name="text">
+            <string>&lt;p align=&quot;right&quot;&gt;Input match pattern:&lt;/p&gt;</string>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabReplace">
+        <attribute name="title">
+         <string>Replace</string>
+        </attribute>
+        <layout class="QGridLayout">
+         <item row="0" column="0">
+          <widget class="QGroupBox" name="Replace">
+           <property name="title">
+            <string>Replace</string>
+           </property>
+           <layout class="QGridLayout">
+            <item row="1" column="0">
+             <widget class="QComboBox" name="replaceModuleComboBox">
+              <property name="toolTip">
+               <string>Select a replacement module</string>
+              </property>
+              <property name="whatsThis">
+               <string>Select the specific module implementation to insert into the models in place of any existing modules of the same type.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QComboBox" name="replaceModuleTypeComboBox">
+              <property name="toolTip">
+               <string>Select a module type to replace</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QListWidget" name="moduleListBox">
+              <property name="toolTip">
+               <string>Information about the replacement module</string>
+              </property>
+              <item>
+               <property name="text">
+                <string>Module Description</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="savePushButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>Save modifed models</string>
+              </property>
+              <property name="text">
+               <string>&amp;Save</string>
+              </property>
+              <property name="shortcut">
+               <string>Alt+S</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="replacePushButton">
+              <property name="toolTip">
+               <string>Substitute replacement module in each selected model</string>
+              </property>
+              <property name="text">
+               <string>&amp;Replace</string>
+              </property>
+              <property name="shortcut">
+               <string>Alt+R</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tabParameters">
+        <attribute name="title">
+         <string>Parameters</string>
+        </attribute>
+        <layout class="QGridLayout">
+         <item row="1" column="0" colspan="2">
+          <widget class="QComboBox" name="replaceParamModuleComboBox">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Select a specfic module to update a parameter in</string>
+           </property>
+           <property name="whatsThis">
+            <string>Select a specific module implementation here, and the combo box beneath this one will be filled in with the parameters that can be changed.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QComboBox" name="replaceParamComboBox">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Select a parameter to change</string>
+           </property>
+           <property name="whatsThis">
+            <string>Select a specific parameter to change. Then enter the input and output patterns below.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QPushButton" name="replaceParamSavePushButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Save modifed models</string>
+           </property>
+           <property name="text">
+            <string>&amp;Save</string>
+           </property>
+           <property name="shortcut">
+            <string>Alt+S</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" colspan="2">
+          <widget class="QListWidget" name="replaceParamListBox">
+           <property name="toolTip">
+            <string>Information about the replacement module</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Parameter Description</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="replaceParamOutPatternLineEdit">
+           <property name="toolTip">
+            <string>Enter regex to substute for the input regex</string>
+           </property>
+           <property name="whatsThis">
+            <string>Enter a perl regex to substitute for the expression that matches in the box to the left. A perl s/inputregex/outputregex/ will be run to update the value of the parameter.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QPushButton" name="replaceParamReplacePushButton">
+           <property name="toolTip">
+            <string>Substitute the parameter values in each selected model</string>
+           </property>
+           <property name="text">
+            <string>&amp;Replace</string>
+           </property>
+           <property name="shortcut">
+            <string>Alt+R</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="QComboBox" name="replaceParamModuleTypeComboBox">
+           <property name="toolTip">
+            <string>Select a module type to replace a parameter in</string>
+           </property>
+           <property name="whatsThis">
+            <string>Select a module type here, and the combo box just below this one will become available to select a specific module whose parameter value is to be changed.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLineEdit" name="replaceParamInPatternLineEdit">
+           <property name="toolTip">
+            <string>Enter regex to match the current value of the parameter</string>
+           </property>
+           <property name="whatsThis">
+            <string>Enter a perl regex to match the current value of the parameter. A partial match will result in a partial update of the value. The value .* will change the value in every module.</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QFrame" name="modelsFrame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QGridLayout">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox5">
+          <property name="title">
+           <string>Models</string>
+          </property>
+          <layout class="QGridLayout">
+           <item row="0" column="0" rowspan="4">
+            <widget class="QListWidget" name="modelsListBox">
+             <property name="whatsThis">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This is the list of models found by the &amp;quot;Find&amp;quot; button. The models in this list should be selected to specify which models will be subject to module replacement.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="invertPushButton">
+             <property name="toolTip">
+              <string>Select unselected models and vice versa</string>
+             </property>
+             <property name="whatsThis">
+              <string>Invert the sense of the selection, so that all currently selected models are not selected, and all not selected models are selected.</string>
+             </property>
+             <property name="text">
+              <string>Invert</string>
+             </property>
+             <property name="shortcut">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="allPushButton">
+             <property name="toolTip">
+              <string>Select all models</string>
+             </property>
+             <property name="whatsThis">
+              <string>Select all the models in the model section box. Click this and then the 'invert' button to clear all selections.</string>
+             </property>
+             <property name="text">
+              <string>All</string>
+             </property>
+             <property name="shortcut">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="purgePushButton">
+             <property name="toolTip">
+              <string>Purge unslected models from list</string>
+             </property>
+             <property name="whatsThis">
+              <string>Consolate the list of models by removing all unselected models from the list.</string>
+             </property>
+             <property name="text">
+              <string>Purge</string>
+             </property>
+             <property name="shortcut">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <spacer name="spacer3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>31</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QFrame" name="logFrame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QGridLayout">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="Log">
+          <property name="title">
+           <string>Log</string>
+          </property>
+          <layout class="QGridLayout">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="clearPushButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Clear log</string>
+             </property>
+             <property name="whatsThis">
+              <string>Clear out all the entries in the log.</string>
+             </property>
+             <property name="text">
+              <string>&amp;Clear</string>
+             </property>
+             <property name="shortcut">
+              <string>Alt+C</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QListWidget" name="logListBox">
+             <property name="toolTip">
+              <string>Activity log</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout">
+      <item>
+       <widget class="QLabel" name="statusTextBox">
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="versionTextBox">
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="text">
+         <string>apm-find-replace 1.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="MenuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>566</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="fileNewAction"/>
+    <addaction name="fileExitAction"/>
+   </widget>
+   <widget class="QMenu" name="editMenu">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="editFindAction"/>
+   </widget>
+   <widget class="QMenu" name="modelMenu">
+    <property name="title">
+     <string>&amp;Model</string>
+    </property>
+    <addaction name="modelEditAction"/>
+   </widget>
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="helpAboutAction"/>
+    <addaction name="helpWhatsThisAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+   <addaction name="modelMenu"/>
+   <addaction name="helpMenu"/>
+   <addaction name="separator"/>
+  </widget>
+  <action name="fileNewAction">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+   <property name="iconText">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="fileExitAction">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+   <property name="iconText">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="editFindAction">
+   <property name="text">
+    <string>&amp;Find...</string>
+   </property>
+   <property name="iconText">
+    <string>Find</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="helpAboutAction">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+   <property name="iconText">
+    <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string/>
+   </property>
+  </action>
+  <action name="moduleEditAction">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="iconText">
+    <string>Edit</string>
+   </property>
+  </action>
+  <action name="helpWhatsThisAction">
+   <property name="text">
+    <string>What's This</string>
+   </property>
+   <property name="iconText">
+    <string>What's This</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
+   </property>
+  </action>
+  <action name="modelEditAction">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="iconText">
+    <string>Edit</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <tabstops>
+  <tabstop>rootdirLineEdit</tabstop>
+  <tabstop>findModuleTypeComboBox</tabstop>
+  <tabstop>rootCheckBox</tabstop>
+  <tabstop>invertCheckBox</tabstop>
+  <tabstop>findPushButton</tabstop>
+  <tabstop>filterLineEdit</tabstop>
+  <tabstop>filterPushButton</tabstop>
+  <tabstop>attrLineEdit</tabstop>
+  <tabstop>attrPushButton</tabstop>
+  <tabstop>filterModuleTypeComboBox</tabstop>
+  <tabstop>typePushButton</tabstop>
+  <tabstop>filterModuleComboBox</tabstop>
+  <tabstop>modulePushButton</tabstop>
+  <tabstop>brokenPushButton</tabstop>
+  <tabstop>replaceModuleTypeComboBox</tabstop>
+  <tabstop>replaceModuleComboBox</tabstop>
+  <tabstop>replacePushButton</tabstop>
+  <tabstop>savePushButton</tabstop>
+  <tabstop>inPatternLineEdit</tabstop>
+  <tabstop>outPatternLineEdit</tabstop>
+  <tabstop>renamePushButton</tabstop>
+  <tabstop>save2PushButton</tabstop>
+  <tabstop>allPushButton</tabstop>
+  <tabstop>invertPushButton</tabstop>
+  <tabstop>purgePushButton</tabstop>
+  <tabstop>logListBox</tabstop>
+  <tabstop>clearPushButton</tabstop>
+  <tabstop>newPushButton</tabstop>
+  <tabstop>tabWidget3</tabstop>
+  <tabstop>moduleListBox</tabstop>
+  <tabstop>operationTabWidget</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>fileNewAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>fileNew()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileExitAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>fileExit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editFindAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>editFind()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>helpAboutAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>helpAbout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logListBox</sender>
+   <signal>doubleClicked(Q3ListBoxItem*)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>logListBox_doubleClicked(Q3ListBoxItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>clearPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moduleEditAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>moduleEdit_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>helpWhatsThisAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>whatsThis()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modelEditAction</sender>
+   <signal>activated()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>modelEditAction_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceParamSavePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replaceParamSavePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceParamReplacePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replaceParamReplacePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceParamComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replaceParamComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceParamModuleComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replaceParamModuleComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceParamModuleTypeComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replaceParamModuleTypeComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replacePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replacePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>savePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>savePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceModuleTypeComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>replaceModuleTypeComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceModuleComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>ModulesComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save2PushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>save2PushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>renamePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>renamePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>brokenPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>brokenPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filterLineEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>filterLineEdit_returnPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filterModuleTypeComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>filterModuleTypeComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>attrLineEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>attrLineEdit_returnPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>attrPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>attrPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filterPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>filterPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>typePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>typePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>modulePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>modulePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>findPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>findPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>newPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>newPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>findModuleTypeComboBox</sender>
+   <signal>activated(QString)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>findModuleTypeComboBox_activated(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>allPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>allPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>purgePushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>purgePushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>invertPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>invertPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>movedPushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>movedPushButton_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
