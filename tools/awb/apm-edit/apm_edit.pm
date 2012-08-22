@@ -88,7 +88,7 @@ use constant {alt_implementation_col => 0, alt_file_col => 1, alt_sort_col => 2}
 
 sub ui() 
 {
-    this->{ui};
+    return this->{ui};
 }
 
 sub module_missing_pix 

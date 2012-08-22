@@ -60,7 +60,7 @@
                <string>Enter directory to start search from</string>
               </property>
               <property name="whatsThis">
-               <string>Enter into this text box the directory to start the recursive seac for models. The directory is relative to the root of the workspace, and will typically be something in config/pm. Searches use the Asim search path, so like named directories in all packages will be searched.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter into this text box the directory to start the recursive seac for models. The directory is relative to the root of the workspace, and will typically be something in config/pm. Searches use the Asim search path, so like named directories in all packages will be searched.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -70,7 +70,7 @@
                <string>Select a module type to search modles for</string>
               </property>
               <property name="whatsThis">
-               <string>Pick a type of module from this list to search for.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Pick a type of module from this list to search for.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -83,7 +83,7 @@
                <string>Only check type of root module of model</string>
               </property>
               <property name="whatsThis">
-               <string>If this box is checked, then modify the search to only examine the root node of each model to see if the module type matches.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;If this box is checked, then modify the search to only examine the root node of each model to see if the module type matches.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Only match root module</string>
@@ -99,7 +99,7 @@
                <string>Only select models NOT containing the given module type</string>
               </property>
               <property name="whatsThis">
-               <string>If this box is checked, then modify the sense of the search so that models that meet the search criteria are NOT selected, but all that do not ARE selected.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;If this box is checked, then modify the sense of the search so that models that meet the search criteria are NOT selected, but all that do not ARE selected.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Not containing</string>
@@ -124,7 +124,7 @@
                <string>Start a new search</string>
               </property>
               <property name="whatsThis">
-               <string>Clicking this button will start a new search, clearlng out the existing search.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Clicking this button will start a new search, clearlng out the existing search.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>&amp;New</string>
@@ -152,7 +152,7 @@
                <string>Find models matching search criteria</string>
               </property>
               <property name="whatsThis">
-               <string>Clicking this button starts a recursive search starting from the directory specified in the directory text box for all models that contain a module of the selected type. The search uses the Asim search path, so models from all packages in the search path are examined. The resulting models are listed in the 'models' box below.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Clicking this button starts a recursive search starting from the directory specified in the directory text box for all models that contain a module of the selected type. The search uses the Asim search path, so models from all packages in the search path are examined. The resulting models are listed in the 'models' box below.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>&amp;Find</string>
@@ -203,6 +203,9 @@
                 <width>100</width>
                 <height>100</height>
                </size>
+              </property>
+              <property name="whatsThis">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;These radio buttons control how a match of a filtering criteria affects themodels selected in the models box. In specfic, 'select' results in the matching models being selected and all others being de-selected; 'add' results in the matching models being selected, while the status of the other models are left unchanged; 'remove'  results in the matching models being de-selected, while the status of the other models are left unchanged&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="styleSheet">
                <string notr="true"/>
@@ -270,7 +273,7 @@
                    <string>Enter a regex to filter model selection</string>
                   </property>
                   <property name="whatsThis">
-                   <string>Enter a perl regex here, and when the 'name' button is pressed all models whose name matches the regex will satisfy the the match critieria.</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter a perl regex here, and when the 'name' button is pressed all models whose name matches the regex will satisfy the the match critieria.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
@@ -293,7 +296,7 @@
                    <string>Enter a regex to filter model selection</string>
                   </property>
                   <property name="whatsThis">
-                   <string>Enter a string here, and when the 'attribute' button is pressed all models with an attribute equal to that string will satisfy the the match critieria.</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter a string here, and when the 'attribute' button is pressed all models with an attribute equal to that string will satisfy the the match critieria.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
@@ -316,7 +319,7 @@
                    <string>Select a module type to search modles for</string>
                   </property>
                   <property name="whatsThis">
-                   <string>Select a module type here, and when the 'type' button is pressed all models containging a module of the selected type will satisfy the the match critieria.</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select a module type here, and when the 'type' button is pressed all models containging a module of the selected type will satisfy the the match critieria.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
@@ -342,7 +345,7 @@
                    <string>Restrict serach to just model containing this module</string>
                   </property>
                   <property name="whatsThis">
-                   <string>Select a specific module implementation here, and when the 'module' button is pressed all models containing the selected  module will satisfy the the match critieria.</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select a specific module implementation here, and when the 'module' button is pressed all models containing the selected  module will satisfy the the match critieria.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                  </widget>
                 </item>
@@ -412,7 +415,7 @@
                <string>Invert the sense of the filter</string>
               </property>
               <property name="whatsThis">
-               <string>For each filtering operation treat as a match those models that do NOT satisfy the filter criteria and not  those that do.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;For each filtering operation treat as a match those models that do NOT satisfy the filter criteria and not  those that do.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Invert</string>
@@ -474,7 +477,7 @@
             <string>Enter regex to match against model names</string>
            </property>
            <property name="whatsThis">
-            <string>Enter a perl regex to match a model's name.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter a perl regex to match a model's name.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -484,7 +487,7 @@
             <string>Enter regex to substitute for model name</string>
            </property>
            <property name="whatsThis">
-            <string>Enter a perl replacement expression to substitute for the input match string.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter a perl replacement expression to substitute for the input match string.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -517,7 +520,7 @@
                <string>Select a replacement module</string>
               </property>
               <property name="whatsThis">
-               <string>Select the specific module implementation to insert into the models in place of any existing modules of the same type.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select the specific module implementation to insert into the models in place of any existing modules of the same type.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -588,7 +591,7 @@
             <string>Select a specfic module to update a parameter in</string>
            </property>
            <property name="whatsThis">
-            <string>Select a specific module implementation here, and the combo box beneath this one will be filled in with the parameters that can be changed.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select a specific module implementation here, and the combo box beneath this one will be filled in with the parameters that can be changed.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -601,7 +604,7 @@
             <string>Select a parameter to change</string>
            </property>
            <property name="whatsThis">
-            <string>Select a specific parameter to change. Then enter the input and output patterns below.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select a specific parameter to change. Then enter the input and output patterns below.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -639,7 +642,7 @@
             <string>Enter regex to substute for the input regex</string>
            </property>
            <property name="whatsThis">
-            <string>Enter a perl regex to substitute for the expression that matches in the box to the left. A perl s/inputregex/outputregex/ will be run to update the value of the parameter.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter a perl regex to substitute for the expression that matches in the box to the left. A perl s/inputregex/outputregex/ will be run to update the value of the parameter.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -656,23 +659,23 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QComboBox" name="replaceParamModuleTypeComboBox">
-           <property name="toolTip">
-            <string>Select a module type to replace a parameter in</string>
-           </property>
-           <property name="whatsThis">
-            <string>Select a module type here, and the combo box just below this one will become available to select a specific module whose parameter value is to be changed.</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0">
           <widget class="QLineEdit" name="replaceParamInPatternLineEdit">
            <property name="toolTip">
             <string>Enter regex to match the current value of the parameter</string>
            </property>
            <property name="whatsThis">
-            <string>Enter a perl regex to match the current value of the parameter. A partial match will result in a partial update of the value. The value .* will change the value in every module.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Enter a perl regex to match the current value of the parameter. A partial match will result in a partial update of the value. The value .* will change the value in every module.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QComboBox" name="replaceParamModuleTypeComboBox">
+           <property name="toolTip">
+            <string>Select a module type to replace a parameter in</string>
+           </property>
+           <property name="whatsThis">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select a module type here, and the combo box just below this one will become available to select a specific module whose parameter value is to be changed.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
@@ -695,8 +698,14 @@
           <layout class="QGridLayout">
            <item row="0" column="0" rowspan="4">
             <widget class="QListWidget" name="modelsListBox">
+             <property name="contextMenuPolicy">
+              <enum>Qt::ActionsContextMenu</enum>
+             </property>
              <property name="whatsThis">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;This is the list of models found by the &amp;quot;Find&amp;quot; button. The models in this list should be selected to specify which models will be subject to module replacement.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::ExtendedSelection</enum>
              </property>
             </widget>
            </item>
@@ -706,7 +715,7 @@
               <string>Select unselected models and vice versa</string>
              </property>
              <property name="whatsThis">
-              <string>Invert the sense of the selection, so that all currently selected models are not selected, and all not selected models are selected.</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Invert the sense of the selection, so that all currently selected models are not selected, and all not selected models are selected.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Invert</string>
@@ -722,7 +731,7 @@
               <string>Select all models</string>
              </property>
              <property name="whatsThis">
-              <string>Select all the models in the model section box. Click this and then the 'invert' button to clear all selections.</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Select all the models in the model section box. Click this and then the 'invert' button to clear all selections.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>All</string>
@@ -738,7 +747,7 @@
               <string>Purge unslected models from list</string>
              </property>
              <property name="whatsThis">
-              <string>Consolate the list of models by removing all unselected models from the list.</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Consolate the list of models by removing all unselected models from the list.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>Purge</string>
@@ -792,7 +801,7 @@
               <string>Clear log</string>
              </property>
              <property name="whatsThis">
-              <string>Clear out all the entries in the log.</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Clear out all the entries in the log.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="text">
               <string>&amp;Clear</string>
@@ -806,6 +815,9 @@
             <widget class="QListWidget" name="logListBox">
              <property name="toolTip">
               <string>Activity log</string>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::SingleSelection</enum>
              </property>
             </widget>
            </item>
@@ -846,7 +858,7 @@
          <enum>QFrame::Sunken</enum>
         </property>
         <property name="text">
-         <string>apm-find-replace 1.0</string>
+         <string>apm-find-replace 2.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -1076,13 +1088,13 @@
   </connection>
   <connection>
    <sender>logListBox</sender>
-   <signal>doubleClicked(Q3ListBoxItem*)</signal>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
    <receiver>apmFindReplace</receiver>
-   <slot>logListBox_doubleClicked(Q3ListBoxItem*)</slot>
+   <slot>logListBox_doubleClicked(QListWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>56</x>
+     <y>543</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1097,8 +1109,8 @@
    <slot>clearPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>473</x>
+     <y>592</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1126,7 +1138,7 @@
    <sender>helpWhatsThisAction</sender>
    <signal>activated()</signal>
    <receiver>apmFindReplace</receiver>
-   <slot>whatsThis()</slot>
+   <slot>helpWhatsThisAction_activated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1161,8 +1173,8 @@
    <slot>replaceParamSavePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>461</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1177,8 +1189,8 @@
    <slot>replaceParamReplacePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>461</x>
+     <y>158</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1193,8 +1205,8 @@
    <slot>replaceParamComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>31</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1209,8 +1221,8 @@
    <slot>replaceParamModuleComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>31</x>
+     <y>105</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1225,8 +1237,8 @@
    <slot>replaceParamModuleTypeComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>31</x>
+     <y>79</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1241,8 +1253,8 @@
    <slot>replacePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>463</x>
+     <y>134</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1257,8 +1269,8 @@
    <slot>savePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>463</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1273,8 +1285,8 @@
    <slot>replaceModuleTypeComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>48</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1289,8 +1301,8 @@
    <slot>ModulesComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>48</x>
+     <y>135</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1305,8 +1317,8 @@
    <slot>save2PushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>461</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1321,8 +1333,8 @@
    <slot>renamePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>461</x>
+     <y>165</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1337,8 +1349,8 @@
    <slot>brokenPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>179</x>
+     <y>144</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1353,8 +1365,8 @@
    <slot>filterLineEdit_returnPressed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>156</x>
+     <y>134</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1369,8 +1381,8 @@
    <slot>filterModuleTypeComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>156</x>
+     <y>200</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1385,8 +1397,8 @@
    <slot>attrLineEdit_returnPressed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>156</x>
+     <y>166</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1401,8 +1413,8 @@
    <slot>attrPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>441</x>
+     <y>165</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1417,8 +1429,8 @@
    <slot>filterPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>441</x>
+     <y>133</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1433,8 +1445,8 @@
    <slot>typePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>441</x>
+     <y>199</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1449,8 +1461,8 @@
    <slot>modulePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>441</x>
+     <y>233</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1465,8 +1477,8 @@
    <slot>findPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>463</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1481,8 +1493,8 @@
    <slot>newPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>463</x>
+     <y>117</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1497,8 +1509,8 @@
    <slot>findModuleTypeComboBox_activated(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>48</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1513,8 +1525,8 @@
    <slot>allPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>473</x>
+     <y>357</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1529,8 +1541,8 @@
    <slot>purgePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>473</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1545,8 +1557,8 @@
    <slot>invertPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>473</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1561,8 +1573,8 @@
    <slot>movedPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>179</x>
+     <y>181</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -1570,5 +1582,60 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>modelsListBox</sender>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
+   <receiver>apmFindReplace</receiver>
+   <slot>modelsListBox_doubleClicked(QListWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>398</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>350</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>modelsListBox_doubleClicked(QListWidgetItem*)</slot>
+  <slot>logListBox_doubleClicked(QListWidgetItem*)</slot>
+  <slot>fileNew()</slot>
+  <slot>fileExit()</slot>
+  <slot>editFind()</slot>
+  <slot>moduleEdit_activated()</slot>
+  <slot>helpAbout()</slot>
+  <slot>newPushButton_clicked()</slot>
+  <slot>findModuleTypeComboBox_activated(QString)</slot>
+  <slot>findPushButton_clicked()</slot>
+  <slot>filterLineEdit_returnPressed()</slot>
+  <slot>filterPushButton_clicked()</slot>
+  <slot>attrLineEdit_returnPressed()</slot>
+  <slot>attrPushButton_clicked()</slot>
+  <slot>filterModuleTypeComboBox_activated(QString)</slot>
+  <slot>typePushButton_clicked()</slot>
+  <slot>modulePushButton_clicked()</slot>
+  <slot>brokenPushButton_clicked()</slot>
+  <slot>replaceModuleTypeComboBox_activated(QString)</slot>
+  <slot>ModulesComboBox_activated(QString)</slot>
+  <slot>replacePushButton_clicked()</slot>
+  <slot>savePushButton_clicked()</slot>
+  <slot>renamePushButton_clicked()</slot>
+  <slot>save2PushButton_clicked()</slot>
+  <slot>replaceParamModuleTypeComboBox_activated(QString)</slot>
+  <slot>replaceParamModuleComboBox_activated(QString)</slot>
+  <slot>replaceParamComboBox_activated(QString)</slot>
+  <slot>replaceParamReplacePushButton_clicked()</slot>
+  <slot>replaceParamSavePushButton_clicked()</slot>
+  <slot>allPushButton_clicked()</slot>
+  <slot>invertPushButton_clicked()</slot>
+  <slot>purgePushButton_clicked()</slot>
+  <slot>modelEditAction_activated()</slot>
+  <slot>clearPushButton_clicked()</slot>
+  <slot>movedPushButton_clicked()</slot>
+  <slot>helpWhatsThisAction_activated()</slot>
+  <slot></slot>
+ </slots>
 </ui>

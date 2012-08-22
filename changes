@@ -10620,3 +10620,18 @@ Directory .
 
 - Added PerlQt4 ported apm-find-replace gui. 
 - Slots/Signals need to be ported still and dont yet work. 
+
+----------
+mgambhir    Date: Wed Aug 22 18:51:36 EDT 2012  CSN: CSN-awb-521
+                  Wed Aug 22 22:51:36 UTC 2012
+
+
+Directory tools/awb/apm-edit
+ apm_edit.pm               Locally Modified          520 
+
+Directory tools/awb/apm-find-replace
+ apm_find_replace.pm       Locally Modified          520 
+ apm_find_replace.ui       Locally Modified          520 
+ apm_find_replace.ui.h     Locally Removed           520 
+
+- apm-find-replace is working with PerlQt4
