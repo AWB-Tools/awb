@@ -1,3 +1,7 @@
+#!/usr/bin/env perl
+# -*- perl -*-
+
+##################################################################################
 #
 # Copyright (C) 2002-2006 Intel Corporation
 # 
@@ -16,5 +20,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 #
+##################################################################################
 
-SUBDIRS= @NO_GUI@ @NO_PERLGUI@ awb awb-resolver amc apm-edit apm-find-replace awb-wizard
+# Author: Joel Emer
+# Date: November 2002
+# Purpose:
+#       A GUI interface to create a new module
+#
+
+#
+# Turn on warnings
+#
+$^W = 1;
+

@@ -257,7 +257,7 @@ tooldir = @tooldir@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = @NO_GUI@ @NO_PERLGUI@ awb awb-resolver amc apm-edit apm-find-replace
+SUBDIRS = @NO_GUI@ @NO_PERLGUI@ awb awb-resolver amc apm-edit apm-find-replace awb-wizard
 all: all-recursive
 
 .SUFFIXES:

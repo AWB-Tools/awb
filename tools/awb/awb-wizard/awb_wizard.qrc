@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/filebuild.png</file>
+    <file>images/filenew.png</file>
+    <file>images/fileopen.png</file>
+    <file>images/filesave.png</file>
+    <file>images/whatsthis.png</file>
+</qresource>
+</RCC>

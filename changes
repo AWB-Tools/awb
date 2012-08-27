@@ -10635,3 +10635,57 @@ Directory tools/awb/apm-find-replace
  apm_find_replace.ui.h     Locally Removed           520 
 
 - apm-find-replace is working with PerlQt4
+
+----------
+mgambhir    Date: Mon Aug 27 16:27:45 EDT 2012  CSN: CSN-awb-522
+                  Mon Aug 27 20:27:45 UTC 2012
+
+
+Directory tools/awb
+ awb-wizard/               Locally Added               0 
+
+Directory tools/awb/awb-wizard
+ awb_wizard_main.pl        Locally Added               0 
+ Makefile.am               Locally Added               0 
+ awb_wizard_write.pl       Locally Added               0 
+ awb_wizard.qrc            Locally Added               0 
+ awb_wizard_about.pm       Locally Added               0 
+ awb_wizard_about.ui       Locally Added               0 
+ Makefile.in               Locally Added               0 
+ awb_wizard_head.pl        Locally Added               0 
+ awb_wizard.pm             Locally Added               0 
+ images/                   Locally Added               0 
+
+Directory tools/awb/awb-wizard/images
+ filenew.png               Locally Added               0 
+ filesave.png              Locally Added               0 
+ whatsthis.png             Locally Added               0 
+ filebuild.png             Locally Added               0 
+ fileopen.png              Locally Added               0 
+
+Directory tools/awb/awb-wizard
+ awb_wizard.ui             Locally Added               0 
+
+Directory tools/awb
+ Makefile.am               Locally Modified          521 
+
+Directory tools/awb/awb
+ awb_dialog.pm             Locally Modified          521 
+ awb_dialog.ui             Locally Modified          521 
+
+Directory tools/awb/apm-edit
+ Makefile.am               Locally Modified          521 
+ Makefile                  Locally Modified          521 
+ Makefile.in               Locally Modified          521 
+
+Directory tools/awb
+ Makefile.in               Locally Modified          521 
+
+Directory .
+ configure                 Locally Modified          521 
+ configure.in              Locally Modified          521 
+
+- Ported awb-wizard ui to PerlQt4. Signals/slots are still to be ported
+- Removed extra toolbars from top of awb GUI
+- Changed the default of HighlightProblems checkbox to false
+- Fixed the childIndicatorPolicy for model_tree and becnhmark_tree to indicate children only if they exist 

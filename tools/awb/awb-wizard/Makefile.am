@@ -1,0 +1,72 @@
+
+# Copyright (C) 2002-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+tool_PROGRAMS= awb-wizard
+
+awb_wizard_SOURCES = awb_wizard.qrc       \
+                     awb_wizard_head.pl   \
+                     awb_wizard.ui        \
+                     awb_wizard.pm        \
+                     awb_wizard_about.ui  \
+                     awb_wizard_write.pl  \
+                     awb_wizard_images.pm \
+                     awb_wizard_main.pl   \
+                     ${IMAGES}
+
+
+
+awb-wizard$(EXEEXT): awb_wizard_head.pl   \
+                     awb_wizard_about.ui.pm  \
+                     awb_wizard_about.pm  \
+                     awb_wizard.ui.pm        \
+                     awb_wizard.pm        \
+                     awb_wizard_write.pl  \
+                     awb_wizard_images.pm \
+                     awb_wizard_main.pl
+	cat awb_wizard_head.pl awb_wizard_about.ui.pm awb_wizard_about.pm awb_wizard.ui.pm awb_wizard.pm awb_wizard_write.pl awb_wizard_images.pm awb_wizard_main.pl >awb-wizard
+	chmod +x awb-wizard
+
+
+awb_wizard.ui.pm: awb_wizard.ui
+
+awb_wizard_about.ui.pm: awb_wizard_about.ui
+
+awb_wizard_images.pm: awb_wizard.qrc
+	prcc4_bin -o awb_wizard_images.pm $<
+
+%.ui.pm: %.ui
+	puic4 -o $@ $<
+
+#
+# Convert perl documentation to man page and install
+#
+
+PERLRUN = perl
+MAN1EXT = 1
+MANPERM = 644
+MAN1DIR=$(mandir)/man1
+POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
+POD2MAN = $(POD2MAN_EXE) --section=$(MAN1EXT) --perm_rw=$(MANPERM)
+
+install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)$(MAN1DIR)
+	$(POD2MAN) awb-wizard $(DESTDIR)$(MAN1DIR)/awb-wizard.$(MAN1EXT)
+
+
+CLEANFILES = *.ui.pm awb_wizard_images.pm

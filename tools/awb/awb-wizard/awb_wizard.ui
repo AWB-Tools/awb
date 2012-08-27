@@ -1,0 +1,2735 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Joel Emer</author>
+ <class>awb_wizard</class>
+ <widget class="QMainWindow" name="awb_wizard">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>617</width>
+    <height>565</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>awb_wizard</string>
+  </property>
+  <widget class="QWidget" name="widget">
+   <layout class="QVBoxLayout">
+    <property name="spacing">
+     <number>6</number>
+    </property>
+    <property name="margin">
+     <number>11</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabs_main">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Description</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="Namebox">
+          <property name="title">
+           <string>Name</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="name">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter a name for the module</string>
+             </property>
+             <property name="whatsThis">
+              <string>The name field contains a name of the module being specified. It is recommended that module names be alphanumeric with spaces, but for backward compatibility certain punctiation marks are still allowed. The module name is automatically converted into a suggested filename for the module.</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="ProvidesBox">
+          <property name="title">
+           <string>Provides</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="provides_2">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter the asim type that this module provides</string>
+             </property>
+             <property name="whatsThis">
+              <string>The provides field should contain the asim type of the module this code implements. It is a underscore separated alphanumeric symbol (usually all lowercase).</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSplitter" name="Splitter9">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QSplitter" name="Splitter8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="DescriptionBox">
+          <property name="title">
+           <string>Description</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="description">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter a brief description of the module</string>
+             </property>
+             <property name="whatsThis">
+              <string>The description field contains a brief textual description of the module being specified. This description will appear in the .awb file for the module.</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="AttributesBox">
+          <property name="title">
+           <string>Attributes</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="attributes">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter the asim attibutes of the module</string>
+             </property>
+             <property name="whatsThis">
+              <string>The attributes field contains a space-separated list of alphanumeric (including _) attributes of the module being specified. The modules attibutes are used to help autobuild a model in the model builder (apm-edit).</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="Spacer17">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="autofill">
+            <property name="toolTip">
+             <string>Autofill fields based on module name</string>
+            </property>
+            <property name="whatsThis">
+             <string>Autofill in as many fields as possible based on the module name and type as specified in the above fields. WARNING: autofill will overwrite values that are already filled in.</string>
+            </property>
+            <property name="text">
+             <string>&amp;Autofill</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="Spacer1">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>290</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_1">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_1">
+       <attribute name="title">
+        <string>Class</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="ButtonGroup2">
+          <property name="toolTip">
+           <string>Kind of module this class implements</string>
+          </property>
+          <property name="whatsThis">
+           <string>Select the kind of module this class implements. The available types are: module for a normal module, algorithm for modules that simply provide a method call based interface and message for modules that implement the messages that are passed on ports.</string>
+          </property>
+          <property name="title">
+           <string>Class Type</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="classtypeModule">
+             <property name="text">
+              <string>Module</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="classtypeAlgorithm">
+             <property name="text">
+              <string>Algorithm</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="classtypeMessage">
+             <property name="text">
+              <string>Message</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="Classname_Box">
+          <property name="title">
+           <string>Classname</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="classname">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter classname for module class</string>
+             </property>
+             <property name="whatsThis">
+              <string>The classname contains the name of the C++ class implemented by the being specified. Enter the name without the conventional trailing _CLASS. Classname is usually all capitalized.</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="BriefDescBox">
+          <property name="title">
+           <string>Brief Description</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="briefDescription">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter brief description of the class</string>
+             </property>
+             <property name="whatsThis">
+              <string>The brief description field contains a decription of this class for use in the doxygen documentation of the class.</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="AuthorBox">
+          <property name="title">
+           <string>Author</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="author">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter name of author of class</string>
+             </property>
+             <property name="whatsThis">
+              <string>The author field contains the name that will used for the author of the module being created.</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="Spacer11">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>160</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer1_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_2">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Dependencies</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="RequiresBox">
+          <property name="title">
+           <string>Used/Required Module</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QTableWidget" name="requires">
+             <property name="toolTip">
+              <string>The list of modules used by this module</string>
+             </property>
+             <property name="whatsThis">
+              <string>This pane contains a list of those modules that are used or required by this module.</string>
+             </property>
+             <column>
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Classname</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Required?</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>IsClocked?</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox25">
+          <property name="whatsThis">
+           <string>This box is used to specify modules that are going to be used (and possibly required) by the module being created. For each such module, fill in the boxes and click add.</string>
+          </property>
+          <property name="title">
+           <string> Module</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="requires_Add">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QGroupBox" name="GroupBox26">
+             <property name="title">
+              <string>Asim Type</string>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="requiresName">
+                <property name="toolTip">
+                 <string>Enter asim-type of the module.</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The type field contains the asim-type of a module that is going to be used by the module being created.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QGroupBox" name="GroupBox39">
+             <property name="title">
+              <string>Attributes</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QCheckBox" name="IsClocked">
+                <property name="toolTip">
+                 <string>Is module clocked by its parent</string>
+                </property>
+                <property name="whatsThis">
+                 <string>This checkbox is used to indicate that this module is to be clocked by its parent module, i.e., the module being created.</string>
+                </property>
+                <property name="text">
+                 <string>Clock</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="IsRequired">
+                <property name="toolTip">
+                 <string>Is module required?</string>
+                </property>
+                <property name="whatsThis">
+                 <string>Check here if this module is to be required in the .awb file. Thus, the module being created will have a child in the model tree with this asim-type. Sometime a module is used by another module but there is not a parent-child relationship between the modules. In that case, uncheck this box.</string>
+                </property>
+                <property name="text">
+                 <string>Required</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QGroupBox" name="GroupBox26_2">
+             <property name="title">
+              <string>Classname</string>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="requiresClassname">
+                <property name="toolTip">
+                 <string>Enter classname of module</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The classname field contains the C++ classname that is implemented by the module that is used by the module being specified.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="GroupBox40">
+             <property name="toolTip">
+              <string>Kind of module this module provides</string>
+             </property>
+             <property name="whatsThis">
+              <string>Select the kind of module this class implements. The available types are: module for a normal module, algorithm for modules that simply provide a method call based interface and message for modules that implement the messages that are passed on ports.</string>
+             </property>
+             <property name="title">
+              <string>Module Type</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QComboBox" name="requiresType">
+                <item>
+                 <property name="text">
+                  <string>module</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>algorithm</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>message</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer1_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_3">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>Parameters</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="GroupBox2_3_3_2_2">
+          <property name="title">
+           <string>Parameters</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QTableWidget" name="parameters">
+             <property name="toolTip">
+              <string>The list of parameters used by this module</string>
+             </property>
+             <property name="whatsThis">
+              <string>This pane contains a list of those parameters that are used by this module.</string>
+             </property>
+             <column>
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Dynamic?</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Export?</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Description</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox27">
+          <property name="whatsThis">
+           <string>This box is used to specify parameters of the module being created. For each such parameter, fill in the boxes and click add.</string>
+          </property>
+          <property name="title">
+           <string>Parameters</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4_3">
+             <property name="title">
+              <string>Value</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="paramValue">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a value for the parameter</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The value field contains the default value (currently only numeric values are supported) for the parameter.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="4">
+            <widget class="QGroupBox" name="GroupBox2_3_4_2">
+             <property name="title">
+              <string>Description</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="paramDescription">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a decription of the parmaeter</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The description field contains a brief description of the parameter.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="Param_Add">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="paramDynamic">
+             <property name="toolTip">
+              <string>Check if the parameter is dynamic</string>
+             </property>
+             <property name="whatsThis">
+              <string>The dynamic checkbox indicates that the parameter can be overwridden on the command line.</string>
+             </property>
+             <property name="text">
+              <string>Dynamic</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QCheckBox" name="paramExport">
+             <property name="toolTip">
+              <string>Check if the parameter is to be exported</string>
+             </property>
+             <property name="whatsThis">
+              <string>The export checkbox indicates that the parameter is exported (and thus available) to all the children of the module being specified.</string>
+             </property>
+             <property name="text">
+              <string>Export</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4">
+             <property name="title">
+              <string>Name</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="paramName">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter the name for a parameter</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The name field contains the name of a parameter of the module.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSplitter" name="Splitter11">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QSplitter" name="Splitter10">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer1_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_4">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_4">
+       <attribute name="title">
+        <string>Clocking</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="ButtonGroup1">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="title">
+             <string>Clocking Style</string>
+            </property>
+            <layout class="QGridLayout">
+             <property name="margin">
+              <number>11</number>
+             </property>
+             <property name="spacing">
+              <number>6</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QRadioButton" name="clockedNot">
+               <property name="toolTip">
+                <string>Click here if module is not clocked</string>
+               </property>
+               <property name="whatsThis">
+                <string>The not clocked radio button indicates that the module being specified is not going to be clocked. Some modules implement algorithms that are called via direct method calls from their parent. Some modues implement classes that are used as the values communicated through ports In both such instances, check not clocked.</string>
+               </property>
+               <property name="text">
+                <string>Not Clocked</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QRadioButton" name="clockedByParent">
+               <property name="toolTip">
+                <string>Check here if module is clocked directly by its parent</string>
+               </property>
+               <property name="whatsThis">
+                <string>The clocked by parent radio button indicates the module being created is going to be clocked directly by its parent module.</string>
+               </property>
+               <property name="text">
+                <string>By Parent</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QRadioButton" name="clockedByClockserver">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Click if module is clocked by the clockserver</string>
+               </property>
+               <property name="whatsThis">
+                <string>The clocked by clockserver radio button indicates the module being created is going to be clocked by the clockserver.</string>
+               </property>
+               <property name="text">
+                <string>By Clockserver</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <spacer name="Spacer12">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Expanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="GroupBox22">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="title">
+             <string>Clockserver</string>
+            </property>
+            <layout class="QGridLayout">
+             <property name="margin">
+              <number>11</number>
+             </property>
+             <property name="spacing">
+              <number>6</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QGroupBox" name="GroupBox_22_1">
+               <property name="title">
+                <string>Frequency</string>
+               </property>
+               <layout class="QHBoxLayout">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="margin">
+                 <number>11</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="clockFreq">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QGroupBox" name="GroupBox_22_1_2">
+               <property name="title">
+                <string>Skew</string>
+               </property>
+               <layout class="QHBoxLayout">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="margin">
+                 <number>11</number>
+                </property>
+                <item>
+                 <widget class="QLineEdit" name="clockSkew">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer1_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_5">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_5">
+       <attribute name="title">
+        <string>Ports</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="GroupBox2_3_3_2_2_2">
+          <property name="title">
+           <string>Ports</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QTableWidget" name="ports">
+             <property name="toolTip">
+              <string>The list of the ports of this module</string>
+             </property>
+             <property name="whatsThis">
+              <string>This pane contains a list of those ports that are used by this module.</string>
+             </property>
+             <column>
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Type</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Variable</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Class</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Latency</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Bandwidth</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox29">
+          <property name="whatsThis">
+           <string>This box is used to specify ports to be used by the module being created. For each such port, fill in the boxes and click add.</string>
+          </property>
+          <property name="title">
+           <string>Ports</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="port_Add">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="GroupBox2_3_4_3_2">
+             <property name="title">
+              <string>Type</string>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QComboBox" name="portType">
+                <property name="toolTip">
+                 <string>Select if this is a read or write port</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The type field specified whether this port is a read or a write port.</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Read</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Write</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="2" colspan="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4_2_2">
+             <property name="title">
+              <string>Class</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="portClass">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter the class of the values communicated on the port</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The class field contains the C++ class of the type of value that is communicated over the port.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4_4">
+             <property name="title">
+              <string>Port Variable</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="portVariable">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a variable name for the port</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The port variable field contains a C++ variable name for the port. The conventional _RPort or _WPort will be added to this name.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4_2_2_2">
+             <property name="title">
+              <string>Latency</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="portLatency">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter the latency of the port</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The latency field contains the latency of the port, i.e., the time that elapses between the write and the read of a value in the port. Normally set on read ports.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="2" column="2" colspan="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4_2_2_2_2">
+             <property name="title">
+              <string>Bandwidth</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="portBandwidth">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a bandwidth for the port</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The bandwidth field contains the bandwidth of the port. Bandwidth is measured in terms of the number of values that can be communicated over the port each cycle. Normally set on write ports.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="2">
+            <widget class="QGroupBox" name="GroupBox2_3_4_2_2_3">
+             <property name="title">
+              <string>Name</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="portName">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a name for the port</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The name field contains an alphanumeric (no spaces and typically all capitalized) name for the port that is used during model initialization to automatically connect corresponding read and write ports.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer2_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_6">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="title">
+        <string>Statistics</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="GroupBox34">
+          <property name="title">
+           <string>Statistics</string>
+          </property>
+          <layout class="QVBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QTableWidget" name="stats">
+             <property name="toolTip">
+              <string>The list of statistics maintained by this module</string>
+             </property>
+             <property name="whatsThis">
+              <string>This pane contains a list of the statistics that are kept by this module.</string>
+             </property>
+             <column>
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Variable</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Size</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Description</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox29_2">
+          <property name="whatsThis">
+           <string>This box is used to specify statistics for the module being created. For each such statistic, fill in the boxes and click add.</string>
+          </property>
+          <property name="title">
+           <string>Statistics</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="2" column="0" colspan="3">
+            <widget class="QGroupBox" name="StatVariable_4">
+             <property name="title">
+              <string>Description</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="statDescription">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a description of the statistic</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The description field contains a textual description of the statistic.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QGroupBox" name="StatVariable">
+             <property name="title">
+              <string>Variable Name</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="statVar">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter the name of the variable to hold the statistic</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The variable name field contains a C++ variable name that will hold the statistic.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="1" colspan="2">
+            <widget class="QGroupBox" name="StatVariable_2">
+             <property name="title">
+              <string>Size</string>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="statSize">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter the size (in elements) of the statistic</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The size field indicates the size (in elements) of the statistic. A value of 1 indicates a scalar, while a number greater than 1 indicates a histogram of the given size.</string>
+                </property>
+                <property name="text">
+                 <string>1</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="stat_Add">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QGroupBox" name="StatVariable_3">
+             <property name="title">
+              <string>Statistic Name</string>
+             </property>
+             <layout class="QHBoxLayout">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="margin">
+               <number>11</number>
+              </property>
+              <item>
+               <widget class="QLineEdit" name="statName">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter the name of the statistic</string>
+                </property>
+                <property name="whatsThis">
+                 <string>The name field contains an alphanumeric (without spaces and typically capitalized) name for the statistic.</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer2_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nextStep_8">
+            <property name="toolTip">
+             <string>Go to next page</string>
+            </property>
+            <property name="text">
+             <string>&amp;Next &gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_7">
+       <attribute name="title">
+        <string>Save</string>
+       </attribute>
+       <layout class="QVBoxLayout">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="margin">
+         <number>11</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="GroupBox2_2">
+          <property name="title">
+           <string>Directory</string>
+          </property>
+          <layout class="QHBoxLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <item>
+            <widget class="QLineEdit" name="modulePath">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter a destination directory for the module</string>
+             </property>
+             <property name="whatsThis">
+              <string>The directory field contains the name of a directory to which the newly created module implementation will be written.</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="browsePath">
+             <property name="text">
+              <string>&amp;Browse</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox2_2_2">
+          <property name="title">
+           <string>.awb filename</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLineEdit" name="awbFilename">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter a filename for the .awb file</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox2_2_2_2">
+          <property name="title">
+           <string>.h filename</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLineEdit" name="hfileName">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter a filename for the .h file</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="GroupBox2_2_2_3">
+          <property name="title">
+           <string>.cpp filename</string>
+          </property>
+          <layout class="QGridLayout">
+           <property name="margin">
+            <number>11</number>
+           </property>
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLineEdit" name="cppFilename">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Enter a filename for the .cpp file</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="Spacer16">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="Spacer4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="NextDone">
+            <property name="toolTip">
+             <string>Save the new module</string>
+            </property>
+            <property name="text">
+             <string>&amp;Build</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="Toolbar">
+   <property name="windowTitle">
+    <string>toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="newModuleAction"/>
+   <addaction name="fileOpenAction"/>
+   <addaction name="fileSaveAction"/>
+   <addaction name="separator"/>
+   <addaction name="fileBuildAction"/>
+   <addaction name="separator"/>
+   <addaction name="whatsThisAction"/>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>617</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="newModuleAction"/>
+    <addaction name="fileOpenAction"/>
+    <addaction name="fileSaveAction"/>
+    <addaction name="fileSaveAsAction"/>
+    <addaction name="separator"/>
+    <addaction name="fileBuildAction"/>
+    <addaction name="separator"/>
+    <addaction name="exitAction"/>
+   </widget>
+   <widget class="QMenu" name="editMenu">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="editUpdateAction"/>
+    <addaction name="editCutAction"/>
+   </widget>
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="manualAction"/>
+    <addaction name="aboutAction"/>
+    <addaction name="separator"/>
+    <addaction name="whatsThisAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+   <addaction name="helpMenu"/>
+  </widget>
+  <action name="exitAction">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+   <property name="iconText">
+    <string>Exit</string>
+   </property>
+   <property name="toolTip">
+    <string>Exit Program</string>
+   </property>
+   <property name="statusTip">
+    <string>Exit Program</string>
+   </property>
+  </action>
+  <action name="aboutAction">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+   <property name="iconText">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="manualAction">
+   <property name="text">
+    <string>&amp;Manual</string>
+   </property>
+   <property name="iconText">
+    <string>Manual</string>
+   </property>
+   <property name="toolTip">
+    <string>Display awb man page</string>
+   </property>
+  </action>
+  <action name="fileBuildAction">
+   <property name="icon">
+    <iconset resource="awb_wizard.qrc">
+     <normaloff>:/images/filebuild.png</normaloff>:/images/filebuild.png</iconset>
+   </property>
+   <property name="iconText">
+    <string>&amp;Build</string>
+   </property>
+   <property name="toolTip">
+    <string>Build module files</string>
+   </property>
+  </action>
+  <action name="newModuleAction">
+   <property name="icon">
+    <iconset resource="awb_wizard.qrc">
+     <normaloff>:/images/filenew.png</normaloff>:/images/filenew.png</iconset>
+   </property>
+   <property name="iconText">
+    <string>&amp;New</string>
+   </property>
+   <property name="toolTip">
+    <string>Start a new module</string>
+   </property>
+  </action>
+  <action name="whatsThisAction">
+   <property name="icon">
+    <iconset resource="awb_wizard.qrc">
+     <normaloff>:/images/whatsthis.png</normaloff>:/images/whatsthis.png</iconset>
+   </property>
+   <property name="iconText">
+    <string>What's this</string>
+   </property>
+  </action>
+  <action name="fileOpenAction">
+   <property name="icon">
+    <iconset resource="awb_wizard.qrc">
+     <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
+   </property>
+   <property name="iconText">
+    <string>&amp;Open</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a new module wizard file</string>
+   </property>
+  </action>
+  <action name="fileSaveAction">
+   <property name="icon">
+    <iconset resource="awb_wizard.qrc">
+     <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
+   </property>
+   <property name="iconText">
+    <string>&amp;Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save a module wizard file</string>
+   </property>
+  </action>
+  <action name="fileSaveAsAction">
+   <property name="iconText">
+    <string>SaveAs</string>
+   </property>
+   <property name="toolTip">
+    <string>Save a module wizard file by filename</string>
+   </property>
+  </action>
+  <action name="editCutAction">
+   <property name="iconText">
+    <string>Cu&amp;t</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut an item</string>
+   </property>
+  </action>
+  <action name="editUpdateAction">
+   <property name="iconText">
+    <string>&amp;Update</string>
+   </property>
+   <property name="toolTip">
+    <string>Update this item</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>tabs_main</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>description</tabstop>
+  <tabstop>attributes</tabstop>
+  <tabstop>autofill</tabstop>
+  <tabstop>nextStep_1</tabstop>
+  <tabstop>classtypeModule</tabstop>
+  <tabstop>classtypeAlgorithm</tabstop>
+  <tabstop>classtypeMessage</tabstop>
+  <tabstop>classname</tabstop>
+  <tabstop>briefDescription</tabstop>
+  <tabstop>author</tabstop>
+  <tabstop>nextStep_2</tabstop>
+  <tabstop>requires</tabstop>
+  <tabstop>requiresType</tabstop>
+  <tabstop>requiresName</tabstop>
+  <tabstop>IsClocked</tabstop>
+  <tabstop>IsRequired</tabstop>
+  <tabstop>requiresClassname</tabstop>
+  <tabstop>requires_Add</tabstop>
+  <tabstop>nextStep_3</tabstop>
+  <tabstop>parameters</tabstop>
+  <tabstop>paramName</tabstop>
+  <tabstop>paramValue</tabstop>
+  <tabstop>paramDescription</tabstop>
+  <tabstop>paramDynamic</tabstop>
+  <tabstop>paramExport</tabstop>
+  <tabstop>Param_Add</tabstop>
+  <tabstop>nextStep_4</tabstop>
+  <tabstop>clockedByParent</tabstop>
+  <tabstop>clockedByClockserver</tabstop>
+  <tabstop>clockFreq</tabstop>
+  <tabstop>clockSkew</tabstop>
+  <tabstop>nextStep_5</tabstop>
+  <tabstop>ports</tabstop>
+  <tabstop>portType</tabstop>
+  <tabstop>portName</tabstop>
+  <tabstop>portVariable</tabstop>
+  <tabstop>portClass</tabstop>
+  <tabstop>portLatency</tabstop>
+  <tabstop>portBandwidth</tabstop>
+  <tabstop>port_Add</tabstop>
+  <tabstop>nextStep_6</tabstop>
+  <tabstop>stats</tabstop>
+  <tabstop>statName</tabstop>
+  <tabstop>statVar</tabstop>
+  <tabstop>statSize</tabstop>
+  <tabstop>statDescription</tabstop>
+  <tabstop>stat_Add</tabstop>
+  <tabstop>nextStep_8</tabstop>
+  <tabstop>modulePath</tabstop>
+  <tabstop>browsePath</tabstop>
+  <tabstop>awbFilename</tabstop>
+  <tabstop>hfileName</tabstop>
+  <tabstop>cppFilename</tabstop>
+  <tabstop>NextDone</tabstop>
+ </tabstops>
+ <resources>
+  <include location="awb_wizard.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>NextDone</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Done_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Param_Add</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Param_Add_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>requires_Add</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Requires_Add_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>name</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Name_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_1</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_1_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_5</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_5_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_6</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_6_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_8</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_8_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileBuildAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>fileBuild()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>newModuleAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>NewModule()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>browsePath</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>browsePath_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>whatsThisAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>whatsThis()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_4</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_4_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_3</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_3_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nextStep_2</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>nextStep_2_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>port_Add</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Port_Add_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stat_Add</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Stat_Add_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileOpenAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>fileOpen()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileSaveAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>fileSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fileSaveAsAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>fileSaveAs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exitAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>fileExit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editCutAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>editCut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>requires</sender>
+   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>parameters</sender>
+   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ports</sender>
+   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>editUpdateAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>editUpdate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>requires</sender>
+   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Requires_Update(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ports</sender>
+   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Ports_Update(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stats</sender>
+   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stats</sender>
+   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Stats_Update(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>parameters</sender>
+   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Parameters_Update(QTableWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>description</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Any_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>provides_2</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Any_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>attributes</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Any_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>classname</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Any_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>briefDescription</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Any_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>author</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Any_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autofill</sender>
+   <signal>clicked()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>Autofill_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>requiresName</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>RequiresName_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>portName</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>PortName_textChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

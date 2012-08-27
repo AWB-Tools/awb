@@ -247,7 +247,7 @@ sub model_tree_expanded
         $citem->setText(1, trUtf8($i));
 
         my $n = awb_util::glob_dir($i);
-        $citem->setChildIndicatorPolicy(0);
+        $citem->setChildIndicatorPolicy(($n > 0)? 0:1);
     }
 }
 
@@ -318,7 +318,7 @@ sub model_tree_clicked
         }
         my $citem = Qt::TreeWidgetItem($ui->model_list(), 0);
         $citem->setBackground(0, Qt::Brush(($color)));
-        $citem->setChildIndicatorPolicy(1); 
+        $citem->setChildIndicatorPolicy(2); 
         #$citem->setExpandable(1);
 
          #Column 0 = model name
@@ -454,7 +454,7 @@ sub benchmark_tree_expanded
         $citem->setText(1, trUtf8($i));
 
         my $n = awb_util::glob_dir($i);
-        $citem->setChildIndicatorPolicy(0);
+        $citem->setChildIndicatorPolicy($n>0? 0:1);
     }
 
 }
