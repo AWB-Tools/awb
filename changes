@@ -10689,3 +10689,19 @@ Directory .
 - Removed extra toolbars from top of awb GUI
 - Changed the default of HighlightProblems checkbox to false
 - Fixed the childIndicatorPolicy for model_tree and becnhmark_tree to indicate children only if they exist 
+
+----------
+mgambhir    Date: Tue Aug 28 16:45:59 EDT 2012  CSN: CSN-awb-523
+                  Tue Aug 28 20:45:59 UTC 2012
+
+
+Directory tools/awb/awb
+ awb_dialog.ui             Locally Modified          522 
+ awb_runlog.pm             Locally Modified          522 
+
+- Added stylesheets for group boxes in awb to get stylized borders and title
+- Fixed layout in BuildOptions, RunOptions and Admin tabs in awb
+- removed a debug statement in awb_runlog that was being printed even when $debug was false
+TODO:
+Fix a warning in awb build - "$ is an invalid widget" - dont yet know where it is coming from
+Add stylesheets for group boxes in other GUI tools (apm-find-replace and awb-wizard)

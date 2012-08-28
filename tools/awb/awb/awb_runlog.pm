@@ -63,29 +63,14 @@ sub run
     # Parse the command line for QProcess
     #   TBD: Need to parse lines with newline (\n) in them
 
-    #my @args = ("/bin/sh", "-c", $command);
     my @args = ("-c", $command);
 
-    #if ($debug) {
+    if ($debug) {
         print "----\n";
         print "Final Command = <$command>\n";
         print join("\n", @args);
         print "\n----\n\n";
-    #}
-
-
-    #this->{logprocess}->setArguments(\@args);
-
-    #
-    # Set working directory
-    #
-    #my $dir = Qt::Dir();
-
-    #this->{logprocess}->setWorkingDirectory($dir);
-    
-    #
-    # Connect up signals and slots
-    #
+    }
 
     Qt::Object::connect(this->{logprocess}, SIGNAL 'readyReadStandardOutput()',
                         this,        SLOT   'receivedLineStdout()');
