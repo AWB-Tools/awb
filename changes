@@ -10705,3 +10705,13 @@ Directory tools/awb/awb
 TODO:
 Fix a warning in awb build - "$ is an invalid widget" - dont yet know where it is coming from
 Add stylesheets for group boxes in other GUI tools (apm-find-replace and awb-wizard)
+
+----------
+mgambhir    Date: Tue Aug 28 17:00:23 EDT 2012  CSN: CSN-awb-524
+                  Tue Aug 28 21:00:23 UTC 2012
+
+
+Directory tools/awb/awb
+ awb_dialog.ui             Locally Modified          523 
+
+- Fixed the info bar at the bottom of awb to show model name, benchmark name and awb version with correct formatting
