@@ -1307,13 +1307,13 @@ sub moduleInsertSubmodelAction_activated
     }
 
     my $file = shift ||
-        Qt::FileDialog::getOpenFileName(
+    Qt::FileDialog::getOpenFileName(
+           this,
+           "Choose a submodel",
             $cwd,
-            "Asim Models (*.apm)",
-            this,
-            "open asim model dialog",
-            "Choose a submodel" ) || 
-        return;;
+           "Asim Models (*.apm)") || 
+    return;;
+
 
     my $submodel = Asim::Model->new($file);
     if (!defined($submodel)) {

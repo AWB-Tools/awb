@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
-    <height>565</height>
+    <width>515</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tab_1">
        <attribute name="title">
         <string>Description</string>
        </attribute>
@@ -40,6 +40,24 @@
         </property>
         <item>
          <widget class="QGroupBox" name="Namebox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Name</string>
           </property>
@@ -68,6 +86,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="ProvidesBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Provides</string>
           </property>
@@ -108,6 +144,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="DescriptionBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Description</string>
           </property>
@@ -136,6 +190,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="AttributesBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Attributes</string>
           </property>
@@ -229,7 +301,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_1">
+      <widget class="QWidget" name="tab_2">
        <attribute name="title">
         <string>Class</string>
        </attribute>
@@ -247,6 +319,24 @@
           </property>
           <property name="whatsThis">
            <string>Select the kind of module this class implements. The available types are: module for a normal module, algorithm for modules that simply provide a method call based interface and message for modules that implement the messages that are passed on ports.</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
           </property>
           <property name="title">
            <string>Class Type</string>
@@ -287,6 +377,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="Classname_Box">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Classname</string>
           </property>
@@ -315,6 +423,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="BriefDescBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Brief Description</string>
           </property>
@@ -343,6 +469,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="AuthorBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Author</string>
           </property>
@@ -423,7 +567,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tab_3">
        <attribute name="title">
         <string>Dependencies</string>
        </attribute>
@@ -436,6 +580,24 @@
         </property>
         <item>
          <widget class="QGroupBox" name="RequiresBox">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Used/Required Module</string>
           </property>
@@ -447,13 +609,34 @@
             <number>11</number>
            </property>
            <item>
-            <widget class="QTableWidget" name="requires">
+            <widget class="QTreeWidget" name="requires">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>The list of modules used by this module</string>
              </property>
              <property name="whatsThis">
               <string>This pane contains a list of those modules that are used or required by this module.</string>
              </property>
+             <property name="uniformRowHeights">
+              <bool>true</bool>
+             </property>
+             <attribute name="headerCascadingSectionResizes">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="headerDefaultSectionSize">
+              <number>100</number>
+             </attribute>
+             <attribute name="headerHighlightSections">
+              <bool>true</bool>
+             </attribute>
+             <attribute name="headerStretchLastSection">
+              <bool>true</bool>
+             </attribute>
              <column>
               <property name="text">
                <string>Name</string>
@@ -488,6 +671,24 @@
          <widget class="QGroupBox" name="GroupBox25">
           <property name="whatsThis">
            <string>This box is used to specify modules that are going to be used (and possibly required) by the module being created. For each such module, fill in the boxes and click add.</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
           </property>
           <property name="title">
            <string> Module</string>
@@ -684,7 +885,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_3">
+      <widget class="QWidget" name="tab_4">
        <attribute name="title">
         <string>Parameters</string>
        </attribute>
@@ -697,6 +898,24 @@
         </property>
         <item>
          <widget class="QGroupBox" name="GroupBox2_3_3_2_2">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Parameters</string>
           </property>
@@ -708,13 +927,28 @@
             <number>11</number>
            </property>
            <item>
-            <widget class="QTableWidget" name="parameters">
+            <widget class="QTreeWidget" name="parameters">
              <property name="toolTip">
               <string>The list of parameters used by this module</string>
              </property>
              <property name="whatsThis">
               <string>This pane contains a list of those parameters that are used by this module.</string>
              </property>
+             <attribute name="headerCascadingSectionResizes">
+              <bool>true</bool>
+             </attribute>
+             <attribute name="headerDefaultSectionSize">
+              <number>100</number>
+             </attribute>
+             <attribute name="headerHighlightSections">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="headerShowSortIndicator" stdset="0">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="headerStretchLastSection">
+              <bool>true</bool>
+             </attribute>
              <column>
               <property name="text">
                <string>Name</string>
@@ -749,6 +983,24 @@
          <widget class="QGroupBox" name="GroupBox27">
           <property name="whatsThis">
            <string>This box is used to specify parameters of the module being created. For each such parameter, fill in the boxes and click add.</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
           </property>
           <property name="title">
            <string>Parameters</string>
@@ -930,7 +1182,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_4">
+      <widget class="QWidget" name="tab_5">
        <attribute name="title">
         <string>Clocking</string>
        </attribute>
@@ -953,6 +1205,24 @@
            <widget class="QGroupBox" name="ButtonGroup1">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
             </property>
             <property name="title">
              <string>Clocking Style</string>
@@ -1033,6 +1303,24 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="styleSheet">
+             <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+            </property>
             <property name="title">
              <string>Clockserver</string>
             </property>
@@ -1087,6 +1375,19 @@
                </layout>
               </widget>
              </item>
+             <item row="2" column="0">
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
           </item>
@@ -1130,7 +1431,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_5">
+      <widget class="QWidget" name="tab_6">
        <attribute name="title">
         <string>Ports</string>
        </attribute>
@@ -1143,6 +1444,24 @@
         </property>
         <item>
          <widget class="QGroupBox" name="GroupBox2_3_3_2_2_2">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Ports</string>
           </property>
@@ -1154,13 +1473,16 @@
             <number>11</number>
            </property>
            <item>
-            <widget class="QTableWidget" name="ports">
+            <widget class="QTreeWidget" name="ports">
              <property name="toolTip">
               <string>The list of the ports of this module</string>
              </property>
              <property name="whatsThis">
               <string>This pane contains a list of those ports that are used by this module.</string>
              </property>
+             <attribute name="headerDefaultSectionSize">
+              <number>100</number>
+             </attribute>
              <column>
               <property name="text">
                <string>Name</string>
@@ -1200,6 +1522,24 @@
          <widget class="QGroupBox" name="GroupBox29">
           <property name="whatsThis">
            <string>This box is used to specify ports to be used by the module being created. For each such port, fill in the boxes and click add.</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
           </property>
           <property name="title">
            <string>Ports</string>
@@ -1434,7 +1774,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_6">
+      <widget class="QWidget" name="tab_7">
        <attribute name="title">
         <string>Statistics</string>
        </attribute>
@@ -1447,6 +1787,24 @@
         </property>
         <item>
          <widget class="QGroupBox" name="GroupBox34">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Statistics</string>
           </property>
@@ -1458,13 +1816,19 @@
             <number>11</number>
            </property>
            <item>
-            <widget class="QTableWidget" name="stats">
+            <widget class="QTreeWidget" name="stats">
              <property name="toolTip">
               <string>The list of statistics maintained by this module</string>
              </property>
              <property name="whatsThis">
               <string>This pane contains a list of the statistics that are kept by this module.</string>
              </property>
+             <attribute name="headerDefaultSectionSize">
+              <number>100</number>
+             </attribute>
+             <attribute name="headerMinimumSectionSize">
+              <number>56</number>
+             </attribute>
              <column>
               <property name="text">
                <string>Name</string>
@@ -1494,6 +1858,24 @@
          <widget class="QGroupBox" name="GroupBox29_2">
           <property name="whatsThis">
            <string>This box is used to specify statistics for the module being created. For each such statistic, fill in the boxes and click add.</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
           </property>
           <property name="title">
            <string>Statistics</string>
@@ -1671,7 +2053,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_7">
+      <widget class="QWidget" name="tab_8">
        <attribute name="title">
         <string>Save</string>
        </attribute>
@@ -1684,6 +2066,24 @@
         </property>
         <item>
          <widget class="QGroupBox" name="GroupBox2_2">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>Directory</string>
           </property>
@@ -1719,6 +2119,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="GroupBox2_2_2">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>.awb filename</string>
           </property>
@@ -1744,6 +2162,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="GroupBox2_2_2_2">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>.h filename</string>
           </property>
@@ -1769,6 +2205,24 @@
         </item>
         <item>
          <widget class="QGroupBox" name="GroupBox2_2_2_3">
+          <property name="styleSheet">
+           <string notr="true">QGroupBox {
+     border: 1px solid gray;
+     border-radius: 5px;
+      border-style: outset;
+     margin-top: 1ex; /* leave space at the top for the title */
+     margin-left: 1ex;
+     margin-right: 1ex;
+     margin-bottom: 1ex;
+   
+ }
+
+ QGroupBox::title {
+     subcontrol-origin: margin;
+     subcontrol-position: top left; /* position at the top center */
+     padding: 0 10px;
+ }</string>
+          </property>
           <property name="title">
            <string>.cpp filename</string>
           </property>
@@ -1873,8 +2327,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>617</width>
-     <height>22</height>
+     <width>515</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -2012,16 +2466,22 @@
    </property>
   </action>
   <action name="editCutAction">
-   <property name="iconText">
+   <property name="text">
     <string>Cu&amp;t</string>
+   </property>
+   <property name="iconText">
+    <string>Cut</string>
    </property>
    <property name="toolTip">
     <string>Cut an item</string>
    </property>
   </action>
   <action name="editUpdateAction">
-   <property name="iconText">
+   <property name="text">
     <string>&amp;Update</string>
+   </property>
+   <property name="iconText">
+    <string>Update</string>
    </property>
    <property name="toolTip">
     <string>Update this item</string>
@@ -2098,8 +2558,8 @@
    <slot>Done_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2114,8 +2574,8 @@
    <slot>Param_Add_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>470</x>
+     <y>338</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2130,8 +2590,8 @@
    <slot>Requires_Add_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>470</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2146,8 +2606,8 @@
    <slot>Name_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2162,8 +2622,8 @@
    <slot>nextStep_1_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2178,8 +2638,8 @@
    <slot>nextStep_5_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2194,8 +2654,8 @@
    <slot>nextStep_6_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2210,8 +2670,8 @@
    <slot>nextStep_8_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2258,8 +2718,8 @@
    <slot>browsePath_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>470</x>
+     <y>164</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2271,7 +2731,7 @@
    <sender>whatsThisAction</sender>
    <signal>activated()</signal>
    <receiver>awb_wizard</receiver>
-   <slot>whatsThis()</slot>
+   <slot>helpWhatsThisAction_activated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -2290,8 +2750,8 @@
    <slot>nextStep_4_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2306,8 +2766,8 @@
    <slot>nextStep_3_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2322,8 +2782,8 @@
    <slot>nextStep_2_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>489</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2338,8 +2798,8 @@
    <slot>Port_Add_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>470</x>
+     <y>309</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2354,8 +2814,8 @@
    <slot>Stat_Add_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>470</x>
+     <y>309</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2444,54 +2904,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>requires</sender>
-   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
-   <receiver>awb_wizard</receiver>
-   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>parameters</sender>
-   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
-   <receiver>awb_wizard</receiver>
-   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ports</sender>
-   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
-   <receiver>awb_wizard</receiver>
-   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>editUpdateAction</sender>
    <signal>activated()</signal>
    <receiver>awb_wizard</receiver>
@@ -2509,13 +2921,13 @@
   </connection>
   <connection>
    <sender>requires</sender>
-   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
    <receiver>awb_wizard</receiver>
-   <slot>Requires_Update(QTableWidgetItem*)</slot>
+   <slot>Requires_Update(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2525,13 +2937,13 @@
   </connection>
   <connection>
    <sender>ports</sender>
-   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
    <receiver>awb_wizard</receiver>
-   <slot>Ports_Update(QTableWidgetItem*)</slot>
+   <slot>Ports_Update(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2541,29 +2953,13 @@
   </connection>
   <connection>
    <sender>stats</sender>
-   <signal>contextMenuRequested(QTableWidgetItem*,QPoint,int)</signal>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
    <receiver>awb_wizard</receiver>
-   <slot>contextMenuRequested(QTableWidgetItem*,QPoint,int)</slot>
+   <slot>Stats_Update(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>stats</sender>
-   <signal>doubleClicked(QTableWidgetItem*)</signal>
-   <receiver>awb_wizard</receiver>
-   <slot>Stats_Update(QTableWidgetItem*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2573,13 +2969,13 @@
   </connection>
   <connection>
    <sender>parameters</sender>
-   <signal>doubleClicked(QTableWidgetItem*)</signal>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
    <receiver>awb_wizard</receiver>
-   <slot>Parameters_Update(QTableWidgetItem*)</slot>
+   <slot>Parameters_Update(QTreeWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2594,8 +2990,8 @@
    <slot>Any_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2610,8 +3006,8 @@
    <slot>Any_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2626,8 +3022,8 @@
    <slot>Any_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>380</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2642,8 +3038,8 @@
    <slot>Any_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>219</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2658,8 +3054,8 @@
    <slot>Any_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>289</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2674,8 +3070,8 @@
    <slot>Any_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>52</x>
+     <y>359</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2690,8 +3086,8 @@
    <slot>Autofill_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>62</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2706,8 +3102,8 @@
    <slot>RequiresName_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>359</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2722,8 +3118,8 @@
    <slot>PortName_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>344</x>
+     <y>309</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -2731,5 +3127,57 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>aboutAction</sender>
+   <signal>activated()</signal>
+   <receiver>awb_wizard</receiver>
+   <slot>about_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>fileOpen()</slot>
+  <slot>init()</slot>
+  <slot>NewModule()</slot>
+  <slot>fileSave()</slot>
+  <slot>fileSaveAs()</slot>
+  <slot>fileBuild()</slot>
+  <slot>fileExit()</slot>
+  <slot>editUpdate()</slot>
+  <slot>editCut()</slot>
+  <slot>Name_textChanged(const QString)</slot>
+  <slot>Autofill_clicked()</slot>
+  <slot>Any_textChanged(const QString)</slot>
+  <slot>contextMenuRequested(QTreeWidgetItem*, const QPoint, int) </slot>
+  <slot>Requires_Update(QTreeWidgetItem*)</slot>
+  <slot>RequiresName_textChanged(const QString)</slot>
+  <slot>Requires_Add_clicked()</slot>
+  <slot>Parameters_Update(QTreeWidgetItem*)</slot>
+  <slot>Param_Add_clicked()</slot>
+  <slot>Ports_Update(QTreeWidgetItem*)</slot>
+  <slot>Port_Add_clicked()</slot>
+  <slot>Stats_Update(QTreeWidgetItem*)</slot>
+  <slot>Stat_Add_clicked()</slot>
+  <slot>nextStep_1_clicked()</slot>
+  <slot>nextStep_2_clicked()</slot>
+  <slot>nextStep_3_clicked()</slot>
+  <slot>nextStep_4_clicked()</slot>
+  <slot>nextStep_5_clicked()</slot>
+  <slot>nextStep_6_clicked()</slot>
+  <slot>nextStep_8_clicked()</slot>
+  <slot>browsePath_clicked()</slot>
+  <slot>Done_clicked()</slot>
+  <slot>PortName_textChanged(const QString)</slot>
+  <slot>helpWhatsThisAction_activated()</slot>
+  <slot>about_activated()</slot>
+ </slots>
 </ui>

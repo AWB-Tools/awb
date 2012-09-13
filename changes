@@ -10715,3 +10715,27 @@ Directory tools/awb/awb
  awb_dialog.ui             Locally Modified          523 
 
 - Fixed the info bar at the bottom of awb to show model name, benchmark name and awb version with correct formatting
+
+----------
+mgambhir    Date: Thu Sep 13 10:31:34 EDT 2012  CSN: CSN-awb-525
+                  Thu Sep 13 14:31:34 UTC 2012
+
+
+Directory tools/awb
+ awb-wizard/               Locally Modified          524 
+
+Directory tools/awb/awb-wizard
+ awb_wizard_head.pl        Locally Modified          524 
+ awb_wizard.pm             Locally Modified          524 
+ awb_wizard.ui             Locally Modified          524 
+ awb_wizard_about.pm       Locally Modified          524 
+
+Directory tools/awb/apm-edit
+ Makefile.am               Locally Modified          524 
+ apm_edit.pm               Locally Modified          524 
+ apm_edit.ui               Locally Modified          524 
+
+- most slots in awb-wizard are now working. It still needs a thorough testing
+- fixed a file open bug in apm-edit
+known bugs
+  - in apm-edit, insert action group in the context menu is not working.

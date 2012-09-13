@@ -3,7 +3,7 @@
 
 ##################################################################################
 #
-# Copyright (C) 2002-2006 Intel Corporation
+# Copyright (C) 2002-20012 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -27,7 +27,10 @@
 # Purpose:
 #       A GUI interface to create a new module
 #
-
+# Author: Mohit Gambhir
+# Date: September 2012
+# Modification: 
+#       Port to PerQt4
 #
 # Turn on warnings
 #
