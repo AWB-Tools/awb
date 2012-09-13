@@ -14,7 +14,7 @@ Module=undef
 Tag=HEAD
 Target=leap-platforms-acp
 Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platform-acp
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-acp
 
 [leap-platforms-acp/HEAD]
 Description=Leap Platform modules for ACP board (HEAD)

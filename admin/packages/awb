@@ -18,7 +18,7 @@
 #
 [Global]
 Description=Architects Workbench
-CSN=CSN-awb-525
+CSN=CSN-awb-526
 Name=awb
 Tag=v12.04
 Prerelease=1

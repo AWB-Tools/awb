@@ -1,0 +1,20 @@
+
+[leap-platforms-fabric]
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-fabric
+Target=leap-platforms-fabric
+Method=svn
+Module=undefined
+Changes=changes
+Description=leap-platforms-fabric package
+Tag=HEAD
+Access=https://asim.csail.mit.edu/svn/leap-platforms-fabric
+
+[leap-platforms-fabric/HEAD]
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-fabric
+Target=leap-platforms-fabric
+Method=svn
+Module=undefined
+Changes=changes
+Description=leap-platforms-fabric package
+Tag=HEAD
+Access=https://asim.csail.mit.edu/svn/leap-platforms-fabric

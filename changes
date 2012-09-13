@@ -10739,3 +10739,19 @@ Directory tools/awb/apm-edit
 - fixed a file open bug in apm-edit
 known bugs
   - in apm-edit, insert action group in the context menu is not working.
+
+----------
+emer        Date: Thu Sep 13 15:39:01 EDT 2012  CSN: CSN-awb-526
+                  Thu Sep 13 19:39:01 UTC 2012
+
+
+Directory tools/awb/apm-edit
+ Makefile                  Locally Modified          525 
+
+Directory etc/repositories.d
+ leap-platforms-fabric.pack Locally Added               0 
+ platform-acp.pack         Locally Modified          525 
+
+Added .pack file for leap-platforms-fabric project.
+
+Fixed svn browse URL in acp .pack file.
