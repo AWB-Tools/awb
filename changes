@@ -10755,3 +10755,48 @@ Directory etc/repositories.d
 Added .pack file for leap-platforms-fabric project.
 
 Fixed svn browse URL in acp .pack file.
+
+----------
+mgambhir    Date: Thu Sep 27 05:04:59 EDT 2012  CSN: CSN-awb-527
+                  Thu Sep 27 09:04:59 UTC 2012
+
+
+Directory tools/scripts
+ Makefile.am               Locally Modified          526 
+ Makefile.in               Locally Modified          526 
+ asimstarter.in            Locally Modified          526 
+ doxygen/                  Locally Added               0 
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Added               0 
+
+Directory tools/scripts
+ README                    Locally Modified          526 
+
+Directory tools/awb/apm-edit
+ Makefile                  Locally Modified          526 
+ Makefile.in               Locally Modified          526 
+
+- Added an initial implementation of the Bluespec source code filter that can be used with doxygen to generate doxygen style Bluespec API documentation
+  - Converts Blusespec interfaces and modules into Java style interfaces and class definitions
+  - Converts stylized comments in the source into doxygen style comments.
+    - Section breaks as shown below are skipped
+      // =================================
+      // 
+      // Section Description
+      //
+      // ================================= 
+    - Following style of comments are considered important and are converted into doxygen style comments that are made available in the documentation
+      1. 
+      //
+      // Interface/Module/Rule descrition goes here
+      //
+
+      2. 
+      // Interface/Module/Rule descrition goes here
+      
+      3. All comments within an interface/module which may or may not follow above two formats are considered important. 
+  - Converts Bluespec style template parameters #() into Java style template parameters <>
+
+TODO:
+Currently the filter was tested only with a few *.bsv files. Further filtering of comments is required when the filter is used to generate documentation for an entire repository

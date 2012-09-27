@@ -239,7 +239,6 @@ apm_edit_SOURCES = apm_edit.qrc \
                    apm_edit_about.pm \
                    apm_edit_properties.ui \
                    apm_edit_properties.pm \
-                   apm_edit_images.pm \
                    runlog.ui \
                    runlog.pm \
                    apm_edit_main.pl 

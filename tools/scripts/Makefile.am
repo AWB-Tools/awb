@@ -18,7 +18,7 @@
 #
 
 # tool programs for libexec
-tool_SCRIPTS = awb-batch awb-benchmark awb-run awb-shell plot-shell regression.launcher regression.verifier regression.cleanup sum-simpoints sum-unweighted summarize-stats model-coverage
+tool_SCRIPTS = awb-batch awb-benchmark awb-run awb-shell plot-shell regression.launcher regression.verifier regression.cleanup sum-simpoints sum-unweighted summarize-stats model-coverage doxygen/bsv.filter
 
 # pod2man_scripts
 pod2man_list = $(tool_SCRIPTS) asimstarter

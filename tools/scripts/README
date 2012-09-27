@@ -10,11 +10,11 @@ the following:
   3) Add a new tool line to 'asimstarter.in'
   4) Add 'new-asim-util' to the tool_SCRIPTS line in Makefile.AM
   5) Do an autoconf of the package, see ../../README for instructions
-  6) Do an 'asim-shell update package core'
+  6) Do an 'awb-shell update package awb'
 
 As a user that can install asim, e.g., root or ASIM1 here in Hudson:
 
-  1) Use asim-shell to check out and build asim-core.
-  2) cd src/asim-core; make install
+  1) Use awb-shell to check out and build awb package.
+  2) cd src/awb; make install
 
 

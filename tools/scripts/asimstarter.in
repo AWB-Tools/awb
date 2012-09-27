@@ -229,6 +229,11 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
   "asim-batch"          => "tools/scripts/awb-batch",
   "asim-pkg-config"     => "tools/scripts/awb-pkg-config",
   "asim-compare-stats"  => "tools/scripts/asim-compare-stats",
+
+#
+# Doxygen tools
+#
+  "bsv.filter"          => "tools/scripts/doxygen/bsv.filter",
 #
 # Obsoleted tools - 
 #
