@@ -10800,3 +10800,13 @@ Directory tools/awb/apm-edit
 
 TODO:
 Currently the filter was tested only with a few *.bsv files. Further filtering of comments is required when the filter is used to generate documentation for an entire repository
+
+----------
+mgambhir    Date: Thu Oct 11 08:38:48 EDT 2012  CSN: CSN-awb-528
+                  Thu Oct 11 12:38:48 UTC 2012
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          527 
+
+- Handled a special bluespec enum syntax that was causing doxygen to seg fault

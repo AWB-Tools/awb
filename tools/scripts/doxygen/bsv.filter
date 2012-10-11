@@ -20,6 +20,7 @@ def filter_bsv():
     in_instance = 0
     in_license = 0
     in_section_break = 0
+    in_enum = 0
     
     for line in fileinput.input():
         # Skip the license section
@@ -135,6 +136,7 @@ def filter_bsv():
                                    ;            # end of interface declaration statement
                                 """, re.X)
         if comment_re.search(line):
+            line = re.sub(r'\binterface\b', r'class', line)
             line = "/** @ingroup BSVInterface */ " + line
             line = line.replace(';', ' {');
             in_interface = 1
@@ -169,10 +171,10 @@ def filter_bsv():
             in_module = 0
         
         # handle methods
-        comment_re = re.compile("""^(\s)*        # start of the string followed by white space
-                           method(\s)+      # method keyword followed by white space
-                           ([\w<>]+)(\s)+     # method type followed by white space
-                           ([\w]+)          # method name
+        comment_re = re.compile("""^(\s)*       # start of the string followed by white space
+                           method(\s)+          # method keyword followed by white space
+                           ([\w<>]+)(\s)+       # method type followed by white space
+                           ([\w]+)              # method name
                            """, re.X)
         if in_module:
             if comment_re.search(line):
@@ -181,7 +183,25 @@ def filter_bsv():
                 line = re.sub(r'\n', ' {\n', line)
             line = line.replace('endmethod', '}')
 
+
+        # handle the special "deriving" enum case
+        comment_re = re.compile("""^(\s)*           # start of a string followed by white space
+                                typedef(\s)+        # typedef keyword followed by white space
+                                enum(\s)+           # enum keyword followed by white space
+                                """, re.X)
+        if comment_re.search(line):
+            in_enum = 1
+
+        comment_re = re.compile("""(\s)+            # white space
+                                deriving(\s)+       # keyword derving followed by white space 
+                                \([\w,]+\)           # Parameters inside parantheses
+                                """, re.X)
+        if in_enum:
+            if comment_re.search(line):
+                line = re.sub(r'deriving(.)*', ';', line)
+                in_enum = 0;
+   
         sys.stdout.write(line)
-        
+    
 filter_bsv()
     
