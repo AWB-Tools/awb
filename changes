@@ -10810,3 +10810,14 @@ Directory tools/scripts/doxygen
  bsv.filter                Locally Modified          527 
 
 - Handled a special bluespec enum syntax that was causing doxygen to seg fault
+
+----------
+mgambhir    Date: Thu Oct 18 09:51:12 EDT 2012  CSN: CSN-awb-529
+                  Thu Oct 18 13:51:12 UTC 2012
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          528 
+
+- Added "deriving" struct case to  filter it out from doxygen output
+- The second highest priority comments (the ones that do not have a blank comment line to start with) now dont generate documentation for interfaces and modules. They still generate documentation for methods inside interfaces

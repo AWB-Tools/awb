@@ -21,6 +21,8 @@ def filter_bsv():
     in_license = 0
     in_section_break = 0
     in_enum = 0
+    in_struct = 0
+    documented_construct = 0
     
     for line in fileinput.input():
         # Skip the license section
@@ -37,6 +39,8 @@ def filter_bsv():
             # if in license and the current line is not a comment then 
             # end the license section
             in_license = 0
+            important_comment = 0
+            documented_construct = 0
     
         # Skip the section break marked by // =============
         comment_re = re.compile(r"""[\s]*       # white space at the start of the line
@@ -57,16 +61,7 @@ def filter_bsv():
                 sys.stdout.write(line)
                 continue
         
-        if important_comment:
-            # If inside an important comment then change double slashes to 
-            # triple slashes
-            comment_re = re.compile(r"""[\s]*   # white space before the comment
-                                        //      # start of a comment
-                                     """)
-            if comment_re.search(line):
-                line = re.sub(r'//', r'///', line)
-                sys.stdout.write(line)
-                continue
+
         # Check if it is the beginning of an important comment 
         # //<space><End of Line>
         comment_re = re.compile(r"""[\s]*    # white space before the comment
@@ -76,24 +71,35 @@ def filter_bsv():
                                 """, re.X)
         if comment_re.search(line):
             # if this is the beginning of an important comment then change double slashes to
-            # triple slashes and set important_comment to 1
+            # triple slashes and set important_comment
             line = re.sub(r'//', r'///', line)
-            important_comment = important_comment ^ 1
+            important_comment = 1
+            documented_construct = 1   
             sys.stdout.write(line)
             continue
-        
-        # Its either not a comment or not the hishest priority comment
-        important_comment=0
-    
+
+        if important_comment:
+            # If inside an important comment then change double slashes to 
+            # triple slashes
+            comment_re = re.compile(r"""[\s]*   # white space before the comment
+                                        //      # start of a comment
+                                     """, re.X)
+            if comment_re.search(line):
+                line = re.sub(r'//', r'///', line)
+                sys.stdout.write(line)
+                continue
+             
+        important_comment = 0
+        #FIXME
         # Check to see if it is the second highest priority comment 
         # //<space><text>
-        comment_re = re.compile(r"""[\s]*   # white space before the comment
-                                    //      # start of comment
-                                    [\s]*   # white space before the start of the text
-                                    (.+)    # comment text
-                                 """, re.X)
-        if comment_re.search(line):
-            line = re.sub(r'//', r'///', line)
+        #comment_re = re.compile(r"""[\s]*   # white space before the comment
+        #                            //      # start of comment
+        #                            [\s]*   # white space before the start of the text
+        #                            (.+)    # comment text
+        #                         """, re.X)
+        #if comment_re.search(line):
+        #    line = re.sub(r'//', r'///', line)
         
         # All comments with or without space/newline in the first line
         # are important within a module or interface
@@ -137,12 +143,14 @@ def filter_bsv():
                                 """, re.X)
         if comment_re.search(line):
             line = re.sub(r'\binterface\b', r'class', line)
-            line = "/** @ingroup BSVInterface */ " + line
+            if documented_construct:
+                line = "/** @ingroup BSVInterface */ " + line
             line = line.replace(';', ' {');
             in_interface = 1
         if re.search(r'endinterface', line):
             line = line.replace('endinterface', '};', re.DOTALL)
             in_interface = 0
+            documented_construct = 0
 
         # handle module definitions
         comment_re = re.compile("""^(\s)*         # start of string followed by white space
@@ -158,8 +166,9 @@ def filter_bsv():
         if comment_re.search(line):
             line = re.sub(r'\bmodule\b', r'class', line)
             line = re.sub(r'\[[\w]+\]', r'', line)
-            line = re.sub(r'\n', ' {\n', line)
-            line = "/** @ingroup BSVModule */ " + line 
+            line = re.sub(r'\n$', ' {\n', line)         # the $ sign denotes the end of line. In case module declaration span multiple lines
+            if documented_construct:
+                line = "/** @ingroup BSVModule */ " + line 
             line = line.replace(';', '');
             # remove interface name from the definition
             line = re.sub(r'\(.*\)', r' ', line)
@@ -169,11 +178,12 @@ def filter_bsv():
         if re.search(r'endmodule', line):
             line = line.replace('endmodule', '};', re.DOTALL)
             in_module = 0
+            documented_construct = 0
         
         # handle methods
         comment_re = re.compile("""^(\s)*       # start of the string followed by white space
                            method(\s)+          # method keyword followed by white space
-                           ([\w<>]+)(\s)+       # method type followed by white space
+                           ([\w<>,]+)(\s)+       # method type followed by white space
                            ([\w]+)              # method name
                            """, re.X)
         if in_module:
@@ -183,6 +193,23 @@ def filter_bsv():
                 line = re.sub(r'\n', ' {\n', line)
             line = line.replace('endmethod', '}')
 
+
+        #FIXME        
+        # handle  functions
+        #comment_re = re.compile("""^(\s)*           # start of a string followed by white space
+        #                        function(\s)+       # function keyword followed by white space
+        #                        ([\w<>,]+)(\s)+      # function return type followed by white space
+        #                        ([\w]+)             # function name
+        #                        """, re.X)
+  
+        #if comment_re.search(line):
+        #    if documented_construct:
+        #        line = "/** @ingroup BSVFunctions */ " + line
+        #    line = re.sub(r'\bfunction\b', r'', line)
+        #    line = line.replace(';', '')
+        #    line = re.sub(r'\n', ' {\n', line)
+        #line = line.replace('endfunction', '}')
+        
 
         # handle the special "deriving" enum case
         comment_re = re.compile("""^(\s)*           # start of a string followed by white space
@@ -194,13 +221,32 @@ def filter_bsv():
 
         comment_re = re.compile("""(\s)+            # white space
                                 deriving(\s)+       # keyword derving followed by white space 
-                                \([\w,]+\)           # Parameters inside parantheses
+                                \([\w,\s]+\)          # Parameters inside parantheses
                                 """, re.X)
         if in_enum:
             if comment_re.search(line):
                 line = re.sub(r'deriving(.)*', ';', line)
                 in_enum = 0;
-   
+                documented_construct = 0
+
+        # handle the special "deriving" struct case
+        comment_re = re.compile("""^(\s)*           # start of a string followed by white space
+                                typedef(\s)+        # typedef keyword followed by white space
+                                struct(\s)+         # struct keyword followed by white space
+                                """, re.X)
+        if comment_re.search(line):
+            in_struct = 1
+
+        comment_re = re.compile("""(\s)+            # white space
+                                deriving(\s)+       # keyword derving followed by white space 
+                                \([\w,\s]+\)          # Parameters inside parantheses
+                                """, re.X)
+        if in_struct:
+            if comment_re.search(line):
+                line = re.sub(r'deriving(.)*', ';', line)
+                in_struct = 0;
+                documented_construct = 0
+
         sys.stdout.write(line)
     
 filter_bsv()
