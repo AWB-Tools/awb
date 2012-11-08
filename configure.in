@@ -236,9 +236,9 @@ AC_DEFUN([FIND_QT], [
 
     if test "$asim_cv_enable_qt4" = "yes"
     then
-        FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/)
+        FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/)
     else 
-        FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/)
+        FIND_QT_LIBS($with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/)
     fi
     if test "X$QTLIBDIR" = "X"
     then

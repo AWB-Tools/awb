@@ -16311,7 +16311,7 @@ $as_echo_n "checking \"for Qt 4.x.x libraries\"... " >&6; }
 $as_echo_n "checking \"for Qt 3.x.x libraries\"... " >&6; }
         QTLIBS="qt-mt qt"
     fi
-    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/
+    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/
     do
         for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
 	do
@@ -16348,7 +16348,7 @@ $as_echo_n "checking \"for Qt 4.x.x libraries\"... " >&6; }
 $as_echo_n "checking \"for Qt 3.x.x libraries\"... " >&6; }
         QTLIBS="qt-mt qt"
     fi
-    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/
+    for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/
     do
         for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
 	do

@@ -10821,3 +10821,22 @@ Directory tools/scripts/doxygen
 
 - Added "deriving" struct case to  filter it out from doxygen output
 - The second highest priority comments (the ones that do not have a blank comment line to start with) now dont generate documentation for interfaces and modules. They still generate documentation for methods inside interfaces
+
+----------
+mgambhir    Date: Thu Nov  8 17:37:00 EST 2012  CSN: CSN-awb-530
+                  Thu Nov  8 22:37:00 UTC 2012
+
+
+Directory .
+ configure                 Locally Modified          529 
+
+Directory debian
+ changelog                 Locally Modified          529 
+
+Directory tools/awb/apm-edit
+ Makefile                  Locally Removed           529 
+
+Directory .
+ configure.in              Locally Modified          529 
+
+- added an additional directory in configure script to look for qt4 libraries when working on i386 build of ubuntu

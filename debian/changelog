@@ -1,4 +1,4 @@
-awb (12.04~svn20120412r497+lucid) lucid; urgency=low
+awb (12.04~svn20120412r497+precise) precise; urgency=low
 
   [ Joel Emer ]
   * Move to version v12.04 - v12.02 was never released
