@@ -10840,3 +10840,18 @@ Directory .
  configure.in              Locally Modified          529 
 
 - added an additional directory in configure script to look for qt4 libraries when working on i386 build of ubuntu
+
+----------
+mgambhir    Date: Thu Apr 18 17:31:45 EDT 2013  CSN: CSN-awb-531
+                  Thu Apr 18 21:31:45 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          530 
+
+- Improved comment parsing
+  - Rmeoved the first line of the comment if it was the same as module name followed by --
+  - Removed empty lines in between comment blocks because doxygen treats them as end of comments
+- removed provisos
+- Added public inheritance between modules and the interface that they implement
+- Partially handled functions - still WIP
