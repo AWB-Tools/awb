@@ -8,7 +8,7 @@ import re
 # define groups to bundle interfaces and modules
 sys.stdout.write("/** @defgroup BSVInterface Interfaces */ ")
 sys.stdout.write("/** @defgroup BSVModule Modules */ ")
-sys.stdout.write("/** @defgroup BSVFunction Functions */ ")
+#sys.stdout.write("/** @defgroup BSVFunction Functions */ ")
 
 def filter_bsv():     
     processing_module = 0
@@ -169,8 +169,8 @@ def filter_bsv():
                                 """, re.X)
         if comment_re.search(line):
             line = re.sub(r'\binterface\b', '/** \public */ class', line)
-            if documented_construct:
-                line = "/** @ingroup BSVInterface */ " + line
+            # if documented_construct:
+            line = "/** @ingroup BSVInterface */ " + line
             line = line.replace(';', ' {');
             in_interface = 1
         if re.search(r'endinterface', line):
@@ -193,8 +193,8 @@ def filter_bsv():
             line = re.sub(r'\bmodule\b', r'/** \public */ class ', line)
             line = re.sub(r'\[[\w]+\]', r'', line)
             #line = re.sub(r'\n$', ' {\n', line)         # the $ sign denotes the end of line. In case module declaration span multiple lines
-            if documented_construct:
-                line = "/** @ingroup BSVModule */ " + line 
+            #if documented_construct:
+            line = "/** @ingroup BSVModule */ " + line 
             in_module = 1
             in_module_header = 1
         #handle provisos in interface methods

@@ -10855,3 +10855,14 @@ Directory tools/scripts/doxygen
 - removed provisos
 - Added public inheritance between modules and the interface that they implement
 - Partially handled functions - still WIP
+
+----------
+mgambhir    Date: Wed May 22 17:25:24 EDT 2013  CSN: CSN-awb-532
+                  Wed May 22 21:25:24 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          531 
+
+- Filter now adds undocumented interfaces/modules to the documentation
+- Removed BSVFunction section for the time being
