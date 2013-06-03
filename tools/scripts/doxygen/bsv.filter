@@ -25,7 +25,11 @@ def filter_bsv():
     in_enum = 0
     in_struct = 0
     in_provisos = 0
+    did_provisos = 0
+    in_typeclass = 0
+    in_instance = 0
     documented_construct = 0
+    in_function_header = 0
     
     for line in fileinput.input():
         # Skip the license section
@@ -64,7 +68,14 @@ def filter_bsv():
                 sys.stdout.write(line)
                 continue
         
-
+        # change ` to # in include, ifdef, else and endif
+        line = re.sub(r'`include', r'#include', line)
+        line = re.sub(r'`ifdef', r'#ifdef', line)
+        line = re.sub(r'`else', r'#else', line)
+        line = re.sub(r'`endif', r'#endif', line)
+        line = re.sub(r'`ifndef', r'#ifndef', line)
+        
+        
         # Check if it is the beginning of an important comment 
         # //<space><End of Line>
         comment_re = re.compile(r"""[\s]*    # white space before the comment
@@ -153,10 +164,48 @@ def filter_bsv():
                 if not re.search(r'#\(', line):
                     prev_line = ""
                     continue_template = 0
-
+            #remove all type keywords
+            line = re.sub(r'\btype\b', '', line)
         if continue_template:
             continue
         
+        # skip typeclasses
+        comment_re = re.compile(r"""^[\s]*       # white space
+                                     typeclass  # typeclass keyword
+                                 """, re.X)
+        if comment_re.search(line):
+            in_typeclass = 1
+
+        comment_re = re.compile(r"""^[\s]*          # white space
+                                     endtypeclass   # endtypeclass keyword
+                                 """, re.X)
+        if comment_re.search(line):
+            in_typeclass = 0
+
+
+        if in_typeclass:
+            sys.stdout.write(line)
+            continue;
+
+        # skip instances
+        comment_re = re.compile(r"""^[\s]*       # white space
+                                     instance    # instance keyword
+                                 """, re.X)
+        if comment_re.search(line):
+            in_instance = 1
+
+        comment_re = re.compile(r"""^[\s]*          # white space
+                                     endinstance    # endinstance keyword
+                                 """, re.X)
+        if comment_re.search(line):
+            in_instance = 0
+
+        if in_instance:
+            sys.stdout.write(line)
+            continue;
+
+
+
         # handle interface definitions
         comment_re = re.compile("""^(\s)*       # start of string followed by white space
                                    interface\s  # interface keyword followed by white space
@@ -190,13 +239,14 @@ def filter_bsv():
                                    (\(.*\))*      # interface name may or may not be present on the same line
                                 """, re.X)
         if comment_re.search(line):
-            line = re.sub(r'\bmodule\b', r'/** \public */ class ', line)
-            line = re.sub(r'\[[\w]+\]', r'', line)
+            line = re.sub(r'\bmodule\b', r'class ', line)
+            line = re.sub(r'\[[\w]+\]', r'', line)       # to remove [connected_module] and such
             #line = re.sub(r'\n$', ' {\n', line)         # the $ sign denotes the end of line. In case module declaration span multiple lines
             #if documented_construct:
             line = "/** @ingroup BSVModule */ " + line 
             in_module = 1
             in_module_header = 1
+            in_module_skip = 1
         #handle provisos in interface methods
         if in_provisos:
             if re.search(r';', line):
@@ -223,15 +273,15 @@ def filter_bsv():
                 if re.search(r'Empty', m.group(1), re.IGNORECASE) or not m.group(1) or m.group(1).isspace():
                     implements = ""
                 else:
-                    implements = " :public " + m.group(1)
-                line = re.sub(r'\(.*\)',implements, line)
+                    implements = ":public " + m.group(1) + " */ "
+                line = re.sub(r'\(.*\)', implements, line)
             if re.search(r';', line):
                 in_module_header = 0
-                line = line.replace(';', ' {')
+                line = line.replace(';', ' { /** @cond 0 */' )
 
         # substitute the end module statement with a closing curly brace
         if re.search(r'endmodule', line):
-            line = line.replace('endmodule', '};', re.DOTALL)
+            line = line.replace('endmodule', '/**@endcond */ };', re.DOTALL)
             in_module = 0
             documented_construct = 0
         
@@ -264,9 +314,18 @@ def filter_bsv():
             line = re.sub(r'\bfunction\b', r'', line)
             m = re.search(r"=", line)
             if not m:
-                line = line.replace(';', '{')
-            line = line.replace('endfunction', '}')
+                if  re.search(r";", line):
+                    line = line.replace(';', '{')
+                else:
+                    in_function_header = 1
         
+        if in_function_header:
+            if re.search(r";", line):
+                    line = line.replace(';', '{')
+                    in_function_header = 0
+
+        if re.search(r"endfunction", line):
+            line = line.replace('endfunction', '}')
 
         # handle the special "deriving" enum case
         comment_re = re.compile("""^(\s)*           # start of a string followed by white space

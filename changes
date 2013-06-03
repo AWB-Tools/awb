@@ -10866,3 +10866,14 @@ Directory tools/scripts/doxygen
 
 - Filter now adds undocumented interfaces/modules to the documentation
 - Removed BSVFunction section for the time being
+
+----------
+mgambhir    Date: Mon Jun  3 15:42:09 EDT 2013  CSN: CSN-awb-533
+                  Mon Jun  3 19:42:09 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          532 
+
+- Removed "type" keyword from Interface parameters to be able to link it to the modules implementing it
+- Code inside a module is now ignored by doxygen for processing
