@@ -10877,3 +10877,15 @@ Directory tools/scripts/doxygen
 
 - Removed "type" keyword from Interface parameters to be able to link it to the modules implementing it
 - Code inside a module is now ignored by doxygen for processing
+
+----------
+mgambhir    Date: Mon Jun 10 19:08:09 EDT 2013  CSN: CSN-awb-534
+                  Mon Jun 10 23:08:09 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          533 
+
+- passed the filename as an input parameter instead of parsing stdin
+- extract repository information from filename using awb-resolver --prefix
+- Added another doxygen group for the repository the sources are coming from

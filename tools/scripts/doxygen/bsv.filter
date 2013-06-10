@@ -4,11 +4,25 @@
 import fileinput
 import sys
 import re
+import subprocess
+import os
+
+filename = str(sys.argv[1])
+f = open(filename, 'r')
+
+cmd = 'awb-resolver --prefix='+filename
+repositoryPath, repositoryName = os.path.split(subprocess.check_output(cmd,shell=True))
+repositoryName = repositoryName.rstrip();
 
 # define groups to bundle interfaces and modules
-sys.stdout.write("/** @defgroup BSVInterface Interfaces */ ")
-sys.stdout.write("/** @defgroup BSVModule Modules */ ")
-#sys.stdout.write("/** @defgroup BSVFunction Functions */ ")
+interfaceGroupName = repositoryName + "Interface"
+moduleGroupName = repositoryName + "Module"
+defParentGroup = "/** @addtogroup " + repositoryName + " */ /** @{ */ "
+defInterface = "/** @defgroup " + interfaceGroupName + " Interfaces */"
+defModule = "/** @defgroup " + moduleGroupName + " Modules */"
+sys.stdout.write(defParentGroup)
+sys.stdout.write(defInterface)
+sys.stdout.write(defModule)
 
 def filter_bsv():     
     processing_module = 0
@@ -31,7 +45,7 @@ def filter_bsv():
     documented_construct = 0
     in_function_header = 0
     
-    for line in fileinput.input():
+    for line in f:
         # Skip the license section
         if "Copyright" in line:
             # Print the line without modification
@@ -219,7 +233,7 @@ def filter_bsv():
         if comment_re.search(line):
             line = re.sub(r'\binterface\b', '/** \public */ class', line)
             # if documented_construct:
-            line = "/** @ingroup BSVInterface */ " + line
+            line = "/** @ingroup " + interfaceGroupName + " */ " + line
             line = line.replace(';', ' {');
             in_interface = 1
         if re.search(r'endinterface', line):
@@ -243,7 +257,7 @@ def filter_bsv():
             line = re.sub(r'\[[\w]+\]', r'', line)       # to remove [connected_module] and such
             #line = re.sub(r'\n$', ' {\n', line)         # the $ sign denotes the end of line. In case module declaration span multiple lines
             #if documented_construct:
-            line = "/** @ingroup BSVModule */ " + line 
+            line = "/** @ingroup " + moduleGroupName + " */ " + line 
             in_module = 1
             in_module_header = 1
             in_module_skip = 1
@@ -367,4 +381,5 @@ def filter_bsv():
         sys.stdout.write(line)
     
 filter_bsv()
+sys.stdout.write("/** @} */")
     
