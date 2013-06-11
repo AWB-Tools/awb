@@ -10889,3 +10889,14 @@ Directory tools/scripts/doxygen
 - passed the filename as an input parameter instead of parsing stdin
 - extract repository information from filename using awb-resolver --prefix
 - Added another doxygen group for the repository the sources are coming from
+
+----------
+mgambhir    Date: Tue Jun 11 10:28:51 EDT 2013  CSN: CSN-awb-535
+                  Tue Jun 11 14:28:51 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          534 
+
+- Changed the way awb-resolver command was executed from the script to make it backwards compatible with 
+python 2.65

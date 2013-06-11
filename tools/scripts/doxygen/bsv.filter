@@ -4,14 +4,15 @@
 import fileinput
 import sys
 import re
-import subprocess
 import os
 
 filename = str(sys.argv[1])
 f = open(filename, 'r')
 
 cmd = 'awb-resolver --prefix='+filename
-repositoryPath, repositoryName = os.path.split(subprocess.check_output(cmd,shell=True))
+p = os.popen(cmd, "r")
+repo = p.readline()
+repositoryPath, repositoryName = os.path.split(repo)
 repositoryName = repositoryName.rstrip();
 
 # define groups to bundle interfaces and modules
