@@ -18,9 +18,9 @@
 #
 [Global]
 Description=Architects Workbench
-CSN=CSN-awb-535
+CSN=CSN-awb-536
 Name=awb
-Tag=v12.04
+Tag=v13.06
 Prerelease=1
 Lock=asim-asimcore
 Buildorder=1

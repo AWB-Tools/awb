@@ -10900,3 +10900,27 @@ Directory tools/scripts/doxygen
 
 - Changed the way awb-resolver command was executed from the script to make it backwards compatible with 
 python 2.65
+
+----------
+mgambhir    Date: Wed Jun 12 17:08:21 EDT 2013  CSN: CSN-awb-536
+                  Wed Jun 12 21:08:21 UTC 2013
+
+
+Directory etc
+ asim.pack                 Locally Modified          535 
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          535 
+
+Directory .
+ README.debian             Locally Modified          535 
+
+Directory debian
+ control                   Locally Modified          535 
+ changelog                 Locally Modified          535 
+ rules                     Locally Modified          535 
+
+Directory admin/packages
+ awb                       Locally Modified          535 
+
+- Creating a new testing release 13.06

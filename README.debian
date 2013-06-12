@@ -22,7 +22,8 @@ Changes to do a release and upgrade release number
 
      c) (Optional) Try a debian build and repository update (see instructions below)
 
-     d) Make sure the buildbots are looking for this as the testing release
+     d) Make sure the buildbots are looking for this as the testing release. 
+        Note: Buildbots may need to be restarted to see this change
 
      e) Commit these changes with 'awb-shell commit' if changes were necessary.
 
