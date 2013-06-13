@@ -39,7 +39,7 @@ Changes to do a release and upgrade release number
               Put branch in tags/ instead of branches [no]: no
 
      c) Change the release name to '+fixes' in the followwing file:
-        For example, 11.04+fixes~svn20100724r382+lucid
+        For example, 12.01+fixes~svn20100724r382+lucid
 
            i) debian/changelog
 

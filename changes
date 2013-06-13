@@ -10924,3 +10924,19 @@ Directory admin/packages
  awb                       Locally Modified          535 
 
 - Creating a new testing release 13.06
+
+----------
+mgambhir    Date: Thu Jun 13 17:35:47 EDT 2013  CSN: CSN-awb-538
+                  Thu Jun 13 21:35:47 UTC 2013
+
+
+Directory .
+ README.debian             Locally Modified          537 
+
+Directory debian
+ changelog                 Locally Modified          537 
+
+Directory admin/packages
+ awb                       Locally Modified          537 
+
+- awb 13.06 final release

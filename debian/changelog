@@ -1,4 +1,4 @@
-awb (13.06~svn20130611r536+precise) precise; urgency=low
+awb (13.06+fixes~svn20130611r536+precise) precise; urgency=low
 
   [ Joel Emer ]
   * Move to version v13.06 - v12.04 & v12.02 were never released
