@@ -10924,3 +10924,13 @@ Directory admin/packages
  awb                       Locally Modified          535 
 
 - Creating a new testing release 13.06
+
+----------
+mgambhir    Date: Mon Jun 17 11:15:52 EDT 2013  CSN: CSN-awb-540
+                  Mon Jun 17 15:15:52 UTC 2013
+
+
+Directory debian
+ control                   Locally Modified          539 
+
+- Changed libqt3-mt-dev dependency to libqt4-dev
