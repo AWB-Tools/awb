@@ -10940,3 +10940,13 @@ Directory admin/packages
  awb                       Locally Modified          537 
 
 - awb 13.06 final release
+
+----------
+mgambhir    Date: Mon Jun 17 11:12:39 EDT 2013  CSN: CSN-awb-539
+                  Mon Jun 17 15:12:39 UTC 2013
+
+
+Directory debian
+ control                   Locally Modified          538 
+
+- Changed libqt3-mt-dev dependency to libqt4-dev
