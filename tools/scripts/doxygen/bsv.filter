@@ -5,6 +5,7 @@ import fileinput
 import sys
 import re
 import os
+import ConfigParser
 
 filename = str(sys.argv[1])
 f = open(filename, 'r')
@@ -12,8 +13,20 @@ f = open(filename, 'r')
 cmd = 'awb-resolver --prefix='+filename
 p = os.popen(cmd, "r")
 repo = p.readline()
+
 repositoryPath, repositoryName = os.path.split(repo)
 repositoryName = repositoryName.rstrip();
+
+# extract the source url from admin/packages/<package> file
+config = ConfigParser.RawConfigParser()
+packfile = repo.rstrip() + "/admin/packages/" + repositoryName
+config.read(packfile)
+sourceurl = config.get('Global', 'Sourceurl')
+
+cmd = 'awb-resolver --suffix='+filename
+p = os.popen(cmd, "r")
+unionDirPath = p.readline()
+unionDirPath = unionDirPath.rstrip();
 
 # define groups to bundle interfaces and modules
 interfaceGroupName = repositoryName + "Interface"
@@ -21,6 +34,8 @@ moduleGroupName = repositoryName + "Module"
 defParentGroup = "/** @addtogroup " + repositoryName + " */ /** @{ */ "
 defInterface = "/** @defgroup " + interfaceGroupName + " Interfaces */"
 defModule = "/** @defgroup " + moduleGroupName + " Modules */"
+defSourceUrl =  "/** @file " + filename + " " + sourceurl + unionDirPath + " **/"
+sys.stdout.write(defSourceUrl)
 sys.stdout.write(defParentGroup)
 sys.stdout.write(defInterface)
 sys.stdout.write(defModule)
@@ -180,6 +195,7 @@ def filter_bsv():
                     prev_line = ""
                     continue_template = 0
             #remove all type keywords
+            line = re.sub(r'numeric type', '', line)
             line = re.sub(r'\btype\b', '', line)
         if continue_template:
             continue
@@ -234,7 +250,7 @@ def filter_bsv():
         if comment_re.search(line):
             line = re.sub(r'\binterface\b', '/** \public */ class', line)
             # if documented_construct:
-            line = "/** @ingroup " + interfaceGroupName + " */ " + line
+            line = "/** @ingroup " + interfaceGroupName + " */" + line
             line = line.replace(';', ' {');
             in_interface = 1
         if re.search(r'endinterface', line):

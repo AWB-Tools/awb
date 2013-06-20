@@ -10934,3 +10934,14 @@ Directory debian
  control                   Locally Modified          539 
 
 - Changed libqt3-mt-dev dependency to libqt4-dev
+
+----------
+mgambhir    Date: Thu Jun 20 14:55:41 EDT 2013  CSN: CSN-awb-541
+                  Thu Jun 20 18:55:41 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          540 
+
+- bsv.filter reads the source URL from admin/packages/package file and puts it 
+  at the top of each file. This URL is used by doxygen to link to live source in the repository
