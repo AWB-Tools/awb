@@ -195,6 +195,7 @@ def filter_bsv():
                     prev_line = ""
                     continue_template = 0
             #remove all type keywords
+            line = re.sub(r'parameter numeric type', '', line)
             line = re.sub(r'numeric type', '', line)
             line = re.sub(r'\btype\b', '', line)
         if continue_template:

@@ -10945,3 +10945,13 @@ Directory tools/scripts/doxygen
 
 - bsv.filter reads the source URL from admin/packages/package file and puts it 
   at the top of each file. This URL is used by doxygen to link to live source in the repository
+
+----------
+mgambhir    Date: Fri Jun 21 13:03:50 EDT 2013  CSN: CSN-awb-542
+                  Fri Jun 21 17:03:50 UTC 2013
+
+
+Directory tools/scripts/doxygen
+ bsv.filter                Locally Modified          541 
+
+- minor update to the bsv.filter to remove parameter numeric type from Interface declaration
