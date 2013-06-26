@@ -10955,3 +10955,13 @@ Directory tools/scripts/doxygen
  bsv.filter                Locally Modified          541 
 
 - minor update to the bsv.filter to remove parameter numeric type from Interface declaration
+
+----------
+mgambhir    Date: Wed Jun 26 15:22:39 EDT 2013  CSN: CSN-awb-543
+                  Wed Jun 26 19:22:39 UTC 2013
+
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          542 
+
+- removed the restriction for git repos to have a mytags file inside admin dir

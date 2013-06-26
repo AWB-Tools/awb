@@ -421,7 +421,7 @@ sub check {
   # Check for standard files
   #
   foreach my $f ($MYTAGS) {
-    if (! -e "$location/$f" && ! -e $f) {
+    if (! -e "$location/$f" && ! -e $f && $self->type ne 'git') {
       ierror("Corrupted package - Missing file $f\n");
       return 0;
     }
