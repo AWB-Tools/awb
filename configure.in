@@ -551,6 +551,9 @@ AC_SUBST(codedir)
 tooldir='${libexecdir}/asim/HEAD'
 AC_SUBST(tooldir)
 
+# directory to install html doxygen documentation
+htmldir='${docdir}/html'
+AC_SUBST(htmldir)
 
 # Checks for programs.
 if test x${CXXFLAGS+set} = x; then

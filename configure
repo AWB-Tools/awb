@@ -3392,6 +3392,9 @@ codedir='${packagedir}/${package}/${release}'
 tooldir='${libexecdir}/asim/HEAD'
 
 
+# directory to install html doxygen documentation
+htmldir='${docdir}/html'
+
 
 # Checks for programs.
 if test x${CXXFLAGS+set} = x; then

@@ -10965,3 +10965,14 @@ Directory libperl/Asim/lib/Asim
  Package.pm                Locally Modified          542 
 
 - removed the restriction for git repos to have a mytags file inside admin dir
+
+----------
+mgambhir    Date: Thu Aug  8 18:04:12 EDT 2013  CSN: CSN-awb-544
+                  Thu Aug  8 22:04:12 UTC 2013
+
+
+Directory .
+ configure                 Locally Modified          543 
+ configure.in              Locally Modified          543 
+
+-$htmldir is now set to $docdir/html
