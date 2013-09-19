@@ -10999,3 +10999,14 @@ at either the model's build directory or the benchmarks's run
 directory.
 
 Added some svn ignores for MYMETA.yml files.
+
+----------
+emer        Date: Thu Sep 19 14:40:13 EDT 2013  CSN: CSN-awb-546
+                  Thu Sep 19 18:40:13 UTC 2013
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          545 
+
+Updated asimstarter to reflect name change of awb2 back to
+plain awb.

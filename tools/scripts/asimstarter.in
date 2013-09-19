@@ -157,8 +157,7 @@ if (! defined($ENV{AWBLOCAL}) || ! -e "$ENV{AWBLOCAL}/awb.config" ) {
 #
 # Awb commands
 #
-  "awb"                 => "$awb_tools_dir/awb2/awb2",
-  "awb2"                => "$awb_tools_dir/awb2/awb2",
+  "awb"                 => "$awb_tools_dir/awb/awb",
   "awb-shell"           => "tools/scripts/awb-shell",
   "awb-run"             => "tools/scripts/awb-run",
   "awb-batch"           => "tools/scripts/awb-batch",
