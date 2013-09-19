@@ -50,6 +50,8 @@ use QtCore4::slots
     EditBenchmark_activated => [],
     Button_setup_clicked => [],
     Button_run_clicked => [],
+    OpenBenchmark_Containing_Folder_activated => [],
+    ShellBenchmark_at_Containing_Folder_activated => [],
     FindReplace_activated => [],
     Manual_activated => [],
     About_activated => [],
@@ -891,6 +893,17 @@ sub Button_run_clicked
             "Model run failed\n");
         return;
     }
+}
+
+sub OpenBenchmark_Containing_Folder_activated()
+{
+    awb_util::open_benchmark_container();
+}
+
+
+sub ShellBenchmark_at_Containing_Folder_activated()
+{
+    awb_util::shell_benchmark_container();
 }
 
 

@@ -552,7 +552,8 @@ sub edit_model {
 sub open_model_container {
   return undef if (! defined($model));
 
-  my $dirname = dirname(Asim::resolve($model->filename));
+#  my $dirname = dirname(Asim::resolve($model->filename));
+  my $dirname = $model->build_dir();
 
   return Asim::open_at($dirname);
 }
@@ -560,7 +561,8 @@ sub open_model_container {
 sub shell_model_container {
   return undef if (! defined($model));
 
-  my $dirname = dirname(Asim::resolve($model->filename));
+#  my $dirname = dirname(Asim::resolve($model->filename));
+  my $dirname = $model->build_dir();
 
   return Asim::shell_at($dirname);
 }
@@ -739,6 +741,24 @@ sub run_model
   $w->run($cmd);
 
   return 1;
+}
+
+sub open_benchmark_container {
+  return undef if (! defined($model));
+  return undef if (! defined($benchmark));
+
+  my $dirname = $model->run_dir($benchmark);
+
+  return Asim::open_at($dirname);
+}
+
+sub shell_benchmark_container {
+  return undef if (! defined($model));
+  return undef if (! defined($benchmark));
+
+  my $dirname = $model->run_dir($benchmark);
+
+  return Asim::shell_at($dirname);
 }
 
 

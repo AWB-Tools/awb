@@ -10976,3 +10976,26 @@ Directory .
  configure.in              Locally Modified          543 
 
 -$htmldir is now set to $docdir/html
+
+----------
+emer        Date: Thu Sep 19 13:55:44 EDT 2013  CSN: CSN-awb-545
+                  Thu Sep 19 17:55:44 UTC 2013
+
+
+Directory libperl
+ PlotShell/                Locally Modified          544 
+ Asim/                     Locally Modified          544 
+ Benchmarks/               Locally Modified          544 
+ AsimShell/                Locally Modified          544 
+ PinPoints/                Locally Modified          544 
+
+Directory tools/awb/awb
+ awb_util.pm               Locally Modified          544 
+ awb_dialog.pm             Locally Modified          544 
+ awb_dialog.ui             Locally Modified          544 
+
+Added actions to awb menus to open a shell or a file browser
+at either the model's build directory or the benchmarks's run
+directory.
+
+Added some svn ignores for MYMETA.yml files.

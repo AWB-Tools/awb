@@ -2290,7 +2290,7 @@
      <x>0</x>
      <y>0</y>
      <width>609</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -2315,11 +2315,12 @@
     </property>
     <addaction name="newModel"/>
     <addaction name="editModel"/>
-    <addaction name="openModel_Containing_Folder"/>
-    <addaction name="shellModel_at_Containing_Folder"/>
     <addaction name="cleanModel"/>
     <addaction name="configureModel"/>
     <addaction name="buildModel"/>
+    <addaction name="separator"/>
+    <addaction name="openModel_Containing_Folder"/>
+    <addaction name="shellModel_at_Containing_Folder"/>
    </widget>
    <widget class="QMenu" name="benchmarkMenu">
     <property name="title">
@@ -2329,6 +2330,9 @@
     <addaction name="editBenchmark"/>
     <addaction name="setupBenchmark"/>
     <addaction name="runBenchmark"/>
+    <addaction name="separator"/>
+    <addaction name="openBenchmark_Containing_Folder"/>
+    <addaction name="shellBenchmark_at_Containing_Folder"/>
    </widget>
    <widget class="QMenu" name="Help">
     <property name="title">
@@ -2458,6 +2462,16 @@
     <string>Ctrl+F</string>
    </property>
   </action>
+  <action name="shellBenchmark_at_Containing_Folder">
+   <property name="text">
+    <string>Shell at containing folder</string>
+   </property>
+  </action>
+  <action name="openBenchmark_Containing_Folder">
+   <property name="text">
+    <string>Open containing folder</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -2501,7 +2515,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>196</x>
-     <y>610</y>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>289</x>
@@ -2516,8 +2530,8 @@
    <slot>Button_clean_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>610</y>
+     <x>99</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2532,8 +2546,8 @@
    <slot>Button_config_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>196</x>
-     <y>667</y>
+     <x>197</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2548,8 +2562,8 @@
    <slot>Button_nuke_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>667</y>
+     <x>99</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2564,8 +2578,8 @@
    <slot>Button_run_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>625</y>
+     <x>101</x>
+     <y>662</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2580,8 +2594,8 @@
    <slot>Button_setup_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>87</x>
-     <y>667</y>
+     <x>99</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -3108,8 +3122,8 @@
    <slot>browseAdfPath_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>656</x>
-     <y>259</y>
+     <x>549</x>
+     <y>238</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3124,8 +3138,8 @@
    <slot>extraBuildSwitches_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>75</x>
-     <y>455</y>
+     <x>106</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3140,8 +3154,8 @@
    <slot>extraRunSwitches_textChanged(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>101</x>
-     <y>493</y>
+     <x>134</x>
+     <y>421</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3172,8 +3186,8 @@
    <slot>nextStep_analysis_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>675</x>
-     <y>668</y>
+     <x>586</x>
+     <y>663</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3188,8 +3202,8 @@
    <slot>nextStep_benchmarks_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>676</x>
-     <y>669</y>
+     <x>587</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3204,8 +3218,8 @@
    <slot>nextStep_buildopts_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>676</x>
-     <y>612</y>
+     <x>587</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3220,8 +3234,8 @@
    <slot>nextStep_models_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>676</x>
-     <y>669</y>
+     <x>587</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3236,8 +3250,8 @@
    <slot>nextStep_parameters_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>676</x>
-     <y>669</y>
+     <x>587</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3252,8 +3266,8 @@
    <slot>nextStep_runopts_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>676</x>
-     <y>627</y>
+     <x>585</x>
+     <y>662</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3284,8 +3298,8 @@
    <slot>paramRefresh_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>634</x>
-     <y>358</y>
+     <x>587</x>
+     <y>365</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3300,8 +3314,8 @@
    <slot>paramUpdate_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>543</x>
-     <y>657</y>
+     <x>496</x>
+     <y>664</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3332,8 +3346,8 @@
    <slot>traceRun_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>514</x>
-     <y>376</y>
+     <x>584</x>
+     <y>368</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3348,8 +3362,8 @@
    <slot>viewCycleDisplay_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>352</x>
-     <y>187</y>
+     <x>383</x>
+     <y>186</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3364,8 +3378,8 @@
    <slot>viewStatistics_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>352</x>
-     <y>121</y>
+     <x>383</x>
+     <y>120</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3380,8 +3394,8 @@
    <slot>viewStripChart_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>352</x>
-     <y>154</y>
+     <x>383</x>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3444,8 +3458,8 @@
    <slot>parallelMake_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>106</x>
-     <y>264</y>
+     <x>120</x>
+     <y>259</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3460,8 +3474,8 @@
    <slot>workspaceBrowsePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>623</x>
-     <y>119</y>
+     <x>570</x>
+     <y>118</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3492,8 +3506,8 @@
    <slot>workspaceCreatePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>623</x>
-     <y>152</y>
+     <x>570</x>
+     <y>151</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3524,8 +3538,8 @@
    <slot>workspaceSwitchPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>623</x>
-     <y>185</y>
+     <x>570</x>
+     <y>184</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3572,8 +3586,8 @@
    <slot>checkoutPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>667</x>
-     <y>424</y>
+     <x>569</x>
+     <y>426</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3620,8 +3634,8 @@
    <slot>checkoutListWidget_doubleClicked(QListWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>333</y>
+     <x>130</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3636,8 +3650,8 @@
    <slot>checkoutBundleListWidget_itemClicked(QListWidgetItem*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>333</y>
+     <x>130</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
      <x>250</x>
@@ -3652,8 +3666,8 @@
    <slot>refreshReposPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>622</x>
-     <y>300</y>
+     <x>569</x>
+     <y>303</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3668,8 +3682,8 @@
    <slot>repositoryBrowsePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>622</x>
-     <y>261</y>
+     <x>569</x>
+     <y>262</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3716,8 +3730,8 @@
    <slot>updatePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>616</x>
-     <y>655</y>
+     <x>569</x>
+     <y>646</y>
     </hint>
     <hint type="destinationlabel">
      <x>348</x>
@@ -3732,8 +3746,8 @@
    <slot>packagesBrowsePushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>602</x>
-     <y>464</y>
+     <x>569</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3748,8 +3762,8 @@
    <slot>refreshPushButton_clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>602</x>
-     <y>497</y>
+     <x>569</x>
+     <y>543</y>
     </hint>
     <hint type="destinationlabel">
      <x>284</x>
@@ -3770,6 +3784,38 @@
     <hint type="destinationlabel">
      <x>348</x>
      <y>355</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openBenchmark_Containing_Folder</sender>
+   <signal>activated()</signal>
+   <receiver>awb_dialog</receiver>
+   <slot>OpenBenchmark_Containing_Folder_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>507</x>
+     <y>225</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>354</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>shellBenchmark_at_Containing_Folder</sender>
+   <signal>activated()</signal>
+   <receiver>awb_dialog</receiver>
+   <slot>ShellBenchmark_at_Containing_Folder_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>402</x>
+     <y>384</y>
     </hint>
    </hints>
   </connection>
@@ -3809,7 +3855,9 @@
   <slot>NewModel_activated()</slot>
   <slot>EditModel_activated()</slot>
   <slot>OpenModel_Containing_Folder_activated()</slot>
+  <slot>OpenBenchmark_Containing_Folder_activated()</slot>
   <slot>ShellModel_at_Containing_Folder_activated()</slot>
+  <slot>ShellBenchmark_at_Containing_Folder_activated()</slot>
   <slot>Button_nuke_clicked()</slot>
   <slot>Button_config_clicked()</slot>
   <slot>Button_clean_clicked()</slot>
