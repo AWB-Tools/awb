@@ -2321,6 +2321,7 @@
     <addaction name="separator"/>
     <addaction name="openModel_Containing_Folder"/>
     <addaction name="shellModel_at_Containing_Folder"/>
+    <addaction name="copyModel_Containing_Folder"/>
    </widget>
    <widget class="QMenu" name="benchmarkMenu">
     <property name="title">
@@ -2333,6 +2334,7 @@
     <addaction name="separator"/>
     <addaction name="openBenchmark_Containing_Folder"/>
     <addaction name="shellBenchmark_at_Containing_Folder"/>
+    <addaction name="copyBenchmark_Containing_Folder"/>
    </widget>
    <widget class="QMenu" name="Help">
     <property name="title">
@@ -2388,12 +2390,12 @@
   </action>
   <action name="openModel_Containing_Folder">
    <property name="text">
-    <string>Open Containing Folder</string>
+    <string>Open containing folder</string>
    </property>
   </action>
   <action name="shellModel_at_Containing_Folder">
    <property name="text">
-    <string>Shell at Containing Folder</string>
+    <string>Shell at containing folder</string>
    </property>
   </action>
   <action name="cleanModel">
@@ -2470,6 +2472,16 @@
   <action name="openBenchmark_Containing_Folder">
    <property name="text">
     <string>Open containing folder</string>
+   </property>
+  </action>
+  <action name="copyModel_Containing_Folder">
+   <property name="text">
+    <string>Copy folder path</string>
+   </property>
+  </action>
+  <action name="copyBenchmark_Containing_Folder">
+   <property name="text">
+    <string>Copy folder path</string>
    </property>
   </action>
  </widget>
@@ -3794,8 +3806,8 @@
    <slot>OpenBenchmark_Containing_Folder_activated()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>507</x>
-     <y>225</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>304</x>
@@ -3816,6 +3828,38 @@
     <hint type="destinationlabel">
      <x>402</x>
      <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>copyModel_Containing_Folder</sender>
+   <signal>activated()</signal>
+   <receiver>awb_dialog</receiver>
+   <slot>CopyModel_Containing_Folder_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>354</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>copyBenchmark_Containing_Folder</sender>
+   <signal>activated()</signal>
+   <receiver>awb_dialog</receiver>
+   <slot>CopyBenchmark_Containing_Folder_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>354</y>
     </hint>
    </hints>
   </connection>
@@ -3854,6 +3898,8 @@
   <slot>Refresh_activated()</slot>
   <slot>NewModel_activated()</slot>
   <slot>EditModel_activated()</slot>
+  <slot>CopyModel_Containing_Folder_activated()</slot>
+  <slot>CopyBenchmark_Containing_Folder_activated()</slot>
   <slot>OpenModel_Containing_Folder_activated()</slot>
   <slot>OpenBenchmark_Containing_Folder_activated()</slot>
   <slot>ShellModel_at_Containing_Folder_activated()</slot>

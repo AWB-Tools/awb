@@ -11010,3 +11010,15 @@ Directory tools/scripts
 
 Updated asimstarter to reflect name change of awb2 back to
 plain awb.
+
+----------
+emer        Date: Fri Sep 20 15:20:44 EDT 2013  CSN: CSN-awb-547
+                  Fri Sep 20 19:20:44 UTC 2013
+
+
+Directory tools/awb/awb
+ awb_dialog.pm             Locally Modified          546 
+ awb_dialog.ui             Locally Modified          546 
+
+In awb, added model and benchmark menu items to copy the path
+of the model build and run directories to the clipboard.

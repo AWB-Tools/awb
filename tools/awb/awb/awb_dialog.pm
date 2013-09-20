@@ -42,6 +42,7 @@ use QtCore4::slots
     EditModel_activated => [],
     OpenModel_Containing_Folder_activated => [],
     ShellModel_at_Containing_Folder_activated => [],
+    CopyModel_Containing_Folder_activated => [],
     Button_nuke_clicked => [],
     Button_config_clicked => [],
     Button_clean_clicked => [],
@@ -52,6 +53,7 @@ use QtCore4::slots
     Button_run_clicked => [],
     OpenBenchmark_Containing_Folder_activated => [],
     ShellBenchmark_at_Containing_Folder_activated => [],
+    CopyBenchmark_Containing_Folder_activated => [],
     FindReplace_activated => [],
     Manual_activated => [],
     About_activated => [],
@@ -740,7 +742,14 @@ sub ShellModel_at_Containing_Folder_activated()
     awb_util::shell_model_container();
 }
 
+sub CopyModel_Containing_Folder_activated()
+{
+    my $clipboard = Qt::Application::clipboard();
 
+    if (defined($model)) {
+       $clipboard->setText(trUtf8($model->build_dir()));
+    }
+}
 
 sub Button_nuke_clicked()
 {
@@ -906,6 +915,14 @@ sub ShellBenchmark_at_Containing_Folder_activated()
     awb_util::shell_benchmark_container();
 }
 
+sub CopyBenchmark_Containing_Folder_activated()
+{
+    my $clipboard = Qt::Application::clipboard();
+
+    if (defined($model) && defined($benchmark)) {
+       $clipboard->setText(trUtf8($model->run_dir($benchmark)));
+    }
+}
 
 sub FindReplace_activated()
 {
