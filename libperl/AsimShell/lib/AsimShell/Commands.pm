@@ -2677,6 +2677,7 @@ sub push_package {
     else {
         $package->push_package(!$deps) || return undef;
     }
+    $url = undef;
   }
   
   return 1;

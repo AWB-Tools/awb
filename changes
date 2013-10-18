@@ -11137,3 +11137,36 @@ Log message:    CSN: CSN-awb-3099
 
 - push package all now should work for heterogenous workspace with svn
 and git repos. Svn repositories will be committed in this case
+
+----------
+mgambhir    Date: Fri Oct 18 15:39:46 EDT 2013  CSN: CSN-awb-554
+                  Fri Oct 18 19:39:46 UTC 2013
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          553 
+
+Directory libperl/Asim/lib/Asim/Package
+ Commit.pm                 Locally Modified          553 
+ Git.pm                    Locally Modified          553 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          553 
+
+Sync with Intel rev-3100
+
+Author: mgambhir
+Last modification:  Rev 3100 - 2013-01-08 20:29:54
+Log message:    CSN: CSN-awb-3100
+
+- refactored git support code in awb
+- moved push command to Git.pm from Commit.pm
+- most git commands are now lighter
+- No CSN tags generated or incremented 
+- No tempfile used to get commit log from user. Instead git's internal
+logging method is used
+- Removed several unnecessary environment checks in case of git.
+Those were required for cvs primarily. 
+TODO:
+commit_check for git calls git->status() which needs fixing
+push_check should check if the local repository is up to date

@@ -20,6 +20,19 @@ use File::Basename;
 
 our @ISA = qw(Asim::Package);
 
+
+# Commit wide variables defined in  Commit.pm
+
+our $HOSTNAME;
+our $DATE;
+our $DATE_UTC;
+
+our $TMPDIR;
+our $HOST;
+our $USER;
+
+our $PROBLEM;
+
 =head1 NAME
 
 Asim::Package::Git - Class to manipulate a checked out Git repository.
@@ -164,19 +177,15 @@ sub commit {
 
   print "Commit: Starting a commit on package: " . $self->name() . "\n";
 
-  ## Sanity stage
-  $self->SUPER::sanity_stage($commitlog_file) 
-+1    || return();
-
-  my $TMPDIR = Asim::get_tmpdir();
-
-  if ( ! defined($TMPDIR)) {
-    commit_failure("Sorry: neither \$ASIMTMPDIR or \$TMPDIR were not found and /tmp does not exist");
-    return 0;
+  #
+  # If user specified a commitlog make sure it exists
+  #
+  if (defined($commitlog_file)) {
+    if ( ! -r $commitlog_file ) {
+      commit_failure("Sorry: user specified commitlog ($commitlog_file) is not readable or does not exist");
+      return 0;
+    }
   }
-
-  # Check stage
-  our $checkindex++;
 
 
  $self->commit_check($commitlog_file)
@@ -192,40 +201,26 @@ sub commit {
     || commit_failure("You are using a shared package that is not up-to-date.\n" .
                       "Check out the package or get the shared package updated.\n") &&  return 0;
 
-  # Prepare stage
-  # git commit does not increment csn or modify the changes file. It will be done at
-  # push time
-  
-  # If there is a commit log file then write its contents into the comment file
-  # otherwise invoke users favorite editor to write commit comments
-   my $tmpfile_comment = "$TMPDIR/asimcommit_comment.$$.$checkindex.txt";
-   if (! defined($commitlog_file)) {
-      Asim::invoke_editor("--eof", $tmpfile_comment)
-        || commit_failure("Could not edit changes file") && return undef;
-    } else {
-      system("cat $commitlog_file >>$tmpfile_comment");
-    }
-
    # Actual commit stage
    print "Commit: I am about to commit your changes. \n\n";
 
   if (! Asim::choose_yes_or_no("Do you really want to proceed and commit","response_required","yes")) {
     $self->{status} = "";
-    system ("rm -f $tmpfile_comment");
     return 0;
   }
 
   # Do the actual commit
-  my $command = "commit -a -F $tmpfile_comment";
-    if (! $self->git_command($command)) {
-      ierror("Commit: Fatal error during git commit: \n".
-             "Commit: Your commit might be partially done \n",
-             "Commit: and the state of your directory is probably messed up.\n");
-      system ("rm -f $tmpfile_comment");
-      return 0;
-    }
-  
-  system ("rm -f $tmpfile_comment");
+  my $command = "commit -a ";
+  if ( defined($commitlog_file) ) {
+    $command = $command . " -F $commitlog_file";
+  }
+  if (! $self->git_command($command)) {
+    ierror("Commit: Fatal error during git commit: \n".
+            "Commit: Your commit might be partially done \n",
+            "Commit: and the state of your directory is probably messed up.\n");
+    return 0;
+  }
+
   return 1;
   
 }
@@ -288,7 +283,7 @@ sub commit_check {
   return 1;
 }
 
-=item $git-E<gt>commit_check()
+=item $git-E<gt>push_check()
 
 A set of checks to make sure that we have a 
 reasonable chance of succeeding at a push
@@ -298,7 +293,7 @@ reasonable chance of succeeding at a push
 sub push_check {
   my $self = shift;
 
-  $self->{status} = "Commit-needed";
+  $self->{status} = "Push-needed";
   return 1;
 }
 
@@ -452,54 +447,6 @@ sub is_public_repo {
   return 0;
 }
 
-=item $git->increment_csn( )
-
-Get current CSN tag and increment the revision number by 1
-
-=cut
-
-sub increment_csn {
-  my $self = shift;
-  my $location = $self->location();
-  my $csn;
-  my $rev;
- 
-  # Force a pull to ensure we get the latest csn in the log
-  #system("cd $location; git pull");
-  $csn = `cd $location && git describe --tags --abbrev=0`;
-  
-  if ( $csn =~ m/^CSN-.*-(\d+)$/ ) {
-    $rev = $1+1;
-  } else {
-    # Last tag generated was not a CSN tag. Try again to retrive the last CSN tag
-    open LIST, "cd $location && git tag -l | ";
-    # git tag generates the list in alphabetical order. It would have been much 
-    # easier if the list was in chronological order. Find the latest revision 
-    # number
-    $rev = 0;
-    while (<LIST>) {
-      if ( m/^CSN-.*-(\d+)$/ ) {
-        if ($rev <= $1) {
-          $rev = $1+1;
-        }
-      }
-    }
-    close LIST;
-  } 
-  
-  # increment the revison number, and replace it in the tag
-  my $name = $self->name();
-  my $branch = $self->{branch}; 
-  if ($branch eq 'master') {
-    $csn = "CSN-$name-$rev";
-  } else {
-    $csn = "CSN-$branch-$rev";
-  }
-
-  # return the updated tag
-  return $csn;
-}
-
 =item $git->get_current_branch( )
 
 Get currently active branch from the working copy
@@ -520,7 +467,7 @@ sub get_current_branch {
   return undef;
 }
 
-=item $svn->get_working_hash()
+=item $git->get_working_hash()
 
 Return the git commit hash that the working copy was checked out with.
 
@@ -556,15 +503,368 @@ sub baseline_tag
   my $self = shift;
   my $use_csn = shift;
   my $md5hash  = $self->get_working_hash();
-  if ( $use_csn ) {
-    return $self->csn();
-  } else {
-    return $md5hash;
-  }
+  return $md5hash;
 }
 
 
+###############################################################
+#
+# Function: push
+#
+#    This is the umbrella function for performing a hierarchical
+#    push of a package and the packages it depends on.
+#
+#    1) Sanity checking
+#       a) make sure global environemnt is ready
+#       a) get packages dependent on this one
+#       b) make sure they are visible in path
+#
+#    2) Run regression
+#
+#    3) Lock Repositories
+#       a) lock repositories
+#       b) abort if packages are not up to date
+#
+#    4) Prepare each package to push
+#       a) package up regression results
+#       b) obtain new CSN and update
+#
+#    5) Commit each package
+#
+#    6) Unlock Repositories
+#
+################################################################
+
+sub push_package {
+  my $self = shift;
+  my $only_self = shift || 0;
+
+  my $stop_push = 0;
+  my $success = 0;
+
+  if (! defined ($self->{url})) {
+    ierror("Push: No url defined. Dont know where to push!") && return 0;
+  }
+  my @all;
+  print "Push: Starting a push of package: " . $self->name() . "\n";
+  print "Push: Target URL " . $self->{url} . "\n";
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Sanity Check", 0);
+  $self->banner();
+
+  $self->sanity_stage()
+    || return ();
+
+  # Find dependent packages that are checked out....
+
+  if ($only_self) {
+    @all = ($self);
+  } else {
+    @all = ();
+
+    foreach my $dp ($self->get_dependent_packages()) {
+      if ( ! $dp->isprivate()) {
+        print "Push: Skipping private dependent package: " . $dp->name() . "\n";
+        next;
+      }
+
+      push(@all, $dp);
+    }
+  }
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Lock the relevant repositories");
+  
+  $self->SUPER::lockall(@all) || return 0;
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Check if packages are ready to be pushed");
+
+  foreach my $p (@all) {
+    $p->banner();
+
+    if (! $p->check_stage()) {
+      $stop_push = 1;
+    }
+  }
+
+  ## Instead of exiting when the first package is not up-to-date,
+  ## check the status of all packages and then exit.
+  if ($stop_push == 1) {
+    $self->SUPER::unlockall(@all);
+    return ();
+  }
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Do necessary updates of package in preparation for a push");
+
+  Asim::Xaction::start();
+
+  foreach my $p (@all) {
+    $p->banner();
+
+    if (! $p->prepare_stage()) {
+      unlockall(@all);
+      Asim::Xaction::abort();
+      return ();
+    }
+  }
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Do actual push");
+
+  print "Push: I am about to push your changes. This is your last chance...\n\n";
+
+  if (! Asim::choose_yes_or_no("Do you really want to proceed and push","response_required","yes")) {
+    $self->{status} = "";
+    $self->SUPER::unlockall(@all);
+    Asim::Xaction::abort();
+    return 0;
+  }
+
+  Asim::disable_signal();
+
+  foreach my $p (@all) {
+    $p->banner();
+    $success = $p->push_stage();
+    if (! ($success)) {
+        $self->SUPER::unlockall(@all);
+        Asim::Xaction::abort();
+        Asim::enable_signal();
+        return 0;
+    }
+  }
+
+  Asim::Xaction::commit();
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Unlock the repositories");
+
+  $self->SUPER::unlockall(@all);
+
+  Asim::enable_signal();
+
+  return 1;
+}
+
+################################################################
+#
+# Function: sanity_stage
+#
+# A set of onetime checks to make sure that we have a 
+# reasonable chance of succeeding at a push
+#
+################################################################
+
+sub sanity_stage {
+  my $self = shift;
+  
+  $| = 1;
+
+  #
+  # Some utility programs
+  #
+  # TODO: We shouldn't just rely on these being in the path
+  #
+  $HOSTNAME = "hostname";
+  $DATE = "date";
+  $DATE_UTC = "date -u";
+
+  #
+  # Some global variables
+  #
+  $HOST = `$HOSTNAME`;
+  chop $HOST;
+
+  $USER = $ENV{'USER'};
+
+  #
+  # Indicate we haven't seen big problems yet
+  #
+  $PROBLEM = 0;
+
+  print "Push: You seem to have a reasonable environment to push your changes\n";
+
+  return 1;
+}
+
+################################################################
+#
+# Function:
+#
+#
+#
+################################################################
+
+sub check_stage {
+  my $self = shift;
+
+  #
+  # Check on the git status of the package
+  #
+  our $checkindex++;
+
+  $self->push_check() 
+      || push_failure("Cannot push from this state") && return 0;
+  
+  print "Push: Status " . $self->{status} . "\n";
+
+  if ($self->{status} eq "No-push-needed") {
+    return 1;
+  }
+
+  $self->isprivate()
+    || push_failure("You are using a shared package that is not up-to-date.\n" .
+                      "Check out the package or get the shared package updated.\n") && return 0;
+
+  return 1;
+}
+
+
+################################################################
+#
+# Function: 
+#
+# 
+#
+################################################################
+
+sub prepare_stage {
+  my $self = shift;
+
+  if ($self->{status} eq "No-push-needed") {
+    print "Push: No push needed for this package, so nothing to do here...\n";
+    system("rm $self->{reportfile}");
+    return 1;
+  }
+
+  $self->update_gold_results()
+    || push_failure("Unable to update gold stats") && return 0;
+
+  $self->do_we_want_regression_results()
+    || push_failure("Unable to get regression results") && return 0;
+
+  $self->get_regression_results()
+    || push_failure("Unable to get regression results") && return 0;
+
+  $self->update_ipchist()
+    || push_failure("Unable to update ipchist file") && return 0;
+
+  return 1;
+}
+
+
+################################################################
+#
+# Function: 
+#
+# 
+#
+################################################################
+
+sub push_stage {
+  my $self = shift;
+
+  if ($self->{status} eq "No-push-needed") { 
+    print "Push: No push needed for this package, so nothing to do here...\n";
+    $self->{status} = "";
+    return 1;
+  }
+
+  $self->push_archive()
+    || ierror("Trouble with git push\n") && return 0;
+
+  $self->push_regtest()
+    || ierror("Trouble with push of regtest\n") && return 0;
+
+  $self->{status} = "";
+  return 1;
+}
+
+################################################################
+#
+# Function: 
+#
+# 
+#
+################################################################
+
+
+sub push_archive {
+  my $self = shift;
+  my $command;
+  my $success;
+
+  my $push_url = $self->{url};
+
+  $self->save();
+
+  #
+  # Execute 'git push' to see all the changes that have been made.
+  #
+  print "Push: Really pushing....\n";
+
+  my $branch = $self->{branch};
+  if (!defined($branch)) {
+      $branch = $self->get_current_branch();
+      $self->{branch} = $branch;
+  }
+  # push changes from local repository into a remote repository
+  $command = "push $push_url $branch";
+  if (! $self->git_command($command)) {
+    ierror("Push: Fatal error during git push. Exiting! \n");
+    return 0;
+  }
+  
+  return 1;
+}
+
+sub push_regtest {
+  my $self = shift;
+  my $regression = $self->{regression}
+    || return 1;
+
+  my $tarfile = $self->{tarfile};
+
+  #
+  # Tar and save regression results
+  #
+  $regression->tar_and_save($tarfile);
+
+  return 1;
+}
+
+################################################################
+#
+# Functions to call in the event of problems
+#
+################################################################
+
+sub push_failure {
+  my $message = shift;
+
+  print "\n";
+  print "Push: I am sorry but there were problems with your push attempt\n";
+  print "Push: so if you can fix the problem you can try to push again\n";
+  print "\n";
+  print "Push: The error I received was: ------ $message -----\n";
+  print "\n";
+
+  return 1;
+}
+
+
+
 =back
+
+
 
 =head1 AUTHORS
 

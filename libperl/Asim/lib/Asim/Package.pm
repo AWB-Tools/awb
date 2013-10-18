@@ -231,6 +231,7 @@ sub init {
   Asim::Package::Cvs::init();
   Asim::Package::Svn::init();
   Asim::Package::BitKeeper::init();
+  Asim::Package::Git::init();
 }
 
 ################################################################

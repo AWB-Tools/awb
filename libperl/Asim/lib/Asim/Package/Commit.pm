@@ -145,7 +145,7 @@ sub commit {
 
   if ( $self->type() ) {
     $self->step("Lock the relevant repositories");
-    lockall(@all) || return 0;
+    $self->lockall(@all) || return 0;
   }
 
 
@@ -164,7 +164,7 @@ sub commit {
   ## Instead of exiting when the first package is not up-to-date,
   ## check the status of all packages and then exit.
   if ($stop_commit == 1) {
-    unlockall(@all);
+    $self->unlockall(@all);
     return ();
   }
 
@@ -178,7 +178,7 @@ sub commit {
     $p->banner();
 
     if (! $p->prepare_stage($commitlog_file)) {
-      unlockall(@all);
+      $self->unlockall(@all);
       Asim::Xaction::abort();
       return ();
     }
@@ -192,7 +192,7 @@ sub commit {
 
   if (! Asim::choose_yes_or_no("Do you really want to proceed and commit","response_required","yes")) {
     $self->{status} = "";
-    unlockall(@all);
+    $self->unlockall(@all);
     Asim::Xaction::abort();
     return 0;
   }
@@ -203,7 +203,7 @@ sub commit {
     $p->banner();
     $success = $p->commit_stage();
     if (! ($success)) {
-        unlockall(@all);
+        $self->unlockall(@all);
         Asim::Xaction::abort();
         Asim::enable_signal();
         return 0;
@@ -215,7 +215,7 @@ sub commit {
 #########      ###########      ###########      ###########      ###########
 
   $self->step("Unlock the repositories");
-  unlockall(@all);
+  $self->unlockall(@all);
 
   Asim::enable_signal();
 
@@ -341,13 +341,8 @@ sub check_stage {
   $tmpfile_comment = "$TMPDIR/asimcommit_comment.$$.$checkindex.txt";
   $self->{commentfile} = $tmpfile_comment;
 
-  if ($self->type eq 'git')  {
-    $self->push_check($tmpfile)
-        || commit_failure("Cannot commit from this state") && return 0;
-  } else {
-    $self->commit_check($tmpfile)
-        || commit_failure("Cannot commit from this state") && return 0;
-  }
+  $self->commit_check($tmpfile)
+      || commit_failure("Cannot commit from this state") && return 0;
 
   print "Commit: Status " . $self->{status} . "\n";
 
@@ -1082,33 +1077,6 @@ sub commit_archive {
     return 0 if (! defined($success));
     last if ($success);
     }
-  } 
-  elsif($self->type() eq "git") {
-    my $branch = $self->{branch};
-    my $git_csn;
-    if (!defined($branch)) {
-      $branch = $self->get_current_branch();
-      $self->{branch} = $branch;
-    }
-    # Create a tag if push is to the public git repository
-    if ( $self->is_public_repo($push_url) ) {
-      $git_csn = $self->increment_csn();
-      $command = "tag $git_csn $branch ";
-      if ($self->git($command)) {
-        ierror("Push: Error while creating a tag for this push.\n");
-        return 0;
-      }
-    }
-    # push changes from local repository into a remote repository
-    $command = "push $push_url $branch $git_csn";
-    while (! $self->git_command($command)) {
-      ierror("Push: Fatal error during git push: \n".
-             "Push: Your push might be partially done \n",
-             "Push: and the state of your directory is probably messed up.\n");
-      $success = $self->commit_dilemma("git $command");
-      return 0 if (! defined($success));
-      last if ($success);
-    }
   } else {
     ierror("No commit for non-cvs/non-svn/non-git packages currently implemented");
     return 0;
@@ -1123,7 +1091,7 @@ sub commit_archive {
   #
   # Tag this commit with its serial number
   #
-   print "Commit: Tagging your changes...\n";
+  print "Commit: Tagging your changes...\n";
 
   if ($self->type() eq "cvs") {
     $command = "tag ${csn}";
@@ -1274,6 +1242,7 @@ sub commit_dilemma {
 ################################################################
 
 sub lockall {
+  my $self = shift;
   my @all = @_;
 
   my $name;
@@ -1285,7 +1254,7 @@ sub lockall {
 
     if (! $p->acquire_lock()) {
       ierror("Commit: Could not obtain lock for $name\n");
-      unlockall(@done);
+      $self->unlockall(@done);
       return 0;
     }
 
@@ -1299,6 +1268,7 @@ sub lockall {
 
 
 sub unlockall {
+  my $self = shift;
   my @all = @_;
 
   my $name;
@@ -1322,161 +1292,5 @@ sub unlockall {
   return 1;
 }  
 
-################################################################
-#
-# Function: push
-#
-#    This is the umbrella function for performing a hierarchical
-#    push of a package and the packages it depends on.
-#
-#    1) Sanity checking
-#       a) make sure global environemnt is ready
-#       a) get packages dependent on this one
-#       b) make sure they are visible in path
-#
-#    2) Run regression
-#
-#    3) Lock Repositories
-#       a) lock repositories
-#       b) abort if packages are not up to date
-#
-#    4) Prepare each package to push
-#       a) package up regression results
-#       b) obtain new CSN and update
-#
-#    5) Commit each package
-#
-#    6) Unlock Repositories
-#
-################################################################
-
-sub push_package {
-  my $self = shift;
-  my $only_self = shift || 0;
-
-  my $stop_commit = 0;
-  my $success = 0;
-
-  if (! defined ($self->{url})) {
-    ierror("Push: No url defined. Dont know where to push!") && return 0;
-  }
-  my @all;
-  print "Push: Starting a push of package: " . $self->name() . "\n";
-  print "Push: Target URL " . $self->{url} . "\n";
-
-#########      ###########      ###########      ###########      ###########
-
-  $self->step("Sanity Check", 0);
-  $self->banner();
-
-  my $commitlog_file = undef;
-  $self->sanity_stage($commitlog_file)
-    || return ();
-
-  # Find dependent packages that are checked out....
-
-  if ($only_self) {
-    @all = ($self);
-  } else {
-    @all = ();
-
-    foreach my $dp ($self->get_dependent_packages()) {
-      if ( ! $dp->isprivate()) {
-        print "Push: Skipping private dependent package: " . $dp->name() . "\n";
-        next;
-      }
-
-      push(@all, $dp);
-    }
-  }
-
-#########      ###########      ###########      ###########      ###########
-
-  $self->step("Lock the relevant repositories");
-
-  lockall(@all) || return 0;
-
-
-#########      ###########      ###########      ###########      ###########
-
-  $self->step("Check if packages are ready to be pushed");
-
-  foreach my $p (@all) {
-    $p->banner();
-
-    if (! $p->check_stage()) {
-      $stop_commit = 1;
-    }
-  }
-
-  ## Instead of exiting when the first package is not up-to-date,
-  ## check the status of all packages and then exit.
-  if ($stop_commit == 1) {
-    unlockall(@all);
-    return ();
-  }
-
-#########      ###########      ###########      ###########      ###########
-
-  $self->step("Do necessary updates of package in preparation for a push");
-
-  Asim::Xaction::start();
-
-  #foreach my $p (@all) {
-  #  $p->banner();
-
-  #  if (! $p->prepare_stage($commitlog_file)) {
-  #    unlockall(@all);
-  #    Asim::Xaction::abort();
-  #    return ();
-  #  }
-  #}
-
-  # For distributed repositories, chages and mytags file will not be updated
-  # CSN will be incremented and used directly to tag the repository
-  #if (! $self->increment_csn()) {
-  #  unlockall(@all);
-  #  Asim::Xaction::abort();
-  #  return();
-  #}
-
-#########      ###########      ###########      ###########      ###########
-
-  $self->step("Do actual push");
-
-  print "Push: I am about to push your changes. This is your last chance...\n\n";
-
-  if (! Asim::choose_yes_or_no("Do you really want to proceed and push","response_required","yes")) {
-    $self->{status} = "";
-    unlockall(@all);
-    Asim::Xaction::abort();
-    return 0;
-  }
-
-  Asim::disable_signal();
-
-  foreach my $p (@all) {
-    $p->banner();
-    $success = $p->commit_stage();
-    if (! ($success)) {
-        unlockall(@all);
-        Asim::Xaction::abort();
-        Asim::enable_signal();
-        return 0;
-    }
-  }
-
-  Asim::Xaction::commit();
-
-#########      ###########      ###########      ###########      ###########
-
-  $self->step("Unlock the repositories");
-
-  unlockall(@all);
-
-  Asim::enable_signal();
-
-  return 1;
-}
 
 1;
