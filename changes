@@ -11091,3 +11091,23 @@ Log message:    CSN: CSN-awb-3096
 
 
 - bug fix for multi-level cfg files
+
+----------
+mgambhir    Date: Fri Oct 18 15:13:18 EDT 2013  CSN: CSN-awb-552
+                  Fri Oct 18 19:13:18 UTC 2013
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Git.pm                    Locally Modified          551 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Git.pm                    Locally Modified          551 
+
+Sync with Intel revision
+
+Author: mgambhir
+Last modification:  Rev 3097 - 2013-01-02 22:13:54
+Log message:    CSN: CSN-awb-3097
+
+- Fixed AWB wrapper for git commands to be able to use ssh protocol to
+access the repository

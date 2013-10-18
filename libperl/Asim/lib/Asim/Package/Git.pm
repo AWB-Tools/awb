@@ -445,8 +445,7 @@ sub is_public_repo {
   my $self = shift;
   my $url = shift;
 
-  if ($url =~ m/testgitbare/) {
-  #if ($url =~ m/cameroon.intel.com/) {
+  if ($url =~ m/devtools.intel.com/) {
     return 1;
   }
 

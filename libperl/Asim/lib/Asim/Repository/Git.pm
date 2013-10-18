@@ -135,8 +135,13 @@ sub checkout {
   my $user = shift || undef;
 
   my $access = $archive->{access} || return undef;
-  if (defined($user)) {
-    $access = $user . "@" . $access;
+  if (defined($user)) {if ($access =~ m/:\/\//) {
+    # URL contains protocol name. Username should be added afetr protocol
+        $access =~ s/:\/\//:\/\/$user@/;
+    }
+    else {
+        $access = $user . "@" . $access;
+    }
   }
   my $tag    = $archive->{tag}    || return undef;
   my $target = $archive->{target} || return undef;
@@ -236,7 +241,13 @@ sub clone {
   # URL of the repository to be cloned
   my $access = $archive->{access} || return undef;
   if (defined($user)) {
-    $access = $user . "@" . $access;
+    if ($access =~ m/:\/\//) {
+    # URL contains protocol name. Username should be added afetr protocol
+        $access =~ s/:\/\//:\/\/$user@/;
+    }
+    else {
+        $access = $user . "@" . $access;
+    }
   }
   my $tag    = $archive->{tag}    || return undef;
   my $target = $archive->{target} || return undef;
