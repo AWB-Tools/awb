@@ -132,9 +132,12 @@ Returns the directory the result was checked out into.
 sub checkout {
   my $self = shift;
   my $archive = $self;
-  my $user = shift || "anonymous";
+  my $user = shift || undef;
 
   my $access = $archive->{access} || return undef;
+  if (defined($user)) {
+    $access = $user . "@" . $access;
+  }
   my $tag    = $archive->{tag}    || return undef;
   my $target = $archive->{target} || return undef;
   my $pkg_name   = $archive->{packagename}  || return undef;
@@ -152,7 +155,7 @@ sub checkout {
     print "Local git repository $target does not exist!\n";
     my $q = "Do you want to clone it using URL $access?\n";
     if (Asim::choose_yes_or_no($q, "yes", "yes")) {
-      return $self->clone();
+      return $self->clone($user);
     }
   }
 
@@ -228,10 +231,13 @@ sub clone {
 
   my $self = shift;
   my $archive = $self;
-  my $user = shift || "anonymous";
+  my $user = shift || undef;
 
   # URL of the repository to be cloned
   my $access = $archive->{access} || return undef;
+  if (defined($user)) {
+    $access = $user . "@" . $access;
+  }
   my $tag    = $archive->{tag}    || return undef;
   my $target = $archive->{target} || return undef;
 
