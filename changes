@@ -11170,3 +11170,21 @@ Those were required for cvs primarily.
 TODO:
 commit_check for git calls git->status() which needs fixing
 push_check should check if the local repository is up to date
+
+----------
+mgambhir    Date: Fri Oct 18 15:50:40 EDT 2013  CSN: CSN-awb-555
+                  Fri Oct 18 19:50:40 UTC 2013
+
+
+Directory tools/awb/apm-edit
+ Makefile.in               Locally Modified          554 
+ Makefile.am               Locally Modified          554 
+
+Sync with Intel awb rev-3101
+
+Author: mgambhir
+Last modification:  Rev 3101 - 2013-01-08 20:45:19
+Log message:    CSN: CSN-awb-3101
+
+-Minor change to make it compile with Redhat Linux with older version of
+sed

@@ -47,7 +47,7 @@ apm_edit_images.pm: apm_edit.qrc
 	prcc4_bin -o apm_edit_images.pm $<
 
 %.ui.pm: %.ui
-	sed -i 's/version=\"3\..\"/version="3.0"/' $<
+	sed 's/version=\"3\..\"/version="3.0"/i' $<
 	puic4 -o $@ $<
 
 #
