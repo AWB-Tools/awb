@@ -1924,7 +1924,10 @@ sub parse_exp_file
                   push (@files, $1);
                 }
                 elsif (/-cfg\s+(\S+)/) { # we will need to make this an absolute path
-                  $subfile = realpath(dirname($file) . '/' . $1);
+                  $subfile = $1;
+                  # Arghh!  Some feeders use $(CDIR)/... to denote a relative path
+                  $subfile =~ s/^\$\(CDIR\)\///;
+                  $subfile = realpath(dirname($file) . '/' . $subfile);
                   next if grep (/$subfile/, @files);
                   push (@files, $subfile);
                 }

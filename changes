@@ -11074,3 +11074,20 @@ Log message:    CSN: CSN-awb-3094
 
 - updated awb-batch script to compress intermediate stats files generated
 during the simulation
+
+----------
+mgambhir    Date: Fri Oct 18 15:00:17 EDT 2013  CSN: CSN-awb-551
+                  Fri Oct 18 19:00:17 UTC 2013
+
+
+Directory tools/scripts
+ awb-run                   Locally Modified          550 
+
+Sync with Intel awb rev-3096
+
+Author: cjbeckma
+Last modification:  Rev 3096 - 2012-12-14 14:44:00
+Log message:    CSN: CSN-awb-3096
+
+
+- bug fix for multi-level cfg files
