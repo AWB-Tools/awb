@@ -158,7 +158,7 @@ sub checkout {
 
   if ( ! -e "$package_dir/.git" ) {
     print "Local git repository $target does not exist!\n";
-    my $q = "Do you want to clone it using URL $access?\n";
+    my $q = "Do you want to clone it using URL $access?";
     if (Asim::choose_yes_or_no($q, "yes", "yes")) {
       return $self->clone($user);
     }

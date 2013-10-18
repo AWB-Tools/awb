@@ -11188,3 +11188,35 @@ Log message:    CSN: CSN-awb-3101
 
 -Minor change to make it compile with Redhat Linux with older version of
 sed
+
+----------
+mgambhir    Date: Fri Oct 18 15:59:44 EDT 2013  CSN: CSN-awb-556
+                  Fri Oct 18 19:59:44 UTC 2013
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          555 
+
+Directory libperl/Asim/lib/Asim/Package
+ Git.pm                    Locally Modified          555 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Git.pm                    Locally Modified          555 
+
+- Sync with Intel rev:3104.3105
+
+Author: mgambhir
+Last modification:  Rev 3104 - 2013-01-18 22:47:47
+Log message:    CSN: CSN-awb-3104
+
+- Minor formatting change when user is prompted to clone a repo when 
+a checkout is attempted without cloning first
+
+
+Author: mgambhir
+Last modification:  Rev 3105 - 2013-01-22 21:17:00
+Log message:    CSN: CSN-awb-3105
+
+- Few more bug fixes to the git support
+- "clone/checkout/pull/update bundle xxx" should not work
+- changed the descriptions in pipersville subproject pack files

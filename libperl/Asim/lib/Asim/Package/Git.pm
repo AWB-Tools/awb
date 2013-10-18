@@ -130,6 +130,7 @@ sub pull {
       last;
     }
   }
+  close LIST;
   if (! $found ) {
     # branch does not exist in the remote repository
     Asim::Package::ierror ("Branch $branch does not exist in the remote repository. \

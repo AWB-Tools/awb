@@ -799,17 +799,17 @@ sub clone_bundle {
   my $addpath = 1;
   my $build = 1;
   my $status;
+  my $golden = 0;
   my $bundlename;
   local @ARGV = @_;
   my @packages;
   my $runstatus;
-  my $url = undef;
 
   # Parse options
 
   $status = GetOptions( "user=s"     => \$user,
 		        "build!"     => \$build,
-		        "url=s"     => \$url,
+			    "golden"     => \$golden,
 		        "addpath!"   => \$addpath );
 
   return 0 if (!$status);
@@ -824,14 +824,14 @@ sub clone_bundle {
   #
   # Determine the list of packages to clone from the bundle file
   #
-  @packages = bundle_packages_( $bundlename );
+  @packages = bundle_packages_( $bundlename, $golden );
   
   print "Cloning: " . join(" ", @packages) . "\n";
 
   #
   # Regenerate the arguments for clone_package
   #     This is not a very aesthetic way of doing this
-  #     adding a subfunction to do the checkout would be better
+  #     adding a subfunction to do the clone would be better
   #
   my @args = ();
 
@@ -840,7 +840,6 @@ sub clone_bundle {
     || shell_error("Must select user for checkout\n") && return ();
 
   push(@args, "--user=$default_user");
-  push(@args, "--url=$url");
 
   if (defined($addpath)) {
     push(@args, ("--" . ($addpath?"":"no") . "addpath"));
@@ -926,10 +925,10 @@ sub pull_bundle {
 
   # Parse options
   my $build = 1;
-  my $url = undef;
+  my $golden = 0;
   local @ARGV = @_;
   my $status = GetOptions( "build!" => \$build,
-                            "--url=s" => \$url );
+                           "golden" => \$golden);
   return 0 if (!$status);
 
   # Bundle name is remaining argument
@@ -939,12 +938,12 @@ sub pull_bundle {
   }
   
   # Determine the list of packages to update from the bundle file
-  my @packages = bundle_packages_( $bundlename );
+  my @packages = bundle_packages_( $bundlename, $golden );
   print "Pulling: " . join(" ", @packages) . "\n";
 
   # Regenerate the arguments for pull_package
   # Do not build since we do all the builds later...
-  my @args = ("--nobuild", "--url=$url");
+  my @args = ("--nobuild");
   my @plist = ();
   foreach my $b (@packages) {
     print "--- pull package $b " . join(" ",@args) . "\n";
