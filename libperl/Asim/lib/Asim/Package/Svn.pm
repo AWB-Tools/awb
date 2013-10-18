@@ -280,6 +280,12 @@ sub status {
       $path = $6;
     }
 
+   elsif (/^(A)\s+(\+)\s+(\-)\s+(\d+)\s+(\S+)\s+(\S+)/)  {
+      $status = 'Locally Added';
+      $reprev = $3;
+      $path = $6;
+    }
+
    # for files that were added through svn
    # but removed without letting svn know
    elsif (/^(!)\s+(\d+)\s+(\?)\s+(\?)\s+(\S+)/)  {

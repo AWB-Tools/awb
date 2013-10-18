@@ -11292,3 +11292,21 @@ Log message:	CSN: CSN-awb-3115
 
 
 - fixed a problem recognizing newly added files in Git packages
+
+----------
+mgambhir    Date: Fri Oct 18 18:58:54 EDT 2013  CSN: CSN-awb-560
+                  Fri Oct 18 22:58:54 UTC 2013
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          559 
+
+Sync with Intel rev-3116
+
+Author:	cjbeckma
+Last modification:	Rev 3116 - 2013-04-23 17:12:26
+Log message:	CSN: CSN-awb-3116
+
+
+- discovered another SVN status format, when you undo a previous commit
+that deleted a file (i.e. you add back the file)
