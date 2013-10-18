@@ -561,6 +561,7 @@ sub help_code {
                     "Asim/Batch/Local.pm",
                     "Asim/Batch/Netbatch.pm",
                     "Asim/Batch/NetbatchRemote.pm",
+                    "Asim/Batch/NetbatchFeeder.pm",
                     "Asim/Nightly.pm",
                     "Asim/Regression.pm",
                     "Asim/GenCFG.pm",

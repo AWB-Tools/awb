@@ -34,6 +34,7 @@ use Asim::Batch::Local;
 use Asim::Batch::Condor;
 use Asim::Batch::Netbatch;
 use Asim::Batch::NetbatchRemote;
+use Asim::Batch::NetbatchFeeder;
 use Asim::Batch::List;
 
 our $DEBUG =  0
@@ -109,7 +110,9 @@ The following public methods are supported:
                                    );
 
 
-Create a new batch object object.
+Create a new batch object object, where "type" is one of the following:
+
+=over 4
 
 =cut
 
@@ -118,21 +121,68 @@ Create a new batch object object.
 sub new {
   my $this = shift;
   my $type = shift;
+  
+=item 'LOCAL'
+
+Run jobs on the local machine
+
+=cut
 
   if ( $type eq "LOCAL") {
     return Asim::Batch::Local->new(@_);
+  
+=item 'NETBATCH'
+
+Run jobs using raw Netbatch commands
+
+=cut
+
   } elsif ( $type eq "NETBATCH") {
     return Asim::Batch::Netbatch->new(@_);
+  
+=item 'CONDOR'
+
+Run jobs using Condor
+
+=cut
+
   } elsif ( $type eq "CONDOR") {
     return Asim::Batch::Condor->new(@_);
+  
+=item 'NETBATCH'
+
+Run jobs on a remote pool using raw Netbatch commands
+
+=cut
+
   } elsif ( $type eq "NETBATCH_REMOTE") {
     return Asim::Batch::NetbatchRemote->new(@_);
+  
+=item 'HOST_LIST'
+
+Run jobs on on a list of machines, using SSH commands
+
+=cut
+
   } elsif ( $type eq "HOST_LIST") {
     return Asim::Batch::List->new(@_);
+  
+=item 'NBFEEDER'
+
+Run jobs using the Netbatch Feeder
+
+=cut
+
+  } elsif ( $type eq "NBFEEDER") {
+    return Asim::Batch::NetbatchFeeder->new(@_);
   } else {
     return undef;
   }
 }
+
+=back
+
+=cut
 
 
 ################################################################

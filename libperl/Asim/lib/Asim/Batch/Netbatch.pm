@@ -42,10 +42,10 @@ our $DEBUG =  0
            || defined($ENV{ASIM_DEBUG_BATCH});
 
 
-my $BATCH_STATUS_COMMAND = "nbqstat";
-my $BATCH_SUBMIT_COMMAND = "nbq";
+our $BATCH_STATUS_COMMAND = "nbqstat";
+our $BATCH_SUBMIT_COMMAND = "nbq";
 
-my $NETBATCH_PRE_NM = "tools/scripts/netbatch-pre";
+our $NETBATCH_PRE_NM = "tools/scripts/netbatch-pre";
 
 
 =head1 NAME

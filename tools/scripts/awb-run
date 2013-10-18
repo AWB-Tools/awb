@@ -40,6 +40,7 @@
 #
 
 use File::Basename;
+use File::Spec;
 use Getopt::Long;
 use IO::Handle;
 use Term::ReadKey;
@@ -180,10 +181,11 @@ my $build       = Asim::Util::get_asimrc_val($optlist, "BUILD",          1     )
 my $nuke        = Asim::Util::get_asimrc_val($optlist, "NUKE",           1     );
 my $compress    = Asim::Util::get_asimrc_val($optlist, "COMPRESS",       "gzip");
 my $replace     = Asim::Util::get_asimrc_val($optlist, "REPLACE",        0     );
-my $buildall    = Asim::Util::get_asimrc_val($optlist, "BUILD_ALL", "0"   );
+my $buildall    = Asim::Util::get_asimrc_val($optlist, "BUILD_ALL",      "0"   );
 my $buildbatch  = Asim::Util::get_asimrc_val($optlist, "BUILD_NETBATCH", "0"   );
 my $builddistcc = Asim::Util::get_asimrc_val($optlist, "BUILD_DISTCC",   "0"   );
 my $runnetbatch = Asim::Util::get_asimrc_val($optlist, "USE_NETBATCH",   "1"   );
+my $runnbfeeder = Asim::Util::get_asimrc_val($optlist, "USE_NBFEEDER",   "0"   );
 my $runcondor   = Asim::Util::get_asimrc_val($optlist, "USE_CONDOR",     "0"   );
 my $runhostlist = Asim::Util::get_asimrc_val($optlist, "USE_HOST_LIST",  "0"   );
 my $slotsperhost= Asim::Util::get_asimrc_val($optlist, "SLOTS_PER_HOST", "1"   );
@@ -199,12 +201,12 @@ my $remoteawblcl= Asim::Util::get_asimrc_val($optlist, "REMOTE_AWBLOCAL",$ENV{"A
 my $remotehome  = Asim::Util::get_asimrc_val($optlist, "REMOTE_HOME",    $ENV{"HOME"});
 my $localhost   = Asim::Util::get_asimrc_val($optlist, "LOCAL_HOST",     $actual_hostname);
 my $checklegal  = Asim::Util::get_asimrc_val($optlist, "CHECK_LEGAL",    "1");
-my $debugoutfile= Asim::Util::get_asimrc_val($optlist, "DEBUG_OUTFILE",    "");
+my $debugoutfile= Asim::Util::get_asimrc_val($optlist, "DEBUG_OUTFILE",  "");
 my $printtimes  = Asim::Util::get_asimrc_val($optlist, "PRINT_TIMES",    1);
-my $forklocal   = Asim::Util::get_asimrc_val($optlist, "FORK_LOCAL",    0);
-my $forkbatch   = Asim::Util::get_asimrc_val($optlist, "FORK_BATCH",   32);
-my $distccjlevel= Asim::Util::get_asimrc_val($optlist, "DISTCC_JLEVEL",    "");
-my $run_time_dir= Asim::Util::get_asimrc_val($optlist, "RUN_TIME_DIR",    undef);
+my $forklocal   = Asim::Util::get_asimrc_val($optlist, "FORK_LOCAL",     0);
+my $forkbatch   = Asim::Util::get_asimrc_val($optlist, "FORK_BATCH",     32);
+my $distccjlevel= Asim::Util::get_asimrc_val($optlist, "DISTCC_JLEVEL",  "");
+my $run_time_dir= Asim::Util::get_asimrc_val($optlist, "RUN_TIME_DIR",   undef);
 
 my $netbatch_taskname = "";
 
@@ -305,6 +307,7 @@ my $status = GetOptions("experiments=s"  => \$experiments,
                         "builddistcc!"   => \$builddistcc,
 			"persist!"       => \$persist,
                         "netbatch!"      => \$runnetbatch,
+                        "nbfeeder!"      => \$runnbfeeder,
                         "condor!"        => \$runcondor,
                         "hostlist!"      => \$runhostlist,
 			"pool=s"         => \$pool,
@@ -388,7 +391,7 @@ if (defined $runhostlist && $runhostlist) {
     $runnetbatch = $runcondor = 0;
 }
 
-if ($runnetbatch || $runcondor || $runhostlist) {
+if ($runnetbatch || $unnbfeeder || $runcondor || $runhostlist) {
     $runbatch = "1";
 }
 
@@ -620,8 +623,18 @@ if ($buildbatch) {
 # Create Asim::Batch objects for running jobs
 ##########################################################
 
-if ($runnetbatch) {
-  if (! $remote) {
+if ($runnbfeeder) {
+    $forkbatch = 0; # run everything in this process
+    $run_sys = Asim::Batch->new("NBFEEDER",
+				pool  =>  $pool,
+				queue =>  $queue,
+				class =>  $class,
+				pool_build  => $pool_build,
+				queue_build => $queue_build,
+				class_build => $class_build,
+                                taskfile => File::Spec->catfile($resdir, 'Tasks')
+			       );
+} elsif ($runnetbatch && ! $remote) {
     $run_sys = Asim::Batch->new("NETBATCH",
 				pool  =>  $pool,
 				queue =>  $queue,
@@ -630,7 +643,7 @@ if ($runnetbatch) {
 				temp  =>  $TMP_DIR,
 				quiet =>  $quiet
 			       );
-  } else {
+} elsif ($runnetbatch && $remote) {
     $run_sys = Asim::Batch->new("NETBATCH_REMOTE",
 				pool  =>  $pool,
 				queue =>  $queue,
@@ -645,7 +658,6 @@ if ($runnetbatch) {
 					   "AWBLOCAL"    => $remoteawblcl
 					  }
 			       );
-  }
 } elsif($runcondor) {
     $run_sys = Asim::Batch->new("CONDOR",				
                                 temp  =>  $TMP_DIR,
@@ -670,7 +682,9 @@ if ($runnetbatch) {
 			       );
 }
 
-if ($buildbatch && $runnetbatch) {
+if ($buildbatch && $runnbfeeder) {
+  $build_sys = $run_sys;
+} elsif ($buildbatch && $runnetbatch) {
   $build_sys = Asim::Batch->new("NETBATCH",
 				pool  =>  $pool_build,
 				queue =>  $queue_build,
@@ -2319,6 +2333,11 @@ sub submit_job
         $dashj = "$resdir/$name/BUILD/$model_name.SUBMITTED";
 
         $log = "$resdir/$name/ADMIN/experiment.log";
+        
+        # some batch systems allow us to track dependencies between identical builds jobs
+        if (submit_batch_build_or_link($model_name, $submit_cmd, $dashj, $log)) {
+            return 0;
+        } # but if that fails, build it the normal way...
 
         # actually run the nbq submit_cmd
         $run_error = $build_sys->submit($submit_cmd, $dashj, ">>$log 2>&1", 1);
@@ -2383,6 +2402,50 @@ sub submit_job
         }
     }
     return 0;
+}
+        
+
+# -----------------------------------------------------------------------------
+#
+# some batch systems allow us to track dependencies between identical builds jobs
+#
+sub submit_batch_build_or_link
+{
+    my $model_name = shift;
+    my $submit_cmd = shift;
+    my $run_log    = shift;
+    my $submit_log = shift;
+    
+    return 0 unless $runnbfeeder;
+    
+    # this is kind of a hack to extract the model build area and binary name:
+    my $model; my $build_area;
+    if ($submit_cmd =~ /--model\s+(\S+)\s.*--builddir\s+(\S+)\s/) {
+        $model = $1;
+        $build_area = $2;
+    } else {
+        return 0;
+    }
+    
+    if (defined $build_models{$model}) {
+        # replace the model build with a soft link command,
+        # and make it depend on the successful completion of the previous build:
+        my $prev = $build_models{$model};
+        print_info('Linking to previously build model '.$prev->{model_name});
+        $submit_cmd = 'ln -s '.$prev->{build_area}.'/'.$prev->{model_name}." $build_area/$model_name";
+        $build_sys->submit_depend($submit_cmd, $run_log, ">>$submit_log 2>&1", 1, $prev->{task_no});
+    }
+    
+    else {
+        # submit the build command, and remember it for later
+        my $prev = {};
+        $prev->{task_no} = $build_sys->submit_depend($submit_cmd, $run_log, ">>$submit_log 2>&1", 1);
+        $prev->{model_name} = $model_name;
+        $prev->{build_area} = $build_area;
+        $build_models{$model} = $prev;
+    }
+
+    return 1;
 }
 
 
