@@ -268,7 +268,7 @@ sub status {
    }
 
    # The below statuses have a different format
-   elsif (/^(A)\s+(\d+)\s+(\?)\s+(\?)\s+(\S+)/)  {
+   elsif (/^(A)\s+(\d*|\-)\s+(\?)\s+(\?)\s+(\S+)/)  {
       $status = 'Locally Added';
       $reprev = $2;
       $path = $5;

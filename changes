@@ -11022,3 +11022,21 @@ Directory tools/awb/awb
 
 In awb, added model and benchmark menu items to copy the path
 of the model build and run directories to the clipboard.
+
+----------
+mgambhir    Date: Fri Oct 18 14:37:38 EDT 2013  CSN: CSN-awb-548
+                  Fri Oct 18 18:37:38 UTC 2013
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          547 
+
+
+Sync with Intel awb rev-3088
+Author: mgambhir
+Last modification:  Rev 3088 - 2012-05-30 19:17:23
+Log message:    CSN: CSN-awb-3088
+
+- Fixed a bug to make svn status work with svn version 1.7.2 and above.
+With newer versions of svn the status command no longer puts 0 in the
+revision number of Locally added files. It instead puts a -
