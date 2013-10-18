@@ -174,6 +174,26 @@ sub create_packfile {
   return 1;
 }
 
+#################################################################################
+
+=item $repository-E<gt>repo_cmd()
+
+Return the repository access command (cvs, svn, git, ...) to use.
+
+It defaults to 'method' if unspecified.
+
+=cut
+
+#################################################################################
+
+sub repo_cmd {
+  my $self = shift;
+  return $self->{repo_cmd} if defined $self->{repo_cmd};
+  return $self->{method};
+}
+
+#################################################################################
+
 ################################################################
 
 =item $dir = $repository-E<gt>checkout([$user])
@@ -373,6 +393,7 @@ sub dump {
   printf "Repository browseURL: %s\n",        _safe_string($self->{browseURL});
   printf "Repository target directory: %s\n", _safe_string($self->{target});
   printf "Repository changes file: %s\n",     _safe_string($self->{changes});
+  printf "Repository access command: %s\n",   _safe_string($self->{repo_cmd});
 
 }
 

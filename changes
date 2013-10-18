@@ -11239,3 +11239,40 @@ Last modification:	Rev 3112 - 2013-03-25 16:06:25
 Log message:	CSN: CSN-awb-3112
 
 - Added Asim.pm (generated from Asim.pm.in by configure script) to the repository to fix a use case when awb package is checked out with --nobuild option, resulting in a lack of Asim.pm file in the awb package which then throws an error on all subsequent awb-shell commands
+
+----------
+mgambhir    Date: Fri Oct 18 18:54:28 EDT 2013  CSN: CSN-awb-558
+                  Fri Oct 18 22:54:28 UTC 2013
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Help.pm                   Locally Modified          557 
+
+Directory libperl/Asim/lib/Asim/Package
+ Git.pm                    Locally Modified          557 
+
+Directory libperl/Asim/lib/Asim
+ Package.pm                Locally Modified          557 
+
+Directory libperl/Asim/lib/Asim/Repository
+ DB.pm                     Locally Modified          557 
+ Git.pm                    Locally Modified          557 
+
+Directory libperl/Asim/lib/Asim
+ Repository.pm             Locally Modified          557 
+
+Sync with Intel rev-3113
+
+Author:	cjbeckma
+Last modification:	Rev 3113 - 2013-04-19 17:58:46
+Log message:	CSN: CSN-awb-3113
+
+
+- Added a "RepoCmd" field to the repository (asim.pack) and
+admin/packages file handlers, so that we can override the repository
+command (git, svn, etc.) used to check out, update, and commit code.
+- Added RepoCmd=/p/dpg/arch/bin/git to the asim.pack entries for Keiko
+and older Coho git repos on archbits.pdx.com that require this special
+git wrapper
+- fixed a bug in the "status package" command for Git packages which was
+giving perl errors.

@@ -72,6 +72,8 @@ our %a =  ( name          =>   [ "name",
                                  "SCALAR"],
             type          =>   [ "type",
                                  "SCALAR"],
+            repo_cmd      =>   [ "repo_cmd",
+                                 "SCALAR"],
           );
 
 # Well known file locations (relative to $self->location())
@@ -494,7 +496,7 @@ Return a list of accessor functions for this object
 sub accessors {
     my $self = shift;
 
-    return qw(name description location dependencies csn tag prerelease lockname buildorder maketarget type);
+    return qw(name description location dependencies csn tag prerelease lockname buildorder maketarget type repo_cmd);
 }
 
 
@@ -906,6 +908,22 @@ Always return model "maketarget".
 ################################################################
 
 sub maketarget { return $_[0]->_accessor("Global","MakeTarget",$_[1]); }
+
+################################################################
+
+=item $package-E<gt>repo_cmd([$value])
+
+Return the repository access command for the package.
+Defaults to the package type if RepoCmd= has not been set in the admin/packages file.
+
+=cut
+
+################################################################
+
+sub repo_cmd {
+  my $self = shift;
+  return $self->_accessor("Global","RepoCmd") || $self->type();
+}
 
 
 ################################################################

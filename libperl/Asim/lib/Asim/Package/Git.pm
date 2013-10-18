@@ -345,13 +345,15 @@ sub status {
       print "$_\n";
     }
     
-    if ( /^#\s+(.+):\s+(.+)$/ ) {
+    if ( /^#\s+(\S+):\s+(.+)$/ ) {
       $status = $1;
       $file = $2;
     }
     
-    if ($status) {
-       push(@files, [$file, $status]);
+    if ($status and $file) {
+       my ($filnam, $dir) = fileparse($file);
+       chop $dir if ($dir =~ m/\/$/); # remove trailing "/" from directory
+       push(@files, [$dir, $filnam, $status, '', '']); # no rev# or date information from Git
     }
   }
   CORE::close(Git);
@@ -423,7 +425,7 @@ sub git {
   #
   # Now do it
   #
-  $command = "(cd $location; git $command)";
+  $command = "(cd $location; ".$self->repo_cmd()." $command)";
   print "$command\n" if $VERBOSE;
 
   $ret = system("$command") >> 8;

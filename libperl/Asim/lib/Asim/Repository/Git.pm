@@ -164,9 +164,9 @@ sub checkout {
     }
   }
 
-  my $cmd = "(cd $package_dir; git checkout ";
+  my $cmd = "(cd $package_dir; ".$self->repo_cmd()." checkout ";
   my $found = 0;
-  open LIST, "cd $package_dir; git show-ref |";
+  open LIST, "cd $package_dir; ".$self->repo_cmd()." show-ref |";
   while ( <LIST> ) {
     if  ($ref_obj eq 'HEAD') {
       $cmd .= "master ";
@@ -263,7 +263,7 @@ sub clone {
   }
 
   my $url = "$access";
-  my $cmd = "(cd $targetdir; git clone -v ";
+  my $cmd = "(cd $targetdir; ".$self->repo_cmd()." clone -v ";
   
   $cmd   .= "$url $target)";
 

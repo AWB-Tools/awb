@@ -454,6 +454,7 @@ sub get_repository {
     $target    = $self->_get_item($fullname, "Target")    || return undef;
     $browseURL = $self->_get_item($fullname, "BrowseURL");
     $changes   = $self->_get_item($fullname, "Changes");
+    my $repo_cmd=$self->_get_item($fullname, "RepoCmd"); # repository access command override
     
     # Set repository type. Bitkeeper should be distributed eventually.
     if (($method eq "git")) {
@@ -474,7 +475,8 @@ sub get_repository {
                                         browseURL   => $browseURL,
                                         target      => $target,
                                         changes     => $changes, 
-                                        type        => $type );
+                                        type        => $type,
+                                        repo_cmd    => $repo_cmd );
 
   } else {
     ierror("Unknown access method $method");
