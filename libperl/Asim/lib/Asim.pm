@@ -1,0 +1,817 @@
+#
+# Copyright (C) 2003-2006 Intel Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+
+#
+# WARNING:
+# Do NOT edit Asim.pm - edit Asim.pm.in instead.
+#
+
+package Asim;
+
+use warnings;
+use strict;
+
+
+# Load all the required modules
+use Getopt::Long;
+
+use Asim::Rcfile;
+
+use Asim::Workspace;
+
+use Asim::Package::DB;
+use Asim::Package;
+
+use Asim::Regression;
+
+use Asim::Repository::DB;
+use Asim::Repository;
+
+use Asim::Bundle;
+
+use Asim::Model::DB;
+use Asim::Model;
+
+use Asim::Module::DB;
+use Asim::Module; 
+
+use Asim::Benchmark::DB;
+use Asim::Benchmark; 
+
+use Asim::GenCFG;
+
+use Asim::Edit;
+use Asim::Xaction;
+use Asim::Signal;
+
+
+
+our $VERSION = "0.02";
+our $debug = 0 || defined($ENV{ASIM_DEBUG});
+
+#
+# Variables from autoconf configuration
+#
+our $package     = "awb";
+our $release     = "v13.06";
+
+our $prefix      = "/p/asim/x86_64_linux26";
+our $exec_prefix = "${prefix}";
+our $bindir      = "${exec_prefix}/bin";
+our $mandir      = "${prefix}/share/man";
+our $libdir      = "${exec_prefix}/lib";
+our $includedir  = "${prefix}/include";
+our $datadir     = "${prefix}/share";
+
+our $sysconfdir  = "${prefix}/etc";
+our $configdir   = "${datadir}/asim/ws/${release}";
+
+our $packagedir  = "${datadir}/asim/packages";
+our $codedir     = "${packagedir}/${package}/${release}";
+our $rcfile = "";
+
+=head1 NAME
+
+Asim - Library for manipulating ASIM objects
+
+=head1 SYNOPSIS
+
+use Asim;
+
+print "This is Asim version: $Asim::VERSION\n";
+
+=head1 DESCRIPTION
+
+Asim:: is a collection of Perl modules which provides an interface to 
+manipulate the Asim specific abstractions.
+
+The principal Asim abstractions available are:
+
+=over 4
+
+=item Asim::Workspace
+
+An Asim::Workspace is a class that represents your currently active area
+for working on an Asim model. Into your Asim::Workspace you can CVS
+checkout Asim::Packages, and build and run models.  By default the
+root directory of your Asim::Workspace is defined by the environment
+variable $AWBLOCAL and contains a file named 'awb.config' which
+contains information about the workspace.
+
+=item Asim::Repository::DB
+
+An Asim::Repository::DB is class that represents the collection of the
+publically known repositories of Asim::Package objects. Currently by
+default this information is obtained from
+/usr/local/share/asim/etc/asim.pack. You can use an
+Asim::Repository::DB to obtain a specific Asim::Repository.
+
+=item Asim::Repository
+
+An Asim::Repository is a class for manipulating the CVS repository
+associated with a Asim::Package.
+
+=item Asim::Package::DB
+
+An Asim::Package::DB is a class that represents the collection of the
+packages (either checked out or newly created) in your currently
+active Asim::Workspace. You can use an Asim::Package:DB to obtain a
+specific Asim::Package.
+
+=item Asim::Package
+
+An Asim::Package is the checked out copy of a set of Asim files. You
+can use and/or modify the files in a package. Modified files can be
+committed back to the associated CVS repository.
+
+=item Asim::Model
+
+An Asim::Model is a class that represents the configuration of a
+particular Asim model. An Asim::Model is primarily defined as a
+hierarhy of Asim::Modules. You can do thinks like edit, build and run
+an Asim::Model.
+
+=item Asim::Module::DB 
+
+An Asim::Module::DB is a class that represents the collection of
+Asim::Module objects available to build a model. You can use an
+Asim::Module:DB to obtain a specific Asim::Module.
+
+=item Asim::Module
+
+An Asim::Module is a class that represents the basic building block,
+i.e., a module, of an Asim::Model. You can create and edit
+Asim::Modules. 
+
+=back
+
+More information can be found in the respective documentation for each
+object class.
+
+=head1 VARIABLES
+
+The following variables based on the autoconf are avaiable:
+
+=over 4
+
+=item $Asim::package
+
+Name of current package
+
+=item $Asim::release
+
+Release identifier
+
+=item $Asim::prefix
+
+Prefix for all installation (default: /usr/local)
+
+=item $Asim::exec_prefix
+
+Prefix for binaries (default: $prefix)
+
+=item $Asim::bindir
+
+Binary installation directory (default: $exec_prefix/bin)
+
+=item $Asim::mandir
+
+Manual pages (default: $prefix/man)
+
+=item $Asim::libdir
+
+Library directory (default: $exec_prefix/lib)
+
+=item $Asim::includedir
+
+Include Headers directory (default: $prefix/include)
+
+=item $Asim::sysconfdir
+
+Configuration directory (default: /etc or $prefix/etc)
+
+=item $Asim::configdir
+
+Asim configuration directory (default: $confdir/asim/$release)
+
+=item $Asim::datadir
+
+Shared data directory (default: $prefix/share)
+
+=item $Asim::codedir
+
+Asim code directory (default: $datadir/$package/$release)
+
+=back
+
+=head1 METHODS
+
+The following methods are supported:
+
+=over 4
+
+=cut
+
+################################################################
+
+
+=item Asim::init();
+
+Initial Asim and create a default workspace.
+
+=cut
+
+################################################################
+
+
+
+
+sub init {
+  my $workspace = shift;
+
+#
+# Optional override location of configuration data
+#
+  if ( -e "/etc/asim" ) {
+     $sysconfdir = "/etc";
+  }
+
+#
+# Miscelaneous initializations
+#
+  Asim::Package::init();
+
+#
+# Create rcfile object
+#
+  $Asim::rcfile = Asim::Rcfile->new("$ENV{HOME}/.asim/asimrc",
+                                    "$sysconfdir/asim/asimrc");
+
+#
+# Find the location of a workspace - in priority order:
+#       1) as specified in the parameter
+#       2) as specified by $AWBLOCAL
+#       3) as specified in the .asimrc file
+#
+  $workspace = $workspace     || 
+               $ENV{AWBLOCAL} || 
+               $Asim::rcfile->workspace();
+
+#
+# Create a default workspace object
+#
+  Asim::open($workspace) || return undef;
+
+  return 1;
+}
+
+sub Version {
+  return $VERSION;
+ }
+
+sub Package {
+  return "$package";
+}
+
+sub Release {
+  return "$release";
+}
+
+sub Prefix {
+  return "$prefix";
+}
+
+sub Exec_prefix {
+  return "$exec_prefix";
+}
+
+sub Bindir {
+  return "$bindir";
+}
+
+sub Mandir {
+  return "$mandir";
+}
+
+sub Libdir {
+  return "$libdir";
+}
+
+sub Includedir {
+  return "$includedir";
+}
+
+sub Sysconfdir {
+  return "$sysconfdir";
+}
+
+sub Configdir {
+  return "$configdir";
+}
+
+sub Datadir {
+  return "$datadir";
+}
+
+sub Packagedir {
+  return "$packagedir";
+}
+
+
+sub Codedir {
+  return "$codedir";
+}
+
+################################################################
+
+
+=item Asim: open();
+
+Open a default workspace.
+
+=cut
+
+################################################################
+
+sub open {
+  my $workspacedir = shift;
+  my $workspace;
+
+  $workspace = Asim::Workspace->new($workspacedir)
+    || return undef;
+
+  $workspace->upgrade();
+
+  $ENV{AWBLOCAL} = $workspace->rootdir();
+
+  $Asim::default_workspace = $workspace;
+
+  return 1;
+}
+
+################################################################
+
+=item Asim::rehash()
+
+Rehash all the information about our default workspace.
+
+=cut
+
+################################################################
+
+sub rehash {
+  return $Asim::default_workspace->rehash();
+}
+
+
+################################################################
+
+
+=item Asim: save();
+
+Save the default workspace.
+
+=cut
+
+################################################################
+
+sub save {
+  return $Asim::default_workspace->save();
+}
+
+################################################################
+
+=item Asim::rootdir()
+
+Returns the pathname of the root of the default workspace
+
+=cut
+
+################################################################
+
+sub rootdir {
+  return $Asim::default_workspace->rootdir();
+}
+
+
+################################################################
+
+=item Asim::build_dir()
+
+Returns the pathname to the build directory of the 
+default workspace.
+
+=cut
+
+################################################################
+
+sub build_dir {
+  return $Asim::default_workspace->build_dir();
+}
+
+
+################################################################
+
+=item Asim::run_dir()
+
+Returns the pathname to the runs directory of the 
+default workspace.
+
+=cut
+
+################################################################
+
+sub run_dir {
+  return $Asim::default_workspace->run_dir();
+}
+
+
+################################################################
+
+=item Asim::src_dir()
+
+Returns the pathname to the source directory of the 
+default workspace.
+
+=cut
+
+################################################################
+
+sub src_dir {
+  return $Asim::default_workspace->src_dir();
+}
+
+
+################################################################
+
+=item Asim::path()
+
+Return the awb search path
+
+=cut
+
+################################################################
+
+sub path {
+  return $Asim::default_workspace->path();
+}
+
+
+################################################################
+
+=item Asim::resolve($file)
+
+Resolve $file using the awb search path into an absolute
+file name.
+
+=cut
+
+################################################################
+
+sub resolve {
+  return $Asim::default_workspace->resolve(@_);
+}
+
+################################################################
+
+=item Asim::unresolve($file)
+
+Unresolve $file using the awb search path into a relative
+file name.
+
+=cut
+
+################################################################
+
+sub unresolve {
+  return $Asim::default_workspace->unresolve(@_);
+}
+
+################################################################
+
+=item Asim::glob($file)
+
+Return the 'glob' of the given partial path using the awb
+search path.
+
+=cut
+
+################################################################
+
+sub glob {
+  return $Asim::default_workspace->glob(@_);
+}
+
+################################################################
+
+=item Asim::packageDB()
+
+Return the packageDB object for the default workspace.
+
+=cut
+
+################################################################
+
+sub packageDB {
+  return $Asim::default_workspace->packageDB();
+}
+
+################################################################
+
+=item Asim::file2package($file)
+
+Return the name of the package containing $file.
+search path.
+
+=cut
+
+################################################################
+
+sub file2package {
+  return $Asim::default_workspace->file2package(@_);
+}
+
+################################################################
+
+=item Asim::invoke_editor($file..., [--eof], [--background])
+
+Edit $file in editor obtained from Asim::get_editor.
+
+=cut
+
+################################################################
+
+sub invoke_editor {
+  local @ARGV = @_;
+
+  my $at_eof     = 0;
+  my $background = "";
+  my @files;
+
+  my $editor_cmd;
+  my $editor_options = "";
+
+  my $status;
+
+  # Get the editor
+
+  $editor_cmd = Asim::get_editor() || return undef;
+
+  # Parse options
+
+  $status = GetOptions( "eof"        => \$at_eof,
+                        "background" => sub { $background = "&"} );
+
+  return 0 if (!$status);
+
+  @files = @ARGV;
+
+  #
+  # Figure out proper switches if user wants to be at the eof
+  #
+  if ($at_eof) {
+
+    if ($editor_cmd =~ "gvim") {
+      # go to end of file; don't fork while starting GUI   
+      $editor_options = "-f +"; 
+
+    } elsif ($editor_cmd =~ "vim?") {
+      # go to end of file
+      $editor_options = "+";
+
+    } elsif ($editor_cmd =~ "x?emacs") {
+      # go to end of file (well, far back at least)
+      $editor_options = "+1000000"; 
+
+    } else {
+      $editor_options = "";
+    }
+  }
+
+  #
+  # Run the editor
+  #
+  $status = system("$editor_cmd $editor_options " . join(" ", @files) ."$background");
+
+  if ($status != 0) {
+    return undef;
+  }
+
+  return 1;
+}
+
+################################################################
+
+=item Asim::get_editor($file..., [--eof], [--background])
+
+Get the name of the editor specified in environment variable ASIMEDITOR
+or EDITOR or fallbacks of xemacs, emacs and gvim. 
+
+
+=cut
+
+################################################################
+
+sub get_editor {
+
+  my $editor_cmd = undef;
+
+  #
+  # Make sure we have an editor
+  #
+  $editor_cmd  = $ENV{ASIMEDITOR}
+              || $ENV{EDITOR};
+
+  #
+  # If user didn't specify an editor look for one
+  #
+  if (! defined($editor_cmd) || $editor_cmd eq "") {
+
+    if (-x "xemacs") {
+      $editor_cmd = "xemacs";
+
+    } elsif ( -x "emacs" ) {
+      $editor_cmd = "emacs";
+
+    } elsif ( -x "gvim" ) {
+      $editor_cmd = "gvim";
+
+    } else {
+      print STDERR "No editor found\n";
+      return undef;
+    }
+  }
+
+  #
+  # Check if editor is executable
+  #
+#  if (! -x $editor_cmd) {
+#    print STDERR "Editor $editor_cmd is not executable\n"
+#    return undef;
+#  }
+
+  return $editor_cmd;
+
+}
+
+################################################################
+
+=item Asim::open_at($directory)
+
+Open a directory browser at $directory
+
+
+=cut
+
+################################################################
+
+sub open_at {
+
+  my $directory = shift;
+
+  if (! -d $directory) {
+    # Tried to open non-existent diretory: $directory
+    return 0;
+  }
+
+  return ! system("xdg-open $directory");
+}
+
+################################################################
+
+=item Asim::shell_at($directory)
+
+Open a shell at $directory
+
+=cut
+
+################################################################
+
+sub shell_at {
+
+  my $directory = shift;
+
+  if (! -d $directory) {
+    # Tried to shell at non-existent diretory: $directory
+    return 0;
+  }
+
+  return ! system("gnome-terminal --working-directory $directory");
+}
+
+################################################################
+
+=item Asim::get_tmpdir()
+
+Get a temporary directory specified in environment variables ASIMTMPDIR,
+TMPDIR with a fallback of /tmp.
+
+=cut
+
+################################################################
+
+sub get_tmpdir {
+
+  my $TMPDIR = $ENV{'TMPDIR'};
+
+  if ( ! defined($TMPDIR) || ! -d $TMPDIR ) {
+    $TMPDIR = "/tmp"
+  }
+
+  if ( ! -d $TMPDIR ) {
+    return undef;
+  }
+
+  return $TMPDIR;
+}
+
+################################################################
+
+=item Asim::get_option($group, $item, [$default])
+
+Get an option first looking in awb.config, then in ~/.asim/asimrc
+and then in the global asimrc. If all that fails use the provided
+default.
+
+=cut
+
+################################################################
+
+sub get_option {
+  return $Asim::default_workspace->get_option(@_);
+}
+
+###########################################################################
+
+sub cleanup_and_exit {
+  my $message = shift;
+
+  print "$message";
+
+  cleanup();
+  exit -1;
+}
+
+###########################################################################
+
+
+
+1;
+
+__END__
+
+
+=back
+
+=head1 BUGS
+
+Needs uniform debug trace functionality.
+
+Methods that generate output to STDOUT are sometimes buffered so you 
+do not see anything until the subjob finishes.
+
+I am still aesthetically displeased with the current code structure in
+which various lower level routines generate error message directly to
+STDOUT instead of having a clean way to bubble the message up. This
+will make this code more difficult to use as the foundation of a
+visual interface. At least very very few ask for terminal input...
+
+=head1 AUTHORS
+
+Joel Emer
+
+=head1 COPYRIGHT
+
+ ********************************************************
+ *                                                      *
+ *   Copyright (c) Compaq Computer Corporation, 2001    *
+ *                                                      *
+ *   All Rights Reserved.  Unpublished rights reserved  *
+ *   under the copyright laws of the United States.     *
+ *                                                      *
+ ********************************************************
+
+=head1 SEE ALSO
+
+Asim::Workspace, Asim::Repository, Asim::Repository::DB, Asim::Model,
+Asim::Module, Asim::Module::DB.
+
+
+=cut
+

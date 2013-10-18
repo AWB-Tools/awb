@@ -11220,3 +11220,22 @@ Log message:    CSN: CSN-awb-3105
 - Few more bug fixes to the git support
 - "clone/checkout/pull/update bundle xxx" should not work
 - changed the descriptions in pipersville subproject pack files
+
+----------
+mgambhir    Date: Fri Oct 18 18:46:29 EDT 2013  CSN: CSN-awb-557
+                  Fri Oct 18 22:46:29 UTC 2013
+
+
+Directory libperl/Asim
+ lib/                      Locally Modified          556 
+
+Directory libperl/Asim/lib
+ Asim.pm                   Locally Added               0 
+
+Sync with Intel awb rev-3112
+
+Author:	mgambhir
+Last modification:	Rev 3112 - 2013-03-25 16:06:25
+Log message:	CSN: CSN-awb-3112
+
+- Added Asim.pm (generated from Asim.pm.in by configure script) to the repository to fix a use case when awb package is checked out with --nobuild option, resulting in a lack of Asim.pm file in the awb package which then throws an error on all subsequent awb-shell commands
