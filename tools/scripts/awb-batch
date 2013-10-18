@@ -305,12 +305,12 @@ else {
 #  $rmrundir=1;
     
 #  if (system ("cp $rundir/$bm.stats $resdir/.")) {
-  if (system ("cp $rundir/*.stats $resdir/.")) {
+  if (system ("cp $rundir/$bm.stats $resdir/.")) {
     &runerror("Unable to copy $rundir/$bm.stats file in $resdir.");
   }
   else {
       # remove the copied over stats files
-      system ("rm $rundir/*.stats > /dev/null 2>&1") unless ($keepstatsfile == 1);
+      system ("rm $rundir/$bm.stats > /dev/null 2>&1") unless ($keepstatsfile == 1);
   }
   if ($compress =~ m/^(none|no)$/) {
     # nothing to be done
@@ -318,10 +318,22 @@ else {
     if (system ("bzip2 --force -9 $resdir/$bm.stats")) {
       &runerror("Unable to bzip2 $resdir/$bm.stats.");
     }
+    # compress intermediate stats file if any 
+    if (glob("$rundir/*.stats")) {
+      if (system ("bzip2 --force -9 $rundir/*.stats")) {
+        &runerror("Unable to bzip2 $rundir/*.stats.");
+      }
+    }
   } else {
     # default to gzip
     if (system ("gzip --force --best $resdir/$bm.stats")) {
       &runerror("Unable to gzip $resdir/$bm.stats.");
+    }
+    # compress intermediate stats file if any 
+    if (glob("$rundir/*.stats")) {
+      if (system ("gzip --force -9 $rundir/*.stats")) {
+          &runerror("Unable to gzip $rundir/*.stats.");
+      }
     }
   }
   system ("cat $runlogfl"); 

@@ -11057,3 +11057,20 @@ Log message:    CSN: CSN-awb-3089
 
 - Patch by Trevor Carlson
 - fix the Git checkout/clone username bug (Awb doesn't respect the username passed in from the command line)
+
+----------
+mgambhir    Date: Fri Oct 18 14:56:19 EDT 2013  CSN: CSN-awb-550
+                  Fri Oct 18 18:56:19 UTC 2013
+
+
+Directory tools/scripts
+ awb-batch                 Locally Modified          549 
+
+Sync with Intel awb rev-3094
+
+Author: mgambhir
+Last modification:  Rev 3094 - 2012-11-12 18:13:17
+Log message:    CSN: CSN-awb-3094
+
+- updated awb-batch script to compress intermediate stats files generated
+during the simulation
