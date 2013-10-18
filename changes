@@ -11111,3 +11111,29 @@ Log message:    CSN: CSN-awb-3097
 
 - Fixed AWB wrapper for git commands to be able to use ssh protocol to
 access the repository
+
+----------
+mgambhir    Date: Fri Oct 18 15:17:51 EDT 2013  CSN: CSN-awb-553
+                  Fri Oct 18 19:17:51 UTC 2013
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          552 
+
+Directory libperl/Asim/lib/Asim/Package
+ Git.pm                    Locally Modified          552 
+
+Sync with Intel awb rev-3098,3099
+
+Author: mgambhir
+Last modification:  Rev 3098 - 2013-01-03 15:35:33
+Log message:    CSN: CSN-awb-3098
+
+- CSN tag now retrived from the repository before incrementing it.
+
+Author: mgambhir
+Last modification:  Rev 3099 - 2013-01-03 22:40:55
+Log message:    CSN: CSN-awb-3099
+
+- push package all now should work for heterogenous workspace with svn
+and git repos. Svn repositories will be committed in this case

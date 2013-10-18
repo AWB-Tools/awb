@@ -466,7 +466,7 @@ sub increment_csn {
  
   # Force a pull to ensure we get the latest csn in the log
   #system("cd $location; git pull");
-  #$csn = `cd $location && git describe --tags --abbrev=0`;
+  $csn = `cd $location && git describe --tags --abbrev=0`;
   
   if ( $csn =~ m/^CSN-.*-(\d+)$/ ) {
     $rev = $1+1;

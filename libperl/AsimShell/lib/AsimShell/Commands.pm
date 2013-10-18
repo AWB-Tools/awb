@@ -2637,6 +2637,7 @@ sub commit_all_packages {
 sub push_package {
   my $deps = 1;
   my $url = undef;
+  my $type = undef;
 
   local @ARGV = @_;
 
@@ -2658,9 +2659,10 @@ sub push_package {
     if (defined($name) && ($name eq "*" || $name eq "all")) {
       return push_all_packages($deps, $url);
     }
-    if (! defined ($url) ) {
-      my $repository = $default_repositoryDB->get_repository($name) 
-    || shell_error("Cannot retrieve URL to push package $name \n Use --url to specify location to push to \n") && return undef;
+    my $repository = $default_repositoryDB->get_repository($name)
+        || shell_error("Cannot retrieve repository type for the package  $name \n") && return undef;
+    $type = $repository->{method};
+    if (! defined ($url)) {
       $url = $repository->{access};
       if (! defined( $url) ) {
           shell_error("Cannot retrieve URL to push package $name \n Use --url to specify location to push to \n") && return undef;
@@ -2669,7 +2671,12 @@ sub push_package {
     my $package = get_package($name) || return undef;
     $package->{url} = $url;
     $package->{branch} = $branch;
-    $package->push_package(!$deps) || return undef;
+    if ($type eq 'svn' ||  $type eq 'cvs') {
+        $package->commit(!$deps) || return undef;
+    }
+    else {
+        $package->push_package(!$deps) || return undef;
+    }
   }
   
   return 1;
@@ -2703,13 +2710,19 @@ sub push_all_packages {
   for my $p (@plist) {
         print "Pushing package " . $p->name() . "\n\n";
         $repository = $default_repositoryDB->get_repository($p->name()) 
-    || shell_error("Cannot retrieve URL to push package $p->name() \n Use --url to specify repository URL \n") && return undef;
+            || shell_error("Cannot retrieve repository type for package $p->name() \n") && return undef;
+        my $type = $repository->{method};
         $url = $repository->{access};
         if (! defined( $url) ) {
           shell_error("Cannot retrieve URL to push package $p->name() \n Use --url to specify location to push to \n") && return undef;
         }
         $p->{url} = $url;
-	$p->push_package(!$deps) || return undef;
+        if ($type eq 'svn' || $type eq 'cvs') {
+            $p->commit(!$deps) || return undef;
+        }
+        else {
+            $p->push_package(!$deps) || return undef;
+        }
 	print "\n";
   }
 
