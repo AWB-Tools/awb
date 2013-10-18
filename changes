@@ -11310,3 +11310,19 @@ Log message:	CSN: CSN-awb-3116
 
 - discovered another SVN status format, when you undo a previous commit
 that deleted a file (i.e. you add back the file)
+
+----------
+mgambhir    Date: Fri Oct 18 19:01:21 EDT 2013  CSN: CSN-awb-561
+                  Fri Oct 18 23:01:21 UTC 2013
+
+
+Directory tools/scripts
+ awb-run                   Locally Modified          560 
+
+Syn with Intel awb rev-3117
+
+Author:	mgambhir
+Last modification:	Rev 3117 - 2013-05-10 21:49:19
+Log message:	CSN: CSN-awb-3117
+
+- removed the hard limit on max number of jobs that awb-run can kick off
