@@ -11392,3 +11392,23 @@ Log message:	CSN: CSN-awb-3123
 
 - fixed a typo in a previous commit that was preventing asim-run from
 working with more than 260 jobs
+
+----------
+mgambhir    Date: Mon Oct 21 12:01:27 EDT 2013  CSN: CSN-awb-565
+                  Mon Oct 21 16:01:27 UTC 2013
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          564 
+
+Directory libperl/Asim/lib/Asim/Repository
+ Git.pm                    Locally Modified          564 
+
+Syn with Intel awb rev-3124
+
+Author:	mgambhir
+Last modification:	Rev 3124 - 2013-09-19 21:14:47
+Log message:	CSN: CSN-awb-3124
+
+- Added some cases to catch (and not add) username being passsed when file
+protocol is used to clone a package

@@ -1434,7 +1434,7 @@ my $user = undef;
   $status = GetOptions( "user=s"   => \$user,
 		        "build!"   => \$build,
 		        "addpath!" => \$addpath,
-                        "url=s"    => \$url);
+                "url=s"    => \$url);
 
   return undef if (!$status);
 

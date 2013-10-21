@@ -241,8 +241,20 @@ sub clone {
   # URL of the repository to be cloned
   my $access = $archive->{access} || return undef;
   if (defined($user)) {
-    if ($access =~ m/:\/\//) {
-    # URL contains protocol name. Username should be added afetr protocol
+    if ($access =~ m/@/)
+    {
+        # URL already contains a username. Do not add one
+    }
+    elsif ($access =~ m/file:\/\/\//)
+    {
+        # URL uses file protocol which does not require username
+    }
+    elsif ($access =~ m/^( )*\//)
+    {
+        # URL starts with a / so it must be using file protocol which does not require username
+    }
+    elsif ($access =~ m/:\/\//) {
+        # URL contains protocol name. Username should be added after protocol
         $access =~ s/:\/\//:\/\/$user@/;
     }
     else {
