@@ -11374,3 +11374,21 @@ Log message:	CSN: CSN-awb-3122
 - added some debugging support in asimstarter.in
 
 
+
+----------
+mgambhir    Date: Mon Oct 21 11:57:54 EDT 2013  CSN: CSN-awb-564
+                  Mon Oct 21 15:57:54 UTC 2013
+
+
+Directory tools/scripts
+ awb-run                   Locally Modified          563 
+
+Sync with Intel awb rev-3123
+
+Author:	cjbeckm
+Last modification:	Rev 3123 - 2013-08-10 13:51:24
+Log message:	CSN: CSN-awb-3123
+
+
+- fixed a typo in a previous commit that was preventing asim-run from
+working with more than 260 jobs

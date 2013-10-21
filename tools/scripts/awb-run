@@ -1867,7 +1867,7 @@ sub parse_exp_file
     # Check user is asking for a reasonable number of experiments
 
     if ($#explist > 260) {
-        if ($limit && $#explist > max_asim_jobs) {
+        if ($limit && $#explist > $MAX_ASIM_JOBS) {
             print_error("Too many experiments ($#explist) were requested\n");
             wait_and_exit($exit_code++);
         }
