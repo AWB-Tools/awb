@@ -341,6 +341,12 @@ if ($? != 0) {
 # Add the asim perl library directories to the front of the perl library path
 
 chomp ($path = `$RESOLVER -config searchpath`);
+if ($debug) {
+    print "Requesting searchpath:\n$RESOLVER -config searchpath\n" if ($debug);
+    print 'Resolver has ' . ( ( $? == 0 ) ? 'passed.' : 'failed.' ) . "\n";
+    print "Resolver output is:\n$path\n"
+}
+
 if ($? == 0) {
   # OK, resolver has found it
   my @asim_inc;

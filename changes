@@ -11356,3 +11356,21 @@ Log message:	CSN: CSN-awb-3120
 that lets us see Asim jobs in the nbflow GUI.
 Enable it by doing USE_NBFEEDER=1 in the [awb-run] section of asimrc
 or awb.config.
+
+----------
+mgambhir    Date: Mon Oct 21 11:55:20 EDT 2013  CSN: CSN-awb-563
+                  Mon Oct 21 15:55:20 UTC 2013
+
+
+Directory tools/scripts
+ asimstarter.in            Locally Modified          562 
+
+Sync with Intel awb rev-3122
+
+Author:	mgambhir
+Last modification:	Rev 3122 - 2013-07-08 20:39:38
+Log message:	CSN: CSN-awb-3122
+
+- added some debugging support in asimstarter.in
+
+
