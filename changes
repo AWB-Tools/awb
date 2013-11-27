@@ -11412,3 +11412,16 @@ Log message:	CSN: CSN-awb-3124
 
 - Added some cases to catch (and not add) username being passsed when file
 protocol is used to clone a package
+
+----------
+mgambhir    Date: Wed Nov 27 18:30:08 EST 2013  CSN: CSN-awb-566
+                  Wed Nov 27 23:30:08 UTC 2013
+
+
+Directory tools/awb/apm-edit
+ apm_edit.ui               Locally Modified          565 
+
+Directory libperl/Asim/lib
+ Asim.pm                   Locally Modified          565 
+
+- Fixed an apm-edit bug where the Refresh method was not called when the Refresh button was pressed in the GUI
