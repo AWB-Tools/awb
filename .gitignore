@@ -1,0 +1,175 @@
+
+# /
+/Makefile
+/config.h
+/config.guess
+/config.sub
+/config.log
+/config.cache
+/config.status
+/autom4te.cache
+/stamp-h1
+/libtool
+/pkgconfig
+/build-arch-stamp
+/build-indep-stamp
+
+# /debian/
+/debian/awb
+/debian/awb-??.??
+/debian/awb-bin
+/debian/awb-doc
+/debian/files
+/debian/*.debhelper
+/debian/*.log
+/debian/*.substvars
+
+# /etc/
+/etc/awb.config.template
+
+# /include/
+/include/stamp-h1
+/include/config.h
+
+# /lib/
+/lib/Makefile
+
+# /lib/libawb/
+/lib/libawb/.libs
+/lib/libawb/.deps
+/lib/libawb/Makefile
+
+# /libperl/
+/libperl/Makefile
+
+# /libperl/Asim/
+/libperl/Asim/pm_to_blib
+/libperl/Asim/blib
+/libperl/Asim/Makefile
+/libperl/Asim/MYMETA.yml
+
+# /libperl/Asim/lib/
+/libperl/Asim/lib/
+
+# /libperl/AsimShell/
+/libperl/AsimShell/pm_to_blib
+/libperl/AsimShell/blib
+/libperl/AsimShell/Makefile
+/libperl/AsimShell/MYMETA.yml
+
+# /libperl/Benchmarks/
+/libperl/Benchmarks/blib
+/libperl/Benchmarks/pm_to_blib
+/libperl/Benchmarks/Makefile
+/libperl/Benchmarks/MYMETA.yml
+
+# /libperl/PinPoints/
+/libperl/PinPoints/pm_to_blib
+/libperl/PinPoints/blib
+/libperl/PinPoints/Makefile
+/libperl/PinPoints/MYMETA.yml
+
+# /libperl/PlotShell/
+/libperl/PlotShell/pm_to_blib
+/libperl/PlotShell/blib
+/libperl/PlotShell/Makefile
+/libperl/PlotShell/MYMETA.yml
+
+# /share/
+/share/awb.config.template
+
+# /tools/
+/tools/Makefile
+
+# /tools/awb/
+/tools/awb/Makefile
+
+# /tools/awb/amc/
+/tools/awb/amc/amc
+/tools/awb/amc/.libs
+/tools/awb/amc/.deps
+/tools/awb/amc/Makefile
+
+# /tools/awb/apm-edit/
+/tools/awb/apm-edit/apm_edit_images.pm
+/tools/awb/apm-edit/runlog.ui.pm
+/tools/awb/apm-edit/apm-edit
+/tools/awb/apm-edit/apm_edit_properties.ui.pm
+/tools/awb/apm-edit/apm_edit_about.ui.pm
+/tools/awb/apm-edit/apm_edit.ui.pm
+/tools/awb/apm-edit/Makefile
+
+# /tools/awb/apm-find-replace/
+/tools/awb/apm-find-replace/apm_find_replace.ui.pm
+/tools/awb/apm-find-replace/apm-find-replace
+/tools/awb/apm-find-replace/Makefile
+
+# /tools/awb/awb/
+/tools/awb/awb/Makefile
+/tools/awb/awb/awb_dialog.ui.pm
+/tools/awb/awb/awb_runlog.ui.pm
+/tools/awb/awb/awb_about.ui.pm
+/tools/awb/awb/awb
+
+# /tools/awb/awb-resolver/
+/tools/awb/awb-resolver/.libs
+/tools/awb/awb-resolver/awb-resolver
+/tools/awb/awb-resolver/.deps
+/tools/awb/awb-resolver/Makefile
+
+# /tools/awb/awb-wizard/
+/tools/awb/awb-wizard/awb_wizard.ui.pm
+/tools/awb/awb-wizard/awb_wizard_images.pm
+/tools/awb/awb-wizard/awb-wizard
+/tools/awb/awb-wizard/awb_wizard_about.ui.pm
+/tools/awb/awb-wizard/Makefile
+
+# /tools/awb_qt3/
+/tools/awb_qt3/Makefile
+
+# /tools/awb_qt3/amc/
+/tools/awb_qt3/amc/amc
+/tools/awb_qt3/amc/.libs
+/tools/awb_qt3/amc/.deps
+/tools/awb_qt3/amc/Makefile
+
+# /tools/awb_qt3/apm-edit/
+/tools/awb_qt3/apm-edit/apm_edit_images.pm
+/tools/awb_qt3/apm-edit/runlog.ui.pm
+/tools/awb_qt3/apm-edit/apm-edit
+/tools/awb_qt3/apm-edit/apm_edit_properties.ui.pm
+/tools/awb_qt3/apm-edit/apm_edit_about.ui.pm
+/tools/awb_qt3/apm-edit/apm_edit.ui.pm
+/tools/awb_qt3/apm-edit/Makefile
+
+# /tools/awb_qt3/apm-find-replace/
+/tools/awb_qt3/apm-find-replace/apm_find_replace.ui.pm
+/tools/awb_qt3/apm-find-replace/apm-find-replace
+/tools/awb_qt3/apm-find-replace/Makefile
+
+# /tools/awb_qt3/awb-resolver/
+/tools/awb_qt3/awb-resolver/.libs
+/tools/awb_qt3/awb-resolver/awb-resolver
+/tools/awb_qt3/awb-resolver/.deps
+/tools/awb_qt3/awb-resolver/Makefile
+
+# /tools/awb_qt3/awb-wizard/
+/tools/awb_qt3/awb-wizard/awb_wizard.ui.pm
+/tools/awb_qt3/awb-wizard/awb_wizard_images.pm
+/tools/awb_qt3/awb-wizard/awb-wizard
+/tools/awb_qt3/awb-wizard/awb_wizard_about.ui.pm
+/tools/awb_qt3/awb-wizard/Makefile
+
+# /tools/awb_qt3/awb2/
+/tools/awb_qt3/awb2/awb_dialog.ui.pm
+/tools/awb_qt3/awb2/awb_runlog.ui.pm
+/tools/awb_qt3/awb2/awb_about.ui.pm
+/tools/awb_qt3/awb2/awb
+/tools/awb_qt3/awb2/awb2
+/tools/awb_qt3/awb2/Makefile
+
+# /tools/scripts/
+/tools/scripts/asimstarter
+/tools/scripts/asim-pkg-config
+/tools/scripts/awb-pkg-config
+/tools/scripts/Makefile
