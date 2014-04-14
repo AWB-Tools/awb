@@ -10960,3 +10960,13 @@ Directory tools/awb/apm-edit
  apm_edit.ui               Locally Modified          566 
 
 - Bug fix to make modules refresh work in apm-edit GUI
+
+----------
+mgambhir    Date: Mon Apr 14 15:30:01 EDT 2014  CSN: CSN-awb-568
+                  Mon Apr 14 19:30:01 UTC 2014
+
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          567 
+
+Fixed awb svn wrapper to handle "Replaced" files that return svn status "R"

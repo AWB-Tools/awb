@@ -238,6 +238,9 @@ sub status {
       if (($1 eq 'M') and !($2)) {
 	$status = 'Locally Modified';
       }
+      elsif (($1 eq 'R') and !($2)) {
+	$status = 'Locally Replaced';
+      }
       elsif (($1 eq 'D') and !($2)) {
 	$status = 'Locally Removed';
       }
