@@ -11425,3 +11425,17 @@ Directory libperl/Asim/lib
  Asim.pm                   Locally Modified          565 
 
 - Fixed an apm-edit bug where the Refresh method was not called when the Refresh button was pressed in the GUI
+
+----------
+mgambhir    Date: Mon Apr 28 17:54:17 EDT 2014  CSN: CSN-awb-569
+                  Mon Apr 28 21:54:17 UTC 2014
+
+
+Directory libperl/Asim/lib
+ Asim.pm                   Locally Modified          568 
+
+Directory libperl/Asim/lib/Asim/Package
+ Svn.pm                    Locally Modified          568 
+
+- Ported rev-568 from v13.06 into trunk. It should have been here to start
+with and then backported to v13.06
