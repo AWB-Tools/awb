@@ -470,7 +470,7 @@ sub new_repository {
 
   my $package = get_package($name) || return ();
 
-  $type =       Asim::choose_name("Repository type:", "cvs", "svn")
+  $type =       Asim::choose_name("Repository type:", "cvs", "svn", "git")
                 || return undef;
 
   $url  =       Asim::choose("Repository URL")
@@ -2838,6 +2838,16 @@ sub svn_package {
 
   return $package->svn("@command");
 }
+
+sub git_package {
+  my $name = shift;
+  my $package = get_package($name) || return ();
+  my @command = @_;
+
+  return $package->git("@command");
+}
+
+
 
 sub lock_package {
   my $name = shift;
