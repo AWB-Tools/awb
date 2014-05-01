@@ -215,10 +215,10 @@ sub commit {
   if ( defined($commitlog_file) ) {
     $command = $command . " -F $commitlog_file";
   }
-  if (! $self->git_command($command)) {
-    ierror("Commit: Fatal error during git commit: \n".
-            "Commit: Your commit might be partially done \n",
-            "Commit: and the state of your directory is probably messed up.\n");
+  my $ret = $self->git($command);
+  if ( $ret ) {
+    Asim::Package::ierror("Commit: Fatal error during git commit: return code: $ret \n".
+            "Commit: You commit message may be found at \$GIT_DIR/COMMIT_EDITMSG \n");
     return 0;
   }
 
@@ -365,7 +365,7 @@ sub status {
 
 =item $git->git_command( <command> )
 
-Issue an Git command robustly.
+Issue a Git command robustly.
 
 =cut
 
@@ -546,8 +546,9 @@ sub push_package {
   my $success = 0;
 
   if (! defined ($self->{url})) {
-    ierror("Push: No url defined. Dont know where to push!") && return 0;
+    Asim::Package::ierror("Push: No url defined. Dont know where to push!") && return 0;
   }
+
   my @all;
   print "Push: Starting a push of package: " . $self->name() . "\n";
   print "Push: Target URL " . $self->{url} . "\n";
@@ -782,10 +783,10 @@ sub push_stage {
   }
 
   $self->push_archive()
-    || ierror("Trouble with git push\n") && return 0;
+    || Asim::Package::ierror("Trouble with git push\n") && return 0;
 
   $self->push_regtest()
-    || ierror("Trouble with push of regtest\n") && return 0;
+    || Asim::Package::ierror("Trouble with push of regtest\n") && return 0;
 
   $self->{status} = "";
   return 1;
@@ -807,6 +808,17 @@ sub push_archive {
 
   my $push_url = $self->{url};
 
+  $command = "git config --get remote.origin.url";
+  my $origin_url = `$command`;
+  $origin_url =~ s/:\/\/.*@/:\/\//;
+  chomp $origin_url;
+  if ( $origin_url eq $push_url ) {
+    # if the origin URL is the same as URL being pushed to then use origin
+    # alias instead. This lets git know that changeset is being pushed to 
+    #the origin
+    $push_url = "origin";
+  }
+  
   $self->save();
 
   #
@@ -822,7 +834,7 @@ sub push_archive {
   # push changes from local repository into a remote repository
   $command = "push $push_url $branch";
   if (! $self->git_command($command)) {
-    ierror("Push: Fatal error during git push. Exiting! \n");
+    Asim::Package::ierror("Push: Fatal error during git push. Exiting! \n");
     return 0;
   }
   

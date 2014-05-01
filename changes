@@ -11439,3 +11439,32 @@ Directory libperl/Asim/lib/Asim/Package
 
 - Ported rev-568 from v13.06 into trunk. It should have been here to start
 with and then backported to v13.06
+
+----------
+mgambhir    Date: Thu May  1 09:47:04 EDT 2014  CSN: CSN-awb-570
+                  Thu May  1 13:47:04 UTC 2014
+
+
+Directory libperl/AsimShell/lib/AsimShell
+ Commands.pm               Locally Modified          569 
+
+Directory libperl/AsimShell/lib
+ AsimShell.pm              Locally Modified          569 
+
+Directory libperl/Asim/lib/Asim/Package
+ Git.pm                    Locally Modified          569 
+
+Sync with Intel commit bbad2a9b
+
+From: Mohit Gambhir <mohit.gambhir@intel.com>
+Date: Wed, 30 Apr 2014 16:48:43 -0400
+- Some modifications to the git wrapper   
+  - If the push_url
+  is the same as origin then "origin" alias is used with the git push command
+  to get rid of "your branch is ahead of origin/branch by x commits" status
+  after push   
+  - Added "git package" command to awb-shell. Can now issue
+  commands like "awb-shell git package testgit diff -- --<diff-options>"   
+  - git commit is now tried only once and awb-shell gives up without retrying if
+  it fails
+

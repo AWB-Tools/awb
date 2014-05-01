@@ -124,6 +124,7 @@ our %COMPOUNDCOMMANDS =
     use       => [ qw(bundle package) ],
     verify    => [ qw(regression configuration) ],
     svn       => [ qw(package) ],
+    git       => [ qw(package) ],
     push      => [ qw(package) ],
     pull      => [ qw(bundle package) ]
   );
