@@ -36,7 +36,7 @@ Description=Software package dependencies for Asim performance models
 
 ###### AWB
 
-[awb-git]
+[awb]
 Description=AWB
 Method=git
 Access=https://asim.csail.mit.edu/git/awb
@@ -45,32 +45,32 @@ Tag=HEAD
 Target=awb
 BrowseURL=https://asim.csail.mit.edu/gitweb/?p=awb
 
-[awb-git/HEAD]
+[awb/HEAD]
 Description=AWB HEAD
 Access=https://asim.csail.mit.edu/git/awb
 Tag=HEAD
 
-[awb-git/v11.03]
+[awb/v11.03]
 Description=AWB v11.03
 Access=https://asim.csail.mit.edu/git/awb
 Tag=v11.03
 
-[awb-git/v11.04]
+[awb/v11.04]
 Description=AWB v11.04
 Access=https://asim.csail.mit.edu/git/awb
 Tag=v11.04
 
-[awb-git/v11.09]
+[awb/v11.09]
 Description=AWB v11.09
 Access=https://asim.csail.mit.edu/git/awb
 Tag=v11.09
 
-[awb-git/v12.04]
+[awb/v12.04]
 Description=AWB v12.04
 Access=https://asim.csail.mit.edu/git/awb
 Tag=v12.04
 
-[awb-git/v13.06]
+[awb/v13.06]
 Description=AWB v13.06
 Access=https://asim.csail.mit.edu/git/awb
 Tag=v13.06

@@ -11498,3 +11498,14 @@ Directory etc/repositories.d
  legacy-svn.pack           Locally Added               - 
 
 - moved legacy-svn.pack into repositories.d directory
+
+----------
+mgambhir    Date: Thu Jun  5 17:28:34 EDT 2014  CSN: CSN-awb-573
+                  Thu Jun  5 21:28:34 UTC 2014
+
+
+Directory etc
+ asim.pack                 Locally Modified          572 
+
+- Fixed a bug in the pack file - removed -git from the repo tag to make it
+the default
