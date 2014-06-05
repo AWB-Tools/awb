@@ -2,59 +2,57 @@
 
 [leap]
 Description=Leap environment
-Method=svn
-Access=https://asim.csail.mit.edu/svn/leap
+Method=git
+Access=https://asim.csail.mit.edu/git/leap
 Module=undefined
 Tag=HEAD
 Target=leap
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap
 
 [leap/HEAD]
 Description=Leap environment HEAD
-Access=https://asim.csail.mit.edu/svn/leap
+Access=https://asim.csail.mit.edu/git/leap
 Tag=HEAD
 
 [leap/v11.03]
 Description=Leap environment v11.03
-Access=https://asim.csail.mit.edu/svn/leap
+Access=https://asim.csail.mit.edu/git/leap
 Tag=v11.03
 
 [leap/v11.04]
 Description=Leap environment v11.04
-Access=https://asim.csail.mit.edu/svn/leap
+Access=https://asim.csail.mit.edu/git/leap
 Tag=v11.04
 
 [leap/v11.09]
 Description=Leap environment v11.09
-Access=https://asim.csail.mit.edu/svn/leap
+Access=https://asim.csail.mit.edu/git/leap
 Tag=v11.09
 
 [leap/v12.04]
 Description=Leap environment v12.04
-Access=https://asim.csail.mit.edu/svn/leap
+Access=https://asim.csail.mit.edu/git/leap
 Tag=v12.04
 
 [leap/v13.06]
-Description=Leap environment v13.06
-Access=https://asim.csail.mit.edu/svn/leap
-Tag=v13.06
+Description=Leap environment v12.04
+Access=https://asim.csail.mit.edu/git/leap
+Tag=v12.04
 
 ###### Leap debug trunk
 
 [leap-debug]
 Description=Leap debugging environment
-Method=svn
-Access=https://asim.csail.mit.edu/svn/leap-debug
+Method=git
+Access=https://asim.csail.mit.edu/git/leap-debug
 Module=undefined
 Tag=HEAD
 Target=leap-debug
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-DEBUG
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-debug
 
 [leap-debug/HEAD]
 Description=Leap debugging environment
-Access=https://asim.csail.mit.edu/svn/leap-debug
+Access=https://asim.csail.mit.edu/git/leap-debug
 Tag=HEAD
 
 
@@ -62,17 +60,16 @@ Tag=HEAD
 
 [leap-examples]
 Description=Leap examples
-Method=svn
-Access=https://asim.csail.mit.edu/svn/leap-examples
+Method=git
+Access=https://asim.csail.mit.edu/git/leap-examples
 Module=undefined
 Tag=HEAD
 Target=leap-examples
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-EXAMPLES
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-examples
 
 [leap-examples/HEAD]
 Description=Leap examples
-Access=https://asim.csail.mit.edu/svn/leap-examples
+Access=https://asim.csail.mit.edu/git/leap-examples
 Tag=HEAD
 
 
@@ -81,17 +78,16 @@ Tag=HEAD
 
 [leap-papers]
 Description=Leap papers
-Method=svn
-Access=https://asim.csail.mit.edu/svn/leap-papers
+Method=git
+Access=https://asim.csail.mit.edu/git/leap-papers
 Module=undefined
 Tag=HEAD
 Target=leap-papers
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-PAPERS
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-papers
 
 [leap-papers/HEAD]
 Description=Leap papers
-Access=https://asim.csail.mit.edu/svn/leap-papers
+Access=https://asim.csail.mit.edu/git/leap-papers
 Tag=HEAD
 
 
@@ -100,40 +96,42 @@ Tag=HEAD
 
 [leap-platforms]
 Description=Leap FPGA Platforms
-Method=svn
-Access=https://asim.csail.mit.edu/svn/leap-platforms
+Method=git
+Access=https://asim.csail.mit.edu/git/leap-platforms
 Module=undefined
 Tag=HEAD
 Target=leap-platforms
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=LEAP-PLATFORMS
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-platforms
 
 [leap-platforms/HEAD]
 Description=Leap FPGA Platforms HEAD
-Access=https://asim.csail.mit.edu/svn/leap-platforms
+Access=https://asim.csail.mit.edu/git/leap-platforms
 Tag=HEAD
 
 [leap-platforms/v11.03]
 Description=Leap FPGA Platforms v11.03
-Access=https://asim.csail.mit.edu/svn/leap-platforms
+Access=https://asim.csail.mit.edu/git/leap-platforms
 Tag=v11.03
 
 [leap-platforms/v11.04]
 Description=Leap FPGA Platforms v11.04
-Access=https://asim.csail.mit.edu/svn/leap-platforms
+Access=https://asim.csail.mit.edu/git/leap-platforms
 Tag=v11.04
 
 [leap-platforms/v11.09]
 Description=Leap FPGA Platforms v11.09
-Access=https://asim.csail.mit.edu/svn/leap-platforms
+Access=https://asim.csail.mit.edu/git/leap-platforms
 Tag=v11.09
 
 [leap-platforms/v12.04]
 Description=Leap FPGA Platforms v12.04
-Access=https://asim.csail.mit.edu/svn/leap-platforms
+Access=https://asim.csail.mit.edu/git/leap-platforms
 Tag=v12.04
 
 [leap-platforms/v13.06]
 Description=Leap FPGA Platforms v13.06
-Access=https://asim.csail.mit.edu/svn/leap-platforms
-Tag=v13.06
+Access=https://asim.csail.mit.edu/git/leap-platforms
+Tag=v12.04
+
+
+

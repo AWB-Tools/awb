@@ -34,138 +34,123 @@ Description=Software package dependencies for Asim performance models
 ##############################################################################
 
 
-###### AWB trunk
+###### AWB
 
 [awb]
 Description=AWB
-Method=svn
-Access=https://asim.csail.mit.edu/svn/awb
+Method=git
+Access=https://asim.csail.mit.edu/git/awb
 Module=undef
 Tag=HEAD
 Target=awb
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=AWB
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=awb
 
 [awb/HEAD]
 Description=AWB HEAD
-Access=https://asim.csail.mit.edu/svn/awb
+Access=https://asim.csail.mit.edu/git/awb
 Tag=HEAD
 
 [awb/v11.03]
 Description=AWB v11.03
-Access=https://asim.csail.mit.edu/svn/awb
+Access=https://asim.csail.mit.edu/git/awb
 Tag=v11.03
 
 [awb/v11.04]
 Description=AWB v11.04
-Access=https://asim.csail.mit.edu/svn/awb
+Access=https://asim.csail.mit.edu/git/awb
 Tag=v11.04
 
 [awb/v11.09]
 Description=AWB v11.09
-Access=https://asim.csail.mit.edu/svn/awb
+Access=https://asim.csail.mit.edu/git/awb
 Tag=v11.09
-
 
 [awb/v12.04]
 Description=AWB v12.04
-Access=https://asim.csail.mit.edu/svn/awb
+Access=https://asim.csail.mit.edu/git/awb
 Tag=v12.04
-
 
 [awb/v13.06]
 Description=AWB v13.06
-Access=https://asim.csail.mit.edu/svn/awb
+Access=https://asim.csail.mit.edu/git/awb
 Tag=v13.06
 
-###### Asim trunk
+####### Asimcore
 
 [asimcore]
 Description=Asim Core
-Method=svn
-Access=https://asim.csail.mit.edu/svn/asimcore
+Method=git
+Access=https://asim.csail.mit.edu/git/asimcore
 Module=undefined
 Tag=HEAD
 Target=asimcore
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=ASIMCORE
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=asimcore
 
 [asimcore/HEAD]
 Description=Asim Core HEAD
-Access=https://asim.csail.mit.edu/svn/asimcore
+Access=https://asim.csail.mit.edu/git/asimcore
 Tag=HEAD
 
 [asimcore/v11.03]
 Description=Asim Core v11.03
-Access=https://asim.csail.mit.edu/svn/asimcore
+Access=https://asim.csail.mit.edu/git/asimcore
 Tag=v11.03
 
 [asimcore/v11.04]
 Description=Asim Core v11.04
-Access=https://asim.csail.mit.edu/svn/asimcore
+Access=https://asim.csail.mit.edu/git/asimcore
 Tag=v11.04
 
 [asimcore/v11.09]
 Description=Asim Core v11.09
-Access=https://asim.csail.mit.edu/svn/asimcore
+Access=https://asim.csail.mit.edu/git/asimcore
 Tag=v11.09
 
 [asimcore/v12.04]
 Description=Asim Core v12.04
-Access=https://asim.csail.mit.edu/svn/asimcore
+Access=https://asim.csail.mit.edu/git/asimcore
 Tag=v12.04
-
 
 [asimcore/v13.06]
 Description=Asim Core v13.06
-Access=https://asim.csail.mit.edu/svn/asimcore
-Tag=v13.06
+Access=https://asim.csail.mit.edu/git/asimcore
+Tag=v12.04
 
 
 ###### Feeder
 
 [feeder]
 Description=Instruction Feeders
-Method=svn
-Access=https://asim.csail.mit.edu/svn/feeder
+Method=git
+Access=https://asim.csail.mit.edu/git/feeder
 Module=undefined
 Tag=HEAD
-Target=asim-feeder
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=FEEDER
+Target=feeder
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=feeder
 
 [feeder/HEAD]
 Description=ASIM Instruction Feeders Library
-Method=svn
-Access=https://asim.csail.mit.edu/svn/feeder
-Module=undefined
+Access=https://asim.csail.mit.edu/git/feeder
 Tag=HEAD
-Target=asim-feeder
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=FEEDER
 
 
-######### Dreams tools
+###### Dreams tools
 
 [dreams]
 Description=Dreams Visualization Tools
-Method=svn
-Access=https://asim.csail.mit.edu/svn/dreams
+Method=git
+Access=https://asim.csail.mit.edu/git/dreams
 Module=undefined
 Target=dreams
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=DREAMS
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=dreams
 
 [dreams/HEAD]
 Description=Dreams Visualization Tools
-Method=svn
-Access=https://asim.csail.mit.edu/svn/dreams
-Module=undefined
-Target=dreams
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=DREAMS
+Access=https://asim.csail.mit.edu/git/dreams
+Tag=HEAD
 
 [dreams/v12.04]
 Description=Dreams Visualization Tools - v12.04
-Access=https://asim.csail.mit.edu/svn/dreams
+Access=https://asim.csail.mit.edu/git/dreams
 Tag=v12.04
+
