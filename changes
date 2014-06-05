@@ -11485,3 +11485,16 @@ Directory etc/repositories.d
 - Changed the asim, hasim and leap pack files to point to new git
 repositories. 
 - Also added a legacy-svn pack file
+
+----------
+mgambhir    Date: Thu Jun  5 17:23:37 EDT 2014  CSN: CSN-awb-572
+                  Thu Jun  5 21:23:37 UTC 2014
+
+
+Directory etc
+ legacy-svn.pack           Locally Removed           571 
+
+Directory etc/repositories.d
+ legacy-svn.pack           Locally Added               - 
+
+- moved legacy-svn.pack into repositories.d directory
