@@ -11468,3 +11468,20 @@ Date: Wed, 30 Apr 2014 16:48:43 -0400
   - git commit is now tried only once and awb-shell gives up without retrying if
   it fails
 
+
+----------
+mgambhir    Date: Thu Jun  5 17:11:47 EDT 2014  CSN: CSN-awb-571
+                  Thu Jun  5 21:11:47 UTC 2014
+
+
+Directory etc
+ legacy-svn.pack           Locally Added               0 
+ asim.pack                 Locally Modified          570 
+
+Directory etc/repositories.d
+ leap.pack                 Locally Modified          570 
+ hasim.pack                Locally Modified          570 
+
+- Changed the asim, hasim and leap pack files to point to new git
+repositories. 
+- Also added a legacy-svn pack file
