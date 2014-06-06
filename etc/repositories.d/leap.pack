@@ -35,9 +35,9 @@ Access=https://asim.csail.mit.edu/git/leap
 Tag=v12.04
 
 [leap/v13.06]
-Description=Leap environment v12.04
+Description=Leap environment v13.06
 Access=https://asim.csail.mit.edu/git/leap
-Tag=v12.04
+Tag=v13.06
 
 ###### Leap debug trunk
 
@@ -131,7 +131,7 @@ Tag=v12.04
 [leap-platforms/v13.06]
 Description=Leap FPGA Platforms v13.06
 Access=https://asim.csail.mit.edu/git/leap-platforms
-Tag=v12.04
+Tag=v13.06
 
 
 

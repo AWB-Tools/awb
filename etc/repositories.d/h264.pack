@@ -8,15 +8,15 @@
 
 [h264]
 Description=H264 Decoder
-Method=svn
-Access=https://asim.csail.mit.edu/svn/h264
-Module=undef
+Method=git
+Access=https://asim.csail.mit.edu/git/h264
+Module=undefined
 Tag=HEAD
 Target=h264
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=H264
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=h264
 
 [h264/HEAD]
 Description=H264 Decoder HEAD
-Access=https://asim.csail.mit.edu/svn/h264
+Access=https://asim.csail.mit.edu/git/h264
 Tag=HEAD
+

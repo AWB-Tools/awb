@@ -23,7 +23,7 @@ Access=https://asim.csail.mit.edu/git/hasim-models
 Module=undef
 Tag=HEAD
 Target=hasim-models
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=/hasim
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=/hasim-models
 
 [hasim-models/HEAD]
 Description=Basic hasim timing models

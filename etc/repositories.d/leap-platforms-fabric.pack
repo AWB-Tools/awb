@@ -1,20 +1,14 @@
 
 [leap-platforms-fabric]
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-fabric
-Target=leap-platforms-fabric
-Method=svn
+Description=Leap FPGA Platforms
+Method=git
+Access=https://asim.csail.mit.edu/git/leap-platforms-fabric
 Module=undefined
-Changes=changes
-Description=leap-platforms-fabric package
 Tag=HEAD
-Access=https://asim.csail.mit.edu/svn/leap-platforms-fabric
+Target=leap-platforms-fabric
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-platforms-fabric
 
 [leap-platforms-fabric/HEAD]
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-fabric
-Target=leap-platforms-fabric
-Method=svn
-Module=undefined
-Changes=changes
-Description=leap-platforms-fabric package
+Description=Leap FPGA Platforms HEAD
+Access=https://asim.csail.mit.edu/git/leap-platforms-fabric
 Tag=HEAD
-Access=https://asim.csail.mit.edu/svn/leap-platforms-fabric

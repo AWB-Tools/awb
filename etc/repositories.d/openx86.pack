@@ -2,15 +2,14 @@
 
 [openx86]
 Description=Open x86 based cpu performance model
-Method=svn
-Access=https://asim.csail.mit.edu/svn/openx86
+Method=git
+Access=https://asim.csail.mit.edu/git/openx86
 Module=undefined
 Tag=HEAD
 Target=openx86
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OPENX86
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=openx86
 
 [openx86/HEAD]
 Description=Open x86 based cpu performance model
-Access=https://asim.csail.mit.edu/svn/openx86
+Access=https://asim.csail.mit.edu/git/openx86
 Tag=HEAD

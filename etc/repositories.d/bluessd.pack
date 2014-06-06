@@ -1,13 +1,32 @@
 ###### bluessd Repository
+
 [bluessd]
-Description=BlueSSD project repository
-Method=svn
-Access=https://asim.csail.mit.edu/svn/bluessh
-Module=undef
+Description=Bluessd Repository
+Method=git
+Access=https://asim.csail.mit.edu/git/bluessd
+Module=undefined
 Tag=HEAD
-Target=BlueSSD
-Changes=changes
-[bluessh/HEAD]
-Description=BlueSSD repository
-Access=https://asim.csail.mit.edu/svn/bluessh
+Target=bluessd
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=bluessd
+
+[bluessd/HEAD]
+Description=Bluessd Repository
+Access=https://asim.csail.mit.edu/git/bluessd
 Tag=HEAD
+
+###### bluessd-2.0
+
+[bluessd-2.0]
+Description=Bluessd 2.0 Repository
+Method=git
+Access=https://asim.csail.mit.edu/git/bluessd-2.0
+Module=undefined
+Tag=HEAD
+Target=bluessd-2.0
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=bluessd-2.0
+
+[bluessd-2.0/HEAD]
+Description=Bluessd Repository
+Access=https://asim.csail.mit.edu/git/bluessd-2.0
+Tag=HEAD
+

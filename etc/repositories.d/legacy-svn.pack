@@ -341,6 +341,143 @@ Description=Hardware Asim Model for MIPS
 Access=https://asim.csail.mit.edu/svn/hasim-mips
 Tag=HEAD
 
+[airblue-svn]
+Description=Airblue OFDM Project
+Method=svn
+Access=https://asim.csail.mit.edu/svn/airblue
+Module=undefined
+Tag=HEAD
+Target=airblue
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=AIRBLUE
+
+[airblue-svn/HEAD]
+Description=Airblue OFDM design
+Access=https://asim.csail.mit.edu/svn/airblue
+Tag=HEAD
+
+[bluessd-svn]
+Description=BlueSSD project repository
+Method=svn
+Access=https://asim.csail.mit.edu/svn/bluessd
+Module=undef
+Tag=HEAD
+Target=BlueSSD
+Changes=changes
+
+[bluessd-svn/HEAD]
+Description=BlueSSD repository
+Access=https://asim.csail.mit.edu/svn/bluessd
+Tag=HEAD
+
+[bluessd-2.0-svn]
+Description=BlueSSD 2.0 project repository
+Method=svn
+Access=https://asim.csail.mit.edu/svn/bluessd-2.0
+Module=undef
+Tag=HEAD
+Target=BlueSSD
+Changes=changes
+
+[bluessd-svn/HEAD]
+Description=BlueSSD repository
+Access=https://asim.csail.mit.edu/svn/bluessd
+Tag=HEAD
+
+[bsv-libraries-svn]
+Description=General Bluespec libraries
+Method=svn
+Access=https://asim.csail.mit.edu/svn/bsv-libraries/
+Module=undef
+Tag=HEAD
+Target=bsv-libraries
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=bsv-libraries
+
+[bsv-libraries-svn/HEAD]
+Description=General Bluespec Libraries
+Access=https://asim.csail.mit.edu/svn/bsv-libraries/
+Tag=HEAD
+
+[h264-svn]
+Description=H264 Decoder
+Method=svn
+Access=https://asim.csail.mit.edu/svn/h264
+Module=undef
+Tag=HEAD
+Target=h264
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=H264
+
+[h264-svn/HEAD]
+Description=H264 Decoder HEAD
+Access=https://asim.csail.mit.edu/svn/h264
+Tag=HEAD
+
+[leap-platforms-fabric-svn]
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-fabric
+Target=leap-platforms-fabric
+Method=svn
+Module=undefined
+Changes=changes
+Description=leap-platforms-fabric package
+Tag=HEAD
+Access=https://asim.csail.mit.edu/svn/leap-platforms-fabric
+
+[leap-platforms-fabric-svn/HEAD]
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-fabric
+Target=leap-platforms-fabric
+Method=svn
+Module=undefined
+Changes=changes
+Description=leap-platforms-fabric package
+Tag=HEAD
+Access=https://asim.csail.mit.edu/svn/leap-platforms-fabric
+
+[openx86-svn]
+Description=Open x86 based cpu performance model
+Method=svn
+Access=https://asim.csail.mit.edu/svn/openx86
+Module=undefined
+Tag=HEAD
+Target=openx86
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=OPENX86
+
+[openx86-svn/HEAD]
+Description=Open x86 based cpu performance model
+Access=https://asim.csail.mit.edu/svn/openx86
+Tag=HEAD
 
 
+[leap-platforms-acp-svn]
+Description=Leap Platform modules for ACP board
+Method=svn
+Access=https://asim.csail.mit.edu/svn/leap-platforms-acp
+Module=undef
+Tag=HEAD
+Target=leap-platforms-acp
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platforms-acp
+
+[leap-platforms-acp-svn/HEAD]
+Description=Leap Platform modules for ACP board (HEAD)
+Access=https://asim.csail.mit.edu/svn/leap-platforms-acp
+Tag=HEAD
+
+
+[leap-platforms-usrp-svn]
+Description=Leap Platform modules for USRP board
+Method=svn
+Access=https://asim.csail.mit.edu/svn/leap-platforms-usrp
+Module=undef
+Tag=HEAD
+Target=leap-platforms-usrp
+Changes=changes
+BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=leap-platform-usrp
+
+[leap-platforms-usrp-svn/HEAD]
+Description=Leap Platform modules for USRP board (HEAD)
+Access=https://asim.csail.mit.edu/svn/leap-platforms-usrp
+Tag=HEAD
 
