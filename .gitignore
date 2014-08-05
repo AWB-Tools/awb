@@ -173,3 +173,10 @@
 /tools/scripts/asim-pkg-config
 /tools/scripts/awb-pkg-config
 /tools/scripts/Makefile
+
+# object files
+*.lo
+*.o
+*.a
+*.la
+

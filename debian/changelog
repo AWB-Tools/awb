@@ -1,6 +1,6 @@
-awb (13.06~git1404316588rb891aae66d1edb114bcccda056f6954fcf697e77+precise) precise; urgency=low
+awb (14.08~git1406922332r063f9b91246ea05fa6120b80a4647abfe2c4e6d4+precise) precise; urgency=low
 
   [ Joel Emer ]
-  * Move to version v13.06 - v12.04 & v12.02 were never released
+  * Move to version 14.08
 
- -- Joel Emer <emer@csail.mit.edu>  Thu, 12 Apr 2012 12:02:24 -0400
+ -- Joel Emer <emer@csail.mit.edu>  Tue, 05 Aug 2014 15:24:24 -0400

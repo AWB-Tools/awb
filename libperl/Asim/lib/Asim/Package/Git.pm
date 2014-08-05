@@ -142,7 +142,7 @@ sub pull {
     return undef;
   } 
 
-  my $command = "pull $url $branch";
+  my $command = "pull $url";
   my $status = $self->git($command);
 
   if ($status) {
@@ -293,8 +293,25 @@ reasonable chance of succeeding at a push
 
 sub push_check {
   my $self = shift;
+  my $location = $self->location();
+  $self->{status} = "No-push-needed";
 
+  if (!defined $self->{url})
+  {
+    # if no url is given at this point  just push to origin
+    $self->{url} = "origin";
+  }
+  if (!defined $self->{branch}) 
+  {
+    $self->{branch} = $self->get_current_branch();
+  }
+  # Check whether there is anything to push
+  my $ret = `cd $location; git rev-list origin/$self->{branch}..$self->{branch} | wc -l`;
+  if ( $ret > 0) 
+  {
+    # There are commits ready to be pushed
   $self->{status} = "Push-needed";
+  }
   return 1;
 }
 
@@ -345,7 +362,7 @@ sub status {
       print "$_\n";
     }
     
-    if ( /^#\s+(.+):\s+(.+)$/ ) {
+    if ( /^#*\s+(.+):\s+(.+)$/ ) {
       $status = $1;
       $file = $2;
     }
@@ -378,7 +395,7 @@ sub git_command {
   my $ret;
 
   #
-  # Command retries for cvs
+  # Command retries for git
   #
   if (! defined($NUM_RETRY)) {
     $NUM_RETRY = 5;
@@ -546,12 +563,15 @@ sub push_package {
   my $success = 0;
 
   if (! defined ($self->{url})) {
-    Asim::Package::ierror("Push: No url defined. Dont know where to push!") && return 0;
+    $self->{url} = "origin";
   }
-
+  if (!defined($self->{branch})) {
+      $self->{branch} = $self->get_current_branch();
+  }
   my @all;
   print "Push: Starting a push of package: " . $self->name() . "\n";
   print "Push: Target URL " . $self->{url} . "\n";
+  print "Push: Branch  " . $self->{branch} . "\n";
 
 #########      ###########      ###########      ###########      ###########
 
@@ -745,7 +765,10 @@ sub prepare_stage {
 
   if ($self->{status} eq "No-push-needed") {
     print "Push: No push needed for this package, so nothing to do here...\n";
+    if ( $self->{reportfile} ) 
+    {
     system("rm $self->{reportfile}");
+    }
     return 1;
   }
 
@@ -826,14 +849,12 @@ sub push_archive {
   #
   print "Push: Really pushing....\n";
 
-  my $branch = $self->{branch};
-  if (!defined($branch)) {
-      $branch = $self->get_current_branch();
-      $self->{branch} = $branch;
+  if (!defined($self->{branch})) {
+      $self->{branch} = $self->get_current_branch();
   }
   # push changes from local repository into a remote repository
-  $command = "push $push_url $branch";
-  if (! $self->git_command($command)) {
+  $command = "push $push_url $self->{branch}";
+  if ( $self->git($command) ) {
     Asim::Package::ierror("Push: Fatal error during git push. Exiting! \n");
     return 0;
   }
