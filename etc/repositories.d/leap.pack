@@ -133,5 +133,22 @@ Description=Leap FPGA Platforms v13.06
 Access=https://asim.csail.mit.edu/git/leap-platforms
 Tag=v13.06
 
+###### Leap workloads trunk
+
+[leap-workloads]
+Description=Leap workloads
+Method=git
+Access=https://asim.csail.mit.edu/git/leap-workloads
+Module=undefined
+Tag=HEAD
+Target=leap-workloads
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-workloads
+
+[leap-workloads/HEAD]
+Description=Leap workloads
+Access=https://asim.csail.mit.edu/git/leap-workloads
+Tag=HEAD
+
+
 
 
