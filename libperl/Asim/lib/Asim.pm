@@ -69,7 +69,7 @@ our $debug = 0 || defined($ENV{ASIM_DEBUG});
 # Variables from autoconf configuration
 #
 our $package     = "awb";
-our $release     = "v13.06";
+our $release     = "v14.08";
 
 our $prefix      = "/p/asim/x86_64_linux26";
 our $exec_prefix = "${prefix}";

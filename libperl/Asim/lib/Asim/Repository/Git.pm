@@ -292,7 +292,7 @@ sub clone {
   # Change the permissions on the directory just checked out,
   # to keep it private to the current user:
   #
-  system("chmod 0700 $package_dir");
+  #system("chmod 0700 $package_dir");
 
   #
   # Rehash the workspace since we have a new package in it
