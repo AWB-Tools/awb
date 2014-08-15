@@ -1,4 +1,4 @@
-awb (14.08~git1406922332r063f9b91246ea05fa6120b80a4647abfe2c4e6d4+precise) precise; urgency=low
+awb (14.08+fixes~git1406922332r063f9b91246ea05fa6120b80a4647abfe2c4e6d4+precise) precise; urgency=low
 
   [ Joel Emer ]
   * Move to version 14.08

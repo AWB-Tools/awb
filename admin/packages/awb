@@ -21,6 +21,6 @@ Description=Architects Workbench
 CSN=CSN-awb-573
 Name=awb
 Tag=v14.08
-Prerelease=1
+Prerelease=0
 Lock=asim-asimcore
 Buildorder=1
