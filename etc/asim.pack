@@ -75,6 +75,11 @@ Description=AWB v13.06
 Access=https://asim.csail.mit.edu/git/awb
 Tag=v13.06
 
+[awb/v14.08]
+Description=AWB v14.08
+Access=https://asim.csail.mit.edu/git/awb
+Tag=v14.08
+
 ####### Asimcore
 
 [asimcore]
@@ -116,6 +121,10 @@ Description=Asim Core v13.06
 Access=https://asim.csail.mit.edu/git/asimcore
 Tag=v13.06
 
+[asimcore/v14.08]
+Description=Asim Core v14.08
+Access=https://asim.csail.mit.edu/git/asimcore
+Tag=v14.08
 
 ###### Feeder
 
@@ -153,4 +162,9 @@ Tag=HEAD
 Description=Dreams Visualization Tools - v12.04
 Access=https://asim.csail.mit.edu/git/dreams
 Tag=v12.04
+
+[dreams/v14.08]
+Description=Dreams Visualization Tools - v14.08
+Access=https://asim.csail.mit.edu/git/dreams
+Tag=v14.08
 
