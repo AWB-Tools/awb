@@ -4,7 +4,7 @@ Method=git
 Access=https://asim.csail.mit.edu/git/leap-multifpga
 Module=undefined
 Tag=HEAD
-Target=leap
+Target=leap-multifpga
 BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-multifpga
 
 [leap-multifpga/HEAD]
