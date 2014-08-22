@@ -87,7 +87,7 @@ AC_SUBST(awb_tools_dir_suffix)
 
 AC_DEFUN([FIND_MOC],[
     AC_MSG_CHECKING("for Qt moc")
-
+    
     for dir in $1
     do
         for try in $dir/bin $dir/qt/bin $dir/qt $dir $dir/qt3/bin $dir/qt3 
@@ -95,11 +95,20 @@ AC_DEFUN([FIND_MOC],[
           if test -f $try/moc
           then
               QTMOCDIR=$try
+              QTMOCBIN=moc-qt4
               AC_MSG_RESULT("found in $QTMOCDIR")
               break 2
-	  fi
+          elif test "$asim_cv_enable_qt4" = "yes"
+          then
+              if test -f $try/moc-qt4
+              then
+                  QTMOCDIR=$try
+                  QTMOCBIN=moc-qt4
+                  AC_MSG_RESULT("found in $QTMOCDIR")
+                  break 2 
+              fi
+          fi
 	done
-	
     done
 ])
 
@@ -113,11 +122,20 @@ AC_DEFUN([FIND_UIC],[
           if test -f $try/uic
           then
               QTUICDIR=$try
+              QTUICBIN=uic
               AC_MSG_RESULT("found in $QTUICDIR")
               break 2
+          elif test "$asim_cv_enable_qt4" = "yes"
+          then
+              if test -f $try/uic-qt4
+              then
+                  QTUICDIR=$try
+                  QTUICBIN=uic-qt4
+                  AC_MSG_RESULT("found in $QTUICDIR")
+                  break 2
+              fi
 	  fi
 	done
-	
     done
 
 ])
@@ -135,7 +153,7 @@ AC_DEFUN([FIND_QT_LIBS],[
     fi
     for dir in $1
     do
-        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3 
+        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir/qt4/lib $dir/lib/qt4 $dir/qt4 $dir/lib64/qt $dir/lib64 $dir/lib64/qt4 $dir/lib64 $dir/qt4 $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3 
 	do
 
           for i in $QTLIBS
@@ -301,7 +319,9 @@ AC_DEFUN([FIND_GUI], [
         AC_SUBST(QTLIBDIR)
         AC_SUBST(QTLIBOBJ)
         AC_SUBST(QTUICDIR)
+        AC_SUBST(QTUICBIN)
         AC_SUBST(QTMOCDIR)
+        AC_SUBST(QTMOCBIN)
 
         dnl Configuring AGT defines
 
@@ -337,7 +357,7 @@ AC_DEFUN([FIND_PERLGUI], [
     AC_MSG_CHECKING(for PerlQt)
 
   perlprefixes="$prefix /usr"
-    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
+    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib64/perl5 lib64/perl5/site_perl/$PERLVERSION lib64/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
     perlarch="/ i386-linux-thread-multi i686-linux"
     if test "$asim_cv_enable_qt4" = "yes"
     then

@@ -627,7 +627,9 @@ LINK
 NO_PERLGUI
 perlqt_search_path
 NO_GUI
+QTMOCBIN
 QTMOCDIR
+QTUICBIN
 QTUICDIR
 QTLIBOBJ
 QTLIBDIR
@@ -16193,12 +16195,22 @@ $as_echo_n "checking \"for Qt moc\"... " >&6; }
           if test -f $try/moc
           then
               QTMOCDIR=$try
+              QTMOCBIN=moc-qt4
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
 $as_echo "\"found in $QTMOCDIR\"" >&6; }
               break 2
-	  fi
+          elif test "$asim_cv_enable_qt4" = "yes"
+          then
+              if test -f $try/moc-qt4
+              then
+                  QTMOCDIR=$try
+                  QTMOCBIN=moc-qt4
+                  { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
+$as_echo "\"found in $QTMOCDIR\"" >&6; }
+                  break 2
+              fi
+          fi
 	done
-
     done
 
     else
@@ -16213,12 +16225,22 @@ $as_echo_n "checking \"for Qt moc\"... " >&6; }
           if test -f $try/moc
           then
               QTMOCDIR=$try
+              QTMOCBIN=moc-qt4
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
 $as_echo "\"found in $QTMOCDIR\"" >&6; }
               break 2
-	  fi
+          elif test "$asim_cv_enable_qt4" = "yes"
+          then
+              if test -f $try/moc-qt4
+              then
+                  QTMOCDIR=$try
+                  QTMOCBIN=moc-qt4
+                  { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
+$as_echo "\"found in $QTMOCDIR\"" >&6; }
+                  break 2
+              fi
+          fi
 	done
-
     done
 
     fi
@@ -16252,12 +16274,22 @@ $as_echo_n "checking \"for Qt uic\"... " >&6; }
           if test -f $try/uic
           then
               QTUICDIR=$try
+              QTUICBIN=uic
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTUICDIR\"" >&5
 $as_echo "\"found in $QTUICDIR\"" >&6; }
               break 2
+          elif test "$asim_cv_enable_qt4" = "yes"
+          then
+              if test -f $try/uic-qt4
+              then
+                  QTUICDIR=$try
+                  QTUICBIN=uic-qt4
+                  { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTUICDIR\"" >&5
+$as_echo "\"found in $QTUICDIR\"" >&6; }
+                  break 2
+              fi
 	  fi
 	done
-
     done
 
 
@@ -16273,12 +16305,22 @@ $as_echo_n "checking \"for Qt uic\"... " >&6; }
           if test -f $try/uic
           then
               QTUICDIR=$try
+              QTUICBIN=uic
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTUICDIR\"" >&5
 $as_echo "\"found in $QTUICDIR\"" >&6; }
               break 2
+          elif test "$asim_cv_enable_qt4" = "yes"
+          then
+              if test -f $try/uic-qt4
+              then
+                  QTUICDIR=$try
+                  QTUICBIN=uic-qt4
+                  { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTUICDIR\"" >&5
+$as_echo "\"found in $QTUICDIR\"" >&6; }
+                  break 2
+              fi
 	  fi
 	done
-
     done
 
 
@@ -16316,7 +16358,7 @@ $as_echo_n "checking \"for Qt 3.x.x libraries\"... " >&6; }
     fi
     for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/
     do
-        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
+        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir/qt4/lib $dir/lib/qt4 $dir/qt4 $dir/lib64/qt $dir/lib64 $dir/lib64/qt4 $dir/lib64 $dir/qt4 $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
 	do
 
           for i in $QTLIBS
@@ -16353,7 +16395,7 @@ $as_echo_n "checking \"for Qt 3.x.x libraries\"... " >&6; }
     fi
     for dir in $with_qt_libs $with_qt_dir $QTDIR ${prefix} /usr/local /usr /usr/X11R6 /usr/lib/qt3/lib64 /usr/lib/x86_64-linux-gnu/ /usr/lib/i386-linux-gnu/
     do
-        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
+        for try in $dir/qt/lib $dir/lib/qt $dir/lib $dir/qt $dir/qt4/lib $dir/lib/qt4 $dir/qt4 $dir/lib64/qt $dir/lib64 $dir/lib64/qt4 $dir/lib64 $dir/qt4 $dir $dir/qt3/lib $dir/lib/qt3 $dir/qt3
 	do
 
           for i in $QTLIBS
@@ -16469,6 +16511,8 @@ $as_echo "\"found in $QTINCDIR\"" >&6; }
 
     if test $qt_available = 1
     then
+
+
 
 
 
@@ -17015,7 +17059,7 @@ fi
 $as_echo_n "checking for PerlQt... " >&6; }
 
   perlprefixes="$prefix /usr"
-    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
+    perllibs="lib/perl5 lib/perl5/site_perl/$PERLVERSION lib/site_perl lib64/perl5 lib64/perl5/site_perl/$PERLVERSION lib64/site_perl lib32/site_perl/$PERLVERSION lib32/site_perl"
     perlarch="/ i386-linux-thread-multi i686-linux"
     if test "$asim_cv_enable_qt4" = "yes"
     then
