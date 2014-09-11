@@ -1,0 +1,15 @@
+###### spatial-cnn
+
+[spatial-cnn]
+Description=Spatial-cnn Repository
+Method=git
+Access=https://asim.csail.mit.edu/git/spatial-cnn
+Module=undefined
+Tag=HEAD
+Target=spatial-cnn
+BrowseURL=https://asim.csail.mit.edu/gitweb/?p=spatial-cnn
+
+[spatial-cnn/HEAD]
+Description=Spatial-cnn Repository
+Access=https://asim.csail.mit.edu/git/spatial-cnn
+Tag=HEAD
