@@ -691,24 +691,24 @@ sub Rehash_activated()
 
     # Rehash the module DB
 
-    statusBar()->message("Loading moduleDB...");
+    statusBar()->showMessage("Loading moduleDB...");
     print "Loading moduleDB...";
     STDOUT->flush();
 
     $moduleDB->rehash();
 
-    statusBar()->message("Loading moduleDB...done", 5000);
+    statusBar()->showMessage("Loading moduleDB...done", 5000);
     print "...done.\n";
 
     # Rehash the model DB
 
-    statusBar()->message("Loading modelDB...");
+    statusBar()->showMessage("Loading modelDB...");
     print "Loading modelDB...";
     STDOUT->flush();
 
     $modelDB->rehash();
 
-    statusBar()->message("Loading modelDB...done", 5000);
+    statusBar()->showMessage("Loading modelDB...done", 5000);
     print "...done.\n";
 
     this->popBusyCursor();
