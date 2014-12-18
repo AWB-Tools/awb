@@ -17,28 +17,23 @@
 # 
 #
 
-
-package Asim::Module::SourceList;
+package Asim::Module::Source;
 use warnings;
 use strict;
 
 use Asim::Base;
-use Asim::Module::Source;
-
 
 our @ISA = qw(Asim::Base);
 
-our %a = ( type         => [ "type", 
-                             "SCALAR" ], 
-           visibility   => [ "visibility",
-                             "SCALAR" ],
-           files        => [ "files",
+our %a = ( attributes   => [ "attributes", 
+                             "HASH" ], 
+           filelist     => [ "filelist",
                              "ARRAY" ]
        );
 
 =head1 NAME
 
-Asim::Module::SourceList - Library for manipulating ASIM module sources
+Asim::Module::Source - Library represeting AWB sources and their metadata
 
 =head1 SYNOPSIS
 
@@ -58,7 +53,7 @@ The following public methods are supported:
 
 =over 4
 
-=item $inifile = Asim::Module::Sources-E<gt>new($file)
+=item $inifile = Asim::Module::SourcesE<gt>new($file, $attributes)
 
 Create a new ASIM source file list with a common type and visibility
 
@@ -68,25 +63,24 @@ Create a new ASIM source file list with a common type and visibility
 
 
 sub new {
-  my $this = shift;
-  my $class = ref($this) || $this;
+    my $this = shift;
+    my $class = ref($this) || $this;
 
-  my $self = _initialize(@_);
+    my $self = _initialize(@_);
 
-  bless	$self, $class;
+    bless	$self, $class;
 
-  return $self;
+    return $self;
 }
 
 sub _initialize {
-  my $self = {  accessors => \%a,
-                type => "",
-                visibility => "",
-                filelist => [],
-                @_
-             };
+    my $self = {  accessors => \%a,
+                  attributes => {},
+                  filelist => [],
+                  @_
+               };
 
-  return $self;
+    return $self;
 }
 
 ################################################################
@@ -100,56 +94,72 @@ Return a list of accessor functions for this object
 ################################################################
 
 sub accessors {
-  return qw( type
-             visibility
-             files
-	   );
+    return qw( setAttribute
+               getAttribute
+               getAllAttributes
+               files
+             );
 }
 
 
 ################################################################
 
-=item $model-E<gt>type([$value])
+=item $model-E<gt>setAttribute($attributeKey, $attributeValue)
 
-Set sourcelist type to $value if supplied.
-Always return current (updated) sourcelist type.
+Set source attribute to provided value.
 
 =cut
 
 ################################################################
 
-sub type {
-  my $self = shift;
-  my $value = shift;
+sub setAttribute {
+    my $self = shift;
+    my $attributeKey = shift;
+    my $attributeValue = shift;
 
-  if (defined($value)) {
-      $self->{type} = $value;
-  }
-
-  return $self->{type};
+    if (defined($attributeKey) && defined($attributeValue)) {
+        $self->{attributes}->{$attributeKey} = $attributeValue;
+    }
 }
+
 
 ################################################################
 
-=item $model-E<gt>visibility([$value])
+=item $model-E<gt>getAttribute($attributeKey)
 
-Set sourcelist visibility to $value if supplied.
-Always return current (updated) sourcelist visibility.
+Returns value of attribute key, or undefined if no attribute exists.
 
 =cut
 
 ################################################################
 
-sub visibility {
-  my $self = shift;
-  my $value = shift;
+sub getAttribute {
+    my $self = shift;
+    my $attributeKey = shift;
 
-  if (defined($value)) {
-      $self->{visibility} = $value;
-  }
+    if (defined($attributeKey)) {
+        if (exists $self->{attributes}->{$attributeKey}) {
+            return $self->{attributes}->{$attributeKey};
+        } else {
+            return undef;
+        }
+    }
+} 
 
-  return $self->{visibility};
-}
+################################################################
+
+=item $model-E<gt>getAllAttributes()
+
+Returns a hash containing all attributes of the given module. 
+
+=cut
+
+################################################################
+
+sub getAllAttributes {
+    my $self = shift;
+    return $self->{attributes};
+} 
 
 ################################################################
 
@@ -163,24 +173,13 @@ Return file list.
 
 sub files {
     my $self = shift;
+    my @files = @_; 
+
+    if (scalar(@files)) {
+       push(@{$self->{filelist}}, @files);  
+    }
+
     return @{$self->{filelist}};
-}
-
-################################################################
-
-=item $model-E<gt>addfiles([$value])
-
-Add files to file list
-
-=cut
-
-################################################################
-
-sub addfiles {
-    my $self = shift;
-    my @flist = @_;
-
-    push(@{$self->{filelist}}, @flist);
 }
 
 =back
@@ -190,11 +189,11 @@ sub addfiles {
 
 =head1 AUTHORS
 
-Angshuman Parashar
+Kermin Fleming
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2007
+Copyright (c) Intel Corporation, 2014
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.
