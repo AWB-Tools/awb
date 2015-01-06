@@ -31,6 +31,8 @@ use warnings;
 use strict;
 
 use Asim::Base;
+use Asim::Module::Source;
+
 
 our @ISA = qw(Asim::Base);
 
@@ -185,6 +187,7 @@ Add files to file list
 sub addfiles {
     my $self = shift;
     my @flist = @_;
+
     push(@{$self->{filelist}}, @flist);
 }
 

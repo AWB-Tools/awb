@@ -29,6 +29,7 @@ use Asim::Module::Attribute;
 use Asim::Module::Param;
 use Asim::Util;
 use Asim::Module::SourceList;
+use Asim::Module::Source;
 
 our @ISA = qw(Asim::Base);
 
@@ -202,6 +203,7 @@ sub open {
   my $space = "[ \t]";
   my $spaces = "$space+";
   my $nospace = "[^ \t]";
+  my $equal = "=";
   my $word = "$nospace+";
   my $words = "$nospace.+$nospace";
 
@@ -346,21 +348,30 @@ sub open {
         next;
     }
 
-    # %sources --type TYPE --visibility PRIVATE/PUBLIC FILENAME...
-    # %sources -t TYPE -v PRIVATE|PUBLIC FILENAME...
+    # %sources --type TYPE --visibility PRIVATE/PUBLIC --attribute foo=bar FILENAME...
+    # %sources -t TYPE -v  PRIVATE|PUBLIC -a foo=bar FILENAME...
 
     if (/^.*%sources$spaces($words)/)
     {
         my $type = "";
         my $vis = "";
+        my %attributes = ();
 
         # parse switches
         local @ARGV = split($spaces, $1);
         GetOptions("type=s" => \$type,
-                   "visibility=s" => \$vis);
+                   "visibility=s" => \$vis,
+                   "attribute=s" => sub {  
+                                            my @attributeStatement = split($equal, $_[1]);
+                                            if (scalar (@attributeStatement) == 2) {
+                                                $attributes{$attributeStatement[0]} = $attributeStatement[1]; 
+                                            } else {
+                                                die("Asim::Module::open: Attribute argument was not parsed.");
+                                            }
+                                        }, 
+                   );
 
-        # insert into source matrix
-        $self->addsources($type, $vis, 1, @ARGV);
+        $self->addsources($type, $vis, 1, \%attributes, @ARGV);
         next;
     }
 
@@ -558,8 +569,23 @@ sub save {
   {
       my $type  = $slist->type();
       my $vis   = $slist->visibility();
-      my @flist = $slist->files();
-      print M " * %sources -t $type -v $vis @flist\n";
+      my @fobjs = $slist->files();
+
+      # Pull files out of fobjs. We should handle attributes syntax as
+      # well.  We assume that all the files in the fobj have the same
+      # attributes.
+      for my $fobj (@fobjs) {
+
+          my $attributes = "";
+          my @flist = $fobj->files();
+ 
+          while( my ($attributeKey, $attributeValue) = each %$fobj->getAllAttributes() ) {
+              $attributes .= " --attribute $attributeKey=$attributeValue "
+          }
+                        
+          print M " * %sources -t $type -v $vis $attributes @flist\n";
+      }
+
   }
 
   foreach my $i ($self->makefile()) {
@@ -975,7 +1001,7 @@ sub public
             # %public directive would *replace* the existing public
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
-            $self->addsources($type, "PUBLIC", 0, ($f));
+            $self->addsources($type, "PUBLIC", 0, {}, ($f));
         }
     }
 
@@ -1021,7 +1047,7 @@ sub private
             # %private directive would *replace* the existing private
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
-            $self->addsources($type, "PRIVATE", 0, ($f));
+            $self->addsources($type, "PRIVATE", 0, {}, ($f));
         }
     }
 
@@ -1051,6 +1077,29 @@ sub generated
     my $type = shift;
 
     return $self->getfilelist($type, "PUBLIC", $self->{generatedmatrix});
+}
+
+################################################################
+
+=item $module-E<gt>generated($t, [$list])
+
+Return the current list of generated file objects of specified type. A
+wildcard "*" can be used for type parameters.
+
+Note: All filenames are relative to the directory
+containing the awbfile...
+
+=cut
+
+################################################################
+
+sub generatedobjects
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+
+    return $self->getfileobjects($type, "PUBLIC", $self->{generatedmatrix});
 }
 
 
@@ -1119,6 +1168,31 @@ sub sources
 
 ################################################################
 
+=item $module-E<gt>sourceobjectss($t, $v, [$list])
+
+Return the current list of source objects of specified
+type and visibility. A wildcard "*" can be used for both type
+and visibility parameters.
+
+Note: All source filenames are relative to the directory
+containing the awbfile...
+
+=cut
+
+################################################################
+
+sub sourceobjects
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+    my $vis  = shift;
+
+    return $self->getfileobjects($type, $vis,$self->{sourcematrix});
+}
+
+################################################################
+
 =item $module-E<gt>getfilelist($t, $v, $matrix, [$list])
 
 Return the current list of source files of specified type and
@@ -1139,6 +1213,41 @@ sub getfilelist
     # list of files I'll send out
     my @outfiles = ();
 
+    my @fobjs =  $self->getfileobjects($type, $vis, $matrixReference);
+
+    # Pull files out of fobjs. 
+    for my $fobj (@fobjs) {
+        my @files = $fobj->files();            
+        push(@outfiles, $fobj->files());
+    }
+
+
+    # return
+    return @outfiles;
+}
+
+################################################################
+
+=item $module-E<gt>getfileobjects($t, $v, $matrix, [$list])
+
+Return the current list of source files objects of specified type and
+visibility, from the specified matrix. A wildcard "*" can be used for
+both type and visibility parameters.
+
+=cut
+
+################################################################
+sub getfileobjects
+{
+    # capture params
+    my $self = shift;
+    my $type = shift;
+    my $vis  = shift;
+    my $matrixReference = shift;
+
+    # list of files I'll send out
+    my @outobjs = ();
+
     # scan through source matrix
     my @smat = @{$matrixReference};
     foreach my $slist (@smat)
@@ -1146,14 +1255,13 @@ sub getfilelist
         # check for type and visibility match
         if ((($type eq "*") || ($slist->type() eq $type)) &&
             (($vis  eq "*") || ($slist->visibility() eq $vis)))
-        {
-            my @l = $slist->files();
-            push(@outfiles, $slist->files());
+        {           
+            push(@outobjs, $slist->files());
         }
     }
 
     # return
-    return @outfiles;
+    return @outobjs;
 }
 
 ################################################################
@@ -1243,7 +1351,8 @@ sub addgenerated
     $self->addfilematrix($specType, 
                          "PUBLIC",      #has no meaning here, 
                                         #but allows source share 
-                         0, 
+                         0,
+                         \{}, 
                          $self->{generatedmatrix},
                          @infiles);
 }
@@ -1271,11 +1380,13 @@ sub addsources
     my $specType = shift;
     my $vis  = shift;
     my $requireType = shift;
+    my $attributesRef = shift;
     my @infiles = (@_);
  
     $self->addfilematrix($specType, 
                          $vis, 
                          $requireType, 
+                         $attributesRef,
                          $self->{sourcematrix},
                          @infiles);
 }
@@ -1305,7 +1416,8 @@ sub addfilematrix
     my $self = shift;
     my $specType = shift;
     my $vis  = shift;
-    my $requireType = shift;
+    my $requireType = shift; 
+    my $attributesRef = shift;
     my $matrixReference = shift; 
     my @infiles = (@_);
     my $lastSlist = undef;
@@ -1314,6 +1426,11 @@ sub addfilematrix
     # Validate type claims against file suffixes
     foreach my $f (@infiles)
     {
+
+        # insert into source matrix           
+        my $fileObject = Asim::Module::Source->new(filelist => [$f],
+                                                   attributes => $attributesRef);
+
         my $type = decipher_type_from_extension($f);
 #        $type = $specType if ($specType ne '');
         if (is_known_type($specType)) { # if the specType is one of the type that can be decipher, they better agree with each other
@@ -1365,7 +1482,9 @@ sub addfilematrix
             ($lastSlist->visibility() eq $vis))
         {
             # Last file was the same type/visibility.  Use the same source list.
-            $lastSlist->addfiles(($f));
+
+            # insert into source matrix           
+            $lastSlist->addfiles(($fileObject)); # array?
         }
         else {
             # scan through source matrix
@@ -1376,8 +1495,8 @@ sub addfilematrix
                 # check for type and visibility match
                 if (($slist->type() eq $type) &&
                     ($slist->visibility() eq $vis))
-                {
-                    $slist->addfiles(($f));
+                {       
+                    $slist->addfiles(($fileObject));
                     $lastSlist = $slist;
                     $found = 1;
                     last;
@@ -1392,7 +1511,7 @@ sub addfilematrix
                 my $slist = Asim::Module::SourceList->new(type => "$type",
                                                           visibility => "$vis",
                                                           files => []);
-                $slist->addfiles(($f));
+                $slist->addfiles(($fileObject));
                 push(@{$matrixReference}, $slist);
                 $lastSlist = $slist;
             }
