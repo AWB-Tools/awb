@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2003-2014 Intel Corporation
+# Copyright (C) 2003-2007 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,15 +16,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # 
 #
-
+#
+# *****************************************************************************
+# *
+# * @brief SourceList.pm  
+# *
+# * @author Angshuman Parashar
+# *
+# *****************************************************************************
+#
 
 package Asim::Module::SourceList;
 use warnings;
 use strict;
 
 use Asim::Base;
-use Asim::Module::Source;
-
 
 our @ISA = qw(Asim::Base);
 
@@ -179,7 +185,6 @@ Add files to file list
 sub addfiles {
     my $self = shift;
     my @flist = @_;
-
     push(@{$self->{filelist}}, @flist);
 }
 

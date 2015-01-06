@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2001-2014 Intel Corporation
+# Copyright (C) 2003-2006 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -29,7 +29,6 @@ use Asim::Module::Attribute;
 use Asim::Module::Param;
 use Asim::Util;
 use Asim::Module::SourceList;
-use Asim::Module::Source;
 
 our @ISA = qw(Asim::Base);
 
@@ -60,8 +59,6 @@ our %a =  ( name =>                 [ "name",
                                       "ARRAY",
                                       "Asim::Module::SourceList" ],
             makefile =>             [ "makefile",
-                                      "ARRAY" ],
-            target =>               [ "target",
                                       "ARRAY" ],
             scons =>                [ "scons",
                                       "ARRAY" ],
@@ -156,7 +153,6 @@ sub _initialize {
 		 sourcematrix => [],
 		 generatedmatrix => [],
 		 makefile => [],
-		 target => [],
 		 scons => {},
 		 attributes => [],
 		 default_attributes => [],
@@ -206,7 +202,6 @@ sub open {
   my $space = "[ \t]";
   my $spaces = "$space+";
   my $nospace = "[^ \t]";
-  my $equal = "=";
   my $word = "$nospace+";
   my $words = "$nospace.+$nospace";
 
@@ -351,30 +346,21 @@ sub open {
         next;
     }
 
-    # %sources --type TYPE --visibility PRIVATE/PUBLIC --attribute foo=bar FILENAME...
-    # %sources -t TYPE -v  PRIVATE|PUBLIC -a foo=bar FILENAME...
+    # %sources --type TYPE --visibility PRIVATE/PUBLIC FILENAME...
+    # %sources -t TYPE -v PRIVATE|PUBLIC FILENAME...
 
     if (/^.*%sources$spaces($words)/)
     {
         my $type = "";
         my $vis = "";
-        my %attributes = ();
 
         # parse switches
         local @ARGV = split($spaces, $1);
         GetOptions("type=s" => \$type,
-                   "visibility=s" => \$vis,
-                   "attribute=s" => sub {  
-                                            my @attributeStatement = split($equal, $_[1]);
-                                            if (scalar (@attributeStatement) == 2) {
-                                                $attributes{$attributeStatement[0]} = $attributeStatement[1]; 
-                                            } else {
-                                                die("Asim::Module::open: Attribute argument was not parsed.");
-                                            }
-                                        }, 
-                   );
+                   "visibility=s" => \$vis);
 
-        $self->addsources($type, $vis, 1, \%attributes, @ARGV);
+        # insert into source matrix
+        $self->addsources($type, $vis, 1, @ARGV);
         next;
     }
 
@@ -405,16 +391,6 @@ sub open {
       # Add files to list of makefiles
       #
       push(@{$self->{makefile}}, split($spaces, $1));
-      next;
-    }
-
-    # %target MAKETARGET...
-
-    if (/^.*%target$spaces($words)/) {
-      #
-      # Add to list of targets
-      #
-      push(@{$self->{target}}, split($spaces, $1));
       next;
     }
 
@@ -582,23 +558,8 @@ sub save {
   {
       my $type  = $slist->type();
       my $vis   = $slist->visibility();
-      my @fobjs = $slist->files();
-
-      # Pull files out of fobjs. We should handle attributes syntax as
-      # well.  We assume that all the files in the fobj have the same
-      # attributes.
-      for my $fobj (@fobjs) {
-
-          my $attributes = "";
-          my @flist = $fobj->files();
- 
-          while( my ($attributeKey, $attributeValue) = each %$fobj->getAllAttributes() ) {
-              $attributes .= " --attribute $attributeKey=$attributeValue "
-          }
-                        
-          print M " * %sources -t $type -v $vis $attributes @flist\n";
-      }
-
+      my @flist = $slist->files();
+      print M " * %sources -t $type -v $vis @flist\n";
   }
 
   foreach my $i ($self->makefile()) {
@@ -1014,7 +975,7 @@ sub public
             # %public directive would *replace* the existing public
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
-            $self->addsources($type, "PUBLIC", 0, {}, ($f));
+            $self->addsources($type, "PUBLIC", 0, ($f));
         }
     }
 
@@ -1060,7 +1021,7 @@ sub private
             # %private directive would *replace* the existing private
             # file list with the new list. We will instead *add*
             # this file to the list of existing files of this type.
-            $self->addsources($type, "PRIVATE", 0, {}, ($f));
+            $self->addsources($type, "PRIVATE", 0, ($f));
         }
     }
 
@@ -1090,29 +1051,6 @@ sub generated
     my $type = shift;
 
     return $self->getfilelist($type, "PUBLIC", $self->{generatedmatrix});
-}
-
-################################################################
-
-=item $module-E<gt>generated($t, [$list])
-
-Return the current list of generated file objects of specified type. A
-wildcard "*" can be used for type parameters.
-
-Note: All filenames are relative to the directory
-containing the awbfile...
-
-=cut
-
-################################################################
-
-sub generatedobjects
-{
-    # capture params
-    my $self = shift;
-    my $type = shift;
-
-    return $self->getfileobjects($type, "PUBLIC", $self->{generatedmatrix});
 }
 
 
@@ -1181,31 +1119,6 @@ sub sources
 
 ################################################################
 
-=item $module-E<gt>sourceobjectss($t, $v, [$list])
-
-Return the current list of source objects of specified
-type and visibility. A wildcard "*" can be used for both type
-and visibility parameters.
-
-Note: All source filenames are relative to the directory
-containing the awbfile...
-
-=cut
-
-################################################################
-
-sub sourceobjects
-{
-    # capture params
-    my $self = shift;
-    my $type = shift;
-    my $vis  = shift;
-
-    return $self->getfileobjects($type, $vis,$self->{sourcematrix});
-}
-
-################################################################
-
 =item $module-E<gt>getfilelist($t, $v, $matrix, [$list])
 
 Return the current list of source files of specified type and
@@ -1226,41 +1139,6 @@ sub getfilelist
     # list of files I'll send out
     my @outfiles = ();
 
-    my @fobjs =  $self->getfileobjects($type, $vis, $matrixReference);
-
-    # Pull files out of fobjs. 
-    for my $fobj (@fobjs) {
-        my @files = $fobj->files();            
-        push(@outfiles, $fobj->files());
-    }
-
-
-    # return
-    return @outfiles;
-}
-
-################################################################
-
-=item $module-E<gt>getfileobjects($t, $v, $matrix, [$list])
-
-Return the current list of source files objects of specified type and
-visibility, from the specified matrix. A wildcard "*" can be used for
-both type and visibility parameters.
-
-=cut
-
-################################################################
-sub getfileobjects
-{
-    # capture params
-    my $self = shift;
-    my $type = shift;
-    my $vis  = shift;
-    my $matrixReference = shift;
-
-    # list of files I'll send out
-    my @outobjs = ();
-
     # scan through source matrix
     my @smat = @{$matrixReference};
     foreach my $slist (@smat)
@@ -1268,13 +1146,14 @@ sub getfileobjects
         # check for type and visibility match
         if ((($type eq "*") || ($slist->type() eq $type)) &&
             (($vis  eq "*") || ($slist->visibility() eq $vis)))
-        {           
-            push(@outobjs, $slist->files());
+        {
+            my @l = $slist->files();
+            push(@outfiles, $slist->files());
         }
     }
 
     # return
-    return @outobjs;
+    return @outfiles;
 }
 
 ################################################################
@@ -1364,8 +1243,7 @@ sub addgenerated
     $self->addfilematrix($specType, 
                          "PUBLIC",      #has no meaning here, 
                                         #but allows source share 
-                         0,
-                         \{}, 
+                         0, 
                          $self->{generatedmatrix},
                          @infiles);
 }
@@ -1393,13 +1271,11 @@ sub addsources
     my $specType = shift;
     my $vis  = shift;
     my $requireType = shift;
-    my $attributesRef = shift;
     my @infiles = (@_);
  
     $self->addfilematrix($specType, 
                          $vis, 
                          $requireType, 
-                         $attributesRef,
                          $self->{sourcematrix},
                          @infiles);
 }
@@ -1429,8 +1305,7 @@ sub addfilematrix
     my $self = shift;
     my $specType = shift;
     my $vis  = shift;
-    my $requireType = shift; 
-    my $attributesRef = shift;
+    my $requireType = shift;
     my $matrixReference = shift; 
     my @infiles = (@_);
     my $lastSlist = undef;
@@ -1439,11 +1314,6 @@ sub addfilematrix
     # Validate type claims against file suffixes
     foreach my $f (@infiles)
     {
-
-        # insert into source matrix           
-        my $fileObject = Asim::Module::Source->new(filelist => [$f],
-                                                   attributes => $attributesRef);
-
         my $type = decipher_type_from_extension($f);
 #        $type = $specType if ($specType ne '');
         if (is_known_type($specType)) { # if the specType is one of the type that can be decipher, they better agree with each other
@@ -1495,9 +1365,7 @@ sub addfilematrix
             ($lastSlist->visibility() eq $vis))
         {
             # Last file was the same type/visibility.  Use the same source list.
-
-            # insert into source matrix           
-            $lastSlist->addfiles(($fileObject)); # array?
+            $lastSlist->addfiles(($f));
         }
         else {
             # scan through source matrix
@@ -1508,8 +1376,8 @@ sub addfilematrix
                 # check for type and visibility match
                 if (($slist->type() eq $type) &&
                     ($slist->visibility() eq $vis))
-                {       
-                    $slist->addfiles(($fileObject));
+                {
+                    $slist->addfiles(($f));
                     $lastSlist = $slist;
                     $found = 1;
                     last;
@@ -1524,7 +1392,7 @@ sub addfilematrix
                 my $slist = Asim::Module::SourceList->new(type => "$type",
                                                           visibility => "$vis",
                                                           files => []);
-                $slist->addfiles(($fileObject));
+                $slist->addfiles(($f));
                 push(@{$matrixReference}, $slist);
                 $lastSlist = $slist;
             }
@@ -1585,6 +1453,9 @@ sub is_known_type
     elsif ($specType eq "UT") {
         return 1;  
     }            # Xilinx script
+    elsif ($specType eq "VERILOG") {
+        return 1;  
+    }       # Verilog
     elsif ($specType eq "VHD") {
         return 1;  
     }           # VHDL
@@ -1683,7 +1554,7 @@ Optionally update the list of makefiles for this module to $list
 
 Return the current (updated) list of makefiles for this module
 
-Note: All makefile names are relative to the directory containing
+Note: All makefilenames are relative to the directory containing
 the awbfile...
 
 =cut
@@ -1699,29 +1570,6 @@ sub makefile {
   }
 
   return @{$self->{"makefile"}};
-}
-
-################################################################
-
-=item $module-E<gt>target([$list])
-
-Optionally update the list of targets for this module to $list
-
-Return the current (updated) list of targets for this module
-
-=cut
-
-################################################################
-
-sub target {
-  my $self = shift;
-  my @value = (@_);
-
-  if (@value) {
-    @{$self->{"target"}} = (@value);
-  }
-
-  return @{$self->{"target"}};
 }
 
 ################################################################
@@ -2036,6 +1884,90 @@ sub attributes2string {
   return join(" ", @attributes);
 }
 
+
+################################################################
+
+=item $module-E<gt>find_modules_with_attribute($attribute [$exclude_submodels])
+
+Recursively search the module list looking modules that have 
+attribute $attribute. Return the list of such modules.
+
+=cut
+
+################################################################
+
+sub find_modules_with_attribute {
+  my $self = shift;
+  my $attribute = shift;
+  my $exclude_submodels = shift || 0;
+
+  my @found = ();
+
+  if ($self->has_attribute($attribute)) {
+    push(@found, $self);
+  }
+
+  # Scan through submodules
+
+  foreach my $submodule ($self->submodules()) {
+    next unless defined($submodule);
+
+    if ($submodule->isroot()) {
+      my $submodel = $submodule->owner();
+      if (!$exclude_submodels && $submodel->has_attribute($attribute)) {
+	push(@found, $submodule);
+      }
+      next;
+    }
+
+    push(@found, $submodule->find_modules_with_attribute($attribute));
+
+  }
+
+  return (@found);
+}
+
+
+################################################################
+
+=item $module-E<gt>is_obsolete()
+
+Return 1 if module is obsolete
+
+=cut
+
+################################################################
+
+sub is_obsolete {
+  my $self = shift;
+
+  return $self->has_attribute("obsolete");
+}
+
+
+################################################################
+
+=item $module-E<gt>has_attribute($attribute)
+
+Return 1 if module has attribute $attribute
+
+=cut
+
+################################################################
+
+sub has_attribute {
+  my $self = shift;
+  my $attribute = shift;
+
+  foreach my $i ($self->attributes()) {
+    if ($i->name() eq $attribute) {
+      return 1;
+    }
+  }
+
+  return undef;
+}
+
 ################################################################
 
 =item $module-E<gt>default_attributes()
@@ -2151,7 +2083,8 @@ that provides $provides
 
 Maybe this should return the list of modules that provide $provides.
 
-Note: this method does not recurse into submodels
+Note: this method does not recurse into submodels, and
+      $stop_at_submodel is not a public argument!
 
 =cut
 
@@ -2166,7 +2099,7 @@ sub find_module_providing {
 
   return $self if ($self->provides() eq $modtype);
 
-  # Do not look at child of a submouule root;
+  # Do not look at child of a submodule root;
   return undef if  $stop_at_submodel && $self->isroot();
 
   foreach my $submodule ($self->submodules()) {
@@ -2213,7 +2146,9 @@ sub embed_submodels {
 Recursively search the module list looking for the first module
 that requires $requires
 
-Note: this method does not recurse into submodels
+Note: this method does not recurse into submodels, and
+      $stop_at_submodel is not a public argument!
+
 
 =cut
 
