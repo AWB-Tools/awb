@@ -317,7 +317,7 @@ sub open {
         $class = 'top';
       } 
       # this is getting ugly probably we want to refactor soon
-      elsif ($class =~ /^%(iface|hw|sw|top|library|private)$/) {
+      elsif ($class =~ /^%(iface|hw|sw|main|top|library|private)$/) {
         $class =~ s/^%//;
       }
       else {
