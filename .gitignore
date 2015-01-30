@@ -49,7 +49,7 @@
 /libperl/Asim/MYMETA.yml
 
 # /libperl/Asim/lib/
-/libperl/Asim/lib/
+#/libperl/Asim/lib/
 
 # /libperl/AsimShell/
 /libperl/AsimShell/pm_to_blib

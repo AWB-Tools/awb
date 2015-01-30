@@ -1572,9 +1572,6 @@ sub is_known_type
     elsif ($specType eq "UT") {
         return 1;  
     }            # Xilinx script
-    elsif ($specType eq "VERILOG") {
-        return 1;  
-    }       # Verilog
     elsif ($specType eq "VHD") {
         return 1;  
     }           # VHDL
