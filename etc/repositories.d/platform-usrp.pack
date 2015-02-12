@@ -9,13 +9,13 @@
 [leap-platforms-usrp]
 Description=Leap Platform modules for USRP board
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-platforms-usrp
+Access=https://github.com/LEAP-Core/leap-platforms-usrp
 Module=undef
 Tag=HEAD
 Target=leap-platforms-usrp
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-platform-usrp
+BrowseURL=https://github.com/LEAP-Core/leap-platforms-usrp
 
 [leap-platforms-usrp/HEAD]
 Description=Leap Platform modules for USRP board (HEAD)
-Access=https://asim.csail.mit.edu/git/leap-platforms-usrp
+Access=https://github.com/LEAP-Core/leap-platforms-usrp
 Tag=HEAD
