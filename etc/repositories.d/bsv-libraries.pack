@@ -3,14 +3,13 @@
 [bsv-libraries]
 Description=General Bluespec Libraries
 Method=git
-Access=https://asim.csail.mit.edu/git/bsv-libraries
+Access=https://github.com/LEAP-Workloads/bsv-libraries
 Module=undefined
 Tag=HEAD
 Target=bsv-libraries
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=bsv-libraries
+BrowseURL=https://github.com/LEAP-Workloads/bsv-libraries
 
 [bsv-libraries/HEAD]
 Description=General Bluespec Libraries
-Access=https://asim.csail.mit.edu/git/bsv-libraries
+Access=https://github.com/LEAP-Workloads/bsv-libraries
 Tag=HEAD
-

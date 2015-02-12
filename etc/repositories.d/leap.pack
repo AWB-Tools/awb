@@ -3,45 +3,45 @@
 [leap]
 Description=Leap environment
 Method=git
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Module=undefined
 Tag=HEAD
 Target=leap
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap
+BrowseURL=https://github.com/LEAP-Core/leap
 
 [leap/HEAD]
 Description=Leap environment HEAD
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=HEAD
 
 [leap/v11.03]
 Description=Leap environment v11.03
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=v11.03
 
 [leap/v11.04]
 Description=Leap environment v11.04
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=v11.04
 
 [leap/v11.09]
 Description=Leap environment v11.09
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=v11.09
 
 [leap/v12.04]
 Description=Leap environment v12.04
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=v12.04
 
 [leap/v13.06]
 Description=Leap environment v13.06
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=v13.06
 
 [leap/v14.08]
 Description=Leap environment v14.08
-Access=https://asim.csail.mit.edu/git/leap
+Access=https://github.com/LEAP-Core/leap
 Tag=v14.08
 
 ###### Leap debug trunk
@@ -49,117 +49,108 @@ Tag=v14.08
 [leap-debug]
 Description=Leap debugging environment
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-debug
+Access=https://github.com/LEAP-Core/leap-debug
 Module=undefined
 Tag=HEAD
 Target=leap-debug
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-debug
+BrowseURL=https://github.com/LEAP-Core/leap-debug
 
 [leap-debug/HEAD]
 Description=Leap debugging environment
-Access=https://asim.csail.mit.edu/git/leap-debug
+Access=https://github.com/LEAP-Core/leap-debug
 Tag=HEAD
-
 
 ###### Leap examples trunk
 
 [leap-examples]
 Description=Leap examples
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-examples
+Access=https://github.com/LEAP-Core/leap-examples
 Module=undefined
 Tag=HEAD
 Target=leap-examples
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-examples
+BrowseURL=https://github.com/LEAP-Core/leap-examples
 
 [leap-examples/HEAD]
 Description=Leap examples
-Access=https://asim.csail.mit.edu/git/leap-examples
+Access=https://github.com/LEAP-Core/leap-examples
 Tag=HEAD
-
-
 
 ###### Leap papers trunk
 
 [leap-papers]
 Description=Leap papers
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-papers
+Access=https://github.mit.edu/LEAP/leap-papers
 Module=undefined
 Tag=HEAD
 Target=leap-papers
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-papers
+BrowseURL=https://github.mit.edu/LEAP/leap-papers
 
 [leap-papers/HEAD]
 Description=Leap papers
-Access=https://asim.csail.mit.edu/git/leap-papers
+Access=https://github.mit.edu/LEAP/leap-papers
 Tag=HEAD
-
-
 
 ###### Leap platforms trunk
 
 [leap-platforms]
 Description=Leap FPGA Platforms
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Module=undefined
 Tag=HEAD
 Target=leap-platforms
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-platforms
+BrowseURL=https://github.com/LEAP-Core/leap-platforms
 
 [leap-platforms/HEAD]
 Description=Leap FPGA Platforms HEAD
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=HEAD
 
 [leap-platforms/v11.03]
 Description=Leap FPGA Platforms v11.03
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v11.03
 
 [leap-platforms/v11.04]
 Description=Leap FPGA Platforms v11.04
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v11.04
 
 [leap-platforms/v11.09]
 Description=Leap FPGA Platforms v11.09
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v11.09
 
 [leap-platforms/v12.04]
 Description=Leap FPGA Platforms v12.04
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v12.04
 
 [leap-platforms/v13.06]
 Description=Leap FPGA Platforms v13.06
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v13.06
 
 [leap-platforms/v14.08]
 Description=Leap FPGA Platforms v14.08
-Access=https://asim.csail.mit.edu/git/leap-platforms
+Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v14.08
-
 
 ###### Leap workloads trunk
 
 [leap-workloads]
 Description=Leap workloads
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-workloads
+Access=https://github.com/LEAP-Workloads/workloads
 Module=undefined
 Tag=HEAD
 Target=leap-workloads
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-workloads
+BrowseURL=https://github.com/LEAP-Workloads/workloads
 
 [leap-workloads/HEAD]
 Description=Leap workloads
-Access=https://asim.csail.mit.edu/git/leap-workloads
+Access=https://github.com/LEAP-Workloads/workloads
 Tag=HEAD
-
-
-
 

@@ -9,14 +9,13 @@
 [leap-platforms-acp]
 Description=Leap Platform modules for ACP board
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-platforms-acp
+Access=https://github.com/LEAP-Core/leap-platforms-acp
 Module=undef
 Tag=HEAD
 Target=leap-platforms-acp
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-platform-acp
+BrowseURL=https://github.com/LEAP-Core/leap-platforms-acp
 
 [leap-platforms-acp/HEAD]
 Description=Leap Platform modules for ACP board (HEAD)
-Access=https://asim.csail.mit.edu/git/leap-platforms-acp
+Access=https://github.com/LEAP-Core/leap-platforms-acp
 Tag=HEAD
-

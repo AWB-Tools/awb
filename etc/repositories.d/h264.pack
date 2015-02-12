@@ -9,14 +9,13 @@
 [h264]
 Description=H264 Decoder
 Method=git
-Access=https://asim.csail.mit.edu/git/h264
+Access=https://github.com/LEAP-Workloads/h264
 Module=undefined
 Tag=HEAD
 Target=h264
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=h264
+BrowseURL=https://github.com/LEAP-Workloads/h264
 
 [h264/HEAD]
 Description=H264 Decoder HEAD
-Access=https://asim.csail.mit.edu/git/h264
+Access=https://github.com/LEAP-Workloads/h264
 Tag=HEAD
-

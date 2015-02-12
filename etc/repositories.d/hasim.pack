@@ -3,15 +3,15 @@
 [hasim]
 Description=Hardware Asim Model
 Method=git
-Access=https://asim.csail.mit.edu/git/hasim
+Access=https://github.com/HAsim-Modeling/hasim
 Module=undefined
 Tag=HEAD
 Target=hasim
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=hasim
+BrowseURL=https://github.com/HAsim-Modeling/hasim
 
 [hasim/HEAD]
 Description=Hardware Asim Model
-Access=https://asim.csail.mit.edu/git/hasim
+Access=https://github.com/HAsim-Modeling/hasim
 Tag=HEAD
 
 ###### Hasim-models trunk
@@ -19,15 +19,15 @@ Tag=HEAD
 [hasim-models]
 Description=Basic hasim timing models
 Method=git
-Access=https://asim.csail.mit.edu/git/hasim-models
+Access=https://github.com/HAsim-Modeling/hasim-models
 Module=undef
 Tag=HEAD
 Target=hasim-models
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=/hasim-models
+BrowseURL=https://github.com/HAsim-Modeling/hasim-models
 
 [hasim-models/HEAD]
 Description=Basic hasim timing models
-Access=https://asim.csail.mit.edu/git/hasim-models
+Access=https://github.com/HAsim-Modeling/hasim-models
 Tag=HEAD
 
 ###### Hasim-alpha trunk
@@ -35,15 +35,15 @@ Tag=HEAD
 [hasim-alpha]
 Description=Hardware Asim Model for ALPHA
 Method=git
-Access=https://asim.csail.mit.edu/git/hasim-alpha
+Access=https://github.com/HAsim-Modeling/hasim-alpha
 Module=undefined
 Tag=HEAD
 Target=hasim-alpha
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=hasim-alpha
+BrowseURL=https://github.com/HAsim-Modeling/hasim-alpha
 
 [hasim-alpha/HEAD]
 Description=Hardware Asim Model for ALPHA
-Access=https://asim.csail.mit.edu/git/hasim-alpha
+Access=https://github.com/HAsim-Modeling/hasim-alpha
 Tag=HEAD
 
 ###### Hasim-mips trunk
@@ -51,46 +51,29 @@ Tag=HEAD
 [hasim-mips]
 Description=Hardware Asim Model for MIPS
 Method=git
-Access=https://asim.csail.mit.edu/git/hasim-mips
+Access=https://github.com/HAsim-Modeling/hasim-mips
 Module=undefined
 Tag=HEAD
 Target=hasim-mips
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=hasim-mips
+BrowseURL=https://github.com/HAsim-Modeling/hasim-mips
 
 [hasim-mips/HEAD]
 Description=Hardware Asim Model for MIPS
-Access=https://asim.csail.mit.edu/git/hasim-mips
-Tag=HEAD
-
-###### hasim-platforms trunk
-
-[hasim-platforms]
-Description=Hardware Asim Model for MIPS
-Method=git
-Access=https://asim.csail.mit.edu/git/hasim-platforms
-Module=undefined
-Tag=HEAD
-Target=hasim-platforms
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=hasim-platforms
-
-[hasim-platforms/HEAD]
-Description=Hardware Asim Model for MIPS
-Access=https://asim.csail.mit.edu/git/hasim-platforms
+Access=https://github.com/HAsim-Modeling/hasim-mips
 Tag=HEAD
 
 ###### M5 trunk
 
 [m5]
 Description=M5 model
-Method=svn
-Access=https://asim.csail.mit.edu/svn/m5
+Method=git
+Access=https://github.com/HAsim-Modeling/m5
 Module=undefined
 Tag=HEAD
 Target=m5
-Changes=changes
-BrowseURL=https://asim.csail.mit.edu/websvn/listing.php?repname=M5
+BrowseURL=https://github.com/HAsim-Modeling/m5
 
 [m5/HEAD]
 Description=M5 model
-Access=https://asim.csail.mit.edu/svn/m5
+Access=https://github.com/HAsim-Modeling/m5
 Tag=HEAD

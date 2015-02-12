@@ -39,45 +39,45 @@ Description=Software package dependencies for Asim performance models
 [awb]
 Description=AWB
 Method=git
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Module=undef
 Tag=HEAD
 Target=awb
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=awb
+BrowseURL=https://github.com/AWB-Tools/awb
 
 [awb/HEAD]
 Description=AWB HEAD
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=HEAD
 
 [awb/v11.03]
 Description=AWB v11.03
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=v11.03
 
 [awb/v11.04]
 Description=AWB v11.04
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=v11.04
 
 [awb/v11.09]
 Description=AWB v11.09
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=v11.09
 
 [awb/v12.04]
 Description=AWB v12.04
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=v12.04
 
 [awb/v13.06]
 Description=AWB v13.06
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=v13.06
 
 [awb/v14.08]
 Description=AWB v14.08
-Access=https://asim.csail.mit.edu/git/awb
+Access=https://github.com/AWB-Tools/awb
 Tag=v14.08
 
 ####### Asimcore
@@ -85,45 +85,45 @@ Tag=v14.08
 [asimcore]
 Description=Asim Core
 Method=git
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Module=undefined
 Tag=HEAD
 Target=asimcore
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=asimcore
+BrowseURL=https://github.com/Asim-Modeling/asimcore.git
 
 [asimcore/HEAD]
 Description=Asim Core HEAD
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=HEAD
 
 [asimcore/v11.03]
 Description=Asim Core v11.03
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v11.03
 
 [asimcore/v11.04]
 Description=Asim Core v11.04
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v11.04
 
 [asimcore/v11.09]
 Description=Asim Core v11.09
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v11.09
 
 [asimcore/v12.04]
 Description=Asim Core v12.04
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v12.04
 
 [asimcore/v13.06]
 Description=Asim Core v13.06
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v13.06
 
 [asimcore/v14.08]
 Description=Asim Core v14.08
-Access=https://asim.csail.mit.edu/git/asimcore
+Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v14.08
 
 ###### Feeder
@@ -131,15 +131,15 @@ Tag=v14.08
 [feeder]
 Description=Instruction Feeders
 Method=git
-Access=https://asim.csail.mit.edu/git/feeder
+Access=https://github.com/Asim-Modeling/feeder
 Module=undefined
 Tag=HEAD
 Target=feeder
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=feeder
+BrowseURL=https://github.com/Asim-Modeling/feeder
 
 [feeder/HEAD]
 Description=ASIM Instruction Feeders Library
-Access=https://asim.csail.mit.edu/git/feeder
+Access=https://github.com/Asim-Modeling/feeder
 Tag=HEAD
 
 
@@ -148,23 +148,23 @@ Tag=HEAD
 [dreams]
 Description=Dreams Visualization Tools
 Method=git
-Access=https://asim.csail.mit.edu/git/dreams
+Access=https://github.com/Asim-Dreams/dreams
 Module=undefined
 Target=dreams
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=dreams
+BrowseURL=https://github.com/Asim-Dreams/dreams
 
 [dreams/HEAD]
 Description=Dreams Visualization Tools
-Access=https://asim.csail.mit.edu/git/dreams
+Access=https://github.com/Asim-Dreams/dreams
 Tag=HEAD
 
 [dreams/v12.04]
 Description=Dreams Visualization Tools - v12.04
-Access=https://asim.csail.mit.edu/git/dreams
+Access=https://github.com/Asim-Dreams/dreams
 Tag=v12.04
 
 [dreams/v14.08]
 Description=Dreams Visualization Tools - v14.08
-Access=https://asim.csail.mit.edu/git/dreams
+Access=https://github.com/Asim-Dreams/dreams
 Tag=v14.08
 

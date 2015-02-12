@@ -1,14 +1,14 @@
 [leap-multifpga]
 Description=Leap environment for multifpga development
 Method=git
-Access=https://asim.csail.mit.edu/git/leap-multifpga
+Access=https://github.com/LEAP-Core/leap-multifpga
 Module=undefined
 Tag=HEAD
 Target=leap-multifpga
-BrowseURL=https://asim.csail.mit.edu/gitweb/?p=leap-multifpga
+BrowseURL=https://github.com/LEAP-Core/leap-multifpga
 
 [leap-multifpga/HEAD]
 Description=Leap environment for multifpga development HEAD
-Access=https://asim.csail.mit.edu/git/leap-multifpga
+Access=https://github.com/LEAP-Core/leap-multifpga
 Tag=HEAD
 
