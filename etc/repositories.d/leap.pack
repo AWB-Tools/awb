@@ -81,7 +81,7 @@ Tag=HEAD
 [leap-papers]
 Description=Leap papers
 Method=git
-Access=https://github.mit.edu/LEAP/leap-papers
+Access=git@github.mit.edu:LEAP/leap-papers
 Module=undefined
 Tag=HEAD
 Target=leap-papers
@@ -89,7 +89,7 @@ BrowseURL=https://github.mit.edu/LEAP/leap-papers
 
 [leap-papers/HEAD]
 Description=Leap papers
-Access=https://github.mit.edu/LEAP/leap-papers
+Access=git@github.mit.edu:LEAP/leap-papers
 Tag=HEAD
 
 ###### Leap platforms trunk
