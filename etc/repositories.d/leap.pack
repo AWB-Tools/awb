@@ -76,6 +76,22 @@ Description=Leap examples
 Access=https://github.com/LEAP-Core/leap-examples
 Tag=HEAD
 
+###### Leap documentation trunk
+
+[leap-documentation]
+Description=Leap documentation
+Method=git
+Access=https://github.com/LEAP-FPGA/leap-documentation
+Module=undefined
+Tag=HEAD
+Target=leap-documentation
+BrowseURL=https://github.com/LEAP-FPGA/leap-documentation
+
+[leap-documentation/HEAD]
+Description=Leap documentation
+Access=https://github.com/LEAP-FPGA/leap-documentation
+Tag=HEAD
+
 ###### Leap papers trunk
 
 [leap-papers]
