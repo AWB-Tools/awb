@@ -578,8 +578,9 @@ sub save {
 
           my $attributes = "";
           my @flist = $fobj->files();
- 
-          while( my ($attributeKey, $attributeValue) = each %$fobj->getAllAttributes() ) {
+          my %attributeHash = $fobj->getAllAttributes();
+
+          while( my ($attributeKey, $attributeValue) = each %attributeHash ) {
               $attributes .= " --attribute $attributeKey=$attributeValue "
           }
                         
