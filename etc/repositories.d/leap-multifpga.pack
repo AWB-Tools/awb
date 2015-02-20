@@ -12,3 +12,12 @@ Description=Leap environment for multifpga development HEAD
 Access=https://github.com/LEAP-Core/leap-multifpga
 Tag=HEAD
 
+[leap-multifpga/v14.08]
+Description=Leap environment for multifpga development v14.08
+Access=https://github.com/LEAP-Core/leap-multifpga
+Tag=v14.08
+
+[leap-multifpga/v15.02]
+Description=Leap environment for multifpga development v15.02
+Access=https://github.com/LEAP-Core/leap-multifpga
+Tag=v15.02

@@ -80,6 +80,11 @@ Description=AWB v14.08
 Access=https://github.com/AWB-Tools/awb
 Tag=v14.08
 
+[awb/v15.02]
+Description=AWB v15.02
+Access=https://github.com/AWB-Tools/awb
+Tag=v15.02
+
 ####### Asimcore
 
 [asimcore]
@@ -125,6 +130,11 @@ Tag=v13.06
 Description=Asim Core v14.08
 Access=https://github.com/Asim-Modeling/asimcore.git
 Tag=v14.08
+
+[asimcore/v15.02]
+Description=Asim Core v15.02
+Access=https://github.com/Asim-Modeling/asimcore.git
+Tag=v15.02
 
 ###### Feeder
 

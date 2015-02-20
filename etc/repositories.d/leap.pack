@@ -44,6 +44,11 @@ Description=Leap environment v14.08
 Access=https://github.com/LEAP-Core/leap
 Tag=v14.08
 
+[leap/v15.02]
+Description=Leap environment v15.02
+Access=https://github.com/LEAP-Core/leap
+Tag=v15.02
+
 ###### Leap debug trunk
 
 [leap-debug]
@@ -153,6 +158,11 @@ Tag=v13.06
 Description=Leap FPGA Platforms v14.08
 Access=https://github.com/LEAP-Core/leap-platforms
 Tag=v14.08
+
+[leap-platforms/v15.02]
+Description=Leap FPGA Platforms v15.02
+Access=https://github.com/LEAP-Core/leap-platforms
+Tag=v15.02
 
 ###### Leap workloads trunk
 
