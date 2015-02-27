@@ -1,6 +1,5 @@
-awb (14.08~git1406922332r063f9b91246ea05fa6120b80a4647abfe2c4e6d4+precise) precise; urgency=low
+awb (15.02~gitee680ee52630b2811d16bf4e9ae6902d6a299ca8+trusty) trusty; urgency=low
 
-  [ Joel Emer ]
-  * Move to version 14.08
+  * Move to version 15.02
 
- -- Joel Emer <emer@csail.mit.edu>  Tue, 05 Aug 2014 15:24:24 -0400
+ -- Kermin E Fleming <kfleming@leap.csail.mit.edu>  Mon, 23 Feb 2015 18:50:30 -0500

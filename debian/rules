@@ -15,7 +15,7 @@
 
 # Set the release name for the <package>-<release> .deb file
 #RELEASE = $(shell $(MAKE) print-release-name | sed 's/v//' )
-RELEASE = 14.08
+RELEASE = 15.02
 
 ifeq ($(shell [ -x /usr/bin/lsb_release -a `lsb_release -s -i` = "Ubuntu" -a `lsb_release -s -r | sed 's/\.//'` -ge 1110 ] && echo yes),yes)
 	SUBSTVARS = -Vperlqt:Depends="perlqt-dev"
