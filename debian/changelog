@@ -1,3 +1,9 @@
+awb (15.02~gitee680ee52630b2811d16bf4e9ae6902d6a299ca8+trustyubuntu1) trusty; urgency=medium
+
+  * Changed maintainer name, changed release metadata. 
+
+ -- Kermin E Fleming <kfleming@leap.csail.mit.edu>  Fri, 27 Feb 2015 13:58:06 -0500
+
 awb (15.02~gitee680ee52630b2811d16bf4e9ae6902d6a299ca8+trusty) trusty; urgency=low
 
   * Move to version 15.02

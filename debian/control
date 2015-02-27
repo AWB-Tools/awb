@@ -1,7 +1,7 @@
 Source: awb
 Section: devel
 Priority: optional
-Maintainer: Joel Emer <emer@csail.mit.edu>
+Maintainer: Kermin Fleming <kermin.fleming@gmail.com>
 Build-Depends: debhelper (>= 7), gcc, g++, autotools-dev, libqt4-dev, libpopt-dev
 Standards-Version: 3.8.4
 
