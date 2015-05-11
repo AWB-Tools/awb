@@ -4012,6 +4012,26 @@ sub replace_module {
   $model->save();
 }
 
+sub new_submodel {
+    my $modulefile = shift;
+    my $submodelfile = shift;
+
+    # submodel may not exist yet, so it needs extra handling                                                                                     
+
+    (my $subvolume, my $subdir , my $subfile) = File::Spec->splitpath( $submodelfile );
+    my $sub_resolved_path = $Asim::default_workspace->resolve($subdir);
+
+    my $submodel = Asim::Model->new();
+
+    my $submodule = get_module($modulefile);
+
+    $submodel->modelroot($submodule);
+
+    $submodel->save("$sub_resolved_path/$subfile");
+}
+
+################################################################ 
+
 ################################################################
 #
 # Submodel functions
