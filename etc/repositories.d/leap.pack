@@ -196,6 +196,18 @@ Description=Leap Platforms Altera
 Access=https://github.com/LEAP-Core/leap-platforms-altera
 Tag=HEAD
 
+###### LEAP Intel platform libraries
 
+[leap-platforms-intel]
+Description=Leap Platforms Intel
+Method=git
+Access=https://github.com/LEAP-Core/leap-platforms-intel
+Module=undefined
+Tag=HEAD
+Target=leap-platforms-intel
+BrowseURL=https://github.com/LEAP-Core/leap-platforms-intel
 
-
+[leap-platforms-intel/HEAD]
+Description=Leap Platforms Intel
+Access=https://github.com/LEAP-Core/leap-platforms-intel
+Tag=HEAD
