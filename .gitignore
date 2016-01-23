@@ -47,6 +47,7 @@
 /libperl/Asim/blib
 /libperl/Asim/Makefile
 /libperl/Asim/MYMETA.yml
+/libperl/Asim/MYMETA.json
 
 # /libperl/Asim/lib/
 #/libperl/Asim/lib/
@@ -56,24 +57,28 @@
 /libperl/AsimShell/blib
 /libperl/AsimShell/Makefile
 /libperl/AsimShell/MYMETA.yml
+/libperl/AsimShell/MYMETA.json
 
 # /libperl/Benchmarks/
 /libperl/Benchmarks/blib
 /libperl/Benchmarks/pm_to_blib
 /libperl/Benchmarks/Makefile
 /libperl/Benchmarks/MYMETA.yml
+/libperl/Benchmarks/MYMETA.json
 
 # /libperl/PinPoints/
 /libperl/PinPoints/pm_to_blib
 /libperl/PinPoints/blib
 /libperl/PinPoints/Makefile
 /libperl/PinPoints/MYMETA.yml
+/libperl/PinPoints/MYMETA.json
 
 # /libperl/PlotShell/
 /libperl/PlotShell/pm_to_blib
 /libperl/PlotShell/blib
 /libperl/PlotShell/Makefile
 /libperl/PlotShell/MYMETA.yml
+/libperl/PlotShell/MYMETA.json
 
 # /share/
 /share/awb.config.template

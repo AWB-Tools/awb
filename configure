@@ -20286,11 +20286,11 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
-    "libperl/Asim/Makefile":C) cd libperl/Asim;      perl Makefile.PL PREFIX=$prefix INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
-    "libperl/AsimShell/Makefile":C) cd libperl/AsimShell; perl Makefile.PL PREFIX=$prefix INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
-    "libperl/Benchmarks/Makefile":C) cd libperl/Benchmarks; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
-    "libperl/PinPoints/Makefile":C) cd libperl/PinPoints; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
-    "libperl/PlotShell/Makefile":C) cd libperl/PlotShell; perl Makefile.PL PREFIX=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/Asim/Makefile":C) cd libperl/Asim;      perl Makefile.PL INSTALL_BASE=$prefix INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/AsimShell/Makefile":C) cd libperl/AsimShell; perl Makefile.PL INSTALL_BASE=$prefix INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/Benchmarks/Makefile":C) cd libperl/Benchmarks; perl Makefile.PL INSTALL_BASE=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/PinPoints/Makefile":C) cd libperl/PinPoints; perl Makefile.PL INSTALL_BASE=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
+    "libperl/PlotShell/Makefile":C) cd libperl/PlotShell; perl Makefile.PL INSTALL_BASE=$prefix  INSTALLDIRS=$perlinstalldirs; cd ../.. ;;
     "tools/scripts/asimstarter":F) chmod +x tools/scripts/asimstarter ;;
     "tools/scripts/awb-pkg-config":F) chmod +x tools/scripts/awb-pkg-config ;;
 
