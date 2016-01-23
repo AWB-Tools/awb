@@ -6,6 +6,7 @@
 # * @author Joel Emer
 # *
 # Copyright (C) 2016 Nvidia Corporation
+# Copyright (c) 2009 Intel Corporation
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -378,14 +379,13 @@ sub p4 {
 
 =head1 AUTHORS
 
-    Joel Emer
+    Joel Emer, Mohit Gambhir
 
 =head1 COPYRIGHT
 
-Copyright (C) 2016 Nvidia Corporation
+Copyright (c) Nvidia Corporation, 2016 
+Copyright (c) Intel Corporation, 2009
 
-All Rights Reserved.  Unpublished rights reserved
-under the copyright laws of the United States.
 
 =cut
 

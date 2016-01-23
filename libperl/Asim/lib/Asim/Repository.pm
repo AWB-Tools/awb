@@ -27,6 +27,7 @@ use Asim::Repository::Cvs;
 use Asim::Repository::BitKeeper;
 use Asim::Repository::Copy;
 use Asim::Repository::Git;
+use Asim::Repository::Hg;
 use Asim::Repository::P4;
 use Asim::Repository::Public;
 
@@ -37,7 +38,7 @@ our $DEBUG =  0
 
 =head1 NAME
 
-Asim::Repository - Library for manipulating a CVS/Svn/Bitkeeper/Git/P4 repositry containing an Asim repository.
+Asim::Repository - Library for manipulating a CVS/Svn/Bitkeeper/Git/Hg/P4 repositry containing an Asim repository.
 
 =head1 SYNOPSIS
 
@@ -59,7 +60,7 @@ The following public methods are supported:
 =over 4
 
 =item $repository = Asim::Repository-E<gt>new(packagename => <name of package>,
-                                        method => [cvs|svn|bitkeeper|git],
+                                        method => [cvs|svn|bitkeeper|git|hg],
                                         access => <accessinfo>,
                                         module => <CVSmodule>,
                                         tag => <CVStag>,
@@ -93,6 +94,7 @@ sub new {
   Asim::Repository::BitKeeper::set_type( $self ) ||
   Asim::Repository::Svn::set_type      ( $self ) ||
   Asim::Repository::Git::set_type      ( $self ) ||
+  Asim::Repository::Hg::set_type       ( $self ) ||
   Asim::Repository::P4::set_type       ( $self ) ||
   Asim::Repository::Public::set_type   ( $self ) ;
 

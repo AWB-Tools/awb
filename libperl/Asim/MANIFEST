@@ -7,10 +7,14 @@ lib/Asim/BuildTree/Configuration.pm
 lib/Asim/GenCFG/Auto.pm
 lib/Asim/Package/Copy.pm
 lib/Asim/Package/Git.pm
+lib/Asim/Package/Hg.pm
+lib/Asim/Package/P4.pm
 lib/Asim/Repository/BitKeeper.pm
 lib/Asim/Repository/Copy.pm
 lib/Asim/Repository/Cvs.pm
 lib/Asim/Repository/Git.pm
+lib/Asim/Repository/Hg.pm
+lib/Asim/Repository/P4.pm
 lib/Asim/Repository/Public.pm
 lib/Asim/Repository/Svn.pm
 lib/Asim/Stats/ToText.pm

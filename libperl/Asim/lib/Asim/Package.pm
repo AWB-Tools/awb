@@ -36,6 +36,7 @@ use Asim::Package::Cvs;
 use Asim::Package::BitKeeper;
 use Asim::Package::Svn;  
 use Asim::Package::Git;  
+use Asim::Package::Hg;  
 use Asim::Package::P4;  
 use Asim::Package::Util;
 use Asim::Package::Commit;
@@ -235,6 +236,7 @@ sub init {
   Asim::Package::Svn::init();
   Asim::Package::BitKeeper::init();
   Asim::Package::Git::init();
+  Asim::Package::Hg::init();
   Asim::Package::P4::init();
 }
 
@@ -361,6 +363,7 @@ sub open {
   Asim::Package::BitKeeper::set_type( $self ) ||
   Asim::Package::Svn::set_type      ( $self ) ||
   Asim::Package::Git::set_type      ( $self ) ||
+  Asim::Package::Hg::set_type       ( $self ) ||
   Asim::Package::P4::set_type       ( $self ) ||
   Asim::Package::set_type           ( $self );
 

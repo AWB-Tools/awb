@@ -404,6 +404,7 @@ sub get_repository {
   # Make CVS happy by converting  .'s to _'s in tag
 
   $cvstag = $tag;
+
   if (! $method) {
     if( $fullname =~ m/^(.+):\/\/(.+)$/) {
     # path to a distributed repository. method can be git/mercurial/bitkeeper
@@ -448,7 +449,7 @@ sub get_repository {
 
   # Following will eventually be conditional on "Method";
 
-  if ( $method  =~ /cvs|pserver|bitkeeper|svn|git|p4/ ) {
+  if ( $method  =~ /^(cvs|pserver|bitkeeper|svn|git|hg|p4)$/ ) {
     $access    = $self->_get_item($fullname, "Access")    || return undef;
     $module    = $self->_get_item($fullname, "Module")    || return undef;
     $target    = $self->_get_item($fullname, "Target")    || return undef;
@@ -457,11 +458,13 @@ sub get_repository {
     my $repo_cmd=$self->_get_item($fullname, "RepoCmd"); # repository access command override
     
     # Set repository type. Bitkeeper should be distributed eventually.
-    if (($method eq "git")) {
+
+    if ($method =~ /^(git|hg)$/) {
       $type = "distributed";
     } else {
       $type = "centralized";
     }
+
     # Note: 
     #   We depend on the packagename matching the package filename,
     #   i.e., the filename in the admin/package directory, 

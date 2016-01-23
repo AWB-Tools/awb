@@ -1,0 +1,888 @@
+#
+# *****************************************************************************
+# *
+# * @brief Hg.pm : utility methods to handle Hg (Mercurial) repositories
+# *
+# * @author Joel Emer
+# *
+# Copyright (c) Nvidia Corporation, 2016
+# Copyright (c) Intel Corporation, 2009
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
+#
+# *****************************************************************************
+#
+
+
+package Asim::Package::Hg;
+use warnings;
+use strict;
+
+use File::Basename;
+
+our @ISA = qw(Asim::Package);
+
+
+# Commit wide variables defined in  Commit.pm
+
+our $HOSTNAME;
+our $DATE;
+our $DATE_UTC;
+
+our $TMPDIR;
+our $HOST;
+our $USER;
+
+our $PROBLEM;
+
+=head1 NAME
+
+Asim::Package::Hg - Class to manipulate a checked out Hg repository.
+
+=head1 SYNOPSIS
+
+use Asim::Package::Hg;
+
+Asim::Package::Hg::init();
+
+my $hg = Asim::Package::Hg->new("~/hgdir");
+
+$hg->push();
+
+$hg->pull();
+
+
+=head1 DESCRIPTION
+
+This is a class to allow a directory to be treated as 
+a Hg repository. 
+
+This is a subclass of Asim::Package.  After creating an instance of Asim::Package,
+you can call the set_type() method here to check whether the package is in a Hg
+repository and set it to this subclass if so.  Set_type will return 1 if it is a
+Hg package.  If it returns 0, you should keep checking other repository types.
+
+=head1 METHODS
+
+The following methods are supported:
+
+=over 4
+
+=item $cvs = Asim::Package::Hg::set_type( $package )
+
+If $package is an Hg repository, set the object's subclass to Asim::Package::Hg and return 1.
+Otherwise return 0.
+
+=cut
+
+sub set_type {
+  my $self = shift;
+  my $location = $self->location();
+  # If there is a ".hg" subdirectory, then this is Mercurial (hg):
+  if (-e "$location/.hg") {
+    bless $self;
+    return 1;
+  }
+  return 0;
+}
+
+=item $package-E<gt>type()
+
+Return type of package - "hg" in this case.
+
+=cut
+
+sub type {
+  return 'hg';
+}
+
+=item $hg = Asim::Package::Hg:init()
+
+Global init of Hg module.
+
+=cut
+
+sub init {
+  # Deal with any Hg environment variables
+  1;
+}
+
+=item $hg-E<gt>pull([version])
+
+Fetch form or merge with another repository or local branch.
+
+If an optional branch string is specified,
+update the package to that branch.
+The version specifier can be the name of a branch or the name of a tag.
+
+=cut
+
+sub pull {
+  my $self = shift;
+  my $branch = shift || undef;
+
+  my $url = $self->{url} || "";
+  my $location = $self->location();
+
+  # Check if the branch exists in the remote repository
+
+  my $found = 0;
+
+  # TBD: Check if the remote branch actually exists
+  $found = 1;
+
+  if (! $found ) {
+    # branch does not exist in the remote repository
+    Asim::Package::ierror ("Branch $branch does not exist in the remote repository. \
+    You probably checked out a specific commit tag\
+    Consider checking out master branch and then pull\
+    awb-shell checkout package <name>/master\
+    awb-shell pull package name\
+    If you have local changes then consider merging with master\n")  ;
+    return undef;
+  } 
+
+  my $command = "pull -u $url";
+  my $status = $self->hg($command);
+
+  if ($status) {
+      return undef;
+  }
+ 
+  return 1;
+}
+
+=item $hg-E<gt>update([version])
+
+Update the package by pulling from parent repository.
+
+=cut
+
+sub update {
+  
+  my $self = shift;
+
+  return $self->pull();
+}
+
+=item $hg-E<gt>commit([version])
+
+Commit local changes in the workspace to the local hg repository
+
+=cut
+
+sub commit {
+  my $self = shift;
+  my $only_self = shift || 0;
+  my $commitlog_file = shift;
+
+  print "Commit: Starting a commit on package: " . $self->name() . "\n";
+
+  #
+  # If user specified a commitlog make sure it exists
+  #
+  if (defined($commitlog_file)) {
+    if ( ! -r $commitlog_file ) {
+      commit_failure("Sorry: user specified commitlog ($commitlog_file) is not readable or does not exist");
+      return 0;
+    }
+  }
+
+
+ $self->commit_check($commitlog_file)
+   || commit_failure("Cannot commit from this state") && return 0;
+
+  print "Commit: Status " . $self->{status} . "\n";
+
+  if ($self->{status} eq "No-commit-needed") {
+    return 0;
+  }
+
+  $self->isprivate()
+    || commit_failure("You are using a shared package that is not up-to-date.\n" .
+                      "Check out the package or get the shared package updated.\n") &&  return 0;
+
+   # Actual commit stage
+   print "Commit: I am about to commit your changes. \n\n";
+
+  if (! Asim::choose_yes_or_no("Do you really want to proceed and commit","response_required","yes")) {
+    $self->{status} = "";
+    return 0;
+  }
+
+  # Do the actual commit
+  my $command = "commit -a ";
+  if ( defined($commitlog_file) ) {
+    $command = $command . " -F $commitlog_file";
+  }
+  my $ret = $self->hg($command);
+  if ( $ret ) {
+    Asim::Package::ierror("Commit: Fatal error during hg commit: return code: $ret \n".
+            "Commit: You commit message may be found at \$HG_DIR/COMMIT_EDITMSG \n");
+    return 0;
+  }
+
+  return 1;
+  
+}
+
+=item $hg-E<gt>commit_check()
+
+A set of checks to make sure that we have a 
+reasonable chance of succeeding at a commit
+
+=cut
+
+sub commit_check {
+  my $self = shift;
+  my $reportfile = shift || "/dev/null";
+
+  print "Commit: Checking the status of your source...\n";
+
+  $self->{status} = "No-commit-needed";
+  $self->{must_have_regression} = 0;
+  $self->{regtestdir} = undef;
+
+  #
+  # FIXME
+  #
+  # Since status() doesn't yet work for hg we just fail for now
+  # rather than actually doing the status check
+  #
+
+  $self->{status} = "Not-ready-to-commit";
+  return 0;
+
+  my @files = $self->status();
+
+  if (! defined($files[0])) { 
+    # if no files came up in hg status then the workspace is upto date
+    $self->{status} = "No-commit-needed";
+    return 1;
+  }
+  
+  my $fail = 0;
+
+  foreach my $i (@files) {
+    my ($file, $status) = @{$i};
+    my $VERBOSE = 1;
+
+    if ( $status =~ /unmerged/ || $status =~ /unknown/)
+    {
+      print ("Commit: File: $file has unacceptable state \"$status\" \n");
+      $fail = 1;
+    }
+    else {
+      $self->{status} = "Commit-needed";
+    }
+  }
+
+  if ($fail) {
+    print "\n";
+    print "Commit: Sorry, one or more files are not up-to-date with respect to the repository\n";
+    print "Commit: Before attempting to commit again try:\n";
+    print "\n";
+    print "      (1) update package " . $self->name() . "\n";
+    print "      (2) merge your changes (if any)\n";
+    print "      (3) re-run the regression test\n";
+    print "      (4) re-run commit\n\n";
+
+    $self->{status} = "Not-ready-to-commit";
+    return 0;
+  }
+
+  return 1;
+}
+
+=item $hg-E<gt>push_check()
+
+A set of checks to make sure that we have a 
+reasonable chance of succeeding at a push
+
+=cut
+
+sub push_check {
+  my $self = shift;
+  my $location = $self->location();
+  $self->{status} = "No-push-needed";
+
+  #
+  # FIXME
+  #
+  # Really check if there is something to push.
+  # For now we just say there is
+  #
+
+  $self->{status} = "Push-needed";
+
+  return 1;
+}
+
+=item $hg-E<gt>status()
+
+Check on the Hg status of each file in the current package
+
+Return a array with one element for each file returned 
+by 'hg status' addin state:
+
+Each array element contains:
+
+ ($directory, $filename, $status, $reprev, $date)
+
+=cut
+
+sub status {
+  my $self = shift;
+  my $location = $self->location();
+  my @files = ();
+
+
+  #
+  # FIXME
+  #
+  # For now just return an empty list
+  #
+
+  Asim::Package::ierror("status: Hg status unimplemented - assuming success\n");
+  return ();
+
+  # Execute 'hg status' to see all the changes that have been made.
+  
+  my $tmp_hg_status = "/tmp/awb-shell-hg-status.$$";
+
+  system("cd $location; hg status >$tmp_hg_status 2>&1");
+ 
+  if (! CORE::open(Hg,"< $tmp_hg_status") ) {
+    Asim::Package::ierror("status: Can't launch 'hg status 1': $!\n");
+    return undef;
+  }
+
+  # Parse the Hg status
+
+  my $fail = 0;
+
+  my $VERBOSE = 0;
+
+  while (<Hg>) {
+    my $file = "";
+    my $status = "";
+
+    print "hg status returned: $_" if ( $VERBOSE );
+    #
+    # Hack in case the remotes/origin/master ssh command asks for a password
+    #
+    if ( /password:/) {
+      print "$_\n";
+    }
+    
+    if ( /^#*\s+(.+):\s+(.+)$/ ) {
+      $status = $1;
+      $file = $2;
+    }
+    
+    if ($status and $file) {
+       my ($filnam, $dir) = fileparse($file);
+       chop $dir if ($dir =~ m/\/$/); # remove trailing "/" from directory
+       push(@files, [$dir, $filnam, $status, '', '']); # no rev# or date information from Hg
+    }
+  }
+  CORE::close(Hg);
+  system("rm $tmp_hg_status");
+  
+  return (@files);
+}
+
+
+=item $hg->hg_command( <command> )
+
+Issue a Hg command robustly.
+
+=cut
+
+sub hg_command {
+  my $self = shift;
+  my $command = shift;
+
+  our $NUM_RETRY;
+
+  my $ret;
+
+  #
+  # Command retries for hg
+  #
+  if (! defined($NUM_RETRY)) {
+    $NUM_RETRY = 5;
+  }
+
+  #
+  # Try the command -- repeat a few times on failures
+  #
+  foreach my $retry (1..$NUM_RETRY) {
+    $ret = $self->hg($command);
+    if ($ret == 0) {
+      last;
+    }
+
+    if ($retry < $NUM_RETRY) {
+      printf "Caught error during hg operation - retrying %d more times\n",
+      $NUM_RETRY - $retry;
+      sleep 5;
+    } else {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+=item $hg->hg( <command> )
+
+Issue an HG command directly.  Don't retry if it fails.
+
+=cut
+
+sub hg {
+  my $self = shift;
+  my $command = shift;
+  #
+  # Make sure we are at the root of the checked out files
+  #
+  my $location = $self->location; 
+  my $ret;
+
+  my $VERBOSE = 1;
+
+  #
+  # Now do it
+  #
+  $command = "(cd $location; ".$self->repo_cmd()." $command)";
+  print "$command\n" if $VERBOSE;
+
+  $ret = system("$command") >> 8;
+
+  return $ret;
+}
+
+=item $hg->is_public_repo( <url> )
+
+Check to see if the URL is that of a public hg repository
+
+=cut
+
+sub is_public_repo {
+  my $self = shift;
+  my $url = shift;
+
+  if ($url =~ m/devtools.intel.com/) {
+    return 1;
+  }
+
+  return 0;
+}
+
+
+
+###############################################################
+#
+# Function: push
+#
+#    This is the umbrella function for performing a hierarchical
+#    push of a package and the packages it depends on.
+#
+#    1) Sanity checking
+#       a) make sure global environemnt is ready
+#       a) get packages dependent on this one
+#       b) make sure they are visible in path
+#
+#    2) Run regression
+#
+#    3) Lock Repositories
+#       a) lock repositories
+#       b) abort if packages are not up to date
+#
+#    4) Prepare each package to push
+#       a) package up regression results
+#       b) obtain new CSN and update
+#
+#    5) Commit each package
+#
+#    6) Unlock Repositories
+#
+################################################################
+
+sub push_package {
+  my $self = shift;
+  my $only_self = shift || 0;
+
+  my $stop_push = 0;
+  my $success = 0;
+
+  if (! defined ($self->{url})) {
+    $self->{url} = "origin";
+  }
+  if (!defined($self->{branch})) {
+      $self->{branch} = $self->get_current_branch();
+  }
+  my @all;
+  print "Push: Starting a push of package: " . $self->name() . "\n";
+  print "Push: Target URL " . $self->{url} . "\n";
+  print "Push: Branch  " . $self->{branch} . "\n";
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Sanity Check", 0);
+  $self->banner();
+
+  $self->sanity_stage()
+    || return ();
+
+  # Find dependent packages that are checked out....
+
+  if ($only_self) {
+    @all = ($self);
+  } else {
+    @all = ();
+
+    foreach my $dp ($self->get_dependent_packages()) {
+      if ( ! $dp->isprivate()) {
+        print "Push: Skipping private dependent package: " . $dp->name() . "\n";
+        next;
+      }
+
+      push(@all, $dp);
+    }
+  }
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Lock the relevant repositories");
+  
+  $self->SUPER::lockall(@all) || return 0;
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Check if packages are ready to be pushed");
+
+  foreach my $p (@all) {
+    $p->banner();
+
+    if (! $p->check_stage()) {
+      $stop_push = 1;
+    }
+  }
+
+  ## Instead of exiting when the first package is not up-to-date,
+  ## check the status of all packages and then exit.
+  if ($stop_push == 1) {
+    $self->SUPER::unlockall(@all);
+    return ();
+  }
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Do necessary updates of package in preparation for a push");
+
+  Asim::Xaction::start();
+
+  foreach my $p (@all) {
+    $p->banner();
+
+    if (! $p->prepare_stage()) {
+      unlockall(@all);
+      Asim::Xaction::abort();
+      return ();
+    }
+  }
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Do actual push");
+
+  print "Push: I am about to push your changes. This is your last chance...\n\n";
+
+  if (! Asim::choose_yes_or_no("Do you really want to proceed and push","response_required","yes")) {
+    $self->{status} = "";
+    $self->SUPER::unlockall(@all);
+    Asim::Xaction::abort();
+    return 0;
+  }
+
+  Asim::disable_signal();
+
+  foreach my $p (@all) {
+    $p->banner();
+    $success = $p->push_stage();
+    if (! ($success)) {
+        $self->SUPER::unlockall(@all);
+        Asim::Xaction::abort();
+        Asim::enable_signal();
+        return 0;
+    }
+  }
+
+  Asim::Xaction::commit();
+
+#########      ###########      ###########      ###########      ###########
+
+  $self->step("Unlock the repositories");
+
+  $self->SUPER::unlockall(@all);
+
+  Asim::enable_signal();
+
+  return 1;
+}
+
+################################################################
+#
+# Function: sanity_stage
+#
+# A set of onetime checks to make sure that we have a 
+# reasonable chance of succeeding at a push
+#
+################################################################
+
+sub sanity_stage {
+  my $self = shift;
+  
+  $| = 1;
+
+  #
+  # Some utility programs
+  #
+  # TODO: We shouldn't just rely on these being in the path
+  #
+  $HOSTNAME = "hostname";
+  $DATE = "date";
+  $DATE_UTC = "date -u";
+
+  #
+  # Some global variables
+  #
+  $HOST = `$HOSTNAME`;
+  chop $HOST;
+
+  $USER = $ENV{'USER'};
+
+  #
+  # Indicate we haven't seen big problems yet
+  #
+  $PROBLEM = 0;
+
+  print "Push: You seem to have a reasonable environment to push your changes\n";
+
+  return 1;
+}
+
+################################################################
+#
+# Function:
+#
+#
+#
+################################################################
+
+sub check_stage {
+  my $self = shift;
+
+  #
+  # Check on the hg status of the package
+  #
+  our $checkindex++;
+
+  $self->push_check() 
+      || push_failure("Cannot push from this state") && return 0;
+  
+  print "Push: Status " . $self->{status} . "\n";
+
+  if ($self->{status} eq "No-push-needed") {
+    return 1;
+  }
+
+  $self->isprivate()
+    || push_failure("You are using a shared package that is not up-to-date.\n" .
+                      "Check out the package or get the shared package updated.\n") && return 0;
+
+  return 1;
+}
+
+
+################################################################
+#
+# Function: 
+#
+# 
+#
+################################################################
+
+sub prepare_stage {
+  my $self = shift;
+
+  if ($self->{status} eq "No-push-needed") {
+    print "Push: No push needed for this package, so nothing to do here...\n";
+    if ( $self->{reportfile} ) 
+    {
+    system("rm $self->{reportfile}");
+    }
+    return 1;
+  }
+
+  $self->update_gold_results()
+    || push_failure("Unable to update gold stats") && return 0;
+
+  $self->do_we_want_regression_results()
+    || push_failure("Unable to get regression results") && return 0;
+
+  $self->get_regression_results()
+    || push_failure("Unable to get regression results") && return 0;
+
+  $self->update_ipchist()
+    || push_failure("Unable to update ipchist file") && return 0;
+
+  return 1;
+}
+
+
+################################################################
+#
+# Function: 
+#
+# 
+#
+################################################################
+
+sub push_stage {
+  my $self = shift;
+
+  if ($self->{status} eq "No-push-needed") { 
+    print "Push: No push needed for this package, so nothing to do here...\n";
+    $self->{status} = "";
+    return 1;
+  }
+
+  $self->push_archive()
+    || Asim::Package::ierror("Trouble with hg push\n") && return 0;
+
+  $self->push_regtest()
+    || Asim::Package::ierror("Trouble with push of regtest\n") && return 0;
+
+  $self->{status} = "";
+  return 1;
+}
+
+################################################################
+#
+# Function: 
+#
+# 
+#
+################################################################
+
+
+sub push_archive {
+  my $self = shift;
+  my $command;
+  my $success;
+
+  my $push_url = $self->{url};
+
+  $command = "hg config --get remote.origin.url";
+  my $origin_url = `$command`;
+  $origin_url =~ s/:\/\/.*@/:\/\//;
+  chomp $origin_url;
+  if ( $origin_url eq $push_url ) {
+    # if the origin URL is the same as URL being pushed to then use origin
+    # alias instead. This lets hg know that changeset is being pushed to 
+    #the origin
+    $push_url = "origin";
+  }
+  
+  $self->save();
+
+  #
+  # Execute 'hg push' to see all the changes that have been made.
+  #
+  print "Push: Really pushing....\n";
+
+  if (!defined($self->{branch})) {
+      $self->{branch} = $self->get_current_branch();
+  }
+  # push changes from local repository into a remote repository
+  $command = "push $push_url $self->{branch}";
+  if ( $self->hg($command) ) {
+    Asim::Package::ierror("Push: Fatal error during hg push. Exiting! \n");
+    return 0;
+  }
+  
+  return 1;
+}
+
+sub push_regtest {
+  my $self = shift;
+  my $regression = $self->{regression}
+    || return 1;
+
+  my $tarfile = $self->{tarfile};
+
+  #
+  # Tar and save regression results
+  #
+  $regression->tar_and_save($tarfile);
+
+  return 1;
+}
+
+################################################################
+#
+# Functions to call in the event of problems
+#
+################################################################
+
+sub push_failure {
+  my $message = shift;
+
+  print "\n";
+  print "Push: I am sorry but there were problems with your push attempt\n";
+  print "Push: so if you can fix the problem you can try to push again\n";
+  print "\n";
+  print "Push: The error I received was: ------ $message -----\n";
+  print "\n";
+
+  return 1;
+}
+
+
+
+=back
+
+
+
+=head1 AUTHORS
+
+Joel Emer based on Git.pm by
+  Mohit Gambhir based on Svn.pm by
+    Sailashri Parthasarathy, Carl Beckmann based on Bitkeeper.pm by
+      Oscar Rosell based on Cvs.pm by
+        Joel Emer, Roger Espasa, Artur Klauser and  Pritpal Ahuja
+
+=head1 COPYRIGHT
+
+Copyright (c) Nvidia Corporation, 2016
+Copyright (c) Intel Corporation, 2009
+
+=cut
+
+1;
