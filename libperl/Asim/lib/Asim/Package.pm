@@ -36,6 +36,7 @@ use Asim::Package::Cvs;
 use Asim::Package::BitKeeper;
 use Asim::Package::Svn;  
 use Asim::Package::Git;  
+use Asim::Package::P4;  
 use Asim::Package::Util;
 use Asim::Package::Commit;
 use Asim::Package::Branch;
@@ -234,6 +235,7 @@ sub init {
   Asim::Package::Svn::init();
   Asim::Package::BitKeeper::init();
   Asim::Package::Git::init();
+  Asim::Package::P4::init();
 }
 
 ################################################################
@@ -359,6 +361,7 @@ sub open {
   Asim::Package::BitKeeper::set_type( $self ) ||
   Asim::Package::Svn::set_type      ( $self ) ||
   Asim::Package::Git::set_type      ( $self ) ||
+  Asim::Package::P4::set_type       ( $self ) ||
   Asim::Package::set_type           ( $self );
 
   return $self;
@@ -422,11 +425,14 @@ sub check {
 
   #
   # Check for standard files
+  #    Only for cvs, svn, bitkeeper - not for git, p4
   #
-  foreach my $f ($MYTAGS) {
-    if (! -e "$location/$f" && ! -e $f && $self->type ne 'git') {
-      ierror("Corrupted package - Missing file $f\n");
-      return 0;
+  if ( $self->type =~ /cvs|svn|bitkeeper/ ) {
+    foreach my $f ($MYTAGS) {
+      if (! -e "$location/$f" ) {
+        ierror("Corrupted package - Missing file $f\n");
+        return 0;
+      }
     }
   }
 

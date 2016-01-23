@@ -3,14 +3,26 @@
 # *
 # * @brief P4.pm : utility methods to handle P4 repositories
 # *
-# * @author Mohit Gambhir
+# * @author Joel Emer
 # *
-# * Copyright (c) 2009 Intel Corporation, all rights reserved.
-# * THIS PROGRAM IS AN UNPUBLISHED WORK FULLY PROTECTED BY COPYRIGHT LAWS AND
-# * IS CONSIDERED A TRADE SECRET BELONGING TO THE INTEL CORPORATION.
-# *
-# *****************************************************************************
+# Copyright (C) 2016 Nvidia Corporation
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# 
 #
+
 
 package Asim::Repository::P4;
 use warnings;
@@ -40,8 +52,10 @@ Asim::Repository::P4::checkout();
 This is a class to allow access to an p4 repository
 
 This is a subclass of Asim::Repository.  After creating an instance of 
-Asim::Repository, you can call the set_type() method here to check whether the package type in asim.pack is P4 and set it to this subclass if so.  Set_type will return 
-1 if it is a P4 package.  If it returns 0, you should keep checking other repository types.
+Asim::Repository, you can call the set_type() method here
+to check whether the package type in asim.pack is P4 and set it to this subclass if so.
+Set_type will return  1 if it is a P4 package.  
+If it returns 0, you should keep checking other repository types.
 
 =cut
 
@@ -164,13 +178,11 @@ sub checkout {
 
   print "Path = $p4path\nServer= $p4server\n";
 
-#There is no error checking here! 
-#@- Need to check DST was created successfully
-#- Need to check it is in the AWB workspace (?)
-#- Need to check P4 server exists
-#- I don't know how to check if a target directory exists in the P4 server
-#- Need to check client creation was successful ...
-
+  # TBD: There needs to be more error checking here! 
+  #
+  #   - Need to check $target was created successfully
+  #   -  Need to check P4 server exists
+  #   - Need to check client creation was successful ...
 
   # Create the target directory
 
@@ -189,13 +201,7 @@ sub checkout {
   print P4CLIENT "P4CLIENT=$p4clientname\n";
   close P4CLIENT;
 
-#PACK =   // AWB package name
-
-#SERVER = // Perforce server:port
-#SRC =    // Perforce source directory
-#DST =    // Local target directory
-
-# Create a p4 client on the server
+  # Create a p4 client on the server
 
   open P4CLIENT, "|p4 client -i";
   print P4CLIENT "# Perforce client auto-generated from AWB\n";
@@ -219,8 +225,7 @@ sub checkout {
   print P4CLIENT "\t$p4path/... //$p4clientname/...\n";
   close P4CLIENT;
 
-  my $cmd = "(cd $package_dir; " . $self->repo_cmd() . " sync ";
-  $cmd .= ")";
+  my $cmd = "(cd $package_dir; " . $self->repo_cmd() . " sync)";
   
   printf STDERR "Executing: %s\n", $cmd;
   $status = system($cmd);
@@ -256,11 +261,11 @@ sub ierror {
 
 =head1 AUTHORS
 
-Mohit Gambhir
+Joel Emer
 
 =head1 COPYRIGHT
 
-Copyright (c) Intel Corporation, 2009
+Copyright (C) 2016 Nvidia Corporation
 
 All Rights Reserved.  Unpublished rights reserved
 under the copyright laws of the United States.

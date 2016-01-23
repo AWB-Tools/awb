@@ -448,7 +448,7 @@ sub get_repository {
 
   # Following will eventually be conditional on "Method";
 
-  if (($method eq "cvs") || ($method eq "pserver") || ($method eq "bitkeeper") || ($method eq "svn") || ($method eq "git")) {
+  if ( $method  =~ /cvs|pserver|bitkeeper|svn|git|p4/ ) {
     $access    = $self->_get_item($fullname, "Access")    || return undef;
     $module    = $self->_get_item($fullname, "Module")    || return undef;
     $target    = $self->_get_item($fullname, "Target")    || return undef;

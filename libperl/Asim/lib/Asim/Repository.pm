@@ -27,6 +27,7 @@ use Asim::Repository::Cvs;
 use Asim::Repository::BitKeeper;
 use Asim::Repository::Copy;
 use Asim::Repository::Git;
+use Asim::Repository::P4;
 use Asim::Repository::Public;
 
 our $DEBUG =  0
@@ -36,7 +37,7 @@ our $DEBUG =  0
 
 =head1 NAME
 
-Asim::Repository - Library for manipulating a CVS/Svn/Bitkeeper/Git repositry containing an Asim repository.
+Asim::Repository - Library for manipulating a CVS/Svn/Bitkeeper/Git/P4 repositry containing an Asim repository.
 
 =head1 SYNOPSIS
 
@@ -92,6 +93,7 @@ sub new {
   Asim::Repository::BitKeeper::set_type( $self ) ||
   Asim::Repository::Svn::set_type      ( $self ) ||
   Asim::Repository::Git::set_type      ( $self ) ||
+  Asim::Repository::P4::set_type       ( $self ) ||
   Asim::Repository::Public::set_type   ( $self ) ;
 
   return $self;
