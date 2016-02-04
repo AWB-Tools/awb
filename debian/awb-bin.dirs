@@ -1,4 +1,5 @@
 etc/asim
+etc/bash_completion.d
 usr/bin
 usr/lib
 usr/lib/perl

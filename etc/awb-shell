@@ -1,0 +1,144 @@
+# awb-shell completion
+
+# A bash completion script for awb-shell
+#
+# Note: this script is heavily dependent on the format and freshness of the 
+# awb-shell "help commands" output. 
+#
+# TBD: Lots of commands default to showing files in the current path...
+#
+
+_get_object_list()
+{
+    # TBD: For repositories don't show characters after the / unless necessary..
+    awb-shell list ${1} 2>&1 | awk '{ print $1 }'
+}
+
+# Global command options
+
+_awbshell_options()
+{
+    # TBD: Implement this
+    awbshell --help-options 2>&1 | awk '/^(     *|\t)-/ { print $1 }'
+}
+
+# Main commands
+
+_awbshell_commands()
+{
+    awb-shell help commands 2>&1 | awk '/^  [a-z].*- / { print $1 }' | sort | uniq
+}
+
+# Subcommands
+
+_awbshell_subcommands()
+{
+    awb-shell help commands 2>&1 | grep "^  $1" | awk '/^  [a-z]+ [a-z]+.*- / { print $2 }' | sort | uniq
+}
+
+# Subcommands
+
+_awbshell_subcommand_objects()
+{
+    command=$1
+    subcommand=$2
+
+    [ $command == "new" ] && return
+
+    case $subcommand in
+        package)
+            if [ $command == "checkout" ] || [ $command == "clone" ]; then
+                _get_object_list repositories
+            else
+                # TBD: Grep for awb-shell help-commands for "$command $subcommand [all|"
+                _get_object_list packages
+            fi
+            ;;
+
+        bundle)
+            _get_object_list bundles
+            ;;
+
+        *)
+            ;;
+    esac
+}
+
+
+# Command options
+
+_awbshell_command_options()
+{
+    # TBD: Implement this...
+    awbshell --help $1 2>&1 | sed -ne 's/^[[:space:]]*\(-[^[:space:]=[]*\).*/\1/p'
+}
+
+_awbshell()
+{
+    local cur prev count i shellcommand command subcommand object
+
+    _get_comp_words_by_ref -n : cur prev
+
+    # Step through to determine command and subcommand
+
+    count=0
+    shellcommand=""
+    command=""
+    subcommand=""
+    object=""
+
+    for i in "${COMP_WORDS[@]}"; do
+        # Process only up until the last word...
+        [ $count -eq $COMP_CWORD ] && break
+
+        if [ -z "$shellcommand" ]; then
+            # First thing we see is the shellcommand
+
+            shellcommand=$i
+
+        elif [ -z "$command" ]; then
+            # Grab a command
+
+            case $i in
+                --*)
+                    # Pass over the early switches
+                    ;;
+                *)
+                    command=$i
+                    ;;
+            esac
+
+
+        elif [ -z "$subcommand" ]; then
+            # Grab a subcommand (currently we always assume there is a subcommand!)
+
+            subcommand=$i
+        fi
+        count=$((++count))
+    done
+
+    COMPREPLY=()
+
+    # TBD: If there are any global options, insist on a "--" before accepting a command
+
+    if [ -z "$command" ]; then
+        COMPREPLY=( $( compgen -W '$( _awbshell_commands ) $( _awbshell_options )' -- "$cur" ))
+    elif [ -z "$subcommand" ]; then
+        COMPREPLY=( $( compgen -W '$( _awbshell_subcommands $command)' -- "$cur" ))
+    elif [ -z "$object" ]; then
+        COMPREPLY=( $( compgen -W '$( _awbshell_subcommand_objects $command $subcommand)' -- "$cur" ))
+    fi
+
+    return 0
+}
+
+complete -F _awbshell -o default awb-shell
+
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# sh-indent-comment: t
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh
