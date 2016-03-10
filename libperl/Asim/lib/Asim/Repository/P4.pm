@@ -198,7 +198,7 @@ sub checkout {
   my $p4configfile = $ENV{"P4CONFIG"} || "Undefined";
 
   open P4CLIENT, ">$package_dir/$p4configfile";
-  print P4CLIENT "P4SERVER=$p4server\n";
+  print P4CLIENT "P4PORT=$p4server\n";
   print P4CLIENT "P4CLIENT=$p4clientname\n";
   close P4CLIENT;
 
