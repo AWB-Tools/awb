@@ -204,7 +204,7 @@ sub checkout {
 
   # Create a p4 client on the server
 
-  open P4CLIENT, "|p4 client -i";
+  open P4CLIENT, "|P4PORT=$p4server p4 client -i";
   print P4CLIENT "# Perforce client auto-generated from AWB\n";
   print P4CLIENT "\n";
   print P4CLIENT "Client:\t$p4clientname\n";
