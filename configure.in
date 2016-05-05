@@ -59,6 +59,17 @@ PERLVERSION=`perl --version | perl -e 'while (<>) {if (m/This is perl.*v(\d+\.\d
 config_perl_version=$PERLVERSION
 AC_SUBST(config_perl_version)
 
+
+#
+# For ancient versions of Ubuntu default to qt3, otherwise assume qt4
+#
+if -x /usr/bin/lsb_release -a $(lsb_release -s -i) = "Ubuntu" -a $(lsb_release -s -r | sed 's/\.//') -lt 1110
+then
+    asim_cv_enable_qt4_default="no"
+else
+    asim_cv_enable_qt4_default="yes"
+fi
+
 #
 # --enable-qt4
 #
@@ -66,12 +77,8 @@ AC_ARG_ENABLE([qt4],
       AC_HELP_STRING([--enable-qt4=ARG],
                      [use qt4 [[ARG=no|yes]] (default=yes)]),
       asim_cv_enable_qt4=$enableval,
-      asim_cv_enable_qt4=no)
+      asim_cv_enable_qt4=$asim_cv_enable_qt4_default)
 
-if test $asim_cv_enable_qt4 = "no" -a -x /usr/bin/lsb_release -a $(lsb_release -s -i) = "Ubuntu" -a $(lsb_release -s -r | sed 's/\.//') -ge 1110
-then
-    asim_cv_enable_qt4="yes"
-fi
 
 if test "$asim_cv_enable_qt4" = "yes"
 then
@@ -95,7 +102,7 @@ AC_DEFUN([FIND_MOC],[
           if test -f $try/moc
           then
               QTMOCDIR=$try
-              QTMOCBIN=moc-qt4
+              QTMOCBIN=moc
               AC_MSG_RESULT("found in $QTMOCDIR")
               break 2
           elif test "$asim_cv_enable_qt4" = "yes"

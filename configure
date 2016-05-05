@@ -3103,6 +3103,17 @@ PERLVERSION=`perl --version | perl -e 'while (<>) {if (m/This is perl.*v(\d+\.\d
 config_perl_version=$PERLVERSION
 
 
+
+#
+# For ancient versions of Ubuntu default to qt3, otherwise assume qt4
+#
+if -x /usr/bin/lsb_release -a $(lsb_release -s -i) = "Ubuntu" -a $(lsb_release -s -r | sed 's/\.//') -lt 1110
+then
+    asim_cv_enable_qt4_default="no"
+else
+    asim_cv_enable_qt4_default="yes"
+fi
+
 #
 # --enable-qt4
 #
@@ -3110,14 +3121,10 @@ config_perl_version=$PERLVERSION
 if test "${enable_qt4+set}" = set; then :
   enableval=$enable_qt4; asim_cv_enable_qt4=$enableval
 else
-  asim_cv_enable_qt4=no
+  asim_cv_enable_qt4=$asim_cv_enable_qt4_default
 fi
 
 
-if test $asim_cv_enable_qt4 = "no" -a -x /usr/bin/lsb_release -a $(lsb_release -s -i) = "Ubuntu" -a $(lsb_release -s -r | sed 's/\.//') -ge 1110
-then
-    asim_cv_enable_qt4="yes"
-fi
 
 if test "$asim_cv_enable_qt4" = "yes"
 then
@@ -16195,7 +16202,7 @@ $as_echo_n "checking \"for Qt moc\"... " >&6; }
           if test -f $try/moc
           then
               QTMOCDIR=$try
-              QTMOCBIN=moc-qt4
+              QTMOCBIN=moc
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
 $as_echo "\"found in $QTMOCDIR\"" >&6; }
               break 2
@@ -16225,7 +16232,7 @@ $as_echo_n "checking \"for Qt moc\"... " >&6; }
           if test -f $try/moc
           then
               QTMOCDIR=$try
-              QTMOCBIN=moc-qt4
+              QTMOCBIN=moc
               { $as_echo "$as_me:${as_lineno-$LINENO}: result: \"found in $QTMOCDIR\"" >&5
 $as_echo "\"found in $QTMOCDIR\"" >&6; }
               break 2
