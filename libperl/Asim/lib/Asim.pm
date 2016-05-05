@@ -264,6 +264,16 @@ sub init {
                                     "$sysconfdir/asim/asimrc");
 
 #
+# If necessary, populate the ~/.asim/ directory
+#
+  foreach my $i ( "repositories.d", "bundles.d") { 
+    my $dir = "$ENV{HOME}/.asim/$i";
+    if ( ! -d "$dir" ) {
+      mkdir "$dir";
+    }
+  }
+
+#
 # Find the location of a workspace - in priority order:
 #       1) as specified in the parameter
 #       2) as specified by $AWBLOCAL

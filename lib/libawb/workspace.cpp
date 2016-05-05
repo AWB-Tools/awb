@@ -215,7 +215,7 @@ Workspace::Workspace (
     //     Default build environment; most of it is defined in
     //     Makefile.config
 
-    SetBuildEnv (BuildEnvMake, "gmake");
+    SetBuildEnv (BuildEnvMake, "make");
     SetBuildEnv (BuildEnvMakeFlags,
         workspaceConfig.Get ("Build", "MAKEFLAGS", DefaultMakeFlags));
     if (StringCmpNocase (GetBuildEnv (BuildEnvCompiler), "GNU") == 0) {
